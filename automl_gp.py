@@ -64,10 +64,8 @@ def pset_from_config(configuration):
     
     return pset
 
-
 def compile_individual(ind, pset):
-    """ Compile the individual to a sklearn pipeline.
-    """
+    """ Compile the individual to a sklearn pipeline."""
     components = []
     name_counter = defaultdict(int)
     while(len(ind) > 0):
