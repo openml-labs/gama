@@ -1,3 +1,7 @@
+""" This file contains function(s) that are in DEAP, but need slight
+modifications in order to work for automatic pipeline construction.
+"""
+
 import inspect
 import sys
 
