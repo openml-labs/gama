@@ -6,6 +6,7 @@ from collections import defaultdict
 
 import numpy as np
 from deap import gp
+import sklearn
 from sklearn.pipeline import Pipeline
 
 from stacking_transformer import make_stacking_transformer
@@ -57,10 +58,15 @@ def pset_from_config(configuration):
                 pset.addTerminal(value, hyperparameter_type, hyperparameter_str)
                 
         class_type = eval(class_)
-        pset.addPrimitive(class_type, [Data, *hyperparameter_types], Predictions)
-        
-        stacking_class = make_stacking_transformer(class_type)
-        pset.addPrimitive(stacking_class, [Data, *hyperparameter_types], Data, name = class_ + stacking_class.__name__)
+        if issubclass(class_type, sklearn.base.TransformerMixin):
+            pset.addPrimitive(class_type, [Data, *hyperparameter_types], Data)
+        elif issubclass(class_type, sklearn.base.ClassifierMixin):
+            pset.addPrimitive(class_type, [Data, *hyperparameter_types], Predictions)
+            stacking_class = make_stacking_transformer(class_type)
+            pset.addPrimitive(stacking_class, [Data, *hyperparameter_types], Data, name = class_ + stacking_class.__name__)
+        else:
+            raise TypeError(f"Expected {class_} to be either subclass of "
+                            "TransformerMixin or ClassifierMixin.")
     
     return pset
 
