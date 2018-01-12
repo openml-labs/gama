@@ -7,6 +7,18 @@ import sys
 
 import numpy as np
 
+def gen_grow_safe(pset, min_, max_, type_=None):
+    """Generate an expression where each leaf might have a different depth between min_ and max_.
+    Condition specifies if desired return type is not Data or Predictions, that a terminal be used.
+    """
+
+    def condition(height, depth, type_):
+        """Stop when the depth is equal to height or when a node should be a terminal."""
+        #return (type_ not in [Data, Predictions]) or (depth == height)
+        return (len(pset.primitives[type_]) == 0) or (depth == height)
+
+    return generate(pset, min_, max_, condition, type_)
+
 def generate(pset, min_, max_, condition, type_=None):
     """Generate a Tree as a list of lists.
     The tree is build from the root to the leaves, and it stop growing when
