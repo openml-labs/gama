@@ -17,20 +17,7 @@ from sklearn.pipeline import Pipeline
 
 from modifiedDEAP import generate
 from StackingTransformer import make_stacking_transformer
-
-d = {
-    'sklearn.tree.DecisionTreeClassifier': {
-        'criterion': ["gini", "entropy"],
-        'max_depth': range(1, 11),
-        'min_samples_split': range(2, 21),
-        'min_samples_leaf': range(1, 21)
-    },
-    
-    'sklearn.naive_bayes.BernoulliNB': {
-        'alpha': [1e-3, 1e-2, 1e-1, 1., 10., 100.],
-        'fit_prior': [True, False]
-    }
-}
+from configuration import configuration
 
 log_level = 2
 def log_message(message, level=5):
@@ -133,7 +120,7 @@ def evaluate_pipeline(ind, X, y, cv = 5):
     pl = toolbox.compile(ind)
     return (np.mean(cross_val_score(pl, X, y, cv = cv)),)
 
-pset = pset_from_config(d)
+pset = pset_from_config(configuration)
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
