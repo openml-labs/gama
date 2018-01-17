@@ -34,6 +34,9 @@ def mut_replace_terminal(ind, pset):
 def evaluate_pipeline(ind, X, y, cv = 5):
     log_message('evaluating '+str(ind), level=3)
     pl = toolbox.compile(ind)
+    if pl is None:
+        # Failed to compile due to invalid hyperparameter configuration
+        return (-float("inf"),)
     return (np.mean(cross_val_score(pl, X, y, cv = cv)),)
 
 pset = pset_from_config(tpot_config)

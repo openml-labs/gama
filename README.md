@@ -8,10 +8,4 @@ An automated machine learning tool based on genetic programming.
 
 [ ] No check on input types (e.g. don't pass negative data to NB)
 
-[ ] Some pipelines (see below) don't implement fit for unknown reason.    
-
-Badpipelines:
-
-KNeighborsClassifier(FeatureAgglomeration(data, FeatureAgglomeration.linkage='ward', FeatureAgglomeration.affinity='l1'), KNeighborsClassifier.n_neighbors=12, KNeighborsClassifier.weights='uniform', KNeighborsClassifier.p=2)
-
-LogisticRegression(GaussianNBStackingTransformer(data), LogisticRegression.penalty='l1', LogisticRegression.C=25.0, LogisticRegression.dual=True)
+[ ] How to with invalidly generated pipelines (prevent them? how?)
