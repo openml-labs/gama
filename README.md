@@ -8,10 +8,7 @@ An automated machine learning tool based on genetic programming.
 
 [ ] No check on input types (e.g. don't pass negative data to NB)
 
-[ ] Some pipelines (see below) don't implement fit for unknown reason.
-
-    < > Implement str to ind function, to more easily test pipelines.
-    
+[ ] Some pipelines (see below) don't implement fit for unknown reason.    
 
 Badpipelines:
 
