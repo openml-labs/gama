@@ -115,7 +115,9 @@ def pset_from_config_new(configuration):
                     hyperparameter_types.append(hyperparameter_type)
                     for value in param_values:
                         # Escape string values with quotes otherwise they are variables
-                        value_str = f"'{value}'" if isinstance(value, str) else f"{value}"
+                        value_str = (f"'{value}'" if isinstance(value, str) 
+                                     else f"{value.__name__}" if callable(value)
+                                     else f"{value}")
                         hyperparameter_str = f"{key.__name__}.{name}={value_str}"            
                         pset.addTerminal(value, hyperparameter_type, hyperparameter_str)
             
