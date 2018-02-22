@@ -14,11 +14,11 @@ from modifiedDEAP import gen_grow_safe
 from configuration import configuration_with_preprocessing, tpot_config, new_config
 from automl_gp import pset_from_config, compile_individual, pset_from_config_new
 
-log_level = 3
+log_level = -3
 def log_message(message, level=5):
     if level <= log_level:
         print(message)
-
+        
 def mut_replace_terminal(ind, pset):
     ind = toolbox.clone(ind)
     eligible = [i for i,el in enumerate(ind) if (issubclass(type(el), gp.Terminal) and len(pset.terminals[el.ret])>1)]
@@ -34,10 +34,15 @@ def mut_replace_terminal(ind, pset):
 def evaluate_pipeline(ind, X, y, cv = 5):
     log_message('evaluating '+str(ind), level=3)
     pl = toolbox.compile(ind)
-    if pl is None:
+    #if pl is None:
         # Failed to compile due to invalid hyperparameter configuration
-        return (-float("inf"),)
-    return (np.mean(cross_val_score(pl, X, y, cv = cv)),)
+    #    return (-float("inf"),)
+    try:
+        fitness = (np.mean(cross_val_score(pl, X, y, cv = cv)),)
+    except:
+        fitness = (-float("inf"),)
+        
+    return fitness
 
 pset = pset_from_config(tpot_config)
 pset, parameter_checks = pset_from_config_new(new_config)
