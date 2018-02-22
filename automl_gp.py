@@ -10,6 +10,7 @@ import sklearn
 from sklearn.pipeline import Pipeline
 
 from stacking_transformer import make_stacking_transformer
+from modifiedDEAP import gen_grow_safe
 
 class Data(np.ndarray):
     """ Dummy class that represents a dataset."""
@@ -20,57 +21,6 @@ class Predictions(np.ndarray):
     pass
 
 def pset_from_config(configuration):
-    """ Create a pset for the given configuration dictionary.
-    
-    Given a configuration dictionary specifying operators (e.g. sklearn 
-    estimators), their hyperparameters and values for each hyperparameter,
-    create a gp.PrimitiveSetTyped that contains:
-        - For each operator a primitive
-        - For each possible hyperparameter-value combination a unique terminal
-        
-    Side effect: Imports the classes of each primitive.
-        
-    Returns the given Pset.
-    """
-    pset = gp.PrimitiveSetTyped("pipeline",in_types=[Data], ret_type=Predictions)
-    pset.renameArguments(ARG0="data")
-    
-    for path, hyperparameters in configuration.items():
-        if '.' in path:
-            module_path, class_ = path.rsplit('.', maxsplit=1)
-            exec(f"from {module_path} import {class_}")
-        else:
-            class_ = path
-            exec(f"import {class_}")
-        
-        hyperparameter_types = []
-        for name, values in hyperparameters.items():
-            # We construct a new type for each hyperparameter, so we can specify
-            # it as terminal type, making sure it matches with expected
-            # input of the operators. Moreover it automatically makes sure that
-            # crossover only happens between same hyperparameters.
-            hyperparameter_type = type(f"{class_}{name}",(object,), {})
-            hyperparameter_types.append(hyperparameter_type)
-            for value in values:
-                # Escape string values with quotes otherwise they are variables
-                value_str = f"'{value}'" if isinstance(value, str) else f"{value}"
-                hyperparameter_str = f"{class_}.{name}={value_str}"            
-                pset.addTerminal(value, hyperparameter_type, hyperparameter_str)
-                
-        class_type = eval(class_)
-        if issubclass(class_type, sklearn.base.TransformerMixin):
-            pset.addPrimitive(class_type, [Data, *hyperparameter_types], Data)
-        elif issubclass(class_type, sklearn.base.ClassifierMixin):
-            pset.addPrimitive(class_type, [Data, *hyperparameter_types], Predictions)
-            stacking_class = make_stacking_transformer(class_type)
-            pset.addPrimitive(stacking_class, [Data, *hyperparameter_types], Data, name = class_ + stacking_class.__name__)
-        else:
-            raise TypeError(f"Expected {class_} to be either subclass of "
-                            "TransformerMixin or ClassifierMixin.")
-    
-    return pset
-
-def pset_from_config_new(configuration):
     """ Create a pset for the given configuration dictionary.
     
     Given a configuration dictionary specifying operators (e.g. sklearn 
@@ -182,3 +132,23 @@ def compile_individual(ind, pset, parameter_checks = None):
             raise TypeError("Type is wrong or missing.")
             
     return Pipeline(list(reversed(components)))
+
+def generate_valid(pset, min_, max_, toolbox):
+    for _ in range(50):
+        ind = gen_grow_safe(pset, min_, max_)
+        pl = toolbox.compile(ind)
+        if pl is not None:
+            return ind
+    raise Exception('Failed')
+
+def mut_replace_terminal(ind, pset, toolbox):
+    ind = toolbox.clone(ind)
+    eligible = [i for i,el in enumerate(ind) if (issubclass(type(el), gp.Terminal) and len(pset.terminals[el.ret])>1)]
+    #els = [el for i,el in enumerate(ind) if (issubclass(type(el), gp.Terminal) and len(pset.terminals[el.ret])>1)]
+    if eligible == []:
+        #print('No way to mutate '+str(ind)+' was found.')
+        return ind,
+    
+    to_change = np.random.choice(eligible)    
+    ind[to_change] = np.random.choice(pset.terminals[ind[to_change].ret])
+    return ind, 
