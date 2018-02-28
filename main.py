@@ -4,6 +4,7 @@ Created on Thu Jan 11 11:45:30 2018
 """
 
 import numpy as np
+from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
@@ -11,10 +12,14 @@ from openml import tasks
 
 from GPAML import GPAML
 
-phoneme_task_id = 145857
-task = tasks.get_task(phoneme_task_id)
-X, y = task.get_X_and_y()
-X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, shuffle=True, random_state=42)
+if False:
+    phoneme_task_id = 145857
+    task = tasks.get_task(phoneme_task_id)
+    X, y = task.get_X_and_y()
+    X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, shuffle=True, random_state=42)
+else:
+    iris = load_iris()
+    X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, stratify=iris.target, shuffle=True, random_state=42)
 
 gpaml = GPAML()
 gpaml.fit(X_train, y_train)
