@@ -5,7 +5,7 @@ learning as a genetic programming problem.
 from collections import defaultdict
 
 import numpy as np
-from deap import gp
+from deap import gp, creator
 import sklearn
 from sklearn.pipeline import Pipeline
 
@@ -134,6 +134,7 @@ def compile_individual(ind, pset, parameter_checks = None):
     return Pipeline(list(reversed(components)))
 
 def generate_valid(pset, min_, max_, toolbox):
+    """ Generates a valid pipeline. """
     for _ in range(50):
         ind = gen_grow_safe(pset, min_, max_)
         pl = toolbox.compile(ind)
@@ -142,6 +143,7 @@ def generate_valid(pset, min_, max_, toolbox):
     raise Exception('Failed')
 
 def mut_replace_terminal(ind, pset, toolbox):
+    """ Mutation function which replaces a terminal."""
     ind = toolbox.clone(ind)
     eligible = [i for i,el in enumerate(ind) if (issubclass(type(el), gp.Terminal) and len(pset.terminals[el.ret])>1)]
     #els = [el for i,el in enumerate(ind) if (issubclass(type(el), gp.Terminal) and len(pset.terminals[el.ret])>1)]
@@ -151,4 +153,60 @@ def mut_replace_terminal(ind, pset, toolbox):
     
     to_change = np.random.choice(eligible)    
     ind[to_change] = np.random.choice(pset.terminals[ind[to_change].ret])
+    return ind, 
+
+def find_next_unmatched_terminal(individual, start, pset, ignore_pset_arguments=True):
+    """ Finds the location of the terminal that provides input of `ret_type` to a given primitive. """
+    
+    # We need to keep track of terminals we expect.
+    argument_ret_types = [pset.mapping[tname].ret for tname in pset.arguments]
+    unmatched_args = []
+    
+    for i, el in enumerate(individual[start:], start=start):
+        if issubclass(type(el), gp.Primitive):
+            new_expected_args = [arg_type for arg_type in el.args if arg_type not in argument_ret_types]
+            # Replace with list-inserts if performance is bad.
+            unmatched_args = new_expected_args + unmatched_args
+        elif el.ret in argument_ret_types:
+            # We ignore 
+            continue
+        elif len(unmatched_args) > 0 and el.ret == unmatched_args[0]:
+            unmatched_args.pop(0)
+        elif len(unmatched_args) == 0:
+            return i
+        
+    raise ValueError(f"No unmatched terminals found.")    
+
+def mut_replace_primitive(ind, pset, toolbox):
+    """ Mutation function which replaces a primitive (and corresponding terminals). """
+    # DEAP.gp's mutNodeReplacement does not work since it will only replace primitives
+    # if they have the same input arguments (which is not true in this context)
+    
+    ind = toolbox.clone(ind)
+    eligible = [i for i,el in enumerate(ind) if (issubclass(type(el), gp.Primitive) and len(pset.primitives[el.ret])>1)]
+    if eligible == []:
+        print('No way to mutate '+str(ind)+' was found.')
+        return ind,
+    
+    to_change = np.random.choice(eligible)    
+    
+    # Replacing a primtive requires three steps:
+    # 1. Determine which terminals should also be removed.
+    # We want to find the first unmatched terminal, but can ignore the data 
+    # input terminal, as that is a subtree we do not wish to replace.
+    terminal_index = find_next_unmatched_terminal(ind, to_change + 1, pset)  
+    number_of_removed_terminals = len(ind[to_change].args) - 1
+            
+    # 2. Determine new primitive and terminals need to be added.
+    new_primitive = np.random.choice(pset.primitives[ind[to_change].ret])
+    new_terminals = [np.random.choice(pset.terminals[ret_type]) for ret_type in new_primitive.args[1:]]
+    
+    # 3. Construct the new individual
+    # Replacing terminals can not be done in-place, as the number of terminals can vary.
+    new_expr = ind[:terminal_index] + new_terminals + ind[terminal_index+number_of_removed_terminals:]
+    # Replacing the primitive can be done in-place.
+    new_expr[to_change] = new_primitive
+    #expr = ind[:to_change] + [new_primitive] + ind[to_change+1:terminal_index] + new_terminals + ind[terminal_index+number_of_removed_terminals:]
+    ind = creator.Individual(new_expr)
+    
     return ind, 
