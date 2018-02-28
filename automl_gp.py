@@ -174,8 +174,9 @@ def find_next_unmatched_terminal(individual, start, pset, ignore_pset_arguments=
             unmatched_args.pop(0)
         elif len(unmatched_args) == 0:
             return i
-        
-    raise ValueError(f"No unmatched terminals found.")    
+    
+    return i+1
+    #raise ValueError(f"No unmatched terminals found. Suggested: {i}")    
 
 def mut_replace_primitive(ind, pset, toolbox):
     """ Mutation function which replaces a primitive (and corresponding terminals). """
@@ -188,7 +189,8 @@ def mut_replace_primitive(ind, pset, toolbox):
         print('No way to mutate '+str(ind)+' was found.')
         return ind,
     
-    to_change = np.random.choice(eligible)    
+    to_change = np.random.choice(eligible)   
+    print(f'mutating {str(ind)} by changing {to_change}')
     
     # Replacing a primtive requires three steps:
     # 1. Determine which terminals should also be removed.
