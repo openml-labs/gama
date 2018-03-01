@@ -39,6 +39,8 @@ class GPAML(object):
         self._pop_size = pop_size
         self._n_generations = n_generations
         
+        self._evaluated_individuals = {}
+        
         if self._random_state:
             random.seed(self._random_state)
             np.random.seed(self._random_state)
@@ -124,15 +126,20 @@ class GPAML(object):
         
     def _evaluate_pipeline(self, ind, X, y, cv=5):
         """ Evaluates a pipeline used k-Fold CV. """
+        if str(ind) in self._evaluated_individuals:
+            return self._evaluated_individuals[str(ind)]
+        
         pl = self._toolbox.compile(ind)
         #if pl is None:
             # Failed to compile due to invalid hyperparameter configuration
         #    return (-float("inf"),)
         try:
-            fitness = (np.mean(cross_val_score(pl, X, y, cv = cv)),)
+            fitness_values = (np.mean(cross_val_score(pl, X, y, cv = cv)),)
         except:
-            fitness = (-float("inf"),)
-            
-        return fitness
+            fitness_values = (-float("inf"),)
+        
+        self._evaluated_individuals[str(ind)] = fitness_values
+        
+        return fitness_values
         
     
