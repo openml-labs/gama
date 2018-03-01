@@ -142,9 +142,9 @@ def generate_valid(pset, min_, max_, toolbox):
             return ind
     raise Exception('Failed')
 
-def mut_replace_terminal(ind, pset, toolbox):
+def mut_replace_terminal(ind, pset):
     """ Mutation function which replaces a terminal."""
-    ind = toolbox.clone(ind)
+    
     eligible = [i for i,el in enumerate(ind) if (issubclass(type(el), gp.Terminal) and len(pset.terminals[el.ret])>1)]
     #els = [el for i,el in enumerate(ind) if (issubclass(type(el), gp.Terminal) and len(pset.terminals[el.ret])>1)]
     if eligible == []:
@@ -178,19 +178,16 @@ def find_next_unmatched_terminal(individual, start, pset, ignore_pset_arguments=
     return i+1
     #raise ValueError(f"No unmatched terminals found. Suggested: {i}")    
 
-def mut_replace_primitive(ind, pset, toolbox):
+def mut_replace_primitive(ind, pset):
     """ Mutation function which replaces a primitive (and corresponding terminals). """
     # DEAP.gp's mutNodeReplacement does not work since it will only replace primitives
     # if they have the same input arguments (which is not true in this context)
     
-    ind = toolbox.clone(ind)
     eligible = [i for i,el in enumerate(ind) if (issubclass(type(el), gp.Primitive) and len(pset.primitives[el.ret])>1)]
     if eligible == []:
-        print('No way to mutate '+str(ind)+' was found.')
         return ind,
     
     to_change = np.random.choice(eligible)   
-    print(f'mutating {str(ind)} by changing {to_change}')
     
     # Replacing a primtive requires three steps:
     # 1. Determine which terminals should also be removed.
@@ -212,3 +209,21 @@ def mut_replace_primitive(ind, pset, toolbox):
     ind = creator.Individual(new_expr)
     
     return ind, 
+
+def random_valid_mutation(ind, pset):
+    """ Picks a mutation uniform at random from options which are possible. 
+    
+    The choices are `mut_random_primitive`, `mut_random_terminal`, 
+    `mutShrink` and `mutInsert`.
+    In particular a pipeline can not shrink a primitive if it only has one.
+    """
+    available_mutations = [mut_replace_terminal, mut_replace_primitive, gp.mutInsert]
+    if len([el for el in ind if issubclass(type(el), gp.Primitive)]) > 1:
+        available_mutations.append(gp.mutShrink)
+        
+    mut_fn = np.random.choice(available_mutations)
+    if gp.mutShrink == mut_fn:
+        # only mutShrink function does not need pset.
+        return mut_fn(ind)
+    else:
+        return mut_fn(ind, pset)

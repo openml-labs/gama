@@ -3,6 +3,7 @@ Created on Thu Feb 22 14:30:52 2018
 
 @author: P. Gijsbers
 """
+import random
 
 import numpy as np
 from scipy.stats import mode
@@ -13,8 +14,9 @@ from deap.algorithms import eaSimple
 from sklearn.model_selection import cross_val_score
 
 from configuration import new_config
-from automl_gp import compile_individual, pset_from_config, mut_replace_terminal, generate_valid, mut_replace_primitive
+from automl_gp import compile_individual, pset_from_config, generate_valid, random_valid_mutation
 from GPAMLExceptions import AttributeNotAssignedError
+from GPAMLHOF import HallOfFame
 
 STR_NO_OPTIMAL_PIPELINE = """GPAML did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
@@ -26,10 +28,20 @@ class GPAML(object):
     def __init__(self, 
                  objective='accuracy',
                  config=new_config,
-                 warm_start=False):
+                 warm_start=False,
+                 random_state=None,
+                 pop_size = 10,
+                 n_generations = 10):
         self._best_pipelines = None
         self._fitted_pipelines = {}
         self._warm_start = warm_start
+        self._random_state = random_state
+        self._pop_size = pop_size
+        self._n_generations = n_generations
+        
+        if self._random_state:
+            random.seed(self._random_state)
+            np.random.seed(self._random_state)
         
         pset, parameter_checks = pset_from_config(config)
         
@@ -46,11 +58,7 @@ class GPAML(object):
         
         self._toolbox.register("mate", gp.cxOnePoint)
         
-        def random_mutate(ind, pset, toolbox):
-            mut_fn = np.random.choice([mut_replace_terminal, mut_replace_primitive])
-            return mut_fn(ind, pset, toolbox)
-        
-        self._toolbox.register("mutate", random_mutate, pset=pset, toolbox=self._toolbox)
+        self._toolbox.register("mutate", random_valid_mutation, pset=self._pset)
         self._toolbox.register("select", tools.selTournament, tournsize=3)  
     
     def predict(self, X, auto_ensemble_n=1):
@@ -100,9 +108,9 @@ class GPAML(object):
         if self._warm_start:
             pop = self._best_pipelines
         else:
-            pop = self._toolbox.population(n=50)
+            pop = self._toolbox.population(n=self._pop_size)
             
-        pop, log = eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8, ngen=5, verbose=True, stats=mstats)
+        pop, log = eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, stats=mstats)
         
         self._best_pipelines = sorted(pop, key = lambda x: -x.fitness.values[0])
         best_individual = self._best_pipelines[0]
@@ -112,7 +120,7 @@ class GPAML(object):
         """ Compiles the individual representation and fit the data to it. """
         pipeline = self._toolbox.compile(individual)
         pipeline.fit(X,y)
-        return pipeline        
+        return pipeline      
         
     def _evaluate_pipeline(self, ind, X, y, cv=5):
         """ Evaluates a pipeline used k-Fold CV. """
