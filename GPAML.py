@@ -14,6 +14,7 @@ from deap.algorithms import eaSimple
 from sklearn.model_selection import cross_val_score
 
 from configuration import new_config
+from modifiedDEAP import cxOnePoint
 from automl_gp import compile_individual, pset_from_config, generate_valid, random_valid_mutation
 from GPAMLExceptions import AttributeNotAssignedError
 from GPAMLHOF import HallOfFame
@@ -58,7 +59,7 @@ class GPAML(object):
         self._toolbox.register("population", tools.initRepeat, list, self._toolbox.individual)
         self._toolbox.register("compile", compile_individual, pset=pset, parameter_checks=parameter_checks)
         
-        self._toolbox.register("mate", gp.cxOnePoint)
+        self._toolbox.register("mate", cxOnePoint)
         
         self._toolbox.register("mutate", random_valid_mutation, pset=self._pset)
         self._toolbox.register("select", tools.selTournament, tournsize=3)  
@@ -112,9 +113,9 @@ class GPAML(object):
         else:
             pop = self._toolbox.population(n=self._pop_size)
             
-        pop, log = eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, stats=mstats)
+        pop, log = eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, halloffame=HallOfFame('log.txt'))#, stats=mstats)
         
-        self._best_pipelines = sorted(pop, key = lambda x: -x.fitness.values[0])
+        self._best_pipelines = sorted(pop, key = lambda x: (-x.fitness.values[0], str(x)))
         best_individual = self._best_pipelines[0]
         self._fitted_pipelines[str(best_individual)] = self._fit_pipeline(best_individual, X, y)
         
