@@ -10,7 +10,7 @@ from sklearn.metrics import accuracy_score
 
 from openml import tasks
 
-from GPAML import GPAML
+from gama import Gama
 
 if True:
     phoneme_task_id = 145857
@@ -21,7 +21,7 @@ else:
     iris = load_iris()
     X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, stratify=iris.target, shuffle=True, random_state=42)
 
-gpaml = GPAML(random_state=1, n_generations = 10, pop_size=50)
+gpaml = Gama(random_state=1, n_generations = 10, pop_size=50)
 gpaml.fit(X_train, y_train)
 predictions_1 = gpaml.predict(X_test)
 print('Accuracy n=1:', accuracy_score(y_test, predictions_1))

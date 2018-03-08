@@ -14,16 +14,16 @@ from deap.algorithms import eaSimple
 from sklearn.model_selection import cross_val_score
 
 from configuration import new_config
-from modifiedDEAP import cxOnePoint
+from modified_deap import cxOnePoint
 from automl_gp import compile_individual, pset_from_config, generate_valid, random_valid_mutation
-from GPAMLExceptions import AttributeNotAssignedError
-from GPAMLHOF import HallOfFame
+from gama_exceptions import AttributeNotAssignedError
+from gama_hof import HallOfFame
 
 STR_NO_OPTIMAL_PIPELINE = """GPAML did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
                           did not terminate successfully."""
 
-class GPAML(object):
+class Gama(object):
     """ Wrapper for the DEAP toolbox logic surrounding the GP process. """
     
     def __init__(self, 

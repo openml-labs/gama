@@ -10,7 +10,7 @@ import sklearn
 from sklearn.pipeline import Pipeline
 
 from stacking_transformer import make_stacking_transformer
-from modifiedDEAP import gen_grow_safe
+from modified_deap import gen_grow_safe
 
 class Data(np.ndarray):
     """ Dummy class that represents a dataset."""
