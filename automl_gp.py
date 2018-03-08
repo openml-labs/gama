@@ -152,7 +152,8 @@ def mut_replace_terminal(ind, pset):
         return ind,
     
     to_change = np.random.choice(eligible)    
-    ind[to_change] = np.random.choice(pset.terminals[ind[to_change].ret])
+    alternatives = [t for t in pset.terminals[ind[to_change].ret] if t != ind[to_change]]
+    ind[to_change] = np.random.choice(alternatives)
     return ind, 
 
 def find_next_unmatched_terminal(individual, start, pset, ignore_pset_arguments=True):
@@ -197,7 +198,8 @@ def mut_replace_primitive(ind, pset):
     number_of_removed_terminals = len(ind[to_change].args) - 1
             
     # 2. Determine new primitive and terminals need to be added.
-    new_primitive = np.random.choice(pset.primitives[ind[to_change].ret])
+    alternatives = [prim for prim in pset.primitives[ind[to_change].ret] if prim.name != ind[to_change].name]
+    new_primitive = np.random.choice(alternatives)
     new_terminals = [np.random.choice(pset.terminals[ret_type]) for ret_type in new_primitive.args[1:]]
     
     # 3. Construct the new individual
