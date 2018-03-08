@@ -42,7 +42,7 @@ class Gama(object):
         
         self._evaluated_individuals = {}
         
-        if self._random_state:
+        if self._random_state is not None:
             random.seed(self._random_state)
             np.random.seed(self._random_state)
         
