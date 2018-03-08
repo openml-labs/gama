@@ -19,7 +19,7 @@ from automl_gp import compile_individual, pset_from_config, generate_valid, rand
 from gama_exceptions import AttributeNotAssignedError
 from gama_hof import HallOfFame
 
-STR_NO_OPTIMAL_PIPELINE = """GPAML did not yet establish an optimal pipeline.
+STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
                           did not terminate successfully."""
 
