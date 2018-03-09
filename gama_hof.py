@@ -12,6 +12,6 @@ class HallOfFame(object):
         
     def update(self, pop):
         with open(self._filename,'a') as fh:
-            print('-gen-')
-            print('\n'.join([str((str(ind), ind.fitness.values[0])) for ind in pop]))
+            #print('-gen-')
+            #print('\n'.join([str((str(ind), ind.fitness.values[0])) for ind in pop]))
             fh.write('\n'.join([str((str(ind), ind.fitness.values[0])) for ind in pop]))
