@@ -101,7 +101,6 @@ def compile_individual(ind, pset, parameter_checks = None):
         prim, remainder = ind[0], ind[1:]
         if isinstance(prim, gp.Terminal):
             if len(remainder)>0:
-                print([el.name for el in remainder])
                 raise Exception
             break
         # See if all terminals have a value provided (except Data Terminal)
@@ -140,7 +139,7 @@ def generate_valid(pset, min_, max_, toolbox):
         pl = toolbox.compile(ind)
         if pl is not None:
             return ind
-    raise Exception('Failed')
+    raise Exception
 
 def mut_replace_terminal(ind, pset):
     """ Mutation function which replaces a terminal."""
@@ -171,7 +170,7 @@ def find_unmatched_terminal(individual):
             # Replace with list-inserts if performance is bad.
             unmatched_args = el.args + unmatched_args
     
-    raise ValueError("No unmatched terminals found.") 
+    return False
 
 def mut_replace_primitive(ind, pset):
     """ Mutation function which replaces a primitive (and corresponding terminals). """
@@ -183,33 +182,46 @@ def mut_replace_primitive(ind, pset):
         return ind,
     
     to_change = np.random.choice(eligible)   
-    
-    # Replacing a primtive requires three steps:
-    # 1. Determine which terminals should also be removed.
-    # We want to find the first unmatched terminal, but can ignore the data 
-    # input terminal, as that is a subtree we do not wish to replace.
-    terminal_index = find_unmatched_terminal(ind[:to_change]+ind[to_change+1:])
-    if (ind[terminal_index].name in pset.arguments):
-        # In the case the unmatched terminal was the Data terminal, we actually
-        # would like to start adding terminals only after this position.
-        terminal_index += 1
-        
     number_of_removed_terminals = len(ind[to_change].args) - 1
-            
-    # 2. Determine new primitive and terminals need to be added.
+    
+    # Determine new primitive and terminals that need to be added.
     alternatives = [prim for prim in pset.primitives[ind[to_change].ret] if prim.name != ind[to_change].name]
     new_primitive = np.random.choice(alternatives)
     new_terminals = [np.random.choice(pset.terminals[ret_type]) for ret_type in new_primitive.args[1:]]
     
-    # 3. Construct the new individual
-    # Replacing terminals can not be done in-place, as the number of terminals can vary.
-    new_expr = ind[:terminal_index] + new_terminals + ind[terminal_index+number_of_removed_terminals:]
-    # Replacing the primitive can be done in-place.
-    new_expr[to_change] = new_primitive
-    #expr = ind[:to_change] + [new_primitive] + ind[to_change+1:terminal_index] + new_terminals + ind[terminal_index+number_of_removed_terminals:]
-    ind = creator.Individual(new_expr)
+    # Determine which terminals should also be removed.
+    # We want to find the first unmatched terminal, but can ignore the data 
+    # input terminal, as that is a subtree we do not wish to replace.
+    terminal_index = find_unmatched_terminal(ind[to_change+1:])
+    if (terminal_index is False):
+        if (number_of_removed_terminals) == 0:
+            # No terminals need to be removed and everything after the primitive is a perfect (data) subtree.
+            new_expr = ind[:] + new_terminals
+            new_expr[to_change] = new_primitive
+            return creator.Individual(new_expr),
+        else:
+            raise Exception("Found no unmatched terminals after removing a primitive which had terminals: {}".format(str(ind)))
+    else:        
+        # Adjust for the fact the searched individual had part removed.
+        # (Since the unmatched terminal was created through removing primitives
+        # before it, this means the adjustment is always necessary)
+        terminal_index += (to_change+1)
+        # In the case the unmatched terminal was the Data terminal, we actually
+        # would like to start adding terminals only after this position.
+        # This way there is no need to make a distinction later on whether a
+        # primitive's data-terminal is a leaf or a subtree.    
+        if (ind[terminal_index].value in pset.arguments):
+            terminal_index += 1
     
-    return ind, 
+        # 3. Construct the new individual
+        # Replacing terminals can not be done in-place, as the number of terminals can vary.
+        new_expr = ind[:terminal_index] + new_terminals + ind[terminal_index+number_of_removed_terminals:]
+        # Replacing the primitive can be done in-place.
+        new_expr[to_change] = new_primitive
+        #expr = ind[:to_change] + [new_primitive] + ind[to_change+1:terminal_index] + new_terminals + ind[terminal_index+number_of_removed_terminals:]
+        ind = creator.Individual(new_expr)
+        
+        return ind, 
 
 def random_valid_mutation(ind, pset):
     """ Picks a mutation uniform at random from options which are possible. 

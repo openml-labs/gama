@@ -2,7 +2,7 @@ import unittest
 
 from deap import gp
 
-from automl_gp import mut_replace_primitive, mut_replace_terminal, find_unmatched_terminal
+from automl_gp import mut_replace_primitive, mut_replace_terminal, find_unmatched_terminal, compile_individual
 from gama import Gama
 
 def automl_gp_test_suite():
@@ -38,7 +38,13 @@ class AutomlGpTestCase(unittest.TestCase):
                 RandomForestClassifier.max_features=0.6000000000000001, 
                 RandomForestClassifier.min_samples_split=6, 
                 RandomForestClassifier.min_samples_leaf=7, 
-                RandomForestClassifier.bootstrap=True)"""
+                RandomForestClassifier.bootstrap=True)""",
+                """LinearSVC(data,
+                LinearSVC.penalty='l2',
+                LinearSVC.loss='squared_hinge',
+                LinearSVC.dual=True,
+                LinearSVC.tol=1e-05,
+                LinearSVC.C=0.001)"""
                 ]
         
         self.individuals = { 
@@ -64,11 +70,7 @@ class AutomlGpTestCase(unittest.TestCase):
         
     
     def test_mut_replace_terminal(self):
-        """ Tests if mut_replace_terminal replaces exactly one terminal. 
-        
-        The fact that the new expression is also valid already follows from the
-        fact an individual is made from it.
-        """
+        """ Tests if mut_replace_terminal replaces exactly one terminal. """
         ind = self.individuals[self.ind_strings[1]]
         ind_clone = self.gama._toolbox.clone(ind)
         new_ind, = mut_replace_terminal(ind_clone, self.gama._pset)
@@ -78,14 +80,12 @@ class AutomlGpTestCase(unittest.TestCase):
         self.assertEqual(len(replaced_elements), 1,
                          "Exactly one component should be replaced. Found {}".format(replaced_elements))        
         self.assertTrue(isinstance(replaced_elements[0], gp.Terminal), 
-                        "Replaced component should be a terminal, is {}".format(type(replaced_elements[0])))
+                        "Replaced component should be a terminal, is {}".format(type(replaced_elements[0]))) 
+        # Should be able to compile the individual.
+        compile_individual(new_ind, self.gama._pset)
         
     def test_mut_replace_primitive_len_1_no_terminal(self):
-        """ Tests if mut_replace_primitive replaces exactly one primitive. 
-        
-        The fact that the new expression is also valid already follows from the
-        fact an individual is made from it.
-        """
+        """ Tests if mut_replace_primitive replaces exactly one primitive. """
         ind = self.individuals[self.ind_strings[1]]
         ind_clone = self.gama._toolbox.clone(ind)
         new_ind, = mut_replace_primitive(ind_clone, self.gama._pset)
@@ -94,13 +94,22 @@ class AutomlGpTestCase(unittest.TestCase):
         
         self.assertEqual(len(replaced_primitives), 1,
                          "Exactly one primitive should be replaced. Found {}".format(replaced_primitives))
+        # Should be able to compile the individual.
+        compile_individual(new_ind, self.gama._pset)
+        
+        ind = self.individuals[self.ind_strings[2]]
+        ind_clone = self.gama._toolbox.clone(ind)
+        new_ind, = mut_replace_primitive(ind_clone, self.gama._pset)
+        
+        replaced_primitives = [el1 for el1, el2 in zip(ind, new_ind) if (el1.name != el2.name and isinstance(el1, gp.Primitive))]            
+        
+        self.assertEqual(len(replaced_primitives), 1,
+                         "Exactly one primitive should be replaced. Found {}".format(replaced_primitives))
+        # Should be able to compile the individual.
+        compile_individual(new_ind, self.gama._pset)
     
     def test_mut_replace_primitive_len_2(self):
-        """ Tests if mut_replace_primitive replaces exactly one primitive. 
-        
-        The fact that the new expression is also valid already follows from the
-        fact an individual is made from it.
-        """
+        """ Tests if mut_replace_primitive replaces exactly one primitive. """
         ind = self.individuals[self.ind_strings[1]]
         ind_clone = self.gama._toolbox.clone(ind)
         new_ind, = mut_replace_primitive(ind_clone, self.gama._pset)
@@ -109,3 +118,13 @@ class AutomlGpTestCase(unittest.TestCase):
         
         self.assertEqual(len(replaced_primitives), 1,
                          "Exactly one primitive should be replaced. Found {}".format(replaced_primitives))
+        try:
+            # Should be able to compile the individual.
+            compile_individual(new_ind, self.gama._pset)
+        except Exception as e:
+            self.fail(
+                    f"""Mutated individual could not be compiled because of error: {str(e)}\n
+                    Original: {str(ind)}\n
+                    New: {str(new_ind)}
+                    """
+                    )

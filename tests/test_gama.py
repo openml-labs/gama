@@ -1,9 +1,12 @@
 """ Contains all unit tests for """
 import unittest
 
+from sklearn.datasets import load_digits
+from sklearn.model_selection import train_test_split
+
 from gama import Gama
 
-def gama_suite():
+def gama_test_suite():
     test_cases = [GamaUnitTestCase, GamaSystemTestCase]
     return unittest.TestSuite(map(unittest.TestLoader().loadTestsFromTestCase, test_cases))
 
@@ -34,5 +37,13 @@ class GamaSystemTestCase(unittest.TestCase):
         pass
         
     def test_full_system(self):
-        self.assertTrue(False, "Implement test.")
+        digits = load_digits()
+        X_train, X_test, y_train, y_test = train_test_split(
+                digits.data, digits.target, stratify= digits.target, random_state=0)
+                
+        # Add checks on individuals (reproducibility)
+        self.gama.fit(X_train, y_train)
+        
+        # Add checks
+        self.gama.predict(X_test)
         
