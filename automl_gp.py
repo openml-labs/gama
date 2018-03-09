@@ -156,28 +156,22 @@ def mut_replace_terminal(ind, pset):
     ind[to_change] = np.random.choice(alternatives)
     return ind, 
 
-def find_next_unmatched_terminal(individual, start, pset, ignore_pset_arguments=True):
-    """ Finds the location of the terminal that provides input of `ret_type` to a given primitive. """
+def find_unmatched_terminal(individual):
+    """ Finds the location of the first terminal that can not be matched with a primitive.
     
-    # We need to keep track of terminals we expect.
-    argument_ret_types = [pset.mapping[tname].ret for tname in pset.arguments]
-    unmatched_args = []
-    
-    for i, el in enumerate(individual[start:], start=start):
-        if issubclass(type(el), gp.Primitive):
-            new_expected_args = [arg_type for arg_type in el.args if arg_type not in argument_ret_types]
-            # Replace with list-inserts if performance is bad.
-            unmatched_args = new_expected_args + unmatched_args
-        elif el.ret in argument_ret_types:
-            # We ignore 
-            continue
-        elif len(unmatched_args) > 0 and el.ret == unmatched_args[0]:
+    Raises a `ValueError` if no terminals are found.
+    """
+    unmatched_args = []    
+    for i, el in enumerate(individual):
+        if len(unmatched_args) > 0 and el.ret == unmatched_args[0]:
             unmatched_args.pop(0)
-        elif len(unmatched_args) == 0:
+        elif issubclass(type(el), gp.Terminal):
             return i
+        if issubclass(type(el), gp.Primitive):
+            # Replace with list-inserts if performance is bad.
+            unmatched_args = el.args + unmatched_args
     
-    return i+1
-    #raise ValueError(f"No unmatched terminals found. Suggested: {i}")    
+    raise ValueError("No unmatched terminals found.") 
 
 def mut_replace_primitive(ind, pset):
     """ Mutation function which replaces a primitive (and corresponding terminals). """
@@ -194,7 +188,12 @@ def mut_replace_primitive(ind, pset):
     # 1. Determine which terminals should also be removed.
     # We want to find the first unmatched terminal, but can ignore the data 
     # input terminal, as that is a subtree we do not wish to replace.
-    terminal_index = find_next_unmatched_terminal(ind, to_change + 1, pset)  
+    terminal_index = find_unmatched_terminal(ind[:to_change]+ind[to_change+1:])
+    if (ind[terminal_index].name in pset.arguments):
+        # In the case the unmatched terminal was the Data terminal, we actually
+        # would like to start adding terminals only after this position.
+        terminal_index += 1
+        
     number_of_removed_terminals = len(ind[to_change].args) - 1
             
     # 2. Determine new primitive and terminals need to be added.
