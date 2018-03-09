@@ -84,6 +84,9 @@ def generate(pset, min_, max_, condition, type_=None):
 from collections import defaultdict
 import random
 __type__ = object
+
+# Copied because common_types was not sorted in original, leading to random ordering
+# and thus random crossover.
 def cxOnePoint(ind1, ind2):
     """Randomly select in each individual and exchange each subtree with the
     point as root between each individual.
@@ -120,5 +123,5 @@ def cxOnePoint(ind1, ind2):
         slice1 = ind1.searchSubtree(index1)
         slice2 = ind2.searchSubtree(index2)
         ind1[slice1], ind2[slice2] = ind2[slice2], ind1[slice1]
-
+        
     return ind1, ind2
