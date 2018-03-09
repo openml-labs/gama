@@ -3,16 +3,16 @@
 An automated machine learning tool based on genetic programming.
 	
 ## TODO
-[ ] Add unit tests  
+[ ] Expand unit and system tests  
 [ ] Support other (custom?) (multi-objective) optimization metrics  
-[ ] Expand the grammar to include NaN/Negative/Non-numeric pre/post conditions  
+[ ] Expand the grammar to include NaN/negative/non-numeric pre/post conditions  
 [ ] Support multi-threading  
 [ ] Model serializability  
 [ ] Progress output to console (in a nice way)  
 [ ] Implement bias correction for crossvalidation (eg. BBC-CV)  
 [ ] Support time-based cut-off  
-[ ] Add Visualization  
-[ ] Add Logging  
+[ ] Add visualization  
+[ ] Add logging  
 
 ## Nice to have
 [ ] Python code export  
