@@ -12,8 +12,8 @@ An automated machine learning tool based on genetic programming.
 [ ] Implement bias correction for crossvalidation (eg. BBC-CV)  
 [ ] Support time-based cut-off  
 [ ] Add visualization  
-[ ] Add logging
-[ ] Support for regression problems
+[ ] Add logging  
+[ ] Support for regression problems  
 
 ## Nice to have
 [ ] Python code export  
