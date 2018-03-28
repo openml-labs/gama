@@ -19,6 +19,8 @@ from automl_gp import compile_individual, pset_from_config, generate_valid, rand
 from gama_exceptions import AttributeNotAssignedError
 from gama_hof import HallOfFame
 
+from async_gp import async_ea, evaluate_individual
+
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
                           did not terminate successfully."""
@@ -106,14 +108,16 @@ class Gama(object):
         mstats.register("min", np.min)
         mstats.register("max", np.max)
         
-        self._toolbox.register("evaluate", self._evaluate_pipeline, X=X, y=y)
+        #self._toolbox.register("evaluate", self._evaluate_pipeline, X=X, y=y)
+        self._toolbox.register("evaluate", evaluate_individual, compile_fn=self._toolbox.compile, X=X, y=y)
         
         if self._warm_start:
             pop = self._best_pipelines
         else:
             pop = self._toolbox.population(n=self._pop_size)
             
-        pop, log = eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, halloffame=HallOfFame('log.txt'))#, stats=mstats)
+        #pop, log = eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, halloffame=HallOfFame('log.txt'))#, stats=mstats)
+        pop, log = async_ea(pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals =self._n_generations*self._pop_size , verbose=True, halloffame=HallOfFame('log.txt'))#, stats=mstats)
         
         self._best_pipelines = sorted(pop, key = lambda x: (-x.fitness.values[0], str(x)))
         best_individual = self._best_pipelines[0]
