@@ -11,16 +11,16 @@ from scipy.stats import mode
 from deap import base, creator, tools, gp
 from deap.algorithms import eaSimple
 
-from sklearn.model_selection import cross_val_score
 import stopit
 
 from configuration import new_config
 from modified_deap import cxOnePoint
+import automl_gp
 from automl_gp import compile_individual, pset_from_config, generate_valid, random_valid_mutation
 from gama_exceptions import AttributeNotAssignedError
 from gama_hof import HallOfFame
 
-from async_gp import async_ea, evaluate_individual
+from async_gp import async_ea
 
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
@@ -79,6 +79,8 @@ class Gama(object):
         """
         if self._best_pipelines is None:
             raise AttributeNotAssignedError(STR_NO_OPTIMAL_PIPELINE)
+        if len(self._best_pipelines) < auto_ensemble_n:
+            print('Warning: Not enough pipelines evaluated. Continuing with less.')
         
         predictions  = np.zeros((len(X), auto_ensemble_n))
         for i, individual in enumerate(self._best_pipelines[:auto_ensemble_n]):
@@ -119,22 +121,22 @@ class Gama(object):
         else:
             pop = self._toolbox.population(n=self._pop_size)
             
-        self._toolbox.register("evaluate", self._evaluate_pipeline, X=X, y=y, timeout=self._max_eval_time)
-        #self._toolbox.register("evaluate", evaluate_individual, compile_fn=self._toolbox.compile, X=X, y=y)
+        self._toolbox.register("evaluate", self._compile_and_evaluate_individual, X=X, y=y, timeout=self._max_eval_time)
+        self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X = X, y = y, timeout = self._max_eval_time)
         hof = HallOfFame('log.txt')
         
         run_ea = lambda : eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, halloffame=hof)
+        run_ea = lambda : async_ea(pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals =self._n_generations*self._pop_size , verbose=True, halloffame=hof)
         
-        if self._max_total_time > 0:
+        
+        if self._max_total_time is not None:
             with stopit.ThreadingTimeout(self._max_total_time) as c_mgr:
                 pop, log = run_ea()
             if not c_mgr:
                 print('Terminated because maximum time has elapsed.')
         else:
             pop, log = run_ea()
-                #, stats=mstats)
-        #pop, log = async_ea(pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals =self._n_generations*self._pop_size , verbose=True, halloffame=HallOfFame('log.txt'))#, stats=mstats)
-        
+            
         self._best_pipelines = sorted(hof._pop, key = lambda x: (-x.fitness.values[0], str(x)))
         best_individual = self._best_pipelines[0]
         self._fitted_pipelines[str(best_individual)] = self._fit_pipeline(best_individual, X, y)
@@ -144,38 +146,17 @@ class Gama(object):
         pipeline = self._toolbox.compile(individual)
         pipeline.fit(X,y)
         return pipeline      
-        
-    def _evaluate_pipeline(self, ind, X, y, timeout, cv=5):
-        """ Evaluates a pipeline used k-Fold CV. """
+    
+    def _compile_and_evaluate_individual(self, ind, X, y, timeout, cv=5):
         if str(ind) in self._evaluated_individuals:
             print('using cache.')
             return self._evaluated_individuals[str(ind)]
-        
-        with stopit.ThreadingTimeout(timeout) as c_mgr:
-            pl = self._toolbox.compile(ind)
-            #if pl is None:
-                # Failed to compile due to invalid hyperparameter configuration
-            #    return (-float("inf"),)
-            try:
-                fitness_values = (np.mean(cross_val_score(pl, X, y, cv = cv)),)
-            except stopit.TimeoutException:
-                raise
-            except Exception as e:
-                print(type(e),str(e))
-                fitness_values = (-float("inf"),)
-        
-        if c_mgr.state == c_mgr.INTERRUPTED:
-            # A TimeoutException was raised, but not by the context manager.
-            # This indicates that the outer context manager (the ea) timed out.
-            raise stopit.TimeoutException()
-            
-        if not c_mgr:
-            print('Evaluation timeout')
-            # For now we treat a eval timeout the same way as e.g. NaN exceptions.
-            fitness_values = (-float("inf"),)
-        
-        self._evaluated_individuals[str(ind)] = fitness_values
-        
-        return fitness_values
+        pl = self._toolbox.compile(ind)        
+        #if pl is None:
+            # Failed to compile due to invalid hyperparameter configuration
+        #    return (-float("inf"),)
+        fitness = automl_gp.evaluate_pipeline(pl, X, y, timeout)        
+        self._evaluated_individuals[str(ind)] = fitness
+        return fitness
         
     

@@ -8,6 +8,8 @@ import numpy as np
 from deap import gp, creator
 import sklearn
 from sklearn.pipeline import Pipeline
+from sklearn.model_selection import cross_val_score
+import stopit
 
 from stacking_transformer import make_stacking_transformer
 from modified_deap import gen_grow_safe
@@ -76,11 +78,11 @@ def pset_from_config(configuration):
             elif issubclass(key, sklearn.base.ClassifierMixin):
                 pset.addPrimitive(key, [Data, *hyperparameter_types], Predictions)
                 
-                stacking_class = make_stacking_transformer(key)
-                primname = key.__name__ + stacking_class.__name__
-                pset.addPrimitive(stacking_class, [Data, *hyperparameter_types], Data, name = primname)
-                if key.__name__ in parameter_checks:
-                    parameter_checks[primname] = parameter_checks[key.__name__]
+                #stacking_class = make_stacking_transformer(key)
+                #primname = key.__name__ + stacking_class.__name__
+                #pset.addPrimitive(stacking_class, [Data, *hyperparameter_types], Data, name = primname)
+                #if key.__name__ in parameter_checks:
+                #    parameter_checks[primname] = parameter_checks[key.__name__]
             else:
                 raise TypeError(f"Expected {key} to be either subclass of "
                                 "TransformerMixin or ClassifierMixin.")
@@ -131,6 +133,30 @@ def compile_individual(ind, pset, parameter_checks = None):
             raise TypeError("Type is wrong or missing.")
             
     return Pipeline(list(reversed(components)))
+
+def evaluate_pipeline(pl, X, y, timeout, cv=5):
+    """ Evaluates a pipeline used k-Fold CV. """
+    
+    with stopit.ThreadingTimeout(timeout) as c_mgr:
+        try:
+            fitness_values = (np.mean(cross_val_score(pl, X, y, cv = cv)),)
+        except stopit.TimeoutException:
+            raise
+        except Exception as e:
+            print(type(e),str(e))
+            fitness_values = (-float("inf"),)
+    
+    if c_mgr.state == c_mgr.INTERRUPTED:
+        # A TimeoutException was raised, but not by the context manager.
+        # This indicates that the outer context manager (the ea) timed out.
+        raise stopit.TimeoutException()
+        
+    if not c_mgr:
+        print('Evaluation timeout')
+        # For now we treat a eval timeout the same way as e.g. NaN exceptions.
+        fitness_values = (-float("inf"),)
+            
+    return fitness_values
 
 def generate_valid(pset, min_, max_, toolbox):
     """ Generates a valid pipeline. """
