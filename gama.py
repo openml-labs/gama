@@ -20,7 +20,7 @@ from automl_gp import compile_individual, pset_from_config, generate_valid, rand
 from gama_exceptions import AttributeNotAssignedError
 from gama_hof import HallOfFame
 
-from async_gp import async_ea
+from async_gp import async_ea, async_ea2
 
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
@@ -121,13 +121,13 @@ class Gama(object):
         else:
             pop = self._toolbox.population(n=self._pop_size)
             
+        hof = HallOfFame('log.txt')
+        
         self._toolbox.register("evaluate", self._compile_and_evaluate_individual, X=X, y=y, timeout=self._max_eval_time)
         self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X = X, y = y, timeout = self._max_eval_time)
-        hof = HallOfFame('log.txt')
         
         run_ea = lambda : eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, halloffame=hof)
         run_ea = lambda : async_ea(pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals =self._n_generations*self._pop_size , verbose=True, halloffame=hof)
-        
         
         if self._max_total_time is not None:
             with stopit.ThreadingTimeout(self._max_total_time) as c_mgr:

@@ -147,6 +147,7 @@ def evaluate_pipeline(pl, X, y, timeout, cv=5):
             fitness_values = (-float("inf"),)
     
     if c_mgr.state == c_mgr.INTERRUPTED:
+        print('Interrupt!')
         # A TimeoutException was raised, but not by the context manager.
         # This indicates that the outer context manager (the ea) timed out.
         raise stopit.TimeoutException()
