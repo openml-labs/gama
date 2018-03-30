@@ -142,6 +142,8 @@ def evaluate_pipeline(pl, X, y, timeout, cv=5):
             fitness_values = (np.mean(cross_val_score(pl, X, y, cv = cv)),)
         except stopit.TimeoutException:
             raise
+        except KeyboardInterrupt:
+            raise
         except Exception as e:
             print(type(e),str(e))
             fitness_values = (-float("inf"),)
