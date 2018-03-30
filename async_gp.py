@@ -45,23 +45,24 @@ def async_ea2(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True
     return running_pop, None
 
 def async_ea(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
-    try:
-        mp_manager = mp.Manager()
-        input_queue = mp_manager.Queue()
-        output_queue = mp_manager.Queue()
-        shutdown = mp_manager.Value('shutdown', False)
+    mp_manager = mp.Manager()
+    input_queue = mp_manager.Queue()
+    output_queue = mp_manager.Queue()
+    shutdown = mp_manager.Value('shutdown', False)
+
+    n_processes = 7
+    P = len(pop)
+    running_pop = []
     
-        n_processes = 0
-        P = len(pop)
-        running_pop = []
+    comp_ind_map = {}
+    
+    for _ in range(n_processes):
+        p = mp.Process(target = evaluator_daemon, args = (input_queue, output_queue, toolbox.evaluate, shutdown,))
+        p.daemon = True
+        p.start()
         
-        comp_ind_map = {}
-        
-        for _ in range(n_processes):
-            p = mp.Process(target = evaluator_daemon, args = (input_queue, output_queue, toolbox.evaluate, shutdown,))
-            p.daemon = True
-            p.start()
-            
+    try:
+        print('Starting EA')
         for ind in pop:
             comp_ind = toolbox.compile(ind)
             comp_ind_map[str(comp_ind)] = ind
@@ -71,11 +72,8 @@ def async_ea(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True,
             received_evaluation = False
             while not received_evaluation:
                 try:
-                    print('Waiting..')
                     comp_ind_str, fitness = output_queue.get(timeout=100)
                     received_evaluation = True
-                except KeyboardInterrupt:
-                    print('so it does happen?')
                 except queue.Empty:
                     continue
                 
@@ -96,9 +94,11 @@ def async_ea(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True,
             comp_ind_map[str(comp_ind)] = ind
             input_queue.put((str(comp_ind), comp_ind))
         
+        shutdown.value = True
+        
     except KeyboardInterrupt:
         print("Shutting down EA due to KeyboardInterrupt.")
-    finally:
+    except:
         shutdown.value = True
         
     return running_pop, None, shutdown
