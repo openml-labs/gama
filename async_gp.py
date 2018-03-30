@@ -1,14 +1,24 @@
 import multiprocessing as mp
 import threading
-
+import time
+import queue
 #from pathos.helpers.mp.process import Process
 #import pathos.multiprocessing as pathosmp
 
-def evaluator_daemon(input_queue, output_queue, fn):    
-    while True:
-        identifier, input_ = input_queue.get()
-        output = fn(input_)
-        output_queue.put((identifier, output))
+def evaluator_daemon(input_queue, output_queue, fn, shutdown):
+    shutdown_message = 'Helper process stopping normally.'
+    try:
+        while not shutdown.value:
+            identifier, input_ = input_queue.get()
+            output = fn(input_)
+            if not shutdown.value:
+                output_queue.put((identifier, output))
+    except KeyboardInterrupt:
+        shutdown_message = 'Helper process stopping due to keyboard interrupt.'
+    except BrokenPipeError:
+        shutdown_message = 'Helper process stopping due to a broken pipe.'
+        
+    print(shutdown_message)
 
 def async_ea2(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
     P = len(pop)
@@ -35,48 +45,63 @@ def async_ea2(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True
     return running_pop, None
 
 def async_ea(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
-    mp_manager = mp.Manager()
-    input_queue = mp_manager.Queue()
-    output_queue = mp_manager.Queue()
+    try:
+        mp_manager = mp.Manager()
+        input_queue = mp_manager.Queue()
+        output_queue = mp_manager.Queue()
+        shutdown = mp_manager.Value('shutdown', False)
     
-    n_processes = 7
-    P = len(pop)
-    running_pop = []
-    
-    comp_ind_map = {}
-    
-    for _ in range(n_processes):
-        p = mp.Process(target = evaluator_daemon, args = (input_queue, output_queue, toolbox.evaluate,))
-        p.daemon = True
-        p.start()
+        n_processes = 0
+        P = len(pop)
+        running_pop = []
         
-    for ind in pop:
-        comp_ind = toolbox.compile(ind)
-        comp_ind_map[str(comp_ind)] = ind
-        input_queue.put((str(comp_ind), comp_ind))
-    
-    for i in range(n_evals):        
-        #print(i)
-        comp_ind_str, fitness = output_queue.get()
-        individual = comp_ind_map[comp_ind_str]
-        individual.fitness.values = fitness
+        comp_ind_map = {}
         
-        # Add to population
-        running_pop.append(individual)
-        halloffame.update([individual])
+        for _ in range(n_processes):
+            p = mp.Process(target = evaluator_daemon, args = (input_queue, output_queue, toolbox.evaluate, shutdown,))
+            p.daemon = True
+            p.start()
+            
+        for ind in pop:
+            comp_ind = toolbox.compile(ind)
+            comp_ind_map[str(comp_ind)] = ind
+            input_queue.put((str(comp_ind), comp_ind))
         
-        # Shrink population if needed        
-        if len(running_pop) > P:
-            running_pop.remove(min(running_pop, key = lambda i: i.fitness.values[0]))
+        for i in range(n_evals):        
+            received_evaluation = False
+            while not received_evaluation:
+                try:
+                    print('Waiting..')
+                    comp_ind_str, fitness = output_queue.get(timeout=100)
+                    received_evaluation = True
+                except KeyboardInterrupt:
+                    print('so it does happen?')
+                except queue.Empty:
+                    continue
+                
+            individual = comp_ind_map[comp_ind_str]
+            individual.fitness.values = fitness
+            
+            # Add to population
+            running_pop.append(individual)
+            halloffame.update([individual])
+            
+            # Shrink population if needed        
+            if len(running_pop) > P:
+                running_pop.remove(min(running_pop, key = lambda i: i.fitness.values[0]))
+            
+            # Create new individual if needed - or do we just always queue?
+            ind = toolbox.individual()
+            comp_ind = toolbox.compile(ind)
+            comp_ind_map[str(comp_ind)] = ind
+            input_queue.put((str(comp_ind), comp_ind))
         
-        # Create new individual if needed - or do we just always queue?
-        ind = toolbox.individual()
-        comp_ind = toolbox.compile(ind)
-        comp_ind_map[str(comp_ind)] = ind
-        input_queue.put((str(comp_ind), comp_ind))
-    
-    print('done')
-    return running_pop, None
+    except KeyboardInterrupt:
+        print("Shutting down EA due to KeyboardInterrupt.")
+    finally:
+        shutdown.value = True
+        
+    return running_pop, None, shutdown
         
     
     
