@@ -141,9 +141,13 @@ class Gama(object):
         
         self._ = sdp
         
-        self._best_pipelines = sorted(hof._pop, key = lambda x: (-x.fitness.values[0], str(x)))
-        best_individual = self._best_pipelines[0]
-        self._fitted_pipelines[str(best_individual)] = self._fit_pipeline(best_individual, X, y)
+        
+        if len(hof._pop) > 0:
+            self._best_pipelines = sorted(hof._pop, key = lambda x: (-x.fitness.values[0], str(x)))
+            best_individual = self._best_pipelines[0]
+            self._fitted_pipelines[str(best_individual)] = self._fit_pipeline(best_individual, X, y)
+        else:
+            print('No pipeline evaluated.')
         
     def _fit_pipeline(self, individual, X, y):
         """ Compiles the individual representation and fit the data to it. """
