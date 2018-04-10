@@ -14,7 +14,7 @@ from automl_gp import compile_individual, pset_from_config, generate_valid, rand
 from gama_exceptions import AttributeNotAssignedError
 from gama_hof import HallOfFame
 
-from async_gp import async_ea, async_ea2
+from async_gp import async_ea
 
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
@@ -31,7 +31,8 @@ class Gama(object):
                  pop_size=10,
                  n_generations=10,
                  max_total_time=None,
-                 max_eval_time=300):
+                 max_eval_time=300,
+                 n_jobs=1):
         self._best_pipelines = None
         self._fitted_pipelines = {}
         self._warm_start = warm_start
@@ -41,6 +42,7 @@ class Gama(object):
         self._max_total_time = max_total_time
         self._max_eval_time = max_eval_time
         self._fit_data = None
+        self._n_threads = n_jobs
         
         self._evaluated_individuals = {}
         
@@ -122,24 +124,25 @@ class Gama(object):
         
         run_ea = lambda : eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8,
                                    ngen=self._n_generations, verbose=True, halloffame=hof)
-        run_ea = lambda : async_ea(pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8,
+        run_ea = lambda : async_ea(self._n_threads, pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8,
                                    n_evals=self._n_generations*self._pop_size , verbose=True, halloffame=hof)
-        
-        if self._max_total_time is not None:
-            try:
+
+        try:
+            if self._max_total_time is not None:
                 with stopit.ThreadingTimeout(self._max_total_time) as c_mgr:
                     pop, log, sdp = run_ea()
-            except KeyboardInterrupt:
-                print('Keyboard Interrupt sent to outer with statement.')
-            if not c_mgr:
-                print('Terminated because maximum time has elapsed.')
-        else:
-            pop, log, sdp = run_ea()
-        
-        self._ = sdp
+            else:
+                pop, log, sdp = run_ea()
+
+            self._ = sdp
+        except KeyboardInterrupt:
+            print('Keyboard Interrupt sent to outer with statement.')
+
+        if self._max_total_time is not None and not c_mgr:
+            print('Terminated because maximum time has elapsed.')
 
         if len(hof._pop) > 0:
-            self._best_pipelines = sorted(hof._pop, key = lambda x: (-x.fitness.values[0], str(x)))
+            self._best_pipelines = sorted(hof._pop, key=lambda x: (-x.fitness.values[0], str(x)))
             best_individual = self._best_pipelines[0]
             self._fitted_pipelines[str(best_individual)] = self._fit_pipeline(best_individual, X, y)
         else:
