@@ -133,6 +133,75 @@ def compile_individual(ind, pset, parameter_checks = None):
             
     return Pipeline(list(reversed(components)))
 
+
+def expression_to_component(primitive, terminals, pset, parameter_checks=None):
+    """ Creates Python-code for the primitive-terminals combination. """
+    # See if all terminals have a value provided (except Data Terminal)
+    required = [terminal for terminal in primitive.args if not terminal.name == 'ARG0']
+    required_provided = list(zip(required, terminals))
+    if not all(r == p.ret for (r, p) in required_provided):
+        raise ValueError('A terminal is missing.')
+
+    def extract_arg_name(terminal_name):
+        equal_idx = terminal_name.rfind('=')
+        start_parameter_name = terminal_name.rfind('.', 0, equal_idx) + 1
+        return terminal_name[start_parameter_name:equal_idx]
+
+    kwargs = {
+        extract_arg_name(p.name): pset.context[p.name]
+        for r, p in required_provided
+    }
+
+    primitive_class = pset.context[primitive.name]
+
+    if (parameter_checks is not None
+            and primitive.name in parameter_checks
+            and not parameter_checks[primitive.name](kwargs)):
+        return None
+
+    return primitive_class(**kwargs)
+
+def compile_individual_tree(ind, pset, parameter_checks=None):
+    """ Compile the individual to a sklearn pipeline."""
+    components = []
+    name_counter = defaultdict(int)
+    while (len(ind) > 0):
+        # log_message('compiling ' + str(ind), level = 4)
+        prim, remainder = ind[0], ind[1:]
+        if isinstance(prim, gp.Terminal):
+            if len(remainder) > 0:
+                raise Exception
+            break
+        # See if all terminals have a value provided (except Data Terminal)
+        required_provided = list(zip(reversed(prim.args[1:]), reversed(remainder)))
+        if all(r == p.ret for (r, p) in required_provided):
+            # log_message('compiling ' + str([p.name for r, p in required_provided]), level = 5)
+            # If so, instantiate the pipeline component with given arguments.
+            def extract_arg_name(terminal_name):
+                equal_idx = terminal_name.rfind('=')
+                start_parameter_name = terminal_name.rfind('.', 0, equal_idx) + 1
+                return terminal_name[start_parameter_name:equal_idx]
+
+            args = {
+                extract_arg_name(p.name): pset.context[p.name]
+                for r, p in required_provided
+            }
+            class_ = pset.context[prim.name]
+            # All pipeline components must have a unique name
+            name = prim.name + str(name_counter[prim.name])
+            name_counter[prim.name] += 1
+            if (parameter_checks is not None
+                    and prim.name in parameter_checks
+                    and not parameter_checks[prim.name](args)):
+                return None
+
+            components.append((name, class_(**args)))
+            ind = ind[1:-len(args)]
+        else:
+            raise TypeError("Type is wrong or missing.")
+
+    return Pipeline(list(reversed(components)))
+
 def evaluate_pipeline(pl, X, y, timeout, cv=5):
     """ Evaluates a pipeline used k-Fold CV. """
     
