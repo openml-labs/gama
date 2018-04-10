@@ -11,7 +11,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import cross_val_score
 import stopit
 
-from stacking_transformer import make_stacking_transformer
 from modified_deap import gen_grow_safe
 
 class Data(np.ndarray):

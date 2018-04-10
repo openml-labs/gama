@@ -1,11 +1,14 @@
 import multiprocessing as mp
-import threading
-import time
 import queue
-#from pathos.helpers.mp.process import Process
-#import pathos.multiprocessing as pathosmp
+import random
+
+import numpy as np
+
 
 def evaluator_daemon(input_queue, output_queue, fn, shutdown):
+    random.seed(0)
+    np.random.seed(0)
+
     shutdown_message = 'Helper process stopping normally.'
     try:
         while not shutdown.value:
@@ -20,8 +23,9 @@ def evaluator_daemon(input_queue, output_queue, fn, shutdown):
         
     print(shutdown_message)
 
+
 def async_ea2(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
-    P = len(pop)
+    max_pop_size = len(pop)
     running_pop = []
         
     for i in range(n_evals):
@@ -39,10 +43,11 @@ def async_ea2(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True
         halloffame.update([ind])
         
         # Shrink population if needed        
-        if len(running_pop) > P:
-            running_pop.remove(min(running_pop, key = lambda i: i.fitness.values[0]))
+        if len(running_pop) > max_pop_size:
+            running_pop.remove(min(running_pop, key=lambda x: x.fitness.values[0]))
         
     return running_pop, None
+
 
 def async_ea(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
     mp_manager = mp.Manager()
@@ -51,13 +56,13 @@ def async_ea(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True,
     shutdown = mp_manager.Value('shutdown', False)
 
     n_processes = 7
-    P = len(pop)
+    max_pop_size = len(pop)
     running_pop = []
     
     comp_ind_map = {}
     
     for _ in range(n_processes):
-        p = mp.Process(target = evaluator_daemon, args = (input_queue, output_queue, toolbox.evaluate, shutdown,))
+        p = mp.Process(target=evaluator_daemon, args=(input_queue, output_queue, toolbox.evaluate, shutdown,))
         p.daemon = True
         p.start()
         
@@ -85,8 +90,8 @@ def async_ea(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True,
             halloffame.update([individual])
             
             # Shrink population if needed        
-            if len(running_pop) > P:
-                running_pop.remove(min(running_pop, key = lambda i: i.fitness.values[0]))
+            if len(running_pop) > max_pop_size:
+                running_pop.remove(min(running_pop, key=lambda x: x.fitness.values[0]))
             
             # Create new individual if needed - or do we just always queue?
             ind = toolbox.individual()
@@ -102,7 +107,3 @@ def async_ea(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True,
         shutdown.value = True
         
     return running_pop, None, shutdown
-        
-    
-    
-    

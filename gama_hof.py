@@ -5,6 +5,7 @@ Created on Wed Feb 28 16:17:03 2018
 @author: s105307
 """
 
+
 class HallOfFame(object):
     
     def __init__(self, filename):
@@ -15,6 +16,6 @@ class HallOfFame(object):
         self._pop += pop
         
         with open(self._filename,'a') as fh:
-            #print('-gen-')
-            #print('\n'.join([str((str(ind), ind.fitness.values[0])) for ind in pop]))
+            # print('-gen-')
+            # print('\n'.join([str((str(ind), ind.fitness.values[0])) for ind in pop]))
             fh.write('\n'.join([str((str(ind), ind.fitness.values[0])) for ind in pop]))

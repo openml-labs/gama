@@ -1,6 +1,7 @@
 from sklearn.base import TransformerMixin
 import numpy as np
 
+
 def make_stacking_transformer(estimator_type):
     """Create a class that is a TransformerMixin for an arbitrary sklearn estimator
     by adding the predictions of the estimator trained on the data, to the data.

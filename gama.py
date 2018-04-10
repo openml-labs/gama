@@ -1,8 +1,3 @@
-"""
-Created on Thu Feb 22 14:30:52 2018
-
-@author: P. Gijsbers
-"""
 import random
 import numpy as np
 from scipy.stats import mode
@@ -33,10 +28,10 @@ class Gama(object):
                  config=new_config,
                  warm_start=False,
                  random_state=None,
-                 pop_size = 10,
-                 n_generations = 10,
-                 max_total_time = None,
-                 max_eval_time = 300):
+                 pop_size=10,
+                 n_generations=10,
+                 max_total_time=None,
+                 max_eval_time=300):
         self._best_pipelines = None
         self._fitted_pipelines = {}
         self._warm_start = warm_start
@@ -45,6 +40,7 @@ class Gama(object):
         self._n_generations = n_generations
         self._max_total_time = max_total_time
         self._max_eval_time = max_eval_time
+        self._fit_data = None
         
         self._evaluated_individuals = {}
         
@@ -99,12 +95,12 @@ class Gama(object):
         
         Various possible machine learning pipelines will be fit to the (X,y) data.
         Using Genetic Programming, the pipelines chosen should lead to gradually
-        better models. Pipelines will internally be validated using crossvalidation.
+        better models. Pipelines will internally be validated using cross validation.
         
         After the search termination condition is met, the best found pipeline 
         configuration is then used to train a final model on all provided data.
         """
-        self._fit_data = (X,y)
+        self._fit_data = (X, y)
         
         stats_fit = tools.Statistics(lambda ind: ind.fitness.values)
         stats_size = tools.Statistics(len)
@@ -113,8 +109,7 @@ class Gama(object):
         mstats.register("std", np.std)
         mstats.register("min", np.min)
         mstats.register("max", np.max)
-        
-        
+
         if self._warm_start:
             pop = self._best_pipelines
         else:
@@ -125,8 +120,10 @@ class Gama(object):
         self._toolbox.register("evaluate", self._compile_and_evaluate_individual, X=X, y=y, timeout=self._max_eval_time)
         self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X = X, y = y, timeout = self._max_eval_time)
         
-        run_ea = lambda : eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, halloffame=hof)
-        run_ea = lambda : async_ea(pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals =self._n_generations*self._pop_size , verbose=True, halloffame=hof)
+        run_ea = lambda : eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8,
+                                   ngen=self._n_generations, verbose=True, halloffame=hof)
+        run_ea = lambda : async_ea(pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8,
+                                   n_evals=self._n_generations*self._pop_size , verbose=True, halloffame=hof)
         
         if self._max_total_time is not None:
             try:
@@ -140,8 +137,7 @@ class Gama(object):
             pop, log, sdp = run_ea()
         
         self._ = sdp
-        
-        
+
         if len(hof._pop) > 0:
             self._best_pipelines = sorted(hof._pop, key = lambda x: (-x.fitness.values[0], str(x)))
             best_individual = self._best_pipelines[0]
@@ -166,5 +162,3 @@ class Gama(object):
         fitness = automl_gp.evaluate_pipeline(pl, X, y, timeout)        
         self._evaluated_individuals[str(ind)] = fitness
         return fitness
-        
-    
