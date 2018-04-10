@@ -24,38 +24,45 @@ def evaluator_daemon(input_queue, output_queue, fn, shutdown):
     print(shutdown_message)
 
 
-def async_ea2(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
+def async_ea(n_threads=1, *args, **kwargs):
+    if n_threads == 1:
+        return async_ea_sequential(*args, **kwargs)
+    else:
+        return async_ea_parallel(n_threads, *args, **kwargs)
+
+
+def async_ea_sequential(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
+    print('starting sequential')
     max_pop_size = len(pop)
     running_pop = []
-        
+
     for i in range(n_evals):
         if i < len(pop):
             ind = pop[i]
         else:
             ind = toolbox.individual()
-        
+
         comp_ind = toolbox.compile(ind)
         fitness = toolbox.evaluate(comp_ind)
         ind.fitness.values = fitness
-        
+
         # Add to population
         running_pop.append(ind)
         halloffame.update([ind])
-        
-        # Shrink population if needed        
+
+        # Shrink population if needed
         if len(running_pop) > max_pop_size:
             running_pop.remove(min(running_pop, key=lambda x: x.fitness.values[0]))
-        
-    return running_pop, None
+    return running_pop, None, None
 
 
-def async_ea(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
+def async_ea_parallel(n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
     mp_manager = mp.Manager()
     input_queue = mp_manager.Queue()
     output_queue = mp_manager.Queue()
     shutdown = mp_manager.Value('shutdown', False)
 
-    n_processes = 7
+    n_processes = n_threads
     max_pop_size = len(pop)
     running_pop = []
     
