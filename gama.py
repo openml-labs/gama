@@ -129,13 +129,13 @@ class Gama(object):
         run_ea = lambda : async_ea(pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals =self._n_generations*self._pop_size , verbose=True, halloffame=hof)
         
         if self._max_total_time is not None:
-           # try:
-           #     with stopit.ThreadingTimeout(self._max_total_time) as c_mgr:
-            pop, log, sdp = run_ea()
-           # except KeyboardInterrupt:
-           #     print('Keyboard Interrupt sent to outer with statement.')
-           # if not c_mgr:
-           #     print('Terminated because maximum time has elapsed.')
+            try:
+                with stopit.ThreadingTimeout(self._max_total_time) as c_mgr:
+                    pop, log, sdp = run_ea()
+            except KeyboardInterrupt:
+                print('Keyboard Interrupt sent to outer with statement.')
+            if not c_mgr:
+                print('Terminated because maximum time has elapsed.')
         else:
             pop, log, sdp = run_ea()
         
