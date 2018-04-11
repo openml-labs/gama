@@ -1,3 +1,14 @@
+""" Prototype grammar based configuration and parsing.
+
+TODO/TRY:
+- expand data classifications
+- make data classifications optional/hierarchical
+- low definition of '+'-distributions (and allow custom ones)
+- further develop Individual with good __str__ and from_string methods.
+- fully replace DEAP GP with this system.
+
+"""
+
 from collections import defaultdict
 
 import numpy as np
