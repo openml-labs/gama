@@ -18,8 +18,8 @@ def evaluator_daemon(input_queue, output_queue, fn, shutdown):
                 output_queue.put((identifier, output))
     except KeyboardInterrupt:
         shutdown_message = 'Helper process stopping due to keyboard interrupt.'
-    except BrokenPipeError:
-        shutdown_message = 'Helper process stopping due to a broken pipe.'
+    except (BrokenPipeError, EOFError):
+        shutdown_message = 'Helper process stopping due to a broken pipe or EOF.'
         
     print(shutdown_message)
 
