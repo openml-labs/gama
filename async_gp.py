@@ -31,6 +31,19 @@ def async_ea(n_threads=1, *args, **kwargs):
         return async_ea_parallel(n_threads, *args, **kwargs)
 
 
+def offspring_mate_and_mutate(pop, toolbox, cxpb, mutpb, n, always_return_list=False):
+    """ Creates n new individuals based on the population. Can apply both crossover and mutation. """
+    offspring = []
+    for _ in range(n):
+        ind1, ind2 = np.random.choice(pop, size=2, replace=False)
+        ind1, ind2 = toolbox.clone(ind1), toolbox.clone(ind2)
+        if np.random.random() < cxpb:
+            ind1, ind2 = toolbox.mate(ind1, ind2)
+        if np.random.random() < mutpb:
+            ind1, = toolbox.mutate(ind1)
+        offspring.append((ind1,))
+    return offspring
+
 def async_ea_sequential(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
     print('starting sequential')
     max_pop_size = len(pop)
@@ -40,7 +53,7 @@ def async_ea_sequential(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, ve
         if i < len(pop):
             ind = pop[i]
         else:
-            ind = toolbox.individual()
+            ind, = offspring_mate_and_mutate(running_pop, toolbox, cxpb, mutpb, n=1)[0]
 
         comp_ind = toolbox.compile(ind)
         fitness = toolbox.evaluate(comp_ind)
@@ -84,10 +97,12 @@ def async_ea_parallel(n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_eval
             received_evaluation = False
             while not received_evaluation:
                 try:
+                    # If we just used the blocking queue.get, then KeyboardInterrupts/Timeout would not work.
                     comp_ind_str, fitness = output_queue.get(timeout=100)
                     received_evaluation = True
                 except queue.Empty:
                     continue
+            print(i)
                 
             individual = comp_ind_map[comp_ind_str]
             individual.fitness.values = fitness
@@ -101,7 +116,10 @@ def async_ea_parallel(n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_eval
                 running_pop.remove(min(running_pop, key=lambda x: x.fitness.values[0]))
             
             # Create new individual if needed - or do we just always queue?
-            ind = toolbox.individual()
+            if len(running_pop) < 2:
+                ind = toolbox.individual()
+            else:
+                ind, = offspring_mate_and_mutate(running_pop, toolbox, cxpb, mutpb, n=1)[0]
             comp_ind = toolbox.compile(ind)
             comp_ind_map[str(comp_ind)] = ind
             input_queue.put((str(comp_ind), comp_ind))
@@ -110,7 +128,10 @@ def async_ea_parallel(n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_eval
         
     except KeyboardInterrupt:
         print("Shutting down EA due to KeyboardInterrupt.")
+        # No need to communicate to processes since they also handle the KeyboardInterrupt directly.
     except:
+        # Even in the event of an error we want the helper processes to shut down.
         shutdown.value = True
+        raise
         
     return running_pop, None, shutdown
