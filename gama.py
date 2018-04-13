@@ -65,7 +65,7 @@ class Gama(object):
         
         self._toolbox.register("mate", cxOnePoint)
         
-        self._toolbox.register("mutate", random_valid_mutation, pset=self._pset)
+        self._toolbox.register("mutate", self._random_valid_mutation_try_new)
         self._toolbox.register("select", tools.selTournament, tournsize=3)  
     
     def predict(self, X, auto_ensemble_n=1):
@@ -165,3 +165,13 @@ class Gama(object):
         fitness = automl_gp.evaluate_pipeline(pl, X, y, timeout)        
         self._evaluated_individuals[str(ind)] = fitness
         return fitness
+
+    def _random_valid_mutation_try_new(self, ind):
+        """ Call `random_valid_mutation` until a new individual (that was not evaluated before) is created (at most 50x).
+        """
+        ind_copy = self._toolbox.clone(ind)
+        for _ in range(50):
+            new_ind, = random_valid_mutation(ind_copy, self._pset)
+            if str(new_ind) not in self._evaluated_individuals:
+                return new_ind,
+        return new_ind,
