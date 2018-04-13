@@ -11,6 +11,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import cross_val_score
 import stopit
 
+from stacking_transformer import make_stacking_transformer
 from modified_deap import gen_grow_safe
 
 class Data(np.ndarray):
@@ -76,12 +77,14 @@ def pset_from_config(configuration):
                 pset.addPrimitive(key, [Data, *hyperparameter_types], Data)
             elif issubclass(key, sklearn.base.ClassifierMixin):
                 pset.addPrimitive(key, [Data, *hyperparameter_types], Predictions)
-                
-                #stacking_class = make_stacking_transformer(key)
-                #primname = key.__name__ + stacking_class.__name__
-                #pset.addPrimitive(stacking_class, [Data, *hyperparameter_types], Data, name = primname)
-                #if key.__name__ in parameter_checks:
-                #    parameter_checks[primname] = parameter_checks[key.__name__]
+
+                if False:
+                    # Does not work with multi-processing.
+                    stacking_class = make_stacking_transformer(key)
+                    primname = key.__name__ + stacking_class.__name__
+                    pset.addPrimitive(stacking_class, [Data, *hyperparameter_types], Data, name = primname)
+                    if key.__name__ in parameter_checks:
+                        parameter_checks[primname] = parameter_checks[key.__name__]
             else:
                 raise TypeError(f"Expected {key} to be either subclass of "
                                 "TransformerMixin or ClassifierMixin.")
