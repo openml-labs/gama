@@ -24,9 +24,9 @@ def evaluator_daemon(input_queue, output_queue, fn, shutdown):
     print(shutdown_message)
 
 
-def async_ea(n_threads=1, *args, **kwargs):
+def async_ea(self, n_threads=1, *args, **kwargs):
     if n_threads == 1:
-        return async_ea_sequential(*args, **kwargs)
+        return async_ea_sequential(self, *args, **kwargs)
     else:
         return async_ea_parallel(n_threads, *args, **kwargs)
 
@@ -35,7 +35,11 @@ def offspring_mate_and_mutate(pop, toolbox, cxpb, mutpb, n, always_return_list=F
     """ Creates n new individuals based on the population. Can apply both crossover and mutation. """
     offspring = []
     for _ in range(n):
-        ind1, ind2 = np.random.choice(pop, size=2, replace=False)
+        try:
+            ind1, ind2 = np.random.choice(range(len(pop)), size=2, replace=False)
+            ind1, ind2 = pop[ind1], pop[ind2]
+        except Exception as e:
+            z =1
         ind1, ind2 = toolbox.clone(ind1), toolbox.clone(ind2)
         if np.random.random() < cxpb:
             ind1, ind2 = toolbox.mate(ind1, ind2)
@@ -44,7 +48,7 @@ def offspring_mate_and_mutate(pop, toolbox, cxpb, mutpb, n, always_return_list=F
         offspring.append((ind1,))
     return offspring
 
-def async_ea_sequential(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
+def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
     print('starting sequential')
     max_pop_size = len(pop)
     running_pop = []
@@ -53,11 +57,15 @@ def async_ea_sequential(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, ve
         if i < len(pop):
             ind = pop[i]
         else:
-            ind, = offspring_mate_and_mutate(running_pop, toolbox, cxpb, mutpb, n=1)[0]
+            for _ in range(50):
+                ind, = offspring_mate_and_mutate(running_pop, toolbox, cxpb, mutpb, n=1)[0]
+                if str(ind) not in self._evaluated_individuals:
+                    break
 
         comp_ind = toolbox.compile(ind)
         fitness = toolbox.evaluate(comp_ind)
         ind.fitness.values = fitness
+        self._evaluated_individuals[str(ind)] = fitness
 
         # Add to population
         running_pop.append(ind)
@@ -66,7 +74,7 @@ def async_ea_sequential(pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, ve
         # Shrink population if needed
         if len(running_pop) > max_pop_size:
             running_pop.remove(min(running_pop, key=lambda x: x.fitness.values[0]))
-    return running_pop, None, None
+    return running_pop, None
 
 
 def async_ea_parallel(n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
@@ -134,4 +142,4 @@ def async_ea_parallel(n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_eval
         shutdown.value = True
         raise
         
-    return running_pop, None, shutdown
+    return running_pop, shutdown
