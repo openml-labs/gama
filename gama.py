@@ -26,25 +26,28 @@ class Gama(object):
     def __init__(self, 
                  objective='accuracy',
                  config=new_config,
+                 async_ea=False,
                  warm_start=False,
                  random_state=None,
-                 pop_size=10,
-                 n_generations=10,
+                 population_size=10,
+                 generations=10,
                  max_total_time=None,
                  max_eval_time=300,
                  n_jobs=1):
+        self._async_ea = async_ea
         self._best_pipelines = None
         self._fitted_pipelines = {}
         self._warm_start = warm_start
         self._random_state = random_state
-        self._pop_size = pop_size
-        self._n_generations = n_generations
+        self._pop_size = population_size
+        self._n_generations = generations
         self._max_total_time = max_total_time
         self._max_eval_time = max_eval_time
         self._fit_data = None
         self._n_threads = n_jobs
         
         self._evaluated_individuals = {}
+        self._final_pop = None
         
         if self._random_state is not None:
             random.seed(self._random_state)
@@ -112,28 +115,31 @@ class Gama(object):
         mstats.register("min", np.min)
         mstats.register("max", np.max)
 
-        if self._warm_start:
-            pop = self._best_pipelines
+        if self._final_pop and self._warm_start:
+            pop = self._final_pop if self._final_pop else self._best_pipelines[:self._pop_size]
         else:
             pop = self._toolbox.population(n=self._pop_size)
             
         hof = HallOfFame('log.txt')
-        
-        self._toolbox.register("evaluate", self._compile_and_evaluate_individual, X=X, y=y, timeout=self._max_eval_time)
-        self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X = X, y = y, timeout = self._max_eval_time)
-        
-        run_ea = lambda : eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8,
-                                   ngen=self._n_generations, verbose=True, halloffame=hof)
-        run_ea = lambda : async_ea(self._n_threads, pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8,
-                                   n_evals=self._n_generations*self._pop_size , verbose=True, halloffame=hof)
+
+        if self._async_ea:
+            self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y, timeout = self._max_eval_time)
+
+            def run_ea():
+                return async_ea(self, self._n_threads, pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=self._n_generations*self._pop_size, verbose=True, halloffame=hof)
+        else:
+            self._toolbox.register("evaluate", self._compile_and_evaluate_individual, X=X, y=y, timeout=self._max_eval_time)
+
+            def run_ea():
+                return eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, halloffame=hof)
 
         try:
             if self._max_total_time is not None:
                 with stopit.ThreadingTimeout(self._max_total_time) as c_mgr:
-                    pop, log, sdp = run_ea()
+                    pop, sdp = run_ea()
             else:
-                pop, log, sdp = run_ea()
-
+                pop, sdp = run_ea()
+            self._final_pop = pop
             self._ = sdp
         except KeyboardInterrupt:
             print('Keyboard Interrupt sent to outer with statement.')
@@ -151,7 +157,7 @@ class Gama(object):
     def _fit_pipeline(self, individual, X, y):
         """ Compiles the individual representation and fit the data to it. """
         pipeline = self._toolbox.compile(individual)
-        pipeline.fit(X,y)
+        pipeline.fit(X, y)
         return pipeline      
     
     def _compile_and_evaluate_individual(self, ind, X, y, timeout, cv=5):
