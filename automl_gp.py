@@ -14,13 +14,16 @@ import stopit
 from stacking_transformer import make_stacking_transformer
 from modified_deap import gen_grow_safe
 
+
 class Data(np.ndarray):
     """ Dummy class that represents a dataset."""
     pass 
 
+
 class Predictions(np.ndarray):
     """ Dummy class that represents prediction data. """
     pass
+
 
 def pset_from_config(configuration):
     """ Create a pset for the given configuration dictionary.
@@ -164,6 +167,7 @@ def expression_to_component(primitive, terminals, pset, parameter_checks=None):
 
     return primitive_class(**kwargs), len(kwargs)
 
+
 def compile_individual_tree(ind, pset, parameter_checks=None):
     """ Compile the individual to a sklearn pipeline."""
     components = []
@@ -205,12 +209,13 @@ def compile_individual_tree(ind, pset, parameter_checks=None):
 
     return Pipeline(list(reversed(components)))
 
-def evaluate_pipeline(pl, X, y, timeout, cv=5):
+
+def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5):
     """ Evaluates a pipeline used k-Fold CV. """
     
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
-            fitness_values = (np.mean(cross_val_score(pl, X, y, cv=cv, scoring='neg_mean_squared_error')),)
+            fitness_values = (np.mean(cross_val_score(pl, X, y, cv=cv, scoring=scoring)),)
         except stopit.TimeoutException:
             raise
         except KeyboardInterrupt:
@@ -232,6 +237,7 @@ def evaluate_pipeline(pl, X, y, timeout, cv=5):
             
     return fitness_values
 
+
 def generate_valid(pset, min_, max_, toolbox):
     """ Generates a valid pipeline. """
     for _ in range(50):
@@ -240,6 +246,7 @@ def generate_valid(pset, min_, max_, toolbox):
         if pl is not None:
             return ind
     raise Exception
+
 
 def mut_replace_terminal(ind, pset):
     """ Mutation function which replaces a terminal."""
@@ -254,6 +261,7 @@ def mut_replace_terminal(ind, pset):
     alternatives = [t for t in pset.terminals[ind[to_change].ret] if t != ind[to_change]]
     ind[to_change] = np.random.choice(alternatives)
     return ind, 
+
 
 def find_unmatched_terminal(individual):
     """ Finds the location of the first terminal that can not be matched with a primitive.
@@ -271,6 +279,7 @@ def find_unmatched_terminal(individual):
             unmatched_args = el.args + unmatched_args
     
     return False
+
 
 def mut_replace_primitive(ind, pset):
     """ Mutation function which replaces a primitive (and corresponding terminals). """

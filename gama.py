@@ -20,6 +20,7 @@ STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
                           did not terminate successfully."""
 
+
 class Gama(object):
     """ Wrapper for the DEAP toolbox logic surrounding the GP process. """
 
@@ -27,7 +28,7 @@ class Gama(object):
                  objective='accuracy',
                  config=None,
                  async_ea=False,
-                 mode='classification',
+                 scoring=None,
                  warm_start=False,
                  random_state=None,
                  population_size=10,
@@ -35,9 +36,6 @@ class Gama(object):
                  max_total_time=None,
                  max_eval_time=300,
                  n_jobs=1):
-        if mode.lower() not in ['classification','clf','regression','reg']:
-            raise ValueError("Parameter `mode` should be one of 'classification','clf','regression','reg'.")
-
         self._async_ea = async_ea
         self._best_pipelines = None
         self._fitted_pipelines = {}
@@ -49,17 +47,7 @@ class Gama(object):
         self._max_eval_time = max_eval_time
         self._fit_data = None
         self._n_threads = n_jobs
-
-        if mode.lower() in ['classification', 'clf']:
-            self._mode = 'clf'
-        elif mode.lower() in ['regression', 'reg']:
-            self._mode = 'reg'
-
-        if not config:
-            if self._mode == 'clf':
-                config = clf_config
-            elif self._mode == 'reg':
-                config = reg_config
+        self._scoring_function = scoring
         
         self._evaluated_individuals = {}
         self._final_pop = None
@@ -85,7 +73,7 @@ class Gama(object):
         
         self._toolbox.register("mutate", self._random_valid_mutation_try_new)
         self._toolbox.register("select", tools.selTournament, tournsize=3)  
-    
+
     def predict(self, X, auto_ensemble_n=1):
         """ Predicts the target for input X. 
         
@@ -97,7 +85,7 @@ class Gama(object):
         if len(self._best_pipelines) < auto_ensemble_n:
             print('Warning: Not enough pipelines evaluated. Continuing with less.')
         
-        predictions  = np.zeros((len(X), auto_ensemble_n))
+        predictions = np.zeros((len(X), auto_ensemble_n))
         for i, individual in enumerate(self._best_pipelines[:auto_ensemble_n]):
             if str(individual) in self._fitted_pipelines:
                 pipeline = self._fitted_pipelines[str(individual)]
@@ -107,14 +95,7 @@ class Gama(object):
                 self._fitted_pipelines[str(individual)] = pipeline
             predictions[:, i] = pipeline.predict(X)
 
-        if self._mode == 'clf':
-            mixed_predictions, counts = scipy.stats.mode(predictions, axis=1)
-        elif self._mode == 'reg':
-            mixed_predictions = np.mean(predictions, axis=1)
-        else:
-            raise Exception('Gama initialized with unexpected mode.')
-
-        return mixed_predictions
+        return self.merge_predictions(predictions)
 
     def fit(self, X, y):
         """ Finds and fits a model to predict target y from X.
@@ -144,12 +125,12 @@ class Gama(object):
         hof = HallOfFame('log.txt')
 
         if self._async_ea:
-            self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y, timeout=self._max_eval_time)
+            self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y, scoring=self._scoring_function, timeout=self._max_eval_time)
 
             def run_ea():
                 return async_ea(self, self._n_threads, pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=self._n_generations*self._pop_size, verbose=True, halloffame=hof)
         else:
-            self._toolbox.register("evaluate", self._compile_and_evaluate_individual, X=X, y=y, timeout=self._max_eval_time)
+            self._toolbox.register("evaluate", self._compile_and_evaluate_individual, X=X, y=y, scoring=self._scoring_function, timeout=self._max_eval_time)
 
             def run_ea():
                 return eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, halloffame=hof)
@@ -181,7 +162,7 @@ class Gama(object):
         pipeline.fit(X, y)
         return pipeline      
     
-    def _compile_and_evaluate_individual(self, ind, X, y, timeout, cv=5):
+    def _compile_and_evaluate_individual(self, ind, X, y, timeout, scoring='accuracy', cv=5):
         if str(ind) in self._evaluated_individuals:
             print('using cache.')
             return self._evaluated_individuals[str(ind)]
@@ -189,7 +170,7 @@ class Gama(object):
         #if pl is None:
             # Failed to compile due to invalid hyperparameter configuration
         #    return (-float("inf"),)
-        fitness = automl_gp.evaluate_pipeline(pl, X, y, timeout)        
+        fitness = automl_gp.evaluate_pipeline(pl, X, y, timeout, scoring)
         self._evaluated_individuals[str(ind)] = fitness
         return fitness
 
