@@ -78,21 +78,29 @@ def pset_from_config(configuration):
             elif issubclass(key, sklearn.base.ClassifierMixin):
                 pset.addPrimitive(key, [Data, *hyperparameter_types], Predictions)
 
-                if False:
+                if True:
                     # Does not work with multi-processing.
                     stacking_class = make_stacking_transformer(key)
                     primname = key.__name__ + stacking_class.__name__
-                    pset.addPrimitive(stacking_class, [Data, *hyperparameter_types], Data, name = primname)
+                    pset.addPrimitive(stacking_class, [Data, *hyperparameter_types], Data, name=primname)
+                    if key.__name__ in parameter_checks:
+                        parameter_checks[primname] = parameter_checks[key.__name__]
+            elif issubclass(key, sklearn.base.RegressorMixin):
+                pset.addPrimitive(key, [Data, *hyperparameter_types], Predictions)
+
+                if True:
+                    # Does not work with multi-processing.
+                    stacking_class = make_stacking_transformer(key)
+                    primname = key.__name__ + stacking_class.__name__
+                    pset.addPrimitive(stacking_class, [Data, *hyperparameter_types], Data, name=primname)
                     if key.__name__ in parameter_checks:
                         parameter_checks[primname] = parameter_checks[key.__name__]
             else:
                 raise TypeError(f"Expected {key} to be either subclass of "
-                                "TransformerMixin or ClassifierMixin.")
+                                "TransformerMixin, RegressorMixin or ClassifierMixin.")
         else:
             raise TypeError('Encountered unknown type as key in dictionary.'
                             'Keys in the configuration should be str or class.')
-                            
-        
     
     return pset, parameter_checks
 
@@ -202,13 +210,13 @@ def evaluate_pipeline(pl, X, y, timeout, cv=5):
     
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
-            fitness_values = (np.mean(cross_val_score(pl, X, y, cv = cv)),)
+            fitness_values = (np.mean(cross_val_score(pl, X, y, cv=cv, scoring='neg_mean_squared_error')),)
         except stopit.TimeoutException:
             raise
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            print(type(e),str(e))
+            print(type(e), str(e))
             fitness_values = (-float("inf"),)
     
     if c_mgr.state == c_mgr.INTERRUPTED:

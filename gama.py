@@ -1,13 +1,13 @@
 import random
 import numpy as np
-from scipy.stats import mode
+import scipy.stats
 
 from deap import base, creator, tools, gp
 from deap.algorithms import eaSimple
 
 import stopit
 
-from configuration import new_config
+from configuration import clf_config, reg_config
 from modified_deap import cxOnePoint
 import automl_gp
 from automl_gp import compile_individual, pset_from_config, generate_valid, random_valid_mutation
@@ -22,11 +22,12 @@ STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
 
 class Gama(object):
     """ Wrapper for the DEAP toolbox logic surrounding the GP process. """
-    
+
     def __init__(self, 
                  objective='accuracy',
-                 config=new_config,
+                 config=None,
                  async_ea=False,
+                 mode='classification',
                  warm_start=False,
                  random_state=None,
                  population_size=10,
@@ -34,6 +35,9 @@ class Gama(object):
                  max_total_time=None,
                  max_eval_time=300,
                  n_jobs=1):
+        if mode.lower() not in ['classification','clf','regression','reg']:
+            raise ValueError("Parameter `mode` should be one of 'classification','clf','regression','reg'.")
+
         self._async_ea = async_ea
         self._best_pipelines = None
         self._fitted_pipelines = {}
@@ -45,6 +49,17 @@ class Gama(object):
         self._max_eval_time = max_eval_time
         self._fit_data = None
         self._n_threads = n_jobs
+
+        if mode.lower() in ['classification', 'clf']:
+            self._mode = 'clf'
+        elif mode.lower() in ['regression', 'reg']:
+            self._mode = 'reg'
+
+        if not config:
+            if self._mode == 'clf':
+                config = clf_config
+            elif self._mode == 'reg':
+                config = reg_config
         
         self._evaluated_individuals = {}
         self._final_pop = None
@@ -91,10 +106,16 @@ class Gama(object):
                 pipeline = self._fit_pipeline(individual, Xt, yt)
                 self._fitted_pipelines[str(individual)] = pipeline
             predictions[:, i] = pipeline.predict(X)
-        
-        modes, counts = mode(predictions, axis=1)
-        return modes
-    
+
+        if self._mode == 'clf':
+            mixed_predictions, counts = scipy.stats.mode(predictions, axis=1)
+        elif self._mode == 'reg':
+            mixed_predictions = np.mean(predictions, axis=1)
+        else:
+            raise Exception('Gama initialized with unexpected mode.')
+
+        return mixed_predictions
+
     def fit(self, X, y):
         """ Finds and fits a model to predict target y from X.
         
@@ -123,7 +144,7 @@ class Gama(object):
         hof = HallOfFame('log.txt')
 
         if self._async_ea:
-            self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y, timeout = self._max_eval_time)
+            self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y, timeout=self._max_eval_time)
 
             def run_ea():
                 return async_ea(self, self._n_threads, pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=self._n_generations*self._pop_size, verbose=True, halloffame=hof)
