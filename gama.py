@@ -3,7 +3,7 @@ import numpy as np
 import scipy.stats
 
 from deap import base, creator, tools, gp
-from deap.algorithms import eaSimple
+from deap.algorithms import eaMuPlusLambda
 
 import stopit
 
@@ -25,17 +25,25 @@ class Gama(object):
     """ Wrapper for the DEAP toolbox logic surrounding the GP process. """
 
     def __init__(self, 
-                 objective='accuracy',
+                 objectives=('accuracy', 'size'),
+                 optimize_strategy=(1, -1),
                  config=None,
-                 async_ea=False,
-                 scoring=None,
+                 async=False,
                  random_state=None,
                  population_size=10,
                  generations=10,
                  max_total_time=None,
                  max_eval_time=300,
                  n_jobs=1):
-        self._async_ea = async_ea
+        if len(objectives) != len(optimize_strategy):
+            raise ValueError("Length of objectives should match length of optimize_strategy. "
+                             "For each objective, an optimization strategy should be maximized.")
+        if max_total_time is not None and max_total_time <= 0:
+            raise ValueError("max_total_time should be greater than zero, or None.")
+        if max_eval_time is not None and max_eval_time <= 0:
+            raise ValueError("max_eval_time should be greater than zero, or None.")
+
+        self._async_ea = async
         self._best_pipelines = None
         self._fitted_pipelines = {}
         self._random_state = random_state
@@ -45,8 +53,9 @@ class Gama(object):
         self._max_eval_time = max_eval_time
         self._fit_data = None
         self._n_threads = n_jobs
-        self._scoring_function = scoring
+        self._scoring_function = objectives[0]
         self._hall_of_fame = None
+        self._objectives = objectives
         
         self._evaluated_individuals = {}
         self._final_pop = None
@@ -60,7 +69,7 @@ class Gama(object):
         self._pset = pset
         self._toolbox = base.Toolbox()
         
-        creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+        creator.create("FitnessMax", base.Fitness, weights=optimize_strategy)
         creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
 
         self._toolbox.register("expr", generate_valid, pset=pset, min_=1, max_=3, toolbox=self._toolbox)
@@ -71,7 +80,13 @@ class Gama(object):
         self._toolbox.register("mate", cxOnePoint)
 
         self._toolbox.register("mutate", self._random_valid_mutation_try_new)
-        self._toolbox.register("select", tools.selTournament, tournsize=3)  
+
+        if len(self._objectives) == 1:
+            self._toolbox.register("select", tools.selTournament, tournsize=3)
+        elif len(self._objectives) == 2:
+            self._toolbox.register("select", tools.selNSGA2)
+        else:
+            raise ValueError('Objectives must be a tuple of length at most 2.')
 
     def predict(self, X, auto_ensemble_n=1):
         """ Predicts the target for input X. 
@@ -96,6 +111,7 @@ class Gama(object):
             predictions[:, i] = pipeline.predict(X)
 
         return self.merge_predictions(predictions)
+
 
     def fit(self, X, y, warm_start=False):
         """ Finds and fits a model to predict target y from X.
@@ -134,7 +150,7 @@ class Gama(object):
             self._toolbox.register("evaluate", self._compile_and_evaluate_individual, X=X, y=y, scoring=self._scoring_function, timeout=self._max_eval_time)
 
             def run_ea():
-                return eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, halloffame=self._hall_of_fame)
+                return eaMuPlusLambda(pop, self._toolbox, mu=len(pop), lambda_=len(pop), cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, halloffame=self._hall_of_fame)
 
         try:
             if self._max_total_time is not None:
@@ -169,10 +185,19 @@ class Gama(object):
             print('using cache.')
             return self._evaluated_individuals[str(ind)]
         pl = self._toolbox.compile(ind)        
-        #if pl is None:
+        if pl is None:
             # Failed to compile due to invalid hyperparameter configuration
-        #    return (-float("inf"),)
-        fitness = automl_gp.evaluate_pipeline(pl, X, y, timeout, scoring)
+            return -float("inf"), 1
+        score, time = automl_gp.evaluate_pipeline(pl, X, y, timeout, scoring)
+        length = automl_gp.pipeline_length(ind)
+
+        if self._objectives[1] == 'size':
+            fitness = (score, length)
+        elif self._objectives[1] == 'time':
+            fitness = (score, time)
+        elif len(self._objectives) == 1:
+            fitness = (score,)
+
         self._evaluated_individuals[str(ind)] = fitness
         return fitness
 

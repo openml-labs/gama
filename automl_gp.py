@@ -215,25 +215,27 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5):
     
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
-            fitness_values = (np.mean(cross_val_score(pl, X, y, cv=cv, scoring=scoring)),)
+            score = np.mean(cross_val_score(pl, X, y, cv=cv, scoring=scoring))
         except stopit.TimeoutException:
             raise
         except KeyboardInterrupt:
             raise
         except Exception as e:
             print(type(e), str(e))
-            fitness_values = (-float("inf"),)
+            score = -float("inf")
     
     if c_mgr.state == c_mgr.INTERRUPTED:
         print('Interrupt!')
         # A TimeoutException was raised, but not by the context manager.
         # This indicates that the outer context manager (the ea) timed out.
         raise stopit.TimeoutException()
-        
+
     if not c_mgr:
         print('Evaluation timeout')
         # For now we treat a eval timeout the same way as e.g. NaN exceptions.
-        fitness_values = (-float("inf"),)
+        fitness_values = (-float("inf"), timeout)
+    else:
+        fitness_values = (score, c_mgr.seconds)
             
     return fitness_values
 
@@ -349,3 +351,8 @@ def random_valid_mutation(ind, pset):
         return mut_fn(ind)
     else:
         return mut_fn(ind, pset)
+
+
+def pipeline_length(individual):
+    """ Gives a measure for the length of the pipeline. Currently, this is the number of primitives. """
+    return len([el for el in individual if isinstance(el, gp.Primitive)])

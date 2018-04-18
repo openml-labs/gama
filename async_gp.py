@@ -3,7 +3,9 @@ import queue
 import random
 
 import numpy as np
+from deap import tools
 
+import automl_gp
 
 def evaluator_daemon(input_queue, output_queue, fn, shutdown):
     random.seed(0)
@@ -35,18 +37,15 @@ def offspring_mate_and_mutate(pop, toolbox, cxpb, mutpb, n, always_return_list=F
     """ Creates n new individuals based on the population. Can apply both crossover and mutation. """
     offspring = []
     for _ in range(n):
-        try:
-            ind1, ind2 = np.random.choice(range(len(pop)), size=2, replace=False)
-            ind1, ind2 = pop[ind1], pop[ind2]
-        except Exception as e:
-            z =1
-        ind1, ind2 = toolbox.clone(ind1), toolbox.clone(ind2)
+        ind1, ind2 = np.random.choice(range(len(pop)), size=2, replace=False)
+        ind1, ind2 = toolbox.clone(pop[ind1]), toolbox.clone(pop[ind2])
         if np.random.random() < cxpb:
             ind1, ind2 = toolbox.mate(ind1, ind2)
         if np.random.random() < mutpb:
             ind1, = toolbox.mutate(ind1)
         offspring.append((ind1,))
     return offspring
+
 
 def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
     print('starting sequential')
@@ -64,6 +63,8 @@ def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=3
 
         comp_ind = toolbox.compile(ind)
         fitness = toolbox.evaluate(comp_ind)
+        if self._objectives[1] == 'size':
+            fitness = (fitness[0], automl_gp.pipeline_length(ind))
         ind.fitness.values = fitness
         self._evaluated_individuals[str(ind)] = fitness
 
@@ -73,7 +74,11 @@ def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=3
 
         # Shrink population if needed
         if len(running_pop) > max_pop_size:
-            running_pop.remove(min(running_pop, key=lambda x: x.fitness.values[0]))
+            if len(self._objectives) == 1:
+                running_pop.remove(min(running_pop, key=lambda x: x.fitness.values[0]))
+            elif len(self._objectives) == 2:
+                worst = tools.selNSGA2(running_pop, k=len(running_pop))[-1]
+                running_pop.remove(worst)
     return running_pop, None
 
 
