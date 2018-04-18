@@ -29,7 +29,6 @@ class Gama(object):
                  config=None,
                  async_ea=False,
                  scoring=None,
-                 warm_start=False,
                  random_state=None,
                  population_size=10,
                  generations=10,
@@ -39,7 +38,6 @@ class Gama(object):
         self._async_ea = async_ea
         self._best_pipelines = None
         self._fitted_pipelines = {}
-        self._warm_start = warm_start
         self._random_state = random_state
         self._pop_size = population_size
         self._n_generations = generations
@@ -48,6 +46,7 @@ class Gama(object):
         self._fit_data = None
         self._n_threads = n_jobs
         self._scoring_function = scoring
+        self._hall_of_fame = None
         
         self._evaluated_individuals = {}
         self._final_pop = None
@@ -63,14 +62,14 @@ class Gama(object):
         
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
         creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
-        
+
         self._toolbox.register("expr", generate_valid, pset=pset, min_=1, max_=3, toolbox=self._toolbox)
         self._toolbox.register("individual", tools.initIterate, creator.Individual, self._toolbox.expr)
         self._toolbox.register("population", tools.initRepeat, list, self._toolbox.individual)
         self._toolbox.register("compile", compile_individual, pset=pset, parameter_checks=parameter_checks)
-        
+
         self._toolbox.register("mate", cxOnePoint)
-        
+
         self._toolbox.register("mutate", self._random_valid_mutation_try_new)
         self._toolbox.register("select", tools.selTournament, tournsize=3)  
 
@@ -80,13 +79,14 @@ class Gama(object):
         Predict target for X, using the best found pipeline(s) during the `fit` call. 
         X must be of similar shape to the X value passed to `fit`.
         """
-        if self._best_pipelines is None:
+        if len(self._hall_of_fame._pop) == 0:
             raise AttributeNotAssignedError(STR_NO_OPTIMAL_PIPELINE)
-        if len(self._best_pipelines) < auto_ensemble_n:
+        if len(self._hall_of_fame._pop) < auto_ensemble_n:
             print('Warning: Not enough pipelines evaluated. Continuing with less.')
         
         predictions = np.zeros((len(X), auto_ensemble_n))
-        for i, individual in enumerate(self._best_pipelines[:auto_ensemble_n]):
+        for i, individual in enumerate(self._hall_of_fame.best_n(auto_ensemble_n)):
+            print(str(individual), individual.fitness.values)
             if str(individual) in self._fitted_pipelines:
                 pipeline = self._fitted_pipelines[str(individual)]
             else:
@@ -97,7 +97,7 @@ class Gama(object):
 
         return self.merge_predictions(predictions)
 
-    def fit(self, X, y):
+    def fit(self, X, y, warm_start=False):
         """ Finds and fits a model to predict target y from X.
         
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -117,31 +117,32 @@ class Gama(object):
         mstats.register("min", np.min)
         mstats.register("max", np.max)
 
-        if self._final_pop and self._warm_start:
-            pop = self._final_pop if self._final_pop else self._best_pipelines[:self._pop_size]
+        if warm_start and self._final_pop is not None:
+            pop = self._final_pop
         else:
+            if warm_start:
+                print('Warning: Warm-start enabled but no earlier fit')
             pop = self._toolbox.population(n=self._pop_size)
-            
-        hof = HallOfFame('log.txt')
+            self._hall_of_fame = HallOfFame('log.txt')
 
         if self._async_ea:
             self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y, scoring=self._scoring_function, timeout=self._max_eval_time)
 
             def run_ea():
-                return async_ea(self, self._n_threads, pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=self._n_generations*self._pop_size, verbose=True, halloffame=hof)
+                return async_ea(self, self._n_threads, pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=self._n_generations*self._pop_size, verbose=True, halloffame=self._hall_of_fame)
         else:
             self._toolbox.register("evaluate", self._compile_and_evaluate_individual, X=X, y=y, scoring=self._scoring_function, timeout=self._max_eval_time)
 
             def run_ea():
-                return eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, halloffame=hof)
+                return eaSimple(pop, self._toolbox, cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, halloffame=self._hall_of_fame)
 
         try:
             if self._max_total_time is not None:
                 with stopit.ThreadingTimeout(self._max_total_time) as c_mgr:
-                    pop, sdp = run_ea()
+                    final_pop, sdp = run_ea()
             else:
-                pop, sdp = run_ea()
-            self._final_pop = pop
+                final_pop, sdp = run_ea()
+            self._final_pop = final_pop
             self._ = sdp
         except KeyboardInterrupt:
             print('Keyboard Interrupt sent to outer with statement.')
@@ -149,10 +150,11 @@ class Gama(object):
         if self._max_total_time is not None and not c_mgr:
             print('Terminated because maximum time has elapsed.')
 
-        if len(hof._pop) > 0:
-            self._best_pipelines = sorted(hof._pop, key=lambda x: (-x.fitness.values[0], str(x)))
-            best_individual = self._best_pipelines[0]
-            self._fitted_pipelines[str(best_individual)] = self._fit_pipeline(best_individual, X, y)
+        if len(self._hall_of_fame._pop) > 0:
+            best_individual = self._hall_of_fame.best_n(n=1)[0]
+            if str(best_individual) not in self._fitted_pipelines:
+                # In the case of warm-starting, the pipeline might have been previously fit.
+                self._fitted_pipelines[str(best_individual)] = self._fit_pipeline(best_individual, X, y)
         else:
             print('No pipeline evaluated.')
         
@@ -160,7 +162,7 @@ class Gama(object):
         """ Compiles the individual representation and fit the data to it. """
         pipeline = self._toolbox.compile(individual)
         pipeline.fit(X, y)
-        return pipeline      
+        return pipeline
     
     def _compile_and_evaluate_individual(self, ind, X, y, timeout, scoring='accuracy', cv=5):
         if str(ind) in self._evaluated_individuals:
