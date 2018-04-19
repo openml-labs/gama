@@ -43,7 +43,11 @@ def pset_from_config(configuration):
     pset.renameArguments(ARG0="data")
     
     shared_hyperparameter_types = {}
-    for key, values in configuration.items():
+    # We have to make sure they str-keys are evaluated first: they describe shared hyperparameters
+    # We can not rely on order-preserving dictionaries as this is not in the Python 3.5 specification.
+    sorted_keys = reversed(sorted(configuration.keys(), key=lambda x: str(type(x))))
+    for key in sorted_keys:
+        values = configuration[key]
         if isinstance(key, str):
             # Specification of shared hyperparameters
             hyperparameter_type = type(str(key),(object,), {})
@@ -73,7 +77,7 @@ def pset_from_config(configuration):
                         value_str = ("'{}'".format(value) if isinstance(value, str)
                                      else "{}".format(value.__name__) if callable(value)
                                      else str(value))
-                        hyperparameter_str = "{}.{}={}".format(key.__name, name, value_str)
+                        hyperparameter_str = "{}.{}={}".format(key.__name__, name, value_str)
                         pset.addTerminal(value, hyperparameter_type, hyperparameter_str)
             
             if issubclass(key, sklearn.base.TransformerMixin):
