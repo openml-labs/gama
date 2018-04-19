@@ -30,7 +30,7 @@ def async_ea(self, n_threads=1, *args, **kwargs):
     if n_threads == 1:
         return async_ea_sequential(self, *args, **kwargs)
     else:
-        return async_ea_parallel(n_threads, *args, **kwargs)
+        return async_ea_parallel(self, n_threads, *args, **kwargs)
 
 
 def offspring_mate_and_mutate(pop, toolbox, cxpb, mutpb, n, always_return_list=False):
@@ -45,6 +45,14 @@ def offspring_mate_and_mutate(pop, toolbox, cxpb, mutpb, n, always_return_list=F
             ind1, = toolbox.mutate(ind1)
         offspring.append((ind1,))
     return offspring
+
+
+def select_to_replace(pop, nr_objectives):
+    """ Selects individual in population to replace. """
+    if nr_objectives == 1:
+        return min(pop, key=lambda x: x.fitness.values[0])
+    elif nr_objectives == 2:
+        return tools.selNSGA2(pop, k=len(pop))[-1]
 
 
 def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
@@ -74,15 +82,12 @@ def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=3
 
         # Shrink population if needed
         if len(running_pop) > max_pop_size:
-            if len(self._objectives) == 1:
-                running_pop.remove(min(running_pop, key=lambda x: x.fitness.values[0]))
-            elif len(self._objectives) == 2:
-                worst = tools.selNSGA2(running_pop, k=len(running_pop))[-1]
-                running_pop.remove(worst)
+                ind_to_replace = select_to_replace(running_pop, len(self._objectives))
+                running_pop.remove(ind_to_replace)
     return running_pop, None
 
 
-def async_ea_parallel(n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
+def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
     mp_manager = mp.Manager()
     input_queue = mp_manager.Queue()
     output_queue = mp_manager.Queue()
@@ -118,6 +123,8 @@ def async_ea_parallel(n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_eval
             print(i)
                 
             individual = comp_ind_map[comp_ind_str]
+            if self._objectives[1] == 'size':
+                fitness = (fitness[0], automl_gp.pipeline_length(ind))
             individual.fitness.values = fitness
             
             # Add to population
@@ -126,7 +133,8 @@ def async_ea_parallel(n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_eval
             
             # Shrink population if needed        
             if len(running_pop) > max_pop_size:
-                running_pop.remove(min(running_pop, key=lambda x: x.fitness.values[0]))
+                ind_to_replace = select_to_replace(running_pop, len(self._objectives))
+                running_pop.remove(ind_to_replace)
             
             # Create new individual if needed - or do we just always queue?
             if len(running_pop) < 2:
