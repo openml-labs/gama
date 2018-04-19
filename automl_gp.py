@@ -46,12 +46,12 @@ def pset_from_config(configuration):
     for key, values in configuration.items():
         if isinstance(key, str):
             # Specification of shared hyperparameters
-            hyperparameter_type = type(f"{key}",(object,), {})
+            hyperparameter_type = type(str(key),(object,), {})
             shared_hyperparameter_types[key] = hyperparameter_type
             for value in values:
                 # Escape string values with quotes otherwise they are variables
-                value_str = f"'{value}'" if isinstance(value, str) else f"{value}"
-                hyperparameter_str = f"{key}={value_str}"            
+                value_str = "'{}'".format(value) if isinstance(value, str) else str(value)
+                hyperparameter_str = "{}={}".format(key, value_str)
                 pset.addTerminal(value, hyperparameter_type, hyperparameter_str)
         elif isinstance(key, object):
             #Specification of operator (learner, preprocessor)
@@ -66,14 +66,14 @@ def pset_from_config(configuration):
                 elif name == "param_check":
                     parameter_checks[key.__name__] = param_values[0]
                 else:                
-                    hyperparameter_type = type(f"{key.__name__}{name}",(object,), {})
+                    hyperparameter_type = type("{}{}".format(key.__name__, name), (object,), {})
                     hyperparameter_types.append(hyperparameter_type)
                     for value in param_values:
                         # Escape string values with quotes otherwise they are variables
-                        value_str = (f"'{value}'" if isinstance(value, str) 
-                                     else f"{value.__name__}" if callable(value)
-                                     else f"{value}")
-                        hyperparameter_str = f"{key.__name__}.{name}={value_str}"            
+                        value_str = ("'{}'".format(value) if isinstance(value, str)
+                                     else "{}".format(value.__name__) if callable(value)
+                                     else str(value))
+                        hyperparameter_str = "{}.{}={}".format(key.__name, name, value_str)
                         pset.addTerminal(value, hyperparameter_type, hyperparameter_str)
             
             if issubclass(key, sklearn.base.TransformerMixin):
@@ -99,8 +99,8 @@ def pset_from_config(configuration):
                     if key.__name__ in parameter_checks:
                         parameter_checks[primname] = parameter_checks[key.__name__]
             else:
-                raise TypeError(f"Expected {key} to be either subclass of "
-                                "TransformerMixin, RegressorMixin or ClassifierMixin.")
+                raise TypeError("Expected {} to be either subclass of "
+                                "TransformerMixin, RegressorMixin or ClassifierMixin.".format(key))
         else:
             raise TypeError('Encountered unknown type as key in dictionary.'
                             'Keys in the configuration should be str or class.')
