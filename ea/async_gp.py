@@ -7,9 +7,10 @@ from deap import tools
 
 from . import automl_gp
 
-def evaluator_daemon(input_queue, output_queue, fn, shutdown):
-    random.seed(0)
-    np.random.seed(0)
+
+def evaluator_daemon(input_queue, output_queue, fn, shutdown, seed=0):
+    random.seed(seed)
+    np.random.seed(seed)
 
     shutdown_message = 'Helper process stopping normally.'
     try:
@@ -31,28 +32,6 @@ def async_ea(self, n_threads=1, *args, **kwargs):
         return async_ea_sequential(self, *args, **kwargs)
     else:
         return async_ea_parallel(self, n_threads, *args, **kwargs)
-
-
-def offspring_mate_and_mutate(pop, toolbox, cxpb, mutpb, n, always_return_list=False):
-    """ Creates n new individuals based on the population. Can apply both crossover and mutation. """
-    offspring = []
-    for _ in range(n):
-        ind1, ind2 = np.random.choice(range(len(pop)), size=2, replace=False)
-        ind1, ind2 = toolbox.clone(pop[ind1]), toolbox.clone(pop[ind2])
-        if np.random.random() < cxpb:
-            ind1, ind2 = toolbox.mate(ind1, ind2)
-        if np.random.random() < mutpb:
-            ind1, = toolbox.mutate(ind1)
-        offspring.append((ind1,))
-    return offspring
-
-
-def select_to_replace(pop, nr_objectives):
-    """ Selects individual in population to replace. """
-    if nr_objectives == 1:
-        return min(pop, key=lambda x: x.fitness.values[0])
-    elif nr_objectives == 2:
-        return tools.selNSGA2(pop, k=len(pop))[-1]
 
 
 def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, halloffame=None):
@@ -156,3 +135,25 @@ def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, 
         raise
         
     return running_pop, shutdown
+
+
+def offspring_mate_and_mutate(pop, toolbox, cxpb, mutpb, n, always_return_list=False):
+    """ Creates n new individuals based on the population. Can apply both crossover and mutation. """
+    offspring = []
+    for _ in range(n):
+        ind1, ind2 = np.random.choice(range(len(pop)), size=2, replace=False)
+        ind1, ind2 = toolbox.clone(pop[ind1]), toolbox.clone(pop[ind2])
+        if np.random.random() < cxpb:
+            ind1, ind2 = toolbox.mate(ind1, ind2)
+        if np.random.random() < mutpb:
+            ind1, = toolbox.mutate(ind1)
+        offspring.append((ind1,))
+    return offspring
+
+
+def select_to_replace(pop, nr_objectives):
+    """ Selects individual in population to replace. """
+    if nr_objectives == 1:
+        return min(pop, key=lambda x: x.fitness.values[0])
+    elif nr_objectives == 2:
+        return tools.selNSGA2(pop, k=len(pop))[-1]
