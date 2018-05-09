@@ -43,17 +43,17 @@ def pset_from_config(configuration):
     pset.renameArguments(ARG0="data")
     
     shared_hyperparameter_types = {}
-    # We have to make sure they str-keys are evaluated first: they describe shared hyperparameters
+    # We have to make sure the str-keys are evaluated first: they describe shared hyperparameters
     # We can not rely on order-preserving dictionaries as this is not in the Python 3.5 specification.
     sorted_keys = reversed(sorted(configuration.keys(), key=lambda x: str(type(x))))
     for key in sorted_keys:
         values = configuration[key]
         if isinstance(key, str):
             # Specification of shared hyperparameters
-            hyperparameter_type = type(str(key),(object,), {})
+            hyperparameter_type = type(str(key), (object,), {})
             shared_hyperparameter_types[key] = hyperparameter_type
             for value in values:
-                # Escape string values with quotes otherwise they are variables
+                # Escape string values with quotes
                 value_str = "'{}'".format(value) if isinstance(value, str) else str(value)
                 hyperparameter_str = "{}={}".format(key, value_str)
                 pset.addTerminal(value, hyperparameter_type, hyperparameter_str)
@@ -66,8 +66,10 @@ def pset_from_config(configuration):
                 # input of the operators. Moreover it automatically makes sure that
                 # crossover only happens between same hyperparameters.
                 if param_values == []:
+                    # An empty list indicates a shared hyperparameter
                     hyperparameter_types.append(shared_hyperparameter_types[name])
                 elif name == "param_check":
+                    # This allows users to define illegal hyperparameter combinations, but is not a terminal.
                     parameter_checks[key.__name__] = param_values[0]
                 else:                
                     hyperparameter_type = type("{}{}".format(key.__name__, name), (object,), {})
@@ -79,7 +81,8 @@ def pset_from_config(configuration):
                                      else str(value))
                         hyperparameter_str = "{}.{}={}".format(key.__name__, name, value_str)
                         pset.addTerminal(value, hyperparameter_type, hyperparameter_str)
-            
+
+            # After registering the hyperparameter types, we can register the operator itself.
             if issubclass(key, sklearn.base.TransformerMixin):
                 pset.addPrimitive(key, [Data, *hyperparameter_types], Data)
             elif issubclass(key, sklearn.base.ClassifierMixin):
