@@ -1,3 +1,8 @@
+"""
+Contains mutation functions for genetic programming.
+Each mutation function takes an individual and either returns a different individual, or None.
+"""
+
 from deap import gp, creator
 import numpy as np
 

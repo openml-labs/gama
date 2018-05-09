@@ -16,6 +16,7 @@ from modified_deap import gen_grow_safe
 
 from .mutation import mut_replace_terminal, mut_replace_primitive
 
+
 class Data(np.ndarray):
     """ Dummy class that represents a dataset."""
     pass 
