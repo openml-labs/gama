@@ -9,12 +9,12 @@ import stopit
 
 from configuration import clf_config, reg_config
 from modified_deap import cxOnePoint
-import automl_gp
-from automl_gp import compile_individual, pset_from_config, generate_valid, random_valid_mutation
+from ea import automl_gp
+from ea.automl_gp import compile_individual, pset_from_config, generate_valid, random_valid_mutation
 from gama_exceptions import AttributeNotAssignedError
 from gama_hof import HallOfFame
 
-from async_gp import async_ea
+from ea.async_gp import async_ea
 
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or

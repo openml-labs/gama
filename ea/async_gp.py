@@ -5,7 +5,7 @@ import random
 import numpy as np
 from deap import tools
 
-import automl_gp
+from . import automl_gp
 
 def evaluator_daemon(input_queue, output_queue, fn, shutdown):
     random.seed(0)
