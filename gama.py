@@ -4,6 +4,7 @@ import scipy.stats
 
 from deap import base, creator, tools, gp
 from deap.algorithms import eaMuPlusLambda
+from sklearn.preprocessing import Imputer
 
 import stopit
 
@@ -56,7 +57,8 @@ class Gama(object):
         self._scoring_function = objectives[0]
         self._hall_of_fame = None
         self._objectives = objectives
-        
+
+        self._imputer = Imputer(strategy="median")
         self._evaluated_individuals = {}
         self._final_pop = None
         
@@ -98,6 +100,9 @@ class Gama(object):
             raise AttributeNotAssignedError(STR_NO_OPTIMAL_PIPELINE)
         if len(self._hall_of_fame._pop) < auto_ensemble_n:
             print('Warning: Not enough pipelines evaluated. Continuing with less.')
+        if np.isnan(X).any():
+            # This does not work if training data set did not have missing numbers.
+            X = self._imputer.transform(X)
         
         predictions = np.zeros((len(X), auto_ensemble_n))
         for i, individual in enumerate(self._hall_of_fame.best_n(auto_ensemble_n)):
@@ -112,7 +117,6 @@ class Gama(object):
 
         return self.merge_predictions(predictions)
 
-
     def fit(self, X, y, warm_start=False):
         """ Finds and fits a model to predict target y from X.
         
@@ -123,6 +127,20 @@ class Gama(object):
         After the search termination condition is met, the best found pipeline 
         configuration is then used to train a final model on all provided data.
         """
+
+        # For now there is no support for semi-supervised learning, so remove all instances with unknown targets.
+        nan_targets = np.isnan(y)
+        if nan_targets.any():
+            X = X[~nan_targets, :]
+            y = y[~nan_targets]
+
+        # For now we always impute if there are missing values, we always impute with median.
+        # One should note that ideally imputation should not always be done since some methods work well without.
+        # Secondly, the way imputation is done can also be dependent on the task. Median is generally not the best.
+        if np.isnan(X).any():
+            self._imputer.fit(X)
+            X = self._imputer.transform(X)
+
         self._fit_data = (X, y)
         
         stats_fit = tools.Statistics(lambda ind: ind.fitness.values)
