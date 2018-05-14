@@ -157,7 +157,7 @@ class Gama(object):
             self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y, scoring=self._scoring_function, timeout=self._max_eval_time)
 
             def run_ea():
-                return async_ea(self, self._n_threads, pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=self._n_generations*self._pop_size, verbose=True, evaluation_callback=self._observer.update)
+                return async_ea(self, self._n_threads, pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=self._n_generations*self._pop_size, verbose=True, evaluation_callback=self._on_evaluation_completed)
         else:
             class DummyHoF:
                 pass
