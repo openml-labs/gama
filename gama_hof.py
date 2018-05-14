@@ -48,7 +48,8 @@ class ParetoFront(object):
 class HallOfFame(object):
     
     def __init__(self, filename):
-        self._callbacks = []
+        self._pareto_callbacks = []
+        self._evaluation_callbacks = []
         self._front = ParetoFront(get_values_fn=lambda ind: ind.fitness.wvalues)
         self._filename = filename
         self._pop = []
@@ -68,12 +69,25 @@ class HallOfFame(object):
             # print('\n'.join([str((str(ind), ind.fitness.values[0])) for ind in pop]))
             fh.write('\n'.join([str((str(ind), ind.fitness.values[0])) for ind in pop]))
 
+        self._update_evaluation(pop)
+
     def best_n(self, n):
         best_pipelines = sorted(self._pop, key=lambda x: (-x.fitness.values[0], str(x)))
         return best_pipelines[:n]
 
+    def _update_evaluation(self, pop):
+        for callback in self._evaluation_callbacks:
+            callback(pop)
+
+    def on_evaluations_received(self, fn):
+        """ Register a callback function that is called when new evaluations are received.
+
+        :param fn: Function to call when evaluations are received. Expected signature is: list: ind -> None
+        """
+        self._evaluation_callbacks.append(fn)
+
     def _update_pareto_front(self, ind):
-        for callback in self._callbacks:
+        for callback in self._pareto_callbacks:
             callback(ind)
 
     def on_pareto_updated(self, fn):
@@ -81,7 +95,7 @@ class HallOfFame(object):
 
         :param fn: Function to call when the pareto front is updated. Expected signature is: ind -> None
         """
-        self._callbacks.append(fn)
+        self._pareto_callbacks.append(fn)
 
     def callback_on_improvement(self, fn, criterion=None):
         """ Register a callback function for when a certain criterion is improved upon in the pareto front.
@@ -90,4 +104,4 @@ class HallOfFame(object):
         :param criterion:
         :return:
         """
-        self._callbacks
+        raise NotImplemented()
