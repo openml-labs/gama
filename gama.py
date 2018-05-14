@@ -1,19 +1,18 @@
 import random
-import numpy as np
-import scipy.stats
+from collections import defaultdict
 
+import numpy as np
 from deap import base, creator, tools, gp
 from deap.algorithms import eaMuPlusLambda
 from sklearn.preprocessing import Imputer
 
 import stopit
 
-from configuration import clf_config, reg_config
 from modified_deap import cxOnePoint
 from ea import automl_gp
 from ea.automl_gp import compile_individual, pset_from_config, generate_valid, random_valid_mutation
 from gama_exceptions import AttributeNotAssignedError
-from gama_hof import HallOfFame
+from observer import Observer
 
 from ea.async_gp import async_ea
 
@@ -55,13 +54,16 @@ class Gama(object):
         self._fit_data = None
         self._n_threads = n_jobs
         self._scoring_function = objectives[0]
-        self._hall_of_fame = None
+        self._observer = None
         self._objectives = objectives
 
-        self._hall_of_fame = HallOfFame('log.txt')
         self._imputer = Imputer(strategy="median")
         self._evaluated_individuals = {}
         self._final_pop = None
+        self._subscribers = defaultdict(list)
+
+        self._observer = Observer('log.txt')
+        self._on_evaluation_completed(self._observer.update)
         
         if self._random_state is not None:
             random.seed(self._random_state)
@@ -97,16 +99,16 @@ class Gama(object):
         Predict target for X, using the best found pipeline(s) during the `fit` call. 
         X must be of similar shape to the X value passed to `fit`.
         """
-        if len(self._hall_of_fame._pop) == 0:
+        if len(self._observer._individuals) == 0:
             raise AttributeNotAssignedError(STR_NO_OPTIMAL_PIPELINE)
-        if len(self._hall_of_fame._pop) < auto_ensemble_n:
+        if len(self._observer._individuals) < auto_ensemble_n:
             print('Warning: Not enough pipelines evaluated. Continuing with less.')
         if np.isnan(X).any():
             # This does not work if training data set did not have missing numbers.
             X = self._imputer.transform(X)
         
         predictions = np.zeros((len(X), auto_ensemble_n))
-        for i, individual in enumerate(self._hall_of_fame.best_n(auto_ensemble_n)):
+        for i, individual in enumerate(self._observer.best_n(auto_ensemble_n)):
             print(str(individual), individual.fitness.values)
             if str(individual) in self._fitted_pipelines:
                 pipeline = self._fitted_pipelines[str(individual)]
@@ -155,12 +157,16 @@ class Gama(object):
             self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y, scoring=self._scoring_function, timeout=self._max_eval_time)
 
             def run_ea():
-                return async_ea(self, self._n_threads, pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=self._n_generations*self._pop_size, verbose=True, halloffame=self._hall_of_fame)
+                return async_ea(self, self._n_threads, pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=self._n_generations*self._pop_size, verbose=True, evaluation_callback=self._observer.update)
         else:
+            class DummyHoF:
+                pass
+            hof = DummyHoF()
+            hof.update = self._on_generation_completed
             self._toolbox.register("evaluate", self._compile_and_evaluate_individual, X=X, y=y, scoring=self._scoring_function, timeout=self._max_eval_time)
 
             def run_ea():
-                return eaMuPlusLambda(pop, self._toolbox, mu=len(pop), lambda_=len(pop), cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, halloffame=self._hall_of_fame)
+                return eaMuPlusLambda(pop, self._toolbox, mu=len(pop), lambda_=len(pop), cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, halloffame=hof)
 
         try:
             if self._max_total_time is not None:
@@ -176,8 +182,8 @@ class Gama(object):
         if self._max_total_time is not None and not c_mgr:
             print('Terminated because maximum time has elapsed.')
 
-        if len(self._hall_of_fame._pop) > 0:
-            best_individual = self._hall_of_fame.best_n(n=1)[0]
+        if len(self._observer._individuals) > 0:
+            best_individual = self._observer.best_n(n=1)[0]
             if str(best_individual) not in self._fitted_pipelines:
                 # In the case of warm-starting, the pipeline might have been previously fit.
                 self._fitted_pipelines[str(best_individual)] = self._fit_pipeline(best_individual, X, y)
@@ -209,6 +215,8 @@ class Gama(object):
             fitness = (score,)
 
         self._evaluated_individuals[str(ind)] = fitness
+        ind.fitness.values = fitness
+        self._on_evaluation_completed(ind)
         return fitness
 
     def _random_valid_mutation_try_new(self, ind):
@@ -220,3 +228,38 @@ class Gama(object):
             if str(new_ind) not in self._evaluated_individuals:
                 return new_ind,
         return new_ind,
+
+    def _on_pareto_front_updated(self, new_point, pareto_front):
+        for callback in self._subscribers['pareto_front_updated']:
+            callback(new_point, pareto_front)
+
+    def pareto_front_updated(self, fn):
+        """ Register a callback function that is called when new pipeline is on the Pareto front.
+
+        :param fn: Function to call when a pipeline is on the Pareto front. Expected signature is: (ind, list: ind) -> None
+                   Here, the first individual is the new individual on the Pareto front. The list of individuals
+                   is the new Pareto front.
+        """
+        self._subscribers['pareto_front_updated'].append(fn)
+
+    def _on_generation_completed(self, pop):
+        for callback in self._subscribers['generation_completed']:
+            callback(pop)
+
+    def generation_completed(self, fn):
+        """ Register a callback function that is called when new generation is completed.
+
+        :param fn: Function to call when a pipeline is evaluated. Expected signature is: list: ind -> None
+        """
+        self._subscribers['generation_completed'].append(fn)
+
+    def _on_evaluation_completed(self, ind):
+        for callback in self._subscribers['evaluation_completed']:
+            callback(ind)
+
+    def evaluation_completed(self, fn):
+        """ Register a callback function that is called when new evaluation is completed.
+
+        :param fn: Function to call when a pipeline is evaluated. Expected signature is: ind -> None
+        """
+        self._subscribers['evaluation_completed'].append(fn)
