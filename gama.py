@@ -58,6 +58,7 @@ class Gama(object):
         self._hall_of_fame = None
         self._objectives = objectives
 
+        self._hall_of_fame = HallOfFame('log.txt')
         self._imputer = Imputer(strategy="median")
         self._evaluated_individuals = {}
         self._final_pop = None
@@ -142,14 +143,6 @@ class Gama(object):
             X = self._imputer.transform(X)
 
         self._fit_data = (X, y)
-        
-        stats_fit = tools.Statistics(lambda ind: ind.fitness.values)
-        stats_size = tools.Statistics(len)
-        mstats = tools.MultiStatistics(fitness=stats_fit, size=stats_size)
-        mstats.register("avg", np.mean)
-        mstats.register("std", np.std)
-        mstats.register("min", np.min)
-        mstats.register("max", np.max)
 
         if warm_start and self._final_pop is not None:
             pop = self._final_pop
@@ -157,7 +150,6 @@ class Gama(object):
             if warm_start:
                 print('Warning: Warm-start enabled but no earlier fit')
             pop = self._toolbox.population(n=self._pop_size)
-            self._hall_of_fame = HallOfFame('log.txt')
 
         if self._async_ea:
             self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y, scoring=self._scoring_function, timeout=self._max_eval_time)
