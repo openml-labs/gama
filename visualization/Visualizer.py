@@ -18,12 +18,8 @@ class Visualizer(object):
         self._fitness_plot.set_xlabel('#individuals')
         self._fitness_plot.set_ylabel('max fitness')
 
-    def new_evaluation_results(self, pop):
-        if isinstance(pop, list):
-            self._all_points += pop
-        else:
-            return
-
+    def new_evaluation_result(self, individual):
+        self._all_points.append(individual)
         max_score = max(map(lambda ind: ind.fitness.wvalues[0], self._all_points))
         self._max_by_pop.append((len(self._all_points), max_score))
         pop_sizes, max_scores = zip(*self._max_by_pop)
