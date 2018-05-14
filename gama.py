@@ -1,4 +1,5 @@
 import random
+import re
 from collections import defaultdict
 
 import numpy as np
@@ -34,7 +35,8 @@ class Gama(object):
                  generations=10,
                  max_total_time=None,
                  max_eval_time=300,
-                 n_jobs=1):
+                 n_jobs=1,
+                 verbosity=None):
         if len(objectives) != len(optimize_strategy):
             raise ValueError("Length of objectives should match length of optimize_strategy. "
                              "For each objective, an optimization strategy should be maximized.")
@@ -129,6 +131,8 @@ class Gama(object):
         
         After the search termination condition is met, the best found pipeline 
         configuration is then used to train a final model on all provided data.
+
+        TODO: determine how to cut down on the amount of if-else branching in this function.
         """
 
         # For now there is no support for semi-supervised learning, so remove all instances with unknown targets.
@@ -250,3 +254,23 @@ class Gama(object):
         :param fn: Function to call when a pipeline is evaluated. Expected signature is: ind -> None
         """
         self._subscribers['evaluation_completed'].append(fn)
+
+
+def pretty_string_individual(individual):
+    """ Creates a `pretty` version of the individual string, removing hyperparameter prefixes and the 'data' argument.
+
+    :param individual: Individual of which to return a pretty string representation.
+    :return: A string that represents the individual.
+    """
+    ugly_string = str(individual)
+    # Remove the 'data' terminal
+    terminal_signature = 'data,'
+    terminal_idx = ugly_string.index(terminal_signature)
+    pretty_string = ugly_string[:terminal_idx] + ugly_string[terminal_idx + len(terminal_signature):]
+    # Remove hyperparameter prefixes
+    pretty_string = re.sub('[ .+\.]', '', pretty_string)
+    # Because some hyperparameters have a prefix and some don't (shared ones), we can't know where spaces are.
+    # Remove all spaces and re-insert them only where wanted.
+    pretty_string = pretty_string.replace(' ', '')
+    pretty_string = pretty_string.replace(',', ', ')
+    return pretty_string
