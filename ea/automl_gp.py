@@ -124,7 +124,7 @@ def compile_individual(ind, pset, parameter_checks=None):
     while len(ind) > 0:
         prim, remainder = ind[0], ind[1:]
         if isinstance(prim, gp.Terminal):
-            if len(remainder)>0:
+            if len(remainder) > 0:
                 raise Exception
             break
 
