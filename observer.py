@@ -63,6 +63,12 @@ class Observer(object):
             fh.write(str((str(ind), ind.fitness.values[0]))+'\n')
 
     def best_n(self, n):
+        """ Return the best n individuals observed based on the first optimization criterion.
+
+        :param n: the number of individuals to return
+        :return: a list of up to n individuals for which the score on the first criterion is the best.
+                returns less than n individuals if less than n have been evaluated.
+        """
         best_pipelines = sorted(self._individuals, key=lambda x: (-x.fitness.values[0], str(x)))
         return best_pipelines[:n]
 
