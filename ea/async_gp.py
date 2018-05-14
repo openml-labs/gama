@@ -34,7 +34,7 @@ def async_ea(self, n_threads=1, *args, **kwargs):
         return async_ea_parallel(self, n_threads, *args, **kwargs)
 
 
-def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True):
+def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, evaluation_callback=None):
     print('starting sequential')
     max_pop_size = len(pop)
     running_pop = []
@@ -54,6 +54,8 @@ def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=3
             fitness = (fitness[0], automl_gp.pipeline_length(ind))
         ind.fitness.values = fitness
         self._evaluated_individuals[str(ind)] = fitness
+        if evaluation_callback:
+            evaluation_callback(ind)
 
         # Add to population
         running_pop.append(ind)
@@ -65,7 +67,7 @@ def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=3
     return running_pop, None
 
 
-def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True):
+def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, evaluation_callback = None, verbose=True):
     mp_manager = mp.Manager()
     input_queue = mp_manager.Queue()
     output_queue = mp_manager.Queue()
@@ -104,6 +106,8 @@ def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, 
             if self._objectives[1] == 'size':
                 fitness = (fitness[0], automl_gp.pipeline_length(ind))
             individual.fitness.values = fitness
+            if evaluation_callback:
+                evaluation_callback(individual)
             
             # Add to population
             running_pop.append(individual)
