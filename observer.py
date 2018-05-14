@@ -45,46 +45,26 @@ class ParetoFront(object):
         return True
 
 
-class HallOfFame(object):
+class Observer(object):
     
     def __init__(self, filename):
+        self._pareto_front = ParetoFront(get_values_fn=lambda ind: ind.fitness.wvalues)
         self._pareto_callbacks = []
-        self._evaluation_callbacks = []
-        self._front = ParetoFront(get_values_fn=lambda ind: ind.fitness.wvalues)
         self._filename = filename
-        self._pop = []
-        self._last_pop = []
+        self._individuals = []
         
-    def update(self, pop):
-        self._pop += pop
-        self._last_pop = pop
-
-        for ind in pop:
-            updated = self._front.update(ind)
-            if updated:
-                self._update_pareto_front(ind)
+    def update(self, ind):
+        self._individuals.append(ind)
+        updated = self._pareto_front.update(ind)
+        if updated:
+            self._update_pareto_front(ind)
         
         with open(self._filename, 'a') as fh:
-            # print('-gen-')
-            # print('\n'.join([str((str(ind), ind.fitness.values[0])) for ind in pop]))
-            fh.write('\n'.join([str((str(ind), ind.fitness.values[0])) for ind in pop]))
-
-        self._update_evaluation(pop)
+            fh.write(str((str(ind), ind.fitness.values[0]))+'\n')
 
     def best_n(self, n):
-        best_pipelines = sorted(self._pop, key=lambda x: (-x.fitness.values[0], str(x)))
+        best_pipelines = sorted(self._individuals, key=lambda x: (-x.fitness.values[0], str(x)))
         return best_pipelines[:n]
-
-    def _update_evaluation(self, pop):
-        for callback in self._evaluation_callbacks:
-            callback(pop)
-
-    def on_evaluations_received(self, fn):
-        """ Register a callback function that is called when new evaluations are received.
-
-        :param fn: Function to call when evaluations are received. Expected signature is: list: ind -> None
-        """
-        self._evaluation_callbacks.append(fn)
 
     def _update_pareto_front(self, ind):
         for callback in self._pareto_callbacks:
