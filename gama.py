@@ -229,19 +229,6 @@ class Gama(object):
                 return new_ind,
         return new_ind,
 
-    def _on_pareto_front_updated(self, new_point, pareto_front):
-        for callback in self._subscribers['pareto_front_updated']:
-            callback(new_point, pareto_front)
-
-    def pareto_front_updated(self, fn):
-        """ Register a callback function that is called when new pipeline is on the Pareto front.
-
-        :param fn: Function to call when a pipeline is on the Pareto front. Expected signature is: (ind, list: ind) -> None
-                   Here, the first individual is the new individual on the Pareto front. The list of individuals
-                   is the new Pareto front.
-        """
-        self._subscribers['pareto_front_updated'].append(fn)
-
     def _on_generation_completed(self, pop):
         for callback in self._subscribers['generation_completed']:
             callback(pop)
