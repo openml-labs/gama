@@ -63,7 +63,7 @@ class Gama(object):
         self._subscribers = defaultdict(list)
 
         self._observer = Observer('log.txt')
-        self._on_evaluation_completed(self._observer.update)
+        self.evaluation_completed(self._observer.update)
         
         if self._random_state is not None:
             random.seed(self._random_state)
