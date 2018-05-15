@@ -11,8 +11,8 @@ An automated machine learning tool based on genetic programming.
 [ ] Progress output to console (in a nice way)  
 [ ] Implement bias correction for crossvalidation (e.g. BBC-CV)
 [ ] Add visualization  
-[ ] Add logging
-[ ] Adopt use of predict/predict_proba based on optimization metric
+[ ] Add logging  
+[ ] Adopt use of predict/predict_proba based on optimization metric  
 
 ## Nice to have
 [ ] Python code export  
@@ -27,6 +27,6 @@ An automated machine learning tool based on genetic programming.
 ## Known issues
 [ ] Nested configuration not supported (e.g. specify estimators for RFE)  
 [ ] Preprocessing may result in invalid data (e.g. feature selection )  
-[ ] Take a second look at validation procedures to make them adaptive to the data.
+[ ] Take a second look at validation procedures to make them adaptive to the data.  
 [ ] No check on input types (e.g. don't pass negative data to NB)       
 [ ] Many duplicate pipelines -> Should maybe only be fixed for *some* selection methods.  
