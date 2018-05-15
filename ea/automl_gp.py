@@ -8,13 +8,13 @@ import numpy as np
 from deap import gp, creator
 import sklearn
 from sklearn.pipeline import Pipeline
-from sklearn.model_selection import cross_val_score
 import stopit
 
 from stacking_transformer import make_stacking_transformer
 from modified_deap import gen_grow_safe
 
 from .mutation import mut_replace_terminal, mut_replace_primitive
+from .evaluation import cross_val_predict_score
 
 
 class Data(np.ndarray):
@@ -219,12 +219,12 @@ def compile_individual_tree(ind, pset, parameter_checks=None):
     return Pipeline(list(reversed(components)))
 
 
-def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5):
+def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache=False):
     """ Evaluates a pipeline used k-Fold CV. """
     
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
-            score = np.mean(cross_val_score(pl, X, y, cv=cv, scoring=scoring))
+            prediction, score = cross_val_predict_score(pl, X, y, cv=cv, scoring=scoring)
         except stopit.TimeoutException:
             raise
         except KeyboardInterrupt:
