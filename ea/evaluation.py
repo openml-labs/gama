@@ -31,11 +31,15 @@ metric_strings = dict(
 )
 
 
-def cross_val_predict_score(estimator, X, y=None, groups=None, scoring=None, cv=None, n_jobs=1, verbose=0,
-                            fit_params=None, pre_dispatch='2*n_jobs', method='predict'):
+def string_to_metric(scoring):
     if isinstance(scoring, str) and scoring not in metric_strings:
         raise ValueError('scoring argument', scoring, 'is invalid. It can be one of', list(metric_strings))
+    return metric_strings[scoring]
 
+
+def cross_val_predict_score(estimator, X, y=None, groups=None, scoring=None, cv=None, n_jobs=1, verbose=0,
+                            fit_params=None, pre_dispatch='2*n_jobs', method='predict'):
+    metric = string_to_metric(scoring)
     predictions = cross_val_predict(estimator, X, y, groups, cv, n_jobs, verbose, fit_params, pre_dispatch, method)
-    score = metric_strings[scoring](y, predictions)
+    score = metric(y, predictions)
     return predictions, score
