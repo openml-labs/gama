@@ -1,6 +1,7 @@
 from sklearn.model_selection import cross_val_predict
 from sklearn import metrics
 
+
 def neg(fn):
     def negative_result(*args, **kwargs):
         return -1 * fn(*args, **kwargs)
