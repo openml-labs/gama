@@ -3,6 +3,10 @@ learning as a genetic programming problem.
 (Yes, I need to find a better file name.)
 """
 from collections import defaultdict
+import os
+import pickle
+import string
+import uuid
 
 import numpy as np
 from deap import gp, creator
@@ -219,7 +223,7 @@ def compile_individual_tree(ind, pset, parameter_checks=None):
     return Pipeline(list(reversed(components)))
 
 
-def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache=False):
+def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=None):
     """ Evaluates a pipeline used k-Fold CV. """
     
     with stopit.ThreadingTimeout(timeout) as c_mgr:
@@ -232,6 +236,11 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache=False):
         except Exception as e:
             print(type(e), str(e))
             score = -float("inf")
+
+        if cache_dir and score != -float("inf"):
+            pl_filename = str(uuid.uuid4())
+            with open(os.path.join(cache_dir, pl_filename + '.pkl'), 'wb') as fh:
+                pickle.dump((pl, prediction, score), fh)
     
     if c_mgr.state == c_mgr.INTERRUPTED:
         print('Interrupt!')
