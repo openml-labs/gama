@@ -1,4 +1,5 @@
 import random
+import os
 import re
 from collections import defaultdict
 
@@ -16,6 +17,7 @@ from gama_exceptions import AttributeNotAssignedError
 from observer import Observer
 
 from ea.async_gp import async_ea
+from utilities.auto_ensemble import auto_ensemble, ensemble_predict
 
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
@@ -26,7 +28,7 @@ class Gama(object):
     """ Wrapper for the DEAP toolbox logic surrounding the GP process. """
 
     def __init__(self, 
-                 objectives=('accuracy', 'size'),
+                 objectives=('neg_log_loss', 'size'),
                  optimize_strategy=(1, -1),
                  config=None,
                  async=False,
@@ -36,7 +38,8 @@ class Gama(object):
                  max_total_time=None,
                  max_eval_time=300,
                  n_jobs=1,
-                 verbosity=None):
+                 verbosity=None,
+                 cache_dir='predictions'):
         if len(objectives) != len(optimize_strategy):
             raise ValueError("Length of objectives should match length of optimize_strategy. "
                              "For each objective, an optimization strategy should be maximized.")
@@ -58,6 +61,10 @@ class Gama(object):
         self._scoring_function = objectives[0]
         self._observer = None
         self._objectives = objectives
+
+        self._cache_dir = cache_dir
+        if not os.path.isdir(self._cache_dir):
+            os.mkdir(self._cache_dir)
 
         self._imputer = Imputer(strategy="median")
         self._evaluated_individuals = {}
@@ -108,19 +115,10 @@ class Gama(object):
         if np.isnan(X).any():
             # This does not work if training data set did not have missing numbers.
             X = self._imputer.transform(X)
-        
-        predictions = np.zeros((len(X), auto_ensemble_n))
-        for i, individual in enumerate(self._observer.best_n(auto_ensemble_n)):
-            print(str(individual), individual.fitness.values)
-            if str(individual) in self._fitted_pipelines:
-                pipeline = self._fitted_pipelines[str(individual)]
-            else:
-                Xt, yt = self._fit_data
-                pipeline = self._fit_pipeline(individual, Xt, yt)
-                self._fitted_pipelines[str(individual)] = pipeline
-            predictions[:, i] = pipeline.predict(X)
 
-        return self.merge_predictions(predictions)
+        Xt, yt = self._fit_data
+        ensemble = auto_ensemble(self._cache_dir, self._scoring_function, yt, size=auto_ensemble_n)
+        return ensemble_predict(ensemble, X, Xt, yt)
 
     def fit(self, X, y, warm_start=False):
         """ Finds and fits a model to predict target y from X.
@@ -158,7 +156,7 @@ class Gama(object):
             pop = self._toolbox.population(n=self._pop_size)
 
         if self._async_ea:
-            self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y, scoring=self._scoring_function, timeout=self._max_eval_time)
+            self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y, scoring=self._scoring_function, timeout=self._max_eval_time, cache_dir=self._cache_dir)
 
             def run_ea():
                 return async_ea(self, self._n_threads, pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=self._n_generations*self._pop_size, verbose=True, evaluation_callback=self._on_evaluation_completed)
@@ -208,7 +206,7 @@ class Gama(object):
         if pl is None:
             # Failed to compile due to invalid hyperparameter configuration
             return -float("inf"), 1
-        score, time = automl_gp.evaluate_pipeline(pl, X, y, timeout, scoring)
+        score, time = automl_gp.evaluate_pipeline(pl, X, y, timeout, scoring, cache_dir=self._cache_dir)
         length = automl_gp.pipeline_length(ind)
 
         if self._objectives[1] == 'size':
