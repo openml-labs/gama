@@ -1,3 +1,4 @@
+from functools import partial
 from sklearn.model_selection import cross_val_predict
 from sklearn import metrics
 
@@ -11,7 +12,7 @@ def neg(fn):
 # Scikit-learn does not have an option to return predictions and score at the same time. Furthermore, the only string
 # interpretation of scoring functions automatically make 'scorers' which train the model internally, also throwing
 # away any predictions. So we need to make our own conversion of scoring string to function, predict, score, and return
-# both. See also:
+# both. Construction of metric_strings copied with minor modifications from SCORERS of scikit-learn. See also:
 # https://github.com/scikit-learn/scikit-learn/blob/a24c8b464d094d2c468a16ea9f8bf8d42d949f84/sklearn/metrics/scorer.py#L530
 # https://stackoverflow.com/questions/41003897/scikit-learn-cross-validates-score-and-predictions-at-one-go
 metric_strings = dict(
@@ -29,6 +30,14 @@ metric_strings = dict(
     log_loss=metrics.log_loss,
     neg_log_loss=neg(metrics.log_loss)
 )
+
+# Below is also based on scikit-learn code:
+for name, metric in [('precision', metrics.precision_score),
+                     ('recall', metrics.recall_score), ('f1', metrics.f1_score)]:
+    metric_strings[name] = metric
+    for average in ['macro', 'micro', 'samples', 'weighted']:
+        qualified_name = '{0}_{1}'.format(name, average)
+        metric_strings[qualified_name] = partial(metric, pos_label=None, average=average)
 
 
 def string_to_metric(scoring):
