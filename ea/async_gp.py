@@ -8,7 +8,7 @@ import numpy as np
 from deap import tools
 
 from . import automl_gp
-from utilities.mp_logger import MultiprocessingLogger
+from ..utilities.mp_logger import MultiprocessingLogger
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)

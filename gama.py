@@ -11,14 +11,14 @@ from sklearn.preprocessing import Imputer
 
 import stopit
 
-from ea.modified_deap import cxOnePoint
-from ea import automl_gp
-from ea.automl_gp import compile_individual, pset_from_config, generate_valid, random_valid_mutation
-from utilities.gama_exceptions import AttributeNotAssignedError
-from utilities.observer import Observer
+from .ea.modified_deap import cxOnePoint
+from .ea import automl_gp
+from .ea.automl_gp import compile_individual, pset_from_config, generate_valid, random_valid_mutation
+from .utilities.gama_exceptions import AttributeNotAssignedError
+from .utilities.observer import Observer
 
-from ea.async_gp import async_ea
-from utilities.auto_ensemble import auto_ensemble, ensemble_predict
+from .ea.async_gp import async_ea
+from .utilities.auto_ensemble import auto_ensemble, ensemble_predict
 
 log = logging.getLogger(__name__)
 

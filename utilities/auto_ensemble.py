@@ -9,7 +9,7 @@ import pickle
 
 import numpy as np
 
-from ea.evaluation import string_to_metric
+from ..ea.evaluation import string_to_metric
 
 Model = namedtuple("Model", ['name', 'pipeline', 'predictions'])
 

@@ -1,7 +1,7 @@
 import scipy.stats
 
-from gama import Gama
-from utilities.configuration import clf_config
+from .gama import Gama
+from .utilities.configuration import clf_config
 
 
 class GamaClassifier(Gama):
