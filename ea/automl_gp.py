@@ -5,7 +5,7 @@ learning as a genetic programming problem.
 from collections import defaultdict
 import os
 import pickle
-import string
+import logging
 import uuid
 
 import numpy as np
@@ -19,6 +19,8 @@ from modified_deap import gen_grow_safe
 
 from .mutation import mut_replace_terminal, mut_replace_primitive
 from .evaluation import cross_val_predict_score
+
+log = logging.getLogger(__name__)
 
 
 class Data(np.ndarray):
@@ -185,7 +187,7 @@ def compile_individual_tree(ind, pset, parameter_checks=None):
     """ Compile the individual to a sklearn pipeline."""
     components = []
     name_counter = defaultdict(int)
-    while (len(ind) > 0):
+    while len(ind) > 0:
         # log_message('compiling ' + str(ind), level = 4)
         prim, remainder = ind[0], ind[1:]
         if isinstance(prim, gp.Terminal):
@@ -223,9 +225,11 @@ def compile_individual_tree(ind, pset, parameter_checks=None):
     return Pipeline(list(reversed(components)))
 
 
-def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=None):
+def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=None, logger=None):
     """ Evaluates a pipeline used k-Fold CV. """
-    
+    if not logger:
+        logger = log
+
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
             prediction, score = cross_val_predict_score(pl, X, y, cv=cv, scoring=scoring)
@@ -234,7 +238,7 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            print(type(e), str(e))
+            logger.info('Error evaluating pipeline {}. {}: {}'.format(pl, type(e), e))
             score = -float("inf")
 
         if cache_dir and score != -float("inf"):
@@ -243,18 +247,18 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
                 pickle.dump((pl, prediction, score), fh)
     
     if c_mgr.state == c_mgr.INTERRUPTED:
-        print('Interrupt!')
         # A TimeoutException was raised, but not by the context manager.
         # This indicates that the outer context manager (the ea) timed out.
+        logger.info("Outer-timeout during evaluation of {}".format(pl))
         raise stopit.TimeoutException()
 
     if not c_mgr:
-        print('Evaluation timeout')
         # For now we treat a eval timeout the same way as e.g. NaN exceptions.
         fitness_values = (-float("inf"), timeout)
+        logger.info("Timeout after {}s: {}".format(timeout, pl))
     else:
         fitness_values = (score, c_mgr.seconds)
-            
+
     return fitness_values
 
 

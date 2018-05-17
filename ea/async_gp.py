@@ -1,11 +1,17 @@
 import multiprocessing as mp
 import queue
 import random
+import logging
+from functools import partial
 
 import numpy as np
 from deap import tools
 
 from . import automl_gp
+from utilities.mp_logger import MultiprocessingLogger
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 
 def evaluator_daemon(input_queue, output_queue, fn, shutdown, seed=0):
@@ -35,7 +41,7 @@ def async_ea(self, n_threads=1, *args, **kwargs):
 
 
 def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, evaluation_callback=None):
-    print('starting sequential')
+    log.info('Starting sequential asynchronous algorithm.')
     max_pop_size = len(pop)
     running_pop = []
 
@@ -67,10 +73,12 @@ def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=3
     return running_pop, None
 
 
-def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, evaluation_callback = None, verbose=True):
+def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, evaluation_callback=None, verbose=True):
+    log.info('Setting up additional processes for parallel asynchronous algorithm.')
     mp_manager = mp.Manager()
     input_queue = mp_manager.Queue()
     output_queue = mp_manager.Queue()
+    mp_logger = MultiprocessingLogger()
     shutdown = mp_manager.Value('shutdown', False)
 
     n_processes = n_threads
@@ -78,14 +86,14 @@ def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, 
     running_pop = []
     
     comp_ind_map = {}
-    
+    evaluate_fn = partial(toolbox.evaluate, logger=mp_logger)
     for _ in range(n_processes):
-        p = mp.Process(target=evaluator_daemon, args=(input_queue, output_queue, toolbox.evaluate, shutdown,))
+        p = mp.Process(target=evaluator_daemon, args=(input_queue, output_queue, evaluate_fn, shutdown))
         p.daemon = True
         p.start()
-        
+
+    log.info('Processes set up. Commencing asynchronous algorithm.')
     try:
-        print('Starting EA')
         for ind in pop:
             comp_ind = toolbox.compile(ind)
             comp_ind_map[str(comp_ind)] = ind
@@ -100,7 +108,9 @@ def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, 
                     received_evaluation = True
                 except queue.Empty:
                     continue
-            print(i)
+            
+            mp_logger.flush_to_log(log)
+            log.debug('Evaluated {} individuals.'.format(i))
                 
             individual = comp_ind_map[comp_ind_str]
             if self._objectives[1] == 'size':
@@ -129,9 +139,10 @@ def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, 
         shutdown.value = True
         
     except KeyboardInterrupt:
-        print("Shutting down EA due to KeyboardInterrupt.")
+        log.info('Shutting down EA due to KeyboardInterrupt.')
         # No need to communicate to processes since they also handle the KeyboardInterrupt directly.
-    except:
+    except Exception:
+        log.error('Unexpected exception in asynchronous parallel algorithm.', exc_info=True)
         # Even in the event of an error we want the helper processes to shut down.
         shutdown.value = True
         raise

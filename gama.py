@@ -1,4 +1,5 @@
 import random
+import logging
 import os
 import re
 from collections import defaultdict
@@ -18,6 +19,8 @@ from observer import Observer
 
 from ea.async_gp import async_ea
 from utilities.auto_ensemble import auto_ensemble, ensemble_predict
+
+log = logging.getLogger(__name__)
 
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or

@@ -1,3 +1,8 @@
+import logging
+
+log = logging.getLogger(__name__)
+
+
 class ParetoFront(object):
 
     def __init__(self, get_values_fn=None):
@@ -58,9 +63,10 @@ class Observer(object):
         updated = self._pareto_front.update(ind)
         if updated:
             self._update_pareto_front(ind)
-        
-        with open(self._filename, 'a') as fh:
-            fh.write(str((str(ind), ind.fitness.values[0]))+'\n')
+
+        log.info("Evaluated {}. W-values: {}".format(ind, ind.fitness.wvalues))
+        #with open(self._filename, 'a') as fh:
+        #    fh.write(str((str(ind), ind.fitness.values[0]))+'\n')
 
     def best_n(self, n):
         """ Return the best n individuals observed based on the first optimization criterion.
