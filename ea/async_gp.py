@@ -11,7 +11,6 @@ from . import automl_gp
 from ..utilities.mp_logger import MultiprocessingLogger
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
 
 
 def evaluator_daemon(input_queue, output_queue, fn, shutdown, seed=0):
