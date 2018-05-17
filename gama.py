@@ -44,12 +44,18 @@ class Gama(object):
                  verbosity=None,
                  cache_dir='predictions'):
         if len(objectives) != len(optimize_strategy):
-            raise ValueError("Length of objectives should match length of optimize_strategy. "
-                             "For each objective, an optimization strategy should be maximized.")
+            error_message = "Length of objectives should match length of optimize_strategy. " \
+                             "For each objective, an optimization strategy should be maximized."
+            log.error(error_message + " objectives: {}, optimize_strategy: {}".format(objectives, optimize_strategy))
+            raise ValueError(error_message)
         if max_total_time is not None and max_total_time <= 0:
-            raise ValueError("max_total_time should be greater than zero, or None.")
+            error_message = "max_total_time should be greater than zero, or None."
+            log.error(error_message + " max_total_time: {}".format(max_total_time))
+            raise ValueError(error_message)
         if max_eval_time is not None and max_eval_time <= 0:
-            raise ValueError("max_eval_time should be greater than zero, or None.")
+            error_message = "max_eval_time should be greater than zero, or None."
+            log.error(error_message + " max_eval_time: {}".format(max_eval_time))
+            raise ValueError(error_message)
 
         self._async_ea = async
         self._best_pipelines = None
