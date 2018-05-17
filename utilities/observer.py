@@ -64,7 +64,7 @@ class Observer(object):
         if updated:
             self._update_pareto_front(ind)
 
-        log.info("Evaluated {}. W-values: {}".format(ind, ind.fitness.wvalues))
+        log.debug("Evaluated {}. W-values: {}".format(ind, ind.fitness.wvalues))
         #with open(self._filename, 'a') as fh:
         #    fh.write(str((str(ind), ind.fitness.values[0]))+'\n')
 
