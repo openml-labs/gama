@@ -1,7 +1,7 @@
 import numpy as np
 
 from gama import Gama
-from configuration import reg_config
+from utilities.configuration import reg_config
 
 
 class GamaRegressor(Gama):

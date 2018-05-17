@@ -9,13 +9,13 @@ import logging
 import uuid
 
 import numpy as np
-from deap import gp, creator
+from deap import gp
 import sklearn
 from sklearn.pipeline import Pipeline
 import stopit
 
-from stacking_transformer import make_stacking_transformer
-from modified_deap import gen_grow_safe
+from utilities.stacking_transformer import make_stacking_transformer
+from ea.modified_deap import gen_grow_safe
 
 from .mutation import mut_replace_terminal, mut_replace_primitive
 from .evaluation import cross_val_predict_score

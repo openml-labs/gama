@@ -1,7 +1,7 @@
 import scipy.stats
 
 from gama import Gama
-from configuration import clf_config
+from utilities.configuration import clf_config
 
 
 class GamaClassifier(Gama):
@@ -9,7 +9,7 @@ class GamaClassifier(Gama):
         if not config:
             config = clf_config
         if not objectives:
-            objectives = ('neg_log_loss', 'size')
+            objectives = ('accuracy', 'size')
         super().__init__(*args, **kwargs, config=config, objectives=objectives)
 
     def merge_predictions(self, Y):

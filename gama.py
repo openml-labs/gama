@@ -11,11 +11,11 @@ from sklearn.preprocessing import Imputer
 
 import stopit
 
-from modified_deap import cxOnePoint
+from ea.modified_deap import cxOnePoint
 from ea import automl_gp
 from ea.automl_gp import compile_individual, pset_from_config, generate_valid, random_valid_mutation
-from gama_exceptions import AttributeNotAssignedError
-from observer import Observer
+from utilities.gama_exceptions import AttributeNotAssignedError
+from utilities.observer import Observer
 
 from ea.async_gp import async_ea
 from utilities.auto_ensemble import auto_ensemble, ensemble_predict
