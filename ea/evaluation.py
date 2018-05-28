@@ -1,6 +1,10 @@
+from collections import namedtuple
 from functools import partial
+
+import numpy as np
 from sklearn.model_selection import cross_val_predict
 from sklearn import metrics
+from sklearn.preprocessing import OneHotEncoder
 
 
 def neg(fn):
@@ -15,6 +19,8 @@ def neg(fn):
 # both. Construction of metric_strings copied with minor modifications from SCORERS of scikit-learn. See also:
 # https://github.com/scikit-learn/scikit-learn/blob/a24c8b464d094d2c468a16ea9f8bf8d42d949f84/sklearn/metrics/scorer.py#L530
 # https://stackoverflow.com/questions/41003897/scikit-learn-cross-validates-score-and-predictions-at-one-go
+Metric = namedtuple("Metric", ["name", "fn", "requires_1d"])
+Metric.__new__.__defaults__ = (False,)
 metric_strings = dict(
     accuracy=metrics.accuracy_score,
     roc_auc=metrics.auc,
@@ -39,16 +45,29 @@ for name, metric in [('precision', metrics.precision_score),
         qualified_name = '{0}_{1}'.format(name, average)
         metric_strings[qualified_name] = partial(metric, pos_label=None, average=average)
 
+metrics = {}
+for name, fn in metric_strings.items():
+    metrics[name] = Metric(name, fn, name == 'accuracy')
+
 
 def string_to_metric(scoring):
     if isinstance(scoring, str) and scoring not in metric_strings:
         raise ValueError('scoring argument', scoring, 'is invalid. It can be one of', list(metric_strings))
-    return metric_strings[scoring]
+    return metrics[scoring]
 
 
 def cross_val_predict_score(estimator, X, y=None, groups=None, scoring=None, cv=None, n_jobs=1, verbose=0,
-                            fit_params=None, pre_dispatch='2*n_jobs', method='predict'):
+                            fit_params=None, pre_dispatch='2*n_jobs'): # , method=None
     metric = string_to_metric(scoring)
+    method = 'predict_proba' if hasattr(estimator, 'predict_proba') else 'predict'
     predictions = cross_val_predict(estimator, X, y, groups, cv, n_jobs, verbose, fit_params, pre_dispatch, method)
-    score = metric(y, predictions)
+
+    if metric.requires_1d:
+        predictions = np.argmax(predictions, axis=1)
+    else:
+        y = OneHotEncoder().fit_transform(y.reshape(-1, 1)).todense()
+        if method == 'predict':
+            predictions = OneHotEncoder().fit_transform(predictions.reshape(-1, 1)).todense()
+
+    score = metric.fn(y, predictions)
     return predictions, score
