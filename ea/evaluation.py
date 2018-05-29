@@ -7,6 +7,32 @@ from sklearn import metrics
 from sklearn.preprocessing import OneHotEncoder
 
 
+def evaluate(metric, y, p):
+    """ Metrics are difficult. Some need a 1d-array. Some don't allow probabilities. This method
+    formats y and p probably, and evaluates the metric.
+
+    :param metric:
+    :param y:
+    :param p:
+    :return:
+    """
+    formatted_predictions = p
+    formatted_y = y
+    if metric.requires_1d:
+        if p.ndim > 1:
+            formatted_predictions = np.argmax(p, axis=1)
+        if y.ndim > 1:
+            formatted_y = np.argmax(y, axis=1)
+    else:
+        if y.ndim == 1:
+            formatted_y = OneHotEncoder().fit_transform(y.reshape(-1, 1)).todense()
+        if p.ndim == 1:
+            formatted_predictions = OneHotEncoder().fit_transform(p.reshape(-1, 1)).todense()
+
+    score = metric.fn(formatted_y, formatted_predictions)
+    return score
+
+
 def neg(fn):
     def negative_result(*args, **kwargs):
         return -1 * fn(*args, **kwargs)
@@ -23,7 +49,7 @@ Metric = namedtuple("Metric", ["name", "fn", "requires_1d"])
 Metric.__new__.__defaults__ = (False,)
 metric_strings = dict(
     accuracy=metrics.accuracy_score,
-    roc_auc=metrics.auc,
+    roc_auc=metrics.roc_auc_score,
     explained_variance=metrics.explained_variance_score,
     r2=metrics.r2_score,
     neg_median_absolute_error=neg(metrics.median_absolute_error),
@@ -47,7 +73,8 @@ for name, metric in [('precision', metrics.precision_score),
 
 metrics = {}
 for name, fn in metric_strings.items():
-    metrics[name] = Metric(name, fn, name == 'accuracy')
+    needs_1d = any([s in name for s in ['accuracy', 'precision', 'recall', 'f1']])
+    metrics[name] = Metric(name, fn, needs_1d)
 
 
 def string_to_metric(scoring):
@@ -61,13 +88,14 @@ def cross_val_predict_score(estimator, X, y=None, groups=None, scoring=None, cv=
     metric = string_to_metric(scoring)
     method = 'predict_proba' if hasattr(estimator, 'predict_proba') else 'predict'
     predictions = cross_val_predict(estimator, X, y, groups, cv, n_jobs, verbose, fit_params, pre_dispatch, method)
+    if predictions.ndim == 1:
+        predictions = OneHotEncoder().fit_transform(predictions.reshape(-1, 1)).todense()
 
     if metric.requires_1d:
-        predictions = np.argmax(predictions, axis=1)
+        formatted_predictions = np.argmax(predictions, axis=1)
     else:
+        formatted_predictions = predictions
         y = OneHotEncoder().fit_transform(y.reshape(-1, 1)).todense()
-        if method == 'predict':
-            predictions = OneHotEncoder().fit_transform(predictions.reshape(-1, 1)).todense()
 
-    score = metric.fn(y, predictions)
+    score = metric.fn(y, formatted_predictions)
     return predictions, score
