@@ -9,7 +9,7 @@ class GamaClassifier(Gama):
         if not config:
             config = clf_config
         if not objectives:
-            objectives = ('accuracy', 'size')
+            objectives = ('neg_log_loss', 'size')
         super().__init__(*args, **kwargs, config=config, objectives=objectives)
 
     def merge_predictions(self, Y):
