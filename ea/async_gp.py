@@ -45,6 +45,7 @@ def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=3
     running_pop = []
 
     for i in range(n_evals):
+        log.debug(i)
         if i < len(pop):
             ind = pop[i]
         else:
@@ -54,7 +55,12 @@ def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=3
                     break
 
         comp_ind = toolbox.compile(ind)
-        fitness = toolbox.evaluate(comp_ind)
+        if comp_ind is None:
+            log.debug('Invalid individual generated, assigning worst fitness.')
+            fitness = (-float('inf'),)
+        else:
+            fitness = toolbox.evaluate(comp_ind)
+
         if self._objectives[1] == 'size':
             fitness = (fitness[0], automl_gp.pipeline_length(ind))
         ind.fitness.values = fitness
