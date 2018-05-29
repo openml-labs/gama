@@ -3,6 +3,8 @@ import logging
 import os
 import re
 from collections import defaultdict
+import datetime
+import shutil
 
 import numpy as np
 from deap import base, creator, tools, gp
@@ -18,7 +20,7 @@ from .utilities.gama_exceptions import AttributeNotAssignedError
 from .utilities.observer import Observer
 
 from .ea.async_gp import async_ea
-from .utilities.auto_ensemble import auto_ensemble, ensemble_predict
+from .utilities.auto_ensemble import auto_ensemble, ensemble_predict_proba
 
 log = logging.getLogger(__name__)
 
@@ -42,7 +44,7 @@ class Gama(object):
                  max_eval_time=300,
                  n_jobs=1,
                  verbosity=None,
-                 cache_dir='predictions'):
+                 cache_dir=None):
         if len(objectives) != len(optimize_strategy):
             error_message = "Length of objectives should match length of optimize_strategy. " \
                              "For each objective, an optimization strategy should be maximized."
@@ -71,7 +73,8 @@ class Gama(object):
         self._observer = None
         self._objectives = objectives
 
-        self._cache_dir = cache_dir
+        default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
+        self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
         if not os.path.isdir(self._cache_dir):
             os.mkdir(self._cache_dir)
 
@@ -111,7 +114,7 @@ class Gama(object):
         else:
             raise ValueError('Objectives must be a tuple of length at most 2.')
 
-    def predict(self, X, auto_ensemble_n=1):
+    def predict_proba(self, X, auto_ensemble_n=1):
         """ Predicts the target for input X. 
         
         Predict target for X, using the best found pipeline(s) during the `fit` call. 
@@ -125,9 +128,14 @@ class Gama(object):
             # This does not work if training data set did not have missing numbers.
             X = self._imputer.transform(X)
 
+        log.info('Constructing ensemble.')
         Xt, yt = self._fit_data
         ensemble = auto_ensemble(self._cache_dir, self._scoring_function, yt, size=auto_ensemble_n)
-        return ensemble_predict(ensemble, X, Xt, yt)
+        return ensemble_predict_proba(ensemble, X, Xt, yt)
+
+    def predict(self, X, auto_ensemble_n=1):
+        predictions = np.argmax(self.predict_proba(X, auto_ensemble_n), axis=1)
+        return np.squeeze(predictions)
 
     def fit(self, X, y, warm_start=False):
         """ Finds and fits a model to predict target y from X.
@@ -239,6 +247,10 @@ class Gama(object):
             if str(new_ind) not in self._evaluated_individuals:
                 return new_ind,
         return new_ind,
+
+    def delete_cache(self):
+        if os.path.exists(self._cache_dir):
+            shutil.rmtree(self._cache_dir)
 
     def _on_generation_completed(self, pop):
         for callback in self._subscribers['generation_completed']:
