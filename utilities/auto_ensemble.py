@@ -6,11 +6,15 @@ created multiple ensembles from randomly selected subset of models, and average 
 from collections import namedtuple
 import os
 import pickle
+import logging
 
 import numpy as np
+from sklearn.preprocessing import OneHotEncoder
 
-from ..ea.evaluation import string_to_metric
+from ..ea.evaluation import string_to_metric, evaluate
 
+
+log = logging.getLogger(__name__)
 Model = namedtuple("Model", ['name', 'pipeline', 'predictions'])
 
 
@@ -20,6 +24,7 @@ def load_predictions(cache_dir):
         if file.endswith('.pkl'):
             with open(os.path.join(cache_dir, file), 'rb') as fh:
                 pl, predictions, score = pickle.load(fh)
+                predictions = np.array(predictions)
             models.append(Model(str(pl), pl, predictions))
     return models
 
@@ -29,9 +34,9 @@ def evaluate_ensemble(ensemble, metric, y_true):
 
     Currently assumes a single prediction value (e.g. numeric response or positive class probability).
     """
-    all_predictions = np.c_[[model.predictions for model in ensemble]].T
-    average_predictions = np.mean(all_predictions, axis=1)
-    return metric(y_true, average_predictions)
+    all_predictions = np.stack([model.predictions for model in ensemble])
+    average_predictions = np.mean(all_predictions, axis=0)
+    return evaluate(metric, y_true, average_predictions)
 
 
 def build_ensemble(models, metric, y_true, n=0, size=5, maximize=True):
@@ -46,9 +51,9 @@ def build_ensemble(models, metric, y_true, n=0, size=5, maximize=True):
     :return:
     """
     if n > size:
-        raise ValueError('Size must be at least match n.')
+        raise ValueError('Size must be at least match n. Size: {}, n: {}.'.format(size, n))
 
-    sorted_ensembles = sorted(models, key=lambda m: metric(y_true, m.predictions))
+    sorted_ensembles = sorted(models, key=lambda m: evaluate(metric, y_true, m.predictions))
     sorted_ensembles = reversed(sorted_ensembles) if maximize else sorted_ensembles
     ensemble = list(sorted_ensembles)[:n]
     best_ensemble = ensemble
@@ -62,23 +67,32 @@ def build_ensemble(models, metric, y_true, n=0, size=5, maximize=True):
                     (not maximize and best_ensemble_score > candidate_ensemble_score)):
                 best_ensemble, best_ensemble_score = candidate_ensemble, candidate_ensemble_score
         ensemble = best_ensemble
-        print('Ensemble size', len(ensemble), ', best score:', best_ensemble_score)
+        log.debug('Ensemble size {} , best score: {}'.format(len(ensemble), best_ensemble_score))
 
     return best_ensemble
 
 
-def ensemble_predict(ensemble, X, Xt, yt):
+def ensemble_predict_proba(ensemble, X, Xt, yt):
     # TODO: Use scikit-learn components instead.
     predictions = []
     for model in ensemble:
         model.pipeline.fit(Xt, yt)
-        predictions.append(model.pipeline.predict(X))
-    all_predictions = np.c_[[prediction for prediction in predictions]].T
-    return np.mean(all_predictions, axis=1)
+        if hasattr(model.pipeline, 'predict_proba'):
+            predictions.append(model.pipeline.predict_proba(X))
+        else:
+            class_prediction = model.pipeline.predict(X)
+            ohe_prediction = OneHotEncoder().fit_transform(class_prediction.reshape(-1, 1)).todense()
+            predictions.append(np.array(ohe_prediction))
+    if len(ensemble) == 1:
+        return predictions[0]
+    else:
+        all_predictions = np.stack(predictions)
+        return np.mean(all_predictions, axis=0)
 
 
 def auto_ensemble(cache_dir, metric, y_true, size):
     if isinstance(metric, str):
         metric = string_to_metric(metric)
     models = load_predictions(cache_dir=cache_dir)
-    return build_ensemble(models, metric, y_true, n=3, size=size, maximize=True)
+    n = 3 if size >= 3 else 1
+    return build_ensemble(models, metric, y_true, n=n, size=size, maximize=True)
