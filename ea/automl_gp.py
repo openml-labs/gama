@@ -238,7 +238,7 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            logger.info('Error evaluating pipeline {}. {}: {}'.format(pl, type(e), e))
+            logger.info('Error evaluating pipeline {}. {}: {}'.format(pl, type(e), e))#, exc_info=True)
             score = -float("inf")
 
         if cache_dir and score != -float("inf"):
