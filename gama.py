@@ -20,7 +20,7 @@ from .utilities.gama_exceptions import AttributeNotAssignedError
 from .utilities.observer import Observer
 
 from .ea.async_gp import async_ea
-from .utilities.auto_ensemble import auto_ensemble, ensemble_predict_proba
+from .utilities.auto_ensemble import Ensemble
 
 log = logging.getLogger(__name__)
 
@@ -68,10 +68,11 @@ class Gama(object):
         self._max_total_time = max_total_time
         self._max_eval_time = max_eval_time
         self._fit_data = None
-        self._n_threads = n_jobs
+        self._n_jobs = n_jobs
         self._scoring_function = objectives[0]
         self._observer = None
         self._objectives = objectives
+        self.ensemble = None
 
         default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
@@ -114,7 +115,7 @@ class Gama(object):
         else:
             raise ValueError('Objectives must be a tuple of length at most 2.')
 
-    def predict_proba(self, X, auto_ensemble_n=1):
+    def predict_proba(self, X):
         """ Predicts the target for input X. 
         
         Predict target for X, using the best found pipeline(s) during the `fit` call. 
@@ -122,22 +123,20 @@ class Gama(object):
         """
         if len(self._observer._individuals) == 0:
             raise AttributeNotAssignedError(STR_NO_OPTIMAL_PIPELINE)
-        if len(self._observer._individuals) < auto_ensemble_n:
-            print('Warning: Not enough pipelines evaluated. Continuing with less.')
+        #if len(self._observer._individuals) < auto_ensemble_n:
+        #    print('Warning: Not enough pipelines evaluated. Continuing with less.')
         if np.isnan(X).any():
             # This does not work if training data set did not have missing numbers.
             X = self._imputer.transform(X)
 
-        log.info('Constructing ensemble.')
-        Xt, yt = self._fit_data
-        ensemble = auto_ensemble(self._cache_dir, self._scoring_function, yt, size=auto_ensemble_n)
-        return ensemble_predict_proba(ensemble, X, Xt, yt)
+        if self.ensemble is not None:
+            return self.ensemble.predict_proba(X)
 
-    def predict(self, X, auto_ensemble_n=1):
-        predictions = np.argmax(self.predict_proba(X, auto_ensemble_n), axis=1)
+    def predict(self, X):
+        predictions = np.argmax(self.predict_proba(X), axis=1)
         return np.squeeze(predictions)
 
-    def fit(self, X, y, warm_start=False):
+    def fit(self, X, y, warm_start=False, auto_ensemble_n=1):
         """ Finds and fits a model to predict target y from X.
         
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -176,7 +175,7 @@ class Gama(object):
             self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y, scoring=self._scoring_function, timeout=self._max_eval_time, cache_dir=self._cache_dir)
 
             def run_ea():
-                return async_ea(self, self._n_threads, pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=self._n_generations*self._pop_size, verbose=True, evaluation_callback=self._on_evaluation_completed)
+                return async_ea(self, self._n_jobs, pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=self._n_generations * self._pop_size, verbose=True, evaluation_callback=self._on_evaluation_completed)
         else:
             class DummyHoF:
                 pass
@@ -202,10 +201,11 @@ class Gama(object):
             print('Terminated because maximum time has elapsed.')
 
         if len(self._observer._individuals) > 0:
-            best_individual = self._observer.best_n(n=1)[0]
-            if str(best_individual) not in self._fitted_pipelines:
-                # In the case of warm-starting, the pipeline might have been previously fit.
-                self._fitted_pipelines[str(best_individual)] = self._fit_pipeline(best_individual, X, y)
+            self.ensemble = Ensemble(self._cache_dir, self._scoring_function, y)
+            log.debug('Building ensemble.')
+            self.ensemble.build(n_models_in_ensemble=auto_ensemble_n)
+            log.debug('Fitting ensemble.')
+            self.ensemble.fit(X, y)
         else:
             print('No pipeline evaluated.')
         
