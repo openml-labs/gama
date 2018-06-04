@@ -89,7 +89,7 @@ def cross_val_predict_score(estimator, X, y=None, groups=None, scoring=None, cv=
     method = 'predict_proba' if hasattr(estimator, 'predict_proba') else 'predict'
     predictions = cross_val_predict(estimator, X, y, groups, cv, n_jobs, verbose, fit_params, pre_dispatch, method)
     if predictions.ndim == 1:
-        predictions = OneHotEncoder().fit_transform(predictions.reshape(-1, 1)).todense()
+        predictions = OneHotEncoder(n_values=len(set(y))).fit_transform(predictions.reshape(-1, 1)).todense()
 
     if metric.requires_1d:
         formatted_predictions = np.argmax(predictions, axis=1)
