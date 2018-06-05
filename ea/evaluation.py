@@ -18,16 +18,18 @@ def evaluate(metric, y, p):
     """
     formatted_predictions = p
     formatted_y = y
-    if metric.requires_1d:
-        if p.ndim > 1:
-            formatted_predictions = np.argmax(p, axis=1)
-        if y.ndim > 1:
-            formatted_y = np.argmax(y, axis=1)
-    else:
-        if y.ndim == 1:
-            formatted_y = OneHotEncoder().fit_transform(y.reshape(-1, 1)).todense()
-        if p.ndim == 1:
-            formatted_predictions = OneHotEncoder().fit_transform(p.reshape(-1, 1)).todense()
+
+    if metric.is_classification:
+        if metric.requires_1d:
+            if p.ndim > 1:
+                formatted_predictions = np.argmax(p, axis=1)
+            if y.ndim > 1:
+                formatted_y = np.argmax(y, axis=1)
+        else:
+            if y.ndim == 1:
+                formatted_y = OneHotEncoder().fit_transform(y.reshape(-1, 1)).todense()
+            if p.ndim == 1:
+                formatted_predictions = OneHotEncoder().fit_transform(p.reshape(-1, 1)).todense()
 
     score = metric.fn(formatted_y, formatted_predictions)
     return score
@@ -45,8 +47,8 @@ def neg(fn):
 # both. Construction of metric_strings copied with minor modifications from SCORERS of scikit-learn. See also:
 # https://github.com/scikit-learn/scikit-learn/blob/a24c8b464d094d2c468a16ea9f8bf8d42d949f84/sklearn/metrics/scorer.py#L530
 # https://stackoverflow.com/questions/41003897/scikit-learn-cross-validates-score-and-predictions-at-one-go
-Metric = namedtuple("Metric", ["name", "fn", "requires_1d"])
-Metric.__new__.__defaults__ = (False,)
+Metric = namedtuple("Metric", ["name", "fn", "requires_1d", "is_classification", "is_regression"])
+Metric.__new__.__defaults__ = (False, False, False,)
 metric_strings = dict(
     accuracy=metrics.accuracy_score,
     roc_auc=metrics.roc_auc_score,
@@ -74,7 +76,9 @@ for name, metric in [('precision', metrics.precision_score),
 metrics = {}
 for name, fn in metric_strings.items():
     needs_1d = any([s in name for s in ['accuracy', 'precision', 'recall', 'f1']])
-    metrics[name] = Metric(name, fn, needs_1d)
+    is_regression = ('error' in name) or (name == 'r2')
+    is_classification = not is_regression
+    metrics[name] = Metric(name, fn, needs_1d, is_classification, is_regression)
 
 
 def string_to_metric(scoring):
@@ -88,14 +92,19 @@ def cross_val_predict_score(estimator, X, y=None, groups=None, scoring=None, cv=
     metric = string_to_metric(scoring)
     method = 'predict_proba' if hasattr(estimator, 'predict_proba') else 'predict'
     predictions = cross_val_predict(estimator, X, y, groups, cv, n_jobs, verbose, fit_params, pre_dispatch, method)
-    if predictions.ndim == 1:
-        predictions = OneHotEncoder(n_values=len(set(y))).fit_transform(predictions.reshape(-1, 1)).todense()
 
-    if metric.requires_1d:
-        formatted_predictions = np.argmax(predictions, axis=1)
-    else:
+    if metric.is_classification:
+        if predictions.ndim == 1:
+            predictions = OneHotEncoder(n_values=len(set(y))).fit_transform(predictions.reshape(-1, 1)).todense()
+
+        if metric.requires_1d:
+            formatted_predictions = np.argmax(predictions, axis=1)
+        else:
+            formatted_predictions = predictions
+            y = OneHotEncoder().fit_transform(y.reshape(-1, 1)).todense()
+    elif metric.is_regression:
+        # single-output regression is always one-dimensional.
         formatted_predictions = predictions
-        y = OneHotEncoder().fit_transform(y.reshape(-1, 1)).todense()
 
     score = metric.fn(y, formatted_predictions)
     return predictions, score
