@@ -133,8 +133,7 @@ class Gama(object):
             return self.ensemble.predict_proba(X)
 
     def predict(self, X):
-        predictions = np.argmax(self.predict_proba(X), axis=1)
-        return np.squeeze(predictions)
+        raise NotImplemented()
 
     def fit(self, X, y, warm_start=False, auto_ensemble_n=1):
         """ Finds and fits a model to predict target y from X.
