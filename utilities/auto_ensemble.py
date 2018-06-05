@@ -63,8 +63,13 @@ class Ensemble(object):
         return self
 
     def predict(self, X):
-        predictions = np.argmax(self.predict_proba(X), axis=1)
-        return np.squeeze(predictions)
+        if self._metric.is_classification:
+            predictions = np.argmax(self.predict_proba(X), axis=1)
+            return np.squeeze(predictions)
+        elif self._metric.is_regression:
+            return self.predict_proba(X)
+        else:
+            raise NotImplemented('Unknown task type for ensemble.')
 
     def predict_proba(self, X):
         predictions = []
@@ -73,8 +78,13 @@ class Ensemble(object):
                 predictions.append(model.predict_proba(X))
             else:
                 class_prediction = model.predict(X)
-                ohe_prediction = OneHotEncoder().fit_transform(class_prediction.reshape(-1, 1)).todense()
-                predictions.append(np.array(ohe_prediction))
+                if self._metric.is_classification:
+                    ohe_prediction = OneHotEncoder().fit_transform(class_prediction.reshape(-1, 1)).todense()
+                    predictions.append(np.array(ohe_prediction))
+                elif self._metric.is_regression:
+                    predictions.append(class_prediction)
+                else:
+                    raise NotImplemented('Unknown task type for ensemble.')
 
         if len(self._fit_models) == 1:
             return predictions[0]
