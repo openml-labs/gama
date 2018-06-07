@@ -15,3 +15,6 @@ class GamaRegressor(Gama):
     def merge_predictions(self, Y):
         """ Computes predictions from a matrix of predictions, with predictions from a pipeline in each columns. """
         return np.mean(Y, axis=1)
+
+    def predict(self, X):
+        return self.predict_proba(X)

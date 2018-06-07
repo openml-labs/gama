@@ -1,4 +1,5 @@
 import scipy.stats
+import numpy as np
 
 from .gama import Gama
 from .utilities.configuration import clf_config
@@ -15,3 +16,7 @@ class GamaClassifier(Gama):
     def merge_predictions(self, Y):
         """ Computes predictions from a matrix of predictions, with predictions from a pipeline in each columns. """
         return scipy.stats.mode(Y, axis=1)[0]
+
+    def predict(self, X):
+        predictions = np.argmax(self.predict_proba(X), axis=1)
+        return np.squeeze(predictions)
