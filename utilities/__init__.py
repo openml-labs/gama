@@ -1,3 +1,5 @@
+import re
+
 def clean_pipeline_string(individual):
     """ Creates a `pretty` version of the individual string, removing hyperparameter prefixes and the 'data' argument.
 
