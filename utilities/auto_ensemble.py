@@ -63,8 +63,11 @@ class Ensemble(object):
         return self
 
     def predict(self, X):
-        predictions = np.argmax(self.predict_proba(X), axis=1)
-        return np.squeeze(predictions)
+        if self._metric.is_classification:
+            predictions = np.argmax(self.predict_proba(X), axis=1)
+            return np.squeeze(predictions)
+        else:
+            return self.predict_proba(X)
 
     def predict_proba(self, X):
         predictions = []
@@ -72,9 +75,12 @@ class Ensemble(object):
             if hasattr(model, 'predict_proba'):
                 predictions.append(model.predict_proba(X))
             else:
-                class_prediction = model.predict(X)
-                ohe_prediction = OneHotEncoder().fit_transform(class_prediction.reshape(-1, 1)).todense()
-                predictions.append(np.array(ohe_prediction))
+                target_prediction = model.predict(X)
+                if self._metric.is_classification:
+                    ohe_prediction = OneHotEncoder().fit_transform(target_prediction.reshape(-1, 1)).todense()
+                    predictions.append(np.array(ohe_prediction))
+                else:
+                    predictions.append(target_prediction)
 
         if len(self._fit_models) == 1:
             return predictions[0]
