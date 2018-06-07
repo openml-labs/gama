@@ -77,12 +77,12 @@ class Ensemble(object):
             if hasattr(model, 'predict_proba'):
                 predictions.append(model.predict_proba(X))
             else:
-                class_prediction = model.predict(X)
+                target_prediction = model.predict(X)
                 if self._metric.is_classification:
-                    ohe_prediction = OneHotEncoder().fit_transform(class_prediction.reshape(-1, 1)).todense()
+                    ohe_prediction = OneHotEncoder().fit_transform(target_prediction.reshape(-1, 1)).todense()
                     predictions.append(np.array(ohe_prediction))
                 elif self._metric.is_regression:
-                    predictions.append(class_prediction)
+                    predictions.append(target_prediction)
                 else:
                     raise NotImplemented('Unknown task type for ensemble.')
 
