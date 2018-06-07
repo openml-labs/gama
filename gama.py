@@ -148,6 +148,11 @@ class Gama(object):
         TODO: determine how to cut down on the amount of if-else branching in this function.
         """
 
+       if hasattr(X, 'values') and hasattr(X, 'astype'):
+            X = X.astype(np.float64).values
+        if hasattr(y, 'values') and hasattr(y, 'astype'):
+            y = y.astype(np.float64).values
+
         # For now there is no support for semi-supervised learning, so remove all instances with unknown targets.
         nan_targets = np.isnan(y)
         if nan_targets.any():
