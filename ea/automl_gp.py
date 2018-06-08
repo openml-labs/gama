@@ -7,6 +7,7 @@ import os
 import pickle
 import logging
 import uuid
+import time
 
 import numpy as np
 from deap import gp
@@ -230,6 +231,7 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
     if not logger:
         logger = log
 
+    start = time.process_time()
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
             prediction, score = cross_val_predict_score(pl, X, y, cv=cv, scoring=scoring)
@@ -245,6 +247,8 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
             pl_filename = str(uuid.uuid4())
             with open(os.path.join(cache_dir, pl_filename + '.pkl'), 'wb') as fh:
                 pickle.dump((pl, prediction, score), fh)
+
+    evaluation_time = time.process_time() - start
     
     if c_mgr.state == c_mgr.INTERRUPTED:
         # A TimeoutException was raised, but not by the context manager.
@@ -257,7 +261,7 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
         fitness_values = (-float("inf"), timeout)
         logger.info("Timeout after {}s: {}".format(timeout, pl))
     else:
-        fitness_values = (score, c_mgr.seconds)
+        fitness_values = (score, evaluation_time)
 
     return fitness_values
 

@@ -63,7 +63,7 @@ class Observer(object):
         if updated:
             self._update_pareto_front(ind)
 
-        log.debug("Evaluated {}. W-values: {}".format(ind, ind.fitness.wvalues))
+        log.debug("Evaluated {} in {}s. W-values: {}".format(ind, ind.fitness.time, ind.fitness.wvalues))
 
     def best_n(self, n):
         """ Return the best n individuals observed based on the first optimization criterion.

@@ -60,11 +60,12 @@ def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=3
             log.debug('Invalid individual generated, assigning worst fitness.')
             fitness = (-float('inf'),)
         else:
-            fitness = toolbox.evaluate(comp_ind)
+            score, eval_time = toolbox.evaluate(comp_ind)
 
         if self._objectives[1] == 'size':
-            fitness = (fitness[0], automl_gp.pipeline_length(ind))
+            fitness = (score, automl_gp.pipeline_length(ind))
         ind.fitness.values = fitness
+        ind.fitness.time = eval_time
         self._evaluated_individuals[str(ind)] = fitness
         if evaluation_callback:
             evaluation_callback(ind)
@@ -128,8 +129,10 @@ def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, 
                 
             individual = comp_ind_map[comp_ind_str]
             if self._objectives[1] == 'size':
+                eval_time = fitness[1]
                 fitness = (fitness[0], automl_gp.pipeline_length(ind))
             individual.fitness.values = fitness
+            individual.fitness.time = eval_time
             if evaluation_callback:
                 evaluation_callback(individual)
             
