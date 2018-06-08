@@ -155,11 +155,11 @@ class Gama(object):
             X = X[~nan_targets, :]
             y = y[~nan_targets]
 
-        # For now we always impute if there are missing values, we always impute with median.
+        # For now we always impute if there are missing values, and we always impute with median.
         # One should note that ideally imputation should not always be done since some methods work well without.
         # Secondly, the way imputation is done can also be dependent on the task. Median is generally not the best.
+        self._imputer.fit(X)
         if np.isnan(X).any():
-            self._imputer.fit(X)
             X = self._imputer.transform(X)
 
         self._fit_data = (X, y)
