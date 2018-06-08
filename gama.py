@@ -1,14 +1,12 @@
 import random
 import logging
 import os
-import re
 from collections import defaultdict
 import datetime
 import shutil
 
 import numpy as np
 from deap import base, creator, tools, gp
-from deap.algorithms import eaMuPlusLambda
 from sklearn.preprocessing import Imputer
 
 import stopit
@@ -27,7 +25,7 @@ log = logging.getLogger(__name__)
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
                           did not terminate successfully."""
-
+__version__ = '0.1.0'
 
 class Gama(object):
     """ Wrapper for the DEAP toolbox logic surrounding the GP process. """
@@ -36,15 +34,15 @@ class Gama(object):
                  objectives=('neg_log_loss', 'size'),
                  optimize_strategy=(1, -1),
                  config=None,
-                 async=False,
                  random_state=None,
-                 population_size=10,
-                 generations=10,
-                 max_total_time=None,
+                 population_size=50,
+                 max_total_time=3600,
                  max_eval_time=300,
                  n_jobs=1,
                  verbosity=None,
                  cache_dir=None):
+        log.debug('Using GAMA version {}.'.format(__version__))
+
         if len(objectives) != len(optimize_strategy):
             error_message = "Length of objectives should match length of optimize_strategy. " \
                              "For each objective, an optimization strategy should be maximized."
@@ -59,12 +57,10 @@ class Gama(object):
             log.error(error_message + " max_eval_time: {}".format(max_eval_time))
             raise ValueError(error_message)
 
-        self._async_ea = async
         self._best_pipelines = None
         self._fitted_pipelines = {}
         self._random_state = random_state
         self._pop_size = population_size
-        self._n_generations = generations
         self._max_total_time = max_total_time
         self._max_eval_time = max_eval_time
         self._fit_data = None
@@ -84,7 +80,7 @@ class Gama(object):
         self._final_pop = None
         self._subscribers = defaultdict(list)
 
-        self._observer = Observer('log.txt')
+        self._observer = Observer()
         self.evaluation_completed(self._observer.update)
         
         if self._random_state is not None:
@@ -117,7 +113,7 @@ class Gama(object):
 
     def predict_proba(self, X):
         """ Predicts the target for input X. 
-        
+
         Predict target for X, using the best found pipeline(s) during the `fit` call. 
         X must be of similar shape to the X value passed to `fit`.
         """
@@ -175,29 +171,18 @@ class Gama(object):
                 print('Warning: Warm-start enabled but no earlier fit')
             pop = self._toolbox.population(n=self._pop_size)
 
-        if self._async_ea:
-            self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y, scoring=self._scoring_function, timeout=self._max_eval_time, cache_dir=self._cache_dir)
-
-            def run_ea():
-                return async_ea(self, self._n_jobs, pop, self._toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=self._n_generations * self._pop_size, verbose=True, evaluation_callback=self._on_evaluation_completed)
-        else:
-            class DummyHoF:
-                pass
-            hof = DummyHoF()
-            hof.update = self._on_generation_completed
-            self._toolbox.register("evaluate", self._compile_and_evaluate_individual, X=X, y=y, scoring=self._scoring_function, timeout=self._max_eval_time)
-
-            def run_ea():
-                return eaMuPlusLambda(pop, self._toolbox, mu=len(pop), lambda_=len(pop), cxpb=0.2, mutpb=0.8, ngen=self._n_generations, verbose=True, halloffame=hof)
+        self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y,
+                               scoring=self._scoring_function, timeout=self._max_eval_time,
+                               cache_dir=self._cache_dir)
 
         try:
-            if self._max_total_time is not None:
-                with stopit.ThreadingTimeout(self._max_total_time) as c_mgr:
-                    final_pop, sdp = run_ea()
-            else:
-                final_pop, sdp = run_ea()
-            self._final_pop = final_pop
-            self._ = sdp
+            with stopit.ThreadingTimeout(self._max_total_time) as c_mgr:
+                log.debug('Starting EA with max time of {} seconds.'.format(self._max_total_time))
+                final_pop, sdp = async_ea(self, self._n_jobs, pop, self._toolbox, X, y,
+                                          cxpb=0.2, mutpb=0.8, n_evals=500000000,
+                                          verbose=True, evaluation_callback=self._on_evaluation_completed)
+                self._final_pop = final_pop
+                self._ = sdp
         except KeyboardInterrupt:
             print('Keyboard Interrupt sent to outer with statement.')
 

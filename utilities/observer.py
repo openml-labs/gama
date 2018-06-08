@@ -52,10 +52,9 @@ class ParetoFront(object):
 
 class Observer(object):
     
-    def __init__(self, filename):
+    def __init__(self):
         self._pareto_front = ParetoFront(get_values_fn=lambda ind: ind.fitness.wvalues)
         self._pareto_callbacks = []
-        self._filename = filename
         self._individuals = []
         
     def update(self, ind):
@@ -65,8 +64,6 @@ class Observer(object):
             self._update_pareto_front(ind)
 
         log.debug("Evaluated {}. W-values: {}".format(ind, ind.fitness.wvalues))
-        #with open(self._filename, 'a') as fh:
-        #    fh.write(str((str(ind), ind.fitness.values[0]))+'\n')
 
     def best_n(self, n):
         """ Return the best n individuals observed based on the first optimization criterion.

@@ -2,6 +2,7 @@ import multiprocessing as mp
 import queue
 import random
 import logging
+import time
 from functools import partial
 
 import numpy as np
@@ -104,14 +105,21 @@ def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, 
             comp_ind_map[str(comp_ind)] = ind
             input_queue.put((str(comp_ind), comp_ind))
         
-        for i in range(n_evals):        
+        for i in range(n_evals):
             received_evaluation = False
+            last_get_successful = True
             while not received_evaluation:
                 try:
                     # If we just used the blocking queue.get, then KeyboardInterrupts/Timeout would not work.
-                    comp_ind_str, fitness = output_queue.get(timeout=100)
+                    # Previously, specifying a timeout worked, but for some reason that seems no longer the case.
+                    # When waiting with sleep, we don't want to wait too long, but we never know when a pipeline
+                    # would finish evaluating.
+                    if not last_get_successful:
+                        time.sleep(0.1)  # seconds
+                    comp_ind_str, fitness = output_queue.get(block=False)
                     received_evaluation = True
                 except queue.Empty:
+                    last_get_successful = False
                     continue
             
             mp_logger.flush_to_log(log)
