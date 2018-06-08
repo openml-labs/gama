@@ -112,6 +112,7 @@ def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, 
                 try:
                     # If we just used the blocking queue.get, then KeyboardInterrupts/Timeout would not work.
                     # Previously, specifying a timeout worked, but for some reason that seems no longer the case.
+                    # Using timeout prevents the stopit.Timeout exception from being received.
                     # When waiting with sleep, we don't want to wait too long, but we never know when a pipeline
                     # would finish evaluating.
                     if not last_get_successful:
