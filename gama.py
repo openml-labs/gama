@@ -176,8 +176,11 @@ class Gama(object):
                                cache_dir=self._cache_dir)
 
         try:
-            with stopit.ThreadingTimeout(self._max_total_time) as c_mgr:
-                log.debug('Starting EA with max time of {} seconds.'.format(self._max_total_time))
+            ensemble_ratio = 0.1
+            fit_time = int((1-ensemble_ratio)*self._max_total_time)
+            ensemble_time = int(ensemble_ratio*self._max_total_time)
+            with stopit.ThreadingTimeout(fit_time) as c_mgr:
+                log.debug('Starting EA with max time of {} seconds.'.format(fit_time))
                 final_pop, sdp = async_ea(self, self._n_jobs, pop, self._toolbox, X, y,
                                           cxpb=0.2, mutpb=0.8, n_evals=500000000,
                                           verbose=True, evaluation_callback=self._on_evaluation_completed)
