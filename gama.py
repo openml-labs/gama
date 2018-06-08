@@ -135,7 +135,7 @@ class Gama(object):
     def predict(self, X):
         raise NotImplemented()
 
-    def fit(self, X, y, warm_start=False, auto_ensemble_n=1):
+    def fit(self, X, y, warm_start=False, auto_ensemble_n=10):
         """ Finds and fits a model to predict target y from X.
         
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -148,7 +148,7 @@ class Gama(object):
         TODO: determine how to cut down on the amount of if-else branching in this function.
         """
 
-       if hasattr(X, 'values') and hasattr(X, 'astype'):
+        if hasattr(X, 'values') and hasattr(X, 'astype'):
             X = X.astype(np.float64).values
         if hasattr(y, 'values') and hasattr(y, 'astype'):
             y = y.astype(np.float64).values
@@ -253,6 +253,7 @@ class Gama(object):
         return new_ind,
 
     def delete_cache(self):
+        """ Removes the cache folder and all files associated to this instance. """
         if os.path.exists(self._cache_dir):
             shutil.rmtree(self._cache_dir)
 
