@@ -3,7 +3,7 @@ TODO: use scikit-learn components to create the ensemble.
 created multiple ensembles from randomly selected subset of models, and average assembles.
 """
 
-from collections import namedtuple
+from collections import namedtuple, Counter
 import os
 import pickle
 import logging
@@ -11,7 +11,7 @@ import logging
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 
-from ..ea.evaluation import string_to_metric, evaluate
+from ..ea.evaluation import string_to_metric, evaluate, Metric
 
 
 log = logging.getLogger(__name__)
@@ -92,14 +92,42 @@ class Ensemble(object):
             all_predictions = np.stack(predictions)
             return np.mean(all_predictions, axis=0)
 
+    def __str__(self):
+        # TODO add internal score and rank of pipeline
+        if self._models is None:
+            return "Ensemble with no models
+        components = Counter([m.name for m in self._models]).
+        ensemble_str = "Ensemble of {} unique pipelines.\nW\tPipeline\n".format(len(components))
+        for pipeline, count in components.items():
+            ensemble_str += "{}\t{}\n".format(count, pipeline)
+        return ensemble_str
 
-def load_predictions(cache_dir):
+    def __getstate__(self):
+        # TODO: Fix properly. Workaround for unpicklable local 'neg' functions.
+        if 'neg' in self._metric.name:
+            name, fn, *rest = self._metric
+            self._metric = Metric(name, None, *rest)
+        # capture what is normally pickled
+        state = self.__dict__.copy()
+        # what we return here will be stored in the pickle
+        return state
+
+
+def load_predictions(cache_dir, argmax_pred=True):
     models = []
     for file in os.listdir(cache_dir):
         if file.endswith('.pkl'):
             with open(os.path.join(cache_dir, file), 'rb') as fh:
                 pl, predictions, score = pickle.load(fh)
                 predictions = np.array(predictions)
+                if argmax_pred:
+                    hard_predictions = np.argmax(predictions, axis=1)
+                    positions = zip(range(len(hard_predictions)), hard_predictions)
+                    ind_predictions = np.zeros_like(predictions)
+                    for pos in positions:
+                        ind_predictions[pos] = 1
+                    predictions = ind_predictions
+
             models.append(Model(str(pl), pl, predictions))
     return models
 
