@@ -95,8 +95,8 @@ class Ensemble(object):
     def __str__(self):
         # TODO add internal score and rank of pipeline
         if self._models is None:
-            return "Ensemble with no models
-        components = Counter([m.name for m in self._models]).
+            return "Ensemble with no models."
+        components = Counter([m.name for m in self._models])
         ensemble_str = "Ensemble of {} unique pipelines.\nW\tPipeline\n".format(len(components))
         for pipeline, count in components.items():
             ensemble_str += "{}\t{}\n".format(count, pipeline)
