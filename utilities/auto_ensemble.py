@@ -1,7 +1,3 @@
-"""
-
-"""
-
 from collections import namedtuple, Counter
 import os
 import pickle
@@ -18,10 +14,15 @@ Model = namedtuple("Model", ['name', 'pipeline', 'predictions'])
 
 class Ensemble(object):
 
-    def __init__(self, model_library_directory, metric, y_true):
+    def __init__(self, metric, y_true, bagging=False,
+                 model_library=[], model_library_directory=None,
+                 shrink_on_pickle=True):
         """
+        Either model_library or model_library_directory must be specified.
+        If model_library is specified, model_library_directory is ignored.
 
         :param model_library_directory: a directory containing results of model evaluations.
+        :param model_library: A list of models from which an ensemble can be built.
         :param metric: metric to optimize the ensemble towards.
         :param y_true: the true labels for the predictions made by the models in the library.
         :param start_size: the top `start_size` models will be included at the start of ensemble building.
@@ -29,12 +30,39 @@ class Ensemble(object):
         if isinstance(metric, str):
             metric = string_to_metric(metric)
 
-        self._model_library_directory = model_library_directory
+        if model_library == [] and model_library_directory is None:
+            raise ValueError("At least one of model_library or model_library_directory must be specified.")
+
+        if model_library != [] and model_library_directory is not None:
+            log.warning("model_library_directory will be ignored because model_library is also specified.")
+
         self._metric = metric
         self._y_true = y_true
-        self._models = []
+        self._bagging = bagging
+        self._model_library_directory = model_library_directory
+        self._model_library = model_library
+        self._shrink_on_pickle = shrink_on_pickle
+
         self._fit_models = None
         self._maximize = True
+        self._child_ensembles = []
+        self._child_ensemble_model_fraction = 0.3
+        self._models = []
+
+    @property
+    def model_library(self):
+        if not self._model_library:
+            log.debug("Loading model library from disk.")
+            self._model_library = load_predictions(self._model_library_directory)
+
+            # This is a work-around because there can be multiple of the same model in the model library.
+            # This causes extra workload in non-bagging case, and breaks the bagging case (because a uniform sample
+            # is no longer guaranteed).
+            # TODO: Fix cause of this issue instead.
+            unique_model_names = {model.name for model in self._model_library}
+            self._model_library = [[model for model in self._model_library if model.name == model_name][0]
+                                   for model_name in unique_model_names]
+        return self._model_library
 
     def build(self, n_models_in_ensemble, start_size=1):
         """ Constructs an ensemble out of a library of models.
@@ -52,6 +80,24 @@ class Ensemble(object):
                                       start_size=start_size, end_size=n_models_in_ensemble)
         return self
 
+    def build_(self, n_ensembles, start_size, total_size):
+
+        for i in range(n_ensembles):
+            log.debug("Constructing ensemble {}/{}.".format(i, n_ensembles))
+
+            subset_n = int(self._child_ensemble_model_fraction * len(self.model_library))
+            model_subset_indices = np.random.choice(range(len(self.model_library)), size=subset_n, replace=False)
+            model_subset = [self.model_library[idx] for idx in model_subset_indices]
+
+            child_ensemble = Ensemble(self._metric, self._y_true, model_library=model_subset)
+            child_ensemble.build_initial_ensemble(start_size)
+            child_ensemble.add_models(total_size - start_size)
+
+            self._child_ensembles.append(child_ensemble)
+            # we combine all the weights of child models, this way we don't have to fit each individual ensemble.
+
+        self._models = [model for child_ensemble in self._child_ensembles for model in child_ensemble._models]
+
     def build_initial_ensemble(self, n):
         """ Builds an ensemble of n models, based solely on the performance of individual models, not their combined performance.
 
@@ -64,8 +110,7 @@ class Ensemble(object):
         if self._models:
             log.warning("The ensemble already contained models. Overwriting the ensemble.")
 
-        models = load_predictions(self._model_library_directory)
-        sorted_ensembles = sorted(models, key=lambda m: evaluate(self._metric, self._y_true, m.predictions))
+        sorted_ensembles = sorted(self.model_library, key=lambda m: evaluate(self._metric, self._y_true, m.predictions))
         if self._maximize:
             sorted_ensembles = reversed(sorted_ensembles)
         self._models = list(sorted_ensembles)[:n]
@@ -80,13 +125,12 @@ class Ensemble(object):
         if not n > 0:
             raise ValueError("n must be greater than 0.")
 
-        models = load_predictions(self._model_library_directory)
         ensemble = self._models
         best_ensemble = ensemble
 
         for _ in range(n):
             best_ensemble_score = -float('inf') if self._maximize else float('inf')
-            for model in models:
+            for model in self.model_library:
                 candidate_ensemble = ensemble + [model]
                 candidate_ensemble_score = evaluate_ensemble(candidate_ensemble, self._metric, self._y_true)
                 if ((self._maximize and best_ensemble_score < candidate_ensemble_score) or
@@ -157,13 +201,19 @@ class Ensemble(object):
         if 'neg' in self._metric.name:
             name, fn, *rest = self._metric
             self._metric = Metric(name, None, *rest)
-        # capture what is normally pickled
-        state = self.__dict__.copy()
-        # what we return here will be stored in the pickle
-        return state
+
+        if self._shrink_on_pickle:
+            log.info('Shrinking before pickle because shrink_on_pickle is True.'
+                     'Removing anything that is not needed for predict-functionality.'
+                     'Functionality to expand ensemble after unpickle is not available.')
+            self._models = None
+            self._model_library = None
+            self._child_ensembles = None
+
+        return self.__dict__.copy()
 
 
-def load_predictions(cache_dir, argmax_pred=True):
+def load_predictions(cache_dir, argmax_pred=False):
     models = []
     for file in os.listdir(cache_dir):
         if file.endswith('.pkl'):
