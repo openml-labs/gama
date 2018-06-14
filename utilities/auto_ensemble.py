@@ -173,7 +173,7 @@ class Ensemble(object):
             else:
                 target_prediction = model.predict(X)
                 if self._metric.is_classification:
-                    ohe_prediction = OneHotEncoder().fit_transform(target_prediction.reshape(-1, 1)).todense()
+                    ohe_prediction = OneHotEncoder(len(set(self._y_true))).fit_transform(target_prediction.reshape(-1, 1)).todense()
                     predictions.append(np.array(ohe_prediction))
                 elif self._metric.is_regression:
                     predictions.append(target_prediction)
