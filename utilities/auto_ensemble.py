@@ -2,6 +2,7 @@ from collections import namedtuple, Counter
 import os
 import pickle
 import logging
+from joblib import Parallel, delayed
 
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
@@ -9,7 +10,7 @@ from sklearn.preprocessing import OneHotEncoder
 from ..ea.evaluation import string_to_metric, evaluate, Metric
 
 log = logging.getLogger(__name__)
-Model = namedtuple("Model", ['name', 'pipeline', 'predictions'])
+Model = namedtuple("Model", ['name', 'pipeline', 'predictions', 'validation_score'])
 
 
 class Ensemble(object):
@@ -110,11 +111,42 @@ class Ensemble(object):
         if self._models:
             log.warning("The ensemble already contained models. Overwriting the ensemble.")
 
+        #sorted_ensembles = sorted(self.model_library, key=lambda m: m.validation_score)
         sorted_ensembles = sorted(self.model_library, key=lambda m: evaluate(self._metric, self._y_true, m.predictions))
         if self._maximize:
             sorted_ensembles = reversed(sorted_ensembles)
-        self._models = list(sorted_ensembles)[:n]
+
+        # Since the model library only features unique models, we do not need to check for duplicates here.
+        selected_models = list(sorted_ensembles)[:n]
+        self._models = {m.name: (m, 1) for m in selected_models}
+        log.debug("Initial ensemble created with score {}".format(
+                  evaluate(self._metric, self._y_true, self._averaged_validation_predictions())))
         return self
+
+    def _total_model_weights(self):
+        return sum([weight for (model, weight) in self._models.values()])
+
+    def _averaged_validation_predictions(self):
+        """ Get weighted average of predictions from the self._models on the hillclimb/validation set. """
+        weighted_predictions = np.stack([model.predictions * weight for (model, weight) in self._models.values()])
+        return np.sum(weighted_predictions, axis=0) / self._total_model_weights()
+
+    def evaluate_ensemble(ensemble, metric, y_true):
+        """ Evaluates the ensemble according to the metric.
+
+        Currently assumes a single prediction value (e.g. numeric response or positive class probability).
+        """
+        all_predictions = np.stack([model.predictions for model in ensemble])
+        average_predictions = np.mean(all_predictions, axis=0)
+        return evaluate(metric, y_true, average_predictions)
+
+    def _add_model(self, model):
+        """ Adds a specific model to the ensemble. """
+        if model.name in self._models:
+            model, weight = self._models[model.name]
+            self._models[model.name] = (model, weight + 1)
+        else:
+            self._models[model.name] = (model, 1)
 
     def add_models(self, n):
         """ Adds new models to the ensemble based on earlier given data.
@@ -125,21 +157,24 @@ class Ensemble(object):
         if not n > 0:
             raise ValueError("n must be greater than 0.")
 
-        ensemble = self._models
-        best_ensemble = ensemble
-
         for _ in range(n):
-            best_ensemble_score = -float('inf') if self._maximize else float('inf')
+            best_addition_score = -float('inf') if self._maximize else float('inf')
+            current_weighted_average = self._averaged_validation_predictions()
+            current_total_weight = self._total_model_weights()
             for model in self.model_library:
-                candidate_ensemble = ensemble + [model]
-                candidate_ensemble_score = evaluate_ensemble(candidate_ensemble, self._metric, self._y_true)
-                if ((self._maximize and best_ensemble_score < candidate_ensemble_score) or
-                        (not self._maximize and best_ensemble_score > candidate_ensemble_score)):
-                    best_ensemble, best_ensemble_score = candidate_ensemble, candidate_ensemble_score
-            ensemble = best_ensemble
-            log.debug('Ensemble size {} , best score: {}'.format(len(ensemble), best_ensemble_score))
+                if model.validation_score == 0:
+                    continue
+                candidate_pred = current_weighted_average + \
+                                 (model.predictions - current_weighted_average) / (current_total_weight + 1)
+                candidate_ensemble_score = evaluate(self._metric, self._y_true, candidate_pred)
+                if ((self._maximize and best_addition_score < candidate_ensemble_score) or
+                        (not self._maximize and best_addition_score > candidate_ensemble_score)):
+                    best_addition, best_addition_score = model, candidate_ensemble_score
 
-        self._models = ensemble
+            self._add_model(best_addition)
+            log.debug('Ensemble size {} , best score: {}'.format(self._total_model_weights(), best_addition_score))
+            log.debug(str(self))
+
         return self
 
     def fit(self, X, y):
@@ -152,7 +187,9 @@ class Ensemble(object):
         if not self._models:
             raise RuntimeError("You need to call `build` to select models for the ensemble, before fitting them.")
 
-        self._fit_models = [model.pipeline.fit(X, y) for model in self._models]
+
+        self._fit_models = Parallel(n_jobs=6)(delayed(fit_and_weight)
+                                              (model.pipeline, X, y, weight) for (model, weight) in self._models.values())
 
         return self
 
@@ -167,16 +204,16 @@ class Ensemble(object):
 
     def predict_proba(self, X):
         predictions = []
-        for model in self._fit_models:
+        for (model, weight) in self._fit_models:
             if hasattr(model, 'predict_proba'):
-                predictions.append(model.predict_proba(X))
+                predictions.append(model.predict_proba(X) * weight)
             else:
                 target_prediction = model.predict(X)
                 if self._metric.is_classification:
                     ohe_prediction = OneHotEncoder(len(set(self._y_true))).fit_transform(target_prediction.reshape(-1, 1)).todense()
-                    predictions.append(np.array(ohe_prediction))
+                    predictions.append(np.array(ohe_prediction) * weight)
                 elif self._metric.is_regression:
-                    predictions.append(target_prediction)
+                    predictions.append(target_prediction * weight)
                 else:
                     raise NotImplemented('Unknown task type for ensemble.')
 
@@ -184,16 +221,15 @@ class Ensemble(object):
             return predictions[0]
         else:
             all_predictions = np.stack(predictions)
-            return np.mean(all_predictions, axis=0)
+            return np.sum(all_predictions, axis=0) / self._total_model_weights()
 
     def __str__(self):
         # TODO add internal score and rank of pipeline
         if not self._models:
             return "Ensemble with no models."
-        components = Counter([m.name for m in self._models])
-        ensemble_str = "Ensemble of {} unique pipelines.\nW\tPipeline\n".format(len(components))
-        for pipeline, count in components.items():
-            ensemble_str += "{}\t{}\n".format(count, pipeline)
+        ensemble_str = "Ensemble of {} unique pipelines.\nW\tScore\tPipeline\n".format(len(self._models))
+        for (model, weight) in self._models.values():
+            ensemble_str += "{}\t{:.4f}\t{}\n".format(weight, model.validation_score, model.name)
         return ensemble_str
 
     def __getstate__(self):
@@ -209,6 +245,8 @@ class Ensemble(object):
             self._models = None
             self._model_library = None
             self._child_ensembles = None
+            # self._y_true can not be removed as it is needed to ensure proper dimensionality of predictions
+            # alternatively, one could just save the number of classes instead.
 
         return self.__dict__.copy()
 
@@ -228,18 +266,8 @@ def load_predictions(cache_dir, argmax_pred=False):
                         ind_predictions[pos] = 1
                     predictions = ind_predictions
 
-            models.append(Model(str(pl), pl, predictions))
+            models.append(Model(str(pl), pl, predictions, score))
     return models
-
-
-def evaluate_ensemble(ensemble, metric, y_true):
-    """ Evaluates the ensemble according to the metric.
-
-    Currently assumes a single prediction value (e.g. numeric response or positive class probability).
-    """
-    all_predictions = np.stack([model.predictions for model in ensemble])
-    average_predictions = np.mean(all_predictions, axis=0)
-    return evaluate(metric, y_true, average_predictions)
 
 
 def build_ensemble(models, metric, y_true, start_size=0, end_size=5, maximize=True, consider_top_n=1000):
@@ -274,3 +302,7 @@ def build_ensemble(models, metric, y_true, start_size=0, end_size=5, maximize=Tr
         log.debug('Ensemble size {} , best score: {}'.format(len(ensemble), best_ensemble_score))
 
     return best_ensemble
+
+def fit_and_weight(pipeline, X, y, weight):
+    pipeline.fit(X, y)
+    return (pipeline, weight)
