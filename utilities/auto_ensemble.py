@@ -15,34 +15,36 @@ Model = namedtuple("Model", ['name', 'pipeline', 'predictions', 'validation_scor
 
 class Ensemble(object):
 
-    def __init__(self, metric, y_true, bagging=False,
-                 model_library=[], model_library_directory=None,
-                 shrink_on_pickle=True):
+    def __init__(self, metric, y_true,
+                 model_library=None, model_library_directory=None,
+                 shrink_on_pickle=True, n_jobs=1):
         """
         Either model_library or model_library_directory must be specified.
         If model_library is specified, model_library_directory is ignored.
 
-        :param model_library_directory: a directory containing results of model evaluations.
-        :param model_library: A list of models from which an ensemble can be built.
         :param metric: metric to optimize the ensemble towards.
         :param y_true: the true labels for the predictions made by the models in the library.
-        :param start_size: the top `start_size` models will be included at the start of ensemble building.
+        :param model_library: A list of models from which an ensemble can be built.
+        :param model_library_directory: a directory containing results of model evaluations.
+        :param shrink_on_pickle: if True, remove memory-intensive attributes that are required during fit,
+                                 but not predict, before pickling
+        :param n_jobs: the number of jobs to run in parallel when fitting the final ensemble.
         """
         if isinstance(metric, str):
             metric = string_to_metric(metric)
 
-        if model_library == [] and model_library_directory is None:
+        if model_library is None and model_library_directory is None:
             raise ValueError("At least one of model_library or model_library_directory must be specified.")
 
-        if model_library != [] and model_library_directory is not None:
+        if model_library is not None and model_library_directory is not None:
             log.warning("model_library_directory will be ignored because model_library is also specified.")
 
         self._metric = metric
         self._y_true = y_true
-        self._bagging = bagging
         self._model_library_directory = model_library_directory
-        self._model_library = model_library
+        self._model_library = model_library if model_library is not None else []
         self._shrink_on_pickle = shrink_on_pickle
+        self._n_jobs = n_jobs
 
         self._fit_models = None
         self._maximize = True
@@ -188,8 +190,8 @@ class Ensemble(object):
             raise RuntimeError("You need to call `build` to select models for the ensemble, before fitting them.")
 
 
-        self._fit_models = Parallel(n_jobs=6)(delayed(fit_and_weight)
-                                              (model.pipeline, X, y, weight) for (model, weight) in self._models.values())
+        self._fit_models = Parallel(n_jobs=self._n_jobs)(delayed(fit_and_weight)
+                                   (model.pipeline, X, y, weight) for (model, weight) in self._models.values())
 
         return self
 
