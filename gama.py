@@ -187,16 +187,12 @@ class Gama(object):
             ensemble_time = int(ensemble_ratio*self._max_total_time)
             with stopit.ThreadingTimeout(fit_time) as c_mgr:
                 log.debug('Starting EA with max time of {} seconds.'.format(fit_time))
-                #final_pop, sdp = async_ea(self._objectives, self._n_jobs, pop, self._toolbox,
-                #                          cxpb=0.2, mutpb=0.8, n_evals=500000000,
-                #                          verbose=True, evaluation_callback=self._on_evaluation_completed)
-
                 final_pop, sdp = async_ea(self._objectives,
                                           pop,
                                           self._toolbox,
                                           evaluation_callback=self._on_evaluation_completed,
                                           n_evaluations=10000,
-                                          n_threads=1)
+                                          n_jobs=self._n_jobs)
                 self._final_pop = final_pop
                 self._ = sdp
         except KeyboardInterrupt:
