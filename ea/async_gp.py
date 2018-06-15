@@ -14,7 +14,7 @@ from ..utilities.mp_logger import MultiprocessingLogger
 log = logging.getLogger(__name__)
 
 
-def evaluator_daemon(input_queue, output_queue, fn, shutdown, seed=0):
+def evaluator_daemon(input_queue, output_queue, fn, shutdown, seed=0, print_exit_message=False):
     random.seed(seed)
     np.random.seed(seed)
 
@@ -29,54 +29,10 @@ def evaluator_daemon(input_queue, output_queue, fn, shutdown, seed=0):
         shutdown_message = 'Helper process stopping due to keyboard interrupt.'
     except (BrokenPipeError, EOFError):
         shutdown_message = 'Helper process stopping due to a broken pipe or EOF.'
-        
-    print(shutdown_message)
 
+    if print_exit_message:
+        print(shutdown_message)
 
-#def async_ea(self, n_threads=1, *args, **kwargs):
-#    if n_threads == 1:
-#        return async_ea_sequential(self, *args, **kwargs)
-#    else:
-#        return async_ea_parallel(self, n_threads, *args, **kwargs)
-
-
-def async_ea_sequential(objectives, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, evaluation_callback=None):
-    log.info('Starting sequential asynchronous algorithm.')
-    max_pop_size = len(pop)
-    running_pop = []
-
-    for i in range(n_evals):
-        log.debug(i)
-        if i < len(pop):
-            ind = pop[i]
-        else:
-            for _ in range(50):
-                ind, = offspring_mate_and_mutate(running_pop, toolbox, cxpb, mutpb, n=1)[0]
-                if str(ind) not in self._evaluated_individuals:
-                    break
-
-        comp_ind = toolbox.compile(ind)
-        if comp_ind is None:
-            log.debug('Invalid individual generated, assigning worst fitness.')
-            fitness = (-float('inf'),)
-        else:
-            score, eval_time = toolbox.evaluate(comp_ind)
-
-        if objectives[1] == 'size':
-            fitness = (score, automl_gp.pipeline_length(ind))
-        ind.fitness.values = fitness
-        ind.fitness.time = eval_time
-        if evaluation_callback:
-            evaluation_callback(ind)
-
-        # Add to population
-        running_pop.append(ind)
-
-        # Shrink population if needed
-        if len(running_pop) > max_pop_size:
-                ind_to_replace = select_to_replace(running_pop, len(self._objectives))
-                running_pop.remove(ind_to_replace)
-    return running_pop, None
 
 class EvaluationDispatcher(object):
 
@@ -135,9 +91,9 @@ class EvaluationDispatcher(object):
         self._shutdown = True
 
 
-def async_ea(objectives, population, toolbox, evaluation_callback=None, n_evaluations=10000, n_threads=1):
+def async_ea(objectives, population, toolbox, evaluation_callback=None, n_evaluations=10000, n_jobs=1):
     logger = MultiprocessingLogger()
-    evaluation_dispatcher = EvaluationDispatcher(n_threads, partial(toolbox.evaluate, logger=logger), toolbox)
+    evaluation_dispatcher = EvaluationDispatcher(n_jobs, partial(toolbox.evaluate, logger=logger), toolbox)
     try:
         evaluation_dispatcher.start()
         # while improvements
@@ -171,7 +127,7 @@ def async_ea(objectives, population, toolbox, evaluation_callback=None, n_evalua
             if len(current_population) > 1:
                 new_individual = toolbox.create(current_population, 1)[0]
                 evaluation_dispatcher.queue_evaluation(new_individual)
-            
+
     except KeyboardInterrupt:
         log.info('Shutting down EA due to KeyboardInterrupt.')
         # No need to communicate to processes since they also handle the KeyboardInterrupt directly.
@@ -183,96 +139,3 @@ def async_ea(objectives, population, toolbox, evaluation_callback=None, n_evalua
 
     evaluation_dispatcher.shut_down()
     return current_population, evaluation_dispatcher
-
-
-def async_ea_parallel(objectives, n_threads, pop, toolbox, cxpb=0.2, mutpb=0.8, n_evals=300, evaluation_callback=None, verbose=True):
-    log.info('Setting up additional processes for parallel asynchronous algorithm.')
-    mp_manager = mp.Manager()
-    input_queue = mp_manager.Queue()
-    output_queue = mp_manager.Queue()
-    mp_logger = MultiprocessingLogger()
-    shutdown = mp_manager.Value('shutdown', False)
-
-    n_processes = n_threads
-    max_pop_size = len(pop)
-    running_pop = []
-    
-    comp_ind_map = {}
-    evaluate_fn = partial(toolbox.evaluate, logger=mp_logger)
-    for _ in range(n_processes):
-        p = mp.Process(target=evaluator_daemon, args=(input_queue, output_queue, evaluate_fn, shutdown))
-        p.daemon = True
-        p.start()
-
-    log.info('Processes set up. Commencing asynchronous algorithm.')
-    try:
-        for ind in pop:
-            comp_ind = toolbox.compile(ind)
-            comp_ind_map[str(comp_ind)] = ind
-            input_queue.put((str(comp_ind), comp_ind))
-
-        for i in range(n_evals):
-            received_evaluation = False
-            last_get_successful = True
-            while not received_evaluation:
-                try:
-                    # If we just used the blocking queue.get, then KeyboardInterrupts/Timeout would not work.
-                    # Previously, specifying a timeout worked, but for some reason that seems no longer the case.
-                    # Using timeout prevents the stopit.Timeout exception from being received.
-                    # When waiting with sleep, we don't want to wait too long, but we never know when a pipeline
-                    # would finish evaluating.
-                    if not last_get_successful:
-                        time.sleep(0.1)  # seconds
-                    comp_ind_str, fitness = output_queue.get(block=False)
-                    received_evaluation = True
-                except queue.Empty:
-                    last_get_successful = False
-                    continue
-
-            mp_logger.flush_to_log(log)
-            #log.debug('Evaluated {} individuals.'.format(i))
-
-            individual = comp_ind_map[comp_ind_str]
-            score, evaluation_time, length = fitness
-            if len(objectives) == 1:
-                individual.fitness.values = (score,)
-            elif objectives[1] == 'time':
-                individual.fitness.values = (score, evaluation_time)
-            elif objectives[1] == 'size':
-                individual.fitness.values = (score, length)
-
-            individual.fitness.time = evaluation_time
-
-            if evaluation_callback:
-                evaluation_callback(individual)
-
-            # Add to population
-            running_pop.append(individual)
-
-            # Shrink population if needed
-            if len(running_pop) > max_pop_size:
-                ind_to_replace = select_to_replace(running_pop, len(self._objectives))
-                running_pop.remove(ind_to_replace)
-
-            # Create new individual if needed - or do we just always queue?
-            if len(running_pop) < 2:
-                ind = toolbox.individual()
-            else:
-                ind, = offspring_mate_and_mutate(running_pop, toolbox, cxpb, mutpb, n=1)[0]
-            comp_ind = toolbox.compile(ind)
-            comp_ind_map[str(comp_ind)] = ind
-            input_queue.put((str(comp_ind), comp_ind))
-
-        shutdown.value = True
-        
-    except KeyboardInterrupt:
-        log.info('Shutting down EA due to KeyboardInterrupt.')
-        # No need to communicate to processes since they also handle the KeyboardInterrupt directly.
-    except Exception:
-        log.error('Unexpected exception in asynchronous parallel algorithm.', exc_info=True)
-        # Even in the event of an error we want the helper processes to shut down.
-        shutdown.value = True
-        raise
-
-    return running_pop, shutdown
-
