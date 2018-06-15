@@ -79,6 +79,78 @@ def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=3
                 running_pop.remove(ind_to_replace)
     return running_pop, None
 
+class EvaluationDispatcher(object):
+
+    def __init__(self, n_jobs, evaluate_fn):
+        mp_manager = mp.Manager()
+        self._input_queue = mp_manager.Queue()
+        self._output_queue = mp_manager.Queue()
+        self._shutdown = mp_manager.Value('shutdown', False)
+
+        self._subscribers = []
+        self._job_map = {}
+        for _ in range(n_jobs):
+            p = mp.Process(target=evaluator_daemon,
+                           args=(self._input_queue, self._output_queue, evaluate_fn, self._shutdown))
+            p.daemon = True
+            p.start()
+
+    def queue_evaluation(self, individual):
+        comp_ind = toolbox.compile(individual)
+        self._job_map[str(comp_ind)] = individual
+        self._input_queue.put((str(comp_ind), comp_ind))
+
+    def get_next_result(self):
+        # If we just used the blocking queue.get, then KeyboardInterrupts/Timeout would not work.
+        # Previously, specifying a timeout worked, but for some reason that seems no longer the case.
+        # Using timeout prevents the stopit.Timeout exception from being received.
+        # When waiting with sleep, we don't want to wait too long, but we never know when a pipeline
+        # would finish evaluating.
+        last_get_successful = True
+        while True:
+            try:
+                if not last_get_successful:
+                    time.sleep(0.1)  # seconds
+
+                comp_ind_str, fitness = self._output_queue.get(block=False)
+                return self._job_map[comp_ind_str], fitness
+
+            except queue.Empty:
+                last_get_successful = False
+                continue
+
+"""
+def async_ea(objectives, population):
+    # set up processes
+    log.info('Setting up additional processes for parallel asynchronous algorithm.')
+    evaluation_dispatcher = EvaluationDispatcher(n_threads, partial(toolbox.evaluate, logger=mp_logger))
+    log.info('Processes set up. Commencing asynchronous algorithm.')
+    # while improvements
+    # queue initial
+    for ind in population:
+        evaluation_dispatcher.queue_evaluation(ind)
+    # run ea
+    for _ in range(n_evals):
+        individual, output = evaluation_dispatcher.get_next_result()
+        score, time, size = output
+        if objectives[1] == 'size':
+            (score, size)
+        elif objectives[1] == 'time':
+            (score, time)
+        if self._objectives[1] == 'size':
+            eval_time = fitness[1]
+            fitness = (fitness[0], automl_gp.pipeline_length(ind))
+        individual.fitness.values = fitness
+        individual.fitness.time = eval_time
+
+        if evaluation_callback:
+            evaluation_callback(individual)
+        # create new individual
+
+        evaluation_dispatcher.queue_evaluation(new_individual)
+"""
+
+
 
 def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, evaluation_callback=None, verbose=True):
     log.info('Setting up additional processes for parallel asynchronous algorithm.')
@@ -105,7 +177,7 @@ def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, 
             comp_ind = toolbox.compile(ind)
             comp_ind_map[str(comp_ind)] = ind
             input_queue.put((str(comp_ind), comp_ind))
-        
+
         for i in range(n_evals):
             received_evaluation = False
             last_get_successful = True
@@ -123,10 +195,10 @@ def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, 
                 except queue.Empty:
                     last_get_successful = False
                     continue
-            
+
             mp_logger.flush_to_log(log)
-            log.debug('Evaluated {} individuals.'.format(i))
-                
+            #log.debug('Evaluated {} individuals.'.format(i))
+
             individual = comp_ind_map[comp_ind_str]
             if self._objectives[1] == 'size':
                 eval_time = fitness[1]
@@ -135,15 +207,15 @@ def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, 
             individual.fitness.time = eval_time
             if evaluation_callback:
                 evaluation_callback(individual)
-            
+
             # Add to population
             running_pop.append(individual)
-            
-            # Shrink population if needed        
+
+            # Shrink population if needed
             if len(running_pop) > max_pop_size:
                 ind_to_replace = select_to_replace(running_pop, len(self._objectives))
                 running_pop.remove(ind_to_replace)
-            
+
             # Create new individual if needed - or do we just always queue?
             if len(running_pop) < 2:
                 ind = toolbox.individual()
@@ -152,7 +224,7 @@ def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, 
             comp_ind = toolbox.compile(ind)
             comp_ind_map[str(comp_ind)] = ind
             input_queue.put((str(comp_ind), comp_ind))
-        
+
         shutdown.value = True
         
     except KeyboardInterrupt:
@@ -163,7 +235,7 @@ def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, 
         # Even in the event of an error we want the helper processes to shut down.
         shutdown.value = True
         raise
-        
+
     return running_pop, shutdown
 
 
