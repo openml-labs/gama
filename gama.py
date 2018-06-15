@@ -193,9 +193,16 @@ class Gama(object):
             print('Terminated because maximum time has elapsed.')
 
         if len(self._observer._individuals) > 0:
-            self.ensemble = Ensemble(self._cache_dir, self._scoring_function, y)
+            self.ensemble = Ensemble(self._scoring_function, y, model_library_directory=self._cache_dir)
             log.debug('Building ensemble.')
-            self.ensemble.build(n_models_in_ensemble=auto_ensemble_n)
+            if auto_ensemble_n <= 5:
+                self.ensemble.build_initial_ensemble(1)
+            else:
+                self.ensemble.build_initial_ensemble(5)
+
+            remainder = auto_ensemble_n - self.ensemble._total_model_weights()
+            if remainder > 0:
+                self.ensemble.add_models(remainder)
             log.debug('Fitting ensemble.')
             self.ensemble.fit(X, y)
         else:
