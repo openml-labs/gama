@@ -10,7 +10,7 @@ import uuid
 import time
 
 import numpy as np
-from deap import gp
+from deap import gp, tools
 import sklearn
 from sklearn.pipeline import Pipeline
 import stopit
@@ -249,6 +249,7 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
                 pickle.dump((pl, prediction, score), fh)
 
     evaluation_time = time.process_time() - start
+    pipeline_length = len(pl.steps)
     
     if c_mgr.state == c_mgr.INTERRUPTED:
         # A TimeoutException was raised, but not by the context manager.
@@ -258,10 +259,10 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
 
     if not c_mgr:
         # For now we treat a eval timeout the same way as e.g. NaN exceptions.
-        fitness_values = (-float("inf"), timeout)
+        fitness_values = (-float("inf"), timeout, pipeline_length)
         logger.info("Timeout after {}s: {}".format(timeout, pl))
     else:
-        fitness_values = (score, evaluation_time)
+        fitness_values = (score, evaluation_time, pipeline_length)
 
     return fitness_values
 
@@ -295,6 +296,28 @@ def random_valid_mutation(ind, pset):
         return mut_fn(ind, pset)
 
 
-def pipeline_length(individual):
+def individual_length(individual):
     """ Gives a measure for the length of the pipeline. Currently, this is the number of primitives. """
     return len([el for el in individual if isinstance(el, gp.Primitive)])
+
+
+def eliminate_NSGA(pop, n):
+    return tools.selNSGA2(pop, k=len(pop))[-n:]
+
+
+def eliminate_worst(pop, n):
+    return list(sorted(pop, key=lambda x: x.fitness.wvalues[0]))[-n:]
+
+
+def offspring_mate_and_mutate(pop, n, cxpb, mutpb, toolbox):
+    """ Creates n new individuals based on the population. Can apply both crossover and mutation. """
+    offspring = []
+    for _ in range(n):
+        ind1, ind2 = np.random.choice(range(len(pop)), size=2, replace=False)
+        ind1, ind2 = toolbox.clone(pop[ind1]), toolbox.clone(pop[ind2])
+        if np.random.random() < cxpb:
+            ind1, ind2 = toolbox.mate(ind1, ind2)
+        if np.random.random() < mutpb:
+            ind1, = toolbox.mutate(ind1)
+        offspring.append(ind1)
+    return offspring

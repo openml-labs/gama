@@ -33,14 +33,14 @@ def evaluator_daemon(input_queue, output_queue, fn, shutdown, seed=0):
     print(shutdown_message)
 
 
-def async_ea(self, n_threads=1, *args, **kwargs):
-    if n_threads == 1:
-        return async_ea_sequential(self, *args, **kwargs)
-    else:
-        return async_ea_parallel(self, n_threads, *args, **kwargs)
+#def async_ea(self, n_threads=1, *args, **kwargs):
+#    if n_threads == 1:
+#        return async_ea_sequential(self, *args, **kwargs)
+#    else:
+#        return async_ea_parallel(self, n_threads, *args, **kwargs)
 
 
-def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, evaluation_callback=None):
+def async_ea_sequential(objectives, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, verbose=True, evaluation_callback=None):
     log.info('Starting sequential asynchronous algorithm.')
     max_pop_size = len(pop)
     running_pop = []
@@ -62,11 +62,10 @@ def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=3
         else:
             score, eval_time = toolbox.evaluate(comp_ind)
 
-        if self._objectives[1] == 'size':
+        if objectives[1] == 'size':
             fitness = (score, automl_gp.pipeline_length(ind))
         ind.fitness.values = fitness
         ind.fitness.time = eval_time
-        self._evaluated_individuals[str(ind)] = fitness
         if evaluation_callback:
             evaluation_callback(ind)
 
@@ -81,22 +80,28 @@ def async_ea_sequential(self, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=3
 
 class EvaluationDispatcher(object):
 
-    def __init__(self, n_jobs, evaluate_fn):
+    def __init__(self, n_jobs, evaluate_fn, toolbox):
         mp_manager = mp.Manager()
         self._input_queue = mp_manager.Queue()
         self._output_queue = mp_manager.Queue()
         self._shutdown = mp_manager.Value('shutdown', False)
+        self._n_jobs = n_jobs
+        self._evaluate_fn = evaluate_fn
+        self._toolbox = toolbox
 
         self._subscribers = []
         self._job_map = {}
-        for _ in range(n_jobs):
+
+    def start(self):
+        log.info('Setting up additional processes for parallel asynchronous evaluations.')
+        for _ in range(self._n_jobs):
             p = mp.Process(target=evaluator_daemon,
-                           args=(self._input_queue, self._output_queue, evaluate_fn, self._shutdown))
+                           args=(self._input_queue, self._output_queue, self._evaluate_fn, self._shutdown))
             p.daemon = True
             p.start()
 
     def queue_evaluation(self, individual):
-        comp_ind = toolbox.compile(individual)
+        comp_ind = self._toolbox.compile(individual)
         self._job_map[str(comp_ind)] = individual
         self._input_queue.put((str(comp_ind), comp_ind))
 
@@ -119,40 +124,68 @@ class EvaluationDispatcher(object):
                 last_get_successful = False
                 continue
 
-"""
-def async_ea(objectives, population):
-    # set up processes
-    log.info('Setting up additional processes for parallel asynchronous algorithm.')
-    evaluation_dispatcher = EvaluationDispatcher(n_threads, partial(toolbox.evaluate, logger=mp_logger))
-    log.info('Processes set up. Commencing asynchronous algorithm.')
-    # while improvements
-    # queue initial
-    for ind in population:
-        evaluation_dispatcher.queue_evaluation(ind)
-    # run ea
-    for _ in range(n_evals):
-        individual, output = evaluation_dispatcher.get_next_result()
-        score, time, size = output
-        if objectives[1] == 'size':
-            (score, size)
-        elif objectives[1] == 'time':
-            (score, time)
-        if self._objectives[1] == 'size':
-            eval_time = fitness[1]
-            fitness = (fitness[0], automl_gp.pipeline_length(ind))
-        individual.fitness.values = fitness
-        individual.fitness.time = eval_time
+    def cancel_all_evaluations(self):
+        while True:
+            try:
+                self._input_queue.get(block=False)
+            except queue.Empty:
+                break
 
-        if evaluation_callback:
-            evaluation_callback(individual)
-        # create new individual
-
-        evaluation_dispatcher.queue_evaluation(new_individual)
-"""
+    def shut_down(self):
+        self._shutdown = True
 
 
+def async_ea(objectives, population, toolbox, evaluation_callback=None, n_evaluations=10000, n_threads=1):
+    logger = MultiprocessingLogger()
+    evaluation_dispatcher = EvaluationDispatcher(n_threads, partial(toolbox.evaluate, logger=logger), toolbox)
+    try:
+        evaluation_dispatcher.start()
+        # while improvements
+        log.info('Starting ')
+        for ind in population:
+            evaluation_dispatcher.queue_evaluation(ind)
+        # run ea
+        max_population_size = len(population)
+        current_population = []
+        for _ in range(n_evaluations):
+            individual, output = evaluation_dispatcher.get_next_result()
+            score, evaluation_time, length = output
+            if len(objectives) == 1:
+                individual.fitness.values = (score,)
+            elif objectives[1] == 'time':
+                individual.fitness.values = (score, evaluation_time)
+            elif objectives[1] == 'size':
+                individual.fitness.values = (score, length)
+            individual.fitness.time = evaluation_time
 
-def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, n_evals=300, evaluation_callback=None, verbose=True):
+            logger.flush_to_log(log)
+            if evaluation_callback:
+                evaluation_callback(individual)
+
+            # TODO: Measure improvements, possibly restart.
+
+            current_population.append(individual)
+            if len(current_population) > max_population_size:
+                current_population = toolbox.eliminate(current_population, 1)
+
+            if len(current_population) > 1:
+                new_individual = toolbox.create(current_population, 1)[0]
+                evaluation_dispatcher.queue_evaluation(new_individual)
+            
+    except KeyboardInterrupt:
+        log.info('Shutting down EA due to KeyboardInterrupt.')
+        # No need to communicate to processes since they also handle the KeyboardInterrupt directly.
+    except Exception:
+        log.error('Unexpected exception in asynchronous parallel algorithm.', exc_info=True)
+        # Even in the event of an error we want the helper processes to shut down.
+        evaluation_dispatcher.shut_down()
+        raise
+
+    evaluation_dispatcher.shut_down()
+    return current_population, evaluation_dispatcher
+
+
+def async_ea_parallel(objectives, n_threads, pop, toolbox, cxpb=0.2, mutpb=0.8, n_evals=300, evaluation_callback=None, verbose=True):
     log.info('Setting up additional processes for parallel asynchronous algorithm.')
     mp_manager = mp.Manager()
     input_queue = mp_manager.Queue()
@@ -200,11 +233,16 @@ def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, 
             #log.debug('Evaluated {} individuals.'.format(i))
 
             individual = comp_ind_map[comp_ind_str]
-            if self._objectives[1] == 'size':
-                eval_time = fitness[1]
-                fitness = (fitness[0], automl_gp.pipeline_length(ind))
-            individual.fitness.values = fitness
-            individual.fitness.time = eval_time
+            score, evaluation_time, length = fitness
+            if len(objectives) == 1:
+                individual.fitness.values = (score,)
+            elif objectives[1] == 'time':
+                individual.fitness.values = (score, evaluation_time)
+            elif objectives[1] == 'size':
+                individual.fitness.values = (score, length)
+
+            individual.fitness.time = evaluation_time
+
             if evaluation_callback:
                 evaluation_callback(individual)
 
@@ -238,24 +276,3 @@ def async_ea_parallel(self, n_threads, pop, toolbox, X, y, cxpb=0.2, mutpb=0.8, 
 
     return running_pop, shutdown
 
-
-def offspring_mate_and_mutate(pop, toolbox, cxpb, mutpb, n, always_return_list=False):
-    """ Creates n new individuals based on the population. Can apply both crossover and mutation. """
-    offspring = []
-    for _ in range(n):
-        ind1, ind2 = np.random.choice(range(len(pop)), size=2, replace=False)
-        ind1, ind2 = toolbox.clone(pop[ind1]), toolbox.clone(pop[ind2])
-        if np.random.random() < cxpb:
-            ind1, ind2 = toolbox.mate(ind1, ind2)
-        if np.random.random() < mutpb:
-            ind1, = toolbox.mutate(ind1)
-        offspring.append((ind1,))
-    return offspring
-
-
-def select_to_replace(pop, nr_objectives):
-    """ Selects individual in population to replace. """
-    if nr_objectives == 1:
-        return min(pop, key=lambda x: x.fitness.values[0])
-    elif nr_objectives == 2:
-        return tools.selNSGA2(pop, k=len(pop))[-1]

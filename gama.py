@@ -4,6 +4,7 @@ import os
 from collections import defaultdict
 import datetime
 import shutil
+from functools import partial
 
 import numpy as np
 from deap import base, creator, tools, gp
@@ -104,10 +105,15 @@ class Gama(object):
 
         self._toolbox.register("mutate", self._random_valid_mutation_try_new)
 
+        create = partial(automl_gp.offspring_mate_and_mutate, toolbox=self._toolbox, cxpb=0.2, mutpb=0.8)
+        self._toolbox.register("create", create)
+
         if len(self._objectives) == 1:
             self._toolbox.register("select", tools.selTournament, tournsize=3)
+            self._toolbox.register("eliminate", automl_gp.eliminate_worst)
         elif len(self._objectives) == 2:
             self._toolbox.register("select", tools.selNSGA2)
+            self._toolbox.register("eliminate", automl_gp.eliminate_NSGA)
         else:
             raise ValueError('Objectives must be a tuple of length at most 2.')
 
@@ -181,9 +187,16 @@ class Gama(object):
             ensemble_time = int(ensemble_ratio*self._max_total_time)
             with stopit.ThreadingTimeout(fit_time) as c_mgr:
                 log.debug('Starting EA with max time of {} seconds.'.format(fit_time))
-                final_pop, sdp = async_ea(self, self._n_jobs, pop, self._toolbox, X, y,
-                                          cxpb=0.2, mutpb=0.8, n_evals=500000000,
-                                          verbose=True, evaluation_callback=self._on_evaluation_completed)
+                #final_pop, sdp = async_ea(self._objectives, self._n_jobs, pop, self._toolbox,
+                #                          cxpb=0.2, mutpb=0.8, n_evals=500000000,
+                #                          verbose=True, evaluation_callback=self._on_evaluation_completed)
+
+                final_pop, sdp = async_ea(self._objectives,
+                                          pop,
+                                          self._toolbox,
+                                          evaluation_callback=self._on_evaluation_completed,
+                                          n_evaluations=10000,
+                                          n_threads=1)
                 self._final_pop = final_pop
                 self._ = sdp
         except KeyboardInterrupt:
