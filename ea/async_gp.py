@@ -37,6 +37,9 @@ def evaluator_daemon(input_queue, output_queue, fn, shutdown, seed=0, print_exit
 class EvaluationDispatcher(object):
 
     def __init__(self, n_jobs, evaluate_fn, toolbox):
+        if n_jobs <= 0:
+            raise ValueError("n_jobs must be at least 1.")
+
         mp_manager = mp.Manager()
         self._input_queue = mp_manager.Queue()
         self._output_queue = mp_manager.Queue()
@@ -45,6 +48,7 @@ class EvaluationDispatcher(object):
         self._evaluate_fn = evaluate_fn
         self._toolbox = toolbox
 
+        self._outstanding_job_counter = 0
         self._subscribers = []
         self._job_map = {}
 
@@ -60,8 +64,9 @@ class EvaluationDispatcher(object):
         comp_ind = self._toolbox.compile(individual)
         self._job_map[str(comp_ind)] = individual
         self._input_queue.put((str(comp_ind), comp_ind))
+        self._outstanding_job_counter += 1
 
-    def get_next_result(self):
+    def _get_next_from_daemons(self):
         # If we just used the blocking queue.get, then KeyboardInterrupts/Timeout would not work.
         # Previously, specifying a timeout worked, but for some reason that seems no longer the case.
         # Using timeout prevents the stopit.Timeout exception from being received.
@@ -79,6 +84,20 @@ class EvaluationDispatcher(object):
             except queue.Empty:
                 last_get_successful = False
                 continue
+
+    def get_next_result(self):
+        if self._outstanding_job_counter <= 0:
+            raise ValueError("You have to queue an evaluation for each time you call this function.")
+        else:
+            self._outstanding_job_counter -= 1
+
+        if self._n_jobs > 1:
+            return self._get_next_from_daemons()
+        else:
+            # For n_jobs = 1, we do not want to spawn a separate process. Mimic behaviour.
+            identifier, input_ = self._input_queue.get()
+            output = self._evaluate_fn(input_)
+            return self._job_map[identifier], output
 
     def cancel_all_evaluations(self):
         while True:
