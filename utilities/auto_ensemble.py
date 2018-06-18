@@ -175,7 +175,7 @@ class Ensemble(object):
 
             self._add_model(best_addition)
             log.debug('Ensemble size {} , best score: {}'.format(self._total_model_weights(), best_addition_score))
-            log.debug(str(self))
+            #log.debug(str(self))
 
         return self
 
@@ -206,7 +206,12 @@ class Ensemble(object):
 
     def predict_proba(self, X):
         predictions = []
+
         for (model, weight) in self._fit_models:
+            if weight == 0:
+                # This happens if fitting the pipeline failed.
+                continue
+
             if hasattr(model, 'predict_proba'):
                 predictions.append(model.predict_proba(X) * weight)
             else:
@@ -223,7 +228,8 @@ class Ensemble(object):
             return predictions[0]
         else:
             all_predictions = np.stack(predictions)
-            return np.sum(all_predictions, axis=0) / self._total_model_weights()
+            actual_weight_sum = sum(map(lambda x: x[1], self._fit_models))
+            return np.sum(all_predictions, axis=0) / actual_weight_sum
 
     def __str__(self):
         # TODO add internal score and rank of pipeline
@@ -305,6 +311,13 @@ def build_ensemble(models, metric, y_true, start_size=0, end_size=5, maximize=Tr
 
     return best_ensemble
 
+
 def fit_and_weight(pipeline, X, y, weight):
-    pipeline.fit(X, y)
-    return (pipeline, weight)
+    try:
+        pipeline.fit(X, y)
+    except Exception:
+        log.warning("Exception when fitting pipeline {} of the ensemble. Assigning weight of 0.".format(pipeline),
+                    exc_info=True)
+        weight = 0
+
+    return pipeline, weight

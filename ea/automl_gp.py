@@ -239,6 +239,7 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
         try:
             prediction, score = cross_val_predict_score(pl, X, y, cv=cv, scoring=scoring)
         except stopit.TimeoutException:
+            score = -float("inf")
             raise
         except KeyboardInterrupt:
             raise
