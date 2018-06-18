@@ -42,7 +42,11 @@ class Gama(object):
                  n_jobs=1,
                  verbosity=None,
                  cache_dir=None):
-        log.debug('Using GAMA version {}.'.format(__version__))
+        log.info('Using GAMA version {}.'.format(__version__))
+        log.info('{}({})'.format(
+            self.__class__.__name__,
+            ','.join(['{}={}'.format(k, v) for (k, v) in locals().items() if k not in ['self', 'config']])
+        ))
 
         if len(objectives) != len(optimize_strategy):
             error_message = "Length of objectives should match length of optimize_strategy. " \
@@ -137,7 +141,7 @@ class Gama(object):
     def predict(self, X):
         raise NotImplemented()
 
-    def fit(self, X, y, warm_start=False, auto_ensemble_n=10):
+    def fit(self, X, y, warm_start=False, auto_ensemble_n=10, restart_=False):
         """ Finds and fits a model to predict target y from X.
         
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -155,6 +159,8 @@ class Gama(object):
         if hasattr(y, 'values') and hasattr(y, 'astype'):
             y = y.astype(np.float64).values
 
+        log.debug('fit(). Shapes X: {}({}), y: {}({}).'.format(X.shape, np.isnan(X).any(), y.shape, np.isnan(y).any()))
+
         # For now there is no support for semi-supervised learning, so remove all instances with unknown targets.
         nan_targets = np.isnan(y)
         if nan_targets.any():
@@ -168,6 +174,7 @@ class Gama(object):
         if np.isnan(X).any():
             X = self._imputer.transform(X)
 
+        log.debug('fit-data. Shapes X: {}({}), y: {}({}).'.format(X.shape, np.isnan(X).any(), y.shape, np.isnan(y).any()))
         self._fit_data = (X, y)
 
         if warm_start and self._final_pop is not None:
@@ -187,10 +194,20 @@ class Gama(object):
             ensemble_time = int(ensemble_ratio*self._max_total_time)
             with stopit.ThreadingTimeout(fit_time) as c_mgr:
                 log.debug('Starting EA with max time of {} seconds.'.format(fit_time))
+
+                def restart_critera():
+                    restart = self._observer._individuals_since_last_pareto_update > 400
+                    if restart and restart_:
+                        self._observer._individuals_since_last_pareto_update = 0
+                        self._observer._pareto_front._front = []
+                        print("=== Restart ===")
+                    return restart and restart_
+
                 final_pop, sdp = async_ea(self._objectives,
                                           pop,
                                           self._toolbox,
                                           evaluation_callback=self._on_evaluation_completed,
+                                          restart_callback=restart_critera,
                                           n_evaluations=10000,
                                           n_jobs=self._n_jobs)
                 self._final_pop = final_pop
@@ -204,15 +221,16 @@ class Gama(object):
         if len(self._observer._individuals) > 0:
             self.ensemble = Ensemble(self._scoring_function, y, model_library_directory=self._cache_dir)
             log.debug('Building ensemble.')
-            if auto_ensemble_n <= 5:
+            if auto_ensemble_n <= 10:
                 self.ensemble.build_initial_ensemble(1)
             else:
-                self.ensemble.build_initial_ensemble(5)
+                self.ensemble.build_initial_ensemble(10)
 
             remainder = auto_ensemble_n - self.ensemble._total_model_weights()
             if remainder > 0:
                 self.ensemble.add_models(remainder)
             log.debug('Fitting ensemble.')
+            log.debug('fit-data. Shapes X: {}({}), y: {}({}).'.format(X.shape, np.isnan(X).any(), y.shape, np.isnan(y).any()))
             self.ensemble.fit(X, y)
         else:
             print('No pipeline evaluated.')
@@ -258,8 +276,18 @@ class Gama(object):
 
     def delete_cache(self):
         """ Removes the cache folder and all files associated to this instance. """
+        # would use shutil.rmtree(self._cache_dir) but it gives an error if a file is placed in the folder while
+        # it is deleting files.
         if os.path.exists(self._cache_dir):
-            shutil.rmtree(self._cache_dir)
+            is_deleted = False
+            while not is_deleted:
+                try:
+                    for f in os.listdir(self._cache_dir):
+                        os.remove(os.path.join(self._cache_dir, f))
+                    os.rmdir(self._cache_dir)
+                    is_deleted = True
+                except OSError:
+                    log.warning("Exception occurred while removing cache.", exc_info=True)
 
     def _on_generation_completed(self, pop):
         for callback in self._subscribers['generation_completed']:

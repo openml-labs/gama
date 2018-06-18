@@ -100,52 +100,72 @@ class EvaluationDispatcher(object):
             return self._job_map[identifier], output
 
     def cancel_all_evaluations(self):
+        jobs_cancelled = 0
         while True:
             try:
                 self._input_queue.get(block=False)
+                jobs_cancelled += 1
             except queue.Empty:
+                self._outstanding_job_counter -= jobs_cancelled
+                if self._outstanding_job_counter > 0:
+                    log.warning("Cancelled {} queued jobs, but {} are already being processed."
+                                .format(jobs_cancelled, self._outstanding_job_counter))
+                else:
+                    log.info("Cancelled {} jobs, no more jobs being processed.".format(jobs_cancelled))
                 break
 
     def shut_down(self):
         self._shutdown = True
 
 
-def async_ea(objectives, population, toolbox, evaluation_callback=None, n_evaluations=10000, n_jobs=1):
+def async_ea(objectives, population, toolbox, evaluation_callback=None, restart_callback=None, n_evaluations=10000, n_jobs=1):
     logger = MultiprocessingLogger()
     evaluation_dispatcher = EvaluationDispatcher(n_jobs, partial(toolbox.evaluate, logger=logger), toolbox)
+    max_population_size = len(population)
+
     try:
         evaluation_dispatcher.start()
-        # while improvements
-        log.info('Starting ')
-        for ind in population:
-            evaluation_dispatcher.queue_evaluation(ind)
-        # run ea
-        max_population_size = len(population)
-        current_population = []
-        for _ in range(n_evaluations):
-            individual, output = evaluation_dispatcher.get_next_result()
-            score, evaluation_time, length = output
-            if len(objectives) == 1:
-                individual.fitness.values = (score,)
-            elif objectives[1] == 'time':
-                individual.fitness.values = (score, evaluation_time)
-            elif objectives[1] == 'size':
-                individual.fitness.values = (score, length)
-            individual.fitness.time = evaluation_time
 
-            logger.flush_to_log(log)
-            if evaluation_callback:
-                evaluation_callback(individual)
+        restart = True
+        while restart:
+            restart = False
+            current_population = []
 
-            # TODO: Measure improvements, possibly restart.
+            log.info('Starting ')
+            for ind in population:
+                evaluation_dispatcher.queue_evaluation(ind)
 
-            current_population.append(individual)
-            if len(current_population) > max_population_size:
-                current_population = toolbox.eliminate(current_population, 1)
+            for _ in range(n_evaluations):
+                individual, output = evaluation_dispatcher.get_next_result()
+                score, evaluation_time, length = output
+                if len(objectives) == 1:
+                    individual.fitness.values = (score,)
+                elif objectives[1] == 'time':
+                    individual.fitness.values = (score, evaluation_time)
+                elif objectives[1] == 'size':
+                    individual.fitness.values = (score, length)
+                individual.fitness.time = evaluation_time
 
-            if len(current_population) > 1:
-                new_individual = toolbox.create(current_population, 1)[0]
-                evaluation_dispatcher.queue_evaluation(new_individual)
+                logger.flush_to_log(log)
+                if evaluation_callback:
+                    evaluation_callback(individual)
+
+                if restart_callback is not None and restart_callback():
+                    log.info("Restart criterion met. Restarting with new random population.")
+                    restart = True
+                    population = toolbox.population(n=max_population_size)
+                    break
+
+                current_population.append(individual)
+                if len(current_population) > max_population_size:
+                    to_remove = toolbox.eliminate(current_population, 1)
+                    current_population.remove(to_remove[0])
+
+                if len(current_population) > 1:
+                    new_individual = toolbox.create(current_population, 1)[0]
+                    evaluation_dispatcher.queue_evaluation(new_individual)
+
+            evaluation_dispatcher.cancel_all_evaluations()
 
     except KeyboardInterrupt:
         log.info('Shutting down EA due to KeyboardInterrupt.')

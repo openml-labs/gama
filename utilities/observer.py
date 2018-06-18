@@ -56,12 +56,17 @@ class Observer(object):
         self._pareto_front = ParetoFront(get_values_fn=lambda ind: ind.fitness.wvalues)
         self._pareto_callbacks = []
         self._individuals = []
+        self._individuals_since_last_pareto_update = 0
         
     def update(self, ind):
         self._individuals.append(ind)
         updated = self._pareto_front.update(ind)
         if updated:
             self._update_pareto_front(ind)
+            self._individuals_since_last_pareto_update = 0
+        else:
+            self._individuals_since_last_pareto_update += 1
+            log.debug("{}".format(self._individuals_since_last_pareto_update))
 
         log.debug("Evaluated {} in {}s. W-values: {}".format(ind, ind.fitness.time, ind.fitness.wvalues))
 
