@@ -26,11 +26,13 @@ def async_ea(objectives, population, toolbox, evaluation_callback=None, restart_
             log.info('Starting EA with new population.')
             for ind in population:
                 compiled_individual = toolbox.compile(ind)
-                queued_individuals
-                evaluation_dispatcher.queue_evaluation(ind)
+                identifier = evaluation_dispatcher.queue_evaluation(compiled_individual)
+                queued_individuals[identifier] = ind
 
             for _ in range(n_evaluations):
-                individual, output = evaluation_dispatcher.get_next_result()
+                identifier, output, _ = evaluation_dispatcher.get_next_result()
+                individual = queued_individuals.pop(identifier)
+
                 score, evaluation_time, length = output
                 if len(objectives) == 1:
                     individual.fitness.values = (score,)
@@ -57,7 +59,9 @@ def async_ea(objectives, population, toolbox, evaluation_callback=None, restart_
 
                 if len(current_population) > 1:
                     new_individual = toolbox.create(current_population, 1)[0]
-                    evaluation_dispatcher.queue_evaluation(new_individual)
+                    compiled_individual = toolbox.compile(new_individual)
+                    identifier = evaluation_dispatcher.queue_evaluation(compiled_individual)
+                    queued_individuals[identifier] = new_individual
 
             evaluation_dispatcher.restart()
     except stopit.utils.TimeoutException:

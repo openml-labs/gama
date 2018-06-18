@@ -48,9 +48,15 @@ def clear_queue(queue_):
 
 
 class FunctionDispatcher(object):
-    """ """
+    """ A manager for evaluating functions async in the background using multi-processing.
 
-    def __init__(self, n_jobs, evaluate_fn, toolbox):
+    This object will spawn `n_jobs` child processes which will run `func` on any input given through `queue_evaluation`.
+    Return values of evaluations can be obtained by calling `get_next_result`.
+    To keep track of which input leads to which output, `queue_evaluation` returns a unique identifier for each call.
+    Finally, `get_next_result` will return the identifier and `item` alongside the output of `func(item)`.
+    """
+
+    def __init__(self, n_jobs, func, toolbox):
         if n_jobs <= 0:
             raise ValueError("n_jobs must be at least 1.")
 
@@ -58,7 +64,7 @@ class FunctionDispatcher(object):
         self._input_queue = mp_manager.Queue()
         self._output_queue = mp_manager.Queue()
         self._n_jobs = n_jobs
-        self._evaluate_fn = evaluate_fn
+        self._func = func
         self._toolbox = toolbox
 
         self._job_map = {}
@@ -70,16 +76,17 @@ class FunctionDispatcher(object):
         self._job_map = {}
         for _ in range(self._n_jobs):
             p = mp.Process(target=evaluator_daemon,
-                           args=(self._input_queue, self._output_queue, self._evaluate_fn))
+                           args=(self._input_queue, self._output_queue, self._func))
             p.daemon = True
             self._child_processes.append(p)
             p.start()
 
     def stop(self):
-        """ Dequeue all outstandig jobs, discard saved results and terminate child processes. """
+        """ Dequeue all outstanding jobs, discard saved results and terminate child processes. """
         log.info('Terminating {} child processes.'.format(len(self._child_processes)))
         for process in self._child_processes:
             process.terminate()
+        self._child_processes = []
 
         nr_cancelled = clear_queue(self._input_queue)
         nr_discarded = clear_queue(self._output_queue)
@@ -91,12 +98,15 @@ class FunctionDispatcher(object):
         self.stop()
         self.start()
 
-    def queue_evaluation(self, individual):
-        """ Queue an individual to be evaluated by a child process according to `evaluate_fn` passed to __init__. """
-        comp_ind = self._toolbox.compile(individual)
+    def queue_evaluation(self, item):
+        """ Queue an item to be processed by a child process according to `func` passed to __init__.
+
+        Returns the identifier of the job.
+        """
         identifier = uuid.uuid4()
-        self._job_map[identifier] = individual
-        self._input_queue.put((identifier, comp_ind))
+        self._job_map[identifier] = item
+        self._input_queue.put((identifier, item))
+        return identifier
 
     def _get_next_from_daemons(self):
         # If we just used the blocking queue.get, then KeyboardInterrupts/Timeout would not work.
@@ -130,8 +140,7 @@ class FunctionDispatcher(object):
         else:
             # For n_jobs = 1, we do not want to spawn a separate process. Mimic behaviour.
             identifier, input_ = self._input_queue.get()
-            output = self._evaluate_fn(input_)
+            output = self._func(input_)
 
-        individual = self._job_map.pop(identifier)
-        return individual, output
-
+        input_ = self._job_map.pop(identifier)
+        return identifier, output, input_
