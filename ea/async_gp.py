@@ -21,9 +21,12 @@ def async_ea(objectives, population, toolbox, evaluation_callback=None, restart_
         while restart:
             restart = False
             current_population = []
+            queued_individuals = {}
 
             log.info('Starting EA with new population.')
             for ind in population:
+                compiled_individual = toolbox.compile(ind)
+                queued_individuals
                 evaluation_dispatcher.queue_evaluation(ind)
 
             for _ in range(n_evaluations):
@@ -56,10 +59,10 @@ def async_ea(objectives, population, toolbox, evaluation_callback=None, restart_
                     new_individual = toolbox.create(current_population, 1)[0]
                     evaluation_dispatcher.queue_evaluation(new_individual)
 
-            evaluation_dispatcher.cancel_all_evaluations()
+            evaluation_dispatcher.restart()
     except stopit.utils.TimeoutException:
         log.info("Shutting down EA due to Timeout.")
-        evaluation_dispatcher.shut_down()
+        evaluation_dispatcher.stop()
         raise
     except KeyboardInterrupt:
         log.info('Shutting down EA due to KeyboardInterrupt.')
@@ -67,8 +70,8 @@ def async_ea(objectives, population, toolbox, evaluation_callback=None, restart_
     except Exception:
         log.error('Unexpected exception in asynchronous parallel algorithm.', exc_info=True)
         # Even in the event of an error we want the helper processes to shut down.
-        evaluation_dispatcher.shut_down()
+        evaluation_dispatcher.stop()
         raise
 
-    evaluation_dispatcher.shut_down()
+    evaluation_dispatcher.stop()
     return current_population

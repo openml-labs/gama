@@ -1,8 +1,15 @@
+"""
+I tried to use multiprocessing.pool.Pool instead, but it failed silently.
+This can happen when objects passed are not pickleable, but I used the same objects.
+So far now, I will have to work with this.
+"""
+
 import logging
 import multiprocessing as mp
 import queue
 import random
 import time
+import uuid
 
 import numpy as np
 
@@ -28,7 +35,20 @@ def evaluator_daemon(input_queue, output_queue, fn, seed=0, print_exit_message=F
         print(shutdown_message)
 
 
+def clear_queue(queue_):
+    """ Dequeue items until the queue is empty. Returns number of items removed from the queue. """
+    items_cleared = 0
+    while True:
+        try:
+            queue_.get(block=False)
+            items_cleared += 1
+        except queue.Empty:
+            break
+    return items_cleared
+
+
 class FunctionDispatcher(object):
+    """ """
 
     def __init__(self, n_jobs, evaluate_fn, toolbox):
         if n_jobs <= 0:
@@ -41,15 +61,13 @@ class FunctionDispatcher(object):
         self._evaluate_fn = evaluate_fn
         self._toolbox = toolbox
 
-        self._outstanding_job_counter = 0
-        self._outstanding_jobs = []
-        self._outstanding_jobs_to_ignore = []
-        self._subscribers = []
         self._job_map = {}
         self._child_processes = []
 
     def start(self):
-        log.info('Setting up additional processes for parallel asynchronous evaluations.')
+        """ Start child processes. """
+        log.info('Starting {} child processes.'.format(self._n_jobs))
+        self._job_map = {}
         for _ in range(self._n_jobs):
             p = mp.Process(target=evaluator_daemon,
                            args=(self._input_queue, self._output_queue, self._evaluate_fn))
@@ -57,11 +75,28 @@ class FunctionDispatcher(object):
             self._child_processes.append(p)
             p.start()
 
+    def stop(self):
+        """ Dequeue all outstandig jobs, discard saved results and terminate child processes. """
+        log.info('Terminating {} child processes.'.format(len(self._child_processes)))
+        for process in self._child_processes:
+            process.terminate()
+
+        nr_cancelled = clear_queue(self._input_queue)
+        nr_discarded = clear_queue(self._output_queue)
+        log.debug("Cancelled {} outstanding jobs. Discarded {} results. Terminated {} currently executing jobs."
+                  .format(nr_cancelled, nr_discarded, len(self._job_map) - nr_cancelled - nr_discarded))
+
+    def restart(self):
+        """ This is equivalent to calling `stop` then `start`."""
+        self.stop()
+        self.start()
+
     def queue_evaluation(self, individual):
+        """ Queue an individual to be evaluated by a child process according to `evaluate_fn` passed to __init__. """
         comp_ind = self._toolbox.compile(individual)
-        self._job_map[str(comp_ind)] = individual
-        self._input_queue.put((str(comp_ind), comp_ind))
-        self._outstanding_jobs.append(str(comp_ind))
+        identifier = uuid.uuid4()
+        self._job_map[identifier] = individual
+        self._input_queue.put((identifier, comp_ind))
 
     def _get_next_from_daemons(self):
         # If we just used the blocking queue.get, then KeyboardInterrupts/Timeout would not work.
@@ -75,65 +110,28 @@ class FunctionDispatcher(object):
                 if not last_get_successful:
                     time.sleep(0.1)  # seconds
 
-                comp_ind_str, fitness = self._output_queue.get(block=False)
-                return comp_ind_str, fitness
+                identifier, fitness = self._output_queue.get(block=False)
+                return identifier, fitness
 
             except queue.Empty:
                 last_get_successful = False
                 continue
 
     def get_next_result(self):
-        if len(self._outstanding_jobs) <= 0:
+        """ Get the result of an evaluation that was queued by calling `queue_evaluation`. This function is blocking.
+
+        This function raises a ValueError if it is called when there is no job queued with `queue_evaluation`.
+        """
+        if len(self._job_map) <= 0:
             raise ValueError("You have to queue an evaluation for each time you call this function since last cancel.")
 
-        while True:
-            if self._n_jobs > 1:
-                identifier, output = self._get_next_from_daemons()
-            else:
-                # For n_jobs = 1, we do not want to spawn a separate process. Mimic behaviour.
-                identifier, input_ = self._input_queue.get()
-                output = self._evaluate_fn(input_)
-
-            if identifier in self._outstanding_jobs:
-                self._outstanding_jobs.remove(identifier)
-                return self._job_map[identifier], output
-            elif identifier in self._outstanding_jobs_to_ignore:
-                self._outstanding_jobs_to_ignore.remove(identifier)
-            else:
-                raise ValueError("Found unexpected job.")
-
-    def cancel_all_evaluations(self):
-        while True:
-            try:
-                identifier, _ = self._input_queue.get(block=False)
-                if identifier in self._outstanding_jobs:
-                    self._outstanding_jobs.remove(identifier)
-                elif identifier in self._outstanding_jobs_to_ignore:
-                    self._outstanding_jobs_to_ignore.remove(identifier)
-                else:
-                    raise ValueError("Found unexpected job.")
-            except queue.Empty:
-                self._outstanding_jobs_to_ignore += self._outstanding_jobs
-                self._outstanding_jobs = []
-                break
-
-        while True:
-            try:
-                identifier, _ = self._output_queue.get(block=False)
-                if identifier in self._outstanding_jobs_to_ignore:
-                    self._outstanding_jobs_to_ignore.remove(identifier)
-                else:
-                    raise ValueError("Found unexpected job.")
-            except queue.Empty:
-                break
-
-        if len(self._outstanding_jobs_to_ignore) > 0:
-            log.warning("Cancelled queued jobs, but {} are already being processed."
-                        .format(len(self._outstanding_jobs_to_ignore)))
+        if self._n_jobs > 1:
+            identifier, output = self._get_next_from_daemons()
         else:
-            log.info("Cancelled all jobs, no more jobs being processed.")
+            # For n_jobs = 1, we do not want to spawn a separate process. Mimic behaviour.
+            identifier, input_ = self._input_queue.get()
+            output = self._evaluate_fn(input_)
 
-    def shut_down(self):
-        log.info('Shutting down additional processes used for parallel asynchronous evaluations.')
-        for process in self._child_processes:
-            process.terminate()
+        individual = self._job_map.pop(identifier)
+        return individual, output
+
