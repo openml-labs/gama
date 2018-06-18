@@ -231,10 +231,19 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
     if not logger:
         logger = log
 
+    if pl is None:
+        return (-float("inf"), timeout, float("inf"))
+
     start = time.process_time()
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
             prediction, score = cross_val_predict_score(pl, X, y, cv=cv, scoring=scoring)
+
+            if cache_dir and score != -float("inf"):
+                pl_filename = str(uuid.uuid4())
+                with open(os.path.join(cache_dir, pl_filename + '.pkl'), 'wb') as fh:
+                    pickle.dump((pl, prediction, score), fh)
+            # TODO: Properly handle file exceptions separately
         except stopit.TimeoutException:
             raise
         except KeyboardInterrupt:
@@ -243,10 +252,6 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
             logger.info('Error evaluating pipeline {}. {}: {}'.format(pl, type(e), e))#, exc_info=True)
             score = -float("inf")
 
-        if cache_dir and score != -float("inf"):
-            pl_filename = str(uuid.uuid4())
-            with open(os.path.join(cache_dir, pl_filename + '.pkl'), 'wb') as fh:
-                pickle.dump((pl, prediction, score), fh)
 
     evaluation_time = time.process_time() - start
     pipeline_length = len(pl.steps)
@@ -255,7 +260,7 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
         # A TimeoutException was raised, but not by the context manager.
         # This indicates that the outer context manager (the ea) timed out.
         logger.info("Outer-timeout during evaluation of {}".format(pl))
-        raise stopit.TimeoutException()
+        raise stopit.utils.TimeoutException()
 
     if not c_mgr:
         # For now we treat a eval timeout the same way as e.g. NaN exceptions.
