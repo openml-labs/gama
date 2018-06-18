@@ -1,7 +1,7 @@
 """
-I tried to use multiprocessing.pool.Pool instead, but it failed silently.
-This can happen when objects passed are not pickleable, but I used the same objects.
-So far now, I will have to work with this.
+I tried to use multiprocessing.pool.Pool and `apply_async` instead, but it failed silently.
+This can happen when objects passed are not pickleable, however all items should be and it still fails.
+I am not sure if the behavior would be exactly the same. For now, I will have to work with this.
 """
 
 import logging
