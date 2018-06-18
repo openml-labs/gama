@@ -203,15 +203,14 @@ class Gama(object):
                         print("=== Restart ===")
                     return restart and restart_
 
-                final_pop, sdp = async_ea(self._objectives,
-                                          pop,
-                                          self._toolbox,
-                                          evaluation_callback=self._on_evaluation_completed,
-                                          restart_callback=restart_critera,
-                                          n_evaluations=10000,
-                                          n_jobs=self._n_jobs)
+                final_pop = async_ea(self._objectives,
+                                     pop,
+                                     self._toolbox,
+                                     evaluation_callback=self._on_evaluation_completed,
+                                     restart_callback=restart_critera,
+                                     n_evaluations=10000,
+                                     n_jobs=self._n_jobs)
                 self._final_pop = final_pop
-                self._ = sdp
         except KeyboardInterrupt:
             print('Keyboard Interrupt sent to outer with statement.')
 

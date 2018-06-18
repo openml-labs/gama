@@ -6,25 +6,23 @@ import time
 from functools import partial
 
 import numpy as np
-from deap import tools
+import stopit
 
-from . import automl_gp
 from ..utilities.mp_logger import MultiprocessingLogger
 
 log = logging.getLogger(__name__)
 
 
-def evaluator_daemon(input_queue, output_queue, fn, shutdown, seed=0, print_exit_message=False):
+def evaluator_daemon(input_queue, output_queue, fn, seed=0, print_exit_message=False):
     random.seed(seed)
     np.random.seed(seed)
 
     shutdown_message = 'Helper process stopping normally.'
     try:
-        while not shutdown.value:
+        while True:
             identifier, input_ = input_queue.get()
             output = fn(input_)
-            if not shutdown.value:
-                output_queue.put((identifier, output))
+            output_queue.put((identifier, output))
     except KeyboardInterrupt:
         shutdown_message = 'Helper process stopping due to keyboard interrupt.'
     except (BrokenPipeError, EOFError):
@@ -43,7 +41,6 @@ class EvaluationDispatcher(object):
         mp_manager = mp.Manager()
         self._input_queue = mp_manager.Queue()
         self._output_queue = mp_manager.Queue()
-        self._shutdown = mp_manager.Value('shutdown', False)
         self._n_jobs = n_jobs
         self._evaluate_fn = evaluate_fn
         self._toolbox = toolbox
@@ -51,13 +48,15 @@ class EvaluationDispatcher(object):
         self._outstanding_job_counter = 0
         self._subscribers = []
         self._job_map = {}
+        self._child_processes = []
 
     def start(self):
         log.info('Setting up additional processes for parallel asynchronous evaluations.')
         for _ in range(self._n_jobs):
             p = mp.Process(target=evaluator_daemon,
-                           args=(self._input_queue, self._output_queue, self._evaluate_fn, self._shutdown))
+                           args=(self._input_queue, self._output_queue, self._evaluate_fn))
             p.daemon = True
+            self._child_processes.append(p)
             p.start()
 
     def queue_evaluation(self, individual):
@@ -115,7 +114,9 @@ class EvaluationDispatcher(object):
                 break
 
     def shut_down(self):
-        self._shutdown = True
+        log.info('Shutting down additional processes used for parallel asynchronous evaluations.')
+        for process in self._child_processes:
+            process.terminate()
 
 
 def async_ea(objectives, population, toolbox, evaluation_callback=None, restart_callback=None, n_evaluations=10000, n_jobs=1):
@@ -166,7 +167,10 @@ def async_ea(objectives, population, toolbox, evaluation_callback=None, restart_
                     evaluation_dispatcher.queue_evaluation(new_individual)
 
             evaluation_dispatcher.cancel_all_evaluations()
-
+    except stopit.utils.TimeoutException:
+        log.info("Shutting down EA due to Timeout.")
+        evaluation_dispatcher.shut_down()
+        raise
     except KeyboardInterrupt:
         log.info('Shutting down EA due to KeyboardInterrupt.')
         # No need to communicate to processes since they also handle the KeyboardInterrupt directly.
@@ -177,4 +181,4 @@ def async_ea(objectives, population, toolbox, evaluation_callback=None, restart_
         raise
 
     evaluation_dispatcher.shut_down()
-    return current_population, evaluation_dispatcher
+    return current_population
