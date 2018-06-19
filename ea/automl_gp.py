@@ -255,7 +255,7 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
                 pickle.dump((pl, prediction, score), fh)
         except FileNotFoundError:
             log.warning("File not found while saving predictions. This can happen in the multi-process case if the "
-                        "cache gets deleted with `max_eval_time` of the end of the search process.", exc_info=True)
+                        "cache gets deleted within `max_eval_time` of the end of the search process.", exc_info=True)
 
     evaluation_time = time.process_time() - start
     pipeline_length = len(pl.steps)
