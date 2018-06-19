@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 def async_ea(objectives, start_population, toolbox, evaluation_callback=None, restart_callback=None, n_evaluations=10000, n_jobs=1):
     logger = MultiprocessingLogger()
-    evaluation_dispatcher = FunctionDispatcher(n_jobs, partial(toolbox.evaluate, logger=logger), toolbox)
+    evaluation_dispatcher = FunctionDispatcher(n_jobs, partial(toolbox.evaluate, logger=logger))
 
     max_population_size = len(start_population)
     queued_individuals_str = set()
