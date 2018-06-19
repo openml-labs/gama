@@ -262,18 +262,7 @@ class Gama(object):
 
     def delete_cache(self):
         """ Removes the cache folder and all files associated to this instance. """
-        # would use shutil.rmtree(self._cache_dir) but it gives an error if a file is placed in the folder while
-        # it is deleting files.
-        if os.path.exists(self._cache_dir):
-            is_deleted = False
-            while not is_deleted:
-                try:
-                    for f in os.listdir(self._cache_dir):
-                        os.remove(os.path.join(self._cache_dir, f))
-                    os.rmdir(self._cache_dir)
-                    is_deleted = True
-                except OSError:
-                    log.warning("Exception occurred while removing cache.", exc_info=True)
+        shutil.rmtree(self._cache_dir)
 
     def _on_generation_completed(self, pop):
         for callback in self._subscribers['generation_completed']:
