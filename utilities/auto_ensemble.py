@@ -1,4 +1,4 @@
-from collections import namedtuple, Counter
+from collections import namedtuple
 import os
 import pickle
 import logging
@@ -6,8 +6,10 @@ from joblib import Parallel, delayed
 
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
+import stopit
 
 from ..ea.evaluation import string_to_metric, evaluate, Metric
+from .function_dispatcher import FunctionDispatcher
 
 log = logging.getLogger(__name__)
 Model = namedtuple("Model", ['name', 'pipeline', 'predictions', 'validation_score'])
@@ -112,7 +114,7 @@ class Ensemble(object):
 
     def _add_model(self, model):
         """ Adds a specific model to the ensemble or increases its weight if it already is contained. """
-        model, weight = self._models.pop(model.pipeline, default=(model, 0))
+        model, weight = self._models.pop(model.pipeline, (model, 0))
         self._models[model.pipeline] = (model, weight + 1)
 
     def add_models(self, n):
@@ -144,18 +146,35 @@ class Ensemble(object):
 
         return self
 
-    def fit(self, X, y):
+    def fit(self, X, y, timeout=1e6):
         """ Constructs an Ensemble out of the library of models.
 
         :param X: Data to fit the final selection of models on.
         :param y: Targets corresponding to features X.
+        :param timeout: Maximum amount of time in seconds that is allowed in total for fitting pipelines.
+                        If this time is exceeded, only pipelines fit until that point are taken into account when making
+                        predictions. Starting the parallelization takes roughly 4 seconds by itself.
         :return: self.
         """
         if not self._models:
             raise RuntimeError("You need to call `build` to select models for the ensemble, before fitting them.")
 
-        self._fit_models = Parallel(n_jobs=self._n_jobs)(delayed(fit_and_weight)(model.pipeline, X, y, weight)
-                                                         for (model, weight) in self._models.values())
+        self._fit_models = []
+        fit_dispatcher = FunctionDispatcher(self._n_jobs, fit_and_weight)
+        with stopit.ThreadingTimeout(timeout) as c_mgr:
+            fit_dispatcher.start()
+            for (model, weight) in self._models.values():
+                fit_dispatcher.queue_evaluation((model.pipeline, X, y, weight))
+
+            for _ in self._models.values():
+                _, output, __ = fit_dispatcher.get_next_result()
+                pipeline, weight = output
+                self._fit_models.append((pipeline, weight))
+
+        fit_dispatcher.stop()
+
+        if not c_mgr:
+            log.info("Fitting of ensemble stopped early.")
 
         return self
 
@@ -247,18 +266,19 @@ def load_predictions(cache_dir, argmax_pred=False):
     return models
 
 
-def fit_and_weight(pipeline, X, y, weight):
+def fit_and_weight(args):
     """ Fit the pipeline given the data. Update weight to 0 if fitting fails.
 
     :return:  pipeline, weight - The same pipeline that was provided as input.
                                  Weight is either the input value of `weight`, if fitting succeeded, or 0 if *any*
                                  exception occurred during fitting.
     """
+    pipeline, X, y, weight = args
     try:
         pipeline.fit(X, y)
     except Exception:
-        log.warning("Exception when fitting pipeline {} of the ensemble. Assigning weight of 0.".format(pipeline),
-                    exc_info=True)
+        log.warning("Exception when fitting pipeline {} of the ensemble. Assigning weight of 0."
+                    .format(pipeline), exc_info=True)
         weight = 0
 
     return pipeline, weight
