@@ -111,12 +111,9 @@ class Ensemble(object):
         return np.sum(weighted_predictions, axis=0) / self._total_model_weights()
 
     def _add_model(self, model):
-        """ Adds a specific model to the ensemble. """
-        if model.pipeline in self._models:
-            model, weight = self._models[model.pipeline]
-            self._models[model.pipeline] = (model, weight + 1)
-        else:
-            self._models[model.pipeline] = (model, 1)
+        """ Adds a specific model to the ensemble or increases its weight if it already is contained. """
+        model, weight = self._models.pop(model.pipeline, default=(model, 0))
+        self._models[model.pipeline] = (model, weight + 1)
 
     def add_models(self, n):
         """ Adds new models to the ensemble based on earlier given data.
