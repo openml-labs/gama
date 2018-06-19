@@ -50,7 +50,7 @@ class Ensemble(object):
         self._maximize = True
         self._child_ensembles = []
         self._child_ensemble_model_fraction = 0.3
-        self._models = []
+        self._models = {}
 
     @property
     def model_library(self):
@@ -58,33 +58,10 @@ class Ensemble(object):
             log.debug("Loading model library from disk.")
             self._model_library = load_predictions(self._model_library_directory)
 
-            # This is a work-around because there can be multiple of the same model in the model library.
-            # This causes extra workload in non-bagging case, and breaks the bagging case (because a uniform sample
-            # is no longer guaranteed).
-            # TODO: Fix cause of this issue instead.
-            unique_model_names = {model.name for model in self._model_library}
-            self._model_library = [[model for model in self._model_library if model.name == model_name][0]
-                                   for model_name in unique_model_names]
         return self._model_library
 
-    def build(self, n_models_in_ensemble, start_size=1):
-        """ Constructs an ensemble out of a library of models.
-
-        :param n_models_in_ensemble: The number of models to include in the ensemble.
-        :param start_size: The number of n best models to include automatically.
-        :return: self
-        """
-        if start_size > n_models_in_ensemble:
-            raise ValueError("`n_models_in_ensemble` cannot be smaller than start_size specified."
-                             "Values were respectively {} and {}".format(n_models_in_ensemble, start_size))
-
-        models = load_predictions(self._model_library_directory)
-        self._models = build_ensemble(models, self._metric, self._y_true,
-                                      start_size=start_size, end_size=n_models_in_ensemble)
-        return self
-
     def build_(self, n_ensembles, start_size, total_size):
-
+        # TODO: Look at what adjustment for model library now unique
         for i in range(n_ensembles):
             log.debug("Constructing ensemble {}/{}.".format(i, n_ensembles))
 
@@ -120,7 +97,7 @@ class Ensemble(object):
 
         # Since the model library only features unique models, we do not need to check for duplicates here.
         selected_models = list(sorted_ensembles)[:n]
-        self._models = {m.name: (m, 1) for m in selected_models}
+        self._models = {m.pipeline: (m, 1) for m in selected_models}
         log.debug("Initial ensemble created with score {}".format(
                   evaluate(self._metric, self._y_true, self._averaged_validation_predictions())))
         return self
@@ -133,22 +110,13 @@ class Ensemble(object):
         weighted_predictions = np.stack([model.predictions * weight for (model, weight) in self._models.values()])
         return np.sum(weighted_predictions, axis=0) / self._total_model_weights()
 
-    def evaluate_ensemble(ensemble, metric, y_true):
-        """ Evaluates the ensemble according to the metric.
-
-        Currently assumes a single prediction value (e.g. numeric response or positive class probability).
-        """
-        all_predictions = np.stack([model.predictions for model in ensemble])
-        average_predictions = np.mean(all_predictions, axis=0)
-        return evaluate(metric, y_true, average_predictions)
-
     def _add_model(self, model):
         """ Adds a specific model to the ensemble. """
-        if model.name in self._models:
-            model, weight = self._models[model.name]
-            self._models[model.name] = (model, weight + 1)
+        if model.pipeline in self._models:
+            model, weight = self._models[model.pipeline]
+            self._models[model.pipeline] = (model, weight + 1)
         else:
-            self._models[model.name] = (model, 1)
+            self._models[model.pipeline] = (model, 1)
 
     def add_models(self, n):
         """ Adds new models to the ensemble based on earlier given data.
@@ -189,9 +157,8 @@ class Ensemble(object):
         if not self._models:
             raise RuntimeError("You need to call `build` to select models for the ensemble, before fitting them.")
 
-
-        self._fit_models = Parallel(n_jobs=self._n_jobs)(delayed(fit_and_weight)
-                                   (model.pipeline, X, y, weight) for (model, weight) in self._models.values())
+        self._fit_models = Parallel(n_jobs=self._n_jobs)(delayed(fit_and_weight)(model.pipeline, X, y, weight)
+                                                         for (model, weight) in self._models.values())
 
         return self
 
@@ -232,7 +199,7 @@ class Ensemble(object):
             return np.sum(all_predictions, axis=0) / actual_weight_sum
 
     def __str__(self):
-        # TODO add internal score and rank of pipeline
+        # TODO add internal rank of pipeline
         if not self._models:
             return "Ensemble with no models."
         ensemble_str = "Ensemble of {} unique pipelines.\nW\tScore\tPipeline\n".format(len(self._models))
@@ -283,41 +250,13 @@ def load_predictions(cache_dir, argmax_pred=False):
     return models
 
 
-def build_ensemble(models, metric, y_true, start_size=0, end_size=5, maximize=True, consider_top_n=1000):
-    """
-
-    :param models: list of models
-    :param metric: metric (y_true, y_pred)
-    :param y_true:
-    :param start_size: use top n models as start of ensemble
-    :param end_size: desired total size of the ensemble
-    :param maximize: True if metric should be maximized, False otherwise.
-    :return:
-    """
-    if start_size > end_size:
-        raise ValueError('Size must be at least match n. Size: {}, n: {}.'.format(end_size, start_size))
-
-    sorted_ensembles = sorted(models, key=lambda m: evaluate(metric, y_true, m.predictions))
-    sorted_ensembles = reversed(sorted_ensembles) if maximize else sorted_ensembles
-    sorted_ensembles = list(sorted_ensembles)[:consider_top_n]
-    ensemble = list(sorted_ensembles)[:start_size]
-    best_ensemble = ensemble
-
-    while len(ensemble) < end_size:
-        best_ensemble_score = -float('inf') if maximize else float('inf')
-        for model in models:
-            candidate_ensemble = ensemble + [model]
-            candidate_ensemble_score = evaluate_ensemble(candidate_ensemble, metric, y_true)
-            if ((maximize and best_ensemble_score < candidate_ensemble_score) or
-                    (not maximize and best_ensemble_score > candidate_ensemble_score)):
-                best_ensemble, best_ensemble_score = candidate_ensemble, candidate_ensemble_score
-        ensemble = best_ensemble
-        log.debug('Ensemble size {} , best score: {}'.format(len(ensemble), best_ensemble_score))
-
-    return best_ensemble
-
-
 def fit_and_weight(pipeline, X, y, weight):
+    """ Fit the pipeline given the data. Update weight to 0 if fitting fails.
+
+    :return:  pipeline, weight - The same pipeline that was provided as input.
+                                 Weight is either the input value of `weight`, if fitting succeeded, or 0 if *any*
+                                 exception occurred during fitting.
+    """
     try:
         pipeline.fit(X, y)
     except Exception:
