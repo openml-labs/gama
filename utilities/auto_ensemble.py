@@ -263,16 +263,21 @@ def load_predictions(cache_dir, argmax_pred=False):
     models = []
     for file in os.listdir(cache_dir):
         if file.endswith('.pkl'):
-            with open(os.path.join(cache_dir, file), 'rb') as fh:
-                pl, predictions, score = pickle.load(fh)
-                predictions = np.array(predictions)
-                if argmax_pred:
-                    hard_predictions = np.argmax(predictions, axis=1)
-                    positions = zip(range(len(hard_predictions)), hard_predictions)
-                    ind_predictions = np.zeros_like(predictions)
-                    for pos in positions:
-                        ind_predictions[pos] = 1
-                    predictions = ind_predictions
+            file_name = os.path.join(cache_dir, file)
+            if os.stat(file_name).st_size > 0:
+                # We check file size, because writing to disk may be interrupted if the process was terminated due
+                # to a restart/timeout. I can not find specifications saying that any interrupt of pickle.dump leads
+                # to 0-sized files, but in practice this seems to case so far. TODO: Find verification, or fix proper.
+                with open(os.path.join(cache_dir, file), 'rb') as fh:
+                    pl, predictions, score = pickle.load(fh)
+                    predictions = np.array(predictions)
+                    if argmax_pred:
+                        hard_predictions = np.argmax(predictions, axis=1)
+                        positions = zip(range(len(hard_predictions)), hard_predictions)
+                        ind_predictions = np.zeros_like(predictions)
+                        for pos in positions:
+                            ind_predictions[pos] = 1
+                        predictions = ind_predictions
 
             models.append(Model(str(pl), pl, predictions, score))
     return models
