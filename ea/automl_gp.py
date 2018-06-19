@@ -145,8 +145,10 @@ def compile_individual(ind, pset, parameter_checks=None):
         name_counter[prim.name] += 1
 
         components.append((name, component))
-        ind = ind[1:-n_kwargs]
-
+        if n_kwargs == 0:
+            ind = ind[1:]
+        else:
+            ind = ind[1:-n_kwargs]
     return Pipeline(list(reversed(components)))
 
 
@@ -194,7 +196,6 @@ def compile_individual_tree(ind, pset, parameter_checks=None):
             if len(remainder) > 0:
                 raise Exception
             break
-
         # See if all terminals have a value provided (except Data Terminal)
         required_provided = list(zip(reversed(prim.args[1:]), reversed(remainder)))
         if all(r == p.ret for (r, p) in required_provided):
@@ -204,7 +205,6 @@ def compile_individual_tree(ind, pset, parameter_checks=None):
                 equal_idx = terminal_name.rfind('=')
                 start_parameter_name = terminal_name.rfind('.', 0, equal_idx) + 1
                 return terminal_name[start_parameter_name:equal_idx]
-
             args = {
                 extract_arg_name(p.name): pset.context[p.name]
                 for r, p in required_provided
@@ -217,7 +217,6 @@ def compile_individual_tree(ind, pset, parameter_checks=None):
                     and prim.name in parameter_checks
                     and not parameter_checks[prim.name](args)):
                 return None
-
             components.append((name, class_(**args)))
             if len(args) > 0:
                 ind = ind[1:-len(args)]
