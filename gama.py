@@ -5,6 +5,7 @@ from collections import defaultdict
 import datetime
 import shutil
 from functools import partial
+import time
 
 import numpy as np
 from deap import base, creator, tools, gp
@@ -27,6 +28,7 @@ STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
                           did not terminate successfully."""
 __version__ = '0.1.0'
+
 
 class Gama(object):
     """ Wrapper for the DEAP toolbox logic surrounding the GP process. """
@@ -150,10 +152,8 @@ class Gama(object):
         
         After the search termination condition is met, the best found pipeline 
         configuration is then used to train a final model on all provided data.
-
-        TODO: determine how to cut down on the amount of if-else branching in this function.
         """
-
+        start_preprocessing = time.time()
         if hasattr(X, 'values') and hasattr(X, 'astype'):
             X = X.astype(np.float64).values
         if hasattr(y, 'values') and hasattr(y, 'astype'):
@@ -188,14 +188,17 @@ class Gama(object):
                                scoring=self._scoring_function, timeout=self._max_eval_time,
                                cache_dir=self._cache_dir)
 
+        processing_time = time.time() - start_preprocessing
+        log.info("Preprocessing data took {}s.".format(processing_time))
         try:
             ensemble_ratio = 0.1
-            fit_time = int((1-ensemble_ratio)*self._max_total_time)
-            ensemble_time = int(ensemble_ratio*self._max_total_time)
+            time_left = self._max_total_time - processing_time
+            fit_time = int((1-ensemble_ratio)*time_left)
+            ensemble_time = int(ensemble_ratio*time_left)
             with stopit.ThreadingTimeout(fit_time) as c_mgr:
                 log.debug('Starting EA with max time of {} seconds.'.format(fit_time))
 
-                def restart_critera():
+                def restart_criteria():
                     restart = self._observer._individuals_since_last_pareto_update > 400
                     if restart and restart_:
                         self._observer._individuals_since_last_pareto_update = 0
@@ -206,32 +209,46 @@ class Gama(object):
                                      pop,
                                      self._toolbox,
                                      evaluation_callback=self._on_evaluation_completed,
-                                     restart_callback=restart_critera,
+                                     restart_callback=restart_criteria,
                                      n_evaluations=10000,
                                      n_jobs=self._n_jobs)
                 self._final_pop = final_pop
         except KeyboardInterrupt:
-            print('Keyboard Interrupt sent to outer with statement.')
+            log.info('Search phase terminated because of Keyboard Interrupt.')
 
-        if self._max_total_time is not None and not c_mgr:
-            print('Terminated because maximum time has elapsed.')
+        if not c_mgr:
+            log.info('Search phase terminated because maximum time has elapsed.')
 
         if len(self._observer._individuals) > 0:
-            self.ensemble = Ensemble(self._scoring_function, y, model_library_directory=self._cache_dir)
-            log.debug('Building ensemble.')
-            if auto_ensemble_n <= 10:
-                self.ensemble.build_initial_ensemble(1)
-            else:
-                self.ensemble.build_initial_ensemble(10)
-
-            remainder = auto_ensemble_n - self.ensemble._total_model_weights()
-            if remainder > 0:
-                self.ensemble.add_models(remainder)
-            log.debug('Fitting ensemble.')
-            log.debug('fit-data. Shapes X: {}({}), y: {}({}).'.format(X.shape, np.isnan(X).any(), y.shape, np.isnan(y).any()))
-            self.ensemble.fit(X, y)
+            self._build_fit_ensemble(auto_ensemble_n, timeout=ensemble_time)
         else:
             print('No pipeline evaluated.')
+
+    def _build_fit_ensemble(self, ensemble_size, timeout):
+        start_build = time.time()
+        X, y = self._fit_data
+        self.ensemble = Ensemble(self._scoring_function, y, model_library_directory=self._cache_dir, n_jobs=self._n_jobs)
+        log.debug('Building ensemble.')
+
+        # Starting with more models in the ensemble should help against overfitting, but depending on the total
+        # ensemble size, it might leave too little room to calibrate the weights or add new models. So we have
+        # some adaptive defaults (for now).
+        if ensemble_size <= 10:
+            self.ensemble.build_initial_ensemble(1)
+        else:
+            self.ensemble.build_initial_ensemble(10)
+
+        remainder = ensemble_size - self.ensemble._total_model_weights()
+        if remainder > 0:
+            self.ensemble.add_models(remainder)
+
+        build_time = time.time() - start_build
+        timeout = timeout - build_time
+        log.info('Building ensemble took {}s. Fitting ensemble with timeout {}s.'.format(build_time, timeout))
+
+        self.ensemble.fit(X, y, timeout=timeout)
+
+        #log.info('Ensemble construction terminated because maximum time has elapsed.')
 
     def _random_valid_mutation_try_new(self, ind):
         """ Call `random_valid_mutation` until a new individual (that was not evaluated before) is created (at most 50x).
