@@ -189,12 +189,12 @@ def compile_individual_tree(ind, pset, parameter_checks=None):
     components = []
     name_counter = defaultdict(int)
     while len(ind) > 0:
-        # log_message('compiling ' + str(ind), level = 4)
         prim, remainder = ind[0], ind[1:]
         if isinstance(prim, gp.Terminal):
             if len(remainder) > 0:
                 raise Exception
             break
+
         # See if all terminals have a value provided (except Data Terminal)
         required_provided = list(zip(reversed(prim.args[1:]), reversed(remainder)))
         if all(r == p.ret for (r, p) in required_provided):
@@ -219,10 +219,12 @@ def compile_individual_tree(ind, pset, parameter_checks=None):
                 return None
 
             components.append((name, class_(**args)))
-            ind = ind[1:-len(args)]
+            if len(args) > 0:
+                ind = ind[1:-len(args)]
+            else:
+                ind = ind[1:]
         else:
             raise TypeError("Type is wrong or missing.")
-
     return Pipeline(list(reversed(components)))
 
 
