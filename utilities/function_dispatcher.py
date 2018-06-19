@@ -56,7 +56,7 @@ class FunctionDispatcher(object):
     Finally, `get_next_result` will return the identifier and `item` alongside the output of `func(item)`.
     """
 
-    def __init__(self, n_jobs, func, toolbox):
+    def __init__(self, n_jobs, func):
         if n_jobs <= 0:
             raise ValueError("n_jobs must be at least 1.")
 
@@ -65,7 +65,6 @@ class FunctionDispatcher(object):
         self._output_queue = mp_manager.Queue()
         self._n_jobs = n_jobs
         self._func = func
-        self._toolbox = toolbox
 
         self._job_map = {}
         self._child_processes = []
