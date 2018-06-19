@@ -200,7 +200,6 @@ class Gama(object):
                     if restart and restart_:
                         self._observer._individuals_since_last_pareto_update = 0
                         self._observer._pareto_front._front = []
-                        print("=== Restart ===")
                     return restart and restart_
 
                 final_pop = async_ea(self._objectives,
@@ -233,35 +232,6 @@ class Gama(object):
             self.ensemble.fit(X, y)
         else:
             print('No pipeline evaluated.')
-        
-    def _fit_pipeline(self, individual, X, y):
-        """ Compiles the individual representation and fit the data to it. """
-        pipeline = self._toolbox.compile(individual)
-        pipeline.fit(X, y)
-        return pipeline
-    
-    def _compile_and_evaluate_individual(self, ind, X, y, timeout, scoring='accuracy', cv=5):
-        if str(ind) in self._evaluated_individuals:
-            print('using cache.')
-            return self._evaluated_individuals[str(ind)]
-        pl = self._toolbox.compile(ind)        
-        if pl is None:
-            # Failed to compile due to invalid hyperparameter configuration
-            return -float("inf"), 1
-        score, time = automl_gp.evaluate_pipeline(pl, X, y, timeout, scoring, cache_dir=self._cache_dir)
-        length = automl_gp.pipeline_length(ind)
-
-        if self._objectives[1] == 'size':
-            fitness = (score, length)
-        elif self._objectives[1] == 'time':
-            fitness = (score, time)
-        elif len(self._objectives) == 1:
-            fitness = (score,)
-
-        self._evaluated_individuals[str(ind)] = fitness
-        ind.fitness.values = fitness
-        self._on_evaluation_completed(ind)
-        return fitness
 
     def _random_valid_mutation_try_new(self, ind):
         """ Call `random_valid_mutation` until a new individual (that was not evaluated before) is created (at most 50x).
