@@ -21,6 +21,7 @@ from .utilities.observer import Observer
 
 from .ea.async_gp import async_ea
 from .utilities.auto_ensemble import Ensemble
+from .utilities.stopwatch import Stopwatch
 
 log = logging.getLogger(__name__)
 
@@ -145,25 +146,52 @@ class Gama(object):
 
     def fit(self, X, y, warm_start=False, auto_ensemble_n=10, restart_=False):
         """ Finds and fits a model to predict target y from X.
-        
+
         Various possible machine learning pipelines will be fit to the (X,y) data.
         Using Genetic Programming, the pipelines chosen should lead to gradually
         better models. Pipelines will internally be validated using cross validation.
-        
-        After the search termination condition is met, the best found pipeline 
+
+        After the search termination condition is met, the best found pipeline
         configuration is then used to train a final model on all provided data.
         """
-        start_preprocessing = time.time()
+
+        ensemble_ratio = 0.1  # fraction of time left after preprocessing that reserved for postprocessing
+
+        def restart_criteria():
+            restart = self._observer._individuals_since_last_pareto_update > 400
+            if restart and restart_:
+                self._observer._individuals_since_last_pareto_update = 0
+                self._observer._pareto_front._front = []
+            return restart and restart_
+
+        with Stopwatch() as preprocessing_sw:
+            X, y = self._preprocess_phase(X, y)
+        log.info("Preprocessing took {:.4f}s. Moving on to search phase.".format(preprocessing_sw.elapsed_time))
+
+        time_left = self._max_total_time - preprocessing_sw.elapsed_time
+        fit_time = int((1 - ensemble_ratio) * time_left)
+
+        with Stopwatch() as search_sw:
+            self._search_phase(X, y, warm_start=False, restart_criteria=restart_criteria, timeout=fit_time)
+        log.info("Search phase took {:.4f}s. Moving on to post processing.".format(search_sw.elapsed_time))
+
+        time_left = self._max_total_time - search_sw.elapsed_time - preprocessing_sw.elapsed_time
+
+        with Stopwatch() as post_sw:
+            self._postprocess_phase(auto_ensemble_n, timeout=time_left)
+        log.info("Postprocessing took {:.4f}s.".format(post_sw.elapsed_time))
+
+    def _preprocess_phase(self, X, y):
         if hasattr(X, 'values') and hasattr(X, 'astype'):
             X = X.astype(np.float64).values
         if hasattr(y, 'values') and hasattr(y, 'astype'):
             y = y.astype(np.float64).values
 
-        log.debug('fit(). Shapes X: {}({}), y: {}({}).'.format(X.shape, np.isnan(X).any(), y.shape, np.isnan(y).any()))
-
         # For now there is no support for semi-supervised learning, so remove all instances with unknown targets.
         nan_targets = np.isnan(y)
         if nan_targets.any():
+            log.info("Target vector y has been found to contain NaN-labels. All NaN entries will be ignored because "
+                     "supervised learning is not (yet) supported.")
             X = X[~nan_targets, :]
             y = y[~nan_targets]
 
@@ -172,39 +200,26 @@ class Gama(object):
         # Secondly, the way imputation is done can also be dependent on the task. Median is generally not the best.
         self._imputer.fit(X)
         if np.isnan(X).any():
+            log.info("Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.")
             X = self._imputer.transform(X)
 
-        log.debug('fit-data. Shapes X: {}({}), y: {}({}).'.format(X.shape, np.isnan(X).any(), y.shape, np.isnan(y).any()))
         self._fit_data = (X, y)
+        return X, y
 
+    def _search_phase(self, X, y, warm_start=False, restart_criteria=None, timeout=1e6):
         if warm_start and self._final_pop is not None:
             pop = self._final_pop
         else:
             if warm_start:
-                print('Warning: Warm-start enabled but no earlier fit')
+                log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = self._toolbox.population(n=self._pop_size)
 
         self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y,
                                scoring=self._scoring_function, timeout=self._max_eval_time,
                                cache_dir=self._cache_dir)
 
-        processing_time = time.time() - start_preprocessing
-        log.info("Preprocessing data took {}s.".format(processing_time))
         try:
-            ensemble_ratio = 0.1
-            time_left = self._max_total_time - processing_time
-            fit_time = int((1-ensemble_ratio)*time_left)
-            ensemble_time = int(ensemble_ratio*time_left)
-            with stopit.ThreadingTimeout(fit_time) as c_mgr:
-                log.debug('Starting EA with max time of {} seconds.'.format(fit_time))
-
-                def restart_criteria():
-                    restart = self._observer._individuals_since_last_pareto_update > 400
-                    if restart and restart_:
-                        self._observer._individuals_since_last_pareto_update = 0
-                        self._observer._pareto_front._front = []
-                    return restart and restart_
-
+            with stopit.ThreadingTimeout(timeout) as c_mgr:
                 final_pop = async_ea(self._objectives,
                                      pop,
                                      self._toolbox,
@@ -219,10 +234,8 @@ class Gama(object):
         if not c_mgr:
             log.info('Search phase terminated because maximum time has elapsed.')
 
-        if len(self._observer._individuals) > 0:
-            self._build_fit_ensemble(auto_ensemble_n, timeout=ensemble_time)
-        else:
-            print('No pipeline evaluated.')
+    def _postprocess_phase(self, n, timeout=1e6):
+        self._build_fit_ensemble(n, timeout=timeout)
 
     def _build_fit_ensemble(self, ensemble_size, timeout):
         start_build = time.time()
