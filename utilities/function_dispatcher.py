@@ -71,7 +71,7 @@ class FunctionDispatcher(object):
 
     def start(self):
         """ Start child processes. """
-        log.info('Starting {} child processes.'.format(self._n_jobs))
+        log.debug('Starting {} child processes.'.format(self._n_jobs))
         self._job_map = {}
         for _ in range(self._n_jobs):
             p = mp.Process(target=evaluator_daemon,
@@ -82,7 +82,7 @@ class FunctionDispatcher(object):
 
     def stop(self):
         """ Dequeue all outstanding jobs, discard saved results and terminate child processes. """
-        log.info('Terminating {} child processes.'.format(len(self._child_processes)))
+        log.debug('Terminating {} child processes.'.format(len(self._child_processes)))
         for process in self._child_processes:
             process.terminate()
         self._child_processes = []
