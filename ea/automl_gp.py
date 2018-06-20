@@ -245,7 +245,8 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            logger.info('Error evaluating pipeline {}. {}: {}'.format(pl, type(e), e))#, exc_info=True)
+            logger.info('{} encountered while evaluating pipeline.'.format(type(e)))#, exc_info=True)
+            logger.debug('Error evaluating pipeline {}. {}: {}'.format(pl, type(e), e))#, exc_info=True)
             score = -float("inf")
 
     if cache_dir and score != -float("inf"):
@@ -270,7 +271,8 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
     if not c_mgr:
         # For now we treat a eval timeout the same way as e.g. NaN exceptions.
         fitness_values = (-float("inf"), timeout, pipeline_length)
-        logger.info("Timeout after {}s: {}".format(timeout, pl))
+        logger.info('Timeout encountered while evaluating pipeline.')#, exc_info=True)
+        logger.debug("Timeout after {}s: {}".format(timeout, pl))
     else:
         fitness_values = (score, evaluation_time, pipeline_length)
 
