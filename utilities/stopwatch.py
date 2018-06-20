@@ -27,5 +27,3 @@ class Stopwatch:
             return time.time() - self._start
         else:
             return self._end - self._start
-
-
