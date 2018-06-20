@@ -60,6 +60,7 @@ def async_ea(objectives, start_population, toolbox, evaluation_callback=None, re
                 current_population.append(individual)
                 if len(current_population) > max_population_size:
                     to_remove = toolbox.eliminate(current_population, 1)
+                    log.debug("Removed from population: {}".format(to_remove))
                     current_population.remove(to_remove[0])
 
                 if len(current_population) > 1:
@@ -77,7 +78,6 @@ def async_ea(objectives, start_population, toolbox, evaluation_callback=None, re
 
             evaluation_dispatcher.restart()
     except stopit.utils.TimeoutException:
-        log.info("Shutting down EA due to Timeout.")
         evaluation_dispatcher.stop()
         raise
     except KeyboardInterrupt:
