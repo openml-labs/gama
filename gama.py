@@ -88,7 +88,7 @@ class Gama(object):
         self._final_pop = None
         self._subscribers = defaultdict(list)
 
-        self._observer = Observer()
+        self._observer = Observer(self._cache_dir)
         self.evaluation_completed(self._observer.update)
         
         if self._random_state is not None:
@@ -160,8 +160,8 @@ class Gama(object):
         def restart_criteria():
             restart = self._observer._individuals_since_last_pareto_update > 400
             if restart and restart_:
-                self._observer._individuals_since_last_pareto_update = 0
-                self._observer._pareto_front._front = []
+                log.info("Continuing search with new population.")
+                self._observer.reset_current_pareto_front()
             return restart and restart_
 
         with Stopwatch() as preprocessing_sw:
@@ -232,7 +232,8 @@ class Gama(object):
             log.info('Search phase terminated because of Keyboard Interrupt.')
 
         if not c_mgr:
-            log.info('Search phase terminated because maximum time has elapsed.')
+            log.info('Search phase terminated because maximum time has elapsed.'
+                     '{} individuals have been evaluated.'.format(len(self._observer._individuals)))
 
     def _postprocess_phase(self, n, timeout=1e6):
         self._build_fit_ensemble(n, timeout=timeout)
