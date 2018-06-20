@@ -91,6 +91,7 @@ class Ensemble(object):
             raise ValueError("Ensemble must include at least one model.")
         if self._models:
             log.warning("The ensemble already contained models. Overwriting the ensemble.")
+            self._models = {}
 
         #sorted_ensembles = sorted(self.model_library, key=lambda m: m.validation_score)
         sorted_ensembles = sorted(self.model_library, key=lambda m: evaluate(self._metric, self._y_true, m.predictions))
@@ -99,7 +100,9 @@ class Ensemble(object):
 
         # Since the model library only features unique models, we do not need to check for duplicates here.
         selected_models = list(sorted_ensembles)[:n]
-        self._models = {m.pipeline: (m, 1) for m in selected_models}
+        for model in selected_models:
+            self._add_model(model)
+
         log.debug("Initial ensemble created with score {}".format(
                   evaluate(self._metric, self._y_true, self._averaged_validation_predictions())))
         return self
@@ -116,6 +119,7 @@ class Ensemble(object):
         """ Adds a specific model to the ensemble or increases its weight if it already is contained. """
         model, weight = self._models.pop(model.pipeline, (model, 0))
         self._models[model.pipeline] = (model, weight + 1)
+        log.info("Assigned a weight of {} to model {}".format(weight + 1, model.name))
 
     def add_models(self, n):
         """ Adds new models to the ensemble based on earlier given data.
