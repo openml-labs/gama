@@ -63,7 +63,6 @@ class Ensemble(object):
         return self._model_library
 
     def build_(self, n_ensembles, start_size, total_size):
-        # TODO: Look at what adjustment for model library now unique
         for i in range(n_ensembles):
             log.debug("Constructing ensemble {}/{}.".format(i, n_ensembles))
 
@@ -78,7 +77,10 @@ class Ensemble(object):
             self._child_ensembles.append(child_ensemble)
             # we combine all the weights of child models, this way we don't have to fit each individual ensemble.
 
-        self._models = [model for child_ensemble in self._child_ensembles for model in child_ensemble._models]
+        self._models = {}
+        for child_ensemble in self._child_ensembles:
+            for (model, weight) in child_ensemble._models.values():
+                self._add_model(model, add_weight=weight)
 
     def build_initial_ensemble(self, n):
         """ Builds an ensemble of n models, based solely on the performance of individual models, not their combined performance.
@@ -115,11 +117,11 @@ class Ensemble(object):
         weighted_predictions = np.stack([model.predictions * weight for (model, weight) in self._models.values()])
         return np.sum(weighted_predictions, axis=0) / self._total_model_weights()
 
-    def _add_model(self, model):
+    def _add_model(self, model, add_weight=1):
         """ Adds a specific model to the ensemble or increases its weight if it already is contained. """
         model, weight = self._models.pop(model.pipeline, (model, 0))
-        self._models[model.pipeline] = (model, weight + 1)
-        log.info("Assigned a weight of {} to model {}".format(weight + 1, model.name))
+        self._models[model.pipeline] = (model, weight + add_weight)
+        log.info("Assigned a weight of {} to model {}".format(weight + add_weight, model.name))
 
     def add_models(self, n):
         """ Adds new models to the ensemble based on earlier given data.
