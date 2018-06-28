@@ -16,12 +16,14 @@ import stopit
 from .ea.modified_deap import cxOnePoint
 from .ea import automl_gp
 from .ea.automl_gp import compile_individual, pset_from_config, generate_valid, random_valid_mutation
+from .ea.evaluation import string_to_metric
 from .utilities.gama_exceptions import AttributeNotAssignedError
 from .utilities.observer import Observer
 
 from .ea.async_gp import async_ea
 from .utilities.auto_ensemble import Ensemble
 from .utilities.stopwatch import Stopwatch
+from .utilities import optimal_constant_predictor
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +37,7 @@ class Gama(object):
     """ Wrapper for the DEAP toolbox logic surrounding the GP process. """
 
     def __init__(self, 
-                 objectives=('neg_log_loss', 'size'),
+                 objectives=('filled_in_by_child_class', 'size'),
                  optimize_strategy=(1, -1),
                  config=None,
                  random_state=None,
@@ -130,8 +132,13 @@ class Gama(object):
         Predict target for X, using the best found pipeline(s) during the `fit` call. 
         X must be of similar shape to the X value passed to `fit`.
         """
-        if len(self._observer._individuals) == 0:
-            raise AttributeNotAssignedError(STR_NO_OPTIMAL_PIPELINE)
+        if (self.ensemble is None) or (sum(map(lambda pl_w: pl_w[1], self.ensemble._fit_models)) == 0):
+            # Sum of weights of ensemble is 0, meaning no pipeline finished fitting.
+            log.warning("Ensemble did not fit in time. Falling back on default predictions.")
+            X_tr, y_tr = self._fit_data
+            prediction = optimal_constant_predictor(y_tr, string_to_metric(self._scoring_function))
+            return np.asarray([prediction for _ in range(len(X))])
+
         #if len(self._observer._individuals) < auto_ensemble_n:
         #    print('Warning: Not enough pipelines evaluated. Continuing with less.')
         if np.isnan(X).any():
@@ -144,7 +151,7 @@ class Gama(object):
     def predict(self, X):
         raise NotImplemented()
 
-    def fit(self, X, y, warm_start=False, auto_ensemble_n=10, restart_=False):
+    def fit(self, X, y, warm_start=False, auto_ensemble_n=25, restart_=False):
         """ Finds and fits a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
