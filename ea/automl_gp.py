@@ -92,9 +92,12 @@ def pset_from_config(configuration):
                         pset.addTerminal(value, hyperparameter_type, hyperparameter_str)
 
             # After registering the hyperparameter types, we can register the operator itself.
-            if issubclass(key, sklearn.base.TransformerMixin):
+            transformer_tags = ["DATA_PREPROCESSING", "FEATURE_SELECTION", "DATA_TRANSFORMATION"]
+            if (issubclass(key, sklearn.base.TransformerMixin) or
+                  (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] in transformer_tags)):
                 pset.addPrimitive(key, [Data, *hyperparameter_types], Data)
-            elif issubclass(key, sklearn.base.ClassifierMixin):
+            elif (issubclass(key, sklearn.base.ClassifierMixin) or
+                  (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] == "CLASSIFICATION")):
                 pset.addPrimitive(key, [Data, *hyperparameter_types], Predictions)
 
                 if False:
@@ -104,7 +107,8 @@ def pset_from_config(configuration):
                     pset.addPrimitive(stacking_class, [Data, *hyperparameter_types], Data, name=primname)
                     if key.__name__ in parameter_checks:
                         parameter_checks[primname] = parameter_checks[key.__name__]
-            elif issubclass(key, sklearn.base.RegressorMixin):
+            elif (issubclass(key, sklearn.base.RegressorMixin) or
+                  (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] == "REGRESSION")):
                 pset.addPrimitive(key, [Data, *hyperparameter_types], Predictions)
 
                 if False:
