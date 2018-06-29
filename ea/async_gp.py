@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 def async_ea(objectives, start_population, toolbox, evaluation_callback=None, restart_callback=None, n_evaluations=10000, n_jobs=1):
-    logger = MultiprocessingLogger()
+    logger = MultiprocessingLogger() if n_jobs > 1 else log
     evaluation_dispatcher = FunctionDispatcher(n_jobs, partial(toolbox.evaluate, logger=logger))
 
     max_population_size = len(start_population)
@@ -47,7 +47,9 @@ def async_ea(objectives, start_population, toolbox, evaluation_callback=None, re
                     individual.fitness.values = (score, length)
                 individual.fitness.time = evaluation_time
 
-                logger.flush_to_log(log)
+                if n_jobs > 1:
+                    logger.flush_to_log(log)
+
                 if evaluation_callback:
                     evaluation_callback(individual)
 
