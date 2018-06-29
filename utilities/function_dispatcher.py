@@ -61,8 +61,8 @@ class FunctionDispatcher(object):
             raise ValueError("n_jobs must be at least 1.")
 
         mp_manager = mp.Manager()
-        self._input_queue = mp_manager.Queue()
-        self._output_queue = mp_manager.Queue()
+        self._input_queue = mp_manager.Queue() if n_jobs > 1 else queue.Queue()
+        self._output_queue = mp_manager.Queue() if n_jobs > 1 else queue.Queue()
         self._n_jobs = n_jobs
         self._func = func
 
