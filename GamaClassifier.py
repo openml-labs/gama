@@ -29,7 +29,7 @@ class GamaClassifier(Gama):
 
     def fit(self, X, y, warm_start=False, auto_ensemble_n=10, restart=False):
         # Allows y input in list and pandas series form. Multi-label and DataFrame does not work.
-        if isinstance(y[0], str):
+        if hasattr(y, 'values') and isinstance(y.values[0], str):
             self._label_encoder = LabelEncoder().fit(y)
             y = self._label_encoder.transform(y)
         super().fit(X, y, warm_start, auto_ensemble_n, restart)
