@@ -193,6 +193,8 @@ class Gama(object):
             X = X.astype(np.float64).values
         if hasattr(y, 'values') and hasattr(y, 'astype'):
             y = y.astype(np.float64).values
+        if isinstance(y, list):
+            y = np.asarray(y)
 
         # For now there is no support for semi-supervised learning, so remove all instances with unknown targets.
         nan_targets = np.isnan(y)
