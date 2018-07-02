@@ -128,8 +128,10 @@ def pset_from_config(configuration):
     return pset, parameter_checks
 
 
-def compile_individual(ind, pset, parameter_checks=None):
+def compile_individual(expr, pset, parameter_checks=None):
     """ Compile the individual to a sklearn pipeline."""
+    # TODO: expr only for compatibility
+    ind = expr
     components = []
     name_counter = defaultdict(int)
     while len(ind) > 0:
