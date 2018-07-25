@@ -44,6 +44,8 @@ def clear_queue(queue_):
             items_cleared += 1
         except queue.Empty:
             break
+        except EOFError:
+            log.warning('EOFError occurred while clearing queue.', exc_info=True)
     return items_cleared
 
 
