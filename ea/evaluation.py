@@ -94,6 +94,8 @@ def cross_val_predict_score(estimator, X, y=None, groups=None, scoring=None, cv=
     predictions = cross_val_predict(estimator, X, y, groups, cv, n_jobs, verbose, fit_params, pre_dispatch, method)
 
     if metric.is_classification:
+        if predictions.ndim == 2 and predictions.shape[1] == 1:
+            predictions = np.squeeze(predictions)
         if predictions.ndim == 1:
             predictions = OneHotEncoder(n_values=len(set(y))).fit_transform(predictions.reshape(-1, 1)).todense()
 
