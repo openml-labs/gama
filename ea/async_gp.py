@@ -51,7 +51,15 @@ def async_ea(objectives, start_population, toolbox, evaluation_callback=None, re
                     logger.flush_to_log(log)
 
                 if evaluation_callback:
-                    evaluation_callback(individual)
+                    try:
+                        evaluation_callback(individual)
+                    except stopit.utils.TimeoutException:
+                        raise
+                    except Exception:
+                        # We actually want to catch any other exception here, because the callback code can be
+                        # arbitrary (it can be provided by users). This excuses the catch-all Exception.
+                        log.warning("Exception during callback.", exc_info=True)
+                        pass
 
                 if restart_callback is not None and restart_callback():
                     log.info("Restart criterion met. Restarting with new random population.")
