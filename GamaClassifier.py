@@ -29,3 +29,7 @@ class GamaClassifier(Gama):
         y = self._label_encoder.transform(y)
 
         super().fit(X, y, warm_start, auto_ensemble_n, restart)
+
+    def _build_fit_ensemble(self, ensemble_size, timeout):
+        super()._build_fit_ensemble(ensemble_size, timeout)
+        self.ensemble._label_encoder = self._label_encoder
