@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 
@@ -23,8 +24,8 @@ class GamaClassifier(Gama):
             return predictions
 
     def fit(self, X, y, warm_start=False, auto_ensemble_n=25, restart=False):
-        # Allows y input in list and pandas series form. Multi-label and DataFrame does not work.
-        if hasattr(y, 'values') and isinstance(y.values[0], str):
-            self._label_encoder = LabelEncoder().fit(y)
-            y = self._label_encoder.transform(y)
+        # Allow arbitrary class name (e.g. string or 1-indexed)
+        self._label_encoder = LabelEncoder().fit(y)
+        y = self._label_encoder.transform(y)
+
         super().fit(X, y, warm_start, auto_ensemble_n, restart)
