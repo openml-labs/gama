@@ -2,10 +2,9 @@ from collections import namedtuple
 import os
 import pickle
 import logging
-from joblib import Parallel, delayed
 
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 import stopit
 
 from ..ea.evaluation import string_to_metric, evaluate, Metric
@@ -19,7 +18,7 @@ class Ensemble(object):
 
     def __init__(self, metric, y_true,
                  model_library=None, model_library_directory=None,
-                 shrink_on_pickle=True, n_jobs=1):
+                 shrink_on_pickle=True, n_jobs=1, label_encoder=None):
         """
         Either model_library or model_library_directory must be specified.
         If model_library is specified, model_library_directory is ignored.
@@ -31,6 +30,7 @@ class Ensemble(object):
         :param shrink_on_pickle: if True, remove memory-intensive attributes that are required during fit,
                                  but not predict, before pickling
         :param n_jobs: the number of jobs to run in parallel when fitting the final ensemble.
+        :param label_encoder: a LabelEncoder which can decode the model predictions to desired labels.
         """
         if isinstance(metric, str):
             metric = string_to_metric(metric)
@@ -42,17 +42,19 @@ class Ensemble(object):
             log.warning("model_library_directory will be ignored because model_library is also specified.")
 
         self._metric = metric
-        self._y_true = y_true
         self._model_library_directory = model_library_directory
         self._model_library = model_library if model_library is not None else []
         self._shrink_on_pickle = shrink_on_pickle
         self._n_jobs = n_jobs
+        self._y_true = y_true
+        self._label_encoder = label_encoder
 
         self._fit_models = None
         self._maximize = True
         self._child_ensembles = []
         self._child_ensemble_model_fraction = 0.3
         self._models = {}
+
 
     @property
     def model_library(self):
@@ -186,15 +188,20 @@ class Ensemble(object):
 
     def predict(self, X):
         if self._metric.is_classification:
-            predictions = np.argmax(self.predict_proba(X), axis=1)
-            return np.squeeze(predictions)
+            predictions = np.squeeze(np.argmax(self.predict_proba(X), axis=1))
+            if self._label_encoder:
+                predictions = self._label_encoder.inverse_transform(predictions)
         elif self._metric.is_regression:
-            return self.predict_proba(X)
+            predictions = self.predict_proba(X)
         else:
             raise NotImplemented('Unknown task type for ensemble.')
+        return predictions
 
     def predict_proba(self, X):
         predictions = []
+
+        if self._metric.is_classification:
+            ohe = OneHotEncoder(len(set(self._y_true)))
 
         for (model, weight) in self._fit_models:
             if weight == 0:
@@ -206,7 +213,7 @@ class Ensemble(object):
             else:
                 target_prediction = model.predict(X)
                 if self._metric.is_classification:
-                    ohe_prediction = OneHotEncoder(len(set(self._y_true))).fit_transform(target_prediction.reshape(-1, 1)).todense()
+                    ohe_prediction = ohe.fit_transform(target_prediction.reshape(-1, 1)).todense()
                     predictions.append(np.array(ohe_prediction) * weight)
                 elif self._metric.is_regression:
                     predictions.append(target_prediction * weight)
