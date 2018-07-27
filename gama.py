@@ -228,21 +228,16 @@ class Gama(object):
                                cache_dir=self._cache_dir)
 
         try:
-            with stopit.ThreadingTimeout(timeout) as c_mgr:
-                final_pop = async_ea(self._objectives,
-                                     pop,
-                                     self._toolbox,
-                                     evaluation_callback=self._on_evaluation_completed,
-                                     restart_callback=restart_criteria,
-                                     n_evaluations=10000,
-                                     n_jobs=self._n_jobs)
-                self._final_pop = final_pop
+            final_pop = async_ea(self._objectives,
+                                 pop,
+                                 self._toolbox,
+                                 evaluation_callback=self._on_evaluation_completed,
+                                 restart_callback=restart_criteria,
+                                 max_time_seconds=timeout,
+                                 n_jobs=self._n_jobs)
+            self._final_pop = final_pop
         except KeyboardInterrupt:
             log.info('Search phase terminated because of Keyboard Interrupt.')
-
-        if not c_mgr:
-            log.info('Search phase terminated because maximum time has elapsed.'
-                     '{} individuals have been evaluated.'.format(len(self._observer._individuals)))
 
     def _postprocess_phase(self, n, timeout=1e6):
         self._build_fit_ensemble(n, timeout=timeout)
