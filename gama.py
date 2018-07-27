@@ -127,7 +127,7 @@ class Gama(object):
             raise ValueError('Objectives must be a tuple of length at most 2.')
 
     def predict_proba(self, X):
-        """ Predicts the target for input X. 
+        """ Predict the target for input X.
 
         Predict target for X, using the best found pipeline(s) during the `fit` call. 
         X must be of similar shape to the X value passed to `fit`.
@@ -152,7 +152,7 @@ class Gama(object):
         raise NotImplemented()
 
     def fit(self, X, y, warm_start=False, auto_ensemble_n=25, restart_=False):
-        """ Finds and fits a model to predict target y from X.
+        """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
         Using Genetic Programming, the pipelines chosen should lead to gradually
@@ -179,7 +179,7 @@ class Gama(object):
         fit_time = int((1 - ensemble_ratio) * time_left)
 
         with Stopwatch() as search_sw:
-            self._search_phase(X, y, warm_start=False, restart_criteria=restart_criteria, timeout=fit_time)
+            self._search_phase(X, y, warm_start, restart_criteria=restart_criteria, timeout=fit_time)
         log.info("Search phase took {:.4f}s. Moving on to post processing.".format(search_sw.elapsed_time))
 
         time_left = self._max_total_time - search_sw.elapsed_time - preprocessing_sw.elapsed_time
@@ -189,6 +189,15 @@ class Gama(object):
         log.info("Postprocessing took {:.4f}s.".format(post_sw.elapsed_time))
 
     def _preprocess_phase(self, X, y):
+        """  Preprocess X and y such that scikit-learn pipelines can be evaluated on it.
+
+        Preprocessing currently transforms the input into float64 numpy arrays.
+        Any row that has a NaN y-value gets removed. Any remaining NaNs in X get imputed.
+
+        :param X: Input data, DataFrame or numpy array with shape (sample, features)
+        :param y: True labels for each sample
+        :return: Preprocessed versions of X and y.
+        """
         if hasattr(X, 'values') and hasattr(X, 'astype'):
             X = X.astype(np.float64).values
         if hasattr(y, 'values') and hasattr(y, 'astype'):
@@ -216,6 +225,7 @@ class Gama(object):
         return X, y
 
     def _search_phase(self, X, y, warm_start=False, restart_criteria=None, timeout=1e6):
+        """ Invoke the evolutionary algorithm, populate `final_pop` regardless of termination. """
         if warm_start and self._final_pop is not None:
             pop = self._final_pop
         else:
@@ -240,6 +250,7 @@ class Gama(object):
             log.info('Search phase terminated because of Keyboard Interrupt.')
 
     def _postprocess_phase(self, n, timeout=1e6):
+        """ Perform any necessary post processing, such as ensemble building. """
         self._build_fit_ensemble(n, timeout=timeout)
 
     def _build_fit_ensemble(self, ensemble_size, timeout):
