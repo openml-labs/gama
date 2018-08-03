@@ -34,7 +34,7 @@ __version__ = '0.1.0'
 
 
 class Gama(object):
-    """ Wrapper for the DEAP toolbox logic surrounding the GP process. """
+    """ Wrapper for the DEAP toolbox logic surrounding the GP process as well as ensemble construction. """
 
     def __init__(self, 
                  objectives=('filled_in_by_child_class', 'size'),
@@ -47,6 +47,29 @@ class Gama(object):
                  n_jobs=1,
                  verbosity=None,
                  cache_dir=None):
+        """
+
+        :param objectives: a tuple which specifies towards which objectives to optimize. The valid metrics depend on
+            the type of task. Many scikit-learn metrics are available. Two additional metrics can also be chosen: `size`
+            which represents the number of components in the pipeline, and `time` which specifies the time it takes to
+            train and validate a model. Currently the maximum arity is 2. Example: ('f1_macro', 'size') or ('f1',)
+        :param optimize_strategy: a tuple of the same arity as objectives. Specifies for each objective whether you
+            want to maximize (1) or minimize (-1) the objective. Example: (1, -1).
+        :param config: a dictionary which specifies available components and their valid hyperparameter settings. For
+            more informatio, see `docs\configuration`.
+        :param random_state: integer or None. If an integer is passed, this will be the seed for the random number
+            generators used in the process. However, with `n_jobs > 1`, there will be randomization introduced by
+            multi-processing. For reproducible results, set this and use `n_jobs=1`.
+        :param population_size: positive integer. The number of individuals to keep in the population at any one time.
+        :param max_total_time: positive integer. The time in seconds that can be used for the `fit` call.
+        :param max_eval_time: positive integer or None. THe time in seconds that can be used to evaluate any one single
+            individual.
+        :param n_jobs: integer. The amount of parallel processes that may be created to speed up `fit`. If this number
+            is zero or negative, it will be set to the amount of cores.
+        :param verbosity: integer. Does nothing right now. Follow progress of optimization by tracking the log.
+        :param cache_dir: string or None. The directory in which to keep the cache during `fit`. In this directory,
+            models and their evaluation results will be stored. This facilitates a quick ensemble construction.
+        """
         log.info('Using GAMA version {}.'.format(__version__))
         log.info('{}({})'.format(
             self.__class__.__name__,
@@ -58,8 +81,8 @@ class Gama(object):
                              "For each objective, an optimization strategy should be maximized."
             log.error(error_message + " objectives: {}, optimize_strategy: {}".format(objectives, optimize_strategy))
             raise ValueError(error_message)
-        if max_total_time is not None and max_total_time <= 0:
-            error_message = "max_total_time should be greater than zero, or None."
+        if max_total_time is None or max_total_time <= 0:
+            error_message = "max_total_time should be greater than zero."
             log.error(error_message + " max_total_time: {}".format(max_total_time))
             raise ValueError(error_message)
         if max_eval_time is not None and max_eval_time <= 0:
@@ -127,10 +150,13 @@ class Gama(object):
             raise ValueError('Objectives must be a tuple of length at most 2.')
 
     def predict_proba(self, X):
-        """ Predict the target for input X.
+        """ Predict the class probabilities for input X.
 
-        Predict target for X, using the best found pipeline(s) during the `fit` call. 
-        X must be of similar shape to the X value passed to `fit`.
+        Predict target for X, using the best found pipeline(s) during the `fit` call.
+
+        :param X: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
+        :return: a numpy array with class probabilities. The array is of shape (N, K) where N is the length of the
+            first dimension of X, and K is the number of class labels found in `y` of `fit`.
         """
         if (self.ensemble is None) or (sum(map(lambda pl_w: pl_w[1], self.ensemble._fit_models)) == 0):
             # Sum of weights of ensemble is 0, meaning no pipeline finished fitting.
@@ -149,9 +175,15 @@ class Gama(object):
             return self.ensemble.predict_proba(X)
 
     def predict(self, X):
+        """ Predict the target for input X.
+
+        :param X: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
+        :return: a numpy array with predictions. The array is of shape (N,) where N is the length of the
+            first dimension of X.
+        """
         raise NotImplemented()
 
-    def fit(self, X, y, warm_start=False, auto_ensemble_n=25, restart_=False):
+    def fit(self, X, y, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -160,6 +192,15 @@ class Gama(object):
 
         After the search termination condition is met, the best found pipeline
         configuration is then used to train a final model on all provided data.
+
+        :param X:
+        :param y:
+        :param warm_start: bool. Indicates the optimization should continue using the last individuals of the
+            previous `fit` call.
+        :param auto_ensemble_n: positive integer. The number of models to include in the ensemble which is built
+            after the optimizatio process.
+        :param restart_: bool. Indicates whether or not the search should be restarted when a specific restart
+            criteria is met.
         """
 
         ensemble_ratio = 0.1  # fraction of time left after preprocessing that reserved for postprocessing
@@ -188,6 +229,10 @@ class Gama(object):
             self._postprocess_phase(auto_ensemble_n, timeout=time_left)
         log.info("Postprocessing took {:.4f}s.".format(post_sw.elapsed_time))
 
+        if not keep_cache:
+            log.debug("Deleting cache.")
+            self.delete_cache()
+
     def _preprocess_phase(self, X, y):
         """  Preprocess X and y such that scikit-learn pipelines can be evaluated on it.
 
@@ -214,6 +259,7 @@ class Gama(object):
             y = y[~nan_targets]
 
         # For now we always impute if there are missing values, and we always impute with median.
+        # This helps us use a wider variety of algorithms without constructing a grammar.
         # One should note that ideally imputation should not always be done since some methods work well without.
         # Secondly, the way imputation is done can also be dependent on the task. Median is generally not the best.
         self._imputer.fit(X)
