@@ -1,4 +1,5 @@
 from collections import Counter
+from datetime import datetime
 
 import logging
 import numpy as np
@@ -8,6 +9,18 @@ from .pretty_string_methods import clean_pipeline_string
 
 log = logging.getLogger(__name__)
 
+TIME_FORMAT = '%Y-%m-%d %H:%M:%S,%f'
+
+
+class TOKENS:
+    EVALUATION_RESULT = 'EVAL'
+    EVALUATION_ERROR = 'EVAL_ERR'
+    SEARCH_END = 'S_END'
+    PREPROCESSING_END = 'PRE_END'
+    POSTPROCESSING_END = 'POST_END'
+    EA_RESTART = 'EA_RST'
+    EA_REMOVE_IND = 'RMV_IND'
+    EVALUATION_TIMEOUT = 'EVAL_TO'
 
 def optimal_constant_predictor(y_tr, metric):
     mean_is_best_for = ["neg_mean_absolute_error", "neg_mean_squared_error", "neg_mean_squared_log_error", "mean_squared_error", "r2"]
@@ -37,3 +50,9 @@ def optimal_constant_predictor(y_tr, metric):
         return [1 if idx == majority_class else 0 for idx in range(len(y_tr_counter))]
     else:
         return np.argmax(np.sum(y_tr, axis=1))
+
+def log_parseable_event(log_, token, *args):
+    start = "PLE;{};".format(token)
+    attrs = ';'.join([str(arg) for arg in args])
+    end = ';' + datetime.now().strftime(TIME_FORMAT)[:-3] + ';END!'
+    log_.debug(start+attrs+end)

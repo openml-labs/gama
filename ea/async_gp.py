@@ -4,6 +4,7 @@ import time
 
 import stopit
 
+from ..utilities import TOKENS, log_parseable_event
 from ..utilities.mp_logger import MultiprocessingLogger
 from ..utilities.function_dispatcher import FunctionDispatcher
 
@@ -88,6 +89,8 @@ def async_ea(objectives, start_population, toolbox, evaluation_callback=None, re
 
             for ind_no in range(n_evaluations):
                 individual = get_next_evaluation_result()
+                log_parseable_event(log, TOKENS.EVALUATION_RESULT,
+                                    individual.fitness.time, individual.fitness.wvalues, individual)
 
                 if evaluation_callback:
                     safe_outside_call(partial(evaluation_callback, individual), exceed_timeout)
@@ -95,13 +98,14 @@ def async_ea(objectives, start_population, toolbox, evaluation_callback=None, re
                 should_restart = (restart_callback is not None and restart_callback())
                 if should_restart:
                     log.info("Restart criterion met. Restarting with new random population.")
+                    log_parseable_event(log, TOKENS.EA_RESTART, ind_no)
                     start_population = toolbox.population(n=max_population_size)
                     break
 
                 current_population.append(individual)
                 if len(current_population) > max_population_size:
                     to_remove = toolbox.eliminate(current_population, 1)
-                    log.debug("Removed from population: {}".format(to_remove))
+                    log_parseable_event(log, TOKENS.EA_REMOVE_IND, to_remove)
                     current_population.remove(to_remove[0])
                     if elimination_callback:
                         safe_outside_call(partial(elimination_callback, to_remove[0]), exceed_timeout)
@@ -112,7 +116,7 @@ def async_ea(objectives, start_population, toolbox, evaluation_callback=None, re
                         if queue_individual_for_evaluation(new_individual):
                             break
                     else:
-                        log.warning('unable to create new individual.')
+                        log.warning('Unable to create new individual.')
 
             evaluation_dispatcher.restart()
 

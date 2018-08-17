@@ -15,6 +15,7 @@ import sklearn
 from sklearn.pipeline import Pipeline
 import stopit
 
+from ..utilities import TOKENS, log_parseable_event
 from ..utilities.stacking_transformer import make_stacking_transformer
 from ..ea.modified_deap import gen_grow_safe
 
@@ -252,7 +253,8 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
             raise
         except Exception as e:
             logger.info('{} encountered while evaluating pipeline.'.format(type(e)))#, exc_info=True)
-            logger.debug('Error evaluating pipeline {}. {}: {}'.format(pl, type(e), e))#, exc_info=True)
+            single_line_pipeline = ''.join(str(pl).split('\n'))
+            log_parseable_event(logger, TOKENS.EVALUATION_ERROR, single_line_pipeline, type(e), e)
             score = -float("inf")
 
     if cache_dir and score != -float("inf"):
@@ -278,6 +280,8 @@ def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=Non
         # For now we treat a eval timeout the same way as e.g. NaN exceptions.
         fitness_values = (-float("inf"), timeout, pipeline_length)
         logger.info('Timeout encountered while evaluating pipeline.')#, exc_info=True)
+        single_line_pipeline = ''.join(str(pl).split('\n'))
+        log_parseable_event(logger, TOKENS.EVALUATION_TIMEOUT, single_line_pipeline)
         logger.debug("Timeout after {}s: {}".format(timeout, pl))
     else:
         fitness_values = (score, evaluation_time, pipeline_length)

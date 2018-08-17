@@ -24,6 +24,7 @@ from .ea.async_gp import async_ea
 from .utilities.auto_ensemble import Ensemble
 from .utilities.stopwatch import Stopwatch
 from .utilities import optimal_constant_predictor
+from .utilities import TOKENS, log_parseable_event
 
 log = logging.getLogger(__name__)
 
@@ -215,6 +216,7 @@ class Gama(object):
         with Stopwatch() as preprocessing_sw:
             X, y = self._preprocess_phase(X, y)
         log.info("Preprocessing took {:.4f}s. Moving on to search phase.".format(preprocessing_sw.elapsed_time))
+        log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
 
         time_left = self._max_total_time - preprocessing_sw.elapsed_time
         fit_time = int((1 - ensemble_ratio) * time_left)
@@ -222,12 +224,14 @@ class Gama(object):
         with Stopwatch() as search_sw:
             self._search_phase(X, y, warm_start, restart_criteria=restart_criteria, timeout=fit_time)
         log.info("Search phase took {:.4f}s. Moving on to post processing.".format(search_sw.elapsed_time))
+        log_parseable_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
 
         time_left = self._max_total_time - search_sw.elapsed_time - preprocessing_sw.elapsed_time
 
         with Stopwatch() as post_sw:
             self._postprocess_phase(auto_ensemble_n, timeout=time_left)
         log.info("Postprocessing took {:.4f}s.".format(post_sw.elapsed_time))
+        log_parseable_event(log, TOKENS.POSTPROCESSING_END, post_sw.elapsed_time)
 
         if not keep_cache:
             log.debug("Deleting cache.")
