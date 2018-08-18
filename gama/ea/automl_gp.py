@@ -3,24 +3,17 @@ learning as a genetic programming problem.
 (Yes, I need to find a better file name.)
 """
 from collections import defaultdict
-import os
-import pickle
 import logging
-import uuid
-import time
 
 import numpy as np
 from deap import gp, tools
 import sklearn
 from sklearn.pipeline import Pipeline
-import stopit
 
-from ..utilities import TOKENS, log_parseable_event
 from ..utilities.stacking_transformer import make_stacking_transformer
 from ..ea.modified_deap import gen_grow_safe
 
 from .mutation import mut_replace_terminal, mut_replace_primitive
-from .evaluation import cross_val_predict_score
 
 log = logging.getLogger(__name__)
 
@@ -232,61 +225,6 @@ def compile_individual_tree(ind, pset, parameter_checks=None):
         else:
             raise TypeError("Type is wrong or missing.")
     return Pipeline(list(reversed(components)))
-
-
-def evaluate_pipeline(pl, X, y, timeout, scoring='accuracy', cv=5, cache_dir=None, logger=None):
-    """ Evaluates a pipeline used k-Fold CV. """
-    if not logger:
-        logger = log
-
-    if pl is None:
-        return (-float("inf"), timeout, float("inf"))
-
-    start = time.process_time()
-    with stopit.ThreadingTimeout(timeout) as c_mgr:
-        try:
-            prediction, score = cross_val_predict_score(pl, X, y, cv=cv, scoring=scoring)
-        except stopit.TimeoutException:
-            score = -float("inf")
-            raise
-        except KeyboardInterrupt:
-            raise
-        except Exception as e:
-            logger.info('{} encountered while evaluating pipeline.'.format(type(e)))#, exc_info=True)
-            single_line_pipeline = ''.join(str(pl).split('\n'))
-            log_parseable_event(logger, TOKENS.EVALUATION_ERROR, single_line_pipeline, type(e), e)
-            score = -float("inf")
-
-    if cache_dir and score != -float("inf"):
-        pl_filename = str(uuid.uuid4())
-
-        try:
-            with open(os.path.join(cache_dir, pl_filename + '.pkl'), 'wb') as fh:
-                pickle.dump((pl, prediction, score), fh)
-        except FileNotFoundError:
-            log.warning("File not found while saving predictions. This can happen in the multi-process case if the "
-                        "cache gets deleted within `max_eval_time` of the end of the search process.", exc_info=True)
-
-    evaluation_time = time.process_time() - start
-    pipeline_length = len(pl.steps)
-    
-    if c_mgr.state == c_mgr.INTERRUPTED:
-        # A TimeoutException was raised, but not by the context manager.
-        # This indicates that the outer context manager (the ea) timed out.
-        logger.info("Outer-timeout during evaluation of {}".format(pl))
-        raise stopit.utils.TimeoutException()
-
-    if not c_mgr:
-        # For now we treat a eval timeout the same way as e.g. NaN exceptions.
-        fitness_values = (-float("inf"), timeout, pipeline_length)
-        logger.info('Timeout encountered while evaluating pipeline.')#, exc_info=True)
-        single_line_pipeline = ''.join(str(pl).split('\n'))
-        log_parseable_event(logger, TOKENS.EVALUATION_TIMEOUT, single_line_pipeline)
-        logger.debug("Timeout after {}s: {}".format(timeout, pl))
-    else:
-        fitness_values = (score, evaluation_time, pipeline_length)
-
-    return fitness_values
 
 
 def generate_valid(pset, min_, max_, toolbox):

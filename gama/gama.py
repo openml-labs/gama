@@ -11,6 +11,7 @@ import numpy as np
 from deap import base, creator, tools, gp
 from sklearn.preprocessing import Imputer
 
+import gama.ea.evaluation
 from .ea.modified_deap import cxOnePoint
 from .ea import automl_gp
 from .ea.automl_gp import compile_individual, pset_from_config, generate_valid, random_valid_mutation
@@ -280,7 +281,7 @@ class Gama(object):
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = self._toolbox.population(n=self._pop_size)
 
-        self._toolbox.register("evaluate", automl_gp.evaluate_pipeline, X=X, y=y,
+        self._toolbox.register("evaluate", gama.ea.evaluation.evaluate_pipeline, X=X, y=y,
                                scoring=self._scoring_function, timeout=self._max_eval_time,
                                cache_dir=self._cache_dir)
 
