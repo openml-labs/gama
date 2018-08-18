@@ -17,7 +17,7 @@ from .ea.automl_gp import compile_individual, pset_from_config, generate_valid, 
 from .ea.evaluation import string_to_metric
 from .utilities.observer import Observer
 
-from .ea.async_gp import async_ea
+from .ea.async_ea import async_ea
 from .utilities.auto_ensemble import Ensemble
 from gama.utilities.generic.stopwatch import Stopwatch
 from .utilities import optimal_constant_predictor
