@@ -4,11 +4,11 @@ import pickle
 import logging
 
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder, LabelEncoder
+from sklearn.preprocessing import OneHotEncoder
 import stopit
 
 from ..ea.evaluation import string_to_metric, evaluate, Metric
-from .function_dispatcher import FunctionDispatcher
+from gama.utilities.generic.function_dispatcher import FunctionDispatcher
 
 log = logging.getLogger(__name__)
 Model = namedtuple("Model", ['name', 'pipeline', 'predictions', 'validation_score'])

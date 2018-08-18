@@ -19,7 +19,7 @@ from .utilities.observer import Observer
 
 from .ea.async_gp import async_ea
 from .utilities.auto_ensemble import Ensemble
-from .utilities.stopwatch import Stopwatch
+from gama.utilities.generic.stopwatch import Stopwatch
 from .utilities import optimal_constant_predictor
 from .utilities import TOKENS, log_parseable_event
 

@@ -6,7 +6,7 @@ import stopit
 
 from ..utilities import TOKENS, log_parseable_event
 from ..utilities.mp_logger import MultiprocessingLogger
-from ..utilities.function_dispatcher import FunctionDispatcher
+from gama.utilities.generic.function_dispatcher import FunctionDispatcher
 
 log = logging.getLogger(__name__)
 
