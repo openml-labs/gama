@@ -93,3 +93,22 @@ def mut_replace_primitive(ind, pset):
         ind = creator.Individual(new_expr)
 
         return ind,
+
+
+def random_valid_mutation(ind, pset):
+    """ Picks a mutation uniform at random from options which are possible.
+
+    The choices are `mut_random_primitive`, `mut_random_terminal`,
+    `mutShrink` and `mutInsert`.
+    In particular a pipeline can not shrink a primitive if it only has one.
+    """
+    available_mutations = [mut_replace_terminal, mut_replace_primitive, gp.mutInsert]
+    if len([el for el in ind if issubclass(type(el), gp.Primitive)]) > 1:
+        available_mutations.append(gp.mutShrink)
+
+    mut_fn = np.random.choice(available_mutations)
+    if gp.mutShrink == mut_fn:
+        # only mutShrink function does not need pset.
+        return mut_fn(ind)
+    else:
+        return mut_fn(ind, pset)

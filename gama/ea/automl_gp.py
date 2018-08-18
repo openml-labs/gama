@@ -12,8 +12,6 @@ from sklearn.pipeline import Pipeline
 
 from ..ea.modified_deap import gen_grow_safe
 
-from .mutation import mut_replace_terminal, mut_replace_primitive
-
 log = logging.getLogger(__name__)
 
 
@@ -164,50 +162,9 @@ def expression_to_component(primitive, terminals, pset, parameter_checks=None):
     if (parameter_checks is not None
             and primitive.name in parameter_checks
             and not parameter_checks[primitive.name](kwargs)):
-        raise ValueError('Not a valid configuration according to the parameter check.')
+        raise ValueError('Not a valid configuration according to the provided parameter check.')
 
     return primitive_class(**kwargs), len(kwargs)
-
-
-def compile_individual_tree(ind, pset, parameter_checks=None):
-    """ Compile the individual to a sklearn pipeline."""
-    components = []
-    name_counter = defaultdict(int)
-    while len(ind) > 0:
-        prim, remainder = ind[0], ind[1:]
-        if isinstance(prim, gp.Terminal):
-            if len(remainder) > 0:
-                raise Exception
-            break
-        # See if all terminals have a value provided (except Data Terminal)
-        required_provided = list(zip(reversed(prim.args[1:]), reversed(remainder)))
-        if all(r == p.ret for (r, p) in required_provided):
-            # log_message('compiling ' + str([p.name for r, p in required_provided]), level = 5)
-            # If so, instantiate the pipeline component with given arguments.
-            def extract_arg_name(terminal_name):
-                equal_idx = terminal_name.rfind('=')
-                start_parameter_name = terminal_name.rfind('.', 0, equal_idx) + 1
-                return terminal_name[start_parameter_name:equal_idx]
-            args = {
-                extract_arg_name(p.name): pset.context[p.name]
-                for r, p in required_provided
-            }
-            class_ = pset.context[prim.name]
-            # All pipeline components must have a unique name
-            name = prim.name + str(name_counter[prim.name])
-            name_counter[prim.name] += 1
-            if (parameter_checks is not None
-                    and prim.name in parameter_checks
-                    and not parameter_checks[prim.name](args)):
-                return None
-            components.append((name, class_(**args)))
-            if len(args) > 0:
-                ind = ind[1:-len(args)]
-            else:
-                ind = ind[1:]
-        else:
-            raise TypeError("Type is wrong or missing.")
-    return Pipeline(list(reversed(components)))
 
 
 def generate_valid(pset, min_, max_, toolbox):
@@ -218,25 +175,6 @@ def generate_valid(pset, min_, max_, toolbox):
         if pl is not None:
             return ind
     raise Exception
-
-
-def random_valid_mutation(ind, pset):
-    """ Picks a mutation uniform at random from options which are possible. 
-    
-    The choices are `mut_random_primitive`, `mut_random_terminal`, 
-    `mutShrink` and `mutInsert`.
-    In particular a pipeline can not shrink a primitive if it only has one.
-    """
-    available_mutations = [mut_replace_terminal, mut_replace_primitive, gp.mutInsert]
-    if len([el for el in ind if issubclass(type(el), gp.Primitive)]) > 1:
-        available_mutations.append(gp.mutShrink)
-        
-    mut_fn = np.random.choice(available_mutations)
-    if gp.mutShrink == mut_fn:
-        # only mutShrink function does not need pset.
-        return mut_fn(ind)
-    else:
-        return mut_fn(ind, pset)
 
 
 def individual_length(individual):

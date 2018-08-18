@@ -14,7 +14,8 @@ from sklearn.preprocessing import Imputer
 import gama.ea.evaluation
 from .ea.modified_deap import cxOnePoint
 from .ea import automl_gp
-from .ea.automl_gp import compile_individual, pset_from_config, generate_valid, random_valid_mutation
+from .ea.automl_gp import compile_individual, pset_from_config, generate_valid
+from gama.ea.mutation import random_valid_mutation
 from .ea.evaluation import string_to_metric
 from .utilities.observer import Observer
 
