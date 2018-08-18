@@ -13,9 +13,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error, log_loss
 from time import time
 
-from GamaRegressor import GamaRegressor
-from GamaClassifier import GamaClassifier
-from visualization.visualizer import Visualizer
+from gama import GamaRegressor
+from gama import GamaClassifier
 
 if __name__ == '__main__':
     root = logging.getLogger()
@@ -44,15 +43,11 @@ if __name__ == '__main__':
 
     for _ in range(1):
         start = time()
-        gpaml = GamaClassifier(random_state=1, generations=5, population_size=10, n_jobs=7, async=True)
+        gpaml = GamaClassifier(random_state=1, population_size=10, n_jobs=7, max_total_time=60)
         gpaml.generation_completed(lambda x: print('generation completed!', len(x), 'individuals.'))
-        #viz = Visualizer()
-        #gpaml.evaluation_completed(viz.new_evaluation_result)
-        #gpaml._observer.on_pareto_updated(viz.new_pareto_entry)
-        gpaml.fit(X_train, y_train)
+        gpaml.fit(X_train, y_train, auto_ensemble_n=3)
         print('dur', time()-start)
-    #predictions_1 = gpaml.predict(X_test)
-    #print('Accuracy n=1:', accuracy_score(y_test, predictions_1))
+
     predictions_5 = gpaml.predict(X_test, auto_ensemble_n=3)
     print('Accuracy n=3:', log_loss(y_test, predictions_5))
 

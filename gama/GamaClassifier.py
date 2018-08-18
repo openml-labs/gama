@@ -1,9 +1,8 @@
-import logging
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 
 from .gama import Gama
-from .utilities.configuration import clf_config
+from gama.configuration.classification import clf_config
 
 
 class GamaClassifier(Gama):
