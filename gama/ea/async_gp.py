@@ -11,7 +11,7 @@ from gama.utilities.generic.function_dispatcher import FunctionDispatcher
 log = logging.getLogger(__name__)
 
 
-def safe_outside_call(fn, timeout):
+def _safe_outside_call(fn, timeout):
     """ Calls fn and log any exception it raises without reraising, except for TimeoutException. """
     try:
         fn()
@@ -28,12 +28,13 @@ def safe_outside_call(fn, timeout):
         raise stopit.utils.TimeoutException
 
 
-def async_ea(objectives, start_population, toolbox, evaluation_callback=None, restart_callback=None, elimination_callback=None, n_evaluations=10000, max_time_seconds=1e7, n_jobs=1):
+def async_ea(objectives, start_population, toolbox, evaluation_callback=None, restart_callback=None,
+             elimination_callback=None, max_n_evaluations=10000, max_time_seconds=1e7, n_jobs=1):
     if max_time_seconds <= 0 or max_time_seconds > 3e6:
         raise ValueError("'max_time_seconds' must be greater than 0 and less than or equal to 3e6, but was {}."
                          .format(max_time_seconds))
-    if n_evaluations <= 0:
-        raise ValueError("'n_evaluations' must be non-negative, but was {}.".format(n_evaluations))
+    if max_n_evaluations <= 0:
+        raise ValueError("'n_evaluations' must be non-negative, but was {}.".format(max_n_evaluations))
     if n_jobs <= 0:
         raise ValueError("'n_jobs' must be non-negative, but was {}.".format(n_jobs))
 
@@ -41,6 +42,9 @@ def async_ea(objectives, start_population, toolbox, evaluation_callback=None, re
     max_population_size = len(start_population)
     queued_individuals_str = set()
     queued_individuals = {}
+    logger = MultiprocessingLogger() if n_jobs > 1 else log
+    evaluation_dispatcher = FunctionDispatcher(n_jobs, partial(toolbox.evaluate, logger=logger))
+    evaluation_dispatcher.start()
 
     def exceed_timeout():
         return (time.time() - start_time) > max_time_seconds
@@ -74,10 +78,6 @@ def async_ea(objectives, start_population, toolbox, evaluation_callback=None, re
         return individual
 
     with stopit.ThreadingTimeout(max_time_seconds) as c_mgr:
-        logger = MultiprocessingLogger() if n_jobs > 1 else log
-        evaluation_dispatcher = FunctionDispatcher(n_jobs, partial(toolbox.evaluate, logger=logger))
-        evaluation_dispatcher.start()
-
         should_restart = True
         while should_restart:
             should_restart = False
@@ -87,13 +87,13 @@ def async_ea(objectives, start_population, toolbox, evaluation_callback=None, re
             for individual in start_population:
                 queue_individual_for_evaluation(individual)
 
-            for ind_no in range(n_evaluations):
+            for ind_no in range(max_n_evaluations):
                 individual = get_next_evaluation_result()
                 log_parseable_event(log, TOKENS.EVALUATION_RESULT,
                                     individual.fitness.time, individual.fitness.wvalues, individual)
 
                 if evaluation_callback:
-                    safe_outside_call(partial(evaluation_callback, individual), exceed_timeout)
+                    _safe_outside_call(partial(evaluation_callback, individual), exceed_timeout)
 
                 should_restart = (restart_callback is not None and restart_callback())
                 if should_restart:
@@ -108,7 +108,7 @@ def async_ea(objectives, start_population, toolbox, evaluation_callback=None, re
                     log_parseable_event(log, TOKENS.EA_REMOVE_IND, to_remove)
                     current_population.remove(to_remove[0])
                     if elimination_callback:
-                        safe_outside_call(partial(elimination_callback, to_remove[0]), exceed_timeout)
+                        _safe_outside_call(partial(elimination_callback, to_remove[0]), exceed_timeout)
 
                 if len(current_population) > 1:
                     for _ in range(50):
