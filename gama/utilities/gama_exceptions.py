@@ -1,4 +1,0 @@
-
-
-class AttributeNotAssignedError(Exception):
-    pass

@@ -17,7 +17,6 @@ from .ea.modified_deap import cxOnePoint
 from .ea import automl_gp
 from .ea.automl_gp import compile_individual, pset_from_config, generate_valid, random_valid_mutation
 from .ea.evaluation import string_to_metric
-from .utilities.gama_exceptions import AttributeNotAssignedError
 from .utilities.observer import Observer
 
 from .ea.async_gp import async_ea
