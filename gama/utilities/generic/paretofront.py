@@ -15,16 +15,20 @@ class ParetoFront(object):
         self._front = []
 
     def update(self, new_item):
-        """ Updates the Pareto-front with new_item if it dominates any current item in the Pareto-front.
+        """ Updates the Pareto front with new_item if it dominates any current item in the Pareto front.
 
-        :param new_item: Item to be evaluated for submission to the Pareto-front.
-        :return: True if the pareto-front is updated, False otherwise.
+        :param new_item: Item to be evaluated for submission to the Pareto front.
+        :return: True if the Pareto front is updated, False otherwise.
         """
         if not self._front:
             self._front.append(new_item)
             return True
 
         values = self._get_values_fn(new_item)
+        if len(self._front[0]) != len(values):
+            raise ValueError("Arity of added tuple must match that of the ones in the Pareto front. Front tuples have "
+                             "arity {} and new tuple has arity {}.".format(len(self._front[0]), len(values)))
+
         to_remove = []
 
         # Check for each point whether new_item dominates it, it gets dominated, or neither.
