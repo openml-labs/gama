@@ -1,8 +1,9 @@
 class ParetoFront(object):
-    """  """
+    """  A Pareto front is a list of tuples in which no one tuple is dominated by another. """
 
-    def __init__(self, get_values_fn=None):
+    def __init__(self, start_list=None, get_values_fn=None):
         """
+        :param start_list: list or None (default: None). List of items of which to calculate the Pareto front.
         :param get_values_fn: (default: None)
             function that takes an item and returns a tuple of values such that each should be maximized.
             If left None, it is assumed that items are already tuples of which each value should be maximized.
@@ -13,11 +14,17 @@ class ParetoFront(object):
             self._get_values_fn = lambda x: x
 
         self._front = []
+        if start_list:
+            for item in start_list:
+                self.update(item)
+
+        self._iterator_index = 0
 
     def update(self, new_item):
         """ Updates the Pareto front with new_item if it dominates any current item in the Pareto front.
 
-        :param new_item: Item to be evaluated for submission to the Pareto front.
+        :param new_item: Item to be evaluated for submission to the Pareto front. Arity must match that of items
+          already in the Pareto front.
         :return: True if the Pareto front is updated, False otherwise.
         """
         if not self._front:
@@ -25,7 +32,8 @@ class ParetoFront(object):
             return True
 
         values = self._get_values_fn(new_item)
-        if len(self._front[0]) != len(values):
+        old_arity = len(self._get_values_fn(self._front[0]))
+        if old_arity != len(values):
             raise ValueError("Arity of added tuple must match that of the ones in the Pareto front. Front tuples have "
                              "arity {} and new tuple has arity {}.".format(len(self._front[0]), len(values)))
 
@@ -48,3 +56,21 @@ class ParetoFront(object):
             self._front.remove(item)
         self._front.append(new_item)
         return True
+
+    def __iter__(self):
+        self._iterator_index = 0
+        return self
+
+    def __next__(self):
+        if self._iterator_index >= len(self._front):
+            raise StopIteration
+
+        self._iterator_index += 1
+        return self._front[self._iterator_index - 1]
+
+    def __str__(self):
+        return str(self._front)
+
+    def __repr__(self):
+        # TODO: Add notification of non-standard `self._get_values_fn`.
+        return 'ParetoFront({})'.format(str(self._front))
