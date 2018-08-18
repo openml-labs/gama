@@ -57,6 +57,9 @@ class ParetoFront(object):
         self._front.append(new_item)
         return True
 
+    def clear(self):
+        self._front = []
+
     def __iter__(self):
         self._iterator_index = 0
         return self

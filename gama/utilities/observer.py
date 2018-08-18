@@ -1,8 +1,8 @@
 import logging
 
+from gama.utilities.generic.paretofront import ParetoFront
+
 log = logging.getLogger(__name__)
-
-
 
 
 class Observer(object):
@@ -44,7 +44,7 @@ class Observer(object):
             log.info("Overall pareto-front updated with individual with wvalues {}.".format(ind.fitness.wvalues))
 
     def reset_current_pareto_front(self):
-        self._current_pareto_front._front = []
+        self._current_pareto_front.clear()
         self._individuals_since_last_pareto_update = 0
 
     def best_n(self, n):
