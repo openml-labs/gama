@@ -10,7 +10,6 @@ from deap import gp, tools
 import sklearn
 from sklearn.pipeline import Pipeline
 
-from ..utilities.stacking_transformer import make_stacking_transformer
 from ..ea.modified_deap import gen_grow_safe
 
 from .mutation import mut_replace_terminal, mut_replace_primitive
@@ -93,25 +92,9 @@ def pset_from_config(configuration):
             elif (issubclass(key, sklearn.base.ClassifierMixin) or
                   (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] == "CLASSIFICATION")):
                 pset.addPrimitive(key, [Data, *hyperparameter_types], Predictions)
-
-                if False:
-                    # Does not work with multi-processing.
-                    stacking_class = make_stacking_transformer(key)
-                    primname = key.__name__ + stacking_class.__name__
-                    pset.addPrimitive(stacking_class, [Data, *hyperparameter_types], Data, name=primname)
-                    if key.__name__ in parameter_checks:
-                        parameter_checks[primname] = parameter_checks[key.__name__]
             elif (issubclass(key, sklearn.base.RegressorMixin) or
                   (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] == "REGRESSION")):
                 pset.addPrimitive(key, [Data, *hyperparameter_types], Predictions)
-
-                if False:
-                    # Does not work with multi-processing.
-                    stacking_class = make_stacking_transformer(key)
-                    primname = key.__name__ + stacking_class.__name__
-                    pset.addPrimitive(stacking_class, [Data, *hyperparameter_types], Data, name=primname)
-                    if key.__name__ in parameter_checks:
-                        parameter_checks[primname] = parameter_checks[key.__name__]
             else:
                 raise TypeError("Expected {} to be either subclass of "
                                 "TransformerMixin, RegressorMixin or ClassifierMixin.".format(key))
