@@ -14,7 +14,8 @@ Welcome to gama's documentation!
    
    basics
    configuration
-   generated\modules
+   api/gamaclassifier
+   generated/modules
    
    :caption: Contents:
 
