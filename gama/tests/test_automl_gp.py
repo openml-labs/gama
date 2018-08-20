@@ -2,8 +2,10 @@ import unittest
 
 from deap import gp
 
-from automl_gp import mut_replace_primitive, mut_replace_terminal, find_unmatched_terminal, compile_individual
-from gama import Gama
+from gama.ea.automl_gp import compile_individual
+from gama.ea.mutation import mut_replace_primitive, mut_replace_terminal, find_unmatched_terminal
+from gama import GamaClassifier
+
 
 def automl_gp_test_suite():
     test_cases = [AutomlGpTestCase]
@@ -24,7 +26,7 @@ class AutomlGpTestCase(unittest.TestCase):
     """
     
     def setUp(self):
-        self.gama = Gama(random_state=0)
+        self.gama = GamaClassifier(random_state=0)
         
         self.ind_strings = [
                 "GaussianNB(data)",
@@ -51,8 +53,6 @@ class AutomlGpTestCase(unittest.TestCase):
                 ind_str: gp.PrimitiveTree.from_string(ind_str, self.gama._pset)
                 for ind_str in self.ind_strings
                 }
-        
-    
     
     def test_find_next_unmatched_terminal(self):
         
@@ -67,7 +67,6 @@ class AutomlGpTestCase(unittest.TestCase):
         # RFC(__(data, FA_t1, FA_t2), RFC_t1,...,RFC_tN -> 1
         pruned_ind = self.individuals[self.ind_strings[1]][:1] + self.individuals[self.ind_strings[1]][2:]
         self.assertEqual(find_unmatched_terminal(pruned_ind), 2)
-        
     
     def test_mut_replace_terminal(self):
         """ Tests if mut_replace_terminal replaces exactly one terminal. """
