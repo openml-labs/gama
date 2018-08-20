@@ -1,4 +1,5 @@
-# GAMA Basics
+GAMA Basics
+===========
 This file gives an introduction to basic components and concepts of GAMA.
 GAMA is an AutoML tool which aims to automatically find the right machine learning algorithms to create the best possible data for your model.
 

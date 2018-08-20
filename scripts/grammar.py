@@ -129,7 +129,8 @@ def individual_to_string(ind):
     return str(primitive) + '(' + ','.join(preprocess_str+[str(el) for el in p_terminals]) + ')'
 
 
-prims, terms = create_pset(config)
-individual_to_string(generate_individual(prims, terms))
-# generate_individual(create_pset(config))
+if __name__ == '__main__':
+    prims, terms = create_pset(config)
+    individual_to_string(generate_individual(prims, terms))
+    # generate_individual(create_pset(config))
 
