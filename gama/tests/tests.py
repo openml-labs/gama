@@ -4,6 +4,7 @@ import warnings
 from gama.tests.test_automl_gp import automl_gp_test_suite
 from gama.tests.test_gama import gama_test_suite
 from gama.tests.test_utilities_generic_paretofront import paretofront_test_suite
+from gama.tests.test_utilities_generic_stopwatch import stopwatch_test_suite
 
 # ..\deap\creator.py:141: RuntimeWarning: A class named 'FitnessMax'/'Individual' has already
 #  been created and it will be overwritten. Consider deleting previous creation of that class
@@ -18,4 +19,5 @@ tests_succeeded = unittest.TextTestRunner().run(paretofront_test_suite()).wasSuc
 tests_succeeded &= unittest.TextTestRunner().run(automl_gp_test_suite()).wasSuccessful()
 if tests_succeeded:
     print('continuing tests....')
+    tests_succeeded = unittest.TextTestRunner().run(stopwatch_test_suite()).wasSuccessful()
     #unittest.TextTestRunner().run(gama_test_suite())
