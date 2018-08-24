@@ -3,6 +3,7 @@ import warnings
 
 from gama.tests.test_automl_gp import automl_gp_test_suite
 from gama.tests.test_gama import gama_test_suite
+from gama.tests.test_ea_mutation import mutation_test_suite
 from gama.tests.test_utilities_generic_paretofront import paretofront_test_suite
 from gama.tests.test_utilities_generic_stopwatch import stopwatch_test_suite
 
@@ -16,7 +17,7 @@ warnings.filterwarnings('ignore',
                         lineno=141)
 
 tests_succeeded = unittest.TextTestRunner().run(paretofront_test_suite()).wasSuccessful()
-tests_succeeded &= unittest.TextTestRunner().run(automl_gp_test_suite()).wasSuccessful()
+tests_succeeded &= unittest.TextTestRunner().run(mutation_test_suite()).wasSuccessful()
 if tests_succeeded:
     print('continuing tests....')
     tests_succeeded = unittest.TextTestRunner().run(stopwatch_test_suite()).wasSuccessful()
