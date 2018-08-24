@@ -53,6 +53,9 @@ class AutomlGpTestCase(unittest.TestCase):
                 ind_str: gp.PrimitiveTree.from_string(ind_str, self.gama._pset)
                 for ind_str in self.ind_strings
                 }
+
+    def tearDown(self):
+        self.gama.delete_cache()
     
     def test_find_next_unmatched_terminal(self):
         
