@@ -18,6 +18,7 @@ warnings.filterwarnings('ignore',
 
 tests_succeeded = unittest.TextTestRunner().run(paretofront_test_suite()).wasSuccessful()
 tests_succeeded &= unittest.TextTestRunner().run(mutation_test_suite()).wasSuccessful()
+tests_succeeded &= unittest.TextTestRunner().run(automl_gp_test_suite()).wasSuccessful()
 if tests_succeeded:
     print('continuing tests....')
     tests_succeeded = unittest.TextTestRunner().run(stopwatch_test_suite()).wasSuccessful()
