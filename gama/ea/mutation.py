@@ -30,10 +30,9 @@ def mut_replace_terminal(ind, pset):
 
     eligible = [i for i, el in enumerate(ind) if
                 (issubclass(type(el), gp.Terminal) and len(pset.terminals[el.ret]) > 1)]
-    # els = [el for i,el in enumerate(ind) if (issubclass(type(el), gp.Terminal) and len(pset.terminals[el.ret])>1)]
+
     if eligible == []:
-        # print('No way to mutate '+str(ind)+' was found.')
-        return ind,
+        raise ValueError('Individual could not be mutated because no valid terminal was available: {}'.format(ind))
 
     to_change = np.random.choice(eligible)
     alternatives = [t for t in pset.terminals[ind[to_change].ret] if t != ind[to_change]]
@@ -49,7 +48,7 @@ def mut_replace_primitive(ind, pset):
     eligible = [i for i, el in enumerate(ind) if
                 (issubclass(type(el), gp.Primitive) and len(pset.primitives[el.ret]) > 1)]
     if eligible == []:
-        return ind,
+        raise ValueError('Individual could not be mutated because no valid primitive was available: {}'.format(ind))
 
     to_change = np.random.choice(eligible)
     number_of_removed_terminals = len(ind[to_change].args) - 1
@@ -100,11 +99,15 @@ def random_valid_mutation(ind, pset):
 
     The choices are `mut_random_primitive`, `mut_random_terminal`,
     `mutShrink` and `mutInsert`.
-    In particular a pipeline can not shrink a primitive if it only has one.
+    A pipeline can not shrink a primitive if it only has one.
+    A terminal can not be replaced if it there is none.
     """
-    available_mutations = [mut_replace_terminal, mut_replace_primitive, gp.mutInsert]
+    available_mutations = [mut_replace_primitive, gp.mutInsert]
     if len([el for el in ind if issubclass(type(el), gp.Primitive)]) > 1:
         available_mutations.append(gp.mutShrink)
+    # The data-input terminal is always guaranteed, but can not be mutated.
+    if len([el for el in ind if issubclass(type(el), gp.Terminal)]) > 1:
+        available_mutations.append(mut_replace_terminal)
 
     mut_fn = np.random.choice(available_mutations)
     if gp.mutShrink == mut_fn:
