@@ -28,7 +28,7 @@ class AutomlGpTestCase(unittest.TestCase):
     """
     
     def setUp(self):
-        self.gama = GamaClassifier(config=clf_config)
+        self.gama = GamaClassifier(config=clf_config, objectives=('accuracy', 'size'))
 
         self.ind_strings = [
             "GaussianNB(data)",
