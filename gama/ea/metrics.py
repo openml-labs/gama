@@ -1,3 +1,4 @@
+from enum import Enum
 from functools import partial
 
 import numpy as np
@@ -41,14 +42,21 @@ regression_metrics = dict(
     mean_squared_error=(metrics.mean_squared_error, False, False)
 )
 
-metric_strings = {**classification_metrics, **regression_metrics}
+
+class MetricType(Enum):
+    CLASSIFICATION = 1
+    REGRESSION = 2
 
 
 class Metric:
 
     def __init__(self, metric_name):
-        if metric_name not in metric_strings:
-            raise ValueError('Metric must be one of {}'.format(metric_strings.keys()))
+        if metric_name in regression_metrics:
+            self.task_type = MetricType.REGRESSION
+        elif metric_name in classification_metrics:
+            self.task_type = MetricType.CLASSIFICATION
+        else:
+            raise ValueError('Metric must be one of {}'.format({**classification_metrics, **regression_metrics}))
 
         self.name = metric_name
         self._score_function, self.requires_probabilities, bigger_is_better = metric_strings[metric_name]
