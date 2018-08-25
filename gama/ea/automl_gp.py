@@ -65,7 +65,7 @@ def pset_from_config(configuration):
                 # it as terminal type, making sure it matches with expected
                 # input of the operators. Moreover it automatically makes sure that
                 # crossover only happens between same hyperparameters.
-                if param_values == []:
+                if isinstance(param_values, list) and not param_values:
                     # An empty list indicates a shared hyperparameter
                     hyperparameter_types.append(shared_hyperparameter_types[name])
                 elif name == "param_check":
