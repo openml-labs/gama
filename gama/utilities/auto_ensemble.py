@@ -7,7 +7,8 @@ import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 import stopit
 
-from ..ea.evaluation import string_to_metric, evaluate, Metric
+from gama.ea.evaluation import evaluate
+from gama.ea.metrics import Metric, classification_metrics
 from gama.utilities.generic.function_dispatcher import FunctionDispatcher
 
 log = logging.getLogger(__name__)
@@ -33,7 +34,7 @@ class Ensemble(object):
         :param label_encoder: a LabelEncoder which can decode the model predictions to desired labels.
         """
         if isinstance(metric, str):
-            metric = string_to_metric(metric)
+            metric = Metric(metric)
 
         if model_library is None and model_library_directory is None:
             raise ValueError("At least one of model_library or model_library_directory must be specified.")
@@ -42,6 +43,7 @@ class Ensemble(object):
             log.warning("model_library_directory will be ignored because model_library is also specified.")
 
         self._metric = metric
+        self._is_classification = (metric.name in classification_metrics)
         self._model_library_directory = model_library_directory
         self._model_library = model_library if model_library is not None else []
         self._shrink_on_pickle = shrink_on_pickle
@@ -97,10 +99,7 @@ class Ensemble(object):
             log.warning("The ensemble already contained models. Overwriting the ensemble.")
             self._models = {}
 
-        #sorted_ensembles = sorted(self.model_library, key=lambda m: m.validation_score)
-        sorted_ensembles = sorted(self.model_library, key=lambda m: evaluate(self._metric, self._y_true, m.predictions))
-        if self._maximize:
-            sorted_ensembles = reversed(sorted_ensembles)
+        sorted_ensembles = sorted(self.model_library, key=lambda m: -self._metric.maximizable_score(self._y_true, m.predictions))
 
         # Since the model library only features unique models, we do not need to check for duplicates here.
         selected_models = list(sorted_ensembles)[:n]
@@ -108,7 +107,7 @@ class Ensemble(object):
             self._add_model(model)
 
         log.debug("Initial ensemble created with score {}".format(
-                  evaluate(self._metric, self._y_true, self._averaged_validation_predictions())))
+                  self._metric.maximizable_score(self._y_true, self._averaged_validation_predictions())))
         return self
 
     def _total_model_weights(self):
@@ -143,7 +142,7 @@ class Ensemble(object):
                     continue
                 candidate_pred = current_weighted_average + \
                                  (model.predictions - current_weighted_average) / (current_total_weight + 1)
-                candidate_ensemble_score = evaluate(self._metric, self._y_true, candidate_pred)
+                candidate_ensemble_score = self._metric.maximizable_score(self._y_true, candidate_pred)
                 if ((self._maximize and best_addition_score < candidate_ensemble_score) or
                         (not self._maximize and best_addition_score > candidate_ensemble_score)):
                     best_addition, best_addition_score = model, candidate_ensemble_score
@@ -187,20 +186,18 @@ class Ensemble(object):
         return self
 
     def predict(self, X):
-        if self._metric.is_classification:
+        if self._is_classification:
             predictions = np.squeeze(np.argmax(self.predict_proba(X), axis=1))
             if self._label_encoder:
                 predictions = self._label_encoder.inverse_transform(predictions)
-        elif self._metric.is_regression:
-            predictions = self.predict_proba(X)
         else:
-            raise NotImplemented('Unknown task type for ensemble.')
+            predictions = self.predict_proba(X)
         return predictions
 
     def predict_proba(self, X):
         predictions = []
 
-        if self._metric.is_classification:
+        if self._is_classification and self._y_true.ndim == 1:
             ohe = OneHotEncoder(len(set(self._y_true)))
 
         for (model, weight) in self._fit_models:
@@ -237,10 +234,6 @@ class Ensemble(object):
         return ensemble_str
 
     def __getstate__(self):
-        # TODO: Fix properly. Workaround for unpicklable local 'neg' functions.
-        if 'neg' in self._metric.name:
-            name, fn, *rest = self._metric
-            self._metric = Metric(name, None, *rest)
 
         if self._shrink_on_pickle:
             log.info('Shrinking before pickle because shrink_on_pickle is True.'
