@@ -73,14 +73,20 @@ class FunctionDispatcher(object):
 
     def start(self):
         """ Start child processes. """
-        log.debug('Starting {} child processes.'.format(self._n_jobs))
-        self._job_map = {}
-        for _ in range(self._n_jobs):
-            p = mp.Process(target=evaluator_daemon,
-                           args=(self._input_queue, self._output_queue, self._func))
-            p.daemon = True
-            self._child_processes.append(p)
-            p.start()
+        if self._child_processes:
+            raise RuntimeError("Child processes already running.")
+
+        if self._n_jobs > 1:
+            log.debug('Starting {} child processes.'.format(self._n_jobs))
+            self._job_map = {}
+            for _ in range(self._n_jobs):
+                p = mp.Process(target=evaluator_daemon,
+                               args=(self._input_queue, self._output_queue, self._func))
+                p.daemon = True
+                self._child_processes.append(p)
+                p.start()
+        else:
+            log.debug('Not starting child processes because n_jobs=1.')
 
     def stop(self):
         """ Dequeue all outstanding jobs, discard saved results and terminate child processes. """
