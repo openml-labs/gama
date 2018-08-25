@@ -1,5 +1,6 @@
 import inspect
 import numpy as np
+from sklearn.base import ClassifierMixin
 from sklearn.preprocessing import LabelEncoder
 
 from .gama import Gama
@@ -18,7 +19,7 @@ class GamaClassifier(Gama):
             # we don't want classifiers that do not have `predict_proba`, because then we have to
             # start doing one hot encodings of predictions etc.
             config = {alg: hp for (alg, hp) in config.items()
-                      if not (inspect.isclass(alg) and not hasattr(alg(), 'predict_proba'))}
+                      if not (inspect.isclass(alg) and issubclass(alg, ClassifierMixin)and not hasattr(alg(), 'predict_proba'))}
 
         self._label_encoder = None
         super().__init__(*args, **kwargs, config=config, objectives=objectives)
