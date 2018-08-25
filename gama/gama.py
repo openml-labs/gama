@@ -9,14 +9,14 @@ import time
 
 import numpy as np
 from deap import base, creator, tools, gp
-from sklearn.preprocessing import Imputer
+from sklearn.preprocessing import Imputer, OneHotEncoder
 
 import gama.ea.evaluation
 from .ea.modified_deap import cxOnePoint
 from .ea import automl_gp
 from .ea.automl_gp import compile_individual, pset_from_config, generate_valid
 from gama.ea.mutation import random_valid_mutation
-from .ea.evaluation import string_to_metric
+from .ea.metrics import Metric
 from .utilities.observer import Observer
 
 from .ea.async_ea import async_ea
@@ -90,7 +90,7 @@ class Gama(object):
             log.error(error_message + " max_eval_time: {}".format(max_eval_time))
             raise ValueError(error_message)
 
-        self._best_pipelines = None
+        self._best_pipeline = None
         self._fitted_pipelines = {}
         self._random_state = random_state
         self._pop_size = population_size
@@ -158,21 +158,28 @@ class Gama(object):
         :return: a numpy array with class probabilities. The array is of shape (N, K) where N is the length of the
             first dimension of X, and K is the number of class labels found in `y` of `fit`.
         """
-        if (self.ensemble is None) or (sum(map(lambda pl_w: pl_w[1], self.ensemble._fit_models)) == 0):
+        ensemble_not_fit = (self.ensemble is None) or (sum(map(lambda pl_w: pl_w[1], self.ensemble._fit_models)) == 0)
+        if ensemble_not_fit:
+            log.warning("Ensemble did not fit in time.")
             # Sum of weights of ensemble is 0, meaning no pipeline finished fitting.
-            log.warning("Ensemble did not fit in time. Falling back on default predictions.")
-            X_tr, y_tr = self._fit_data
-            prediction = optimal_constant_predictor(y_tr, string_to_metric(self._scoring_function))
-            return np.asarray([prediction for _ in range(len(X))])
+            if self._best_pipeline is None:
+                log.warning("Best pipeline did not fit in time. Falling back on default predictions.")
+                X_tr, y_tr = self._fit_data
+                prediction = optimal_constant_predictor(y_tr, Metric(self._scoring_function))
+                return np.asarray([prediction for _ in range(len(X))])
 
-        #if len(self._observer._individuals) < auto_ensemble_n:
-        #    print('Warning: Not enough pipelines evaluated. Continuing with less.')
         if np.isnan(X).any():
             # This does not work if training data set did not have missing numbers.
             X = self._imputer.transform(X)
 
         if self.ensemble is not None:
             return self.ensemble.predict_proba(X)
+        elif self._best_pipeline is not None:
+            if hasattr(self._best_pipeline, 'predict_proba'):
+                return self._best_pipeline.predict_proba(X)
+            else:
+                log.warning('Best pipeline can not predict probabilities. Providing one-hot encoded predictions.')
+                raise NotImplementedError
 
     def predict(self, X):
         """ Predict the target for input X.
@@ -270,6 +277,13 @@ class Gama(object):
             log.info("Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.")
             X = self._imputer.transform(X)
 
+        self.X = X
+        self.y_train = y
+        if Metric(self._scoring_function).requires_probabilities:
+            self.y_score = OneHotEncoder().fit_transform(y.reshape(-1, 1)).todense()
+        else:
+            self.y_score = y
+
         self._fit_data = (X, y)
         return X, y
 
@@ -282,7 +296,8 @@ class Gama(object):
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = self._toolbox.population(n=self._pop_size)
 
-        self._toolbox.register("evaluate", gama.ea.evaluation.evaluate_pipeline, X=X, y=y,
+        self._toolbox.register("evaluate", gama.ea.evaluation.evaluate_pipeline,
+                               X=self.X, y_train=self.y_train, y_score=self.y_score,
                                scoring=self._scoring_function, timeout=self._max_eval_time,
                                cache_dir=self._cache_dir)
 
@@ -300,7 +315,12 @@ class Gama(object):
 
     def _postprocess_phase(self, n, timeout=1e6):
         """ Perform any necessary post processing, such as ensemble building. """
-        self._build_fit_ensemble(n, timeout=timeout)
+        self._best_pipeline = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.wvalues)))[0]
+        print(self._best_pipeline.fitness.wvalues)
+        self._best_pipeline = self._toolbox.compile(self._best_pipeline)
+        X, y = self._fit_data
+        self._best_pipeline.fit(X, self.y_train)
+        #self._build_fit_ensemble(n, timeout=timeout)
 
     def _build_fit_ensemble(self, ensemble_size, timeout):
         start_build = time.time()
