@@ -42,6 +42,8 @@ regression_metrics = dict(
     mean_squared_error=(metrics.mean_squared_error, False, False)
 )
 
+all_metrics = {**classification_metrics, **regression_metrics}
+
 
 class MetricType(Enum):
     CLASSIFICATION = 1
@@ -56,10 +58,10 @@ class Metric:
         elif metric_name in classification_metrics:
             self.task_type = MetricType.CLASSIFICATION
         else:
-            raise ValueError('Metric must be one of {}'.format({**classification_metrics, **regression_metrics}))
+            raise ValueError('Metric must be one of {}'.format())
 
         self.name = metric_name
-        self._score_function, self.requires_probabilities, bigger_is_better = metric_strings[metric_name]
+        self._score_function, self.requires_probabilities, bigger_is_better = all_metrics[metric_name]
         self.optimize_modifier = 1 if bigger_is_better else -1
 
     def score(self, y_true, predictions):
