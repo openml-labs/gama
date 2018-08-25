@@ -3,43 +3,13 @@ import pickle
 import time
 import uuid
 
-import numpy as np
 import stopit
 from sklearn.model_selection import cross_val_predict
-from sklearn.preprocessing import OneHotEncoder
 
 from gama.ea.automl_gp import log
 from gama.ea.metrics import Metric
 from gama.utilities import log_parseable_event, TOKENS
 from gama.utilities.mp_logger import MultiprocessingLogger
-
-
-def evaluate(metric, y, p):
-    """ Metrics are difficult. Some need a 1d-array. Some don't allow probabilities. This method
-    formats y and p probably, and evaluates the metric.
-
-    :param metric:
-    :param y:
-    :param p:
-    :return:
-    """
-    formatted_predictions = p
-    formatted_y = y
-
-    if metric.is_classification:
-        if metric.requires_1d:
-            if p.ndim > 1:
-                formatted_predictions = np.argmax(p, axis=1)
-            if y.ndim > 1:
-                formatted_y = np.argmax(y, axis=1)
-        else:
-            if y.ndim == 1:
-                formatted_y = OneHotEncoder().fit_transform(y.reshape(-1, 1)).todense()
-            if p.ndim == 1:
-                formatted_predictions = OneHotEncoder().fit_transform(p.reshape(-1, 1)).todense()
-
-    score = metric.fn(formatted_y, formatted_predictions)
-    return score
 
 
 def cross_val_predict_score(estimator, X, y_train, y_score, groups=None, scoring=None, cv=None, n_jobs=1, verbose=0,
@@ -85,11 +55,11 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, scoring='accuracy', cv=5
             raise
         except Exception as e:
             if isinstance(logger, MultiprocessingLogger):
-                logger.info('{} encountered while evaluating pipeline.'.format(type(e)))#, exc_info=True)
+                logger.info('{} encountered while evaluating pipeline.'.format(type(e)))
             else:
                 logger.info('{} encountered while evaluating pipeline.'.format(type(e)), exc_info=True)
 
-            single_line_pipeline = ''.join(str(pl).split('\n'))
+            single_line_pipeline = str(pl).replace(old='\n', new='')
             log_parseable_event(logger, TOKENS.EVALUATION_ERROR, single_line_pipeline, type(e), e)
             score = -float("inf")
 
