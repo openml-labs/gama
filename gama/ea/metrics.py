@@ -62,7 +62,7 @@ class Metric:
 
         self.name = metric_name
         self._score_function, self.requires_probabilities, bigger_is_better = all_metrics[metric_name]
-        self.optimize_modifier = 1 if bigger_is_better else -1
+        self._optimize_modifier = 1 if bigger_is_better else -1
 
     def score(self, y_true, predictions):
         # Scikit-learn metrics can be very flexible with their input, interpreting a list as class labels for one
@@ -85,4 +85,4 @@ class Metric:
 
     def maximizable_score(self, y_true, predictions):
         """ Calculates the score, but negated if necessary so that maximizing is always better. """
-        return self.optimize_modifier * self.score(y_true, predictions)
+        return self._optimize_modifier * self.score(y_true, predictions)
