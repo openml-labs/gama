@@ -51,19 +51,19 @@ class Metric:
             raise ValueError('Metric must be one of {}'.format(metric_strings.keys()))
 
         self.name = metric_name
-        self._score_function, self._requires_probabilities, bigger_is_better = metric_strings[metric_name]
+        self._score_function, self.requires_probabilities, bigger_is_better = metric_strings[metric_name]
         self.optimize_modifier = 1 if bigger_is_better else -1
 
     def score(self, y_true, predictions):
         # Scikit-learn metrics can be very flexible with their input, interpreting a list as class labels for one
         # metric, while interpreting it as class probability for the positive class for another.
         # We want to force clear and early errors to avoid accidentally working with the wrong data/interpretation.
-        if not isinstance(y_true, np.array):
+        if not isinstance(y_true, np.ndarray):
             raise TypeError('y_true must be a numpy array.')
-        if not isinstance(predictions, np.array):
+        if not isinstance(predictions, np.ndarray):
             raise TypeError('y_true must be a numpy array.')
 
-        required_dimensionality = 2 if self._requires_probabilities else 1
+        required_dimensionality = 2 if self.requires_probabilities else 1
         if predictions.ndim != required_dimensionality:
             raise ValueError('Metric {} requires predictions with dimensionality {}, found {} (shape{}).'
                              .format(self.name, required_dimensionality, predictions.ndim, predictions.shape))
