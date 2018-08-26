@@ -338,7 +338,7 @@ class Gama(object):
 
         remainder = ensemble_size - self.ensemble._total_model_weights()
         if remainder > 0:
-            self.ensemble.add_models(remainder)
+            self.ensemble.expand_ensemble(remainder)
 
         build_time = time.time() - start_build
         timeout = timeout - build_time

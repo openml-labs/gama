@@ -7,8 +7,7 @@ import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 import stopit
 
-from gama.ea.evaluation import evaluate
-from gama.ea.metrics import Metric, classification_metrics
+from gama.ea.metrics import Metric, classification_metrics, MetricType
 from gama.utilities.generic.function_dispatcher import FunctionDispatcher
 
 log = logging.getLogger(__name__)
@@ -19,12 +18,12 @@ class Ensemble(object):
 
     def __init__(self, metric, y_true,
                  model_library=None, model_library_directory=None,
-                 shrink_on_pickle=True, n_jobs=1, label_encoder=None):
+                 shrink_on_pickle=True, n_jobs=1):
         """
         Either model_library or model_library_directory must be specified.
         If model_library is specified, model_library_directory is ignored.
 
-        :param metric: metric to optimize the ensemble towards.
+        :param metric: string or `gama.ea.metrics.Metric`. Metric to optimize the ensemble towards.
         :param y_true: the true labels for the predictions made by the models in the library.
         :param model_library: A list of models from which an ensemble can be built.
         :param model_library_directory: a directory containing results of model evaluations.
@@ -35,6 +34,8 @@ class Ensemble(object):
         """
         if isinstance(metric, str):
             metric = Metric(metric)
+        elif not isinstance(metric, Metric):
+            raise ValueError("metric must be specified as string or `gama.ea.metrics.Metric`.")
 
         if model_library is None and model_library_directory is None:
             raise ValueError("At least one of model_library or model_library_directory must be specified.")
@@ -43,48 +44,33 @@ class Ensemble(object):
             log.warning("model_library_directory will be ignored because model_library is also specified.")
 
         self._metric = metric
-        self._is_classification = (metric.name in classification_metrics)
         self._model_library_directory = model_library_directory
         self._model_library = model_library if model_library is not None else []
         self._shrink_on_pickle = shrink_on_pickle
         self._n_jobs = n_jobs
         self._y_true = y_true
-        self._label_encoder = label_encoder
+        self._prediction_transformation = None
 
         self._fit_models = None
         self._maximize = True
         self._child_ensembles = []
-        self._child_ensemble_model_fraction = 0.3
         self._models = {}
-
 
     @property
     def model_library(self):
         if not self._model_library:
             log.debug("Loading model library from disk.")
-            self._model_library = load_predictions(self._model_library_directory)
+            self._model_library = load_predictions(self._model_library_directory, self._prediction_transformation)
 
         return self._model_library
 
-    def build_(self, n_ensembles, start_size, total_size):
-        for i in range(n_ensembles):
-            log.debug("Constructing ensemble {}/{}.".format(i, n_ensembles))
+    def _total_model_weights(self):
+        return sum([weight for (model, weight) in self._models.values()])
 
-            subset_n = int(self._child_ensemble_model_fraction * len(self.model_library))
-            model_subset_indices = np.random.choice(range(len(self.model_library)), size=subset_n, replace=False)
-            model_subset = [self.model_library[idx] for idx in model_subset_indices]
-
-            child_ensemble = Ensemble(self._metric, self._y_true, model_library=model_subset)
-            child_ensemble.build_initial_ensemble(start_size)
-            child_ensemble.add_models(total_size - start_size)
-
-            self._child_ensembles.append(child_ensemble)
-            # we combine all the weights of child models, this way we don't have to fit each individual ensemble.
-
-        self._models = {}
-        for child_ensemble in self._child_ensembles:
-            for (model, weight) in child_ensemble._models.values():
-                self._add_model(model, add_weight=weight)
+    def _averaged_validation_predictions(self):
+        """ Get weighted average of predictions from the self._models on the hillclimb/validation set. """
+        weighted_sum_predictions = sum([model.predictions * weight for (model, weight) in self._models.values()])
+        return weighted_sum_predictions / self._total_model_weights()
 
     def build_initial_ensemble(self, n):
         """ Builds an ensemble of n models, based solely on the performance of individual models, not their combined performance.
@@ -99,24 +85,15 @@ class Ensemble(object):
             log.warning("The ensemble already contained models. Overwriting the ensemble.")
             self._models = {}
 
-        sorted_ensembles = sorted(self.model_library, key=lambda m: -self._metric.maximizable_score(self._y_true, m.predictions))
+        sorted_ensembles = sorted(self.model_library, key=lambda m: -m.validation_score)
 
         # Since the model library only features unique models, we do not need to check for duplicates here.
         selected_models = list(sorted_ensembles)[:n]
         for model in selected_models:
             self._add_model(model)
 
-        log.debug("Initial ensemble created with score {}".format(
-                  self._metric.maximizable_score(self._y_true, self._averaged_validation_predictions())))
+        log.debug("Initial ensemble created with score {}".format(self._ensemble_validation_score()))
         return self
-
-    def _total_model_weights(self):
-        return sum([weight for (model, weight) in self._models.values()])
-
-    def _averaged_validation_predictions(self):
-        """ Get weighted average of predictions from the self._models on the hillclimb/validation set. """
-        weighted_predictions = np.stack([model.predictions * weight for (model, weight) in self._models.values()])
-        return np.sum(weighted_predictions, axis=0) / self._total_model_weights()
 
     def _add_model(self, model, add_weight=1):
         """ Adds a specific model to the ensemble or increases its weight if it already is contained. """
@@ -124,7 +101,7 @@ class Ensemble(object):
         self._models[model.pipeline] = (model, weight + add_weight)
         log.info("Assigned a weight of {} to model {}".format(weight + add_weight, model.name))
 
-    def add_models(self, n):
+    def expand_ensemble(self, n):
         """ Adds new models to the ensemble based on earlier given data.
 
         :param n: Number of models to add to current ensemble.
@@ -134,7 +111,7 @@ class Ensemble(object):
             raise ValueError("n must be greater than 0.")
 
         for _ in range(n):
-            best_addition_score = -float('inf') if self._maximize else float('inf')
+            best_addition_score = -float('inf')
             current_weighted_average = self._averaged_validation_predictions()
             current_total_weight = self._total_model_weights()
             for model in self.model_library:
@@ -142,14 +119,12 @@ class Ensemble(object):
                     continue
                 candidate_pred = current_weighted_average + \
                                  (model.predictions - current_weighted_average) / (current_total_weight + 1)
-                candidate_ensemble_score = self._metric.maximizable_score(self._y_true, candidate_pred)
-                if ((self._maximize and best_addition_score < candidate_ensemble_score) or
-                        (not self._maximize and best_addition_score > candidate_ensemble_score)):
+                candidate_ensemble_score = self._ensemble_validation_score(candidate_pred)
+                if best_addition_score < candidate_ensemble_score:
                     best_addition, best_addition_score = model, candidate_ensemble_score
 
             self._add_model(best_addition)
             log.debug('Ensemble size {} , best score: {}'.format(self._total_model_weights(), best_addition_score))
-            #log.debug(str(self))
 
         return self
 
@@ -185,6 +160,7 @@ class Ensemble(object):
 
         return self
 
+    """
     def predict(self, X):
         if self._is_classification:
             predictions = np.squeeze(np.argmax(self.predict_proba(X), axis=1))
@@ -223,6 +199,7 @@ class Ensemble(object):
             all_predictions = np.stack(predictions)
             actual_weight_sum = sum(map(lambda x: x[1], self._fit_models))
             return np.sum(all_predictions, axis=0) / actual_weight_sum
+    """
 
     def __str__(self):
         # TODO add internal rank of pipeline
@@ -248,7 +225,7 @@ class Ensemble(object):
         return self.__dict__.copy()
 
 
-def load_predictions(cache_dir, argmax_pred=False):
+def load_predictions(cache_dir, prediction_transformation=None):
     models = []
     for file in os.listdir(cache_dir):
         if file.endswith('.pkl'):
@@ -259,16 +236,9 @@ def load_predictions(cache_dir, argmax_pred=False):
                 # to 0-sized files, but in practice this seems to case so far. TODO: Find verification, or fix proper.
                 with open(os.path.join(cache_dir, file), 'rb') as fh:
                     pl, predictions, score = pickle.load(fh)
-                    predictions = np.array(predictions)
-                    if argmax_pred:
-                        hard_predictions = np.argmax(predictions, axis=1)
-                        positions = zip(range(len(hard_predictions)), hard_predictions)
-                        ind_predictions = np.zeros_like(predictions)
-                        for pos in positions:
-                            ind_predictions[pos] = 1
-                        predictions = ind_predictions
-
-            models.append(Model(str(pl), pl, predictions, score))
+                if prediction_transformation:
+                    predictions = prediction_transformation(predictions)
+                models.append(Model(str(pl), pl, predictions, score))
     return models
 
 
@@ -288,3 +258,61 @@ def fit_and_weight(args):
         weight = 0
 
     return pipeline, weight
+
+
+class EnsembleClassifier(Ensemble):
+    def __init__(self, metric, y_true, label_encoder=None, *args, **kwargs):
+        super().__init__(metric, y_true, *args, **kwargs)
+        self._label_encoder = label_encoder
+
+        if not self._metric.requires_probabilities:
+            # For metrics that only require class labels, we still want to apply one-hot-encoding to average predictions.
+            self._one_hot_encoder = OneHotEncoder()
+            self._y_original = self._y_true
+            self._y_true = self._one_hot_encoder.fit_transform(self._y_true.reshape(-1, 1))
+            self._y_true = self._y_true.toarray()
+
+            def one_hot_encode_predictions(predictions):
+                return self._one_hot_encoder.transform(predictions.reshape(-1, 1))
+            self._prediction_transformation = one_hot_encode_predictions
+
+    def _ensemble_validation_score(self, class_probabilities=None):
+        if class_probabilities is None:
+            class_probabilities = self._averaged_validation_predictions()
+
+        if self._metric.requires_probabilities:
+            return self._metric.maximizable_score(self._y_true, class_probabilities)
+        else:
+            # argmax returns (N, 1) matrix, need to squeeze it to (N,) for scoring.
+            class_predictions = np.argmax(class_probabilities, axis=1).A.ravel()
+            return self._metric.maximizable_score(self._y_original, class_predictions)
+
+    def predict(self, X):
+        if self.metric.requires_probabilities:
+            log.warning('Ensemble was tuned with a class-probabilities metric.'
+                        'Using argmax of probabilities, which may not give optimal predictions.')
+            class_probabilities = self.predict_proba(X)
+            class_predictions = np.argmax(class_probabilities, axis=1)
+        else:
+            class_predictions = 1
+
+        if self._label_encoder:
+            class_predictions = self._label_encoder.inverse_transform(class_predictions)
+        return class_predictions
+
+    def predict_proba(self, X):
+        if self._metric.requires_probabilities:
+            pass
+        else:
+            log.warning('Ensemble was tuned with a class label predictions metric, not probabilities.'
+                        'Using weighted mean of class predictions.')
+            pass
+
+
+class EnsembleRegressor(Ensemble):
+    def _ensemble_validation_score(self):
+        return self._metric.maximizable_score(self._y_true, self._averaged_validation_predictions())
+
+    def predict(self, X):
+        target_predictions = 1
+        return target_predictions
