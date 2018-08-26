@@ -254,15 +254,15 @@ class EnsembleClassifier(Ensemble):
 
             self._prediction_transformation = one_hot_encode_predictions
 
-    def _ensemble_validation_score(self, class_probabilities=None):
-        if class_probabilities is None:
-            class_probabilities = self._averaged_validation_predictions()
+    def _ensemble_validation_score(self, prediction_to_validate=None):
+        if prediction_to_validate is None:
+            prediction_to_validate = self._averaged_validation_predictions()
 
         if self._metric.requires_probabilities:
-            return self._metric.maximizable_score(self._y_score, class_probabilities)
+            return self._metric.maximizable_score(self._y_score, prediction_to_validate)
         else:
             # argmax returns (N, 1) matrix, need to squeeze it to (N,) for scoring.
-            class_predictions = np.argmax(class_probabilities, axis=1).A.ravel()
+            class_predictions = np.argmax(prediction_to_validate, axis=1).A.ravel()
             return self._metric.maximizable_score(self._y_score, class_predictions)
 
     def predict(self, X):
@@ -288,8 +288,10 @@ class EnsembleClassifier(Ensemble):
 
 
 class EnsembleRegressor(Ensemble):
-    def _ensemble_validation_score(self):
-        return self._metric.maximizable_score(self._y_score, self._averaged_validation_predictions())
+    def _ensemble_validation_score(self, prediction_to_validate=None):
+        if prediction_to_validate is None:
+            prediction_to_validate = self._averaged_validation_predictions()
+        return self._metric.maximizable_score(self._y_score, prediction_to_validate)
 
     def predict(self, X):
         return self._get_weighted_mean_predictions(X)
