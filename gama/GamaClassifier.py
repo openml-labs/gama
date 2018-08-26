@@ -27,11 +27,7 @@ class GamaClassifier(Gama):
 
     def predict(self, X):
         X = self._preprocess_predict_X(X)
-        class_predictions = self.ensemble.predict(X)
-        if self._label_encoder:
-            return np.asarray(self._label_encoder.inverse_transform(class_predictions))
-        else:
-            return class_predictions
+        return self.ensemble.predict(X)
 
     def predict_proba(self, X):
         """ Predict the class probabilities for input X.
