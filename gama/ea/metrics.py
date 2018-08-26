@@ -71,7 +71,7 @@ class Metric:
         if not isinstance(y_true, np.ndarray):
             raise TypeError('y_true must be a numpy array.')
         if not isinstance(predictions, np.ndarray):
-            raise TypeError('y_true must be a numpy array.')
+            raise TypeError('predictions must be a numpy array.')
 
         required_dimensionality = 2 if self.requires_probabilities else 1
         if predictions.ndim != required_dimensionality:
