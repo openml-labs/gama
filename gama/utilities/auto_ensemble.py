@@ -64,6 +64,9 @@ class Ensemble(object):
 
         return self._model_library
 
+    def _total_fit_weights(self):
+        return sum([weight for (model, weight) in self._fit_models])
+
     def _total_model_weights(self):
         return sum([weight for (model, weight) in self._models.values()])
 
@@ -151,7 +154,8 @@ class Ensemble(object):
             for _ in self._models.values():
                 _, output, __ = fit_dispatcher.get_next_result()
                 pipeline, weight = output
-                self._fit_models.append((pipeline, weight))
+                if weight > 0:
+                    self._fit_models.append((pipeline, weight))
 
         fit_dispatcher.stop()
 
@@ -160,46 +164,15 @@ class Ensemble(object):
 
         return self
 
-    """
-    def predict(self, X):
-        if self._is_classification:
-            predictions = np.squeeze(np.argmax(self.predict_proba(X), axis=1))
-            if self._label_encoder:
-                predictions = self._label_encoder.inverse_transform(predictions)
-        else:
-            predictions = self.predict_proba(X)
-        return predictions
-
-    def predict_proba(self, X):
-        predictions = []
-
-        if self._is_classification and self._y_true.ndim == 1:
-            ohe = OneHotEncoder(len(set(self._y_true)))
-
+    def _get_weighted_mean_predictions(self, X, predict_method='predict'):
+        weighted_predictions = []
         for (model, weight) in self._fit_models:
-            if weight == 0:
-                # This happens if fitting the pipeline failed.
-                continue
+            target_prediction = getattr(model, predict_method)(X)
+            if self._prediction_transformation:
+                target_prediction = self._prediction_transformation(target_prediction)
+            weighted_predictions.append(target_prediction * weight)
 
-            if hasattr(model, 'predict_proba'):
-                predictions.append(model.predict_proba(X) * weight)
-            else:
-                target_prediction = model.predict(X)
-                if self._metric.is_classification:
-                    ohe_prediction = ohe.fit_transform(target_prediction.reshape(-1, 1)).todense()
-                    predictions.append(np.array(ohe_prediction) * weight)
-                elif self._metric.is_regression:
-                    predictions.append(target_prediction * weight)
-                else:
-                    raise NotImplemented('Unknown task type for ensemble.')
-
-        if len(self._fit_models) == 1:
-            return predictions[0]
-        else:
-            all_predictions = np.stack(predictions)
-            actual_weight_sum = sum(map(lambda x: x[1], self._fit_models))
-            return np.sum(all_predictions, axis=0) / actual_weight_sum
-    """
+        return sum(weighted_predictions) / self._total_fit_weights()
 
     def __str__(self):
         # TODO add internal rank of pipeline
@@ -211,7 +184,6 @@ class Ensemble(object):
         return ensemble_str
 
     def __getstate__(self):
-
         if self._shrink_on_pickle:
             log.info('Shrinking before pickle because shrink_on_pickle is True.'
                      'Removing anything that is not needed for predict-functionality.'
@@ -288,25 +260,25 @@ class EnsembleClassifier(Ensemble):
             return self._metric.maximizable_score(self._y_original, class_predictions)
 
     def predict(self, X):
-        if self.metric.requires_probabilities:
-            log.warning('Ensemble was tuned with a class-probabilities metric.'
+        if self._metric.requires_probabilities:
+            log.warning('Ensemble was tuned with a class-probabilities metric. '
                         'Using argmax of probabilities, which may not give optimal predictions.')
-            class_probabilities = self.predict_proba(X)
-            class_predictions = np.argmax(class_probabilities, axis=1)
+            class_probabilities = self._get_weighted_mean_predictions(X, 'predict_proba')
         else:
-            class_predictions = 1
+            class_probabilities = self._get_weighted_mean_predictions(X, 'predict').toarray()
 
+        class_predictions = np.argmax(class_probabilities, axis=1)
         if self._label_encoder:
             class_predictions = self._label_encoder.inverse_transform(class_predictions)
         return class_predictions
 
     def predict_proba(self, X):
         if self._metric.requires_probabilities:
-            pass
+            return self._get_weighted_mean_predictions(X, 'predict_proba')
         else:
-            log.warning('Ensemble was tuned with a class label predictions metric, not probabilities.'
+            log.warning('Ensemble was tuned with a class label predictions metric, not probabilities. '
                         'Using weighted mean of class predictions.')
-            pass
+            return self._get_weighted_mean_predictions(X, 'predict').toarray()
 
 
 class EnsembleRegressor(Ensemble):
@@ -314,5 +286,4 @@ class EnsembleRegressor(Ensemble):
         return self._metric.maximizable_score(self._y_true, self._averaged_validation_predictions())
 
     def predict(self, X):
-        target_predictions = 1
-        return target_predictions
+        return self._get_weighted_mean_predictions(X)
