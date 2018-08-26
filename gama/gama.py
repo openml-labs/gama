@@ -149,37 +149,13 @@ class Gama(object):
         else:
             raise ValueError('Objectives must be a tuple of length at most 2.')
 
-    def predict_proba(self, X):
-        """ Predict the class probabilities for input X.
-
-        Predict target for X, using the best found pipeline(s) during the `fit` call.
-
-        :param X: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
-        :return: a numpy array with class probabilities. The array is of shape (N, K) where N is the length of the
-            first dimension of X, and K is the number of class labels found in `y` of `fit`.
-        """
-        ensemble_not_fit = (self.ensemble is None) or (sum(map(lambda pl_w: pl_w[1], self.ensemble._fit_models)) == 0)
-        if ensemble_not_fit:
-            log.warning("Ensemble did not fit in time.")
-            # Sum of weights of ensemble is 0, meaning no pipeline finished fitting.
-            if self._best_pipeline is None:
-                log.warning("Best pipeline did not fit in time. Falling back on default predictions.")
-                X_tr, y_tr = self._fit_data
-                prediction = optimal_constant_predictor(y_tr, Metric(self._scoring_function))
-                return np.asarray([prediction for _ in range(len(X))])
-
+    def _preprocess_predict_X(self, X):
+        if hasattr(X, 'values') and hasattr(X, 'astype'):
+            X = X.astype(np.float64).values
         if np.isnan(X).any():
-            # This does not work if training data set did not have missing numbers.
+            log.info("Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.")
             X = self._imputer.transform(X)
-
-        if self.ensemble is not None:
-            return self.ensemble.predict_proba(X)
-        elif self._best_pipeline is not None:
-            if hasattr(self._best_pipeline, 'predict_proba'):
-                return self._best_pipeline.predict_proba(X)
-            else:
-                log.warning('Best pipeline can not predict probabilities. Providing one-hot encoded predictions.')
-                raise NotImplementedError
+        return X
 
     def predict(self, X):
         """ Predict the target for input X.
@@ -188,7 +164,7 @@ class Gama(object):
         :return: a numpy array with predictions. The array is of shape (N,) where N is the length of the
             first dimension of X.
         """
-        raise NotImplemented()
+        raise NotImplemented('predict is implemented by base classes.')
 
     def fit(self, X, y, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
         """ Find and fit a model to predict target y from X.
@@ -315,18 +291,20 @@ class Gama(object):
 
     def _postprocess_phase(self, n, timeout=1e6):
         """ Perform any necessary post processing, such as ensemble building. """
-        self._best_pipeline = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.wvalues)))[0]
-        print(self._best_pipeline.fitness.wvalues)
-        self._best_pipeline = self._toolbox.compile(self._best_pipeline)
-        X, y = self._fit_data
-        self._best_pipeline.fit(X, self.y_train)
-        #self._build_fit_ensemble(n, timeout=timeout)
+        #self._best_pipeline = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.wvalues)))[0]
+        #print(self._best_pipeline.fitness.wvalues)
+        #self._best_pipeline = self._toolbox.compile(self._best_pipeline)
+        #X, y = self._fit_data
+        #self._best_pipeline.fit(X, self.y_train)
+        self._build_fit_ensemble(n, timeout=timeout)
+
+    def _initialize_ensemble(self):
+        raise NotImplementedError('_initialize_ensemble should be implemented by a child class.')
 
     def _build_fit_ensemble(self, ensemble_size, timeout):
         start_build = time.time()
-        X, y = self._fit_data
-        self.ensemble = Ensemble(self._scoring_function, y, model_library_directory=self._cache_dir, n_jobs=self._n_jobs)
         log.debug('Building ensemble.')
+        self._initialize_ensemble()
 
         # Starting with more models in the ensemble should help against overfitting, but depending on the total
         # ensemble size, it might leave too little room to calibrate the weights or add new models. So we have
@@ -344,9 +322,8 @@ class Gama(object):
         timeout = timeout - build_time
         log.info('Building ensemble took {}s. Fitting ensemble with timeout {}s.'.format(build_time, timeout))
 
+        X, y = self._fit_data
         self.ensemble.fit(X, y, timeout=timeout)
-
-        #log.info('Ensemble construction terminated because maximum time has elapsed.')
 
     def _random_valid_mutation_try_new(self, ind):
         """ Call `random_valid_mutation` until a new individual (that was not evaluated before) is created (at most 50x).
