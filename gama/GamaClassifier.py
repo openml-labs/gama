@@ -36,7 +36,7 @@ class GamaClassifier(Gama):
         else:
             return predictions
 
-    def fit(self, X, y, warm_start=False, auto_ensemble_n=25, restart=False):
+    def fit(self, X, y, warm_start=False, auto_ensemble_n=25, restart=False, keep_cache=False):
         # Allow arbitrary class name (e.g. string or 1-indexed)
         self._label_encoder = LabelEncoder().fit(y)
         y = self._label_encoder.transform(y)
