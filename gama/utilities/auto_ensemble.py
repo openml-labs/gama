@@ -43,12 +43,16 @@ class Ensemble(object):
         if model_library is not None and model_library_directory is not None:
             log.warning("model_library_directory will be ignored because model_library is also specified.")
 
+        if not y_true.ndim == 1:
+            raise ValueError("Expect y_true to be of shape (N,)")
+
         self._metric = metric
         self._model_library_directory = model_library_directory
         self._model_library = model_library if model_library is not None else []
         self._shrink_on_pickle = shrink_on_pickle
         self._n_jobs = n_jobs
         self._y_true = y_true
+        self._y_score = y_true
         self._prediction_transformation = None
 
         self._fit_models = None
@@ -143,6 +147,8 @@ class Ensemble(object):
         """
         if not self._models:
             raise RuntimeError("You need to call `build` to select models for the ensemble, before fitting them.")
+        if timeout <= 0:
+            raise ValueError("timeout must be greater than 0.")
 
         self._fit_models = []
         fit_dispatcher = FunctionDispatcher(self._n_jobs, fit_and_weight)
@@ -237,15 +243,15 @@ class EnsembleClassifier(Ensemble):
         super().__init__(metric, y_true, *args, **kwargs)
         self._label_encoder = label_encoder
 
-        if not self._metric.requires_probabilities:
-            # For metrics that only require class labels, we still want to apply one-hot-encoding to average predictions.
-            self._one_hot_encoder = OneHotEncoder()
-            self._y_original = self._y_true
-            self._y_true = self._one_hot_encoder.fit_transform(self._y_true.reshape(-1, 1))
-            self._y_true = self._y_true.toarray()
+        # For metrics that only require class labels, we still want to apply one-hot-encoding to average predictions.
+        self._one_hot_encoder = OneHotEncoder().fit(self._y_true.reshape(-1, 1))
 
+        if self._metric.requires_probabilities:
+            self._y_score = self._one_hot_encoder.transform(self._y_true.reshape(-1, 1)).toarray()
+        else:
             def one_hot_encode_predictions(predictions):
                 return self._one_hot_encoder.transform(predictions.reshape(-1, 1))
+
             self._prediction_transformation = one_hot_encode_predictions
 
     def _ensemble_validation_score(self, class_probabilities=None):
@@ -253,11 +259,11 @@ class EnsembleClassifier(Ensemble):
             class_probabilities = self._averaged_validation_predictions()
 
         if self._metric.requires_probabilities:
-            return self._metric.maximizable_score(self._y_true, class_probabilities)
+            return self._metric.maximizable_score(self._y_score, class_probabilities)
         else:
             # argmax returns (N, 1) matrix, need to squeeze it to (N,) for scoring.
             class_predictions = np.argmax(class_probabilities, axis=1).A.ravel()
-            return self._metric.maximizable_score(self._y_original, class_predictions)
+            return self._metric.maximizable_score(self._y_score, class_predictions)
 
     def predict(self, X):
         if self._metric.requires_probabilities:
@@ -283,7 +289,7 @@ class EnsembleClassifier(Ensemble):
 
 class EnsembleRegressor(Ensemble):
     def _ensemble_validation_score(self):
-        return self._metric.maximizable_score(self._y_true, self._averaged_validation_predictions())
+        return self._metric.maximizable_score(self._y_score, self._averaged_validation_predictions())
 
     def predict(self, X):
         return self._get_weighted_mean_predictions(X)
