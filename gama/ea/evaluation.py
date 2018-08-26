@@ -59,7 +59,7 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, scoring='accuracy', cv=5
             else:
                 logger.info('{} encountered while evaluating pipeline.'.format(type(e)), exc_info=True)
 
-            single_line_pipeline = str(pl).replace(old='\n', new='')
+            single_line_pipeline = str(pl).replace('\n', '')
             log_parseable_event(logger, TOKENS.EVALUATION_ERROR, single_line_pipeline, type(e), e)
             score = -float("inf")
 
