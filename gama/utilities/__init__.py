@@ -35,7 +35,7 @@ def optimal_constant_predictor(y_tr, metric):
     elif metric.name in median_is_best_for:
         return np.median(y_tr)
     elif metric.name in class_probabilities_best_for:
-        if y.ndim == 1:
+        if y_tr.ndim == 1:
             return [count / len(y_tr) for class_, count in sorted(Counter(y_tr).most_common())]
         else:
             return np.mean(y_tr, axis=1)

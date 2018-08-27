@@ -19,7 +19,7 @@ class MutationTestCase(unittest.TestCase):
     """ Unit Tests for ea/mutation.py """
 
     def setUp(self):
-        self.gama = GamaClassifier(random_state=0, config=clf_config)
+        self.gama = GamaClassifier(random_state=0, config=clf_config, objectives=('accuracy', 'size'))
 
         self.ind_strings = [
             "GaussianNB(data)",

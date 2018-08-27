@@ -12,7 +12,7 @@ def stopwatch_test_suite():
 class StopwatchUnitTestCase(unittest.TestCase):
 
     def setUp(self):
-        pass
+        self._margin = 0.005  # seconds
 
     def tearDown(self):
         pass
@@ -29,13 +29,13 @@ class StopwatchUnitTestCase(unittest.TestCase):
             self.assertLess(sw.elapsed_time, 1)
 
             time.sleep(1)
-            self.assertGreaterEqual(sw.elapsed_time, 1)
+            self.assertGreaterEqual(sw.elapsed_time, 1 - self._margin)
             self.assertLess(sw.elapsed_time, 2)
 
     def test_stopwatch_elapsed_time_after_running(self):
-        """ Tests that time elapsed it stored after exiting the context. """
+        """ Tests that time elapsed is stored after exiting the context. """
         with Stopwatch() as sw:
             time.sleep(1)
         time.sleep(1)
-        self.assertGreaterEqual(sw.elapsed_time, 1)
+        self.assertGreaterEqual(sw.elapsed_time, 1 - self._margin)
         self.assertLess(sw.elapsed_time, 2)

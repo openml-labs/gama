@@ -2,6 +2,7 @@ import numpy as np
 
 from .gama import Gama
 from gama.configuration.regression import reg_config
+from gama.utilities.auto_ensemble import EnsembleRegressor
 
 
 class GamaRegressor(Gama):
@@ -13,5 +14,9 @@ class GamaRegressor(Gama):
         super().__init__(*args, **kwargs, config=config, objectives=objectives)
 
     def predict(self, X):
-        predictions = self.ensemble.predict_proba(X)
-        return np.squeeze(predictions)
+        X = self._preprocess_predict_X(X)
+        return self.ensemble.predict(X)
+
+    def _initialize_ensemble(self):
+        self.ensemble = EnsembleRegressor(self._scoring_function, self.y_train,
+                                          model_library_directory=self._cache_dir, n_jobs=self._n_jobs)
