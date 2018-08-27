@@ -1,32 +1,32 @@
 # GAMA
 **G**eneral **A**utomated **M**achine learning **A**ssistant  
 An automated machine learning tool based on genetic programming.
-	
-## TODO
-[ ] Expand unit and system tests  
-[ ] Improve support for (custom?) (multi-objective) optimization metrics  
-[ ] Expand the grammar to include NaN/negative/non-numeric pre/post conditions  
-[ ] Support multi-processing for generational EA
-[ ] Model serializability
-[ ] Progress output to console (in a nice way)  
-[ ] Implement bias correction for crossvalidation (e.g. BBC-CV)
-[ ] Add visualization  
-[ ] Add logging  
-[ ] Adopt use of predict/predict_proba based on optimization metric  
 
-## Nice to have
-[ ] Python code export  
-[ ] Custom operator  
-	[ ] Specifically also support some popular packages like LightGBM or XGBoost  
-[ ] Use half-trained models (eg. RF that only had first x trees trained)  
+## Installing GAMA
+Clone GAMA:
 
-## Ideas
-[ ] Schema that can define how mutation/crossover should vary over time  
-[ ] (on-the-fly/meta)-hyperparameter space pruning  
+`git clone https://github.com/PGijsbers/gama.git`
 
-## Known issues
-[ ] Nested configuration not supported (e.g. specify estimators for RFE)  
-[ ] Preprocessing may result in invalid data (e.g. feature selection )  
-[ ] Take a second look at validation procedures to make them adaptive to the data.  
-[ ] No check on input types (e.g. don't pass negative data to NB)       
-[ ] Many duplicate pipelines -> Should maybe only be fixed for *some* selection methods.  
+Move to the GAMA directory (`cd gama`) and install:
+`python setup.py install`
+
+All done!
+
+## Minimal Example
+The following example uses AutoML to find a machine learning pipeline to classify images of digits.
+```
+from sklearn.datasets import load_digits
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from gama import GamaClassifier
+
+X, y = load_digits(return_X_y=True)
+X_train, X_test, y_train, y_test= train_test_split(X, y, stratify=y, random_state=42)
+
+automl = GamaClassifier(max_total_time=300, n_jobs=4)
+automl.fit(X_train, y_train)
+predictions = automl.predict(X_test)
+print('accuracy', accuracy_score(y_test, predictions))
+```
+
+*note*: By default, GamaClassifier optimizes towards `log_loss`.
