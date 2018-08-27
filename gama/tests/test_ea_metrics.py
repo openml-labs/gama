@@ -2,7 +2,7 @@
 import unittest
 import numpy as np
 
-from gama.ea.metrics import Metric
+from gama.ea.metrics import Metric, all_metrics
 
 
 def metrics_test_suite():
@@ -54,6 +54,10 @@ class MetricsTestCase(unittest.TestCase):
         probabilities_logloss = 0.44562543641520713
         self.assertAlmostEquals(accuracy_metric.score(self.y_true_ohe, self.y_probabilities), probabilities_logloss)
         self.assertAlmostEquals(accuracy_metric.maximizable_score(self.y_true_ohe, self.y_probabilities), -probabilities_logloss)
+
+    def test_all_metrics_instantiate(self):
+        for metric in all_metrics:
+            Metric(metric)
 
 
 if __name__ == '__main__':
