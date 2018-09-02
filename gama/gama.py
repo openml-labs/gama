@@ -7,6 +7,8 @@ import shutil
 from functools import partial
 import time
 
+import arff
+import pandas as pd
 import numpy as np
 from deap import base, creator, tools, gp
 from sklearn.preprocessing import Imputer, OneHotEncoder
@@ -20,10 +22,9 @@ from .ea.metrics import Metric
 from .utilities.observer import Observer
 
 from .ea.async_ea import async_ea
-from .utilities.auto_ensemble import Ensemble
 from gama.utilities.generic.stopwatch import Stopwatch
-from .utilities import optimal_constant_predictor
 from .utilities import TOKENS, log_parseable_event
+from gama.utilities.preprocessing import define_preprocessing_steps
 
 log = logging.getLogger(__name__)
 
@@ -166,7 +167,25 @@ class Gama(object):
         """
         raise NotImplemented('predict is implemented by base classes.')
 
-    def fit(self, X, y, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
+    def fit_arff(self, arff_file_path, *args, **kwargs):
+        # load arff
+        with open(arff_file_path, 'r') as arff_file:
+            arff_dict = arff.load(arff_file)
+
+        attribute_names, data_types = zip(*arff_dict['attributes'])
+        data = pd.DataFrame(arff_dict['data'], columns=attribute_names)
+        for attribute_name, dtype in arff_dict['attributes']:
+            # if dtype.lower() in ['real', 'numeric']:  probably interpreted correctly.
+            if isinstance(dtype, list):
+                data[attribute_name] = data[attribute_name].astype('category')
+            # TODO: add date support
+
+        X, y = data.iloc[:, :-1], data.iloc[:, -1]
+        steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
+        self._toolbox.register("compile", compile_individual, pset=self._pset, preprocessing_steps=steps)
+        self.fit(X, y, skip_preprocess=True, *args, **kwargs)
+
+    def fit(self, X, y, skip_preprocess=False, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -195,12 +214,21 @@ class Gama(object):
                 self._observer.reset_current_pareto_front()
             return restart and restart_
 
-        with Stopwatch() as preprocessing_sw:
-            X, y = self._preprocess_phase(X, y)
-        log.info("Preprocessing took {:.4f}s. Moving on to search phase.".format(preprocessing_sw.elapsed_time))
-        log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
+        if not skip_preprocess:
+            print('preprocess anyway')
+            with Stopwatch() as preprocessing_sw:
+                X, y = self._preprocess_phase(X, y)
+            log.info("Preprocessing took {:.4f}s. Moving on to search phase.".format(preprocessing_sw.elapsed_time))
+            log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
+            time_left = self._max_total_time - preprocessing_sw.elapsed_time
+        else:
+            print('assigning')
+            self._fit_data = (X, y)
+            self.X = X
+            self.y_train = y
+            self._construct_y_score(y)
+            time_left = self._max_total_time
 
-        time_left = self._max_total_time - preprocessing_sw.elapsed_time
         fit_time = int((1 - ensemble_ratio) * time_left)
 
         with Stopwatch() as search_sw:
@@ -208,7 +236,7 @@ class Gama(object):
         log.info("Search phase took {:.4f}s. Moving on to post processing.".format(search_sw.elapsed_time))
         log_parseable_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
 
-        time_left = self._max_total_time - search_sw.elapsed_time - preprocessing_sw.elapsed_time
+        time_left = time_left - search_sw.elapsed_time
 
         with Stopwatch() as post_sw:
             self._postprocess_phase(auto_ensemble_n, timeout=time_left)
@@ -255,13 +283,15 @@ class Gama(object):
 
         self.X = X
         self.y_train = y
+        self._construct_y_score(y)
+
+        return X, y
+
+    def _construct_y_score(self, y):
         if Metric(self._scoring_function).requires_probabilities:
             self.y_score = OneHotEncoder().fit_transform(y.reshape(-1, 1)).todense()
         else:
             self.y_score = y
-
-        self._fit_data = (X, y)
-        return X, y
 
     def _search_phase(self, X, y, warm_start=False, restart_criteria=None, timeout=1e6):
         """ Invoke the evolutionary algorithm, populate `final_pop` regardless of termination. """

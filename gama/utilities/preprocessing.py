@@ -1,4 +1,6 @@
 import category_encoders as ce
+import pandas as pd
+from sklearn.preprocessing import Imputer
 
 
 def define_preprocessing_steps(df, max_extra_features_created=None, max_categories_for_one_hot=10):
@@ -19,5 +21,6 @@ def define_preprocessing_steps(df, max_extra_features_created=None, max_categori
 
     one_hot_encoder = ce.OneHotEncoder(cols=one_hot_columns, impute_missing=False, handle_unknown='ignore')
     target_encoder = ce.TargetEncoder(cols=target_encoding_columns)
+    imputer = Imputer(strategy='median')
 
-    return [one_hot_encoder, target_encoder]
+    return [one_hot_encoder, target_encoder, imputer]

@@ -41,12 +41,12 @@ class GamaClassifier(Gama):
         X = self._preprocess_predict_X(X)
         return self.ensemble.predict_proba(X)
 
-    def fit(self, X, y, warm_start=False, auto_ensemble_n=25, restart=False, keep_cache=False):
+    def fit(self, X, y, skip_preprocess=False, warm_start=False, auto_ensemble_n=25, restart=False, keep_cache=False):
         # Allow arbitrary class name (e.g. string or 1-indexed)
         self._label_encoder = LabelEncoder().fit(y)
         y = self._label_encoder.transform(y)
 
-        super().fit(X, y, warm_start, auto_ensemble_n, restart)
+        super().fit(X, y, skip_preprocess, warm_start, auto_ensemble_n, restart)
 
     def _initialize_ensemble(self):
         self.ensemble = EnsembleClassifier(self._scoring_function, self.y_train,

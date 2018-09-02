@@ -103,7 +103,7 @@ def pset_from_config(configuration):
     return pset, parameter_checks
 
 
-def compile_individual(expr, pset, parameter_checks=None):
+def compile_individual(expr, pset, parameter_checks=None, preprocessing_steps=None):
     """ Compile the individual to a sklearn pipeline."""
     # TODO: expr only for compatibility
     ind = expr
@@ -130,6 +130,10 @@ def compile_individual(expr, pset, parameter_checks=None):
             ind = ind[1:]
         else:
             ind = ind[1:-n_kwargs]
+
+    if preprocessing_steps:
+        for step in reversed(preprocessing_steps):
+            components.append((step.__class__.__name__, step))
     return Pipeline(list(reversed(components)))
 
 
