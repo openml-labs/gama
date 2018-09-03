@@ -167,7 +167,7 @@ class Gama(object):
         """
         raise NotImplemented('predict is implemented by base classes.')
 
-    def fit_arff(self, arff_file_path, *args, **kwargs):
+    def _preprocess_arff(self, arff_file_path):
         # load arff
         with open(arff_file_path, 'r') as arff_file:
             arff_dict = arff.load(arff_file)
@@ -183,9 +183,9 @@ class Gama(object):
         X, y = data.iloc[:, :-1], data.iloc[:, -1]
         steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
         self._toolbox.register("compile", compile_individual, pset=self._pset, preprocessing_steps=steps)
-        self.fit(X, y, skip_preprocess=True, *args, **kwargs)
+        return X, y
 
-    def fit(self, X, y, skip_preprocess=False, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
+    def fit(self, X=None, y=None, arff_file_path=None, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -214,20 +214,26 @@ class Gama(object):
                 self._observer.reset_current_pareto_front()
             return restart and restart_
 
-        if not skip_preprocess:
-            print('preprocess anyway')
-            with Stopwatch() as preprocessing_sw:
-                X, y = self._preprocess_phase(X, y)
-            log.info("Preprocessing took {:.4f}s. Moving on to search phase.".format(preprocessing_sw.elapsed_time))
-            log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
-            time_left = self._max_total_time - preprocessing_sw.elapsed_time
-        else:
-            print('assigning')
-            self._fit_data = (X, y)
-            self.X = X
-            self.y_train = y
-            self._construct_y_score(y)
-            time_left = self._max_total_time
+        with Stopwatch() as preprocessing_sw:
+            if arff_file_path:
+                X, y = self._preprocess_arff(arff_file_path)
+            elif (X is not None) and (y is not None):
+                X, y = self._preprocess_numpy(X, y)
+
+        log.info("Preprocessing took {:.4f}s. Moving on to search phase.".format(preprocessing_sw.elapsed_time))
+        log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
+
+        self.X = X
+        if hasattr(self, '_encode_labels'):
+            if isinstance(y, pd.Series):
+                y = np.asarray(y)
+            y = self._encode_labels(y)
+
+        self.y_train = y
+        self._construct_y_score(y)
+        self._fit_data = (X, y)
+
+        time_left = self._max_total_time - preprocessing_sw.elapsed_time
 
         fit_time = int((1 - ensemble_ratio) * time_left)
 
@@ -247,7 +253,7 @@ class Gama(object):
             log.debug("Deleting cache.")
             self.delete_cache()
 
-    def _preprocess_phase(self, X, y):
+    def _preprocess_numpy(self, X, y):
         """  Preprocess X and y such that scikit-learn pipelines can be evaluated on it.
 
         Preprocessing currently transforms the input into float64 numpy arrays.
@@ -280,10 +286,6 @@ class Gama(object):
         if np.isnan(X).any():
             log.info("Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.")
             X = self._imputer.transform(X)
-
-        self.X = X
-        self.y_train = y
-        self._construct_y_score(y)
 
         return X, y
 
