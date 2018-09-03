@@ -109,7 +109,7 @@ class Gama(object):
         if not os.path.isdir(self._cache_dir):
             os.mkdir(self._cache_dir)
 
-        self._imputer = Imputer(strategy="median")
+        self._imputer = None
         self._evaluated_individuals = {}
         self._final_pop = None
         self._subscribers = defaultdict(list)
@@ -150,24 +150,7 @@ class Gama(object):
         else:
             raise ValueError('Objectives must be a tuple of length at most 2.')
 
-    def _preprocess_predict_X(self, X):
-        if hasattr(X, 'values') and hasattr(X, 'astype'):
-            X = X.astype(np.float64).values
-        if np.isnan(X).any():
-            log.info("Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.")
-            X = self._imputer.transform(X)
-        return X
-
-    def predict(self, X):
-        """ Predict the target for input X.
-
-        :param X: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
-        :return: a numpy array with predictions. The array is of shape (N,) where N is the length of the
-            first dimension of X.
-        """
-        raise NotImplemented('predict is implemented by base classes.')
-
-    def _preprocess_arff(self, arff_file_path):
+    def _get_data_from_arff(self, arff_file_path, split_last=True):
         # load arff
         with open(arff_file_path, 'r') as arff_file:
             arff_dict = arff.load(arff_file)
@@ -180,7 +163,35 @@ class Gama(object):
                 data[attribute_name] = data[attribute_name].astype('category')
             # TODO: add date support
 
-        X, y = data.iloc[:, :-1], data.iloc[:, -1]
+        if split_last:
+            return data.iloc[:, :-1], data.iloc[:, -1]
+        else:
+            return data
+
+    def _preprocess_predict_X(self, X=None, arff_file_path=None):
+        if X is not None:
+            if hasattr(X, 'values') and hasattr(X, 'astype'):
+                X = X.astype(np.float64).values
+            if np.isnan(X).any() and self._imputer is not None:
+                log.info("Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.")
+                X = self._imputer.transform(X)
+        elif arff_file_path is not None:
+            X, y = self._preprocess_arff(arff_file_path)
+        else:
+            raise ValueError("Must specify either X or arff_file_path.")
+        return X
+
+    def predict(self, X=None, arff_file_path=None):
+        """ Predict the target for input X.
+
+        :param X: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
+        :return: a numpy array with predictions. The array is of shape (N,) where N is the length of the
+            first dimension of X.
+        """
+        raise NotImplemented('predict is implemented by base classes.')
+
+    def _preprocess_arff(self, arff_file_path):
+        X, y = self._get_data_from_arff(arff_file_path)
         steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
         self._toolbox.register("compile", compile_individual, pset=self._pset, preprocessing_steps=steps)
         return X, y
@@ -282,6 +293,7 @@ class Gama(object):
         # This helps us use a wider variety of algorithms without constructing a grammar.
         # One should note that ideally imputation should not always be done since some methods work well without.
         # Secondly, the way imputation is done can also be dependent on the task. Median is generally not the best.
+        self._imputer = Imputer(strategy="median")
         self._imputer.fit(X)
         if np.isnan(X).any():
             log.info("Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.")

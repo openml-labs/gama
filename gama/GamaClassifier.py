@@ -25,11 +25,11 @@ class GamaClassifier(Gama):
         self._label_encoder = None
         super().__init__(*args, **kwargs, config=config, objectives=objectives)
 
-    def predict(self, X):
-        X = self._preprocess_predict_X(X)
+    def predict(self, X=None, arff_file_path=None):
+        X = self._preprocess_predict_X(X, arff_file_path)
         return self.ensemble.predict(X)
 
-    def predict_proba(self, X):
+    def predict_proba(self, X=None, arff_file_path=None):
         """ Predict the class probabilities for input X.
 
         Predict target for X, using the best found pipeline(s) during the `fit` call.
@@ -38,7 +38,7 @@ class GamaClassifier(Gama):
         :return: a numpy array with class probabilities. The array is of shape (N, K) where N is the length of the
             first dimension of X, and K is the number of class labels found in `y` of `fit`.
         """
-        X = self._preprocess_predict_X(X)
+        X = self._preprocess_predict_X(X, arff_file_path)
         return self.ensemble.predict_proba(X)
 
     def _encode_labels(self, y):
