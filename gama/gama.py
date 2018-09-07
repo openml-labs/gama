@@ -228,18 +228,19 @@ class Gama(object):
         with Stopwatch() as preprocessing_sw:
             if arff_file_path:
                 X, y = self._preprocess_arff(arff_file_path)
-            elif (X is not None) and (y is not None):
+
+            if hasattr(self, '_encode_labels'):
+                if isinstance(y, pd.Series):
+                    y = np.asarray(y)
+                y = self._encode_labels(y)
+
+            if not arff_file_path:
                 X, y = self._preprocess_numpy(X, y)
 
         log.info("Preprocessing took {:.4f}s. Moving on to search phase.".format(preprocessing_sw.elapsed_time))
         log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
 
         self.X = X
-        if hasattr(self, '_encode_labels'):
-            if isinstance(y, pd.Series):
-                y = np.asarray(y)
-            y = self._encode_labels(y)
-
         self.y_train = y
         self._construct_y_score(y)
         self._fit_data = (X, y)
