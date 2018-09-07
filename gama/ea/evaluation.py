@@ -14,6 +14,23 @@ from gama.utilities.mp_logger import MultiprocessingLogger
 
 def cross_val_predict_score(estimator, X, y_train, y_score, groups=None, scoring=None, cv=None, n_jobs=1, verbose=0,
                             fit_params=None, pre_dispatch='2*n_jobs'):
+    """ Return both the predictions and score of the estimator trained on the data given the cv strategy.
+    # TODO: Add reference to underlying sklearn cross_val_predict for parameter descriptions.
+
+    :param estimator: the estimator to evaluate
+    :param X:
+    :param y_train: target in appropriate format for training (typically (N,))
+    :param y_score: target in appropriate format for scoring (typically (N,K) for metrics based on class probabilities,
+        (N,) otherwise).
+    :param groups:
+    :param scoring:
+    :param cv:
+    :param n_jobs:
+    :param verbose:
+    :param fit_params:
+    :param pre_dispatch:
+    :return:
+    """
     if isinstance(scoring, Metric):
         metric = scoring
     elif isinstance(scoring, str):
@@ -29,6 +46,7 @@ def cross_val_predict_score(estimator, X, y_train, y_score, groups=None, scoring
 
 
 def object_is_valid_pipeline(o):
+    """ Determines if object behaves like a valid scikit-learn pipeline (it must have `fit`, `predict` and `steps`). """
     return (o is not None and
             hasattr(o, 'fit') and
             hasattr(o, 'predict') and
