@@ -46,11 +46,13 @@ all_metrics = {**classification_metrics, **regression_metrics}
 
 
 class MetricType(Enum):
+    """ Metric types supported by GAMA. """
     CLASSIFICATION = 1
     REGRESSION = 2
 
 
 class Metric:
+    """ A wrapper for a scoring function to provide additional meta-data. """
 
     def __init__(self, metric_name):
         if metric_name in regression_metrics:
@@ -65,6 +67,12 @@ class Metric:
         self._optimize_modifier = 1 if bigger_is_better else -1
 
     def score(self, y_true, predictions):
+        """ Score the predictions based on the metric.
+
+        :param y_true: numpy array of shape (N,K) if metric relies on class probabilities, (N,) otherwise.
+        :param predictions: numpy array of shape (N,K) if metric relies on class probabilities, (N,) otherwise.
+        :return: score of predictions according to the metric.
+        """
         # Scikit-learn metrics can be very flexible with their input, interpreting a list as class labels for one
         # metric, while interpreting it as class probability for the positive class for another.
         # We want to force clear and early errors to avoid accidentally working with the wrong data/interpretation.
