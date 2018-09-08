@@ -224,14 +224,6 @@ class GamaClassifierARFFSystemTestCase(unittest.TestCase):
         """ GamaClassifier can do multi-class with predict-proba metric. """
         self._test_dataset_problem(wine, 'log_loss')
 
-    #def test_string_label_classification_accuracy(self):
-    #    """ GamaClassifier can work with string-like target labels when using predict-metric. """
-    #    self._test_dataset_problem(breast_cancer, 'accuracy', labelled_y=True)
-
-    #def test_string_label_classification_log_loss(self):
-    #    """ GamaClassifier can work with string-type target labels when using predict-proba metric. """
-    #    self._test_dataset_problem(breast_cancer, 'log_loss', labelled_y=True)
-
     # def test_missing_value_classification(self):
     #     """ GamaClassifier handles missing data. """
     #     data = breast_cancer
