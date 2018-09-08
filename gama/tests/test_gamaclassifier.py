@@ -18,7 +18,7 @@ def gamaclassifier_test_suite():
 
 # While we could derive statistics dynamically, we want to know if any changes ever happen, so we save them statically.
 breast_cancer = dict(
-    name='breast cancer',
+    name='breast_cancer',
     load=load_breast_cancer,
     test_size=143,
     n_classes=2,
@@ -43,6 +43,16 @@ iris_arff = dict(
     n_classes=3,
     base_accuracy=0.3333,
     base_log_loss=1.09861
+)
+
+diabetes_arff = dict(
+    name='diabetes',
+    train='gama/tests/data/diabetes_train.arff',
+    test='gama/tests/data/diabetes_test.arff',
+    test_size=150,
+    n_classes=2,
+    base_accuracy=0.65104,
+    base_log_loss=0.63705
 )
 
 class GamaClassifierSystemTestCase(unittest.TestCase):
@@ -90,7 +100,7 @@ class GamaClassifierSystemTestCase(unittest.TestCase):
                              'predictions should be at least as good as majority class.')
 
     def test_binary_classification_accuracy(self):
-        """ GamaClassifier can do binary classification with predit metric from numpy data. """
+        """ GamaClassifier can do binary classification with predict metric from numpy data. """
         self._test_dataset_problem(breast_cancer, 'accuracy')
 
     def test_binary_classification_logloss(self):
@@ -160,22 +170,24 @@ class GamaClassifierARFFSystemTestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def _load_y_from_arff(self, file_path):
-        """ Load the ARFF file, interpet data to numpy array, return last column. """
-        with open(file_path, 'r') as fh:
-            arff_data = arff.load(fh)
-        arff_data = np.asarray(arff_data['data'])
-        return arff_data[:, -1]
-
     def _test_dataset_problem(self, data, metric):
+        train_path = 'data/{}_train.arff'.format(data['name'])
+        test_path = 'data/{}_test.arff'.format(data['name'])
         gama = GamaClassifier(random_state=0, max_total_time=60, objectives=(metric, 'size'))
-        y_test = self._load_y_from_arff(data['test'])
+
+        X, y = data['load'](return_X_y=True)
+        #if labelled_y:
+        #    databunch = data['load']()
+        #    y = [databunch.target_names[c_i] for c_i in databunch.target]
+        X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
+        y_test = [str(val) for val in y_test]
+
         with Stopwatch() as sw:
-            gama.fit(arff_file_path=data['train'], auto_ensemble_n=5)
+            gama.fit(arff_file_path=train_path, auto_ensemble_n=5)
 
         self.assertLessEqual(sw.elapsed_time, 60 * self._fit_time_margin, 'fit must stay within 110% of allotted time.')
 
-        class_predictions = gama.predict(arff_file_path=data['test'])
+        class_predictions = gama.predict(arff_file_path=test_path)
         self.assertTrue(isinstance(class_predictions, np.ndarray), 'predictions should be numpy arrays.')
         self.assertEqual(class_predictions.shape, (data['test_size'],), 'predict should return (N,) shaped array.')
 
@@ -184,7 +196,9 @@ class GamaClassifierARFFSystemTestCase(unittest.TestCase):
         self.assertGreaterEqual(accuracy, data['base_accuracy'],
                                 'predictions should be at least as good as majority class.')
 
-        class_probabilities = gama.predict_proba(arff_file_path=data['test'])
+        class_probabilities = gama.predict_proba(arff_file_path=test_path)
+
+        print(list(zip(class_predictions, y_test, class_probabilities)))
         self.assertTrue(isinstance(class_probabilities, np.ndarray), 'probability predictions should be numpy arrays.')
         self.assertEqual(class_probabilities.shape, (data['test_size'], data['n_classes']),
                          'predict_proba should return (N,K) shaped array.')
@@ -194,21 +208,21 @@ class GamaClassifierARFFSystemTestCase(unittest.TestCase):
         self.assertLessEqual(logloss, data['base_log_loss'],
                              'predictions should be at least as good as majority class.')
 
-    #def test_binary_classification_accuracy(self):
-    #    """ GamaClassifier can do binary classification with predit metric. """
-    #    self._test_dataset_problem(breast_cancer, 'accuracy')
+    def test_binary_classification_accuracy(self):
+        """ GamaClassifier can do binary classification with predict metric. """
+        self._test_dataset_problem(breast_cancer, 'accuracy')
 
-    #def test_binary_classification_logloss(self):
-    #    """ GamaClassifier can do binary classification with predict-proba metric. """
-    #    self._test_dataset_problem(breast_cancer, 'log_loss')
+    def test_binary_classification_logloss(self):
+        """ GamaClassifier can do binary classification with predict-proba metric. """
+        self._test_dataset_problem(breast_cancer, 'log_loss')
 
     def test_multiclass_classification_accuracy(self):
         """ GamaClassifier can do multi-class with predict metric. """
-        self._test_dataset_problem(iris_arff, 'accuracy')
+        self._test_dataset_problem(wine, 'accuracy')
 
     def test_multiclass_classification_logloss(self):
         """ GamaClassifier can do multi-class with predict-proba metric. """
-        self._test_dataset_problem(iris_arff, 'log_loss')
+        self._test_dataset_problem(wine, 'log_loss')
 
     #def test_string_label_classification_accuracy(self):
     #    """ GamaClassifier can work with string-like target labels when using predict-metric. """
@@ -217,7 +231,6 @@ class GamaClassifierARFFSystemTestCase(unittest.TestCase):
     #def test_string_label_classification_log_loss(self):
     #    """ GamaClassifier can work with string-type target labels when using predict-proba metric. """
     #    self._test_dataset_problem(breast_cancer, 'log_loss', labelled_y=True)
-
 
     # def test_missing_value_classification(self):
     #     """ GamaClassifier handles missing data. """
