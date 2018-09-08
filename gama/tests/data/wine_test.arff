@@ -1,0 +1,160 @@
+% wine dataset from sklearn
+% Wine Data Database
+% ====================
+%
+% Notes
+% -----
+% Data Set Characteristics:
+%     :Number of Instances: 178 (50 in each of three classes)
+%     :Number of Attributes: 13 numeric, predictive attributes and the class
+%     :Attribute Information:
+%  		- 1) Alcohol
+%  		- 2) Malic acid
+%  		- 3) Ash
+% 		- 4) Alcalinity of ash  
+%  		- 5) Magnesium
+% 		- 6) Total phenols
+%  		- 7) Flavanoids
+%  		- 8) Nonflavanoid phenols
+%  		- 9) Proanthocyanins
+% 		- 10)Color intensity
+%  		- 11)Hue
+%  		- 12)OD280/OD315 of diluted wines
+%  		- 13)Proline
+%         	- class:
+%                 - class_0
+%                 - class_1
+%                 - class_2
+% 		
+%     :Summary Statistics:
+%     
+%     ============================= ==== ===== ======= =====
+%                                    Min   Max   Mean     SD
+%     ============================= ==== ===== ======= =====
+%     Alcohol:                      11.0  14.8    13.0   0.8
+%     Malic Acid:                   0.74  5.80    2.34  1.12
+%     Ash:                          1.36  3.23    2.36  0.27
+%     Alcalinity of Ash:            10.6  30.0    19.5   3.3
+%     Magnesium:                    70.0 162.0    99.7  14.3
+%     Total Phenols:                0.98  3.88    2.29  0.63
+%     Flavanoids:                   0.34  5.08    2.03  1.00
+%     Nonflavanoid Phenols:         0.13  0.66    0.36  0.12
+%     Proanthocyanins:              0.41  3.58    1.59  0.57
+%     Colour Intensity:              1.3  13.0     5.1   2.3
+%     Hue:                          0.48  1.71    0.96  0.23
+%     OD280/OD315 of diluted wines: 1.27  4.00    2.61  0.71
+%     Proline:                       278  1680     746   315
+%     ============================= ==== ===== ======= =====
+%
+%     :Missing Attribute Values: None
+%     :Class Distribution: class_0 (59), class_1 (71), class_2 (48)
+%     :Creator: R.A. Fisher
+%     :Donor: Michael Marshall (MARSHALL%PLU@io.arc.nasa.gov)
+%     :Date: July, 1988
+%
+% This is a copy of UCI ML Wine recognition datasets.
+% https://archive.ics.uci.edu/ml/machine-learning-databases/wine/wine.data
+%
+% The data is the results of a chemical analysis of wines grown in the same
+% region in Italy by three different cultivators. There are thirteen different
+% measurements taken for different constituents found in the three types of
+% wine.
+%
+% Original Owners: 
+%
+% Forina, M. et al, PARVUS - 
+% An Extendible Package for Data Exploration, Classification and Correlation. 
+% Institute of Pharmaceutical and Food Analysis and Technologies,
+% Via Brigata Salerno, 16147 Genoa, Italy.
+%
+% Citation:
+%
+% Lichman, M. (2013). UCI Machine Learning Repository
+% [http://archive.ics.uci.edu/ml]. Irvine, CA: University of California,
+% School of Information and Computer Science. 
+%
+% References
+% ----------
+% (1) 
+% S. Aeberhard, D. Coomans and O. de Vel, 
+% Comparison of Classifiers in High Dimensional Settings, 
+% Tech. Rep. no. 92-02, (1992), Dept. of Computer Science and Dept. of 
+% Mathematics and Statistics, James Cook University of North Queensland. 
+% (Also submitted to Technometrics). 
+%
+% The data was used with many others for comparing various 
+% classifiers. The classes are separable, though only RDA 
+% has achieved 100% correct classification. 
+% (RDA : 100%, QDA 99.4%, LDA 98.9%, 1NN 96.1% (z-transformed data)) 
+% (All results using the leave-one-out technique) 
+%
+% (2) 
+% S. Aeberhard, D. Coomans and O. de Vel, 
+% "THE CLASSIFICATION PERFORMANCE OF RDA" 
+% Tech. Rep. no. 92-01, (1992), Dept. of Computer Science and Dept. of 
+% Mathematics and Statistics, James Cook University of North Queensland. 
+% (Also submitted to Journal of Chemometrics). 
+%
+@RELATION wine
+
+@ATTRIBUTE alcohol REAL
+@ATTRIBUTE malic_acid REAL
+@ATTRIBUTE ash REAL
+@ATTRIBUTE alcalinity_of_ash REAL
+@ATTRIBUTE magnesium REAL
+@ATTRIBUTE total_phenols REAL
+@ATTRIBUTE flavanoids REAL
+@ATTRIBUTE nonflavanoid_phenols REAL
+@ATTRIBUTE proanthocyanins REAL
+@ATTRIBUTE color_intensity REAL
+@ATTRIBUTE hue REAL
+@ATTRIBUTE od280/od315_of_diluted_wines REAL
+@ATTRIBUTE proline REAL
+@ATTRIBUTE cultivator {0, 1, 2}
+
+@DATA
+13.32,3.24,2.38,21.5,92.0,1.93,0.76,0.45,1.25,8.42,0.55,1.62,650.0,2
+13.5,1.81,2.61,20.0,96.0,2.53,2.61,0.28,1.66,3.52,1.12,3.82,845.0,0
+12.42,2.55,2.27,22.0,90.0,1.68,1.84,0.66,1.42,2.7,0.86,3.3,315.0,1
+12.93,3.8,2.65,18.6,102.0,2.41,2.41,0.25,1.98,4.5,13,3.52,770.0,0
+13.73,4.36,2.26,22.5,88.0,1.28,0.47,0.52,1.15,6.62,0.78,1.75,520.0,2
+13.78,2.76,2.3,22.0,90.0,1.35,0.68,0.41,13,9.58,0.7,1.68,615.0,2
+13.45,3.7,2.6,23.0,111.0,1.7,0.92,0.43,1.46,10.68,0.85,1.56,695.0,2
+12.88,2.99,2.4,20.0,104.0,1.3,1.22,0.24,0.83,5.4,0.74,1.42,530.0,2
+14.39,1.87,2.45,14.6,96.0,2.5,2.52,0.3,1.98,5.25,12,3.58,1290.0,0
+12.7,3.55,2.36,21.5,106.0,1.7,1.2,0.17,0.84,5.0,0.78,1.29,600.0,2
+13.64,3.1,2.56,15.2,116.0,2.7,3.03,0.17,1.66,5.1,0.96,3.36,845.0,0
+14.37,1.95,2.5,16.8,113.0,3.85,3.49,0.24,2.18,7.8,0.86,3.45,1480.0,0
+11.62,1.99,2.28,18.0,98.0,3.02,2.26,0.17,1.35,3.25,1.16,2.96,345.0,1
+13.5,3.12,2.62,24.0,123.0,1.4,1.57,0.22,1.25,8.6,0.59,1.3,500.0,2
+13.28,1.64,2.84,15.5,110.0,2.6,2.68,0.34,1.36,4.6,19,2.78,880.0,0
+13.77,1.9,2.68,17.1,115.0,3.0,2.79,0.39,1.68,6.3,1.13,2.93,1375.0,0
+14.23,1.71,2.43,15.6,127.0,2.8,3.06,0.28,2.29,5.64,14,3.92,1065.0,0
+12.6,1.34,1.9,18.5,88.0,1.45,1.36,0.29,1.35,2.45,14,2.77,562.0,1
+12.45,3.03,2.64,27.0,97.0,1.9,0.58,0.63,1.14,7.5,0.67,1.73,880.0,2
+13.9,1.68,2.12,16.0,101.0,3.1,3.39,0.21,2.14,6.1,0.91,3.33,985.0,0
+13.86,1.35,2.27,16.0,98.0,2.98,3.15,0.22,1.85,7.22,11,3.55,1045.0,0
+13.17,2.59,2.37,20.0,120.0,1.65,0.68,0.53,1.46,9.3,0.6,1.62,840.0,2
+12.87,4.61,2.48,21.5,86.0,1.7,0.65,0.47,0.86,7.65,0.54,1.86,625.0,2
+12.25,3.88,2.2,18.5,112.0,1.38,0.78,0.29,1.14,8.21,0.65,2,855.0,2
+11.03,1.51,2.2,21.5,85.0,2.46,2.17,0.52,21,1.9,1.71,2.87,407.0,1
+13.05,1.77,2.1,17.0,107.0,3.0,3.0,0.28,23,5.04,0.88,3.35,885.0,0
+11.76,2.68,2.92,20.0,103.0,1.75,23,0.6,15,3.8,1.23,2.5,607.0,1
+14.22,3.99,2.51,13.2,128.0,3.0,3.04,0.2,28,5.1,0.89,3.53,760.0,0
+12.08,28,1.7,17.5,97.0,2.23,2.17,0.26,1.4,3.3,1.27,2.96,710.0,1
+12.85,1.6,2.52,17.8,95.0,2.48,2.37,0.26,1.46,3.93,19,3.63,1015.0,0
+12.37,17,2.1,18.5,88.0,3.52,3.75,0.24,1.95,4.5,14,2.77,660.0,1
+12.08,1.83,2.32,18.5,81.0,1.6,1.5,0.52,1.64,2.4,18,2.27,480.0,1
+12.17,1.45,2.53,19.0,104.0,1.89,1.75,0.45,13,2.95,1.45,2.23,355.0,1
+12.29,1.61,2.21,20.4,103.0,1.1,12,0.37,1.46,3.05,0.906,1.82,870.0,1
+12.33,1.1,2.28,16.0,101.0,25,19,0.63,0.41,3.27,1.25,1.67,680.0,1
+14.21,4.04,2.44,18.9,111.0,2.85,2.65,0.3,1.25,5.24,0.87,3.33,1080.0,0
+12.43,1.53,2.29,21.5,86.0,2.74,3.15,0.39,1.77,3.94,0.69,2.84,352.0,1
+13.03,0.9,1.71,16.0,86.0,1.95,23,0.24,1.46,4.6,1.19,2.48,392.0,1
+12.36,3.83,2.38,21.0,88.0,2.3,0.92,0.5,14,7.65,0.56,1.58,520.0,2
+12.37,1.13,2.16,19.0,87.0,3.5,3.1,0.19,1.87,4.45,1.22,2.87,420.0,1
+12.47,1.52,2.2,19.0,162.0,2.5,2.27,0.32,3.28,2.6,1.16,2.63,937.0,1
+12.42,1.61,2.19,22.5,108.0,2,29,0.34,1.61,26,16,2.96,345.0,1
+13.74,1.67,2.25,16.4,118.0,2.6,2.9,0.21,1.62,5.85,0.92,3.2,1060.0,0
+12.0,3.43,2,19.0,87.0,2,1.64,0.37,1.87,1.28,0.93,3.05,564.0,1
+12.29,1.41,1.98,16.0,85.0,2.55,2.5,0.29,1.77,2.9,1.23,2.74,428.0,1
