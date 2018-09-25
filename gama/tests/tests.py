@@ -24,13 +24,14 @@ def run_suite(suite):
     return unittest.TextTestRunner(verbosity=2).run(suite())
 
 
-tests_succeeded = run_suite(paretofront_test_suite).wasSuccessful()
-tests_succeeded &= run_suite(mutation_test_suite).wasSuccessful()
-tests_succeeded &= run_suite(automl_gp_test_suite).wasSuccessful()
-tests_succeeded &= run_suite(metrics_test_suite).wasSuccessful()
-if tests_succeeded:
-    print('continuing tests....')
-    tests_succeeded &= run_suite(stopwatch_test_suite).wasSuccessful()
-    tests_succeeded &= run_suite(gamaclassifier_test_suite).wasSuccessful()
-    tests_succeeded &= run_suite(gamaregressor_test_suite).wasSuccessful()
-    unittest.TextTestRunner().run(gama_test_suite())
+if __name__ == '__main__':
+    tests_succeeded = run_suite(paretofront_test_suite).wasSuccessful()
+    tests_succeeded &= run_suite(mutation_test_suite).wasSuccessful()
+    tests_succeeded &= run_suite(automl_gp_test_suite).wasSuccessful()
+    tests_succeeded &= run_suite(metrics_test_suite).wasSuccessful()
+    if tests_succeeded:
+        print('continuing tests....')
+        #tests_succeeded &= run_suite(stopwatch_test_suite).wasSuccessful()
+        tests_succeeded &= run_suite(gamaclassifier_test_suite).wasSuccessful()
+        #tests_succeeded &= run_suite(gamaregressor_test_suite).wasSuccessful()
+        #unittest.TextTestRunner().run(gama_test_suite())
