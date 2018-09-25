@@ -1,7 +1,6 @@
 """ Contains full system tests for GamaClassifier """
 import unittest
 
-import arff
 import numpy as np
 from sklearn.datasets import load_wine, load_breast_cancer
 from sklearn.model_selection import train_test_split
