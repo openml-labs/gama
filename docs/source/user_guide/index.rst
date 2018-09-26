@@ -1,4 +1,4 @@
-Getting Started
+User Guide
 ===========
 This file gives an introduction to basic components and concepts of GAMA.
 GAMA is an AutoML tool which aims to automatically find the right machine learning algorithms to create the best possible data for your model.
@@ -76,19 +76,11 @@ In this example, the following hyperparameters are changed from their default va
   - `keep_cache`: During the optimization process, each model evaluated is stored alongside its predictions. 
    This is useful for automatically constructing an ensemble.
    Normally, this cache is deleted automatically, but should you wish to keep it, you can specify it here.
-   
-## Installation
 
-To install GAMA, follow these steps:
-
-1. Clone the repository: `git clone https://github.com/PGijsbers/gama.git`
-
-2. Move to the GAMA directory: `cd gama`
-
-3. Call the setup script: `python setup.py install`
-
-All done!
-
+.. include:: installation.rst
+.. include:: configuration.rst
+.. include:: examples.rst
+.. include:: related_packages.rst
    
  
  

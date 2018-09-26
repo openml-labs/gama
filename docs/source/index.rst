@@ -21,13 +21,20 @@ Using GAMA is as simple as using::
 	automl.predict(X_test)
 	automl.predict_proba(X_test)
 
+You can install GAMA (and its dependencies) by cloning the repository and calling the setup script::
+
+    git clone https://github.com/PGijsbers/gama.git
+    cd gama
+    python setup.py install
+
 .. toctree::
    :maxdepth: 2
    
-   getting_started
-   configuration
-   api/gamaclassifier
-   generated/modules
+   user_guide/index
+   api
+   releases
+   contributing
+   citing
    
    :caption: Contents:
 
