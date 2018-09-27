@@ -29,25 +29,16 @@ You can install GAMA (and its dependencies) by cloning the repository and callin
 
 .. toctree::
    :maxdepth: 2
-   
+   :hidden:
+
    user_guide/index
    api
    releases
    contributing
    citing
-   
+
    :caption: Contents:
 
-Citing
 
-Contributing
-
-License
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+To get a general understanding on how to work with GAMA, read the :ref:`user_guide_index`.
+It gives background information, examples and other pointers.
