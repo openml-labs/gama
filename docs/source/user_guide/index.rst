@@ -1,3 +1,5 @@
+..  _user_guide_index:
+
 User Guide
 ===========
 This file gives an introduction to basic components and concepts of GAMA.
