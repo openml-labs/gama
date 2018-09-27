@@ -78,8 +78,8 @@ In this example, the following hyperparameters are changed from their default va
    Normally, this cache is deleted automatically, but should you wish to keep it, you can specify it here.
 
 .. include:: installation.rst
-.. include:: configuration.rst
 .. include:: examples.rst
+.. include:: configuration.rst
 .. include:: related_packages.rst
    
  
