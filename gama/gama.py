@@ -384,17 +384,6 @@ class Gama(object):
         """ Removes the cache folder and all files associated to this instance. """
         shutil.rmtree(self._cache_dir)
 
-    def _on_generation_completed(self, pop):
-        for callback in self._subscribers['generation_completed']:
-            callback(pop)
-
-    def generation_completed(self, fn):
-        """ Register a callback function that is called when new generation is completed.
-
-        :param fn: Function to call when a pipeline is evaluated. Expected signature is: list: ind -> None
-        """
-        self._subscribers['generation_completed'].append(fn)
-
     def _on_evaluation_completed(self, ind):
         for callback in self._subscribers['evaluation_completed']:
             callback(ind)
