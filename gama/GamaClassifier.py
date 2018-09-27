@@ -10,12 +10,7 @@ from gama.utilities.auto_ensemble import EnsembleClassifier
 
 
 class GamaClassifier(Gama):
-    def __init__(self, config=None, objectives=None, *args, **kwargs):
-        if not config:
-            config = clf_config
-        if not objectives:
-            objectives = ('neg_log_loss', 'size')
-
+    def __init__(self, config=clf_config, objectives=('neg_log_loss', 'size'), *args, **kwargs):
         if Metric(objectives[0]).requires_probabilities:
             # we don't want classifiers that do not have `predict_proba`, because then we have to
             # start doing one hot encodings of predictions etc.

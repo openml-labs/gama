@@ -6,11 +6,7 @@ from gama.utilities.auto_ensemble import EnsembleRegressor
 
 
 class GamaRegressor(Gama):
-    def __init__(self, config=None, objectives=None, *args, **kwargs):
-        if not config:
-            config = reg_config
-        if not objectives:
-            objectives = ('neg_mean_squared_error', 'size')
+    def __init__(self, config=reg_config, objectives=('neg_mean_squared_error', 'size'), *args, **kwargs):
         super().__init__(*args, **kwargs, config=config, objectives=objectives)
 
     def predict(self, X):
