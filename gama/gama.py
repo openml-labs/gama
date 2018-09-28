@@ -218,8 +218,15 @@ class Gama(object):
         After the search termination condition is met, the best found pipeline
         configuration is then used to train a final model on all provided data.
 
-        :param X:
-        :param y:
+        Must either specify *both* `X` and `y`, or `arff_file_path`.
+
+        :param X: Numpy Array (optional), shape = [n_samples, n_features]
+            Training data. All elements must be able to be converted to float.
+        :param y: Numpy Array (optional), shape = [n_samples,]
+            Target values.
+        :param arff_file_path: string (optional).
+            Path to an ARFF file containing the training data.
+            The last column is always taken to be the target.
         :param warm_start: bool. Indicates the optimization should continue using the last individuals of the
             previous `fit` call.
         :param auto_ensemble_n: positive integer. The number of models to include in the ensemble which is built
