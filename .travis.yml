@@ -8,7 +8,7 @@ install:
   - pwd
   - python setup.py install
 script:
-  - python tests/tests.py
+  - python -m unittest
 branches:
   only:
     - master
