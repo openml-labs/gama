@@ -1,5 +1,4 @@
 import inspect
-import numpy as np
 from sklearn.base import ClassifierMixin
 from sklearn.preprocessing import LabelEncoder
 
@@ -10,7 +9,10 @@ from gama.utilities.auto_ensemble import EnsembleClassifier
 
 
 class GamaClassifier(Gama):
-    def __init__(self, config=clf_config, objectives=('neg_log_loss', 'size'), *args, **kwargs):
+    def __init__(self, config=None, objectives=('neg_log_loss', 'size'), *args, **kwargs):
+        if not config:
+            # Do this to avoid the whole dictionary being included in the documentation.
+            config = clf_config
         if Metric(objectives[0]).requires_probabilities:
             # we don't want classifiers that do not have `predict_proba`, because then we have to
             # start doing one hot encodings of predictions etc.
@@ -21,6 +23,12 @@ class GamaClassifier(Gama):
         super().__init__(*args, **kwargs, config=config, objectives=objectives)
 
     def predict(self, X=None, arff_file_path=None):
+        """ Predict the target for input X.
+
+        :param X: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
+        :return: a numpy array with predictions. The array is of shape (N,) where N is the length of the
+            first dimension of X.
+        """
         X = self._preprocess_predict_X(X, arff_file_path)
         return self.ensemble.predict(X)
 

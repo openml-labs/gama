@@ -1,4 +1,5 @@
 GAMA Classifier
 ===============
 
-.. autoclass:: gama.gama.Gama
+.. autoclass:: gama.GamaClassifier
+    :members: fit, predict, predict_proba, delete_cache

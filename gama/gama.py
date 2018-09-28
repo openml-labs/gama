@@ -35,7 +35,47 @@ __version__ = '0.1.0'
 
 
 class Gama(object):
-    """ Wrapper for the DEAP toolbox logic surrounding the GP process as well as ensemble construction. """
+    """ Wrapper for the DEAP toolbox logic surrounding the GP process as well as ensemble construction.
+
+    :param objectives: a tuple which specifies towards which objectives to optimize
+        The valid metrics depend on the type of task. Many scikit-learn metrics are available.
+        Two additional metrics can also be chosen: `size` which represents the number of components in the pipeline,
+        and `time` which specifies the time it takes to train and validate a model.
+        Currently the maximum arity is 2.
+        Example: ('f1_macro', 'size') or ('f1',)
+
+    :param optimize_strategy: a tuple of the same arity as `objectives`
+        Specifies for each objective whether you want to maximize (1) or minimize (-1) the objective.
+        Example: (1, -1).
+
+    :param config: a dictionary which specifies available components and their valid hyperparameter settings
+        For more information, see :ref:`search_space_configuration`.
+
+    :param random_state:  integer or None (default=None)
+        If an integer is passed, this will be the seed for the random number generators used in the process.
+        However, with `n_jobs > 1`, there will be randomization introduced by multi-processing.
+        For reproducible results, set this and use `n_jobs=1`.
+
+    :param population_size: positive integer (default=50)
+        Number of individuals to keep in the population at any one time.
+
+    :param max_total_time: positive integer (default=3600)
+        Time in seconds that can be used for the `fit` call.
+
+    :param max_eval_time: positive integer or None (default=300)
+        Time in seconds that can be used to evaluate any one single individual.
+
+    :param n_jobs: integer (default=1)
+        The amount of parallel processes that may be created to speed up `fit`. If this number
+        is zero or negative, it will be set to the amount of cores.
+
+    :param verbosity: integer (default=0)
+        Does nothing right now. Follow progress of optimization by tracking the log.
+
+    :param cache_dir: string or None (default=None)
+        The directory in which to keep the cache during `fit`. In this directory,
+        models and their evaluation results will be stored. This facilitates a quick ensemble construction.
+    """
 
     def __init__(self, 
                  objectives=('filled_in_by_child_class', 'size'),
@@ -48,29 +88,7 @@ class Gama(object):
                  n_jobs=1,
                  verbosity=None,
                  cache_dir=None):
-        """
 
-        :param objectives: a tuple which specifies towards which objectives to optimize. The valid metrics depend on
-            the type of task. Many scikit-learn metrics are available. Two additional metrics can also be chosen: `size`
-            which represents the number of components in the pipeline, and `time` which specifies the time it takes to
-            train and validate a model. Currently the maximum arity is 2. Example: ('f1_macro', 'size') or ('f1',)
-        :param optimize_strategy: a tuple of the same arity as objectives. Specifies for each objective whether you
-            want to maximize (1) or minimize (-1) the objective. Example: (1, -1).
-        :param config: a dictionary which specifies available components and their valid hyperparameter settings. For
-            more informatio, see `docs\configuration`.
-        :param random_state: integer or None. If an integer is passed, this will be the seed for the random number
-            generators used in the process. However, with `n_jobs > 1`, there will be randomization introduced by
-            multi-processing. For reproducible results, set this and use `n_jobs=1`.
-        :param population_size: positive integer. The number of individuals to keep in the population at any one time.
-        :param max_total_time: positive integer. The time in seconds that can be used for the `fit` call.
-        :param max_eval_time: positive integer or None. THe time in seconds that can be used to evaluate any one single
-            individual.
-        :param n_jobs: integer. The amount of parallel processes that may be created to speed up `fit`. If this number
-            is zero or negative, it will be set to the amount of cores.
-        :param verbosity: integer. Does nothing right now. Follow progress of optimization by tracking the log.
-        :param cache_dir: string or None. The directory in which to keep the cache during `fit`. In this directory,
-            models and their evaluation results will be stored. This facilitates a quick ensemble construction.
-        """
         log.info('Using GAMA version {}.'.format(__version__))
         log.info('{}({})'.format(
             self.__class__.__name__,
@@ -182,12 +200,6 @@ class Gama(object):
         return X
 
     def predict(self, X=None, arff_file_path=None):
-        """ Predict the target for input X.
-
-        :param X: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
-        :return: a numpy array with predictions. The array is of shape (N,) where N is the length of the
-            first dimension of X.
-        """
         raise NotImplemented('predict is implemented by base classes.')
 
     def _preprocess_arff(self, arff_file_path):

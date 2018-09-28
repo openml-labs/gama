@@ -1,3 +1,5 @@
+.. _search_space_configuration:
+
 GAMA Search Space Configuration
 ------------------------
 
