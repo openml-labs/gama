@@ -1,0 +1,10 @@
+language: python
+python:
+  - "3.5"
+  - "3.6"
+  - "3.7"
+
+script: python tests/tests.py
+branches:
+  only:
+    - master
