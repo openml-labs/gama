@@ -1,0 +1,474 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gama.tests.test_ea_mutation &mdash; gama 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html#gama-classifier">GAMA Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html#gama-regressor">GAMA Regressor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>gama.tests.test_ea_mutation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gama.tests.test_ea_mutation</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">deap</span> <span class="k">import</span> <span class="n">gp</span>
+
+<span class="kn">from</span> <span class="nn">gama.configuration.testconfiguration</span> <span class="k">import</span> <span class="n">clf_config</span>
+<span class="kn">from</span> <span class="nn">gama.ea.automl_gp</span> <span class="k">import</span> <span class="n">compile_individual</span>
+<span class="kn">from</span> <span class="nn">gama.ea.mutation</span> <span class="k">import</span> <span class="n">mut_replace_primitive</span><span class="p">,</span> <span class="n">mut_replace_terminal</span><span class="p">,</span> <span class="n">find_unmatched_terminal</span>
+<span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
+
+
+<div class="viewcode-block" id="mutation_test_suite"><a class="viewcode-back" href="../../../generated/gama.tests.html#gama.tests.test_ea_mutation.mutation_test_suite">[docs]</a><span class="k">def</span> <span class="nf">mutation_test_suite</span><span class="p">():</span>
+    <span class="n">test_cases</span> <span class="o">=</span> <span class="p">[</span><span class="n">MutationTestCase</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestSuite</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestLoader</span><span class="p">()</span><span class="o">.</span><span class="n">loadTestsFromTestCase</span><span class="p">,</span> <span class="n">test_cases</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="MutationTestCase"><a class="viewcode-back" href="../../../generated/gama.tests.html#gama.tests.test_ea_mutation.MutationTestCase">[docs]</a><span class="k">class</span> <span class="nc">MutationTestCase</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Unit Tests for ea/mutation.py &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MutationTestCase.setUp"><a class="viewcode-back" href="../../../generated/gama.tests.html#gama.tests.test_ea_mutation.MutationTestCase.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">clf_config</span><span class="p">,</span> <span class="n">objectives</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ind_strings</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;GaussianNB(data)&quot;</span><span class="p">,</span>
+            <span class="sd">&quot;&quot;&quot;RandomForestClassifier(</span>
+<span class="sd">            FeatureAgglomeration(</span>
+<span class="sd">                    data,</span>
+<span class="sd">                    FeatureAgglomeration.linkage=&#39;complete&#39;,</span>
+<span class="sd">                    FeatureAgglomeration.affinity=&#39;l2&#39;), </span>
+<span class="sd">            RandomForestClassifier.n_estimators=100, </span>
+<span class="sd">            RandomForestClassifier.criterion=&#39;gini&#39;, </span>
+<span class="sd">            RandomForestClassifier.max_features=0.6000000000000001, </span>
+<span class="sd">            RandomForestClassifier.min_samples_split=6, </span>
+<span class="sd">            RandomForestClassifier.min_samples_leaf=7, </span>
+<span class="sd">            RandomForestClassifier.bootstrap=True)&quot;&quot;&quot;</span><span class="p">,</span>
+            <span class="sd">&quot;&quot;&quot;LinearSVC(data,</span>
+<span class="sd">            LinearSVC.penalty=&#39;l2&#39;,</span>
+<span class="sd">            LinearSVC.loss=&#39;squared_hinge&#39;,</span>
+<span class="sd">            LinearSVC.dual=True,</span>
+<span class="sd">            LinearSVC.tol=1e-05,</span>
+<span class="sd">            LinearSVC.C=0.001)&quot;&quot;&quot;</span>
+        <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">individuals</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">ind_str</span><span class="p">:</span> <span class="n">gp</span><span class="o">.</span><span class="n">PrimitiveTree</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">ind_str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gama</span><span class="o">.</span><span class="n">_pset</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ind_str</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind_strings</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="MutationTestCase.tearDown"><a class="viewcode-back" href="../../../generated/gama.tests.html#gama.tests.test_ea_mutation.MutationTestCase.tearDown">[docs]</a>    <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gama</span><span class="o">.</span><span class="n">delete_cache</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MutationTestCase.test_find_unmatched_terminal"><a class="viewcode-back" href="../../../generated/gama.tests.html#gama.tests.test_ea_mutation.MutationTestCase.test_find_unmatched_terminal">[docs]</a>    <span class="k">def</span> <span class="nf">test_find_unmatched_terminal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># (data) -&gt; immediately missing</span>
+        <span class="n">pruned_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individuals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind_strings</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">find_unmatched_terminal</span><span class="p">(</span><span class="n">pruned_ind</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># FA(data, FA_t1, FA_t2), RFC_t1,...,RFC_tN -&gt; 4 (RFC_t1)</span>
+        <span class="n">pruned_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individuals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind_strings</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">find_unmatched_terminal</span><span class="p">(</span><span class="n">pruned_ind</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+
+        <span class="c1"># RFC(__(data, FA_t1, FA_t2), RFC_t1,...,RFC_tN -&gt; 1 (FA_t1)</span>
+        <span class="n">pruned_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individuals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind_strings</span><span class="p">[</span><span class="mi">1</span><span class="p">]][:</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">individuals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind_strings</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">find_unmatched_terminal</span><span class="p">(</span><span class="n">pruned_ind</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MutationTestCase.test_mut_replace_terminal"><a class="viewcode-back" href="../../../generated/gama.tests.html#gama.tests.test_ea_mutation.MutationTestCase.test_mut_replace_terminal">[docs]</a>    <span class="k">def</span> <span class="nf">test_mut_replace_terminal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Tests if mut_replace_terminal replaces exactly one terminal. &quot;&quot;&quot;</span>
+        <span class="n">ind1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individuals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind_strings</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_mutation</span><span class="p">(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">mut_replace_terminal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mut_replace_terminal_is_applied</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MutationTestCase.test_mut_replace_terminal_none_available"><a class="viewcode-back" href="../../../generated/gama.tests.html#gama.tests.test_ea_mutation.MutationTestCase.test_mut_replace_terminal_none_available">[docs]</a>    <span class="k">def</span> <span class="nf">test_mut_replace_terminal_none_available</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Tests if mut_replace_terminal raises an exception if no valid mutation is possible. &quot;&quot;&quot;</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individuals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind_strings</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">ind_clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gama</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mut_replace_terminal</span><span class="p">(</span><span class="n">ind_clone</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gama</span><span class="o">.</span><span class="n">_pset</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fail</span><span class="p">(</span><span class="s2">&quot;Individual should not have been able to be mutated as it only contained the data terminal.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s2">&quot;Individual could not be mutated&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="MutationTestCase.test_mut_replace_primitive_len_1"><a class="viewcode-back" href="../../../generated/gama.tests.html#gama.tests.test_ea_mutation.MutationTestCase.test_mut_replace_primitive_len_1">[docs]</a>    <span class="k">def</span> <span class="nf">test_mut_replace_primitive_len_1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Tests if mut_replace_primitive replaces exactly one primitive. &quot;&quot;&quot;</span>
+        <span class="n">ind1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individuals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind_strings</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_mutation</span><span class="p">(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">mut_replace_primitive</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mut_replace_primitive_is_applied</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MutationTestCase.test_mut_replace_primitive_len_2"><a class="viewcode-back" href="../../../generated/gama.tests.html#gama.tests.test_ea_mutation.MutationTestCase.test_mut_replace_primitive_len_2">[docs]</a>    <span class="k">def</span> <span class="nf">test_mut_replace_primitive_len_2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Tests if mut_replace_primitive replaces exactly one primitive. &quot;&quot;&quot;</span>
+        <span class="n">ind1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individuals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind_strings</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_mutation</span><span class="p">(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">mut_replace_primitive</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mut_replace_primitive_is_applied</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MutationTestCase.test_random_valid_mutation_with_all"><a class="viewcode-back" href="../../../generated/gama.tests.html#gama.tests.test_ea_mutation.MutationTestCase.test_random_valid_mutation_with_all">[docs]</a>    <span class="k">def</span> <span class="nf">test_random_valid_mutation_with_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Test if a valid mutation is applied at random.</span>
+
+<span class="sd">        I am honestly not sure of the best way to test this.</span>
+<span class="sd">        Because of the random nature, we repeat this enough times to ensure each mutation is tried with</span>
+<span class="sd">        probability &gt;0.99999.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">applied_mutation</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_trials</span><span class="p">(</span><span class="n">n_mutations</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individuals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind_strings</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">ind_clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gama</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+            <span class="n">new_ind</span><span class="p">,</span> <span class="o">=</span> <span class="n">mut_replace_primitive</span><span class="p">(</span><span class="n">ind_clone</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gama</span><span class="o">.</span><span class="n">_pset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutShrink_is_applied</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">new_ind</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">applied_mutation</span><span class="p">[</span><span class="s1">&#39;shrink&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutInsert_is_applied</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">new_ind</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">applied_mutation</span><span class="p">[</span><span class="s1">&#39;insert&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mut_replace_terminal_is_applied</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">new_ind</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">applied_mutation</span><span class="p">[</span><span class="s1">&#39;terminal&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mut_replace_primitive_is_applied</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">new_ind</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">applied_mutation</span><span class="p">[</span><span class="s1">&#39;primitive&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fail</span><span class="p">(</span><span class="s2">&quot;No mutation (or one that is unaccounted for) is applied.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">all</span><span class="p">([</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="p">(</span><span class="n">mut</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="ow">in</span> <span class="n">applied_mutation</span><span class="o">.</span><span class="n">items</span><span class="p">()]))</span></div>
+
+<div class="viewcode-block" id="MutationTestCase.test_random_valid_mutation_without_shrink"><a class="viewcode-back" href="../../../generated/gama.tests.html#gama.tests.test_ea_mutation.MutationTestCase.test_random_valid_mutation_without_shrink">[docs]</a>    <span class="k">def</span> <span class="nf">test_random_valid_mutation_without_shrink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Test if a valid mutation is applied at random.</span>
+
+<span class="sd">        I am honestly not sure of the best way to test this.</span>
+<span class="sd">        Because of the random nature, we repeat this enough times to ensure each mutation is tried with</span>
+<span class="sd">        probability &gt;0.99999.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">applied_mutation</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_trials</span><span class="p">(</span><span class="n">n_mutations</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individuals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind_strings</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+            <span class="n">ind_clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gama</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+            <span class="n">new_ind</span><span class="p">,</span> <span class="o">=</span> <span class="n">mut_replace_primitive</span><span class="p">(</span><span class="n">ind_clone</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gama</span><span class="o">.</span><span class="n">_pset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutInsert_is_applied</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">new_ind</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">applied_mutation</span><span class="p">[</span><span class="s1">&#39;insert&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mut_replace_terminal_is_applied</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">new_ind</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">applied_mutation</span><span class="p">[</span><span class="s1">&#39;terminal&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mut_replace_primitive_is_applied</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">new_ind</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">applied_mutation</span><span class="p">[</span><span class="s1">&#39;primitive&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fail</span><span class="p">(</span><span class="s2">&quot;No mutation (or one that is unaccounted for) is applied.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">all</span><span class="p">([</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="p">(</span><span class="n">mut</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="ow">in</span> <span class="n">applied_mutation</span><span class="o">.</span><span class="n">items</span><span class="p">()]))</span></div>
+
+<div class="viewcode-block" id="MutationTestCase.test_random_valid_mutation_without_terminal"><a class="viewcode-back" href="../../../generated/gama.tests.html#gama.tests.test_ea_mutation.MutationTestCase.test_random_valid_mutation_without_terminal">[docs]</a>    <span class="k">def</span> <span class="nf">test_random_valid_mutation_without_terminal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Test if a valid mutation is applied at random.</span>
+
+<span class="sd">        I am honestly not sure of the best way to test this.</span>
+<span class="sd">        Because of the random nature, we repeat this enough times to ensure each mutation is tried with</span>
+<span class="sd">        probability &gt;0.99999.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># The tested individual contains no terminals and one primitive,</span>
+        <span class="c1"># and thus is not eligible for replace_terminal and mutShrink.</span>
+        <span class="n">applied_mutation</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_trials</span><span class="p">(</span><span class="n">n_mutations</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individuals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind_strings</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">ind_clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gama</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+            <span class="n">new_ind</span><span class="p">,</span> <span class="o">=</span> <span class="n">mut_replace_primitive</span><span class="p">(</span><span class="n">ind_clone</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gama</span><span class="o">.</span><span class="n">_pset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutInsert_is_applied</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">new_ind</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">applied_mutation</span><span class="p">[</span><span class="s1">&#39;insert&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mut_replace_primitive_is_applied</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">new_ind</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">applied_mutation</span><span class="p">[</span><span class="s1">&#39;primitive&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fail</span><span class="p">(</span><span class="s2">&quot;No mutation (or one that is unaccounted for) is applied.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">all</span><span class="p">([</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="p">(</span><span class="n">mut</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="ow">in</span> <span class="n">applied_mutation</span><span class="o">.</span><span class="n">items</span><span class="p">()]))</span></div>
+
+    <span class="k">def</span> <span class="nf">_min_trials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_mutations</span><span class="p">,</span> <span class="n">max_error_rate</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">max_error_rate</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">n_mutations</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_mutations</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">_mutShrink_is_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">original</span><span class="p">,</span> <span class="n">mutated</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Checks if mutation was caused by `deap.gp.mutShrink`.</span>
+
+<span class="sd">        :param original: the pre-mutation individual</span>
+<span class="sd">        :param mutated:  the post-mutation individual</span>
+<span class="sd">        :return: (bool, str). If mutation was caused by function, True. False otherwise.</span>
+<span class="sd">            str is a message explaining why mutation is not caused by function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">primitives_original</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">original</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">Primitive</span><span class="p">)]</span>
+        <span class="n">primitives_mutated</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">mutated</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">Primitive</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">primitives_original</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">primitives_mutated</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Number of primitives should be strictly less, was </span><span class="si">{}</span><span class="s2"> is </span><span class="si">{}</span><span class="s2">.&quot;</span>
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">primitives_original</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">primitives_mutated</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_mutInsert_is_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">original</span><span class="p">,</span> <span class="n">mutated</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Checks if mutation was caused by `deap.gp.mutInsert`.</span>
+
+<span class="sd">        :param original: the pre-mutation individual</span>
+<span class="sd">        :param mutated:  the post-mutation individual</span>
+<span class="sd">        :return: (bool, str). If mutation was caused by function, True. False otherwise.</span>
+<span class="sd">            str is a message explaining why mutation is not caused by function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">primitives_original</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">original</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">Primitive</span><span class="p">)]</span>
+        <span class="n">primitives_mutated</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">mutated</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">Primitive</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">primitives_original</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">primitives_mutated</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Number of primitives should be strictly greater, was </span><span class="si">{}</span><span class="s2"> is </span><span class="si">{}</span><span class="s2">.&quot;</span>
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">primitives_original</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">primitives_mutated</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_mut_replace_terminal_is_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">original</span><span class="p">,</span> <span class="n">mutated</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Checks if mutation was caused by `gama.ea.mutation.mut_replace_terminal`.</span>
+
+<span class="sd">        :param original: the pre-mutation individual</span>
+<span class="sd">        :param mutated:  the post-mutation individual</span>
+<span class="sd">        :return: (bool, str). If mutation was caused by function, True. False otherwise.</span>
+<span class="sd">            str is a message explaining why mutation is not caused by function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">terminals_original</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">original</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">Terminal</span><span class="p">)]</span>
+        <span class="n">terminals_mutated</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">mutated</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">Terminal</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">terminals_original</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">terminals_mutated</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Number of terminals should be unchanged, was </span><span class="si">{}</span><span class="s2"> is </span><span class="si">{}</span><span class="s2">.&quot;</span>
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">terminals_original</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">terminals_mutated</span><span class="p">)))</span>
+
+        <span class="n">replaced_terminals</span> <span class="o">=</span> <span class="p">[</span><span class="n">t1</span> <span class="k">for</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">terminals_original</span><span class="p">,</span> <span class="n">terminals_mutated</span><span class="p">)</span> <span class="k">if</span> <span class="n">t1</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">t2</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">replaced_terminals</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expected 1 replaced Terminal, found </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">replaced_terminals</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_mut_replace_primitive_is_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">original</span><span class="p">,</span> <span class="n">mutated</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Checks if mutation was caused by `gama.ea.mutation.mut_replace_primitive`.</span>
+
+<span class="sd">        :param original: the pre-mutation individual</span>
+<span class="sd">        :param mutated:  the post-mutation individual</span>
+<span class="sd">        :return: (bool, str). If mutation was caused by function, True. False otherwise.</span>
+<span class="sd">            str is a message explaining why mutation is not caused by function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">primitives_original</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">original</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">Primitive</span><span class="p">)]</span>
+        <span class="n">primitives_mutated</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">mutated</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">Primitive</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">primitives_original</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">primitives_mutated</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Number of primitives should be unchanged, was </span><span class="si">{}</span><span class="s2"> is </span><span class="si">{}</span><span class="s2">.&quot;</span>
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">primitives_original</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">primitives_mutated</span><span class="p">)))</span>
+
+        <span class="n">replaced_primitives</span> <span class="o">=</span> <span class="p">[</span><span class="n">p1</span> <span class="k">for</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">primitives_original</span><span class="p">,</span> <span class="n">primitives_mutated</span><span class="p">)</span> <span class="k">if</span> <span class="n">p1</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">replaced_primitives</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expected 1 replaced Primitive, found </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">replaced_primitives</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_test_mutation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">individual</span><span class="p">,</span> <span class="n">mutation</span><span class="p">,</span> <span class="n">mutation_check</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Test if an individual mutated by `mutation` passes `mutation_check` and compiles.</span>
+
+<span class="sd">        :param individual: The individual to be mutated.</span>
+<span class="sd">        :param mutation: function: ind -&gt; (ind,). Should mutate the individual</span>
+<span class="sd">        :param mutation_check: function: (ind1, ind2)-&gt;(bool, str).</span>
+<span class="sd">           A function to check if ind2 could have been created by `mutation(ind1)`, see above functions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ind_clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gama</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">individual</span><span class="p">)</span>
+        <span class="n">new_ind</span><span class="p">,</span> <span class="o">=</span> <span class="n">mutation</span><span class="p">(</span><span class="n">ind_clone</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gama</span><span class="o">.</span><span class="n">_pset</span><span class="p">)</span>
+
+        <span class="n">applied</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="n">mutation_check</span><span class="p">(</span><span class="n">individual</span><span class="p">,</span> <span class="n">new_ind</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">applied</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fail</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+        <span class="c1"># Should be able to compile the individual, will raise an Exception if not.</span>
+        <span class="n">compile_individual</span><span class="p">(</span><span class="n">new_ind</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gama</span><span class="o">.</span><span class="n">_pset</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Pieter Gijsbers.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

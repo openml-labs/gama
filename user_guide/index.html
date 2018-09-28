@@ -1,0 +1,529 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>User Guide &mdash; gama 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API" href="../api/index.html" />
+    <link rel="prev" title="GAMA - Genetic Automated Machine learning Assistant" href="../index.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#classification">Classification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#regression">Regression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-arff-files">Using ARFF files</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#things-to-know">Things To Know</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#important-hyperparameters">Important Hyperparameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logging">Logging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#events-and-observers">Events and Observers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gama-search-space-configuration">GAMA Search Space Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#related-packages">Related Packages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tpot">TPOT</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#in-gama-but-not-in-tpot">In GAMA but not in TPOT:</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#in-tpot-but-not-in-gama">In TPOT but not in GAMA:</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#auto-sklearn">auto-sklearn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other-packages">Other packages</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html#gama-classifier">GAMA Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html#gama-regressor">GAMA Regressor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>User Guide</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/user_guide/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="user-guide">
+<span id="user-guide-index"></span><h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this headline">¶</a></h1>
+<p>This file gives an introduction to basic components and concepts of GAMA.
+GAMA is an AutoML tool which aims to automatically find the right machine learning algorithms to create the best possible data for your model.</p>
+<p>In the process, GAMA performs a search over <em>machine learning pipelines</em>.
+An example of a machine learnig pipeline would be to first perform data normalization and then use a decision tree classifier to make a prediction on the normalized data.
+More formally, a <em>machine learning pipeline</em> is a sequence of one or more <em>components</em>.
+A <em>component</em> is an algorithm which performs either data transformation <em>or</em> a prediction.
+This means that components can be preprocessing algorithms such as PCA or standard scaling, or a predictor such as a decision tree or support vector machine.
+A machine learning pipeline then consists of zero or more preprocessing components followed by a predictor component.</p>
+<p>Given some data, GAMA will start a search to try and find the best possible machine learning pipelines for it.
+After the search, the best model found can be used to make predictions.
+Alternatively, GAMA can combine several models into an <em>ensemble</em> to take into account more than one model when making predictions.
+For ease of use, GAMA provides a <cite>fit</cite>, <cite>predict</cite> and <cite>predict_proba</cite> function akin to scikit-learn.</p>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>To install GAMA and its dependencies, clone the repository and run the setup script:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">PGijsbers</span><span class="o">/</span><span class="n">gama</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">gama</span>
+<span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>The following dependencies will be installed if needed:</p>
+<blockquote>
+<div><ul class="simple">
+<li>numpy&gt;=1.14.0</li>
+<li>scipy&gt;=1.0.0</li>
+<li>scikit-learn&gt;=0.19.0</li>
+<li>deap&gt;=1.2</li>
+<li>stopit&gt;=1.1.1</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="classification">
+<h3>Classification<a class="headerlink" href="#classification" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="k">import</span> <span class="n">load_breast_cancer</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">log_loss</span><span class="p">,</span> <span class="n">accuracy_score</span>
+<span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="n">label_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">probability_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;accuracy:&#39;</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">label_predictions</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;log loss:&#39;</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">probability_predictions</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Should take 3 minutes to run and give the output below (exact performance might differ):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">accuracy</span><span class="p">:</span> <span class="mf">0.951048951048951</span>
+<span class="n">log</span> <span class="n">loss</span><span class="p">:</span> <span class="mf">0.1111237013184977</span>
+</pre></div>
+</div>
+<p>By default, GamaClassifier will optimize towards <cite>log loss</cite>.</p>
+</div>
+<div class="section" id="regression">
+<h3>Regression<a class="headerlink" href="#regression" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="k">import</span> <span class="n">load_boston</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">mean_squared_error</span>
+<span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaRegressor</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_boston</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">automl</span> <span class="o">=</span> <span class="n">GamaRegressor</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MSE:&#39;</span><span class="p">,</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Should take 3 minutes to run and give the output below (exact performance might differ):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">MSE</span><span class="p">:</span> <span class="mf">19.238475470025886</span>
+</pre></div>
+</div>
+<p>By default, GamaRegressor will optimize towards <cite>mean squared error</cite>.</p>
+</div>
+<div class="section" id="using-arff-files">
+<h3>Using ARFF files<a class="headerlink" href="#using-arff-files" title="Permalink to this headline">¶</a></h3>
+<p>GAMA supports data in ARFF files directly, utilizing extra information given, such as which features are categorical.
+In the example below, make sure to replace the file paths to the ARFF files to be used.
+The example results are obtained by using
+<a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_train.arff">breast_cancer_train.arff</a> and
+<a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_test.arff">breast_cancer_test.arff</a>.
+The target should always be specified as the last column.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">log_loss</span><span class="p">,</span> <span class="n">accuracy_score</span>
+<span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
+
+<span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">arff_file_path</span><span class="o">=</span><span class="s1">&#39;your_train_data.arff&#39;</span><span class="p">)</span>
+
+<span class="n">label_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">arff_file_path</span><span class="o">=</span><span class="s1">&#39;your_test_data.arff&#39;</span><span class="p">)</span>
+<span class="n">probability_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">arff_file_path</span><span class="o">=</span><span class="s1">&#39;your_test_data.arff&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;accuracy:&#39;</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">label_predictions</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;log loss:&#39;</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">probability_predictions</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>It should take 3 minutes to run and give the output below (exact performance might differ):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">accuracy</span><span class="p">:</span> <span class="mf">0.951048951048951</span>
+<span class="n">log</span> <span class="n">loss</span><span class="p">:</span> <span class="mf">0.1111237013184977</span>
+</pre></div>
+</div>
+<p>The GamaRegressor also has ARFF support.</p>
+</div>
+</div>
+<div class="section" id="things-to-know">
+<h2>Things To Know<a class="headerlink" href="#things-to-know" title="Permalink to this headline">¶</a></h2>
+<p>GAMA is in its early stages and very much work in progress.
+Some things won’t change, such as providing a scikit-learn like interface as well as ARFF support.
+However, many other things such as how search space configuration or even the search itself is done, can <em>and probably will</em> still change.</p>
+<div class="section" id="important-hyperparameters">
+<h3>Important Hyperparameters<a class="headerlink" href="#important-hyperparameters" title="Permalink to this headline">¶</a></h3>
+<p>GAMA has a lot of hyperparameters to tweak.
+Finding the best defaults is always a work in progress, so if you run into issues, try tuning some of them.</p>
+<p>Here is a selection that might be of particular interest that are accessed on initialization:</p>
+<p><strong>objectives</strong>: states towards which metrics to optimize.
+Supplying a binary tuple allows for multi-objective optimization.
+Make sure to optimize towards the metric that reflects well what is important to you.</p>
+<p><strong>n_jobs</strong>: determines how many processes can be run in parallel during <cite>fit</cite>.
+By default only one core is used, so if you have more cores available, this has the most influence over how many
+machine learning pipelines can be evaluated.</p>
+<p><strong>max_total_time</strong>: the maximum time in seconds that GAMA should aim to use to construct a model from the data.
+By default GAMA uses one hour. For large datasets, more time may be needed to get useful results.</p>
+<p><strong>max_eval_time</strong>: the maximum time in seconds that GAMA is allowed to use to evaluate a single machine learning pipeline.
+By default GAMA uses five minutes. For large datasets, more time may be needed to get useful results.</p>
+<p>The <cite>fit</cite> function can also be supplied with some optional hyperparameters:</p>
+<p><strong>auto_ensemble_n</strong>: This hyperparameter specifies the number of models to include in the final ensemble.
+The final ensemble may contain duplicates as a form of assigning weights.</p>
+<p><strong>keep_cache</strong>: During the optimization process, each model evaluated is stored alongside its predictions.
+This is needed for automatic ensemble construction.
+Normally, this cache is deleted automatically, but should you wish to keep it, you can specify it here.</p>
+</div>
+<div class="section" id="logging">
+<h3>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h3>
+<p>GAMA makes use of the default Python <a class="reference external" href="https://docs.python.org/3.5/library/logging.html">logging</a> module.
+The log can be captured at different levels, and handled by one of several StreamHandlers.
+For instance, to print GAMA logs to stdout:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
+
+<span class="n">gama_log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;gama&#39;</span><span class="p">)</span>
+<span class="n">gama_log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+<span class="n">stdout_streamhandler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+<span class="n">stdout_streamhandler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="n">gama_log</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">stdout_streamhandler</span><span class="p">)</span>
+
+<span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Running the above script display the GAMA version used, and the hyperparameter values on initialization:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Using</span> <span class="n">GAMA</span> <span class="n">version</span> <span class="mf">0.1</span><span class="o">.</span><span class="mf">0.</span>
+<span class="n">GamaClassifier</span><span class="p">(</span><span class="n">cache_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">verbosity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">max_eval_time</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span><span class="n">population_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span><span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">optimize_strategy</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="n">objectives</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;neg_log_loss&#39;</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Actual values or hyperparameter names may vary depending on the version of GAMA you are using.
+Make sure to set <em>both</em> the log level of the log and the stream handler.</p>
+</div>
+<div class="section" id="events-and-observers">
+<h3>Events and Observers<a class="headerlink" href="#events-and-observers" title="Permalink to this headline">¶</a></h3>
+<p>It is also possible to programmatically receive updates of the optimization process through the events:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
+
+<span class="k">def</span> <span class="nf">process_individual</span><span class="p">(</span><span class="n">individual</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> was evaluated. Fitness is </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">individual</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+
+<span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">()</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">evaluation_completed</span><span class="p">(</span><span class="n">process_individual</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This can be used to create useful observers, such as one that keeps track of the Pareto front or visualizes progress.</p>
+</div>
+</div>
+<div class="section" id="gama-search-space-configuration">
+<span id="search-space-configuration"></span><h2>GAMA Search Space Configuration<a class="headerlink" href="#gama-search-space-configuration" title="Permalink to this headline">¶</a></h2>
+<p>By default GAMA will build pipelines out of scikit-learn algorithms, both for preprocessing and learning models.
+It is possible to modify this search space, changing the algorithms or hyperparameter ranges to consider.</p>
+<p>The search space is determined by the <cite>search_space</cite> dictionary passed upon initialization.
+The defaults are found in
+<a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/configuration/classification.py">classification.py</a> and
+<a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/configuration/regression.py">regression.py</a>
+for the GamaClassifier and GamaRegressor, respectively.</p>
+<p>The search space configuration is a python dictionary.
+For reference, a minimal example search space configuration can look like this:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.naive_bayes</span> <span class="k">import</span> <span class="n">BernoulliNB</span>
+<span class="n">search_space</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">,</span> <span class="mf">1e-1</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">],</span>
+    <span class="n">BernoulliNB</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;fit_prior&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>At the top level, allowed key types are:</p>
+<ul class="simple">
+<li><cite>string</cite>, with a list as value. It specifies the name of a hyperparameter with its possible values.</li>
+</ul>
+<blockquote>
+<div>By defining a hyperparameter at the top level, you can reference it as hyperparameter for any specific algorithm.
+To do so, identify it with the same name and set its possible values to an empty list (see <cite>alpha</cite> in the example).
+The benefit of doing is that multiple algorithms can a hyperparameter space that is defined only once.
+Additionally, in evolution this makes it possible to know which hyperparameter values can be crossed over between
+different algorithms.</div></blockquote>
+<ul class="simple">
+<li><cite>class</cite>, with a dictionary as value. The key specifies the algorithm, calling it should instantiate the algorithm.</li>
+</ul>
+<blockquote>
+<div>The dictionary specifies the hyperparameters by name and their possible values as list.
+All hyperparameters specified should be taken as arguments for the algorithm’s initialization.
+A hyperparameter specified at the top level of the dictionary shares a name with a hyperparameter of the algorithm.
+To use the values provided by the shared hyperparameter, set the possible values to an empty list.
+If a list of values is provided instead, it will not use the shared hyperparameter values.</div></blockquote>
+</div>
+<div class="section" id="related-packages">
+<h2>Related Packages<a class="headerlink" href="#related-packages" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="tpot">
+<h3>TPOT<a class="headerlink" href="#tpot" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://epistasislab.github.io/tpot/">TPOT</a> is the package most closely related to GAMA.
+Like GAMA, it is an AutoML package that is based on genetic programming in Python.
+Below you will find a list of differences and similarities of the packages.</p>
+<p><em>Disclaimer: the list is intended to give the main differences, but is by no means exhaustive. If anything is missing that
+is important to add, please open an issue.</em></p>
+<div class="section" id="in-gama-but-not-in-tpot">
+<h4>In GAMA but not in TPOT:<a class="headerlink" href="#in-gama-but-not-in-tpot" title="Permalink to this headline">¶</a></h4>
+<dl class="docutils">
+<dt>Asynchronous evolution</dt>
+<dd>In theory, asynchronous evolution should be able to utilize the computing resources better.
+This is due to generation-based evolution waiting for the last individual in the population to be evaluated in each generation,
+whereas asynchronous evolution does not have any point where all evaluations need to be finished at the same time.
+More on the differences in the user guide.</dd>
+<dt>ARFF support</dt>
+<dd>The Attribute-Relation File Format (<a class="reference external" href="https://www.cs.waikato.ac.nz/ml/weka/arff.html">ARFF</a>)
+is used to store and describe data. It can be used, for instance, to make sure certain data preprocessing steps,
+such as category encoding, are applied only on the columns it was intended for instead of using heuristics.</dd>
+<dt>Automatic Ensembling</dt>
+<dd>During the optimization process, many pipelines get evaluated. Instead of using only
+the single best in the final model to make predictions, GAMA can create an ensemble out of a subset of them.
+This can lead to better generalization performance.</dd>
+</dl>
+</div>
+<div class="section" id="in-tpot-but-not-in-gama">
+<h4>In TPOT but not in GAMA:<a class="headerlink" href="#in-tpot-but-not-in-gama" title="Permalink to this headline">¶</a></h4>
+<dl class="docutils">
+<dt>Code export</dt>
+<dd>TPOT is able to export Python code to recreate the best found pipeline. The Python code can be used
+without any further dependency on TPOT.</dd>
+<dt>Command Line Interface</dt>
+<dd>TPOT can be used directly from the command line (in addition to the Python API).</dd>
+<dt>DASK integration</dt>
+<dd>When DASK is installed, TPOT’s pipelines can be evaluated on any DASK cluster. Moreover, it can
+use other optimizations such as caching and computing graphs to avoid (some of the) double work.</dd>
+</dl>
+<p>An empirical study of performance will follow.</p>
+</div>
+</div>
+<div class="section" id="auto-sklearn">
+<h3>auto-sklearn<a class="headerlink" href="#auto-sklearn" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://automl.github.io/auto-sklearn/stable/">auto-sklearn</a> is another AutoML package in Python.
+It uses Bayesian optimization to search for good machine learning pipelines and also features automatic ensemble construction.
+Auto-sklearn won ChaLearn AutoML challenge 1 and 2.</p>
+</div>
+<div class="section" id="other-packages">
+<h3>Other packages<a class="headerlink" href="#other-packages" title="Permalink to this headline">¶</a></h3>
+<p>[I will provide a link here]</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../api/index.html" class="btn btn-neutral float-right" title="API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral" title="GAMA - Genetic Automated Machine learning Assistant" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Pieter Gijsbers.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

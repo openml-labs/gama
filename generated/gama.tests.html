@@ -1,0 +1,722 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gama.tests package &mdash; gama 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html#gama-classifier">GAMA Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html#gama-regressor">GAMA Regressor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>gama.tests package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/generated/gama.tests.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="gama-tests-package">
+<h1>gama.tests package<a class="headerlink" href="#gama-tests-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-gama.tests.test_automl_gp">
+<span id="gama-tests-test-automl-gp-module"></span><h2>gama.tests.test_automl_gp module<a class="headerlink" href="#module-gama.tests.test_automl_gp" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gama.tests.test_automl_gp.AutomlGpTestCase">
+<em class="property">class </em><code class="descclassname">gama.tests.test_automl_gp.</code><code class="descname">AutomlGpTestCase</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_automl_gp.html#AutomlGpTestCase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_automl_gp.AutomlGpTestCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<p>Unit Tests for some functions of automl_gp.py.</p>
+<p>Functions excluded (for now?):
+[ ] pset_from_config
+[ ] compile_individual</p>
+<blockquote>
+<div>If this breaks it’s probably not subtle, hard to test edge cases, leave it to system test?</div></blockquote>
+<p>[ ] expression_to_component
+[ ] generate_valid</p>
+<blockquote>
+<div>If this breaks it’s probably not subtle, hard to test edge cases, leave it to system test?</div></blockquote>
+<p>[ ] eliminate_worst
+[ ] offspring_mate_and_mutate</p>
+<dl class="method">
+<dt id="gama.tests.test_automl_gp.AutomlGpTestCase.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_automl_gp.html#AutomlGpTestCase.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_automl_gp.AutomlGpTestCase.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_automl_gp.AutomlGpTestCase.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_automl_gp.html#AutomlGpTestCase.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_automl_gp.AutomlGpTestCase.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_automl_gp.AutomlGpTestCase.test_eliminate_NSGA">
+<code class="descname">test_eliminate_NSGA</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_automl_gp.html#AutomlGpTestCase.test_eliminate_NSGA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_automl_gp.AutomlGpTestCase.test_eliminate_NSGA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_automl_gp.AutomlGpTestCase.test_individual_length">
+<code class="descname">test_individual_length</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_automl_gp.html#AutomlGpTestCase.test_individual_length"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_automl_gp.AutomlGpTestCase.test_individual_length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.tests.test_automl_gp.automl_gp_test_suite">
+<code class="descclassname">gama.tests.test_automl_gp.</code><code class="descname">automl_gp_test_suite</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_automl_gp.html#automl_gp_test_suite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_automl_gp.automl_gp_test_suite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-gama.tests.test_ea_metrics">
+<span id="gama-tests-test-ea-metrics-module"></span><h2>gama.tests.test_ea_metrics module<a class="headerlink" href="#module-gama.tests.test_ea_metrics" title="Permalink to this headline">¶</a></h2>
+<p>Contains full system tests for GamaRegressor</p>
+<dl class="class">
+<dt id="gama.tests.test_ea_metrics.MetricsTestCase">
+<em class="property">class </em><code class="descclassname">gama.tests.test_ea_metrics.</code><code class="descname">MetricsTestCase</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_metrics.html#MetricsTestCase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_metrics.MetricsTestCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<p>Unit tests for Metric.</p>
+<dl class="method">
+<dt id="gama.tests.test_ea_metrics.MetricsTestCase.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_metrics.html#MetricsTestCase.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_metrics.MetricsTestCase.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_ea_metrics.MetricsTestCase.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_metrics.html#MetricsTestCase.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_metrics.MetricsTestCase.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_ea_metrics.MetricsTestCase.test_accuracy_numeric">
+<code class="descname">test_accuracy_numeric</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_metrics.html#MetricsTestCase.test_accuracy_numeric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_metrics.MetricsTestCase.test_accuracy_numeric" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_ea_metrics.MetricsTestCase.test_accuracy_string">
+<code class="descname">test_accuracy_string</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_metrics.html#MetricsTestCase.test_accuracy_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_metrics.MetricsTestCase.test_accuracy_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_ea_metrics.MetricsTestCase.test_all_metrics_instantiate">
+<code class="descname">test_all_metrics_instantiate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_metrics.html#MetricsTestCase.test_all_metrics_instantiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_metrics.MetricsTestCase.test_all_metrics_instantiate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_ea_metrics.MetricsTestCase.test_logloss_numeric">
+<code class="descname">test_logloss_numeric</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_metrics.html#MetricsTestCase.test_logloss_numeric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_metrics.MetricsTestCase.test_logloss_numeric" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.tests.test_ea_metrics.metrics_test_suite">
+<code class="descclassname">gama.tests.test_ea_metrics.</code><code class="descname">metrics_test_suite</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_metrics.html#metrics_test_suite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_metrics.metrics_test_suite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-gama.tests.test_ea_mutation">
+<span id="gama-tests-test-ea-mutation-module"></span><h2>gama.tests.test_ea_mutation module<a class="headerlink" href="#module-gama.tests.test_ea_mutation" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gama.tests.test_ea_mutation.MutationTestCase">
+<em class="property">class </em><code class="descclassname">gama.tests.test_ea_mutation.</code><code class="descname">MutationTestCase</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_mutation.html#MutationTestCase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_mutation.MutationTestCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<p>Unit Tests for ea/mutation.py</p>
+<dl class="method">
+<dt id="gama.tests.test_ea_mutation.MutationTestCase.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_mutation.html#MutationTestCase.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_mutation.MutationTestCase.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_ea_mutation.MutationTestCase.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_mutation.html#MutationTestCase.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_mutation.MutationTestCase.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_ea_mutation.MutationTestCase.test_find_unmatched_terminal">
+<code class="descname">test_find_unmatched_terminal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_mutation.html#MutationTestCase.test_find_unmatched_terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_mutation.MutationTestCase.test_find_unmatched_terminal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_ea_mutation.MutationTestCase.test_mut_replace_primitive_len_1">
+<code class="descname">test_mut_replace_primitive_len_1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_mutation.html#MutationTestCase.test_mut_replace_primitive_len_1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_mutation.MutationTestCase.test_mut_replace_primitive_len_1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if mut_replace_primitive replaces exactly one primitive.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_ea_mutation.MutationTestCase.test_mut_replace_primitive_len_2">
+<code class="descname">test_mut_replace_primitive_len_2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_mutation.html#MutationTestCase.test_mut_replace_primitive_len_2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_mutation.MutationTestCase.test_mut_replace_primitive_len_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if mut_replace_primitive replaces exactly one primitive.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_ea_mutation.MutationTestCase.test_mut_replace_terminal">
+<code class="descname">test_mut_replace_terminal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_mutation.html#MutationTestCase.test_mut_replace_terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_mutation.MutationTestCase.test_mut_replace_terminal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if mut_replace_terminal replaces exactly one terminal.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_ea_mutation.MutationTestCase.test_mut_replace_terminal_none_available">
+<code class="descname">test_mut_replace_terminal_none_available</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_mutation.html#MutationTestCase.test_mut_replace_terminal_none_available"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_mutation.MutationTestCase.test_mut_replace_terminal_none_available" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if mut_replace_terminal raises an exception if no valid mutation is possible.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_ea_mutation.MutationTestCase.test_random_valid_mutation_with_all">
+<code class="descname">test_random_valid_mutation_with_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_mutation.html#MutationTestCase.test_random_valid_mutation_with_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_mutation.MutationTestCase.test_random_valid_mutation_with_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if a valid mutation is applied at random.</p>
+<p>I am honestly not sure of the best way to test this.
+Because of the random nature, we repeat this enough times to ensure each mutation is tried with
+probability &gt;0.99999.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_ea_mutation.MutationTestCase.test_random_valid_mutation_without_shrink">
+<code class="descname">test_random_valid_mutation_without_shrink</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_mutation.html#MutationTestCase.test_random_valid_mutation_without_shrink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_mutation.MutationTestCase.test_random_valid_mutation_without_shrink" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if a valid mutation is applied at random.</p>
+<p>I am honestly not sure of the best way to test this.
+Because of the random nature, we repeat this enough times to ensure each mutation is tried with
+probability &gt;0.99999.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_ea_mutation.MutationTestCase.test_random_valid_mutation_without_terminal">
+<code class="descname">test_random_valid_mutation_without_terminal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_mutation.html#MutationTestCase.test_random_valid_mutation_without_terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_mutation.MutationTestCase.test_random_valid_mutation_without_terminal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if a valid mutation is applied at random.</p>
+<p>I am honestly not sure of the best way to test this.
+Because of the random nature, we repeat this enough times to ensure each mutation is tried with
+probability &gt;0.99999.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.tests.test_ea_mutation.mutation_test_suite">
+<code class="descclassname">gama.tests.test_ea_mutation.</code><code class="descname">mutation_test_suite</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_ea_mutation.html#mutation_test_suite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_ea_mutation.mutation_test_suite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-gama.tests.test_gama">
+<span id="gama-tests-test-gama-module"></span><h2>gama.tests.test_gama module<a class="headerlink" href="#module-gama.tests.test_gama" title="Permalink to this headline">¶</a></h2>
+<p>Contains all unit tests for</p>
+<dl class="class">
+<dt id="gama.tests.test_gama.GamaSystemTestCase">
+<em class="property">class </em><code class="descclassname">gama.tests.test_gama.</code><code class="descname">GamaSystemTestCase</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gama.html#GamaSystemTestCase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gama.GamaSystemTestCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<p>Contain complete system tests for Gama.</p>
+<dl class="method">
+<dt id="gama.tests.test_gama.GamaSystemTestCase.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gama.html#GamaSystemTestCase.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gama.GamaSystemTestCase.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gama.GamaSystemTestCase.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gama.html#GamaSystemTestCase.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gama.GamaSystemTestCase.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gama.GamaSystemTestCase.test_full_system_multi_core">
+<code class="descname">test_full_system_multi_core</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gama.html#GamaSystemTestCase.test_full_system_multi_core"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gama.GamaSystemTestCase.test_full_system_multi_core" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gama.GamaSystemTestCase.test_full_system_single_core">
+<code class="descname">test_full_system_single_core</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gama.html#GamaSystemTestCase.test_full_system_single_core"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gama.GamaSystemTestCase.test_full_system_single_core" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gama.tests.test_gama.GamaUnitTestCase">
+<em class="property">class </em><code class="descclassname">gama.tests.test_gama.</code><code class="descname">GamaUnitTestCase</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gama.html#GamaUnitTestCase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gama.GamaUnitTestCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<p>Contains unit tests for Gama, that test small components.</p>
+<dl class="method">
+<dt id="gama.tests.test_gama.GamaUnitTestCase.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gama.html#GamaUnitTestCase.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gama.GamaUnitTestCase.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gama.GamaUnitTestCase.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gama.html#GamaUnitTestCase.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gama.GamaUnitTestCase.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gama.GamaUnitTestCase.test_reproducible_initialization">
+<code class="descname">test_reproducible_initialization</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gama.html#GamaUnitTestCase.test_reproducible_initialization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gama.GamaUnitTestCase.test_reproducible_initialization" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.tests.test_gama.gama_test_suite">
+<code class="descclassname">gama.tests.test_gama.</code><code class="descname">gama_test_suite</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gama.html#gama_test_suite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gama.gama_test_suite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-gama.tests.test_gamaclassifier">
+<span id="gama-tests-test-gamaclassifier-module"></span><h2>gama.tests.test_gamaclassifier module<a class="headerlink" href="#module-gama.tests.test_gamaclassifier" title="Permalink to this headline">¶</a></h2>
+<p>Contains full system tests for GamaClassifier</p>
+<dl class="class">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase">
+<em class="property">class </em><code class="descclassname">gama.tests.test_gamaclassifier.</code><code class="descname">GamaClassifierARFFSystemTestCase</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierARFFSystemTestCase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<p>Contain complete system tests for Gama from ARFF data.</p>
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierARFFSystemTestCase.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierARFFSystemTestCase.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase.test_binary_classification_accuracy">
+<code class="descname">test_binary_classification_accuracy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierARFFSystemTestCase.test_binary_classification_accuracy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase.test_binary_classification_accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>GamaClassifier can do binary classification with predict metric.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase.test_binary_classification_logloss">
+<code class="descname">test_binary_classification_logloss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierARFFSystemTestCase.test_binary_classification_logloss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase.test_binary_classification_logloss" title="Permalink to this definition">¶</a></dt>
+<dd><p>GamaClassifier can do binary classification with predict-proba metric.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase.test_missing_value_classification">
+<code class="descname">test_missing_value_classification</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierARFFSystemTestCase.test_missing_value_classification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase.test_missing_value_classification" title="Permalink to this definition">¶</a></dt>
+<dd><p>GamaClassifier handles missing data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase.test_multiclass_classification_accuracy">
+<code class="descname">test_multiclass_classification_accuracy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierARFFSystemTestCase.test_multiclass_classification_accuracy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase.test_multiclass_classification_accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>GamaClassifier can do multi-class with predict metric.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase.test_multiclass_classification_logloss">
+<code class="descname">test_multiclass_classification_logloss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierARFFSystemTestCase.test_multiclass_classification_logloss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierARFFSystemTestCase.test_multiclass_classification_logloss" title="Permalink to this definition">¶</a></dt>
+<dd><p>GamaClassifier can do multi-class with predict-proba metric.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase">
+<em class="property">class </em><code class="descclassname">gama.tests.test_gamaclassifier.</code><code class="descname">GamaClassifierSystemTestCase</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierSystemTestCase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<p>Contain complete system tests for Gama from numpy data.</p>
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierSystemTestCase.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierSystemTestCase.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.test_binary_classification_accuracy">
+<code class="descname">test_binary_classification_accuracy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierSystemTestCase.test_binary_classification_accuracy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.test_binary_classification_accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>GamaClassifier can do binary classification with predict metric from numpy data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.test_binary_classification_logloss">
+<code class="descname">test_binary_classification_logloss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierSystemTestCase.test_binary_classification_logloss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.test_binary_classification_logloss" title="Permalink to this definition">¶</a></dt>
+<dd><p>GamaClassifier can do binary classification with predict-proba metric from numpy data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.test_missing_value_classification">
+<code class="descname">test_missing_value_classification</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierSystemTestCase.test_missing_value_classification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.test_missing_value_classification" title="Permalink to this definition">¶</a></dt>
+<dd><p>GamaClassifier handles missing data from numpy data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.test_multiclass_classification_accuracy">
+<code class="descname">test_multiclass_classification_accuracy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierSystemTestCase.test_multiclass_classification_accuracy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.test_multiclass_classification_accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>GamaClassifier can do multi-class with predict metric from numpy data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.test_multiclass_classification_logloss">
+<code class="descname">test_multiclass_classification_logloss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierSystemTestCase.test_multiclass_classification_logloss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.test_multiclass_classification_logloss" title="Permalink to this definition">¶</a></dt>
+<dd><p>GamaClassifier can do multi-class with predict-proba metric from numpy data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.test_string_label_classification_accuracy">
+<code class="descname">test_string_label_classification_accuracy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierSystemTestCase.test_string_label_classification_accuracy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.test_string_label_classification_accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>GamaClassifier can work with string-like target labels when using predict-metric from numpy data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.test_string_label_classification_log_loss">
+<code class="descname">test_string_label_classification_log_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#GamaClassifierSystemTestCase.test_string_label_classification_log_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.GamaClassifierSystemTestCase.test_string_label_classification_log_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>GamaClassifier can work with string-type target labels when using predict-proba metric from numpy data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.tests.test_gamaclassifier.gamaclassifier_test_suite">
+<code class="descclassname">gama.tests.test_gamaclassifier.</code><code class="descname">gamaclassifier_test_suite</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaclassifier.html#gamaclassifier_test_suite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaclassifier.gamaclassifier_test_suite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-gama.tests.test_gamaregressor">
+<span id="gama-tests-test-gamaregressor-module"></span><h2>gama.tests.test_gamaregressor module<a class="headerlink" href="#module-gama.tests.test_gamaregressor" title="Permalink to this headline">¶</a></h2>
+<p>Contains full system tests for GamaRegressor</p>
+<dl class="class">
+<dt id="gama.tests.test_gamaregressor.GamaRegressorSystemTestCase">
+<em class="property">class </em><code class="descclassname">gama.tests.test_gamaregressor.</code><code class="descname">GamaRegressorSystemTestCase</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaregressor.html#GamaRegressorSystemTestCase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaregressor.GamaRegressorSystemTestCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<p>Contain complete system tests for Gama.</p>
+<dl class="method">
+<dt id="gama.tests.test_gamaregressor.GamaRegressorSystemTestCase.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaregressor.html#GamaRegressorSystemTestCase.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaregressor.GamaRegressorSystemTestCase.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaregressor.GamaRegressorSystemTestCase.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaregressor.html#GamaRegressorSystemTestCase.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaregressor.GamaRegressorSystemTestCase.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaregressor.GamaRegressorSystemTestCase.test_missing_value_regression">
+<code class="descname">test_missing_value_regression</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaregressor.html#GamaRegressorSystemTestCase.test_missing_value_regression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaregressor.GamaRegressorSystemTestCase.test_missing_value_regression" title="Permalink to this definition">¶</a></dt>
+<dd><p>GamaRegressor works when missing values are present.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_gamaregressor.GamaRegressorSystemTestCase.test_regression_mean_squared_error">
+<code class="descname">test_regression_mean_squared_error</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaregressor.html#GamaRegressorSystemTestCase.test_regression_mean_squared_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaregressor.GamaRegressorSystemTestCase.test_regression_mean_squared_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>GamaRegressor works on all-numeric data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.tests.test_gamaregressor.gamaregressor_test_suite">
+<code class="descclassname">gama.tests.test_gamaregressor.</code><code class="descname">gamaregressor_test_suite</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_gamaregressor.html#gamaregressor_test_suite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_gamaregressor.gamaregressor_test_suite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-gama.tests.test_utilities_generic_paretofront">
+<span id="gama-tests-test-utilities-generic-paretofront-module"></span><h2>gama.tests.test_utilities_generic_paretofront module<a class="headerlink" href="#module-gama.tests.test_utilities_generic_paretofront" title="Permalink to this headline">¶</a></h2>
+<p>Contains all unit tests for</p>
+<dl class="class">
+<dt id="gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase">
+<em class="property">class </em><code class="descclassname">gama.tests.test_utilities_generic_paretofront.</code><code class="descname">ParetoFrontUnitTestCase</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_paretofront.html#ParetoFrontUnitTestCase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<dl class="method">
+<dt id="gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_paretofront.html#ParetoFrontUnitTestCase.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_paretofront.html#ParetoFrontUnitTestCase.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.test_pareto_front_clear">
+<code class="descname">test_pareto_front_clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_paretofront.html#ParetoFrontUnitTestCase.test_pareto_front_clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.test_pareto_front_clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests that the calling clear empties the Pareto front.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.test_pareto_front_custom_function">
+<code class="descname">test_pareto_front_custom_function</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_paretofront.html#ParetoFrontUnitTestCase.test_pareto_front_custom_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.test_pareto_front_custom_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test construction of Pareto front with custom object and value function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.test_pareto_initialization_empty">
+<code class="descname">test_pareto_initialization_empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_paretofront.html#ParetoFrontUnitTestCase.test_pareto_initialization_empty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.test_pareto_initialization_empty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test initialization of empty front.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.test_pareto_initialization_pareto_front">
+<code class="descname">test_pareto_initialization_pareto_front</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_paretofront.html#ParetoFrontUnitTestCase.test_pareto_initialization_pareto_front"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.test_pareto_initialization_pareto_front" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test initialization with a list which only has Pareto front elements.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.test_pareto_initialization_with_duplicates">
+<code class="descname">test_pareto_initialization_with_duplicates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_paretofront.html#ParetoFrontUnitTestCase.test_pareto_initialization_with_duplicates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.test_pareto_initialization_with_duplicates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test initialization with duplicate elements in list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.test_pareto_initialization_with_inferiors">
+<code class="descname">test_pareto_initialization_with_inferiors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_paretofront.html#ParetoFrontUnitTestCase.test_pareto_initialization_with_inferiors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.test_pareto_initialization_with_inferiors" title="Permalink to this definition">¶</a></dt>
+<dd><p>” Test initialization with a list containing elements that should not be in the Pareto front.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.test_pareto_update_unique">
+<code class="descname">test_pareto_update_unique</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_paretofront.html#ParetoFrontUnitTestCase.test_pareto_update_unique"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_paretofront.ParetoFrontUnitTestCase.test_pareto_update_unique" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test creating Pareto front by updating one by one.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.tests.test_utilities_generic_paretofront.paretofront_test_suite">
+<code class="descclassname">gama.tests.test_utilities_generic_paretofront.</code><code class="descname">paretofront_test_suite</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_paretofront.html#paretofront_test_suite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_paretofront.paretofront_test_suite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-gama.tests.test_utilities_generic_stopwatch">
+<span id="gama-tests-test-utilities-generic-stopwatch-module"></span><h2>gama.tests.test_utilities_generic_stopwatch module<a class="headerlink" href="#module-gama.tests.test_utilities_generic_stopwatch" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gama.tests.test_utilities_generic_stopwatch.StopwatchUnitTestCase">
+<em class="property">class </em><code class="descclassname">gama.tests.test_utilities_generic_stopwatch.</code><code class="descname">StopwatchUnitTestCase</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_stopwatch.html#StopwatchUnitTestCase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_stopwatch.StopwatchUnitTestCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<dl class="method">
+<dt id="gama.tests.test_utilities_generic_stopwatch.StopwatchUnitTestCase.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_stopwatch.html#StopwatchUnitTestCase.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_stopwatch.StopwatchUnitTestCase.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_utilities_generic_stopwatch.StopwatchUnitTestCase.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_stopwatch.html#StopwatchUnitTestCase.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_stopwatch.StopwatchUnitTestCase.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_utilities_generic_stopwatch.StopwatchUnitTestCase.test_stopwatch_elapsed_time_after_running">
+<code class="descname">test_stopwatch_elapsed_time_after_running</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_stopwatch.html#StopwatchUnitTestCase.test_stopwatch_elapsed_time_after_running"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_stopwatch.StopwatchUnitTestCase.test_stopwatch_elapsed_time_after_running" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests that time elapsed is stored after exiting the context.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_utilities_generic_stopwatch.StopwatchUnitTestCase.test_stopwatch_elapsed_time_while_running">
+<code class="descname">test_stopwatch_elapsed_time_while_running</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_stopwatch.html#StopwatchUnitTestCase.test_stopwatch_elapsed_time_while_running"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_stopwatch.StopwatchUnitTestCase.test_stopwatch_elapsed_time_while_running" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests that elapsed_time increments as expected while running.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gama.tests.test_utilities_generic_stopwatch.StopwatchUnitTestCase.test_stopwatch_initialization_zero">
+<code class="descname">test_stopwatch_initialization_zero</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_stopwatch.html#StopwatchUnitTestCase.test_stopwatch_initialization_zero"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_stopwatch.StopwatchUnitTestCase.test_stopwatch_initialization_zero" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test that elapsed time is 0 if stopwatch is not started yet.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.tests.test_utilities_generic_stopwatch.stopwatch_test_suite">
+<code class="descclassname">gama.tests.test_utilities_generic_stopwatch.</code><code class="descname">stopwatch_test_suite</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/test_utilities_generic_stopwatch.html#stopwatch_test_suite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.test_utilities_generic_stopwatch.stopwatch_test_suite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-gama.tests.tests">
+<span id="gama-tests-tests-module"></span><h2>gama.tests.tests module<a class="headerlink" href="#module-gama.tests.tests" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="gama.tests.tests.run_suite">
+<code class="descclassname">gama.tests.tests.</code><code class="descname">run_suite</code><span class="sig-paren">(</span><em>suite</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/tests/tests.html#run_suite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.tests.tests.run_suite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-gama.tests">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-gama.tests" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Pieter Gijsbers.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

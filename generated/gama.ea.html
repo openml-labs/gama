@@ -1,0 +1,442 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gama.ea package &mdash; gama 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html#gama-classifier">GAMA Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html#gama-regressor">GAMA Regressor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>gama.ea package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/generated/gama.ea.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="gama-ea-package">
+<h1>gama.ea package<a class="headerlink" href="#gama-ea-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-gama.ea.async_ea">
+<span id="gama-ea-async-ea-module"></span><h2>gama.ea.async_ea module<a class="headerlink" href="#module-gama.ea.async_ea" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="gama.ea.async_ea.async_ea">
+<code class="descclassname">gama.ea.async_ea.</code><code class="descname">async_ea</code><span class="sig-paren">(</span><em>objectives</em>, <em>start_population</em>, <em>toolbox</em>, <em>evaluation_callback=None</em>, <em>restart_callback=None</em>, <em>elimination_callback=None</em>, <em>max_n_evaluations=10000</em>, <em>max_time_seconds=10000000.0</em>, <em>n_jobs=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/async_ea.html#async_ea"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.async_ea.async_ea" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-gama.ea.automl_gp">
+<span id="gama-ea-automl-gp-module"></span><h2>gama.ea.automl_gp module<a class="headerlink" href="#module-gama.ea.automl_gp" title="Permalink to this headline">¶</a></h2>
+<p>Contains classes and function(s) which help define automated machine 
+learning as a genetic programming problem.
+(Yes, I need to find a better file name.)</p>
+<dl class="class">
+<dt id="gama.ea.automl_gp.Data">
+<em class="property">class </em><code class="descclassname">gama.ea.automl_gp.</code><code class="descname">Data</code><a class="reference internal" href="../_modules/gama/ea/automl_gp.html#Data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.automl_gp.Data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></code></p>
+<p>Dummy class that represents a dataset.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="gama.ea.automl_gp.Predictions">
+<em class="property">class </em><code class="descclassname">gama.ea.automl_gp.</code><code class="descname">Predictions</code><a class="reference internal" href="../_modules/gama/ea/automl_gp.html#Predictions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.automl_gp.Predictions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></code></p>
+<p>Dummy class that represents prediction data.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.ea.automl_gp.compile_individual">
+<code class="descclassname">gama.ea.automl_gp.</code><code class="descname">compile_individual</code><span class="sig-paren">(</span><em>expr</em>, <em>pset</em>, <em>parameter_checks=None</em>, <em>preprocessing_steps=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/automl_gp.html#compile_individual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.automl_gp.compile_individual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compile the individual to a sklearn pipeline.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.ea.automl_gp.eliminate_NSGA">
+<code class="descclassname">gama.ea.automl_gp.</code><code class="descname">eliminate_NSGA</code><span class="sig-paren">(</span><em>pop</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/automl_gp.html#eliminate_NSGA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.automl_gp.eliminate_NSGA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="gama.ea.automl_gp.eliminate_worst">
+<code class="descclassname">gama.ea.automl_gp.</code><code class="descname">eliminate_worst</code><span class="sig-paren">(</span><em>pop</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/automl_gp.html#eliminate_worst"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.automl_gp.eliminate_worst" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="gama.ea.automl_gp.expression_to_component">
+<code class="descclassname">gama.ea.automl_gp.</code><code class="descname">expression_to_component</code><span class="sig-paren">(</span><em>primitive</em>, <em>terminals</em>, <em>pset</em>, <em>parameter_checks=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/automl_gp.html#expression_to_component"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.automl_gp.expression_to_component" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates Python-object for the primitive-terminals combination.</p>
+<p>It is allowed to have trailing terminals in the list, they will be ignored.</p>
+<p>Returns an instantiated python object and the number of terminals used.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.ea.automl_gp.generate_valid">
+<code class="descclassname">gama.ea.automl_gp.</code><code class="descname">generate_valid</code><span class="sig-paren">(</span><em>pset</em>, <em>min_</em>, <em>max_</em>, <em>toolbox</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/automl_gp.html#generate_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.automl_gp.generate_valid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a valid pipeline.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.ea.automl_gp.individual_length">
+<code class="descclassname">gama.ea.automl_gp.</code><code class="descname">individual_length</code><span class="sig-paren">(</span><em>individual</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/automl_gp.html#individual_length"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.automl_gp.individual_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives a measure for the length of the pipeline. Currently, this is the number of primitives.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.ea.automl_gp.offspring_mate_and_mutate">
+<code class="descclassname">gama.ea.automl_gp.</code><code class="descname">offspring_mate_and_mutate</code><span class="sig-paren">(</span><em>pop</em>, <em>n</em>, <em>cxpb</em>, <em>mutpb</em>, <em>toolbox</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/automl_gp.html#offspring_mate_and_mutate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.automl_gp.offspring_mate_and_mutate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates n new individuals based on the population. Can apply both crossover and mutation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.ea.automl_gp.pset_from_config">
+<code class="descclassname">gama.ea.automl_gp.</code><code class="descname">pset_from_config</code><span class="sig-paren">(</span><em>configuration</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/automl_gp.html#pset_from_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.automl_gp.pset_from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a pset for the given configuration dictionary.</p>
+<p>Given a configuration dictionary specifying operators (e.g. sklearn 
+estimators), their hyperparameters and values for each hyperparameter,
+create a gp.PrimitiveSetTyped that contains:</p>
+<blockquote>
+<div><ul class="simple">
+<li>For each operator a primitive</li>
+<li>For each possible hyperparameter-value combination a unique terminal</li>
+</ul>
+</div></blockquote>
+<p>Side effect: Imports the classes of each primitive.</p>
+<p>Returns the given Pset.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-gama.ea.evaluation">
+<span id="gama-ea-evaluation-module"></span><h2>gama.ea.evaluation module<a class="headerlink" href="#module-gama.ea.evaluation" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="gama.ea.evaluation.cross_val_predict_score">
+<code class="descclassname">gama.ea.evaluation.</code><code class="descname">cross_val_predict_score</code><span class="sig-paren">(</span><em>estimator</em>, <em>X</em>, <em>y_train</em>, <em>y_score</em>, <em>groups=None</em>, <em>scoring=None</em>, <em>cv=None</em>, <em>n_jobs=1</em>, <em>verbose=0</em>, <em>fit_params=None</em>, <em>pre_dispatch='2*n_jobs'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/evaluation.html#cross_val_predict_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.evaluation.cross_val_predict_score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return both the predictions and score of the estimator trained on the data given the cv strategy.
+# TODO: Add reference to underlying sklearn cross_val_predict for parameter descriptions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>estimator</strong> – the estimator to evaluate</li>
+<li><strong>X</strong> – </li>
+<li><strong>y_train</strong> – target in appropriate format for training (typically (N,))</li>
+<li><strong>y_score</strong> – target in appropriate format for scoring (typically (N,K) for metrics based on class probabilities,
+(N,) otherwise).</li>
+<li><strong>groups</strong> – </li>
+<li><strong>scoring</strong> – </li>
+<li><strong>cv</strong> – </li>
+<li><strong>n_jobs</strong> – </li>
+<li><strong>verbose</strong> – </li>
+<li><strong>fit_params</strong> – </li>
+<li><strong>pre_dispatch</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.ea.evaluation.evaluate_pipeline">
+<code class="descclassname">gama.ea.evaluation.</code><code class="descname">evaluate_pipeline</code><span class="sig-paren">(</span><em>pl</em>, <em>X</em>, <em>y_train</em>, <em>y_score</em>, <em>timeout</em>, <em>scoring='accuracy'</em>, <em>cv=5</em>, <em>cache_dir=None</em>, <em>logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/evaluation.html#evaluate_pipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.evaluation.evaluate_pipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates a pipeline used k-Fold CV.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.ea.evaluation.object_is_valid_pipeline">
+<code class="descclassname">gama.ea.evaluation.</code><code class="descname">object_is_valid_pipeline</code><span class="sig-paren">(</span><em>o</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/evaluation.html#object_is_valid_pipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.evaluation.object_is_valid_pipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if object behaves like a valid scikit-learn pipeline (it must have <cite>fit</cite>, <cite>predict</cite> and <cite>steps</cite>).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-gama.ea.modified_deap">
+<span id="gama-ea-modified-deap-module"></span><h2>gama.ea.modified_deap module<a class="headerlink" href="#module-gama.ea.modified_deap" title="Permalink to this headline">¶</a></h2>
+<p>This file contains function(s) that are in DEAP, but need slight
+modifications in order to work for automatic pipeline construction.</p>
+<dl class="function">
+<dt id="gama.ea.modified_deap.cxOnePoint">
+<code class="descclassname">gama.ea.modified_deap.</code><code class="descname">cxOnePoint</code><span class="sig-paren">(</span><em>ind1</em>, <em>ind2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/modified_deap.html#cxOnePoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.modified_deap.cxOnePoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Randomly select in each individual and exchange each subtree with the
+point as root between each individual.
+:param ind1: First tree participating in the crossover.
+:param ind2: Second tree participating in the crossover.
+:returns: A tuple of two trees.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.ea.modified_deap.gen_grow_safe">
+<code class="descclassname">gama.ea.modified_deap.</code><code class="descname">gen_grow_safe</code><span class="sig-paren">(</span><em>pset</em>, <em>min_</em>, <em>max_</em>, <em>type_=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/modified_deap.html#gen_grow_safe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.modified_deap.gen_grow_safe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate an expression where each leaf might have a different depth between <a href="#id1"><span class="problematic" id="id2">min_</span></a> and <a href="#id3"><span class="problematic" id="id4">max_</span></a>.
+Condition specifies if desired return type is not Data or Predictions, that a terminal be used.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.ea.modified_deap.generate">
+<code class="descclassname">gama.ea.modified_deap.</code><code class="descname">generate</code><span class="sig-paren">(</span><em>pset</em>, <em>min_</em>, <em>max_</em>, <em>condition</em>, <em>type_=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/modified_deap.html#generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.modified_deap.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a Tree as a list of lists.
+The tree is build from the root to the leaves, and it stop growing when
+the condition is fulfilled.
+Parameters
+———-
+pset: PrimitiveSetTyped</p>
+<blockquote>
+<div>Primitive set from which primitives are selected.</div></blockquote>
+<dl class="docutils">
+<dt><a href="#id5"><span class="problematic" id="id6">min_</span></a>: int</dt>
+<dd>Minimum height of the produced trees.</dd>
+<dt><a href="#id7"><span class="problematic" id="id8">max_</span></a>: int</dt>
+<dd>Maximum Height of the produced trees.</dd>
+<dt>condition: function</dt>
+<dd>The condition is a function that takes two arguments,
+the height of the tree to build and the current
+depth in the tree.</dd>
+<dt><a href="#id9"><span class="problematic" id="id10">type_</span></a>: class</dt>
+<dd>The type that should return the tree when called, when
+:obj:None (default) no return type is enforced.</dd>
+</dl>
+<dl class="docutils">
+<dt>individual: list</dt>
+<dd>A grown tree with leaves at possibly different depths
+dependending on the condition function.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-gama.ea.mutation">
+<span id="gama-ea-mutation-module"></span><h2>gama.ea.mutation module<a class="headerlink" href="#module-gama.ea.mutation" title="Permalink to this headline">¶</a></h2>
+<p>Contains mutation functions for genetic programming.
+Each mutation function takes an individual and either returns a different individual, or None.</p>
+<dl class="function">
+<dt id="gama.ea.mutation.find_unmatched_terminal">
+<code class="descclassname">gama.ea.mutation.</code><code class="descname">find_unmatched_terminal</code><span class="sig-paren">(</span><em>individual</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/mutation.html#find_unmatched_terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.mutation.find_unmatched_terminal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the location of the first terminal that can not be matched with a primitive.</p>
+<p>Raises a <cite>ValueError</cite> if no terminals are found.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.ea.mutation.mut_replace_primitive">
+<code class="descclassname">gama.ea.mutation.</code><code class="descname">mut_replace_primitive</code><span class="sig-paren">(</span><em>ind</em>, <em>pset</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/mutation.html#mut_replace_primitive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.mutation.mut_replace_primitive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mutation function which replaces a primitive (and corresponding terminals).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.ea.mutation.mut_replace_terminal">
+<code class="descclassname">gama.ea.mutation.</code><code class="descname">mut_replace_terminal</code><span class="sig-paren">(</span><em>ind</em>, <em>pset</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/mutation.html#mut_replace_terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.mutation.mut_replace_terminal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mutation function which replaces a terminal.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gama.ea.mutation.random_valid_mutation">
+<code class="descclassname">gama.ea.mutation.</code><code class="descname">random_valid_mutation</code><span class="sig-paren">(</span><em>ind</em>, <em>pset</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/mutation.html#random_valid_mutation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.mutation.random_valid_mutation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Picks a mutation uniform at random from options which are possible.</p>
+<p>The choices are <cite>mut_random_primitive</cite>, <cite>mut_random_terminal</cite>,
+<cite>mutShrink</cite> and <cite>mutInsert</cite>.
+A pipeline can not shrink a primitive if it only has one.
+A terminal can not be replaced if it there is none.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-gama.ea">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-gama.ea" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Pieter Gijsbers.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

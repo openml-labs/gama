@@ -1,0 +1,366 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gama.utilities.generic.function_dispatcher &mdash; gama 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/index.html#gama-classifier">GAMA Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/index.html#gama-regressor">GAMA Regressor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../utilities.html">gama.utilities</a> &raquo;</li>
+        
+      <li>gama.utilities.generic.function_dispatcher</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gama.utilities.generic.function_dispatcher</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">I tried to use multiprocessing.pool.Pool and `apply_async` instead, but it failed silently.</span>
+<span class="sd">This can happen when objects passed are not pickleable, however all items should be and it still fails.</span>
+<span class="sd">I am not sure if the behavior would be exactly the same. For now, I will have to work with this.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+<span class="kn">import</span> <span class="nn">queue</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="evaluator_daemon"><a class="viewcode-back" href="../../../../generated/gama.utilities.generic.html#gama.utilities.generic.function_dispatcher.evaluator_daemon">[docs]</a><span class="k">def</span> <span class="nf">evaluator_daemon</span><span class="p">(</span><span class="n">input_queue</span><span class="p">,</span> <span class="n">output_queue</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">print_exit_message</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">shutdown_message</span> <span class="o">=</span> <span class="s1">&#39;Helper process stopping normally.&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">identifier</span><span class="p">,</span> <span class="n">input_</span> <span class="o">=</span> <span class="n">input_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+            <span class="n">output_queue</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">identifier</span><span class="p">,</span> <span class="n">output</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+        <span class="n">shutdown_message</span> <span class="o">=</span> <span class="s1">&#39;Helper process stopping due to keyboard interrupt.&#39;</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">BrokenPipeError</span><span class="p">,</span> <span class="ne">EOFError</span><span class="p">):</span>
+        <span class="n">shutdown_message</span> <span class="o">=</span> <span class="s1">&#39;Helper process stopping due to a broken pipe or EOF.&#39;</span>
+
+    <span class="k">if</span> <span class="n">print_exit_message</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">shutdown_message</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="clear_queue"><a class="viewcode-back" href="../../../../generated/gama.utilities.generic.html#gama.utilities.generic.function_dispatcher.clear_queue">[docs]</a><span class="k">def</span> <span class="nf">clear_queue</span><span class="p">(</span><span class="n">queue_</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Dequeue items until the queue is empty. Returns number of items removed from the queue. &quot;&quot;&quot;</span>
+    <span class="n">items_cleared</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">queue_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">items_cleared</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="n">queue</span><span class="o">.</span><span class="n">Empty</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">except</span> <span class="ne">EOFError</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;EOFError occurred while clearing queue.&#39;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">items_cleared</span></div>
+
+
+<div class="viewcode-block" id="FunctionDispatcher"><a class="viewcode-back" href="../../../../generated/gama.utilities.generic.html#gama.utilities.generic.function_dispatcher.FunctionDispatcher">[docs]</a><span class="k">class</span> <span class="nc">FunctionDispatcher</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A manager for evaluating functions async in the background using multi-processing.</span>
+
+<span class="sd">    This object will spawn `n_jobs` child processes which will run `func` on any input given through `queue_evaluation`.</span>
+<span class="sd">    Return values of evaluations can be obtained by calling `get_next_result`.</span>
+<span class="sd">    To keep track of which input leads to which output, `queue_evaluation` returns a unique identifier for each call.</span>
+<span class="sd">    Finally, `get_next_result` will return the identifier and `item` alongside the output of `func(item)`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_jobs</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">n_jobs</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;n_jobs must be at least 1.&quot;</span><span class="p">)</span>
+
+        <span class="n">mp_manager</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input_queue</span> <span class="o">=</span> <span class="n">mp_manager</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span> <span class="k">if</span> <span class="n">n_jobs</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_queue</span> <span class="o">=</span> <span class="n">mp_manager</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span> <span class="k">if</span> <span class="n">n_jobs</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_func</span> <span class="o">=</span> <span class="n">func</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_job_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_child_processes</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="FunctionDispatcher.start"><a class="viewcode-back" href="../../../../generated/gama.utilities.generic.html#gama.utilities.generic.function_dispatcher.FunctionDispatcher.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Start child processes. &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_child_processes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Child processes already running.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Starting </span><span class="si">{}</span><span class="s1"> child processes.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_job_map</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span><span class="p">):</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">evaluator_daemon</span><span class="p">,</span>
+                               <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_queue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_queue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_func</span><span class="p">))</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_child_processes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Not starting child processes because n_jobs=1.&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FunctionDispatcher.stop"><a class="viewcode-back" href="../../../../generated/gama.utilities.generic.html#gama.utilities.generic.function_dispatcher.FunctionDispatcher.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Dequeue all outstanding jobs, discard saved results and terminate child processes. &quot;&quot;&quot;</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Terminating </span><span class="si">{}</span><span class="s1"> child processes.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_child_processes</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">process</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_child_processes</span><span class="p">:</span>
+            <span class="n">process</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_child_processes</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">nr_cancelled</span> <span class="o">=</span> <span class="n">clear_queue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_queue</span><span class="p">)</span>
+        <span class="n">nr_discarded</span> <span class="o">=</span> <span class="n">clear_queue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_queue</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Cancelled </span><span class="si">{}</span><span class="s2"> outstanding jobs. Discarded </span><span class="si">{}</span><span class="s2"> results. Terminated </span><span class="si">{}</span><span class="s2"> currently executing jobs.&quot;</span>
+                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nr_cancelled</span><span class="p">,</span> <span class="n">nr_discarded</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_job_map</span><span class="p">)</span> <span class="o">-</span> <span class="n">nr_cancelled</span> <span class="o">-</span> <span class="n">nr_discarded</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="FunctionDispatcher.restart"><a class="viewcode-back" href="../../../../generated/gama.utilities.generic.html#gama.utilities.generic.function_dispatcher.FunctionDispatcher.restart">[docs]</a>    <span class="k">def</span> <span class="nf">restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; This is equivalent to calling `stop` then `start`.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="FunctionDispatcher.queue_evaluation"><a class="viewcode-back" href="../../../../generated/gama.utilities.generic.html#gama.utilities.generic.function_dispatcher.FunctionDispatcher.queue_evaluation">[docs]</a>    <span class="k">def</span> <span class="nf">queue_evaluation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Queue an item to be processed by a child process according to `func` passed to __init__.</span>
+
+<span class="sd">        Returns the identifier of the job.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">identifier</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_job_map</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input_queue</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">identifier</span><span class="p">,</span> <span class="n">item</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">identifier</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_next_from_daemons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># If we just used the blocking queue.get, then KeyboardInterrupts/Timeout would not work.</span>
+        <span class="c1"># Previously, specifying a timeout worked, but for some reason that seems no longer the case.</span>
+        <span class="c1"># Using timeout prevents the stopit.Timeout exception from being received.</span>
+        <span class="c1"># When waiting with sleep, we don&#39;t want to wait too long, but we never know when a pipeline</span>
+        <span class="c1"># would finish evaluating.</span>
+        <span class="n">last_get_successful</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">last_get_successful</span><span class="p">:</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># seconds</span>
+
+                <span class="n">identifier</span><span class="p">,</span> <span class="n">fitness</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_queue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">fitness</span>
+
+            <span class="k">except</span> <span class="n">queue</span><span class="o">.</span><span class="n">Empty</span><span class="p">:</span>
+                <span class="n">last_get_successful</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">continue</span>
+
+<div class="viewcode-block" id="FunctionDispatcher.get_next_result"><a class="viewcode-back" href="../../../../generated/gama.utilities.generic.html#gama.utilities.generic.function_dispatcher.FunctionDispatcher.get_next_result">[docs]</a>    <span class="k">def</span> <span class="nf">get_next_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get the result of an evaluation that was queued by calling `queue_evaluation`. This function is blocking.</span>
+
+<span class="sd">        This function raises a ValueError if it is called when there is no job queued with `queue_evaluation`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_job_map</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You have to queue an evaluation for each time you call this function since last cancel.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">identifier</span><span class="p">,</span> <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_next_from_daemons</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># For n_jobs = 1, we do not want to spawn a separate process. Mimic behaviour.</span>
+            <span class="n">identifier</span><span class="p">,</span> <span class="n">input_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_func</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+
+        <span class="n">input_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_job_map</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">input_</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Pieter Gijsbers.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'0.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

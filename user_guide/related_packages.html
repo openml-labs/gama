@@ -1,0 +1,265 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Related Packages &mdash; gama 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html#gama-classifier">GAMA Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html#gama-regressor">GAMA Regressor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Related Packages</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/user_guide/related_packages.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="related-packages">
+<h1>Related Packages<a class="headerlink" href="#related-packages" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="tpot">
+<h2>TPOT<a class="headerlink" href="#tpot" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://epistasislab.github.io/tpot/">TPOT</a> is the package most closely related to GAMA.
+Like GAMA, it is an AutoML package that is based on genetic programming in Python.
+Below you will find a list of differences and similarities of the packages.</p>
+<p><em>Disclaimer: the list is intended to give the main differences, but is by no means exhaustive. If anything is missing that
+is important to add, please open an issue.</em></p>
+<div class="section" id="in-gama-but-not-in-tpot">
+<h3>In GAMA but not in TPOT:<a class="headerlink" href="#in-gama-but-not-in-tpot" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Asynchronous evolution</dt>
+<dd>In theory, asynchronous evolution should be able to utilize the computing resources better.
+This is due to generation-based evolution waiting for the last individual in the population to be evaluated in each generation,
+whereas asynchronous evolution does not have any point where all evaluations need to be finished at the same time.
+More on the differences in the user guide.</dd>
+<dt>ARFF support</dt>
+<dd>The Attribute-Relation File Format (<a class="reference external" href="https://www.cs.waikato.ac.nz/ml/weka/arff.html">ARFF</a>)
+is used to store and describe data. It can be used, for instance, to make sure certain data preprocessing steps,
+such as category encoding, are applied only on the columns it was intended for instead of using heuristics.</dd>
+<dt>Automatic Ensembling</dt>
+<dd>During the optimization process, many pipelines get evaluated. Instead of using only
+the single best in the final model to make predictions, GAMA can create an ensemble out of a subset of them.
+This can lead to better generalization performance.</dd>
+</dl>
+</div>
+<div class="section" id="in-tpot-but-not-in-gama">
+<h3>In TPOT but not in GAMA:<a class="headerlink" href="#in-tpot-but-not-in-gama" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Code export</dt>
+<dd>TPOT is able to export Python code to recreate the best found pipeline. The Python code can be used
+without any further dependency on TPOT.</dd>
+<dt>Command Line Interface</dt>
+<dd>TPOT can be used directly from the command line (in addition to the Python API).</dd>
+<dt>DASK integration</dt>
+<dd>When DASK is installed, TPOT’s pipelines can be evaluated on any DASK cluster. Moreover, it can
+use other optimizations such as caching and computing graphs to avoid (some of the) double work.</dd>
+</dl>
+<p>An empirical study of performance will follow.</p>
+</div>
+</div>
+<div class="section" id="auto-sklearn">
+<h2>auto-sklearn<a class="headerlink" href="#auto-sklearn" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://automl.github.io/auto-sklearn/stable/">auto-sklearn</a> is another AutoML package in Python.
+It uses Bayesian optimization to search for good machine learning pipelines and also features automatic ensemble construction.
+Auto-sklearn won ChaLearn AutoML challenge 1 and 2.</p>
+</div>
+<div class="section" id="other-packages">
+<h2>Other packages<a class="headerlink" href="#other-packages" title="Permalink to this headline">¶</a></h2>
+<p>[I will provide a link here]</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Pieter Gijsbers.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

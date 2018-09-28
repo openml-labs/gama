@@ -1,0 +1,626 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gama.gama &mdash; gama 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html#gama-classifier">GAMA Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html#gama-regressor">GAMA Regressor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>gama.gama</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gama.gama</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">arff</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">deap</span> <span class="k">import</span> <span class="n">base</span><span class="p">,</span> <span class="n">creator</span><span class="p">,</span> <span class="n">tools</span><span class="p">,</span> <span class="n">gp</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">Imputer</span><span class="p">,</span> <span class="n">OneHotEncoder</span>
+
+<span class="kn">import</span> <span class="nn">gama.ea.evaluation</span>
+<span class="kn">from</span> <span class="nn">.ea.modified_deap</span> <span class="k">import</span> <span class="n">cxOnePoint</span>
+<span class="kn">from</span> <span class="nn">.ea</span> <span class="k">import</span> <span class="n">automl_gp</span>
+<span class="kn">from</span> <span class="nn">.ea.automl_gp</span> <span class="k">import</span> <span class="n">compile_individual</span><span class="p">,</span> <span class="n">pset_from_config</span><span class="p">,</span> <span class="n">generate_valid</span>
+<span class="kn">from</span> <span class="nn">gama.ea.mutation</span> <span class="k">import</span> <span class="n">random_valid_mutation</span>
+<span class="kn">from</span> <span class="nn">.ea.metrics</span> <span class="k">import</span> <span class="n">Metric</span>
+<span class="kn">from</span> <span class="nn">.utilities.observer</span> <span class="k">import</span> <span class="n">Observer</span>
+
+<span class="kn">from</span> <span class="nn">.ea.async_ea</span> <span class="k">import</span> <span class="n">async_ea</span>
+<span class="kn">from</span> <span class="nn">gama.utilities.generic.stopwatch</span> <span class="k">import</span> <span class="n">Stopwatch</span>
+<span class="kn">from</span> <span class="nn">.utilities</span> <span class="k">import</span> <span class="n">TOKENS</span><span class="p">,</span> <span class="n">log_parseable_event</span>
+<span class="kn">from</span> <span class="nn">gama.utilities.preprocessing</span> <span class="k">import</span> <span class="n">define_preprocessing_steps</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">STR_NO_OPTIMAL_PIPELINE</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;Gama did not yet establish an optimal pipeline.</span>
+<span class="s2">                          This can be because `fit` was not yet called, or</span>
+<span class="s2">                          did not terminate successfully.&quot;&quot;&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.1.0&#39;</span>
+
+
+<div class="viewcode-block" id="Gama"><a class="viewcode-back" href="../../generated/gama.html#gama.Gama">[docs]</a><span class="k">class</span> <span class="nc">Gama</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Wrapper for the DEAP toolbox logic surrounding the GP process as well as ensemble construction.</span>
+
+<span class="sd">    :param objectives: a tuple which specifies towards which objectives to optimize</span>
+<span class="sd">        The valid metrics depend on the type of task. Many scikit-learn metrics are available.</span>
+<span class="sd">        Two additional metrics can also be chosen: `size` which represents the number of components in the pipeline,</span>
+<span class="sd">        and `time` which specifies the time it takes to train and validate a model.</span>
+<span class="sd">        Currently the maximum arity is 2.</span>
+<span class="sd">        Example: (&#39;f1_macro&#39;, &#39;size&#39;) or (&#39;f1&#39;,)</span>
+
+<span class="sd">    :param optimize_strategy: a tuple of the same arity as `objectives`</span>
+<span class="sd">        Specifies for each objective whether you want to maximize (1) or minimize (-1) the objective.</span>
+<span class="sd">        Example: (1, -1).</span>
+
+<span class="sd">    :param config: a dictionary which specifies available components and their valid hyperparameter settings</span>
+<span class="sd">        For more information, see :ref:`search_space_configuration`.</span>
+
+<span class="sd">    :param random_state:  integer or None (default=None)</span>
+<span class="sd">        If an integer is passed, this will be the seed for the random number generators used in the process.</span>
+<span class="sd">        However, with `n_jobs &gt; 1`, there will be randomization introduced by multi-processing.</span>
+<span class="sd">        For reproducible results, set this and use `n_jobs=1`.</span>
+
+<span class="sd">    :param population_size: positive integer (default=50)</span>
+<span class="sd">        Number of individuals to keep in the population at any one time.</span>
+
+<span class="sd">    :param max_total_time: positive integer (default=3600)</span>
+<span class="sd">        Time in seconds that can be used for the `fit` call.</span>
+
+<span class="sd">    :param max_eval_time: positive integer or None (default=300)</span>
+<span class="sd">        Time in seconds that can be used to evaluate any one single individual.</span>
+
+<span class="sd">    :param n_jobs: integer (default=1)</span>
+<span class="sd">        The amount of parallel processes that may be created to speed up `fit`. If this number</span>
+<span class="sd">        is zero or negative, it will be set to the amount of cores.</span>
+
+<span class="sd">    :param verbosity: integer (default=0)</span>
+<span class="sd">        Does nothing right now. Follow progress of optimization by tracking the log.</span>
+
+<span class="sd">    :param cache_dir: string or None (default=None)</span>
+<span class="sd">        The directory in which to keep the cache during `fit`. In this directory,</span>
+<span class="sd">        models and their evaluation results will be stored. This facilitates a quick ensemble construction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                 <span class="n">objectives</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;filled_in_by_child_class&#39;</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">),</span>
+                 <span class="n">optimize_strategy</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                 <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">population_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                 <span class="n">max_total_time</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>
+                 <span class="n">max_eval_time</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+                 <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">verbosity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">cache_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Using GAMA version </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__version__</span><span class="p">))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">(</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="s1">&#39;config&#39;</span><span class="p">]])</span>
+        <span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">objectives</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">optimize_strategy</span><span class="p">):</span>
+            <span class="n">error_message</span> <span class="o">=</span> <span class="s2">&quot;Length of objectives should match length of optimize_strategy. &quot;</span> \
+                             <span class="s2">&quot;For each objective, an optimization strategy should be maximized.&quot;</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_message</span> <span class="o">+</span> <span class="s2">&quot; objectives: </span><span class="si">{}</span><span class="s2">, optimize_strategy: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">objectives</span><span class="p">,</span> <span class="n">optimize_strategy</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">max_total_time</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">max_total_time</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">error_message</span> <span class="o">=</span> <span class="s2">&quot;max_total_time should be greater than zero.&quot;</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_message</span> <span class="o">+</span> <span class="s2">&quot; max_total_time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">max_total_time</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">max_eval_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">max_eval_time</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">error_message</span> <span class="o">=</span> <span class="s2">&quot;max_eval_time should be greater than zero, or None.&quot;</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_message</span> <span class="o">+</span> <span class="s2">&quot; max_eval_time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">max_eval_time</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_best_pipeline</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitted_pipelines</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pop_size</span> <span class="o">=</span> <span class="n">population_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_total_time</span> <span class="o">=</span> <span class="n">max_total_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_eval_time</span> <span class="o">=</span> <span class="n">max_eval_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scoring_function</span> <span class="o">=</span> <span class="n">objectives</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_observer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_objectives</span> <span class="o">=</span> <span class="n">objectives</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">default_cache_dir</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_GAMA&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="o">=</span> <span class="n">cache_dir</span> <span class="k">if</span> <span class="n">cache_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">default_cache_dir</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_imputer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated_individuals</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_final_pop</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subscribers</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_observer</span> <span class="o">=</span> <span class="n">Observer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluation_completed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observer</span><span class="o">.</span><span class="n">update</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_random_state</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_random_state</span><span class="p">)</span>
+        
+        <span class="n">pset</span><span class="p">,</span> <span class="n">parameter_checks</span> <span class="o">=</span> <span class="n">pset_from_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pset</span> <span class="o">=</span> <span class="n">pset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">Toolbox</span><span class="p">()</span>
+        
+        <span class="n">creator</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;FitnessMax&quot;</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Fitness</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">optimize_strategy</span><span class="p">)</span>
+        <span class="n">creator</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;Individual&quot;</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">PrimitiveTree</span><span class="p">,</span> <span class="n">fitness</span><span class="o">=</span><span class="n">creator</span><span class="o">.</span><span class="n">FitnessMax</span><span class="p">,</span> <span class="n">pset</span><span class="o">=</span><span class="n">pset</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;expr&quot;</span><span class="p">,</span> <span class="n">generate_valid</span><span class="p">,</span> <span class="n">pset</span><span class="o">=</span><span class="n">pset</span><span class="p">,</span> <span class="n">min_</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">toolbox</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;individual&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">initIterate</span><span class="p">,</span> <span class="n">creator</span><span class="o">.</span><span class="n">Individual</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">expr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;population&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">initRepeat</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">individual</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;compile&quot;</span><span class="p">,</span> <span class="n">compile_individual</span><span class="p">,</span> <span class="n">pset</span><span class="o">=</span><span class="n">pset</span><span class="p">,</span> <span class="n">parameter_checks</span><span class="o">=</span><span class="n">parameter_checks</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mate&quot;</span><span class="p">,</span> <span class="n">cxOnePoint</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mutate&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random_valid_mutation_try_new</span><span class="p">)</span>
+
+        <span class="n">create</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">automl_gp</span><span class="o">.</span><span class="n">offspring_mate_and_mutate</span><span class="p">,</span> <span class="n">toolbox</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="p">,</span> <span class="n">cxpb</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">mutpb</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="n">create</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_objectives</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;select&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">selTournament</span><span class="p">,</span> <span class="n">tournsize</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;eliminate&quot;</span><span class="p">,</span> <span class="n">automl_gp</span><span class="o">.</span><span class="n">eliminate_worst</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_objectives</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;select&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">selNSGA2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;eliminate&quot;</span><span class="p">,</span> <span class="n">automl_gp</span><span class="o">.</span><span class="n">eliminate_NSGA</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Objectives must be a tuple of length at most 2.&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_data_from_arff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="p">,</span> <span class="n">split_last</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="c1"># load arff</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">arff_file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">arff_file</span><span class="p">:</span>
+            <span class="n">arff_dict</span> <span class="o">=</span> <span class="n">arff</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">arff_file</span><span class="p">)</span>
+
+        <span class="n">attribute_names</span><span class="p">,</span> <span class="n">data_types</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">arff_dict</span><span class="p">[</span><span class="s1">&#39;attributes&#39;</span><span class="p">])</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">arff_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">attribute_names</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">attribute_name</span><span class="p">,</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">arff_dict</span><span class="p">[</span><span class="s1">&#39;attributes&#39;</span><span class="p">]:</span>
+            <span class="c1"># if dtype.lower() in [&#39;real&#39;, &#39;numeric&#39;]:  probably interpreted correctly.</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">attribute_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">attribute_name</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;category&#39;</span><span class="p">)</span>
+            <span class="c1"># TODO: add date support</span>
+
+        <span class="k">if</span> <span class="n">split_last</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_preprocess_predict_X</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;astype&#39;</span><span class="p">):</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_imputer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.&quot;</span><span class="p">)</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_imputer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">arff_file_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_arff</span><span class="p">(</span><span class="n">arff_file_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Must specify either X or arff_file_path.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span>
+
+<div class="viewcode-block" id="Gama.predict"><a class="viewcode-back" href="../../generated/gama.html#gama.Gama.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">(</span><span class="s1">&#39;predict is implemented by base classes.&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_preprocess_arff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="p">):</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data_from_arff</span><span class="p">(</span><span class="n">arff_file_path</span><span class="p">)</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="n">define_preprocessing_steps</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">max_extra_features_created</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_categories_for_one_hot</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;compile&quot;</span><span class="p">,</span> <span class="n">compile_individual</span><span class="p">,</span> <span class="n">pset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pset</span><span class="p">,</span> <span class="n">preprocessing_steps</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
+
+<div class="viewcode-block" id="Gama.fit"><a class="viewcode-back" href="../../generated/gama.html#gama.Gama.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">warm_start</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_ensemble_n</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">restart_</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Find and fit a model to predict target y from X.</span>
+
+<span class="sd">        Various possible machine learning pipelines will be fit to the (X,y) data.</span>
+<span class="sd">        Using Genetic Programming, the pipelines chosen should lead to gradually</span>
+<span class="sd">        better models. Pipelines will internally be validated using cross validation.</span>
+
+<span class="sd">        After the search termination condition is met, the best found pipeline</span>
+<span class="sd">        configuration is then used to train a final model on all provided data.</span>
+
+<span class="sd">        Must either specify *both* `X` and `y`, or `arff_file_path`.</span>
+
+<span class="sd">        :param X: Numpy Array (optional), shape = [n_samples, n_features]</span>
+<span class="sd">            Training data. All elements must be able to be converted to float.</span>
+<span class="sd">        :param y: Numpy Array (optional), shape = [n_samples,]</span>
+<span class="sd">            Target values.</span>
+<span class="sd">        :param arff_file_path: string (optional).</span>
+<span class="sd">            Path to an ARFF file containing the training data.</span>
+<span class="sd">            The last column is always taken to be the target.</span>
+<span class="sd">        :param warm_start: bool. Indicates the optimization should continue using the last individuals of the</span>
+<span class="sd">            previous `fit` call.</span>
+<span class="sd">        :param auto_ensemble_n: positive integer. The number of models to include in the ensemble which is built</span>
+<span class="sd">            after the optimizatio process.</span>
+<span class="sd">        :param restart_: bool. Indicates whether or not the search should be restarted when a specific restart</span>
+<span class="sd">            criteria is met.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ensemble_ratio</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># fraction of time left after preprocessing that reserved for postprocessing</span>
+
+        <span class="k">def</span> <span class="nf">restart_criteria</span><span class="p">():</span>
+            <span class="n">restart</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observer</span><span class="o">.</span><span class="n">_individuals_since_last_pareto_update</span> <span class="o">&gt;</span> <span class="mi">400</span>
+            <span class="k">if</span> <span class="n">restart</span> <span class="ow">and</span> <span class="n">restart_</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Continuing search with new population.&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_observer</span><span class="o">.</span><span class="n">reset_current_pareto_front</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">restart</span> <span class="ow">and</span> <span class="n">restart_</span>
+
+        <span class="k">with</span> <span class="n">Stopwatch</span><span class="p">()</span> <span class="k">as</span> <span class="n">preprocessing_sw</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">arff_file_path</span><span class="p">:</span>
+                <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_arff</span><span class="p">(</span><span class="n">arff_file_path</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_encode_labels&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encode_labels</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">arff_file_path</span><span class="p">:</span>
+                <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_numpy</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Preprocessing took </span><span class="si">{:.4f}</span><span class="s2">s. Moving on to search phase.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">preprocessing_sw</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">))</span>
+        <span class="n">log_parseable_event</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">TOKENS</span><span class="o">.</span><span class="n">PREPROCESSING_END</span><span class="p">,</span> <span class="n">preprocessing_sw</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_train</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_construct_y_score</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="n">time_left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_total_time</span> <span class="o">-</span> <span class="n">preprocessing_sw</span><span class="o">.</span><span class="n">elapsed_time</span>
+
+        <span class="n">fit_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ensemble_ratio</span><span class="p">)</span> <span class="o">*</span> <span class="n">time_left</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">Stopwatch</span><span class="p">()</span> <span class="k">as</span> <span class="n">search_sw</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_search_phase</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">warm_start</span><span class="p">,</span> <span class="n">restart_criteria</span><span class="o">=</span><span class="n">restart_criteria</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">fit_time</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Search phase took </span><span class="si">{:.4f}</span><span class="s2">s. Moving on to post processing.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">search_sw</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">))</span>
+        <span class="n">log_parseable_event</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">TOKENS</span><span class="o">.</span><span class="n">SEARCH_END</span><span class="p">,</span> <span class="n">search_sw</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">)</span>
+
+        <span class="n">time_left</span> <span class="o">=</span> <span class="n">time_left</span> <span class="o">-</span> <span class="n">search_sw</span><span class="o">.</span><span class="n">elapsed_time</span>
+
+        <span class="k">with</span> <span class="n">Stopwatch</span><span class="p">()</span> <span class="k">as</span> <span class="n">post_sw</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_postprocess_phase</span><span class="p">(</span><span class="n">auto_ensemble_n</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">time_left</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Postprocessing took </span><span class="si">{:.4f}</span><span class="s2">s.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">post_sw</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">))</span>
+        <span class="n">log_parseable_event</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">TOKENS</span><span class="o">.</span><span class="n">POSTPROCESSING_END</span><span class="p">,</span> <span class="n">post_sw</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_cache</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Deleting cache.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">delete_cache</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_preprocess_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;  Preprocess X and y such that scikit-learn pipelines can be evaluated on it.</span>
+
+<span class="sd">        Preprocessing currently transforms the input into float64 numpy arrays.</span>
+<span class="sd">        Any row that has a NaN y-value gets removed. Any remaining NaNs in X get imputed.</span>
+
+<span class="sd">        :param X: Input data, DataFrame or numpy array with shape (sample, features)</span>
+<span class="sd">        :param y: True labels for each sample</span>
+<span class="sd">        :return: Preprocessed versions of X and y.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;astype&#39;</span><span class="p">):</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;astype&#39;</span><span class="p">):</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="c1"># For now there is no support for semi-supervised learning, so remove all instances with unknown targets.</span>
+        <span class="n">nan_targets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nan_targets</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Target vector y has been found to contain NaN-labels. All NaN entries will be ignored because &quot;</span>
+                     <span class="s2">&quot;supervised learning is not (yet) supported.&quot;</span><span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="o">~</span><span class="n">nan_targets</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">nan_targets</span><span class="p">]</span>
+
+        <span class="c1"># For now we always impute if there are missing values, and we always impute with median.</span>
+        <span class="c1"># This helps us use a wider variety of algorithms without constructing a grammar.</span>
+        <span class="c1"># One should note that ideally imputation should not always be done since some methods work well without.</span>
+        <span class="c1"># Secondly, the way imputation is done can also be dependent on the task. Median is generally not the best.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_imputer</span> <span class="o">=</span> <span class="n">Imputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;median&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_imputer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.&quot;</span><span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_imputer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
+
+    <span class="k">def</span> <span class="nf">_construct_y_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">Metric</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_function</span><span class="p">)</span><span class="o">.</span><span class="n">requires_probabilities</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y_score</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">todense</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y_score</span> <span class="o">=</span> <span class="n">y</span>
+
+    <span class="k">def</span> <span class="nf">_search_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">warm_start</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">restart_criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">1e6</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Invoke the evolutionary algorithm, populate `final_pop` regardless of termination. &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">warm_start</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_final_pop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_final_pop</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">warm_start</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Warm-start enabled but no earlier fit. Using new generated population instead.&#39;</span><span class="p">)</span>
+            <span class="n">pop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">population</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pop_size</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;evaluate&quot;</span><span class="p">,</span> <span class="n">gama</span><span class="o">.</span><span class="n">ea</span><span class="o">.</span><span class="n">evaluation</span><span class="o">.</span><span class="n">evaluate_pipeline</span><span class="p">,</span>
+                               <span class="n">X</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">y_train</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_train</span><span class="p">,</span> <span class="n">y_score</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_score</span><span class="p">,</span>
+                               <span class="n">scoring</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_function</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_eval_time</span><span class="p">,</span>
+                               <span class="n">cache_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">final_pop</span> <span class="o">=</span> <span class="n">async_ea</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_objectives</span><span class="p">,</span>
+                                 <span class="n">pop</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="p">,</span>
+                                 <span class="n">evaluation_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_evaluation_completed</span><span class="p">,</span>
+                                 <span class="n">restart_callback</span><span class="o">=</span><span class="n">restart_criteria</span><span class="p">,</span>
+                                 <span class="n">max_time_seconds</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+                                 <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_final_pop</span> <span class="o">=</span> <span class="n">final_pop</span>
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Search phase terminated because of Keyboard Interrupt.&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_postprocess_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">1e6</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Perform any necessary post processing, such as ensemble building. &quot;&quot;&quot;</span>
+        <span class="c1">#self._best_pipeline = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.wvalues)))[0]</span>
+        <span class="c1">#print(self._best_pipeline.fitness.wvalues)</span>
+        <span class="c1">#self._best_pipeline = self._toolbox.compile(self._best_pipeline)</span>
+        <span class="c1">#X, y = self._fit_data</span>
+        <span class="c1">#self._best_pipeline.fit(X, self.y_train)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_build_fit_ensemble</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_initialize_ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;_initialize_ensemble should be implemented by a child class.&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_build_fit_ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ensemble_size</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+        <span class="n">start_build</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Building ensemble.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_ensemble</span><span class="p">()</span>
+
+        <span class="c1"># Starting with more models in the ensemble should help against overfitting, but depending on the total</span>
+        <span class="c1"># ensemble size, it might leave too little room to calibrate the weights or add new models. So we have</span>
+        <span class="c1"># some adaptive defaults (for now).</span>
+        <span class="k">if</span> <span class="n">ensemble_size</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">build_initial_ensemble</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">build_initial_ensemble</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="n">remainder</span> <span class="o">=</span> <span class="n">ensemble_size</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">_total_model_weights</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">remainder</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">expand_ensemble</span><span class="p">(</span><span class="n">remainder</span><span class="p">)</span>
+
+        <span class="n">build_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_build</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="o">-</span> <span class="n">build_time</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Building ensemble took </span><span class="si">{}</span><span class="s1">s. Fitting ensemble with timeout </span><span class="si">{}</span><span class="s1">s.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">build_time</span><span class="p">,</span> <span class="n">timeout</span><span class="p">))</span>
+
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_random_valid_mutation_try_new</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Call `random_valid_mutation` until a new individual (that was not evaluated before) is created (at most 50x).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ind_copy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">50</span><span class="p">):</span>
+            <span class="n">new_ind</span><span class="p">,</span> <span class="o">=</span> <span class="n">random_valid_mutation</span><span class="p">(</span><span class="n">ind_copy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_ind</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated_individuals</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">new_ind</span><span class="p">,</span>
+        <span class="k">return</span> <span class="n">new_ind</span><span class="p">,</span>
+
+<div class="viewcode-block" id="Gama.delete_cache"><a class="viewcode-back" href="../../generated/gama.html#gama.Gama.delete_cache">[docs]</a>    <span class="k">def</span> <span class="nf">delete_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Removes the cache folder and all files associated to this instance. &quot;&quot;&quot;</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_on_evaluation_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subscribers</span><span class="p">[</span><span class="s1">&#39;evaluation_completed&#39;</span><span class="p">]:</span>
+            <span class="n">callback</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Gama.evaluation_completed"><a class="viewcode-back" href="../../generated/gama.html#gama.Gama.evaluation_completed">[docs]</a>    <span class="k">def</span> <span class="nf">evaluation_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Register a callback function that is called when new evaluation is completed.</span>
+
+<span class="sd">        :param fn: Function to call when a pipeline is evaluated. Expected signature is: ind -&gt; None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subscribers</span><span class="p">[</span><span class="s1">&#39;evaluation_completed&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Pieter Gijsbers.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

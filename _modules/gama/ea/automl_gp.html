@@ -1,0 +1,419 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gama.ea.automl_gp &mdash; gama 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html#gama-classifier">GAMA Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html#gama-regressor">GAMA Regressor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>gama.ea.automl_gp</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gama.ea.automl_gp</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Contains classes and function(s) which help define automated machine </span>
+<span class="sd">learning as a genetic programming problem.</span>
+<span class="sd">(Yes, I need to find a better file name.)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">deap</span> <span class="k">import</span> <span class="n">gp</span><span class="p">,</span> <span class="n">tools</span>
+<span class="kn">import</span> <span class="nn">sklearn</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="k">import</span> <span class="n">Pipeline</span>
+
+<span class="kn">from</span> <span class="nn">..ea.modified_deap</span> <span class="k">import</span> <span class="n">gen_grow_safe</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Data"><a class="viewcode-back" href="../../../generated/gama.ea.html#gama.ea.automl_gp.Data">[docs]</a><span class="k">class</span> <span class="nc">Data</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Dummy class that represents a dataset.&quot;&quot;&quot;</span>
+    <span class="k">pass</span> </div>
+
+
+<div class="viewcode-block" id="Predictions"><a class="viewcode-back" href="../../../generated/gama.ea.html#gama.ea.automl_gp.Predictions">[docs]</a><span class="k">class</span> <span class="nc">Predictions</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Dummy class that represents prediction data. &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="pset_from_config"><a class="viewcode-back" href="../../../generated/gama.ea.html#gama.ea.automl_gp.pset_from_config">[docs]</a><span class="k">def</span> <span class="nf">pset_from_config</span><span class="p">(</span><span class="n">configuration</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Create a pset for the given configuration dictionary.</span>
+<span class="sd">    </span>
+<span class="sd">    Given a configuration dictionary specifying operators (e.g. sklearn </span>
+<span class="sd">    estimators), their hyperparameters and values for each hyperparameter,</span>
+<span class="sd">    create a gp.PrimitiveSetTyped that contains:</span>
+<span class="sd">        - For each operator a primitive</span>
+<span class="sd">        - For each possible hyperparameter-value combination a unique terminal</span>
+<span class="sd">        </span>
+<span class="sd">    Side effect: Imports the classes of each primitive.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns the given Pset.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pset</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">PrimitiveSetTyped</span><span class="p">(</span><span class="s2">&quot;pipeline&quot;</span><span class="p">,</span> <span class="n">in_types</span><span class="o">=</span><span class="p">[</span><span class="n">Data</span><span class="p">],</span> <span class="n">ret_type</span><span class="o">=</span><span class="n">Predictions</span><span class="p">)</span>
+    <span class="n">parameter_checks</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">pset</span><span class="o">.</span><span class="n">renameArguments</span><span class="p">(</span><span class="n">ARG0</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
+    
+    <span class="n">shared_hyperparameter_types</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># We have to make sure the str-keys are evaluated first: they describe shared hyperparameters</span>
+    <span class="c1"># We can not rely on order-preserving dictionaries as this is not in the Python 3.5 specification.</span>
+    <span class="n">sorted_keys</span> <span class="o">=</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">configuration</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))))</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sorted_keys</span><span class="p">:</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="c1"># Specification of shared hyperparameters</span>
+            <span class="n">hyperparameter_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="p">(</span><span class="nb">object</span><span class="p">,),</span> <span class="p">{})</span>
+            <span class="n">shared_hyperparameter_types</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">hyperparameter_type</span>
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                <span class="c1"># Escape string values with quotes</span>
+                <span class="n">value_str</span> <span class="o">=</span> <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="n">hyperparameter_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value_str</span><span class="p">)</span>
+                <span class="n">pset</span><span class="o">.</span><span class="n">addTerminal</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">hyperparameter_type</span><span class="p">,</span> <span class="n">hyperparameter_str</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">object</span><span class="p">):</span>
+            <span class="c1">#Specification of operator (learner, preprocessor)</span>
+            <span class="n">hyperparameter_types</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param_values</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c1"># We construct a new type for each hyperparameter, so we can specify</span>
+                <span class="c1"># it as terminal type, making sure it matches with expected</span>
+                <span class="c1"># input of the operators. Moreover it automatically makes sure that</span>
+                <span class="c1"># crossover only happens between same hyperparameters.</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param_values</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">param_values</span><span class="p">:</span>
+                    <span class="c1"># An empty list indicates a shared hyperparameter</span>
+                    <span class="n">hyperparameter_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shared_hyperparameter_types</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;param_check&quot;</span><span class="p">:</span>
+                    <span class="c1"># This allows users to define illegal hyperparameter combinations, but is not a terminal.</span>
+                    <span class="n">parameter_checks</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>                
+                    <span class="n">hyperparameter_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span> <span class="p">(</span><span class="nb">object</span><span class="p">,),</span> <span class="p">{})</span>
+                    <span class="n">hyperparameter_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hyperparameter_type</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">param_values</span><span class="p">:</span>
+                        <span class="c1"># Escape string values with quotes otherwise they are variables</span>
+                        <span class="n">value_str</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+                                     <span class="k">else</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span> <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                                     <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                        <span class="n">hyperparameter_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value_str</span><span class="p">)</span>
+                        <span class="n">pset</span><span class="o">.</span><span class="n">addTerminal</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">hyperparameter_type</span><span class="p">,</span> <span class="n">hyperparameter_str</span><span class="p">)</span>
+
+            <span class="c1"># After registering the hyperparameter types, we can register the operator itself.</span>
+            <span class="n">transformer_tags</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;DATA_PREPROCESSING&quot;</span><span class="p">,</span> <span class="s2">&quot;FEATURE_SELECTION&quot;</span><span class="p">,</span> <span class="s2">&quot;DATA_TRANSFORMATION&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">TransformerMixin</span><span class="p">)</span> <span class="ow">or</span>
+                  <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">query</span><span class="p">()[</span><span class="s2">&quot;primitive_family&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">transformer_tags</span><span class="p">)):</span>
+                <span class="n">pset</span><span class="o">.</span><span class="n">addPrimitive</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[</span><span class="n">Data</span><span class="p">,</span> <span class="o">*</span><span class="n">hyperparameter_types</span><span class="p">],</span> <span class="n">Data</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">ClassifierMixin</span><span class="p">)</span> <span class="ow">or</span>
+                  <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">query</span><span class="p">()[</span><span class="s2">&quot;primitive_family&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;CLASSIFICATION&quot;</span><span class="p">)):</span>
+                <span class="n">pset</span><span class="o">.</span><span class="n">addPrimitive</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[</span><span class="n">Data</span><span class="p">,</span> <span class="o">*</span><span class="n">hyperparameter_types</span><span class="p">],</span> <span class="n">Predictions</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">RegressorMixin</span><span class="p">)</span> <span class="ow">or</span>
+                  <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">query</span><span class="p">()[</span><span class="s2">&quot;primitive_family&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;REGRESSION&quot;</span><span class="p">)):</span>
+                <span class="n">pset</span><span class="o">.</span><span class="n">addPrimitive</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[</span><span class="n">Data</span><span class="p">,</span> <span class="o">*</span><span class="n">hyperparameter_types</span><span class="p">],</span> <span class="n">Predictions</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Expected </span><span class="si">{}</span><span class="s2"> to be either subclass of &quot;</span>
+                                <span class="s2">&quot;TransformerMixin, RegressorMixin or ClassifierMixin.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Encountered unknown type as key in dictionary.&#39;</span>
+                            <span class="s1">&#39;Keys in the configuration should be str or class.&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">pset</span><span class="p">,</span> <span class="n">parameter_checks</span></div>
+
+
+<div class="viewcode-block" id="compile_individual"><a class="viewcode-back" href="../../../generated/gama.ea.html#gama.ea.automl_gp.compile_individual">[docs]</a><span class="k">def</span> <span class="nf">compile_individual</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">pset</span><span class="p">,</span> <span class="n">parameter_checks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">preprocessing_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Compile the individual to a sklearn pipeline.&quot;&quot;&quot;</span>
+    <span class="c1"># TODO: expr only for compatibility</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">expr</span>
+    <span class="n">components</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">name_counter</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">prim</span><span class="p">,</span> <span class="n">remainder</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ind</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prim</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">Terminal</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remainder</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span>
+            <span class="k">break</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">component</span><span class="p">,</span> <span class="n">n_kwargs</span> <span class="o">=</span> <span class="n">expression_to_component</span><span class="p">(</span><span class="n">prim</span><span class="p">,</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">remainder</span><span class="p">),</span> <span class="n">pset</span><span class="p">,</span> <span class="n">parameter_checks</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Each component in the pipeline must have a unique name.</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">prim</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">name_counter</span><span class="p">[</span><span class="n">prim</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+        <span class="n">name_counter</span><span class="p">[</span><span class="n">prim</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">components</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">component</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">n_kwargs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="n">n_kwargs</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">preprocessing_steps</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">preprocessing_steps</span><span class="p">):</span>
+            <span class="n">components</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">step</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">step</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">Pipeline</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">components</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="expression_to_component"><a class="viewcode-back" href="../../../generated/gama.ea.html#gama.ea.automl_gp.expression_to_component">[docs]</a><span class="k">def</span> <span class="nf">expression_to_component</span><span class="p">(</span><span class="n">primitive</span><span class="p">,</span> <span class="n">terminals</span><span class="p">,</span> <span class="n">pset</span><span class="p">,</span> <span class="n">parameter_checks</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Creates Python-object for the primitive-terminals combination.</span>
+
+<span class="sd">    It is allowed to have trailing terminals in the list, they will be ignored.</span>
+
+<span class="sd">    Returns an instantiated python object and the number of terminals used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># See if all terminals have a value provided (except Data Terminal)</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="nb">reversed</span><span class="p">([</span><span class="n">terminal</span> <span class="k">for</span> <span class="n">terminal</span> <span class="ow">in</span> <span class="n">primitive</span><span class="o">.</span><span class="n">args</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">terminal</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;Data&#39;</span><span class="p">])</span>
+    <span class="n">required_provided</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">required</span><span class="p">,</span> <span class="n">terminals</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">r</span> <span class="o">==</span> <span class="n">p</span><span class="o">.</span><span class="n">ret</span> <span class="k">for</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="ow">in</span> <span class="n">required_provided</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">([(</span><span class="n">r</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">ret</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">p</span><span class="p">)</span> <span class="ow">in</span> <span class="n">required_provided</span><span class="p">])</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Missing </span><span class="si">{}</span><span class="s1">-terminal for </span><span class="si">{}</span><span class="s1">-primitive.&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">extract_arg_name</span><span class="p">(</span><span class="n">terminal_name</span><span class="p">):</span>
+        <span class="n">equal_idx</span> <span class="o">=</span> <span class="n">terminal_name</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+        <span class="n">start_parameter_name</span> <span class="o">=</span> <span class="n">terminal_name</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">equal_idx</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">terminal_name</span><span class="p">[</span><span class="n">start_parameter_name</span><span class="p">:</span><span class="n">equal_idx</span><span class="p">]</span>
+
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">extract_arg_name</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">):</span> <span class="n">pset</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">required_provided</span>
+    <span class="p">}</span>
+
+    <span class="n">primitive_class</span> <span class="o">=</span> <span class="n">pset</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="n">primitive</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">parameter_checks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="n">primitive</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">parameter_checks</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">parameter_checks</span><span class="p">[</span><span class="n">primitive</span><span class="o">.</span><span class="n">name</span><span class="p">](</span><span class="n">kwargs</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Not a valid configuration according to the provided parameter check.&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">primitive_class</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="generate_valid"><a class="viewcode-back" href="../../../generated/gama.ea.html#gama.ea.automl_gp.generate_valid">[docs]</a><span class="k">def</span> <span class="nf">generate_valid</span><span class="p">(</span><span class="n">pset</span><span class="p">,</span> <span class="n">min_</span><span class="p">,</span> <span class="n">max_</span><span class="p">,</span> <span class="n">toolbox</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Generates a valid pipeline. &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">50</span><span class="p">):</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">gen_grow_safe</span><span class="p">(</span><span class="n">pset</span><span class="p">,</span> <span class="n">min_</span><span class="p">,</span> <span class="n">max_</span><span class="p">)</span>
+        <span class="n">pl</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ind</span>
+    <span class="k">raise</span> <span class="ne">Exception</span></div>
+
+
+<div class="viewcode-block" id="individual_length"><a class="viewcode-back" href="../../../generated/gama.ea.html#gama.ea.automl_gp.individual_length">[docs]</a><span class="k">def</span> <span class="nf">individual_length</span><span class="p">(</span><span class="n">individual</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Gives a measure for the length of the pipeline. Currently, this is the number of primitives. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">([</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">individual</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">Primitive</span><span class="p">)])</span></div>
+
+
+<div class="viewcode-block" id="eliminate_NSGA"><a class="viewcode-back" href="../../../generated/gama.ea.html#gama.ea.automl_gp.eliminate_NSGA">[docs]</a><span class="k">def</span> <span class="nf">eliminate_NSGA</span><span class="p">(</span><span class="n">pop</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">tools</span><span class="o">.</span><span class="n">selNSGA2</span><span class="p">(</span><span class="n">pop</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">pop</span><span class="p">))[</span><span class="o">-</span><span class="n">n</span><span class="p">:]</span></div>
+
+
+<div class="viewcode-block" id="eliminate_worst"><a class="viewcode-back" href="../../../generated/gama.ea.html#gama.ea.automl_gp.eliminate_worst">[docs]</a><span class="k">def</span> <span class="nf">eliminate_worst</span><span class="p">(</span><span class="n">pop</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">pop</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">wvalues</span><span class="p">[</span><span class="mi">0</span><span class="p">]))[</span><span class="o">-</span><span class="n">n</span><span class="p">:]</span></div>
+
+
+<div class="viewcode-block" id="offspring_mate_and_mutate"><a class="viewcode-back" href="../../../generated/gama.ea.html#gama.ea.automl_gp.offspring_mate_and_mutate">[docs]</a><span class="k">def</span> <span class="nf">offspring_mate_and_mutate</span><span class="p">(</span><span class="n">pop</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">cxpb</span><span class="p">,</span> <span class="n">mutpb</span><span class="p">,</span> <span class="n">toolbox</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Creates n new individuals based on the population. Can apply both crossover and mutation. &quot;&quot;&quot;</span>
+    <span class="n">offspring</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pop</span><span class="p">)),</span> <span class="n">size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">pop</span><span class="p">[</span><span class="n">ind1</span><span class="p">]),</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">pop</span><span class="p">[</span><span class="n">ind2</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">cxpb</span><span class="p">:</span>
+            <span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">mate</span><span class="p">(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">mutpb</span><span class="p">:</span>
+            <span class="n">ind1</span><span class="p">,</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">mutate</span><span class="p">(</span><span class="n">ind1</span><span class="p">)</span>
+        <span class="n">offspring</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">offspring</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Pieter Gijsbers.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
