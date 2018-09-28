@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 requirements = [
     'numpy>=1.14.0',
@@ -18,6 +18,6 @@ setup(
     description='A package for automated machine learning based on scikit-learn.',
     author='Pieter Gijsbers',
     url='https://github.com/PGijsbers/GAMA',
-    packages=['gama'],
+    packages=find_packages(),
     install_requires=requirements
 )
