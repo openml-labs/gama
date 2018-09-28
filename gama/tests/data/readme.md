@@ -1,1 +1,0 @@
-This directory contains files for testing GAMA and its components.
