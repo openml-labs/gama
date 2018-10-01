@@ -43,6 +43,8 @@ class MutationTestCase(unittest.TestCase):
             LinearSVC.tol=1e-05)"""
         ]
 
+        print('keys', self.gama._pset.mapping.keys())
+
         self.individuals = {
             ind_str: gp.PrimitiveTree.from_string(ind_str, self.gama._pset)
             for ind_str in self.ind_strings
