@@ -30,16 +30,17 @@ if __name__ == '__main__':
     suite = sys.argv[1] if len(sys.argv) > 1 else None
 
     if os.environ.get('TEST_SUITE') == 'unit' or suite == 'unit':
-        run_suite(paretofront_test_suite)
-        run_suite(mutation_test_suite)
-        run_suite(automl_gp_test_suite)
-        run_suite(metrics_test_suite)
-        run_suite(stopwatch_test_suite)
+        success = run_suite(paretofront_test_suite).wasSuccessful()
+        success &= run_suite(mutation_test_suite).wasSuccessful()
+        success &= run_suite(automl_gp_test_suite).wasSuccessful()
+        success &= run_suite(metrics_test_suite).wasSuccessful()
+        success &= run_suite(stopwatch_test_suite).wasSuccessful()
+        if not success:
+            sys.exit("Not all tests completed successfully.")
     elif os.environ.get('TEST_SUITE') == 'system' or suite == 'system':
         run_suite(gama_test_suite)
         run_suite(gamaclassifier_test_suite)
         run_suite(gamaregressor_test_suite)
     else:
-        print('NO TEST SUITE VARIABLE DETECTED. RUN NO TEST.')
         print('Command line suite specified:', suite)
-        quit(-1)
+        sys.exit("NO TEST SUITE VARIABLE DETECTED. RUN NO TEST.")
