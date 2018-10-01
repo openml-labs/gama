@@ -3,6 +3,8 @@
 An automated machine learning tool based on genetic programming.
 
 [![Build Status](https://travis-ci.org/PGijsbers/gama.svg?branch=master)](https://travis-ci.org/PGijsbers/gama)
+[![codecov](https://codecov.io/gh/PGijsbers/gama/branch/master/graph/badge.svg)](https://codecov.io/gh/PGijsbers/gama)
+
 
 **WORK IN PROGRESS**
 
