@@ -1,3 +1,5 @@
+import os
+import sys
 import unittest
 import warnings
 
@@ -25,13 +27,19 @@ def run_suite(suite):
 
 
 if __name__ == '__main__':
-    tests_succeeded = run_suite(paretofront_test_suite).wasSuccessful()
-    tests_succeeded &= run_suite(mutation_test_suite).wasSuccessful()
-    tests_succeeded &= run_suite(automl_gp_test_suite).wasSuccessful()
-    tests_succeeded &= run_suite(metrics_test_suite).wasSuccessful()
-    if tests_succeeded:
-        print('continuing tests....')
-        #tests_succeeded &= run_suite(stopwatch_test_suite).wasSuccessful()
-        tests_succeeded &= run_suite(gamaclassifier_test_suite).wasSuccessful()
-        #tests_succeeded &= run_suite(gamaregressor_test_suite).wasSuccessful()
-        #unittest.TextTestRunner().run(gama_test_suite())
+    suite = sys.argv[1] if len(sys.argv) > 1 else None
+
+    if os.environ.get('TEST_SUITE') == 'unit' or suite == 'unit':
+        run_suite(paretofront_test_suite)
+        run_suite(mutation_test_suite)
+        run_suite(automl_gp_test_suite)
+        run_suite(metrics_test_suite)
+        run_suite(stopwatch_test_suite)
+    elif os.environ.get('TEST_SUITE') == 'system' or suite == 'system':
+        run_suite(gama_test_suite)
+        run_suite(gamaclassifier_test_suite)
+        run_suite(gamaregressor_test_suite)
+    else:
+        print('NO TEST SUITE VARIABLE DETECTED. RUN NO TEST.')
+        print('Command line suite specified:', suite)
+        quit(-1)
