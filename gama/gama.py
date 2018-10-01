@@ -143,7 +143,11 @@ class Gama(object):
         
         self._pset = pset
         self._toolbox = base.Toolbox()
-        
+
+        if "FitnessMax" in creator.__dict__:
+            del creator.FitnessMax
+        if "Individual" in creator.__dict__:
+            del creator.Individual
         creator.create("FitnessMax", base.Fitness, weights=optimize_strategy)
         creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
 
