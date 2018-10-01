@@ -45,8 +45,8 @@ wine = dict(
 
 iris_arff = dict(
     name='iris',
-    train='gama/tests/data/iris_train.arff',
-    test='gama/tests/data/iris_test.arff',
+    train='tests/data/iris_train.arff',
+    test='tests/data/iris_test.arff',
     test_size=50,
     n_classes=3,
     base_accuracy=0.3333,
@@ -55,8 +55,8 @@ iris_arff = dict(
 
 diabetes_arff = dict(
     name='diabetes',
-    train='gama/tests/data/diabetes_train.arff',
-    test='gama/tests/data/diabetes_test.arff',
+    train='tests/data/diabetes_train.arff',
+    test='tests/data/diabetes_test.arff',
     test_size=150,
     n_classes=2,
     base_accuracy=0.65104,
@@ -179,8 +179,8 @@ class GamaClassifierARFFSystemTestCase(unittest.TestCase):
         pass
 
     def _test_dataset_problem(self, data, metric):
-        train_path = 'gama/tests/data/{}_train.arff'.format(data['name'])
-        test_path = 'gama/tests/data/{}_test.arff'.format(data['name'])
+        train_path = 'tests/data/{}_train.arff'.format(data['name'])
+        test_path = 'tests/data/{}_test.arff'.format(data['name'])
         gama = GamaClassifier(random_state=0, max_total_time=60, objectives=(metric, 'size'))
 
         X, y = data['load'](return_X_y=True)
