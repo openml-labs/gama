@@ -35,20 +35,20 @@ class AutomlGpTestCase(unittest.TestCase):
             """RandomForestClassifier(
             FeatureAgglomeration(
                     data,
-                    FeatureAgglomeration.linkage='complete',
-                    FeatureAgglomeration.affinity='l2'), 
-            RandomForestClassifier.n_estimators=100, 
+                    FeatureAgglomeration.affinity='l2',
+                    FeatureAgglomeration.linkage='complete'),
+            RandomForestClassifier.bootstrap=True,
             RandomForestClassifier.criterion='gini', 
             RandomForestClassifier.max_features=0.6, 
+            RandomForestClassifier.min_samples_leaf=7,
             RandomForestClassifier.min_samples_split=6, 
-            RandomForestClassifier.min_samples_leaf=7, 
-            RandomForestClassifier.bootstrap=True)""",
+            RandomForestClassifier.n_estimators=100)""",
             """LinearSVC(data,
-            LinearSVC.penalty='l2',
-            LinearSVC.loss='squared_hinge',
+            LinearSVC.C=0.001,
             LinearSVC.dual=True,
-            LinearSVC.tol=1e-05,
-            LinearSVC.C=0.001)"""
+            LinearSVC.loss='squared_hinge',
+            LinearSVC.penalty='l2',
+            LinearSVC.tol=1e-05)"""
         ]
 
         self.individual_list = [creator.Individual(gp.PrimitiveTree.from_string(ind_str, self.gama._pset))
