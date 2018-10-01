@@ -31,7 +31,7 @@ class MutationTestCase(unittest.TestCase):
                     ),   
             RandomForestClassifier.bootstrap=True,
             RandomForestClassifier.criterion='gini',
-            RandomForestClassifier.max_features=0.6000000000000001,
+            RandomForestClassifier.max_features=0.6,
             RandomForestClassifier.min_samples_leaf=7,  
             RandomForestClassifier.min_samples_split=6, 
             RandomForestClassifier.n_estimators=100)""",

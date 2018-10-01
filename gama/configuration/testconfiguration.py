@@ -46,7 +46,7 @@ clf_config = {
     ExtraTreesClassifier: {
         'n_estimators': [100],
         'criterion': ["gini", "entropy"],
-        'max_features': np.arange(0.05, 1.01, 0.05),
+        'max_features': [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
         'min_samples_split': [],
         'min_samples_leaf': [],
         'bootstrap': [True, False]
@@ -55,7 +55,7 @@ clf_config = {
     RandomForestClassifier: {
         'n_estimators': [100],
         'criterion': ["gini", "entropy"],
-        'max_features': np.arange(0.05, 1.01, 0.05),
+        'max_features': [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
         'min_samples_split': range(2, 21),
         'min_samples_leaf': range(1, 21),
         'bootstrap': [True, False]
@@ -67,7 +67,7 @@ clf_config = {
         'max_depth': range(1, 11),
         'min_samples_split': range(2, 21),
         'min_samples_leaf': range(1, 21),
-        'subsample': np.arange(0.05, 1.01, 0.05),
+        'subsample': [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
         'max_features': np.arange(0.05, 1.01, 0.05)
     },
 
