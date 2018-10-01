@@ -43,8 +43,6 @@ class MutationTestCase(unittest.TestCase):
             LinearSVC.tol=1e-05)"""
         ]
 
-        #print('keys', self.gama._pset.mapping.keys())
-
         self.individuals = {
             ind_str: gp.PrimitiveTree.from_string(ind_str, self.gama._pset)
             for ind_str in self.ind_strings
@@ -76,11 +74,11 @@ class MutationTestCase(unittest.TestCase):
         """ Tests if mut_replace_terminal raises an exception if no valid mutation is possible. """
         ind = self.individuals[self.ind_strings[0]]
         ind_clone = self.gama._toolbox.clone(ind)
-        try:
+
+        with self.assertRaises(ValueError) as error:
             mut_replace_terminal(ind_clone, self.gama._pset)
-            self.fail("Individual should not have been able to be mutated as it only contained the data terminal.")
-        except ValueError as e:
-            self.assertTrue("Individual could not be mutated" in str(e))
+
+        self.assertTrue("Individual could not be mutated" in str(error.exception))
 
     def test_mut_replace_primitive_len_1(self):
         """ Tests if mut_replace_primitive replaces exactly one primitive. """
