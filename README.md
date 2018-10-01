@@ -2,6 +2,8 @@
 **G**enetic **A**utomated **M**achine learning **A**ssistant  
 An automated machine learning tool based on genetic programming.
 
+[![Build Status](https://travis-ci.org/PGijsbers/gama.svg?branch=master)](https://travis-ci.org/PGijsbers/gama)
+
 **WORK IN PROGRESS**
 
 Notice from author: 
