@@ -60,7 +60,7 @@ def pset_from_config(configuration):
         elif isinstance(key, object):
             #Specification of operator (learner, preprocessor)
             hyperparameter_types = []
-            for name, param_values in values.items():
+            for name, param_values in sorted(values.items()):
                 # We construct a new type for each hyperparameter, so we can specify
                 # it as terminal type, making sure it matches with expected
                 # input of the operators. Moreover it automatically makes sure that
