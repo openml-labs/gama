@@ -7,11 +7,6 @@ env:
   - TEST_SUITE=unit
   - TEST_SUITE=system
 
-branches:
-  only:
-    - master
-    - development
-
 install:
   - pip install coverage
   - python setup.py install
