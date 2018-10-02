@@ -14,11 +14,38 @@ bibliography: paper.bib
 
 # Summary
 
-This is a test.
-This is a reference [@Olson2016EvoBio].
-JOSS welcomes submissions from broadly diverse research areas. 
-For this reason, we request that authors include in the paper some sentences that would explain the software functionality
- and domain of use to a non-specialist reader. Your submission should probably be somewhere between 250-1000 words.
+Machine learning is a technique to automatically learn models from data.
+Those models are used today in many real world applications, from detecting fraudulent transactions to recommending movies to driving cars autonomously.
+To create a successful model with machine learning, an expert has to pick the right algorithms to use, as well as do fine-tuning in the form of hyperparameter optimization.
+
+In recent years an active field of research has developed around automating this process of algorithm selection and hyperparameter optimization in the context of machine learning.
+This field is often called AutoML (Automated Machine Learning), and an AutoML system is able to automatically create a good machine learning pipeline from data.
+Its usefulness is twofold.
+It makes creating good machine learning models more accessible to non-experts, as AutoML systems often support simple to use interfaces.
+For experts, it takes away a time consuming process of model selection and hyperparameter tuning.
+They can instead focus on related tasks such as interpreting the model or curating the data.
+
+GAMA is an AutoML package for end-users and AutoML researchers.
+Given data and resource constraints, it will try to construct good machine learning pipelines.
+A machine learning pipeline contains data preprocessing as well as a machine learning algorithm, with fine-tuned hyperparameter settings.
+GAMA can also combine multiple tuned machine learning pipelines together into an ensemble, which on average should help model performance.
+At the moment, GAMA is restricted to classification and regression problems.
+
+Provide insight into the evolutionary process.
+
+# Related Work
+
+There are already many AutoML systems, both open-source and closed-source.
+Amongst these are auto-sklearn[@autosklearn], TPOT[@TPOT], ML-Plan[@MLPlan], Auto-WEKA[@Auto-WEKA] and H2O[@H2O].
+They differ in optimization strategy, programming language, target audience or underlying machine learning package.
+
+Most closely related to GAMA is TPOT[@TPOT].
+TPOT is also a Python package performing AutoML based on genetic programming using scikit-learn pipelines.
+However, there are differences.
+TPOT uses generation based evolution, whereas GAMA uses asynchronous evolution.
+
+
+# Notes
 
 In addition, your paper should include:
 
@@ -40,5 +67,7 @@ JOSS publishes articles about research software.
   extracts knowledge from large data sets; offers a mathematical library, or similar.
 
 https://joss.readthedocs.io/en/latest/review_criteria.html
+
+# Acknowledgements
 
 # References
