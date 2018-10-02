@@ -37,7 +37,7 @@ class PrettyStringMethodsTestCase(unittest.TestCase):
                        "RandomForestClassifier.min_samples_split=6, "
                        "RandomForestClassifier.n_estimators=100)")
         expected_string = ("RandomForestClassifier("
-                           "FeatureAgglomeration(data, "
+                           "FeatureAgglomeration("
                            "affinity='l2', "
                            "linkage='complete'), "
                            "bootstrap=True, "
