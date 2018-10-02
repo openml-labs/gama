@@ -84,9 +84,11 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#gama-classifier">GAMA Classifier</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#gama-regressor">GAMA Regressor</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gama-classifier">GAMA Classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gama-regressor">GAMA Regressor</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
@@ -207,9 +209,8 @@ models and their evaluation results will be stored. This facilitates a quick ens
 I could not get Sphinx to display the base class docstrings correctly
 (see <a class="reference external" href="https://github.com/PGijsbers/gama/issues/8">issue #8</a>).</p>
 </div>
-</div>
 <div class="section" id="gama-classifier">
-<h1>GAMA Classifier<a class="headerlink" href="#gama-classifier" title="Permalink to this headline">¶</a></h1>
+<h2>GAMA Classifier<a class="headerlink" href="#gama-classifier" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="gama.GamaClassifier">
 <em class="property">class </em><code class="descclassname">gama.</code><code class="descname">GamaClassifier</code><span class="sig-paren">(</span><em>config=None</em>, <em>objectives=('neg_log_loss'</em>, <em>'size')</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaClassifier.html#GamaClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.GamaClassifier" title="Permalink to this definition">¶</a></dt>
@@ -293,7 +294,7 @@ first dimension of X, and K is the number of class labels found in <cite>y</cite
 
 </div>
 <div class="section" id="gama-regressor">
-<h1>GAMA Regressor<a class="headerlink" href="#gama-regressor" title="Permalink to this headline">¶</a></h1>
+<h2>GAMA Regressor<a class="headerlink" href="#gama-regressor" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="gama.GamaRegressor">
 <em class="property">class </em><code class="descclassname">gama.</code><code class="descname">GamaRegressor</code><span class="sig-paren">(</span><em>config=None</em>, <em>objectives=('neg_mean_squared_error'</em>, <em>'size')</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaRegressor.html#GamaRegressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.GamaRegressor" title="Permalink to this definition">¶</a></dt>
@@ -351,6 +352,7 @@ first dimension of X.</td>
 
 </dd></dl>
 
+</div>
 </div>
 
 

@@ -83,8 +83,6 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/index.html#gama-classifier">GAMA Classifier</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/index.html#gama-regressor">GAMA Regressor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
@@ -320,41 +318,8 @@ exception occurred during fitting.</td>
 <dd></dd></dl>
 
 </div>
-<div class="section" id="module-gama.utilities.mp_logger">
-<span id="gama-utilities-mp-logger-module"></span><h2>gama.utilities.mp_logger module<a class="headerlink" href="#module-gama.utilities.mp_logger" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="gama.utilities.mp_logger.MultiprocessingLogger">
-<em class="property">class </em><code class="descclassname">gama.utilities.mp_logger.</code><code class="descname">MultiprocessingLogger</code><a class="reference internal" href="../_modules/gama/utilities/mp_logger.html#MultiprocessingLogger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.mp_logger.MultiprocessingLogger" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
-<p>Stores log messages to be written to a log later. This is helpful when communicating log messages from
-auxiliary processes to the main process.</p>
-<dl class="method">
-<dt id="gama.utilities.mp_logger.MultiprocessingLogger.debug">
-<code class="descname">debug</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/mp_logger.html#MultiprocessingLogger.debug"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.mp_logger.MultiprocessingLogger.debug" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="gama.utilities.mp_logger.MultiprocessingLogger.error">
-<code class="descname">error</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/mp_logger.html#MultiprocessingLogger.error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.mp_logger.MultiprocessingLogger.error" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="gama.utilities.mp_logger.MultiprocessingLogger.flush_to_log">
-<code class="descname">flush_to_log</code><span class="sig-paren">(</span><em>log</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/mp_logger.html#MultiprocessingLogger.flush_to_log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.mp_logger.MultiprocessingLogger.flush_to_log" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="gama.utilities.mp_logger.MultiprocessingLogger.info">
-<code class="descname">info</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/mp_logger.html#MultiprocessingLogger.info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.mp_logger.MultiprocessingLogger.info" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="gama.utilities.mp_logger.MultiprocessingLogger.warning">
-<code class="descname">warning</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/mp_logger.html#MultiprocessingLogger.warning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.mp_logger.MultiprocessingLogger.warning" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<div class="section" id="gama-utilities-mp-logger-module">
+<h2>gama.utilities.mp_logger module<a class="headerlink" href="#gama-utilities-mp-logger-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-gama.utilities.observer">
 <span id="gama-utilities-observer-module"></span><h2>gama.utilities.observer module<a class="headerlink" href="#module-gama.utilities.observer" title="Permalink to this headline">¶</a></h2>
@@ -445,70 +410,9 @@ returns less than n individuals if less than n have been evaluated.</td>
 </table>
 </dd></dl>
 
-<dl class="function">
-<dt id="gama.utilities.pretty_string_methods.string_format_pareto">
-<code class="descclassname">gama.utilities.pretty_string_methods.</code><code class="descname">string_format_pareto</code><span class="sig-paren">(</span><em>pareto_front</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/pretty_string_methods.html#string_format_pareto"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.pretty_string_methods.string_format_pareto" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </div>
 <div class="section" id="module-gama.utilities">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-gama.utilities" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="gama.utilities.TOKENS">
-<em class="property">class </em><code class="descclassname">gama.utilities.</code><code class="descname">TOKENS</code><a class="reference internal" href="../_modules/gama/utilities.html#TOKENS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.TOKENS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
-<dl class="attribute">
-<dt id="gama.utilities.TOKENS.EA_REMOVE_IND">
-<code class="descname">EA_REMOVE_IND</code><em class="property"> = 'RMV_IND'</em><a class="headerlink" href="#gama.utilities.TOKENS.EA_REMOVE_IND" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="gama.utilities.TOKENS.EA_RESTART">
-<code class="descname">EA_RESTART</code><em class="property"> = 'EA_RST'</em><a class="headerlink" href="#gama.utilities.TOKENS.EA_RESTART" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="gama.utilities.TOKENS.EVALUATION_ERROR">
-<code class="descname">EVALUATION_ERROR</code><em class="property"> = 'EVAL_ERR'</em><a class="headerlink" href="#gama.utilities.TOKENS.EVALUATION_ERROR" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="gama.utilities.TOKENS.EVALUATION_RESULT">
-<code class="descname">EVALUATION_RESULT</code><em class="property"> = 'EVAL'</em><a class="headerlink" href="#gama.utilities.TOKENS.EVALUATION_RESULT" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="gama.utilities.TOKENS.EVALUATION_TIMEOUT">
-<code class="descname">EVALUATION_TIMEOUT</code><em class="property"> = 'EVAL_TO'</em><a class="headerlink" href="#gama.utilities.TOKENS.EVALUATION_TIMEOUT" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="gama.utilities.TOKENS.POSTPROCESSING_END">
-<code class="descname">POSTPROCESSING_END</code><em class="property"> = 'POST_END'</em><a class="headerlink" href="#gama.utilities.TOKENS.POSTPROCESSING_END" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="gama.utilities.TOKENS.PREPROCESSING_END">
-<code class="descname">PREPROCESSING_END</code><em class="property"> = 'PRE_END'</em><a class="headerlink" href="#gama.utilities.TOKENS.PREPROCESSING_END" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="gama.utilities.TOKENS.SEARCH_END">
-<code class="descname">SEARCH_END</code><em class="property"> = 'S_END'</em><a class="headerlink" href="#gama.utilities.TOKENS.SEARCH_END" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="gama.utilities.log_parseable_event">
-<code class="descclassname">gama.utilities.</code><code class="descname">log_parseable_event</code><span class="sig-paren">(</span><em>log_</em>, <em>token</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities.html#log_parseable_event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.log_parseable_event" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="gama.utilities.optimal_constant_predictor">
-<code class="descclassname">gama.utilities.</code><code class="descname">optimal_constant_predictor</code><span class="sig-paren">(</span><em>y_tr</em>, <em>metric</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities.html#optimal_constant_predictor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.optimal_constant_predictor" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </div>
 </div>
 

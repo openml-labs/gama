@@ -83,8 +83,6 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html#gama-classifier">GAMA Classifier</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html#gama-regressor">GAMA Regressor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing</a></li>
@@ -157,8 +155,8 @@
 
 <span class="kn">import</span> <span class="nn">stopit</span>
 
-<span class="kn">from</span> <span class="nn">..utilities</span> <span class="k">import</span> <span class="n">TOKENS</span><span class="p">,</span> <span class="n">log_parseable_event</span>
-<span class="kn">from</span> <span class="nn">..utilities.mp_logger</span> <span class="k">import</span> <span class="n">MultiprocessingLogger</span>
+<span class="kn">from</span> <span class="nn">gama.utilities.logging_utilities</span> <span class="k">import</span> <span class="n">TOKENS</span><span class="p">,</span> <span class="n">log_parseable_event</span>
+<span class="kn">from</span> <span class="nn">..utilities.logging_utilities</span> <span class="k">import</span> <span class="n">MultiprocessingLogger</span>
 <span class="kn">from</span> <span class="nn">gama.utilities.generic.function_dispatcher</span> <span class="k">import</span> <span class="n">FunctionDispatcher</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>

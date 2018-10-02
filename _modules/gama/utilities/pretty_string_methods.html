@@ -83,8 +83,6 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html#gama-classifier">GAMA Classifier</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html#gama-regressor">GAMA Regressor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing</a></li>
@@ -163,30 +161,23 @@
 <span class="sd">    :return: A string that represents the individual.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ugly_string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">individual</span><span class="p">)</span>
-    <span class="c1"># Remove the &#39;data&#39; terminal</span>
-    <span class="n">terminal_signature</span> <span class="o">=</span> <span class="s1">&#39;data,&#39;</span>
-    <span class="k">if</span> <span class="n">terminal_signature</span> <span class="ow">in</span> <span class="n">ugly_string</span><span class="p">:</span>
-        <span class="n">terminal_idx</span> <span class="o">=</span> <span class="n">ugly_string</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">terminal_signature</span><span class="p">)</span>
-        <span class="n">pretty_string</span> <span class="o">=</span> <span class="n">ugly_string</span><span class="p">[:</span><span class="n">terminal_idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">ugly_string</span><span class="p">[</span><span class="n">terminal_idx</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">terminal_signature</span><span class="p">):]</span>
-        <span class="c1"># Remove hyperparameter prefixes</span>
-        <span class="n">pretty_string</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;[ .+\.]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">pretty_string</span><span class="p">)</span>
+    <span class="c1"># Data terminal is found either as &#39;...(data, ....&#39; or &#39;...(data)&#39;</span>
+    <span class="n">terminal_signature</span> <span class="o">=</span> <span class="s1">&#39;\(data[,)]&#39;</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">terminal_signature</span><span class="p">,</span> <span class="n">ugly_string</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ugly_string</span><span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">():</span><span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">()]</span> <span class="o">==</span> <span class="s1">&#39;(data)&#39;</span><span class="p">:</span>
+            <span class="n">pretty_string</span> <span class="o">=</span> <span class="n">ugly_string</span><span class="p">[:</span><span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ugly_string</span><span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pretty_string</span> <span class="o">=</span> <span class="n">ugly_string</span><span class="p">[:</span><span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ugly_string</span><span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">():]</span>
+        <span class="c1"># Remove hyperparameter prefixes: scan to the last period that is before any &#39;=&#39; sign</span>
+        <span class="n">pretty_string</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39; [^=]+\.&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">sub_string</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">sub_string</span> <span class="ow">in</span> <span class="n">pretty_string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)])</span>
         <span class="c1"># Because some hyperparameters have a prefix and some don&#39;t (shared ones), we can&#39;t know where spaces are.</span>
         <span class="c1"># Remove all spaces and re-insert them only where wanted.</span>
         <span class="n">pretty_string</span> <span class="o">=</span> <span class="n">pretty_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
         <span class="n">pretty_string</span> <span class="o">=</span> <span class="n">pretty_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pretty_string</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># This does not seem to be a pipeline string. Just return as is for now.</span>
-        <span class="k">return</span> <span class="n">ugly_string</span></div>
-
-
-<div class="viewcode-block" id="string_format_pareto"><a class="viewcode-back" href="../../../generated/gama.utilities.html#gama.utilities.pretty_string_methods.string_format_pareto">[docs]</a><span class="k">def</span> <span class="nf">string_format_pareto</span><span class="p">(</span><span class="n">pareto_front</span><span class="p">):</span>
-    <span class="c1">#TODO make columns right length</span>
-    <span class="n">complete_string</span> <span class="o">=</span> <span class="s1">&#39;1.</span><span class="se">\t</span><span class="s1">2.</span><span class="se">\t\t</span><span class="s1">Pipeline</span><span class="se">\n</span><span class="s1">&#39;</span>
-    <span class="k">for</span> <span class="n">individual</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">pareto_front</span><span class="o">.</span><span class="n">_front</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">ind</span><span class="p">:</span><span class="n">ind</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
-        <span class="n">score</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">complete_string</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="se">\t</span><span class="si">{:.4f}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">clean_pipeline_string</span><span class="p">(</span><span class="n">individual</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">complete_string</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All pipeline strings should contain the data terminal.&quot;</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

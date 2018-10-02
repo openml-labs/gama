@@ -83,8 +83,6 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html#gama-classifier">GAMA Classifier</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html#gama-regressor">GAMA Regressor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing</a></li>
@@ -161,8 +159,7 @@
 
 <span class="kn">from</span> <span class="nn">gama.ea.automl_gp</span> <span class="k">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">gama.ea.metrics</span> <span class="k">import</span> <span class="n">Metric</span>
-<span class="kn">from</span> <span class="nn">gama.utilities</span> <span class="k">import</span> <span class="n">log_parseable_event</span><span class="p">,</span> <span class="n">TOKENS</span>
-<span class="kn">from</span> <span class="nn">gama.utilities.mp_logger</span> <span class="k">import</span> <span class="n">MultiprocessingLogger</span>
+<span class="kn">from</span> <span class="nn">gama.utilities.logging_utilities</span> <span class="k">import</span> <span class="n">MultiprocessingLogger</span><span class="p">,</span> <span class="n">TOKENS</span><span class="p">,</span> <span class="n">log_parseable_event</span>
 
 
 <div class="viewcode-block" id="cross_val_predict_score"><a class="viewcode-back" href="../../../generated/gama.ea.html#gama.ea.evaluation.cross_val_predict_score">[docs]</a><span class="k">def</span> <span class="nf">cross_val_predict_score</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_score</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>

@@ -14,3 +14,5 @@ The following dependencies will be installed if needed:
  - scikit-learn>=0.19.0
  - deap>=1.2
  - stopit>=1.1.1
+ - liac-arff>=2.2.2
+ - category-encoders>=1.2.8
