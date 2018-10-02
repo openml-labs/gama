@@ -8,13 +8,16 @@ def clean_pipeline_string(individual):
     :return: A string that represents the individual.
     """
     ugly_string = str(individual)
-    # Remove the 'data' terminal
-    terminal_signature = 'data,'
-    if terminal_signature in ugly_string:
-        terminal_idx = ugly_string.index(terminal_signature)
-        pretty_string = ugly_string[:terminal_idx] + ugly_string[terminal_idx + len(terminal_signature):]
-        # Remove hyperparameter prefixes
-        pretty_string = re.sub('[ .+\.]', '', pretty_string)
+    # Data terminal is found either as '...(data, ....' or '...(data)'
+    terminal_signature = '\(data[,)]'
+    match = re.search(terminal_signature, ugly_string)
+    if match:
+        if ugly_string[match.start():match.end()] == '(data)':
+            pretty_string = ugly_string[:match.start() + 1] + ugly_string[match.end() - 1:]
+        else:
+            pretty_string = ugly_string[:match.start() + 1] + ugly_string[match.end():]
+        # Remove hyperparameter prefixes: scan to the last period that is before any '=' sign
+        pretty_string = ','.join([re.sub(' [^=]+\.', '', sub_string, 1) for sub_string in pretty_string.split(',')])
         # Because some hyperparameters have a prefix and some don't (shared ones), we can't know where spaces are.
         # Remove all spaces and re-insert them only where wanted.
         pretty_string = pretty_string.replace(' ', '')
