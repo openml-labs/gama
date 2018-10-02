@@ -23,7 +23,7 @@ from .utilities.observer import Observer
 
 from .ea.async_ea import async_ea
 from gama.utilities.generic.stopwatch import Stopwatch
-from .utilities import TOKENS, log_parseable_event
+from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.preprocessing import define_preprocessing_steps
 
 log = logging.getLogger(__name__)

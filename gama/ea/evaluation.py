@@ -8,8 +8,7 @@ from sklearn.model_selection import cross_val_predict
 
 from gama.ea.automl_gp import log
 from gama.ea.metrics import Metric
-from gama.utilities import log_parseable_event, TOKENS
-from gama.utilities.mp_logger import MultiprocessingLogger
+from gama.utilities.logging_utilities import MultiprocessingLogger, TOKENS, log_parseable_event
 
 
 def cross_val_predict_score(estimator, X, y_train, y_score, groups=None, scoring=None, cv=None, n_jobs=1, verbose=0,

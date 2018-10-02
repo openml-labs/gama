@@ -4,8 +4,8 @@ import time
 
 import stopit
 
-from ..utilities import TOKENS, log_parseable_event
-from ..utilities.mp_logger import MultiprocessingLogger
+from gama.utilities.logging_utilities import TOKENS, log_parseable_event
+from ..utilities.logging_utilities import MultiprocessingLogger
 from gama.utilities.generic.function_dispatcher import FunctionDispatcher
 
 log = logging.getLogger(__name__)
