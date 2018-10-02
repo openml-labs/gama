@@ -21,14 +21,4 @@ def clean_pipeline_string(individual):
         pretty_string = pretty_string.replace(',', ', ')
         return pretty_string
     else:
-        # This does not seem to be a pipeline string. Just return as is for now.
-        return ugly_string
-
-
-def string_format_pareto(pareto_front):
-    #TODO make columns right length
-    complete_string = '1.\t2.\t\tPipeline\n'
-    for individual in sorted(pareto_front._front, key=lambda ind:ind.fitness.values):
-        score, length = individual.fitness.values
-        complete_string += "{}\t{:.4f}\t{}\n".format(length, score, clean_pipeline_string(individual))
-    return complete_string
+        raise ValueError("All pipeline strings should contain the data terminal.")
