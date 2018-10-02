@@ -11,7 +11,6 @@ An automated machine learning tool based on genetic programming.
 Notice from author: 
 I am still working on getting things in order for a 'proper' public release.
 Things left to do:
- - Set up CI
  - Review and expand documentation
  - last round of refactoring, time permitting
 
