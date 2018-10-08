@@ -6,6 +6,7 @@ import datetime
 import shutil
 from functools import partial
 import time
+import uuid
 
 import arff
 import pandas as pd
@@ -21,6 +22,7 @@ from gama.ea.mutation import random_valid_mutation
 from .ea.metrics import Metric
 from .utilities.observer import Observer
 
+from .ea.operations import create_from_population, mate_new, random_valid_mutation_new, generate_neww
 from .ea.async_ea import async_ea
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
@@ -152,16 +154,14 @@ class Gama(object):
         creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
 
         self._toolbox.register("expr", generate_valid, pset=pset, min_=1, max_=3, toolbox=self._toolbox)
-        self._toolbox.register("individual", tools.initIterate, creator.Individual, self._toolbox.expr)
+        self._toolbox.register("individual", generate_neww, creator.Individual, self._toolbox.expr)
         self._toolbox.register("population", tools.initRepeat, list, self._toolbox.individual)
         self._toolbox.register("compile", compile_individual, pset=pset, parameter_checks=parameter_checks)
 
-        self._toolbox.register("mate", cxOnePoint)
+        self._toolbox.register("mate", mate_new)
 
-        self._toolbox.register("mutate", self._random_valid_mutation_try_new)
-
-        create = partial(automl_gp.offspring_mate_and_mutate, toolbox=self._toolbox, cxpb=0.2, mutpb=0.8)
-        self._toolbox.register("create", create)
+        self._toolbox.register("mutate", random_valid_mutation_new, pset=self._pset)
+        self._toolbox.register("create", create_from_population, toolbox=self._toolbox, cxpb=0.2, mutpb=0.8)
 
         if len(self._objectives) == 1:
             self._toolbox.register("select", tools.selTournament, tournsize=3)
@@ -392,16 +392,6 @@ class Gama(object):
 
         X, y = self._fit_data
         self.ensemble.fit(X, y, timeout=timeout)
-
-    def _random_valid_mutation_try_new(self, ind):
-        """ Call `random_valid_mutation` until a new individual (that was not evaluated before) is created (at most 50x).
-        """
-        ind_copy = self._toolbox.clone(ind)
-        for _ in range(50):
-            new_ind, = random_valid_mutation(ind_copy, self._pset)
-            if str(new_ind) not in self._evaluated_individuals:
-                return new_ind,
-        return new_ind,
 
     def delete_cache(self):
         """ Removes the cache folder and all files associated to this instance. """
