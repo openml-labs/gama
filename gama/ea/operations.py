@@ -71,28 +71,15 @@ def mate_new(ind1, ind2):
 
 def create_from_population(pop, n, cxpb, mutpb, toolbox):
     """ Creates n new individuals based on the population. Can apply both crossover and mutation. """
-    cxpb = 0
     offspring = []
     for _ in range(n):
         ind1, ind2 = np.random.choice(range(len(pop)), size=2, replace=False)
-        true_parent =  toolbox.clone(pop[ind1])
         ind1, ind2 = toolbox.clone(pop[ind1]), toolbox.clone(pop[ind2])
         if np.random.random() < cxpb:
             new_ind, log_args = toolbox.mate(ind1, ind2)
             log_parseable_event(log, *log_args)
         else:
             new_ind, log_args = toolbox.mutate(ind1, toolbox)
-            token, child, parent, fn = log_args
-            if parent in map(lambda x: x.id, pop):
-                print('was there')
-            else:
-                print('=====================================')
-                print(str(parent), true_parent.id, str(fn))
-                print('*************************************')
-                print(str(ind1))
-                for ind in pop:
-                    print(str(ind), ind.id)
-                print('=====================================')
             log_parseable_event(log, *log_args)
         offspring.append(new_ind)
     return offspring
