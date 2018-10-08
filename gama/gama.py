@@ -22,7 +22,7 @@ from gama.ea.mutation import random_valid_mutation
 from .ea.metrics import Metric
 from .utilities.observer import Observer
 
-from .ea.operations import create_from_population, mate_new, random_valid_mutation_new, generate_neww
+from .ea.operations import create_from_population, mate_new, random_valid_mutation_new, generate_new
 from .ea.async_ea import async_ea
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
@@ -154,7 +154,7 @@ class Gama(object):
         creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
 
         self._toolbox.register("expr", generate_valid, pset=pset, min_=1, max_=3, toolbox=self._toolbox)
-        self._toolbox.register("individual", generate_neww, creator.Individual, self._toolbox.expr)
+        self._toolbox.register("individual", generate_new, creator.Individual, self._toolbox.expr)
         self._toolbox.register("population", tools.initRepeat, list, self._toolbox.individual)
         self._toolbox.register("compile", compile_individual, pset=pset, parameter_checks=parameter_checks)
 

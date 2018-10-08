@@ -21,8 +21,7 @@ def is_new(item):
     return _is_new
 
 
-#def force_new(ind_is_new=is_new, max_tries=50):
-def decorator_function(func):
+def try_until_new(func):
     def fn_new(*args, **kwargs):
         max_tries = 50
         ind_is_new = is_new
@@ -33,25 +32,20 @@ def decorator_function(func):
         log.warning("Could not create a new individual from 50 iterations of {}".format(func.__name__))
         return new_ind, log_args
     return fn_new
-#    return decorator_function
 
 
-def generate(container, generator):
+@try_until_new
+def generate_new_with_id(container, generator):
     individual = tools.initIterate(container, generator)
     individual.id = uuid.uuid4()
-    return individual
+    return individual, []
 
 
-@decorator_function
 def generate_new(*args, **kwargs):
-    return generate(*args, **kwargs), []
+    return generate_new_with_id(*args, **kwargs)[0]
 
 
-def generate_neww(*args, **kwargs):
-    return generate_new(*args, **kwargs)[0]
-
-
-@decorator_function
+@try_until_new
 def random_valid_mutation_new(ind, toolbox, pset):
     new_ind = toolbox.clone(ind)
     (new_ind,), mut_fn = random_valid_mutation(new_ind, pset, return_function=True)
@@ -60,7 +54,7 @@ def random_valid_mutation_new(ind, toolbox, pset):
     return new_ind, log_args
 
 
-@decorator_function
+@try_until_new
 def mate_new(ind1, ind2):
     parent1_id, parent2_id = ind1.id, ind2.id
     new_ind, _ = cxOnePoint(ind1, ind2)
