@@ -7,8 +7,11 @@ tags:
 authors:
  - name: Pieter Gijsbers
    orcid: 0000-0001-7346-8075
-   affiliation: Eindhoven University of Technology
-date: 02 October 2018
+   affiliation: "1"
+affiliations:
+ - name: Eindhoven University of Technology
+   index: "1"
+date: 13 October 2018
 bibliography: paper.bib
 ---
 
@@ -29,45 +32,24 @@ GAMA is an AutoML package for end-users and AutoML researchers.
 Given data and resource constraints, it will try to construct good machine learning pipelines.
 A machine learning pipeline contains data preprocessing as well as a machine learning algorithm, with fine-tuned hyperparameter settings.
 GAMA can also combine multiple tuned machine learning pipelines together into an ensemble, which on average should help model performance.
-At the moment, GAMA is restricted to classification and regression problems.
+At the moment, GAMA is restricted to classification and regression problems on tabular data.
 
-Provide insight into the evolutionary process.
+In addition to its general use AutoML functionality, GAMA aims to serve AutoML researches as well.
+During the optimization process, GAMA keeps an extensive log of progress made.
+Using this log insight can be obtained on the behaviour of the population of pipelines.
+It can answer questions such as which mutation operator is most effective, how fitness changes over time, and how much time each algorithm takes.
 
 # Related Work
 
 There are already many AutoML systems, both open-source and closed-source.
-Amongst these are auto-sklearn[@autosklearn], TPOT[@TPOT], ML-Plan[@MLPlan], Auto-WEKA[@Auto-WEKA] and H2O[@H2O].
+Amongst these are auto-sklearn [@autosklearn], TPOT [@TPOT], ML-Plan [@MLPlan], Auto-WEKA [@AutoWEKA] and H2O [@H2O].
 They differ in optimization strategy, programming language, target audience or underlying machine learning package.
 
-Most closely related to GAMA is TPOT[@TPOT].
+Most closely related to GAMA is TPOT [@TPOT].
 TPOT is also a Python package performing AutoML based on genetic programming using scikit-learn pipelines.
-However, there are differences.
-TPOT uses generation based evolution, whereas GAMA uses asynchronous evolution.
-
-
-# Notes
-
-In addition, your paper should include:
-
-    A summary describing the high-level functionality and purpose of the software for a diverse, non-specialist audience
-    A clear statement of need that illustrates the purpose of the software
-    The software should have an obvious research application
-    A list of key references including a link to the software archive
-    Mentions (if applicable) of any ongoing research projects using the software
-     or recent scholarly publications enabled by it
-
-    The software should be a significant contribution to the available open source software that either enables some new research challenges
-     to be addressed or makes addressing research challenges significantly better (e.g., faster, easier, simpler)
-    The software should be feature complete (no half-baked solutions) Minor, ‘utility’ packages, including ‘thin’ API clients are not acceptable
-
-JOSS publishes articles about research software.
- This definition includes software that: solves complex modeling problems in a scientific context
-  (physics, mathematics, biology, medicine, social science, neuroscience, engineering); 
-  supports the functioning of research instruments or the execution of research experiments; 
-  extracts knowledge from large data sets; offers a mathematical library, or similar.
-
-https://joss.readthedocs.io/en/latest/review_criteria.html
-
-# Acknowledgements
+The major difference between the two is the evolutionary algorithm used.
+TPOT uses a synchronous evolutionary algorithm, whereas GAMA uses an asynchronous algorithm.
+Other differences include having a CLI (TPOT), exporting independent Python code (TPOT), direct ARFF support (GAMA) and visualization of the optimization process (GAMA).
+Further comparison is contained in GAMA's documentation.
 
 # References
