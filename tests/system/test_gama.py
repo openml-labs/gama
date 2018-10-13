@@ -1,4 +1,3 @@
-""" Contains all unit tests for """
 import unittest
 
 from sklearn.datasets import load_digits
@@ -8,26 +7,8 @@ from gama import GamaClassifier
 
 
 def gama_test_suite():
-    test_cases = [GamaUnitTestCase, GamaSystemTestCase]
+    test_cases = [GamaSystemTestCase]
     return unittest.TestSuite(map(unittest.TestLoader().loadTestsFromTestCase, test_cases))
-
-
-class GamaUnitTestCase(unittest.TestCase):
-    """ Contains unit tests for Gama, that test small components. """
-    
-    def setUp(self):
-        self.gama = GamaClassifier(random_state=0)
-    
-    def tearDown(self):
-        pass
-    
-    def test_reproducible_initialization(self):
-        g1 = GamaClassifier(random_state=1)
-        pop1 = g1._toolbox.population(n=10)
-        g2 = GamaClassifier(random_state=1)
-        pop2 = g2._toolbox.population(n=10)
-        for ind1, ind2 in zip(pop1, pop2):
-            self.assertEqual(str(ind1), str(ind2), "The initial population should be reproducible.")
 
 
 class GamaSystemTestCase(unittest.TestCase):
