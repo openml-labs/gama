@@ -8,6 +8,9 @@ authors:
  - name: Pieter Gijsbers
    orcid: 0000-0001-7346-8075
    affiliation: "1"
+- name: Joaquin Vanschoren
+   orcid: 0000-0001-7044-9805
+   affiliation: "1"
 affiliations:
  - name: Eindhoven University of Technology
    index: "1"
@@ -17,10 +20,8 @@ bibliography: paper.bib
 
 # Summary
 
-Machine learning is a technique to automatically learn models from data.
-Those models are used today in many real world applications, from detecting fraudulent transactions to recommending movies to driving cars autonomously.
-To create a successful model with machine learning, an expert has to pick the right algorithms to use, as well as do fine-tuning in the form of hyperparameter optimization.
-
+Successful machine learning applications hinge on a plethora of design decisions, which require extensive experience and relentless empirical evaluation. 
+To train a successful model, one has to decide which algorithms to use, how to preprocess the data, and how to tune any hyperparameters that influence the final model.
 In recent years an active field of research has developed around automating this process of algorithm selection and hyperparameter optimization in the context of machine learning.
 This field is often called AutoML (Automated Machine Learning), and an AutoML system is able to automatically create a good machine learning pipeline from data.
 Its usefulness is twofold.
@@ -29,6 +30,7 @@ For experts, it takes away a time consuming process of model selection and hyper
 They can instead focus on related tasks such as interpreting the model or curating the data.
 
 GAMA is an AutoML package for end-users and AutoML researchers.
+It uses genetic programming to efficiently generate optimized machine learning pipelines given specific input data and resource constraints.
 Given data and resource constraints, it will try to construct good machine learning pipelines.
 A machine learning pipeline contains data preprocessing as well as a machine learning algorithm, with fine-tuned hyperparameter settings.
 GAMA can also combine multiple tuned machine learning pipelines together into an ensemble, which on average should help model performance.
