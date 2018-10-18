@@ -13,3 +13,5 @@ Either way, work on your contribution on a separate branch created from the late
 When finished, make sure all the unit tests work and the documentation is updated before submitting a pull request.
 In the pull request, mention the issue that discusses the contribution and please mention any additional information
 that might be useful for reviewing the changes.
+
+To ensure a pleasant environment for everyone, we ask that all our contributors adhere to the [code of conduct](https://github.com/PGijsbers/gama/blob/master/code_of_conduct.md).
