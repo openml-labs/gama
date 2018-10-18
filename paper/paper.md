@@ -37,7 +37,7 @@ At the moment, GAMA is restricted to classification and regression problems on t
 
 In addition to its general use AutoML functionality, GAMA aims to serve AutoML researches as well.
 During the optimization process, GAMA keeps an extensive log of progress made.
-Using this log insight can be obtained on the behaviour of the population of pipelines.
+Using this log, insight can be obtained on the behaviour of the population of pipelines.
 It can answer questions such as which mutation operator is most effective, how fitness changes over time, and how much time each algorithm takes.
 
 # Related Work
@@ -54,6 +54,6 @@ Other differences include having a CLI (TPOT), exporting independent Python code
 Further comparison is contained in GAMA's documentation.
 
 # Acknowledgements
-This software was developed with financial support from Air Force Research Laboratory and DARPA.
+This software was developed with support from the Data Driven Discovery of Models (D3M) program run by DARPA and the Air Force Research Laboratory.
 
 # References
