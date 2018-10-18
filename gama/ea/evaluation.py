@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import pickle
 import time
@@ -60,6 +61,7 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, scoring='accuracy', cv=5
     if not object_is_valid_pipeline(pl):
         return ValueError('Pipeline is not valid. Must not be None and have `fit`, `predict` and `steps`.')
 
+    start_datetime = datetime.now()
     start = time.process_time()
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
@@ -77,7 +79,7 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, scoring='accuracy', cv=5
                 logger.info('{} encountered while evaluating pipeline.'.format(type(e)), exc_info=True)
 
             single_line_pipeline = str(pl).replace('\n', '')
-            log_parseable_event(logger, TOKENS.EVALUATION_ERROR, single_line_pipeline, type(e), e)
+            log_parseable_event(logger, TOKENS.EVALUATION_ERROR, start_datetime, single_line_pipeline, type(e), e)
             score = -float("inf")
 
     if cache_dir and score != -float("inf"):
@@ -101,13 +103,13 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, scoring='accuracy', cv=5
 
     if not c_mgr:
         # For now we treat a eval timeout the same way as e.g. NaN exceptions.
-        fitness_values = (-float("inf"), timeout, pipeline_length)
+        fitness_values = (-float("inf"), start_datetime, timeout, pipeline_length)
         logger.info('Timeout encountered while evaluating pipeline.')
 
         single_line_pipeline = ''.join(str(pl).split('\n'))
-        log_parseable_event(logger, TOKENS.EVALUATION_TIMEOUT, single_line_pipeline)
+        log_parseable_event(logger, TOKENS.EVALUATION_TIMEOUT, start_datetime, single_line_pipeline)
         logger.debug("Timeout after {}s: {}".format(timeout, pl))
     else:
-        fitness_values = (score, evaluation_time, pipeline_length)
+        fitness_values = (score, start_datetime, evaluation_time, pipeline_length)
 
     return fitness_values

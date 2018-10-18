@@ -194,7 +194,7 @@ def eliminate_worst(pop, n):
     return list(sorted(pop, key=lambda x: x.fitness.wvalues[0]))[-n:]
 
 
-def offspring_mate_and_mutate(pop, n, cxpb, mutpb, toolbox):
+def offspring_mate_or_mutate(pop, n, cxpb, mutpb, toolbox):
     """ Creates n new individuals based on the population. Can apply both crossover and mutation. """
     offspring = []
     for _ in range(n):
@@ -202,7 +202,7 @@ def offspring_mate_and_mutate(pop, n, cxpb, mutpb, toolbox):
         ind1, ind2 = toolbox.clone(pop[ind1]), toolbox.clone(pop[ind2])
         if np.random.random() < cxpb:
             ind1, ind2 = toolbox.mate(ind1, ind2)
-        if np.random.random() < mutpb:
+        elif np.random.random() < mutpb:
             ind1, = toolbox.mutate(ind1)
         offspring.append(ind1)
     return offspring

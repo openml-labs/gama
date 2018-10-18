@@ -94,5 +94,75 @@ clf_config = {
         'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25.],
         'dual': [False, True],
         'param_check': [lambda params: not params['dual'] or params['penalty'] == "l2"]
+    },
+
+    Binarizer: {
+        'threshold': np.arange(0.0, 1.01, 0.05)
+    },
+
+    FastICA: {
+        'tol': np.arange(0.0, 1.01, 0.05)
+    },
+
+    FeatureAgglomeration: {
+        'linkage': ['ward', 'complete', 'average'],
+        'affinity': ['euclidean', 'l1', 'l2', 'manhattan', 'cosine', 'precomputed'],
+        'param_check': [lambda params: (not params['linkage'] == "ward") or params['affinity'] == "euclidean"]
+    },
+
+    MaxAbsScaler: {
+    },
+
+    MinMaxScaler: {
+    },
+
+    Normalizer: {
+        'norm': ['l1', 'l2', 'max']
+    },
+
+    Nystroem: {
+        'kernel': ['rbf', 'cosine', 'chi2', 'laplacian', 'polynomial', 'poly', 'linear', 'additive_chi2', 'sigmoid'],
+        'gamma': np.arange(0.0, 1.01, 0.05),
+        'n_components': range(1, 11)
+    },
+
+    PCA: {
+        'svd_solver': ['randomized'],
+        'iterated_power': range(1, 11)
+    },
+
+    PolynomialFeatures: {
+        'degree': [2],
+        'include_bias': [False],
+        'interaction_only': [False]
+    },
+
+    RBFSampler: {
+        'gamma': np.arange(0.0, 1.01, 0.05)
+    },
+
+    RobustScaler: {
+    },
+
+    StandardScaler: {
+    },
+
+    # Selectors
+    SelectFwe: {
+        'alpha': np.arange(0, 0.05, 0.001),
+        'score_func': {
+            f_classif: None
+        }
+    },
+
+    SelectPercentile: {
+        'percentile': range(1, 100),
+        'score_func': {
+            f_classif: None
+        }
+    },
+
+    VarianceThreshold: {
+        'threshold': np.arange(0.05, 1.01, 0.05)
     }
 }

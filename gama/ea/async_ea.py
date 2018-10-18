@@ -4,7 +4,7 @@ import time
 
 import stopit
 
-from gama.utilities.logging_utilities import TOKENS, log_parseable_event
+from gama.utilities.logging_utilities import TOKENS, log_parseable_event, default_time_format
 from ..utilities.logging_utilities import MultiprocessingLogger
 from gama.utilities.generic.function_dispatcher import FunctionDispatcher
 
@@ -64,13 +64,15 @@ def async_ea(objectives, start_population, toolbox, evaluation_callback=None, re
         """ Get a new evaluation result, process it and assign it to the correct individual. """
         identifier, output, _ = evaluation_dispatcher.get_next_result()
         individual = queued_individuals[identifier]
-        score, evaluation_time, length = output
+        score, start_time, evaluation_time, length = output
         if len(objectives) == 1:
             individual.fitness.values = (score,)
         elif objectives[1] == 'time':
             individual.fitness.values = (score, evaluation_time)
         elif objectives[1] == 'size':
             individual.fitness.values = (score, length)
+
+        individual.fitness.start_time = start_time
         individual.fitness.time = evaluation_time
 
         if n_jobs > 1:
@@ -89,8 +91,8 @@ def async_ea(objectives, start_population, toolbox, evaluation_callback=None, re
 
             for ind_no in range(max_n_evaluations):
                 individual = get_next_evaluation_result()
-                log_parseable_event(log, TOKENS.EVALUATION_RESULT,
-                                    individual.fitness.time, individual.fitness.wvalues, individual)
+                log_parseable_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
+                                    individual.fitness.time, individual.fitness.wvalues, individual.id, individual)
 
                 if evaluation_callback:
                     _safe_outside_call(partial(evaluation_callback, individual), exceed_timeout)

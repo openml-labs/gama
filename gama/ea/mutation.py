@@ -94,8 +94,15 @@ def mut_replace_primitive(ind, pset):
         return ind,
 
 
-def random_valid_mutation(ind, pset):
+def random_valid_mutation(ind, pset, return_function=False):
     """ Picks a mutation uniform at random from options which are possible.
+
+    :params ind: an individual to be mutated *in place*
+    :params pset: a DEAP primitive set
+    :params return_function: bool, optional.
+        If True, also return the function object which was applied.
+
+    :returns: the mutated individual and optionally the mutation function
 
     The choices are `mut_random_primitive`, `mut_random_terminal`,
     `mutShrink` and `mutInsert`.
@@ -112,6 +119,11 @@ def random_valid_mutation(ind, pset):
     mut_fn = np.random.choice(available_mutations)
     if gp.mutShrink == mut_fn:
         # only mutShrink function does not need pset.
-        return mut_fn(ind)
+        new_ind, = mut_fn(ind)
     else:
-        return mut_fn(ind, pset)
+        new_ind, = mut_fn(ind, pset)
+
+    if return_function:
+        return (new_ind, ), mut_fn
+    else:
+        return new_ind,

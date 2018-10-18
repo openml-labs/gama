@@ -1,6 +1,7 @@
 # GAMA
 **G**enetic **A**utomated **M**achine learning **A**ssistant  
-An automated machine learning tool based on genetic programming.
+An automated machine learning tool based on genetic programming.  
+Make sure to check out the [documentation](https://pgijsbers.github.io/gama/).
 
 [![Build Status](https://travis-ci.org/PGijsbers/gama.svg?branch=master)](https://travis-ci.org/PGijsbers/gama)
 [![codecov](https://codecov.io/gh/PGijsbers/gama/branch/master/graph/badge.svg)](https://codecov.io/gh/PGijsbers/gama)
@@ -11,7 +12,6 @@ An automated machine learning tool based on genetic programming.
 Notice from author: 
 I am still working on getting things in order for a 'proper' public release.
 Things left to do:
- - Set up CI
  - Review and expand documentation
  - last round of refactoring, time permitting
 
