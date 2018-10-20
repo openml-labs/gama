@@ -5,6 +5,7 @@ from collections import defaultdict
 import datetime
 import shutil
 from functools import partial
+import sys
 import time
 import uuid
 
@@ -88,13 +89,30 @@ class Gama(object):
                  max_total_time=3600,
                  max_eval_time=300,
                  n_jobs=1,
-                 verbosity=None,
+                 verbosity=logging.WARNING,
+                 keep_analysis_log=True,
                  cache_dir=None):
+
+        #  gamalog is for the entire gama module and submodules.
+        gamalog = logging.getLogger('gama')
+        gamalog.setLevel(logging.DEBUG)
+        if verbosity >= logging.DEBUG:
+            print('setting up streamhandler stdout.')
+            stdout_streamhandler = logging.StreamHandler(sys.stdout)
+            stdout_streamhandler.setLevel(verbosity)
+            gamalog.addHandler(stdout_streamhandler)
+
+        if keep_analysis_log:
+            print('setting up streamhandler file.')
+            file_handler = logging.FileHandler('gama.log')
+            file_handler.setLevel(logging.DEBUG)
+            gamalog.addHandler(file_handler)
 
         log.info('Using GAMA version {}.'.format(__version__))
         log.info('{}({})'.format(
             self.__class__.__name__,
-            ','.join(['{}={}'.format(k, v) for (k, v) in locals().items() if k not in ['self', 'config']])
+            ','.join(['{}={}'.format(k, v) for (k, v) in locals().items()
+                      if k not in ['self', 'config', 'gamalog', 'file_handler', 'stdout_streamhandler']])
         ))
 
         if len(objectives) != len(optimize_strategy):
