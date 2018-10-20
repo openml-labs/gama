@@ -1,0 +1,23 @@
+{
+  "@context": "https://raw.githubusercontent.com/codemeta/codemeta/master/codemeta.jsonld",
+  "@type": "Code",
+  "author": [
+    {
+      "@id": "http://orcid.org/0000-0001-7346-8075",
+      "@type": "Person",
+      "email": "p.gijsbers@tue.nl",
+      "name": "Pieter Gijsbers",
+      "affiliation": "Eindhoven University of Technology"
+    }
+  ],
+  "identifier": "doi",
+  "codeRepository": "https://github.com/PGijsbers/GAMA",
+  "datePublished": "n/a",
+  "dateModified": "2018-10-18",
+  "dateCreated": "2018-10-18",
+  "description": "An AutoML package based on genetic programming.",
+  "keywords": "AutoML, genetic programming, evolutionary algorithms",
+  "license": "Apache-2.0",
+  "title": "GAMA: Genetic Automated Machine learning Assistant",
+  "version": "v0.1.0"
+}
