@@ -25,16 +25,23 @@ def find_unmatched_terminal(individual):
     return False
 
 
+def find_replaceable_terminals(ind, pset):
+    """ Find indices of all terminals which can be replaced from the given individual.
+
+    :param ind: individual
+    :param pset: primitive set with all available terminals
+    :return: List of indices of terminals that may be replaced. Empty list if no valid replacement is available.
+    """
+    return [i for i, el in enumerate(ind) if (issubclass(type(el), gp.Terminal) and len(pset.terminals[el.ret]) > 1)]
+
+
 def mut_replace_terminal(ind, pset):
     """ Mutation function which replaces a terminal."""
-
-    eligible = [i for i, el in enumerate(ind) if
-                (issubclass(type(el), gp.Terminal) and len(pset.terminals[el.ret]) > 1)]
-
-    if eligible == []:
+    replaceable_terminals = find_replaceable_terminals(ind, pset)
+    if replaceable_terminals == []:
         raise ValueError('Individual could not be mutated because no valid terminal was available: {}'.format(ind))
 
-    to_change = np.random.choice(eligible)
+    to_change = np.random.choice(replaceable_terminals)
     alternatives = [t for t in pset.terminals[ind[to_change].ret] if t != ind[to_change]]
     ind[to_change] = np.random.choice(alternatives)
     return ind,
@@ -113,7 +120,7 @@ def random_valid_mutation(ind, pset, return_function=False):
     if len([el for el in ind if issubclass(type(el), gp.Primitive)]) > 1:
         available_mutations.append(gp.mutShrink)
     # The data-input terminal is always guaranteed, but can not be mutated.
-    if len([el for el in ind if issubclass(type(el), gp.Terminal)]) > 1:
+    if len(find_replaceable_terminals(ind, pset)) > 0:
         available_mutations.append(mut_replace_terminal)
 
     mut_fn = np.random.choice(available_mutations)
