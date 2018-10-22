@@ -97,13 +97,11 @@ class Gama(object):
         gamalog = logging.getLogger('gama')
         gamalog.setLevel(logging.DEBUG)
         if verbosity >= logging.DEBUG:
-            print('setting up streamhandler stdout.')
             stdout_streamhandler = logging.StreamHandler(sys.stdout)
             stdout_streamhandler.setLevel(verbosity)
             gamalog.addHandler(stdout_streamhandler)
 
         if keep_analysis_log:
-            print('setting up streamhandler file.')
             file_handler = logging.FileHandler('gama.log')
             file_handler.setLevel(logging.DEBUG)
             gamalog.addHandler(file_handler)
