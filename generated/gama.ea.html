@@ -83,8 +83,6 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/index.html#gama-classifier">GAMA Classifier</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/index.html#gama-regressor">GAMA Regressor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
@@ -221,8 +219,8 @@ learning as a genetic programming problem.
 </dd></dl>
 
 <dl class="function">
-<dt id="gama.ea.automl_gp.offspring_mate_and_mutate">
-<code class="descclassname">gama.ea.automl_gp.</code><code class="descname">offspring_mate_and_mutate</code><span class="sig-paren">(</span><em>pop</em>, <em>n</em>, <em>cxpb</em>, <em>mutpb</em>, <em>toolbox</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/automl_gp.html#offspring_mate_and_mutate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.automl_gp.offspring_mate_and_mutate" title="Permalink to this definition">¶</a></dt>
+<dt id="gama.ea.automl_gp.offspring_mate_or_mutate">
+<code class="descclassname">gama.ea.automl_gp.</code><code class="descname">offspring_mate_or_mutate</code><span class="sig-paren">(</span><em>pop</em>, <em>n</em>, <em>cxpb</em>, <em>mutpb</em>, <em>toolbox</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/automl_gp.html#offspring_mate_or_mutate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.automl_gp.offspring_mate_or_mutate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates n new individuals based on the population. Can apply both crossover and mutation.</p>
 </dd></dl>
 
@@ -349,6 +347,27 @@ dependending on the condition function.</dd>
 <p>Contains mutation functions for genetic programming.
 Each mutation function takes an individual and either returns a different individual, or None.</p>
 <dl class="function">
+<dt id="gama.ea.mutation.find_replaceable_terminals">
+<code class="descclassname">gama.ea.mutation.</code><code class="descname">find_replaceable_terminals</code><span class="sig-paren">(</span><em>ind</em>, <em>pset</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/mutation.html#find_replaceable_terminals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.mutation.find_replaceable_terminals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find indices of all terminals which can be replaced from the given individual.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ind</strong> – individual</li>
+<li><strong>pset</strong> – primitive set with all available terminals</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">List of indices of terminals that may be replaced. Empty list if no valid replacement is available.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="gama.ea.mutation.find_unmatched_terminal">
 <code class="descclassname">gama.ea.mutation.</code><code class="descname">find_unmatched_terminal</code><span class="sig-paren">(</span><em>individual</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/mutation.html#find_unmatched_terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.mutation.find_unmatched_terminal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds the location of the first terminal that can not be matched with a primitive.</p>
@@ -369,8 +388,24 @@ Each mutation function takes an individual and either returns a different indivi
 
 <dl class="function">
 <dt id="gama.ea.mutation.random_valid_mutation">
-<code class="descclassname">gama.ea.mutation.</code><code class="descname">random_valid_mutation</code><span class="sig-paren">(</span><em>ind</em>, <em>pset</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/mutation.html#random_valid_mutation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.mutation.random_valid_mutation" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gama.ea.mutation.</code><code class="descname">random_valid_mutation</code><span class="sig-paren">(</span><em>ind</em>, <em>pset</em>, <em>return_function=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/ea/mutation.html#random_valid_mutation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.ea.mutation.random_valid_mutation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Picks a mutation uniform at random from options which are possible.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Params ind:</th><td class="field-body">an individual to be mutated <em>in place</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Params pset:</th><td class="field-body">a DEAP primitive set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Params return_function:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">bool, optional.
+If True, also return the function object which was applied.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the mutated individual and optionally the mutation function</td>
+</tr>
+</tbody>
+</table>
 <p>The choices are <cite>mut_random_primitive</cite>, <cite>mut_random_terminal</cite>,
 <cite>mutShrink</cite> and <cite>mutInsert</cite>.
 A pipeline can not shrink a primitive if it only has one.

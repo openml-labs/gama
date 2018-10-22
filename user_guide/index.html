@@ -94,6 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#things-to-know">Things To Know</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#important-hyperparameters">Important Hyperparameters</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#logging">Logging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#log-visualization">Log Visualization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#events-and-observers">Events and Observers</a></li>
 </ul>
 </li>
@@ -180,8 +181,10 @@
             
   <div class="section" id="user-guide">
 <span id="user-guide-index"></span><h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this headline">¶</a></h1>
-<p>This file gives an introduction to basic components and concepts of GAMA.
-GAMA is an AutoML tool which aims to automatically find the right machine learning algorithms to create the best possible data for your model.</p>
+<p>GAMA is an AutoML tool which aims to automatically find the right machine learning algorithms to create the best possible data for your model.
+This page gives an introduction to basic components and concepts of GAMA.
+If there are any questions you have that are not answered here, check the <a class="reference external" href="https://github.com/PGijsbers/GAMA/issues">issue page</a>.
+If your question has not been answered there yet, please open a new issue and label with the question label.</p>
 <p>In the process, GAMA performs a search over <em>machine learning pipelines</em>.
 An example of a machine learnig pipeline would be to first perform data normalization and then use a decision tree classifier to make a prediction on the normalized data.
 More formally, a <em>machine learning pipeline</em> is a sequence of one or more <em>components</em>.
@@ -192,6 +195,14 @@ A machine learning pipeline then consists of zero or more preprocessing componen
 After the search, the best model found can be used to make predictions.
 Alternatively, GAMA can combine several models into an <em>ensemble</em> to take into account more than one model when making predictions.
 For ease of use, GAMA provides a <cite>fit</cite>, <cite>predict</cite> and <cite>predict_proba</cite> function akin to scikit-learn.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p>To install GAMA and its dependencies, clone the repository and run the setup script:</p>
@@ -212,9 +223,25 @@ For ease of use, GAMA provides a <cite>fit</cite>, <cite>predict</cite> and <cit
 <li>category-encoders&gt;=1.2.8</li>
 </ul>
 </div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
 <div class="section" id="classification">
 <h3>Classification<a class="headerlink" href="#classification" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="k">import</span> <span class="n">load_breast_cancer</span>
@@ -241,6 +268,14 @@ For ease of use, GAMA provides a <cite>fit</cite>, <cite>predict</cite> and <cit
 </pre></div>
 </div>
 <p>By default, GamaClassifier will optimize towards <cite>log loss</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="regression">
 <h3>Regression<a class="headerlink" href="#regression" title="Permalink to this headline">¶</a></h3>
@@ -265,34 +300,41 @@ For ease of use, GAMA provides a <cite>fit</cite>, <cite>predict</cite> and <cit
 </pre></div>
 </div>
 <p>By default, GamaRegressor will optimize towards <cite>mean squared error</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="using-arff-files">
 <h3>Using ARFF files<a class="headerlink" href="#using-arff-files" title="Permalink to this headline">¶</a></h3>
 <p>GAMA supports data in ARFF files directly, utilizing extra information given, such as which features are categorical.
 In the example below, make sure to replace the file paths to the ARFF files to be used.
-The example results are obtained by using
+The example script can be run by using e.g.
 <a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_train.arff">breast_cancer_train.arff</a> and
 <a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_test.arff">breast_cancer_test.arff</a>.
 The target should always be specified as the last column.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">log_loss</span><span class="p">,</span> <span class="n">accuracy_score</span>
-<span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
 
 <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
 <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">arff_file_path</span><span class="o">=</span><span class="s1">&#39;your_train_data.arff&#39;</span><span class="p">)</span>
 
 <span class="n">label_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">arff_file_path</span><span class="o">=</span><span class="s1">&#39;your_test_data.arff&#39;</span><span class="p">)</span>
 <span class="n">probability_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">arff_file_path</span><span class="o">=</span><span class="s1">&#39;your_test_data.arff&#39;</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;accuracy:&#39;</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">label_predictions</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;log loss:&#39;</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">probability_predictions</span><span class="p">))</span>
-</pre></div>
-</div>
-<p>It should take 3 minutes to run and give the output below (exact performance might differ):</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">accuracy</span><span class="p">:</span> <span class="mf">0.951048951048951</span>
-<span class="n">log</span> <span class="n">loss</span><span class="p">:</span> <span class="mf">0.1111237013184977</span>
 </pre></div>
 </div>
 <p>The GamaRegressor also has ARFF support.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div class="section" id="things-to-know">
@@ -325,8 +367,13 @@ Normally, this cache is deleted automatically, but should you wish to keep it, y
 <div class="section" id="logging">
 <h3>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h3>
 <p>GAMA makes use of the default Python <a class="reference external" href="https://docs.python.org/3.5/library/logging.html">logging</a> module.
-The log can be captured at different levels, and handled by one of several StreamHandlers.
-For instance, to print GAMA logs to stdout:</p>
+The log can be captured at different levels, and handled by one of several StreamHandlers.</p>
+<p>The most common use cases would be to write a comprehensive log to file, as well as print important messages to <cite>stdout</cite>.
+Both of these cases are directly supported by GAMA through the <cite>verbosity</cite> and <cite>keep_analysis_log</cite> hyperparameters.
+The level of <cite>verbosity</cite> defines what level messages should be written to <cite>stdout</cite>, and is by default set to <cite>logging.WARNING</cite>.
+The <cite>keep_analysis_log</cite> sets whether or not to write <em>all</em> log output to file (<cite>logging.DEBUG</cite> level).</p>
+<p>However, the logging module offers you great flexibility on making your own variations.
+The following script manually sets up GAMA to print to stdout (and ignores the built-in):</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
@@ -338,7 +385,7 @@ For instance, to print GAMA logs to stdout:</p>
 <span class="n">stdout_streamhandler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
 <span class="n">gama_log</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">stdout_streamhandler</span><span class="p">)</span>
 
-<span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
+<span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Running the above script display the GAMA version used, and the hyperparameter values on initialization:</p>
@@ -348,6 +395,12 @@ For instance, to print GAMA logs to stdout:</p>
 </div>
 <p>Actual values or hyperparameter names may vary depending on the version of GAMA you are using.
 Make sure to set <em>both</em> the log level of the log and the stream handler.</p>
+</div>
+<div class="section" id="log-visualization">
+<h3>Log Visualization<a class="headerlink" href="#log-visualization" title="Permalink to this headline">¶</a></h3>
+<p>When using the default hyperparameters, GAMA will produce a log file called <cite>gama.log</cite>.
+This log file is structured so that important events are easy to parse.
+For an example and easy way to visualize information from the log file, take a look at [this notebook](<a class="reference external" href="https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb">https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb</a>).</p>
 </div>
 <div class="section" id="events-and-observers">
 <h3>Events and Observers<a class="headerlink" href="#events-and-observers" title="Permalink to this headline">¶</a></h3>
@@ -363,6 +416,14 @@ Make sure to set <em>both</em> the log level of the log and the stream handler.<
 </pre></div>
 </div>
 <p>This can be used to create useful observers, such as one that keeps track of the Pareto front or visualizes progress.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div class="section" id="gama-search-space-configuration">
@@ -405,6 +466,14 @@ All hyperparameters specified should be taken as arguments for the algorithm’s
 A hyperparameter specified at the top level of the dictionary shares a name with a hyperparameter of the algorithm.
 To use the values provided by the shared hyperparameter, set the possible values to an empty list.
 If a list of values is provided instead, it will not use the shared hyperparameter values.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="related-packages">
 <h2>Related Packages<a class="headerlink" href="#related-packages" title="Permalink to this headline">¶</a></h2>

@@ -155,7 +155,7 @@
 
 <span class="kn">import</span> <span class="nn">stopit</span>
 
-<span class="kn">from</span> <span class="nn">gama.utilities.logging_utilities</span> <span class="k">import</span> <span class="n">TOKENS</span><span class="p">,</span> <span class="n">log_parseable_event</span>
+<span class="kn">from</span> <span class="nn">gama.utilities.logging_utilities</span> <span class="k">import</span> <span class="n">TOKENS</span><span class="p">,</span> <span class="n">log_parseable_event</span><span class="p">,</span> <span class="n">default_time_format</span>
 <span class="kn">from</span> <span class="nn">..utilities.logging_utilities</span> <span class="k">import</span> <span class="n">MultiprocessingLogger</span>
 <span class="kn">from</span> <span class="nn">gama.utilities.generic.function_dispatcher</span> <span class="k">import</span> <span class="n">FunctionDispatcher</span>
 
@@ -215,13 +215,15 @@
         <span class="sd">&quot;&quot;&quot; Get a new evaluation result, process it and assign it to the correct individual. &quot;&quot;&quot;</span>
         <span class="n">identifier</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">evaluation_dispatcher</span><span class="o">.</span><span class="n">get_next_result</span><span class="p">()</span>
         <span class="n">individual</span> <span class="o">=</span> <span class="n">queued_individuals</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span>
-        <span class="n">score</span><span class="p">,</span> <span class="n">evaluation_time</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="n">output</span>
+        <span class="n">score</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">evaluation_time</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="n">output</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">objectives</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="p">(</span><span class="n">score</span><span class="p">,)</span>
         <span class="k">elif</span> <span class="n">objectives</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span>
             <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">evaluation_time</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">objectives</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;size&#39;</span><span class="p">:</span>
             <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+
+        <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">start_time</span>
         <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">evaluation_time</span>
 
         <span class="k">if</span> <span class="n">n_jobs</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -240,8 +242,8 @@
 
             <span class="k">for</span> <span class="n">ind_no</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_n_evaluations</span><span class="p">):</span>
                 <span class="n">individual</span> <span class="o">=</span> <span class="n">get_next_evaluation_result</span><span class="p">()</span>
-                <span class="n">log_parseable_event</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">TOKENS</span><span class="o">.</span><span class="n">EVALUATION_RESULT</span><span class="p">,</span>
-                                    <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">wvalues</span><span class="p">,</span> <span class="n">individual</span><span class="p">)</span>
+                <span class="n">log_parseable_event</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">TOKENS</span><span class="o">.</span><span class="n">EVALUATION_RESULT</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">start_time</span><span class="p">,</span>
+                                    <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">wvalues</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">individual</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">evaluation_callback</span><span class="p">:</span>
                     <span class="n">_safe_outside_call</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">evaluation_callback</span><span class="p">,</span> <span class="n">individual</span><span class="p">),</span> <span class="n">exceed_timeout</span><span class="p">)</span>

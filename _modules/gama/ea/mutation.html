@@ -176,16 +176,23 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
+<div class="viewcode-block" id="find_replaceable_terminals"><a class="viewcode-back" href="../../../generated/gama.ea.html#gama.ea.mutation.find_replaceable_terminals">[docs]</a><span class="k">def</span> <span class="nf">find_replaceable_terminals</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">pset</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Find indices of all terminals which can be replaced from the given individual.</span>
+
+<span class="sd">    :param ind: individual</span>
+<span class="sd">    :param pset: primitive set with all available terminals</span>
+<span class="sd">    :return: List of indices of terminals that may be replaced. Empty list if no valid replacement is available.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">el</span><span class="p">),</span> <span class="n">gp</span><span class="o">.</span><span class="n">Terminal</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">pset</span><span class="o">.</span><span class="n">terminals</span><span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">ret</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)]</span></div>
+
+
 <div class="viewcode-block" id="mut_replace_terminal"><a class="viewcode-back" href="../../../generated/gama.ea.html#gama.ea.mutation.mut_replace_terminal">[docs]</a><span class="k">def</span> <span class="nf">mut_replace_terminal</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">pset</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Mutation function which replaces a terminal.&quot;&quot;&quot;</span>
-
-    <span class="n">eligible</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="k">if</span>
-                <span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">el</span><span class="p">),</span> <span class="n">gp</span><span class="o">.</span><span class="n">Terminal</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">pset</span><span class="o">.</span><span class="n">terminals</span><span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">ret</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)]</span>
-
-    <span class="k">if</span> <span class="n">eligible</span> <span class="o">==</span> <span class="p">[]:</span>
+    <span class="n">replaceable_terminals</span> <span class="o">=</span> <span class="n">find_replaceable_terminals</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">pset</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">replaceable_terminals</span> <span class="o">==</span> <span class="p">[]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Individual could not be mutated because no valid terminal was available: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">))</span>
 
-    <span class="n">to_change</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">eligible</span><span class="p">)</span>
+    <span class="n">to_change</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">replaceable_terminals</span><span class="p">)</span>
     <span class="n">alternatives</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">pset</span><span class="o">.</span><span class="n">terminals</span><span class="p">[</span><span class="n">ind</span><span class="p">[</span><span class="n">to_change</span><span class="p">]</span><span class="o">.</span><span class="n">ret</span><span class="p">]</span> <span class="k">if</span> <span class="n">t</span> <span class="o">!=</span> <span class="n">ind</span><span class="p">[</span><span class="n">to_change</span><span class="p">]]</span>
     <span class="n">ind</span><span class="p">[</span><span class="n">to_change</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">alternatives</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ind</span><span class="p">,</span></div>
@@ -245,8 +252,15 @@
         <span class="k">return</span> <span class="n">ind</span><span class="p">,</span></div>
 
 
-<div class="viewcode-block" id="random_valid_mutation"><a class="viewcode-back" href="../../../generated/gama.ea.html#gama.ea.mutation.random_valid_mutation">[docs]</a><span class="k">def</span> <span class="nf">random_valid_mutation</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">pset</span><span class="p">):</span>
+<div class="viewcode-block" id="random_valid_mutation"><a class="viewcode-back" href="../../../generated/gama.ea.html#gama.ea.mutation.random_valid_mutation">[docs]</a><span class="k">def</span> <span class="nf">random_valid_mutation</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">pset</span><span class="p">,</span> <span class="n">return_function</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Picks a mutation uniform at random from options which are possible.</span>
+
+<span class="sd">    :params ind: an individual to be mutated *in place*</span>
+<span class="sd">    :params pset: a DEAP primitive set</span>
+<span class="sd">    :params return_function: bool, optional.</span>
+<span class="sd">        If True, also return the function object which was applied.</span>
+
+<span class="sd">    :returns: the mutated individual and optionally the mutation function</span>
 
 <span class="sd">    The choices are `mut_random_primitive`, `mut_random_terminal`,</span>
 <span class="sd">    `mutShrink` and `mutInsert`.</span>
@@ -257,15 +271,20 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">([</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">ind</span> <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">el</span><span class="p">),</span> <span class="n">gp</span><span class="o">.</span><span class="n">Primitive</span><span class="p">)])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">available_mutations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">mutShrink</span><span class="p">)</span>
     <span class="c1"># The data-input terminal is always guaranteed, but can not be mutated.</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">([</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">ind</span> <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">el</span><span class="p">),</span> <span class="n">gp</span><span class="o">.</span><span class="n">Terminal</span><span class="p">)])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">find_replaceable_terminals</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">pset</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">available_mutations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mut_replace_terminal</span><span class="p">)</span>
 
     <span class="n">mut_fn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">available_mutations</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">mutShrink</span> <span class="o">==</span> <span class="n">mut_fn</span><span class="p">:</span>
         <span class="c1"># only mutShrink function does not need pset.</span>
-        <span class="k">return</span> <span class="n">mut_fn</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+        <span class="n">new_ind</span><span class="p">,</span> <span class="o">=</span> <span class="n">mut_fn</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">mut_fn</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">pset</span><span class="p">)</span></div>
+        <span class="n">new_ind</span><span class="p">,</span> <span class="o">=</span> <span class="n">mut_fn</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">pset</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">return_function</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">new_ind</span><span class="p">,</span> <span class="p">),</span> <span class="n">mut_fn</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">new_ind</span><span class="p">,</span></div>
 </pre></div>
 
            </div>

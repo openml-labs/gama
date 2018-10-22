@@ -1,3 +1,5 @@
+:orphan:
+
 Related Packages
 ----------------
 
@@ -11,7 +13,7 @@ Below you will find a list of differences and similarities of the packages.
 is important to add, please open an issue.*
 
 In GAMA but not in TPOT:
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Asynchronous evolution
  In theory, asynchronous evolution should be able to utilize the computing resources better.
@@ -30,7 +32,7 @@ Automatic Ensembling
  This can lead to better generalization performance.
 
 In TPOT but not in GAMA:
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Code export
  TPOT is able to export Python code to recreate the best found pipeline. The Python code can be used

@@ -83,8 +83,6 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="index.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/index.html#gama-classifier">GAMA Classifier</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/index.html#gama-regressor">GAMA Regressor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
@@ -182,8 +180,13 @@ Normally, this cache is deleted automatically, but should you wish to keep it, y
 <div class="section" id="logging">
 <h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
 <p>GAMA makes use of the default Python <a class="reference external" href="https://docs.python.org/3.5/library/logging.html">logging</a> module.
-The log can be captured at different levels, and handled by one of several StreamHandlers.
-For instance, to print GAMA logs to stdout:</p>
+The log can be captured at different levels, and handled by one of several StreamHandlers.</p>
+<p>The most common use cases would be to write a comprehensive log to file, as well as print important messages to <cite>stdout</cite>.
+Both of these cases are directly supported by GAMA through the <cite>verbosity</cite> and <cite>keep_analysis_log</cite> hyperparameters.
+The level of <cite>verbosity</cite> defines what level messages should be written to <cite>stdout</cite>, and is by default set to <cite>logging.WARNING</cite>.
+The <cite>keep_analysis_log</cite> sets whether or not to write <em>all</em> log output to file (<cite>logging.DEBUG</cite> level).</p>
+<p>However, the logging module offers you great flexibility on making your own variations.
+The following script manually sets up GAMA to print to stdout (and ignores the built-in):</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
@@ -195,7 +198,7 @@ For instance, to print GAMA logs to stdout:</p>
 <span class="n">stdout_streamhandler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
 <span class="n">gama_log</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">stdout_streamhandler</span><span class="p">)</span>
 
-<span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
+<span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Running the above script display the GAMA version used, and the hyperparameter values on initialization:</p>
@@ -205,6 +208,12 @@ For instance, to print GAMA logs to stdout:</p>
 </div>
 <p>Actual values or hyperparameter names may vary depending on the version of GAMA you are using.
 Make sure to set <em>both</em> the log level of the log and the stream handler.</p>
+</div>
+<div class="section" id="log-visualization">
+<h2>Log Visualization<a class="headerlink" href="#log-visualization" title="Permalink to this headline">¶</a></h2>
+<p>When using the default hyperparameters, GAMA will produce a log file called <cite>gama.log</cite>.
+This log file is structured so that important events are easy to parse.
+For an example and easy way to visualize information from the log file, take a look at [this notebook](<a class="reference external" href="https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb">https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb</a>).</p>
 </div>
 <div class="section" id="events-and-observers">
 <h2>Events and Observers<a class="headerlink" href="#events-and-observers" title="Permalink to this headline">¶</a></h2>

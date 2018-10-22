@@ -1,7 +1,9 @@
+:orphan:
+
 .. _search_space_configuration:
 
 GAMA Search Space Configuration
-------------------------
+-------------------------------
 
 By default GAMA will build pipelines out of scikit-learn algorithms, both for preprocessing and learning models.
 It is possible to modify this search space, changing the algorithms or hyperparameter ranges to consider.

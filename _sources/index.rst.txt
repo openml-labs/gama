@@ -7,7 +7,7 @@
    :members:
    
 GAMA - Genetic Automated Machine learning Assistant
-================================
+===================================================
 
 GAMA is a tool for Automated Machine Learning (AutoML).
 All you need to do is supply the data, and GAMA will automatically try to find a good *machine learning pipeline*.
