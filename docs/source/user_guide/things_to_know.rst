@@ -1,3 +1,5 @@
+:orphan:
+
 Things To Know
 --------------
 GAMA is in its early stages and very much work in progress.
