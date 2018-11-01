@@ -19,7 +19,7 @@ Supplying a binary tuple allows for multi-objective optimization.
 Make sure to optimize towards the metric that reflects well what is important to you.
 
 **n_jobs**: determines how many processes can be run in parallel during `fit`.
-By default only one core is used, so if you have more cores available, this has the most influence over how many
+By default only one core is used. If you have more cores available, this has the most influence over how many
 machine learning pipelines can be evaluated.
 
 **max_total_time**: the maximum time in seconds that GAMA should aim to use to construct a model from the data.

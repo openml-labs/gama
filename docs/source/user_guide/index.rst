@@ -20,7 +20,12 @@ Alternatively, GAMA can combine several models into an *ensemble* to take into a
 For ease of use, GAMA provides a `fit`, `predict` and `predict_proba` function akin to scikit-learn.
 
 .. include:: installation.rst
+    :start-line: 1
 .. include:: examples.rst
+    :start-line: 1
 .. include:: things_to_know.rst
+    :start-line: 1
 .. include:: configuration.rst
+    :start-line: 1
 .. include:: related_packages.rst
+    :start-line: 1
