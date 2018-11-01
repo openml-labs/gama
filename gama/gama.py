@@ -139,6 +139,7 @@ class Gama(object):
         self._observer = None
         self._objectives = objectives
         self.ensemble = None
+        self._ensemble_fit = False
 
         default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
@@ -375,11 +376,10 @@ class Gama(object):
 
     def _postprocess_phase(self, n, timeout=1e6):
         """ Perform any necessary post processing, such as ensemble building. """
-        #self._best_pipeline = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.wvalues)))[0]
-        #print(self._best_pipeline.fitness.wvalues)
-        #self._best_pipeline = self._toolbox.compile(self._best_pipeline)
-        #X, y = self._fit_data
-        #self._best_pipeline.fit(X, self.y_train)
+        self._best_pipeline = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.wvalues)))[0]
+        log.info("Best pipeline has fitness of {}".format(self._best_pipeline.fitness.wvalues))
+        self._best_pipeline = self._toolbox.compile(self._best_pipeline)
+        self._best_pipeline.fit(self.X, self.y_train)
         self._build_fit_ensemble(n, timeout=timeout)
 
     def _initialize_ensemble(self):
@@ -387,27 +387,32 @@ class Gama(object):
 
     def _build_fit_ensemble(self, ensemble_size, timeout):
         start_build = time.time()
-        log.debug('Building ensemble.')
-        self._initialize_ensemble()
+        try:
+            log.debug('Building ensemble.')
+            self._initialize_ensemble()
 
-        # Starting with more models in the ensemble should help against overfitting, but depending on the total
-        # ensemble size, it might leave too little room to calibrate the weights or add new models. So we have
-        # some adaptive defaults (for now).
-        if ensemble_size <= 10:
-            self.ensemble.build_initial_ensemble(1)
-        else:
-            self.ensemble.build_initial_ensemble(10)
+            # Starting with more models in the ensemble should help against overfitting, but depending on the total
+            # ensemble size, it might leave too little room to calibrate the weights or add new models. So we have
+            # some adaptive defaults (for now).
+            if ensemble_size <= 10:
+                self.ensemble.build_initial_ensemble(1)
+            else:
+                self.ensemble.build_initial_ensemble(10)
 
-        remainder = ensemble_size - self.ensemble._total_model_weights()
-        if remainder > 0:
-            self.ensemble.expand_ensemble(remainder)
+            remainder = ensemble_size - self.ensemble._total_model_weights()
+            if remainder > 0:
+                self.ensemble.expand_ensemble(remainder)
 
-        build_time = time.time() - start_build
-        timeout = timeout - build_time
-        log.info('Building ensemble took {}s. Fitting ensemble with timeout {}s.'.format(build_time, timeout))
+            build_time = time.time() - start_build
+            timeout = timeout - build_time
+            log.info('Building ensemble took {}s. Fitting ensemble with timeout {}s.'.format(build_time, timeout))
 
-        X, y = self._fit_data
-        self.ensemble.fit(X, y, timeout=timeout)
+            X, y = self._fit_data
+            self.ensemble.fit(X, y, timeout=timeout)
+            self._ensemble_fit = True
+        except Exception as e:
+            log.warning("Error during auto ensemble: {}".format(e))
+
 
     def delete_cache(self):
         """ Removes the cache folder and all files associated to this instance. """

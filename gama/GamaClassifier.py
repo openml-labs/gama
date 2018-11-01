@@ -30,7 +30,8 @@ class GamaClassifier(Gama):
             first dimension of X.
         """
         X = self._preprocess_predict_X(X, arff_file_path)
-        return self.ensemble.predict(X)
+        classifier = self.ensemble if self._ensemble_fit else self._best_pipeline
+        return classifier.predict(X)
 
     def predict_proba(self, X=None, arff_file_path=None):
         """ Predict the class probabilities for input X.
@@ -42,7 +43,8 @@ class GamaClassifier(Gama):
             first dimension of X, and K is the number of class labels found in `y` of `fit`.
         """
         X = self._preprocess_predict_X(X, arff_file_path)
-        return self.ensemble.predict_proba(X)
+        classifier = self.ensemble if self._ensemble_fit else self._best_pipeline
+        return classifier.predict_proba(X)
 
     def _encode_labels(self, y):
         self._label_encoder = LabelEncoder().fit(y)
