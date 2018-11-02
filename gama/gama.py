@@ -379,6 +379,7 @@ class Gama(object):
         self._best_pipeline = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.wvalues)))[0]
         log.info("Best pipeline has fitness of {}".format(self._best_pipeline.fitness.wvalues))
         self._best_pipeline = self._toolbox.compile(self._best_pipeline)
+        log.info("Pipeline {}, steps: {}".format(self._best_pipeline, self._best_pipeline.steps))
         self._best_pipeline.fit(self.X, self.y_train)
         self._build_fit_ensemble(n, timeout=timeout)
 
