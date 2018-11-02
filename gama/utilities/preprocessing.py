@@ -22,7 +22,7 @@ def define_preprocessing_steps(X_df, max_extra_features_created=None, max_catego
         if isinstance(dtype, pd.core.dtypes.dtypes.CategoricalDtype):
             if unique_values > max_categories_for_one_hot:
                 target_encoding_columns.append(column_index)
-            elif unique_values > 2:
+            elif unique_values > 1:
                 one_hot_columns.append(column_index)
             else:
                 pass  # Binary category or constant feature.
