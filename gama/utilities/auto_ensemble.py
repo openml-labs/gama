@@ -65,6 +65,7 @@ class Ensemble(object):
         if not self._model_library:
             log.debug("Loading model library from disk.")
             self._model_library = load_predictions(self._model_library_directory, self._prediction_transformation)
+            log.info("Loaded model library of size {} from disk.".format(len(self._model_library)))
 
         return self._model_library
 
@@ -85,7 +86,6 @@ class Ensemble(object):
         :param n: Number of models to include.
         :return: self
         """
-        pass
         if not n > 0:
             raise ValueError("Ensemble must include at least one model.")
         if self._models:
