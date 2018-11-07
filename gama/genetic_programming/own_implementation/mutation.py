@@ -11,7 +11,7 @@ from .components import Individual
 
 
 def mut_replace_terminal(individual: Individual, primitive_set: dict):
-    terminals = list(individual.terminals)
+    terminals = list(enumerate(individual.terminals))
     if len(terminals) == 0:
         raise ValueError("Individual has no terminals.")
 

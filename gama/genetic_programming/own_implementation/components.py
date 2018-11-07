@@ -1,6 +1,6 @@
 from collections import defaultdict
 import random
-from typing import List
+from typing import List, Generator
 import uuid
 
 import sklearn
@@ -61,6 +61,10 @@ class PrimitiveNode:
         else:
             return "{}({})".format(self._primitive._identifier, str(self._data_node))
 
+    def copy(self):
+        data_node_copy = self._data_node if self._data_node == DATA_TERMINAL else self._data_node.copy()
+        return PrimitiveNode(primitive=self._primitive, data_node=data_node_copy, terminals=self._terminals.copy())
+
 
 class Individual:
     """ A collection of PrimitiveNodes which together specify a machine learning pipeline. """
@@ -83,7 +87,7 @@ class Individual:
         return """Individual {}\nPipeline: {}\nFitness: {}""".format(self._id, self.pipeline_str(), self.fitness)
 
     @property
-    def primitives(self) -> List[PrimitiveNode]:
+    def primitives(self) -> Generator[PrimitiveNode, None, None]:
         yield self.main_node
         current_node = self.main_node._data_node
         while current_node != DATA_TERMINAL:
@@ -91,12 +95,10 @@ class Individual:
             current_node = current_node._data_node
 
     @property
-    def terminals(self):
-        terminal_index = 0
+    def terminals(self) -> Generator[Terminal, None, None]:
         for primitive in self.primitives:
             for terminal in primitive._terminals:
-                yield (terminal_index, terminal)
-                terminal_index += 1
+                yield terminal
 
     def replace_terminal(self, position: int, new_terminal: Terminal):
         scan_position = 0
@@ -115,6 +117,13 @@ class Individual:
                 scan_position += len(primitive._terminals)
         if scan_position < position:
             raise ValueError("Position {} is out of range with {} terminals.".format(position, scan_position))
+
+    def replace_primitive(self, position: int, new_primitive: PrimitiveNode):
+        raise NotImplemented
+
+    def copy_as_new(self):
+        """ Make a deep copy of the individual, but with fitness set to None and assign a new id. """
+        return Individual(main_node=self.main_node.copy())
 
 
 def pset_from_config(configuration):
@@ -209,6 +218,17 @@ def create_random_individual(primitive_set: dict, min_length: int=1, max_length:
 
 
 if __name__ == '__main__':
+    from gama.genetic_programming.own_implementation.components import PrimitiveNode, pset_from_config, Individual, create_random_individual
     from gama.configuration.classification import clf_config
     pset, param = pset_from_config(clf_config)
+    from gama.genetic_programming.own_implementation.mutation import mut_replace_terminal
+
     i = create_random_individual(pset)
+    print(str(i))
+    mut_replace_terminal(i, pset)
+    print(str(i))
+    i2 = i.copy_as_new()
+    print(str(i2))
+    mut_replace_terminal(i, pset)
+    print(str(i))
+    print(str(i2))
