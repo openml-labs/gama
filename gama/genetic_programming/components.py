@@ -44,7 +44,7 @@ class Primitive:
 
 
 class PrimitiveNode:
-    """ An instantiation  """
+    """ An instantiation for a Primitive with specific Terminals. """
 
     def __init__(self, primitive: Primitive, data_node, terminals: List[Terminal]):
         self._primitive = primitive
@@ -60,6 +60,7 @@ class PrimitiveNode:
 
 
 class Individual:
+    """ A collection of PrimitiveNodes which together specify a machine learning pipeline. """
 
     def __init__(self):
         self.fitness = None
@@ -147,8 +148,19 @@ def random_terminals_for_primitive(primitive_set: dict, primitive: Primitive):
 
 def create_random_individual(primitive_set: dict, min_length: int=1, max_length: int=3) -> Individual:
     individual_length = random.randint(min_length, max_length)
-    learner, = random.sample(primitive_set['prediction'], k=1)
-    learner_node = PrimitiveNode(learner, data_node='data', terminals=random_terminals_for_primitive(primitive_set, learner))
+    primitive, = random.sample(primitive_set['prediction'], k=1)
+    learner_node = PrimitiveNode(primitive,
+                                 data_node='data',
+                                 terminals=random_terminals_for_primitive(primitive_set, primitive))
+    last_primitive_node = learner_node
+    for _ in range(individual_length - 1):
+        primitive, = random.sample(primitive_set['data'], k=1)
+        primitive_node = PrimitiveNode(primitive,
+                                       data_node='data',
+                                       terminals=random_terminals_for_primitive(primitive_set, primitive))
+        last_primitive_node._data_node = primitive_node
+        last_primitive_node = primitive_node
+
     return learner_node
 
 
