@@ -1,6 +1,7 @@
 from collections import defaultdict
 import random
 from typing import List
+import uuid
 
 import sklearn
 
@@ -62,15 +63,22 @@ class PrimitiveNode:
 class Individual:
     """ A collection of PrimitiveNodes which together specify a machine learning pipeline. """
 
-    def __init__(self):
+    def __init__(self, main_node: PrimitiveNode):
         self.fitness = None
-        self._tree = None
+        self.main_node = main_node
+        self._id = uuid.uuid4()
+
+    def pipeline_str(self):
+        return str(self.main_node)
+
+    def __eq__(self, other):
+        return isinstance(other, Individual) and other._id == self._id
 
     def __repr__(self):
         super().__repr__(self)
 
     def __str__(self):
-        super().__str__(self)
+        return """Individual {}\nPipeline: {}\nFitness: {}""".format(self._id, self.pipeline_str(), self.fitness)
 
 
 def pset_from_config(configuration):
@@ -161,7 +169,7 @@ def create_random_individual(primitive_set: dict, min_length: int=1, max_length:
         last_primitive_node._data_node = primitive_node
         last_primitive_node = primitive_node
 
-    return learner_node
+    return Individual(learner_node)
 
 
 if __name__ == '__main__':
