@@ -2,49 +2,29 @@
 Contains mutation functions for genetic programming.
 Each mutation function takes an individual and either returns a different individual, or None.
 """
+import random
 
 from deap import gp, creator
 import numpy as np
 
-
-def find_unmatched_terminal(individual):
-    """ Finds the location of the first terminal that can not be matched with a primitive.
-
-    Raises a `ValueError` if no terminals are found.
-    """
-    unmatched_args = []
-    for i, el in enumerate(individual):
-        if len(unmatched_args) > 0 and el.ret == unmatched_args[0]:
-            unmatched_args.pop(0)
-        elif issubclass(type(el), gp.Terminal):
-            return i
-        if issubclass(type(el), gp.Primitive):
-            # Replace with list-inserts if performance is bad.
-            unmatched_args = el.args + unmatched_args
-
-    return False
+from .components import Individual
 
 
-def find_replaceable_terminals(ind, pset):
-    """ Find indices of all terminals which can be replaced from the given individual.
+def mut_replace_terminal(individual: Individual, primitive_set: dict):
+    terminals = list(individual.terminals)
+    if len(terminals) == 0:
+        raise ValueError("Individual has no terminals.")
 
-    :param ind: individual
-    :param pset: primitive set with all available terminals
-    :return: List of indices of terminals that may be replaced. Empty list if no valid replacement is available.
-    """
-    return [i for i, el in enumerate(ind) if (issubclass(type(el), gp.Terminal) and len(pset.terminals[el.ret]) > 1)]
+    terminal_index, old_terminal = random.sample(terminals, k=1)[0]
+    acceptable_new_terminals = [t for t in primitive_set[old_terminal._identifier] if t.value != old_terminal.value]
+    new_terminal = random.sample(acceptable_new_terminals, k=1)[0]
+    individual.replace_terminal(terminal_index, new_terminal)
 
 
-def mut_replace_terminal(ind, pset):
-    """ Mutation function which replaces a terminal."""
-    replaceable_terminals = find_replaceable_terminals(ind, pset)
-    if replaceable_terminals == []:
-        raise ValueError('Individual could not be mutated because no valid terminal was available: {}'.format(ind))
-
-    to_change = np.random.choice(replaceable_terminals)
-    alternatives = [t for t in pset.terminals[ind[to_change].ret] if t != ind[to_change]]
-    ind[to_change] = np.random.choice(alternatives)
-    return ind,
+def mut_replace_primitive(individual: Individual, primitive_set: dict):
+    replaceable_primitives = [p for p in list(individual.primitives) if len(primitive_set[p._primitive.output]) > 1]
+    if replaceable_primitives == 0:
+        raise ValueError("Individual has no primitives which can be replaced with a different primitive.")
 
 
 def mut_replace_primitive(ind, pset):

@@ -105,7 +105,7 @@ class Individual:
                 terminal_to_be_replaced = primitive._terminals[position - scan_position]
                 if terminal_to_be_replaced._identifier == new_terminal._identifier:
                     primitive._terminals[position - scan_position] = new_terminal
-                    break
+                    return
                 else:
                     raise ValueError("New terminal does not share output type with the one at position {}."
                                      "Old: {}. New: {}.".format(position,
