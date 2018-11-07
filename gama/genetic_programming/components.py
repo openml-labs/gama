@@ -6,6 +6,8 @@ import uuid
 import sklearn
 
 
+DATA_TERMINAL = 'data'
+
 class Terminal:
     """ Specifies a specific value for a specific type or input, e.g. a value for a hyperparameter for an algorithm. """
 
@@ -80,6 +82,40 @@ class Individual:
     def __str__(self):
         return """Individual {}\nPipeline: {}\nFitness: {}""".format(self._id, self.pipeline_str(), self.fitness)
 
+    @property
+    def primitives(self) -> List[PrimitiveNode]:
+        yield self.main_node
+        current_node = self.main_node._data_node
+        while current_node != DATA_TERMINAL:
+            yield current_node
+            current_node = current_node._data_node
+
+    @property
+    def terminals(self):
+        terminal_index = 0
+        for primitive in self.primitives:
+            for terminal in primitive._terminals:
+                yield (terminal_index, terminal)
+                terminal_index += 1
+
+    def replace_terminal(self, position: int, new_terminal: Terminal):
+        scan_position = 0
+        for primitive in self.primitives:
+            if scan_position + len(primitive._terminals) > position:
+                terminal_to_be_replaced = primitive._terminals[position - scan_position]
+                if terminal_to_be_replaced._identifier == new_terminal._identifier:
+                    primitive._terminals[position - scan_position] = new_terminal
+                    break
+                else:
+                    raise ValueError("New terminal does not share output type with the one at position {}."
+                                     "Old: {}. New: {}.".format(position,
+                                                                terminal_to_be_replaced._identifier,
+                                                                new_terminal._identifier))
+            else:
+                scan_position += len(primitive._terminals)
+        if scan_position < position:
+            raise ValueError("Position {} is out of range with {} terminals.".format(position, scan_position))
+
 
 def pset_from_config(configuration):
     """ Create a pset for the given configuration dictionary.
@@ -132,7 +168,7 @@ def pset_from_config(configuration):
             transformer_tags = ["DATA_PREPROCESSING", "FEATURE_SELECTION", "DATA_TRANSFORMATION"]
             if (issubclass(key, sklearn.base.TransformerMixin) or
                     (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] in transformer_tags)):
-                pset["data"].append(Primitive(input_=hyperparameter_types, output="data", identifier=key.__name__))
+                pset[DATA_TERMINAL].append(Primitive(input_=hyperparameter_types, output=DATA_TERMINAL, identifier=key.__name__))
             elif (issubclass(key, sklearn.base.ClassifierMixin) or
                   (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] == "CLASSIFICATION")):
                 pset["prediction"].append(Primitive(input_=hyperparameter_types, output="prediction", identifier=key.__name__))
@@ -158,13 +194,13 @@ def create_random_individual(primitive_set: dict, min_length: int=1, max_length:
     individual_length = random.randint(min_length, max_length)
     primitive, = random.sample(primitive_set['prediction'], k=1)
     learner_node = PrimitiveNode(primitive,
-                                 data_node='data',
+                                 data_node=DATA_TERMINAL,
                                  terminals=random_terminals_for_primitive(primitive_set, primitive))
     last_primitive_node = learner_node
     for _ in range(individual_length - 1):
-        primitive, = random.sample(primitive_set['data'], k=1)
+        primitive, = random.sample(primitive_set[DATA_TERMINAL], k=1)
         primitive_node = PrimitiveNode(primitive,
-                                       data_node='data',
+                                       data_node=DATA_TERMINAL,
                                        terminals=random_terminals_for_primitive(primitive_set, primitive))
         last_primitive_node._data_node = primitive_node
         last_primitive_node = primitive_node
