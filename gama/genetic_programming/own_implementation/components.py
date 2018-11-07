@@ -8,6 +8,7 @@ import sklearn
 
 DATA_TERMINAL = 'data'
 
+
 class Terminal:
     """ Specifies a specific value for a specific type or input, e.g. a value for a hyperparameter for an algorithm. """
 
@@ -119,7 +120,23 @@ class Individual:
             raise ValueError("Position {} is out of range with {} terminals.".format(position, scan_position))
 
     def replace_primitive(self, position: int, new_primitive: PrimitiveNode):
-        raise NotImplemented
+        last_primitive = None
+        for i, primitive_node in enumerate(self.primitives):
+            if i == position:
+                if primitive_node._primitive.output != new_primitive._primitive.output:
+                    raise ValueError("New primitive does not produce same output as the primitive to be replaced.")
+                if isinstance(primitive_node._data_node, str):
+                    new_primitive._data_node = primitive_node._data_node
+                else:
+                    new_primitive._data_node = primitive_node._data_node.copy()
+                break
+            else:
+                last_primitive = primitive_node
+
+        if position == 0:
+            self.main_node = new_primitive
+        else:
+            last_primitive._data_node = new_primitive
 
     def copy_as_new(self):
         """ Make a deep copy of the individual, but with fitness set to None and assign a new id. """
@@ -221,14 +238,14 @@ if __name__ == '__main__':
     from gama.genetic_programming.own_implementation.components import PrimitiveNode, pset_from_config, Individual, create_random_individual
     from gama.configuration.classification import clf_config
     pset, param = pset_from_config(clf_config)
-    from gama.genetic_programming.own_implementation.mutation import mut_replace_terminal
+    from gama.genetic_programming.own_implementation.mutation import mut_replace_terminal, mut_replace_primitive
 
-    i = create_random_individual(pset)
-    print(str(i))
-    mut_replace_terminal(i, pset)
-    print(str(i))
-    i2 = i.copy_as_new()
+    ind = create_random_individual(pset)
+    print(str(ind))
+    mut_replace_primitive(ind, pset)
+    print(str(ind))
+    i2 = ind.copy_as_new()
     print(str(i2))
-    mut_replace_terminal(i, pset)
-    print(str(i))
+    mut_replace_primitive(ind, pset)
+    print(str(ind))
     print(str(i2))
