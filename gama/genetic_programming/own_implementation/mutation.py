@@ -52,18 +52,10 @@ def mut_shrink(individual: Individual, primitive_set=None) -> None:
 
 def mut_insert(individual: Individual, primitive_set: dict) -> None:
     """ Adds a PrimitiveNode at a random location, except as root node. """
-    n_primitives = len(list(individual.primitives))
-    insert_location = random.randint(1, n_primitives)
-
-    current_location = 1
-    current_node = individual.main_node
-    while current_location != insert_location:
-        current_node = current_node._data_node
-        current_location += 1
-
+    parent_node = random.choice(list(individual.primitives)[:-1])
     new_primitive_node = random_primitive_node(output_type=DATA_TERMINAL, primitive_set=primitive_set)
-    new_primitive_node._data_node = current_node._data_node
-    current_node._data_node = new_primitive_node
+    new_primitive_node._data_node = parent_node._data_node
+    parent_node._data_node = new_primitive_node
 
 
 def random_valid_mutation_in_place(individual: Individual, primitive_set: dict) -> Callable:
@@ -91,3 +83,9 @@ def random_valid_mutation_in_place(individual: Individual, primitive_set: dict) 
     mut_fn(individual, primitive_set)
 
     return mut_fn
+
+
+def crossover(individual1: Individual, individual2: Individual) -> None:
+    parent_node_1 = random.choice(list(individual1.primitives)[:-1])
+    parent_node_2 = random.choice(list(individual2.primitives)[:-1])
+    parent_node_1._data_node, parent_node_2._data_node = parent_node_2._data_node, parent_node_1._data_node
