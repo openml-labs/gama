@@ -1,6 +1,6 @@
 from collections import defaultdict
 import random
-from typing import List, Generator
+from typing import List, Generator, Callable
 import uuid
 
 import sklearn
@@ -35,13 +35,13 @@ class Terminal:
 class Primitive:
     """ Defines an operator which takes input and produces output, e.g. a preprocessing or classification algorithm. """
 
-    def __init__(self, input_: List[str], output: str, identifier: str):
+    def __init__(self, input_: List[str], output: str, identifier: Callable):
         self.input = input_
         self.output = output
         self._identifier = identifier
 
     def __str__(self):
-        return self._identifier
+        return self._identifier.__name__
 
     def __repr__(self):
         return self._identifier
@@ -58,9 +58,9 @@ class PrimitiveNode:
     def __str__(self):
         if self._terminals:
             terminal_str = ", ".join([str(terminal) for terminal in self._terminals])
-            return "{}({}, {})".format(self._primitive._identifier, str(self._data_node), terminal_str)
+            return "{}({}, {})".format(self._primitive, str(self._data_node), terminal_str)
         else:
-            return "{}({})".format(self._primitive._identifier, str(self._data_node))
+            return "{}({})".format(self._primitive, str(self._data_node))
 
     def copy(self):
         data_node_copy = self._data_node if self._data_node == DATA_TERMINAL else self._data_node.copy()
@@ -191,13 +191,13 @@ def pset_from_config(configuration):
             transformer_tags = ["DATA_PREPROCESSING", "FEATURE_SELECTION", "DATA_TRANSFORMATION"]
             if (issubclass(key, sklearn.base.TransformerMixin) or
                     (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] in transformer_tags)):
-                pset[DATA_TERMINAL].append(Primitive(input_=hyperparameter_types, output=DATA_TERMINAL, identifier=key.__name__))
+                pset[DATA_TERMINAL].append(Primitive(input_=hyperparameter_types, output=DATA_TERMINAL, identifier=key))
             elif (issubclass(key, sklearn.base.ClassifierMixin) or
                   (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] == "CLASSIFICATION")):
-                pset["prediction"].append(Primitive(input_=hyperparameter_types, output="prediction", identifier=key.__name__))
+                pset["prediction"].append(Primitive(input_=hyperparameter_types, output="prediction", identifier=key))
             elif (issubclass(key, sklearn.base.RegressorMixin) or
                   (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] == "REGRESSION")):
-                pset["prediction"].append(Primitive(input_=hyperparameter_types, output="prediction", identifier=key.__name__))
+                pset["prediction"].append(Primitive(input_=hyperparameter_types, output="prediction", identifier=key))
             else:
                 raise TypeError("Expected {} to be either subclass of "
                                 "TransformerMixin, RegressorMixin or ClassifierMixin.".format(key))
