@@ -81,9 +81,6 @@ class Individual:
     def __eq__(self, other):
         return isinstance(other, Individual) and other._id == self._id
 
-    def __repr__(self):
-        super().__repr__(self)
-
     def __str__(self):
         return """Individual {}\nPipeline: {}\nFitness: {}""".format(self._id, self.pipeline_str(), self.fitness)
 
@@ -212,22 +209,22 @@ def pset_from_config(configuration):
 
 
 def random_terminals_for_primitive(primitive_set: dict, primitive: Primitive):
-    return [random.sample(primitive_set[needed_terminal_type], k=1)[0]
-            for needed_terminal_type in primitive.input]
+    return [random.choice(primitive_set[needed_terminal_type]) for needed_terminal_type in primitive.input]
+
+
+def random_primitive_node(output_type: str, primitive_set: dict):
+    """ Create a PrimitiveNode with a Primitive of specified output_type, with random terminals. """
+    primitive = random.choice(primitive_set[output_type])
+    terminals = random_terminals_for_primitive(primitive_set, primitive)
+    return PrimitiveNode(primitive, data_node=DATA_TERMINAL, terminals=terminals)
 
 
 def create_random_individual(primitive_set: dict, min_length: int=1, max_length: int=3) -> Individual:
     individual_length = random.randint(min_length, max_length)
-    primitive, = random.sample(primitive_set['prediction'], k=1)
-    learner_node = PrimitiveNode(primitive,
-                                 data_node=DATA_TERMINAL,
-                                 terminals=random_terminals_for_primitive(primitive_set, primitive))
+    learner_node = random_primitive_node(output_type='prediction', primitive_set=primitive_set)
     last_primitive_node = learner_node
     for _ in range(individual_length - 1):
-        primitive, = random.sample(primitive_set[DATA_TERMINAL], k=1)
-        primitive_node = PrimitiveNode(primitive,
-                                       data_node=DATA_TERMINAL,
-                                       terminals=random_terminals_for_primitive(primitive_set, primitive))
+        primitive_node = random_primitive_node(output_type=DATA_TERMINAL, primitive_set=primitive_set)
         last_primitive_node._data_node = primitive_node
         last_primitive_node = primitive_node
 
