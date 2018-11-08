@@ -92,7 +92,7 @@ def async_ea(objectives, start_population, toolbox, evaluation_callback=None, re
             for ind_no in range(max_n_evaluations):
                 individual = get_next_evaluation_result()
                 log_parseable_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
-                                    individual.fitness.time, individual.fitness.wvalues, individual.id, individual)
+                                    individual.fitness.time, individual.fitness.wvalues, individual._id, individual)
 
                 if evaluation_callback:
                     _safe_outside_call(partial(evaluation_callback, individual), exceed_timeout)
@@ -101,7 +101,7 @@ def async_ea(objectives, start_population, toolbox, evaluation_callback=None, re
                 if should_restart:
                     log.info("Restart criterion met. Restarting with new random population.")
                     log_parseable_event(log, TOKENS.EA_RESTART, ind_no)
-                    start_population = toolbox.population(n=max_population_size)
+                    start_population = [toolbox.individual() for _ in range(max_population_size)]
                     break
 
                 current_population.append(individual)

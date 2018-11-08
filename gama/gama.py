@@ -16,10 +16,8 @@ from deap import base, creator, tools, gp
 from sklearn.preprocessing import Imputer, OneHotEncoder
 
 import gama.ea.evaluation
-from .ea.modified_deap import cxOnePoint
 from .ea import automl_gp
 from .ea.automl_gp import compile_individual, pset_from_config, generate_valid
-from gama.ea.mutation import random_valid_mutation
 from .ea.metrics import Metric
 from .utilities.observer import Observer
 
@@ -28,6 +26,10 @@ from .ea.async_ea import async_ea
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.preprocessing import define_preprocessing_steps
+from .genetic_programming.own_implementation.mutation import random_valid_mutation_in_place, crossover, create_from_population2
+from .genetic_programming.own_implementation.components import create_random_individual, pset_from_config2
+from .genetic_programming.own_implementation.operator_shell import OperatorShell
+from .genetic_programming.scikitlearn import compile_individual
 
 log = logging.getLogger(__name__)
 
@@ -161,6 +163,7 @@ class Gama(object):
         pset, parameter_checks = pset_from_config(config)
         
         self._pset = pset
+        # == DEAP TOOLBOX ===
         self._toolbox = base.Toolbox()
 
         if "FitnessMax" in creator.__dict__:
@@ -188,6 +191,17 @@ class Gama(object):
             self._toolbox.register("eliminate", automl_gp.eliminate_NSGA)
         else:
             raise ValueError('Objectives must be a tuple of length at most 2.')
+
+        # == Operator Shell ===
+        self._pset, parameter_checks = pset_from_config2(config)
+        self._toolbox = OperatorShell(
+            mutate=partial(random_valid_mutation_in_place, primitive_set=self._pset),
+            mate=crossover,
+            create_from_population=partial(create_from_population2, cxpb=0.2, mutpb=0.8),
+            create_new=partial(create_random_individual, primitive_set=self._pset),
+            compile_=compile_individual,
+            eliminate=automl_gp.eliminate_NSGA
+        )
 
     def _get_data_from_arff(self, arff_file_path, split_last=True):
         # load arff
@@ -355,12 +369,12 @@ class Gama(object):
         else:
             if warm_start:
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
-            pop = self._toolbox.population(n=self._pop_size)
+            pop = [self._toolbox.individual() for _ in range(self._pop_size)]
 
-        self._toolbox.register("evaluate", gama.ea.evaluation.evaluate_pipeline,
-                               X=self.X, y_train=self.y_train, y_score=self.y_score,
-                               scoring=self._scoring_function, timeout=self._max_eval_time,
-                               cache_dir=self._cache_dir)
+        self._toolbox.evaluate = partial(gama.ea.evaluation.evaluate_pipeline,
+                                         X=self.X, y_train=self.y_train, y_score=self.y_score,
+                                         scoring=self._scoring_function, timeout=self._max_eval_time,
+                                         cache_dir=self._cache_dir)
 
         try:
             final_pop = async_ea(self._objectives,

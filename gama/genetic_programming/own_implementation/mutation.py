@@ -9,9 +9,9 @@ from .components import Individual, DATA_TERMINAL, random_primitive_node
 
 
 def mut_replace_terminal(individual: Individual, primitive_set: dict) -> None:
-    terminals = list(enumerate(individual.terminals))
+    terminals = list([(i, t) for i, t in enumerate(individual.terminals) if len(primitive_set[t._identifier]) > 1])
     if len(terminals) == 0:
-        raise ValueError("Individual has no terminals.")
+        raise ValueError("Individual has no terminals or no terminals suitable for mutation.")
 
     terminal_index, old_terminal = random.choice(terminals)
     acceptable_new_terminals = [t for t in primitive_set[old_terminal._identifier] if t.value != old_terminal.value]
@@ -41,7 +41,6 @@ def mut_shrink(individual: Individual, primitive_set=None) -> None:
         raise ValueError("Can not shrink an individual with only one primitive.")
 
     n_primitives_to_cut = random.randint(1, n_primitives-1)
-    print('cutting', n_primitives_to_cut)
     current_primitive_node = individual.main_node
     primitives_left = n_primitives - 1
     while primitives_left > n_primitives_to_cut:
@@ -52,7 +51,10 @@ def mut_shrink(individual: Individual, primitive_set=None) -> None:
 
 def mut_insert(individual: Individual, primitive_set: dict) -> None:
     """ Adds a PrimitiveNode at a random location, except as root node. """
-    parent_node = random.choice(list(individual.primitives)[:-1])
+    if len(list(individual.primitives)) == 1:
+        parent_node = individual.main_node
+    else:
+        parent_node = random.choice(list(individual.primitives)[:-1])
     new_primitive_node = random_primitive_node(output_type=DATA_TERMINAL, primitive_set=primitive_set)
     new_primitive_node._data_node = parent_node._data_node
     parent_node._data_node = new_primitive_node
@@ -89,3 +91,17 @@ def crossover(individual1: Individual, individual2: Individual) -> None:
     parent_node_1 = random.choice(list(individual1.primitives)[:-1])
     parent_node_2 = random.choice(list(individual2.primitives)[:-1])
     parent_node_1._data_node, parent_node_2._data_node = parent_node_2._data_node, parent_node_1._data_node
+
+
+def create_from_population2(operator_shell, pop, n, cxpb, mutpb):
+    """ Creates n new individuals based on the population. Can apply both crossover and mutation. """
+    offspring = []
+    for _ in range(n):
+        ind1, ind2 = random.sample(pop, k=2)
+        ind1, ind2 = ind1.copy_as_new(), ind2.copy_as_new()
+        if random.random() < cxpb and len(list(ind1.primitives))>1 and len(list(ind2.primitives))>1:
+            ind1 = operator_shell.mate(ind1, ind2)
+        else:
+            ind1 = operator_shell.mutate(ind1)
+        offspring.append(ind1)
+    return offspring

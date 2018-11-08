@@ -67,11 +67,25 @@ class PrimitiveNode:
         return PrimitiveNode(primitive=self._primitive, data_node=data_node_copy, terminals=self._terminals.copy())
 
 
+class Fitness:
+    def __init__(self):
+        self.values = None
+        self.start_time = None
+        self.time = None
+
+    @property
+    def wvalues(self):
+        return self.values[0], self.values[1]*-1
+
+    def dominates(self, other):
+        return self.wvalues > other.wvalues
+
+
 class Individual:
     """ A collection of PrimitiveNodes which together specify a machine learning pipeline. """
 
     def __init__(self, main_node: PrimitiveNode):
-        self.fitness = None
+        self.fitness = Fitness()
         self.main_node = main_node
         self._id = uuid.uuid4()
 
@@ -140,7 +154,7 @@ class Individual:
         return Individual(main_node=self.main_node.copy())
 
 
-def pset_from_config(configuration):
+def pset_from_config2(configuration):
     """ Create a pset for the given configuration dictionary.
 
     Given a configuration dictionary specifying operators (e.g. sklearn
