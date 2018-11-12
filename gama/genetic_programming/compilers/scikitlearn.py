@@ -1,15 +1,32 @@
-from datetime import datetime
+import logging
 import os
 import pickle
 import time
 import uuid
+from datetime import datetime
 
 import stopit
 from sklearn.model_selection import cross_val_predict
+from sklearn.pipeline import Pipeline
 
-from gama.ea.automl_gp import log
-from gama.ea.metrics import Metric
-from gama.utilities.logging_utilities import MultiprocessingLogger, TOKENS, log_parseable_event
+from gama.genetic_programming.algorithms.metrics import Metric
+
+from gama.genetic_programming.components import Individual, PrimitiveNode
+from gama.utilities.logging_utilities import MultiprocessingLogger, log_parseable_event, TOKENS
+
+log = logging.getLogger(__name__)
+
+
+def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
+    hyperparameters = {terminal.output: terminal.value for terminal in primitive_node._terminals}
+    return primitive_node._primitive._identifier(**hyperparameters)
+
+
+def compile_individual(individual: Individual, parameter_checks=None, preprocessing_steps=None) -> Pipeline:
+    steps = [(str(i), primitive_node_to_sklearn(primitive)) for i, primitive in enumerate(individual.primitives)]
+    if preprocessing_steps:
+        steps = steps + [(str(i), step) for (i, step) in enumerate(preprocessing_steps, start=len(steps))]
+    return Pipeline(list(reversed(steps)))
 
 
 def cross_val_predict_score(estimator, X, y_train, y_score, groups=None, scoring=None, cv=None, n_jobs=1, verbose=0,

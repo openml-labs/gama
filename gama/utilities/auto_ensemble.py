@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 import stopit
 
-from gama.ea.metrics import Metric, classification_metrics, MetricType
+from gama.genetic_programming.algorithms.metrics import Metric
 from gama.utilities.generic.function_dispatcher import FunctionDispatcher
 
 log = logging.getLogger(__name__)

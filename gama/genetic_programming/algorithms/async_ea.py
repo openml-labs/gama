@@ -5,7 +5,7 @@ import time
 import stopit
 
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event, default_time_format
-from ..utilities.logging_utilities import MultiprocessingLogger
+from gama.utilities.logging_utilities import MultiprocessingLogger
 from gama.utilities.generic.function_dispatcher import FunctionDispatcher
 
 log = logging.getLogger(__name__)

@@ -7,29 +7,25 @@ import shutil
 from functools import partial
 import sys
 import time
-import uuid
 
 import arff
 import pandas as pd
 import numpy as np
-from deap import base, creator, tools, gp
 from sklearn.preprocessing import Imputer, OneHotEncoder
 
-import gama.ea.evaluation
-from .ea import automl_gp
-from .ea.automl_gp import compile_individual, pset_from_config, generate_valid
-from .ea.metrics import Metric
+import gama.genetic_programming.compilers.scikitlearn
+from gama.genetic_programming.algorithms.metrics import Metric
 from .utilities.observer import Observer
 
-from .ea.operations import create_from_population, mate_new, random_valid_mutation_new, generate_new
-from .ea.async_ea import async_ea
+from gama.genetic_programming.algorithms.async_ea import async_ea
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.preprocessing import define_preprocessing_steps
-from .genetic_programming.own_implementation.mutation import random_valid_mutation_in_place, crossover, create_from_population2
-from .genetic_programming.own_implementation.components import create_random_individual, pset_from_config2
-from .genetic_programming.own_implementation.operator_shell import OperatorShell
-from .genetic_programming.scikitlearn import compile_individual
+from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
+from gama.genetic_programming.selection import create_from_population2, eliminate_NSGA
+from gama.genetic_programming.components import create_random_individual, pset_from_config2
+from gama.genetic_programming.operator_set import OperatorSet
+from gama.genetic_programming.compilers.scikitlearn import compile_individual
 
 log = logging.getLogger(__name__)
 
@@ -159,48 +155,15 @@ class Gama(object):
         if self._random_state is not None:
             random.seed(self._random_state)
             np.random.seed(self._random_state)
-        
-        pset, parameter_checks = pset_from_config(config)
-        
-        self._pset = pset
-        # == DEAP TOOLBOX ===
-        self._toolbox = base.Toolbox()
 
-        if "FitnessMax" in creator.__dict__:
-            del creator.FitnessMax
-        if "Individual" in creator.__dict__:
-            del creator.Individual
-        creator.create("FitnessMax", base.Fitness, weights=optimize_strategy)
-        creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
-
-        self._toolbox.register("expr", generate_valid, pset=pset, min_=1, max_=3, toolbox=self._toolbox)
-        self._toolbox.register("individual", generate_new, creator.Individual, self._toolbox.expr)
-        self._toolbox.register("population", tools.initRepeat, list, self._toolbox.individual)
-        self._toolbox.register("compile", compile_individual, pset=pset, parameter_checks=parameter_checks)
-
-        self._toolbox.register("mate", mate_new)
-
-        self._toolbox.register("mutate", random_valid_mutation_new, pset=self._pset)
-        self._toolbox.register("create", create_from_population, toolbox=self._toolbox, cxpb=0.2, mutpb=0.8)
-
-        if len(self._objectives) == 1:
-            self._toolbox.register("select", tools.selTournament, tournsize=3)
-            self._toolbox.register("eliminate", automl_gp.eliminate_worst)
-        elif len(self._objectives) == 2:
-            self._toolbox.register("select", tools.selNSGA2)
-            self._toolbox.register("eliminate", automl_gp.eliminate_NSGA)
-        else:
-            raise ValueError('Objectives must be a tuple of length at most 2.')
-
-        # == Operator Shell ===
         self._pset, parameter_checks = pset_from_config2(config)
-        self._toolbox = OperatorShell(
+        self._operator_set = OperatorSet(
             mutate=partial(random_valid_mutation_in_place, primitive_set=self._pset),
             mate=crossover,
             create_from_population=partial(create_from_population2, cxpb=0.2, mutpb=0.8),
             create_new=partial(create_random_individual, primitive_set=self._pset),
             compile_=compile_individual,
-            eliminate=automl_gp.eliminate_NSGA
+            eliminate=eliminate_NSGA
         )
 
     def _get_data_from_arff(self, arff_file_path, split_last=True):
@@ -240,7 +203,7 @@ class Gama(object):
     def _preprocess_arff(self, arff_file_path):
         X, y = self._get_data_from_arff(arff_file_path)
         steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
-        self._toolbox.register("compile", compile_individual, pset=self._pset, preprocessing_steps=steps)
+        self._operator_set.register("compile", compile_individual, pset=self._pset, preprocessing_steps=steps)
         return X, y
 
     def fit(self, X=None, y=None, arff_file_path=None, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
@@ -369,17 +332,17 @@ class Gama(object):
         else:
             if warm_start:
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
-            pop = [self._toolbox.individual() for _ in range(self._pop_size)]
+            pop = [self._operator_set.individual() for _ in range(self._pop_size)]
 
-        self._toolbox.evaluate = partial(gama.ea.evaluation.evaluate_pipeline,
-                                         X=self.X, y_train=self.y_train, y_score=self.y_score,
-                                         scoring=self._scoring_function, timeout=self._max_eval_time,
-                                         cache_dir=self._cache_dir)
+        self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_pipeline,
+                                              X=self.X, y_train=self.y_train, y_score=self.y_score,
+                                              scoring=self._scoring_function, timeout=self._max_eval_time,
+                                              cache_dir=self._cache_dir)
 
         try:
             final_pop = async_ea(self._objectives,
                                  pop,
-                                 self._toolbox,
+                                 self._operator_set,
                                  evaluation_callback=self._on_evaluation_completed,
                                  restart_callback=restart_criteria,
                                  max_time_seconds=timeout,
@@ -392,7 +355,7 @@ class Gama(object):
         """ Perform any necessary post processing, such as ensemble building. """
         self._best_pipeline = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.wvalues)))[0]
         log.info("Best pipeline has fitness of {}".format(self._best_pipeline.fitness.wvalues))
-        self._best_pipeline = self._toolbox.compile(self._best_pipeline)
+        self._best_pipeline = self._operator_set.compile(self._best_pipeline)
         log.info("Pipeline {}, steps: {}".format(self._best_pipeline, self._best_pipeline.steps))
         self._best_pipeline.fit(self.X, self.y_train)
         self._build_fit_ensemble(n, timeout=timeout)

@@ -60,7 +60,7 @@ class Metric:
         elif metric_name in classification_metrics:
             self.task_type = MetricType.CLASSIFICATION
         else:
-            raise ValueError('Metric must be one of {}'.format())
+            raise ValueError('Metric not known: {}.'.format(metric_name))
 
         self.name = metric_name
         self._score_function, self.requires_probabilities, bigger_is_better = all_metrics[metric_name]

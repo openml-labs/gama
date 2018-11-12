@@ -1,12 +1,12 @@
 import logging
 
-from ...utilities.logging_utilities import log_parseable_event, TOKENS
+from gama.utilities.logging_utilities import log_parseable_event, TOKENS
 from .components import Individual
 
 log = logging.getLogger(__name__)
 
 
-class OperatorShell:
+class OperatorSet:
     """ Provides a thin layer for ea operators for logging and safety. """
 
     def __init__(self, mutate, mate, create_from_population, create_new, compile_, eliminate, max_retry=50):

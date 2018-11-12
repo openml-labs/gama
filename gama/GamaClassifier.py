@@ -4,7 +4,7 @@ from sklearn.preprocessing import LabelEncoder
 
 from .gama import Gama
 from gama.configuration.classification import clf_config
-from gama.ea.metrics import Metric
+from gama.genetic_programming.algorithms.metrics import Metric
 from gama.utilities.auto_ensemble import EnsembleClassifier
 
 

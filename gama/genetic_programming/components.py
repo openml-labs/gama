@@ -246,10 +246,10 @@ def create_random_individual(primitive_set: dict, min_length: int=1, max_length:
 
 
 if __name__ == '__main__':
-    from gama.genetic_programming.own_implementation.components import PrimitiveNode, pset_from_config, Individual, create_random_individual
+    from gama.genetic_programming.components import PrimitiveNode, pset_from_config, Individual, create_random_individual
     from gama.configuration.classification import clf_config
     pset, param = pset_from_config(clf_config)
-    from gama.genetic_programming.own_implementation.mutation import mut_replace_terminal, mut_replace_primitive
+    from gama.genetic_programming.mutation import mut_replace_primitive
 
     ind = create_random_individual(pset)
     print(str(ind))
