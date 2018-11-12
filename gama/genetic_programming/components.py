@@ -44,7 +44,7 @@ class Primitive:
         return self._identifier.__name__
 
     def __repr__(self):
-        return self._identifier
+        return self._identifier.__name__
 
 
 class PrimitiveNode:
@@ -53,7 +53,7 @@ class PrimitiveNode:
     def __init__(self, primitive: Primitive, data_node, terminals: List[Terminal]):
         self._primitive = primitive
         self._data_node = data_node
-        self._terminals = terminals
+        self._terminals = sorted(terminals, key=lambda t: str(t))
 
     def __str__(self):
         if self._terminals:
@@ -158,6 +158,45 @@ class Individual:
         shared_primitives = [p for p in self.primitives if p._primitive in other_primitives]
         both_at_least_length_2 = len(other_primitives) >= 2 and len(list(self.primitives)) >= 2
         return both_at_least_length_2 or shared_primitives
+
+    @classmethod
+    def from_string(cls, string: str, primitive_set: dict):
+        # GaussianNB(Normalizer(data, norm='l1'))
+        primitives = string.split('(')[:-1]
+        # GaussianNB(Normalizer(data, norm='l1'))
+        terminal_start_index = string.index(DATA_TERMINAL)
+        terminals_string = string[terminal_start_index+len(DATA_TERMINAL):]
+        terminal_sets = terminals_string.split(')')[:-1]
+
+        last_node = DATA_TERMINAL
+        for primitive_string, terminal_set in zip(reversed(primitives), terminal_sets):
+            primitive = find_primitive(primitive_set, primitive_string)
+            print(terminal_set)
+            if terminal_set == '':
+                terminals = []
+            else:
+                terminal_set = terminal_set[2:]
+                terminals = [find_terminal(primitive_set, terminal_string)
+                             for terminal_string in terminal_set.split(', ')]
+            if not all([required_terminal in map(lambda t: t._identifier, terminals)
+                        for required_terminal in primitive.input]):
+                missing = [required_terminal for required_terminal in primitive.input
+                           if required_terminal not in map(lambda t: t._identifier, terminals)]
+                raise ValueError("Individual does not define all required terminals for primitive {}. Missing: {}."
+                                 .format(primitive, missing))
+            last_node = PrimitiveNode(primitive, last_node, terminals)
+
+        return cls(last_node)
+
+
+def find_primitive(primitive_set: dict, primitive_string: str):
+    all_primitives = primitive_set[DATA_TERMINAL] + primitive_set['prediction']
+    return [p for p in all_primitives if repr(p) == primitive_string][0]
+
+
+def find_terminal(primitive_set: dict, terminal_string: str):
+    terminal_return_type, terminal_value = terminal_string.split('=')
+    return [t for t in primitive_set[terminal_return_type] if repr(t) == terminal_string][0]
 
 
 def pset_from_config2(configuration):
