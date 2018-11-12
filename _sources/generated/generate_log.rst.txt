@@ -1,0 +1,7 @@
+generate\_log module
+====================
+
+.. automodule:: generate_log
+    :members:
+    :undoc-members:
+    :show-inheritance:

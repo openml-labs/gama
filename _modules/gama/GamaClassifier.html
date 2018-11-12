@@ -159,7 +159,7 @@
 <span class="kn">from</span> <span class="nn">gama.utilities.auto_ensemble</span> <span class="k">import</span> <span class="n">EnsembleClassifier</span>
 
 
-<div class="viewcode-block" id="GamaClassifier"><a class="viewcode-back" href="../../api/index.html#gama.GamaClassifier">[docs]</a><span class="k">class</span> <span class="nc">GamaClassifier</span><span class="p">(</span><span class="n">Gama</span><span class="p">):</span>
+<div class="viewcode-block" id="GamaClassifier"><a class="viewcode-back" href="../../generated/gama.html#gama.GamaClassifier">[docs]</a><span class="k">class</span> <span class="nc">GamaClassifier</span><span class="p">(</span><span class="n">Gama</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">objectives</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;neg_log_loss&#39;</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="p">:</span>
             <span class="c1"># Do this to avoid the whole dictionary being included in the documentation.</span>
@@ -173,7 +173,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">objectives</span><span class="o">=</span><span class="n">objectives</span><span class="p">)</span>
 
-<div class="viewcode-block" id="GamaClassifier.predict"><a class="viewcode-back" href="../../api/index.html#gama.GamaClassifier.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="GamaClassifier.predict"><a class="viewcode-back" href="../../generated/gama.html#gama.GamaClassifier.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Predict the target for input X.</span>
 
 <span class="sd">        :param X: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.</span>
@@ -181,9 +181,10 @@
 <span class="sd">            first dimension of X.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_predict_X</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+        <span class="n">classifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble_fit</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_best_pipeline</span>
+        <span class="k">return</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GamaClassifier.predict_proba"><a class="viewcode-back" href="../../api/index.html#gama.GamaClassifier.predict_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="GamaClassifier.predict_proba"><a class="viewcode-back" href="../../generated/gama.html#gama.GamaClassifier.predict_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Predict the class probabilities for input X.</span>
 
 <span class="sd">        Predict target for X, using the best found pipeline(s) during the `fit` call.</span>
@@ -193,7 +194,8 @@
 <span class="sd">            first dimension of X, and K is the number of class labels found in `y` of `fit`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_predict_X</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+        <span class="n">classifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble_fit</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_best_pipeline</span>
+        <span class="k">return</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_encode_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span> <span class="o">=</span> <span class="n">LabelEncoder</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>

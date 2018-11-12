@@ -195,14 +195,6 @@ A machine learning pipeline then consists of zero or more preprocessing componen
 After the search, the best model found can be used to make predictions.
 Alternatively, GAMA can combine several models into an <em>ensemble</em> to take into account more than one model when making predictions.
 For ease of use, GAMA provides a <cite>fit</cite>, <cite>predict</cite> and <cite>predict_proba</cite> function akin to scikit-learn.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p>To install GAMA and its dependencies, clone the repository and run the setup script:</p>
@@ -223,25 +215,9 @@ For ease of use, GAMA provides a <cite>fit</cite>, <cite>predict</cite> and <cit
 <li>category-encoders&gt;=1.2.8</li>
 </ul>
 </div></blockquote>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
 </div>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
 <div class="section" id="classification">
 <h3>Classification<a class="headerlink" href="#classification" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="k">import</span> <span class="n">load_breast_cancer</span>
@@ -268,14 +244,6 @@ For ease of use, GAMA provides a <cite>fit</cite>, <cite>predict</cite> and <cit
 </pre></div>
 </div>
 <p>By default, GamaClassifier will optimize towards <cite>log loss</cite>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
 </div>
 <div class="section" id="regression">
 <h3>Regression<a class="headerlink" href="#regression" title="Permalink to this headline">¶</a></h3>
@@ -300,14 +268,6 @@ For ease of use, GAMA provides a <cite>fit</cite>, <cite>predict</cite> and <cit
 </pre></div>
 </div>
 <p>By default, GamaRegressor will optimize towards <cite>mean squared error</cite>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
 </div>
 <div class="section" id="using-arff-files">
 <h3>Using ARFF files<a class="headerlink" href="#using-arff-files" title="Permalink to this headline">¶</a></h3>
@@ -327,14 +287,6 @@ The target should always be specified as the last column.</p>
 </pre></div>
 </div>
 <p>The GamaRegressor also has ARFF support.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
 <div class="section" id="things-to-know">
@@ -351,7 +303,7 @@ Finding the best defaults is always a work in progress, so if you run into issue
 Supplying a binary tuple allows for multi-objective optimization.
 Make sure to optimize towards the metric that reflects well what is important to you.</p>
 <p><strong>n_jobs</strong>: determines how many processes can be run in parallel during <cite>fit</cite>.
-By default only one core is used, so if you have more cores available, this has the most influence over how many
+By default only one core is used. If you have more cores available, this has the most influence over how many
 machine learning pipelines can be evaluated.</p>
 <p><strong>max_total_time</strong>: the maximum time in seconds that GAMA should aim to use to construct a model from the data.
 By default GAMA uses one hour. For large datasets, more time may be needed to get useful results.</p>
@@ -416,14 +368,6 @@ For an example and easy way to visualize information from the log file, take a l
 </pre></div>
 </div>
 <p>This can be used to create useful observers, such as one that keeps track of the Pareto front or visualizes progress.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
 <div class="section" id="gama-search-space-configuration">
@@ -466,14 +410,6 @@ All hyperparameters specified should be taken as arguments for the algorithm’s
 A hyperparameter specified at the top level of the dictionary shares a name with a hyperparameter of the algorithm.
 To use the values provided by the shared hyperparameter, set the possible values to an empty list.
 If a list of values is provided instead, it will not use the shared hyperparameter values.</div></blockquote>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">orphan:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
 </div>
 <div class="section" id="related-packages">
 <h2>Related Packages<a class="headerlink" href="#related-packages" title="Permalink to this headline">¶</a></h2>

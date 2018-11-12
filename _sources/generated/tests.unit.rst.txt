@@ -1,0 +1,70 @@
+tests\.unit package
+===================
+
+Submodules
+----------
+
+tests\.unit\.test\_automl\_gp module
+------------------------------------
+
+.. automodule:: tests.unit.test_automl_gp
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+tests\.unit\.test\_ea\_metrics module
+-------------------------------------
+
+.. automodule:: tests.unit.test_ea_metrics
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+tests\.unit\.test\_ea\_mutation module
+--------------------------------------
+
+.. automodule:: tests.unit.test_ea_mutation
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+tests\.unit\.test\_gama module
+------------------------------
+
+.. automodule:: tests.unit.test_gama
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+tests\.unit\.test\_utilities\_generic\_paretofront module
+---------------------------------------------------------
+
+.. automodule:: tests.unit.test_utilities_generic_paretofront
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+tests\.unit\.test\_utilities\_generic\_stopwatch module
+-------------------------------------------------------
+
+.. automodule:: tests.unit.test_utilities_generic_stopwatch
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+tests\.unit\.test\_utilities\_pretty\_string\_methods module
+------------------------------------------------------------
+
+.. automodule:: tests.unit.test_utilities_pretty_string_methods
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: tests.unit
+    :members:
+    :undoc-members:
+    :show-inheritance:
