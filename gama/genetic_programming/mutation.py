@@ -27,7 +27,8 @@ def mut_replace_primitive(individual: Individual, primitive_set: dict) -> None:
 
     primitive_index, old_primitive_node = random.choice(replaceable_primitives)
     primitive_node = random_primitive_node(output_type=old_primitive_node._primitive.output,
-                                           primitive_set=primitive_set)
+                                           primitive_set=primitive_set,
+                                           exclude=old_primitive_node._primitive)
     individual.replace_primitive(primitive_index, primitive_node)
 
 
@@ -78,7 +79,7 @@ def random_valid_mutation_in_place(individual: Individual, primitive_set: dict) 
     available_mutations = [mut_replace_primitive, mut_insert]
     if len(list(individual.primitives)) > 1:
         available_mutations.append(mut_shrink)
-    if len([t for t in individual.terminals if len(primitive_set[t.output]) > 1]):
+    if len([t for t in individual.terminals if len(primitive_set[t._identifier]) > 1]):
         available_mutations.append(mut_replace_terminal)
 
     mut_fn = random.choice(available_mutations)

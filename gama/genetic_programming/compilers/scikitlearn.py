@@ -12,6 +12,7 @@ from sklearn.pipeline import Pipeline
 from gama.genetic_programming.algorithms.metrics import Metric
 
 from gama.genetic_programming.components import Individual, PrimitiveNode
+from gama.genetic_programming.operator_set import OperatorSet
 from gama.utilities.logging_utilities import MultiprocessingLogger, log_parseable_event, TOKENS
 
 log = logging.getLogger(__name__)
@@ -70,8 +71,8 @@ def object_is_valid_pipeline(o):
             hasattr(o, 'steps'))
 
 
-def evaluate_individual(individual: Individual, *args, **kwargs):
-    pipeline = compile_individual(individual, parameter_checks=None, preprocessing_steps=None)
+def evaluate_individual(individual: Individual, operator_set: OperatorSet, *args, **kwargs):
+    pipeline = operator_set.compile(individual)
     (score, start_datetime, evaluation_time, pipeline_length) = evaluate_pipeline(pipeline, *args, **kwargs)
     individual.fitness.values = (score, pipeline_length)
     individual.fitness.start_time = start_datetime

@@ -78,7 +78,8 @@ class Fitness:
         return self.values[0], self.values[1]*-1
 
     def dominates(self, other):
-        return self.wvalues > other.wvalues
+        return ((self.wvalues[0] >= other.wvalues[0] and self.wvalues[1] >= other.wvalues[1])
+                and (self.wvalues[0] > other.wvalues[0] or self.wvalues[1] > other.wvalues[1]))
 
 
 class Individual:
@@ -171,7 +172,6 @@ class Individual:
         last_node = DATA_TERMINAL
         for primitive_string, terminal_set in zip(reversed(primitives), terminal_sets):
             primitive = find_primitive(primitive_set, primitive_string)
-            print(terminal_set)
             if terminal_set == '':
                 terminals = []
             else:
@@ -271,9 +271,9 @@ def random_terminals_for_primitive(primitive_set: dict, primitive: Primitive):
     return [random.choice(primitive_set[needed_terminal_type]) for needed_terminal_type in primitive.input]
 
 
-def random_primitive_node(output_type: str, primitive_set: dict):
+def random_primitive_node(output_type: str, primitive_set: dict, exclude: Primitive=None):
     """ Create a PrimitiveNode with a Primitive of specified output_type, with random terminals. """
-    primitive = random.choice(primitive_set[output_type])
+    primitive = random.choice([p for p in primitive_set[output_type] if p != exclude])
     terminals = random_terminals_for_primitive(primitive_set, primitive)
     return PrimitiveNode(primitive, data_node=DATA_TERMINAL, terminals=terminals)
 

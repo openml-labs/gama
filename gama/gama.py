@@ -203,7 +203,7 @@ class Gama(object):
     def _preprocess_arff(self, arff_file_path):
         X, y = self._get_data_from_arff(arff_file_path)
         steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
-        self._operator_set.register("compile", compile_individual, pset=self._pset, preprocessing_steps=steps)
+        self._operator_set._compile = partial(compile_individual, pset=self._pset, preprocessing_steps=steps)
         return X, y
 
     def fit(self, X=None, y=None, arff_file_path=None, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
@@ -334,7 +334,9 @@ class Gama(object):
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = [self._operator_set.individual() for _ in range(self._pop_size)]
 
-        self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
+        evaluate_individual = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
+                                      operator_set=self._operator_set)
+        self._operator_set.evaluate = partial(evaluate_individual,
                                               X=self.X, y_train=self.y_train, y_score=self.y_score,
                                               scoring=self._scoring_function, timeout=self._max_eval_time,
                                               cache_dir=self._cache_dir)

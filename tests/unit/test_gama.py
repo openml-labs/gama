@@ -20,12 +20,9 @@ class GamaUnitTestCase(unittest.TestCase):
 
     def test_reproducible_initialization(self):
         g1 = gama.GamaClassifier(random_state=1)
-        pop1 = g1._toolbox.population(n=10)
-
-        #  For now, operations contains a variable which caches created individuals.
-        importlib.reload(gama.ea.operations)
+        pop1 = [g1._operator_set.individual() for _ in range(10)]
 
         g2 = gama.GamaClassifier(random_state=1)
-        pop2 = g2._toolbox.population(n=10)
+        pop2 = [g2._operator_set.individual() for _ in range(10)]
         for ind1, ind2 in zip(pop1, pop2):
-            self.assertEqual(str(ind1), str(ind2), "The initial population should be reproducible.")
+            self.assertEqual(ind1.pipeline_str(), ind2.pipeline_str(), "The initial population should be reproducible.")

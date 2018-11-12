@@ -2,7 +2,7 @@
 import unittest
 import numpy as np
 
-from gama.ea.metrics import Metric, all_metrics
+from gama.genetic_programming.algorithms.metrics import Metric, all_metrics
 
 
 def metrics_test_suite():

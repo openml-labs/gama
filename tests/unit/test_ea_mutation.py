@@ -2,11 +2,11 @@ from collections import defaultdict
 import unittest
 
 import numpy as np
-from deap import gp
 
+from gama.genetic_programming.components import Individual
+from gama.genetic_programming.mutation import mut_replace_terminal, mut_replace_primitive, random_valid_mutation_in_place
+from gama.genetic_programming.compilers.scikitlearn import compile_individual
 from gama.configuration.testconfiguration import clf_config
-from gama.ea.automl_gp import compile_individual
-from gama.ea.mutation import mut_replace_primitive, mut_replace_terminal, find_unmatched_terminal
 from gama import GamaClassifier
 
 
@@ -26,7 +26,7 @@ class MutationTestCase(unittest.TestCase):
             """RandomForestClassifier(
             FeatureAgglomeration(
                     data,
-                    FeatureAgglomeration.affinity='l2'
+                    FeatureAgglomeration.affinity='l2',
                     FeatureAgglomeration.linkage='complete'
                     ),   
             RandomForestClassifier.bootstrap=True,
@@ -44,26 +44,12 @@ class MutationTestCase(unittest.TestCase):
         ]
 
         self.individuals = {
-            ind_str: gp.PrimitiveTree.from_string(ind_str, self.gama._pset)
+            ind_str: Individual.from_string(''.join(ind_str.split()).replace(',', ', '), self.gama._pset)
             for ind_str in self.ind_strings
         }
 
     def tearDown(self):
         self.gama.delete_cache()
-
-    def test_find_unmatched_terminal(self):
-
-        # (data) -> immediately missing
-        pruned_ind = self.individuals[self.ind_strings[0]][1:]
-        self.assertEqual(find_unmatched_terminal(pruned_ind), 0)
-
-        # FA(data, FA_t1, FA_t2), RFC_t1,...,RFC_tN -> 4 (RFC_t1)
-        pruned_ind = self.individuals[self.ind_strings[1]][1:]
-        self.assertEqual(find_unmatched_terminal(pruned_ind), 4)
-
-        # RFC(__(data, FA_t1, FA_t2), RFC_t1,...,RFC_tN -> 1 (FA_t1)
-        pruned_ind = self.individuals[self.ind_strings[1]][:1] + self.individuals[self.ind_strings[1]][2:]
-        self.assertEqual(find_unmatched_terminal(pruned_ind), 2)
 
     def test_mut_replace_terminal(self):
         """ Tests if mut_replace_terminal replaces exactly one terminal. """
@@ -73,12 +59,12 @@ class MutationTestCase(unittest.TestCase):
     def test_mut_replace_terminal_none_available(self):
         """ Tests if mut_replace_terminal raises an exception if no valid mutation is possible. """
         ind = self.individuals[self.ind_strings[0]]
-        ind_clone = self.gama._toolbox.clone(ind)
+        ind_clone = ind.copy_as_new()
 
         with self.assertRaises(ValueError) as error:
             mut_replace_terminal(ind_clone, self.gama._pset)
 
-        self.assertTrue("Individual could not be mutated" in str(error.exception))
+        self.assertTrue("Individual has no terminals or no terminals suitable for mutation." in str(error.exception))
 
     def test_mut_replace_primitive_len_1(self):
         """ Tests if mut_replace_primitive replaces exactly one primitive. """
@@ -103,15 +89,15 @@ class MutationTestCase(unittest.TestCase):
 
         for i in range(N):
             ind = self.individuals[self.ind_strings[1]]
-            ind_clone = self.gama._toolbox.clone(ind)
-            new_ind, = mut_replace_primitive(ind_clone, self.gama._pset)
-            if self._mutShrink_is_applied(ind, new_ind)[0]:
+            ind_clone = ind.copy_as_new()
+            random_valid_mutation_in_place(ind_clone, self.gama._pset)
+            if self._mutShrink_is_applied(ind, ind_clone)[0]:
                 applied_mutation['shrink'] += 1
-            elif self._mutInsert_is_applied(ind, new_ind)[0]:
+            elif self._mutInsert_is_applied(ind, ind_clone)[0]:
                 applied_mutation['insert'] += 1
-            elif self._mut_replace_terminal_is_applied(ind, new_ind)[0]:
+            elif self._mut_replace_terminal_is_applied(ind, ind_clone)[0]:
                 applied_mutation['terminal'] += 1
-            elif self._mut_replace_primitive_is_applied(ind, new_ind)[0]:
+            elif self._mut_replace_primitive_is_applied(ind, ind_clone)[0]:
                 applied_mutation['primitive'] += 1
             else:
                 self.fail("No mutation (or one that is unaccounted for) is applied.")
@@ -131,13 +117,13 @@ class MutationTestCase(unittest.TestCase):
 
         for i in range(N):
             ind = self.individuals[self.ind_strings[2]]
-            ind_clone = self.gama._toolbox.clone(ind)
-            new_ind, = mut_replace_primitive(ind_clone, self.gama._pset)
-            if self._mutInsert_is_applied(ind, new_ind)[0]:
+            ind_clone = ind.copy_as_new()
+            random_valid_mutation_in_place(ind_clone, self.gama._pset)
+            if self._mutInsert_is_applied(ind, ind_clone)[0]:
                 applied_mutation['insert'] += 1
-            elif self._mut_replace_terminal_is_applied(ind, new_ind)[0]:
+            elif self._mut_replace_terminal_is_applied(ind, ind_clone)[0]:
                 applied_mutation['terminal'] += 1
-            elif self._mut_replace_primitive_is_applied(ind, new_ind)[0]:
+            elif self._mut_replace_primitive_is_applied(ind, ind_clone)[0]:
                 applied_mutation['primitive'] += 1
             else:
                 self.fail("No mutation (or one that is unaccounted for) is applied.")
@@ -158,11 +144,11 @@ class MutationTestCase(unittest.TestCase):
 
         for i in range(N):
             ind = self.individuals[self.ind_strings[0]]
-            ind_clone = self.gama._toolbox.clone(ind)
-            new_ind, = mut_replace_primitive(ind_clone, self.gama._pset)
-            if self._mutInsert_is_applied(ind, new_ind)[0]:
+            ind_clone = ind.copy_as_new()
+            random_valid_mutation_in_place(ind_clone, self.gama._pset)
+            if self._mutInsert_is_applied(ind, ind_clone)[0]:
                 applied_mutation['insert'] += 1
-            elif self._mut_replace_primitive_is_applied(ind, new_ind)[0]:
+            elif self._mut_replace_primitive_is_applied(ind, ind_clone)[0]:
                 applied_mutation['primitive'] += 1
             else:
                 self.fail("No mutation (or one that is unaccounted for) is applied.")
@@ -180,11 +166,9 @@ class MutationTestCase(unittest.TestCase):
         :return: (bool, str). If mutation was caused by function, True. False otherwise.
             str is a message explaining why mutation is not caused by function.
         """
-        primitives_original = [el for el in original if isinstance(el, gp.Primitive)]
-        primitives_mutated = [el for el in mutated if isinstance(el, gp.Primitive)]
-        if len(primitives_original) <= len(primitives_mutated):
+        if len(list(original.primitives)) <= len(list(mutated.primitives)):
             return (False, "Number of primitives should be strictly less, was {} is {}."
-                    .format(len(primitives_original), len(primitives_mutated)))
+                    .format(len(list(original.primitives)), len(list(mutated.primitives))))
 
         return (True, None)
 
@@ -196,11 +180,9 @@ class MutationTestCase(unittest.TestCase):
         :return: (bool, str). If mutation was caused by function, True. False otherwise.
             str is a message explaining why mutation is not caused by function.
         """
-        primitives_original = [el for el in original if isinstance(el, gp.Primitive)]
-        primitives_mutated = [el for el in mutated if isinstance(el, gp.Primitive)]
-        if len(primitives_original) >= len(primitives_mutated):
+        if len(list(original.primitives)) >= len(list(mutated.primitives)):
             return (False, "Number of primitives should be strictly greater, was {} is {}."
-                    .format(len(primitives_original), len(primitives_mutated)))
+                    .format(len(list(original.primitives)), len(list(mutated.primitives))))
 
         return (True, None)
 
@@ -212,13 +194,11 @@ class MutationTestCase(unittest.TestCase):
         :return: (bool, str). If mutation was caused by function, True. False otherwise.
             str is a message explaining why mutation is not caused by function.
         """
-        terminals_original = [el for el in original if isinstance(el, gp.Terminal)]
-        terminals_mutated = [el for el in mutated if isinstance(el, gp.Terminal)]
-        if len(terminals_original) != len(terminals_mutated):
+        if len(list(original.terminals)) != len(list(mutated.terminals)):
             return (False, "Number of terminals should be unchanged, was {} is {}."
-                    .format(len(terminals_original), len(terminals_mutated)))
+                    .format(len(list(original.terminals)), len(list(mutated.terminals))))
 
-        replaced_terminals = [t1 for t1, t2 in zip(terminals_original, terminals_mutated) if t1.name != t2.name]
+        replaced_terminals = [t1 for t1, t2 in zip(original.terminals, mutated.terminals) if str(t1) != str(t2)]
         if len(replaced_terminals) != 1:
             return (False, "Expected 1 replaced Terminal, found {}.".format(len(replaced_terminals)))
 
@@ -232,19 +212,18 @@ class MutationTestCase(unittest.TestCase):
         :return: (bool, str). If mutation was caused by function, True. False otherwise.
             str is a message explaining why mutation is not caused by function.
         """
-        primitives_original = [el for el in original if isinstance(el, gp.Primitive)]
-        primitives_mutated = [el for el in mutated if isinstance(el, gp.Primitive)]
-        if len(primitives_original) != len(primitives_mutated):
+        if len(list(original.primitives)) != len(list(mutated.primitives)):
             return (False, "Number of primitives should be unchanged, was {} is {}."
-                    .format(len(primitives_original), len(primitives_mutated)))
+                    .format(len(list(original.primitives)), len(list(mutated.primitives))))
 
-        replaced_primitives = [p1 for p1, p2 in zip(primitives_original, primitives_mutated) if p1.name != p2.name]
+        replaced_primitives = [p1 for p1, p2 in zip(original.primitives, mutated.primitives)
+                               if str(p1._primitive) != str(p2._primitive)]
         if len(replaced_primitives) != 1:
             return (False, "Expected 1 replaced Primitive, found {}.".format(len(replaced_primitives)))
 
         return (True, None)
 
-    def _test_mutation(self, individual, mutation, mutation_check):
+    def _test_mutation(self, individual: Individual, mutation, mutation_check):
         """ Test if an individual mutated by `mutation` passes `mutation_check` and compiles.
 
         :param individual: The individual to be mutated.
@@ -252,13 +231,13 @@ class MutationTestCase(unittest.TestCase):
         :param mutation_check: function: (ind1, ind2)->(bool, str).
            A function to check if ind2 could have been created by `mutation(ind1)`, see above functions.
         """
-        ind_clone = self.gama._toolbox.clone(individual)
-        new_ind, = mutation(ind_clone, self.gama._pset)
+        ind_clone = individual.copy_as_new()
+        mutation(ind_clone, self.gama._pset)
 
-        applied, message = mutation_check(individual, new_ind)
+        applied, message = mutation_check(individual, ind_clone)
         if not applied:
             self.fail(message)
 
         # Should be able to compile the individual, will raise an Exception if not.
-        compile_individual(new_ind, self.gama._pset)
+        compile_individual(ind_clone, self.gama._pset)
 

@@ -1,9 +1,8 @@
 import unittest
 
-from deap import gp, creator
-
+from gama.genetic_programming.components import Individual
+from gama.genetic_programming.selection import eliminate_NSGA
 from gama.configuration.testconfiguration import clf_config
-from gama.ea.automl_gp import compile_individual, individual_length, eliminate_NSGA
 from gama import GamaClassifier
 
 
@@ -51,7 +50,7 @@ class AutomlGpTestCase(unittest.TestCase):
             LinearSVC.tol=1e-05)"""
         ]
 
-        self.individual_list = [creator.Individual(gp.PrimitiveTree.from_string(ind_str, self.gama._pset))
+        self.individual_list = [Individual.from_string(''.join(ind_str.split()).replace(',', ', '), self.gama._pset)
                                 for ind_str in self.ind_strings]
 
     def tearDown(self):
@@ -59,16 +58,16 @@ class AutomlGpTestCase(unittest.TestCase):
 
     def test_individual_length(self):
         # GaussianNB
-        self.assertEqual(individual_length(self.individual_list[0]), 1)
+        self.assertEqual(len(list(self.individual_list[0].primitives)), 1)
         # RandomForest(FeatureAgglomeration)
-        self.assertEqual(individual_length(self.individual_list[1]), 2)
+        self.assertEqual(len(list(self.individual_list[1].primitives)), 2)
         # LinearSVC
-        self.assertEqual(individual_length(self.individual_list[2]), 1)
+        self.assertEqual(len(list(self.individual_list[2].primitives)), 1)
 
     def test_eliminate_NSGA(self):
-        self.individual_list[0].fitness.wvalues = (2, 1)
-        self.individual_list[1].fitness.wvalues = (1, 2)
-        self.individual_list[2].fitness.wvalues = (3, 1)
+        self.individual_list[0].fitness.values = (2, -1)
+        self.individual_list[1].fitness.values = (1, -2)
+        self.individual_list[2].fitness.values = (3, -1)
 
         eliminated = eliminate_NSGA(pop=self.individual_list, n=1)
         self.assertListEqual(eliminated, [self.individual_list[0]])
