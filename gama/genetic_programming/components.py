@@ -57,7 +57,7 @@ class PrimitiveNode:
 
     def __str__(self):
         if self._terminals:
-            terminal_str = ", ".join([str(terminal) for terminal in self._terminals])
+            terminal_str = ", ".join([repr(terminal) for terminal in self._terminals])
             return "{}({}, {})".format(self._primitive, str(self._data_node), terminal_str)
         else:
             return "{}({})".format(self._primitive, str(self._data_node))
@@ -161,9 +161,9 @@ class Individual:
 
     @classmethod
     def from_string(cls, string: str, primitive_set: dict):
-        # GaussianNB(Normalizer(data, norm='l1'))
+        # General form is A(B(C(data[, C.param=value, ...])[, B.param=value, ...])[, A.param=value, ...])
+        # below assumes that left parenthesis is never part of a parameter name or value.
         primitives = string.split('(')[:-1]
-        # GaussianNB(Normalizer(data, norm='l1'))
         terminal_start_index = string.index(DATA_TERMINAL)
         terminals_string = string[terminal_start_index+len(DATA_TERMINAL):]
         terminal_sets = terminals_string.split(')')[:-1]
@@ -175,7 +175,7 @@ class Individual:
             if terminal_set == '':
                 terminals = []
             else:
-                terminal_set = terminal_set[2:]
+                terminal_set = terminal_set[2:]  # 2 is because string starts with ', '
                 terminals = [find_terminal(primitive_set, terminal_string)
                              for terminal_string in terminal_set.split(', ')]
             if not all([required_terminal in map(lambda t: t._identifier, terminals)
