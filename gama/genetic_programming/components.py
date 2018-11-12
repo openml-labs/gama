@@ -153,6 +153,12 @@ class Individual:
         """ Make a deep copy of the individual, but with fitness set to None and assign a new id. """
         return Individual(main_node=self.main_node.copy())
 
+    def can_mate_with(self, other) -> bool:
+        other_primitives = list(map(lambda primitive_node: primitive_node._primitive, other.primitives))
+        shared_primitives = [p for p in self.primitives if p._primitive in other_primitives]
+        both_at_least_length_2 = len(other_primitives) >= 2 and len(list(self.primitives)) >= 2
+        return both_at_least_length_2 or shared_primitives
+
 
 def pset_from_config2(configuration):
     """ Create a pset for the given configuration dictionary.

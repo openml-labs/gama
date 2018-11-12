@@ -334,14 +334,13 @@ class Gama(object):
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = [self._operator_set.individual() for _ in range(self._pop_size)]
 
-        self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_pipeline,
+        self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
                                               X=self.X, y_train=self.y_train, y_score=self.y_score,
                                               scoring=self._scoring_function, timeout=self._max_eval_time,
                                               cache_dir=self._cache_dir)
 
         try:
-            final_pop = async_ea(self._objectives,
-                                 pop,
+            final_pop = async_ea(pop,
                                  self._operator_set,
                                  evaluation_callback=self._on_evaluation_completed,
                                  restart_callback=restart_criteria,

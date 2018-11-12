@@ -70,6 +70,15 @@ def object_is_valid_pipeline(o):
             hasattr(o, 'steps'))
 
 
+def evaluate_individual(individual: Individual, *args, **kwargs):
+    pipeline = compile_individual(individual, parameter_checks=None, preprocessing_steps=None)
+    (score, start_datetime, evaluation_time, pipeline_length) = evaluate_pipeline(pipeline, *args, **kwargs)
+    individual.fitness.values = (score, pipeline_length)
+    individual.fitness.start_time = start_datetime
+    individual.fitness.time = evaluation_time
+    return individual
+
+
 def evaluate_pipeline(pl, X, y_train, y_score, timeout, scoring='accuracy', cv=5, cache_dir=None, logger=None):
     """ Evaluates a pipeline used k-Fold CV. """
     if not logger:

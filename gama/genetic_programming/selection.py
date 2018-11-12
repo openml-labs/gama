@@ -9,7 +9,7 @@ def create_from_population2(operator_shell, pop, n, cxpb, mutpb):
     for _ in range(n):
         ind1, ind2 = random.sample(pop, k=2)
         ind1, ind2 = ind1.copy_as_new(), ind2.copy_as_new()
-        if random.random() < cxpb and len(list(ind1.primitives))>1 and len(list(ind2.primitives))>1:
+        if random.random() < cxpb and ind1.can_mate_with(ind2):
             ind1 = operator_shell.mate(ind1, ind2)
         else:
             ind1 = operator_shell.mutate(ind1)
