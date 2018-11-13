@@ -13,7 +13,8 @@ import arff
 import pandas as pd
 import numpy as np
 from deap import base, creator, tools, gp
-from sklearn.preprocessing import Imputer, OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.impute import SimpleImputer
 
 import gama.ea.evaluation
 from .ea.modified_deap import cxOnePoint
@@ -334,7 +335,7 @@ class Gama(object):
         # This helps us use a wider variety of algorithms without constructing a grammar.
         # One should note that ideally imputation should not always be done since some methods work well without.
         # Secondly, the way imputation is done can also be dependent on the task. Median is generally not the best.
-        self._imputer = Imputer(strategy="median")
+        self._imputer = SimpleImputer(strategy="median")
         self._imputer.fit(X)
         if np.isnan(X).any():
             log.info("Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.")
@@ -344,7 +345,7 @@ class Gama(object):
 
     def _construct_y_score(self, y):
         if Metric(self._scoring_function).requires_probabilities:
-            self.y_score = OneHotEncoder().fit_transform(y.reshape(-1, 1)).todense()
+            self.y_score = OneHotEncoder(categories='auto').fit_transform(y.reshape(-1, 1)).todense()
         else:
             self.y_score = y
 
