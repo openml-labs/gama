@@ -231,6 +231,15 @@ class Gama(object):
     def predict(self, X=None, arff_file_path=None):
         raise NotImplemented('predict is implemented by base classes.')
 
+    def score(self, X=None, y=None, arff_file_path=None):
+        if arff_file_path:
+            X, y = self._get_data_from_arff(arff_file_path)
+        y_score = self._construct_y_score(y)
+
+        score_metric = Metric(self._scoring_function)
+        predictions = self.predict_proba(X) if score_metric.requires_probabilities else self.predict(X)
+        return score_metric.score(y_score, predictions)
+
     def _preprocess_arff(self, arff_file_path):
         X, y = self._get_data_from_arff(arff_file_path)
         steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
@@ -290,7 +299,7 @@ class Gama(object):
 
         self.X = X
         self.y_train = y
-        self._construct_y_score(y)
+        self.y_score = self._construct_y_score(y)
         self._fit_data = (X, y)
 
         time_left = self._max_total_time - preprocessing_sw.elapsed_time
@@ -352,9 +361,8 @@ class Gama(object):
 
     def _construct_y_score(self, y):
         if Metric(self._scoring_function).requires_probabilities:
-            self.y_score = OneHotEncoder(categories='auto').fit_transform(y.reshape(-1, 1)).todense()
-        else:
-            self.y_score = y
+            return OneHotEncoder(categories='auto').fit_transform(y.reshape(-1, 1)).todense()
+        return y
 
     def _search_phase(self, X, y, warm_start=False, restart_criteria=None, timeout=1e6):
         """ Invoke the evolutionary algorithm, populate `final_pop` regardless of termination. """
