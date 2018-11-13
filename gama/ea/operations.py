@@ -29,7 +29,7 @@ def try_until_new(func):
             new_ind, log_args = func(*args, **kwargs)
             if ind_is_new(new_ind):
                 return new_ind, log_args
-        log.warning("Could not create a new individual from 50 iterations of {}".format(func.__name__))
+        log.debug("Could not create a new individual from 50 iterations of {}".format(func.__name__))
         return new_ind, log_args
     return fn_new
 
