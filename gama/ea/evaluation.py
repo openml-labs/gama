@@ -3,6 +3,7 @@ import os
 import pickle
 import time
 import uuid
+import warnings
 
 import stopit
 from sklearn.model_selection import cross_val_predict
@@ -40,7 +41,10 @@ def cross_val_predict_score(estimator, X, y_train, y_score, groups=None, scoring
                          .format(type(scoring)))
 
     method = 'predict_proba' if metric.requires_probabilities else 'predict'
-    predictions = cross_val_predict(estimator, X, y_train, groups, cv, n_jobs, verbose, fit_params, pre_dispatch, method)
+    # Not the best fix. The context manager has undefined behaviour in the multi-threaded scenarios!
+    # https://docs.python.org/3/library/warnings.html#temporarily-suppressing-warnings
+    with warnings.catch_warnings():
+        predictions = cross_val_predict(estimator, X, y_train, groups, cv, n_jobs, verbose, fit_params, pre_dispatch, method)
     score = metric.maximizable_score(y_score, predictions)
     return predictions, score
 
