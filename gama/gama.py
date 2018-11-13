@@ -85,7 +85,8 @@ class Gama(object):
         models and their evaluation results will be stored. This facilitates a quick ensemble construction.
     """
 
-    def __init__(self, 
+    def __init__(self,
+                 scoring=None,
                  objectives=('filled_in_by_child_class', 'size'),
                  optimize_strategy=(1, -1),
                  config=None,
@@ -134,6 +135,9 @@ class Gama(object):
 
         if n_jobs == -1:
             n_jobs = multiprocessing.cpu_count()
+
+        if scoring is not None:
+            objectives = (scoring, *objectives[1:])
 
         self._best_pipeline = None
         self._fitted_pipelines = {}
