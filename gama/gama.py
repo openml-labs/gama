@@ -7,7 +7,7 @@ import shutil
 from functools import partial
 import sys
 import time
-import uuid
+import warnings
 
 import arff
 import pandas as pd
@@ -36,6 +36,8 @@ STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
                           did not terminate successfully."""
 __version__ = '0.1.0'
+
+warnings.filterwarnings("ignore", module="sklearn")
 
 
 class Gama(object):
