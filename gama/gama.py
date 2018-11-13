@@ -38,7 +38,8 @@ STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           did not terminate successfully."""
 __version__ = '0.1.0'
 
-warnings.filterwarnings("ignore", module="sklearn")
+for module_to_ignore in ["sklearn", "deap", "numpy"]:
+    warnings.filterwarnings("ignore", module=module_to_ignore)
 
 
 class Gama(object):
