@@ -3,6 +3,7 @@ import logging
 import os
 from collections import defaultdict
 import datetime
+import multiprocessing
 import shutil
 from functools import partial
 import sys
@@ -129,6 +130,9 @@ class Gama(object):
             error_message = "max_eval_time should be greater than zero, or None."
             log.error(error_message + " max_eval_time: {}".format(max_eval_time))
             raise ValueError(error_message)
+
+        if n_jobs == -1:
+            n_jobs = multiprocessing.cpu_count()
 
         self._best_pipeline = None
         self._fitted_pipelines = {}
