@@ -3,15 +3,18 @@ import logging
 import os
 from collections import defaultdict
 import datetime
+import multiprocessing
 import shutil
 from functools import partial
 import sys
 import time
+import warnings
 
 import arff
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import Imputer, OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.impute import SimpleImputer
 
 import gama.genetic_programming.compilers.scikitlearn
 from gama.genetic_programming.algorithms.metrics import Metric
@@ -33,6 +36,9 @@ STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
                           did not terminate successfully."""
 __version__ = '0.1.0'
+
+for module_to_ignore in ["sklearn", "deap", "numpy"]:
+    warnings.filterwarnings("ignore", module=module_to_ignore)
 
 
 class Gama(object):
@@ -78,7 +84,8 @@ class Gama(object):
         models and their evaluation results will be stored. This facilitates a quick ensemble construction.
     """
 
-    def __init__(self, 
+    def __init__(self,
+                 scoring=None,
                  objectives=('filled_in_by_child_class', 'size'),
                  optimize_strategy=(1, -1),
                  config=None,
@@ -124,6 +131,12 @@ class Gama(object):
             error_message = "max_eval_time should be greater than zero, or None."
             log.error(error_message + " max_eval_time: {}".format(max_eval_time))
             raise ValueError(error_message)
+
+        if n_jobs == -1:
+            n_jobs = multiprocessing.cpu_count()
+
+        if scoring is not None:
+            objectives = (scoring, *objectives[1:])
 
         self._best_pipeline = None
         self._fitted_pipelines = {}
@@ -200,6 +213,15 @@ class Gama(object):
     def predict(self, X=None, arff_file_path=None):
         raise NotImplemented('predict is implemented by base classes.')
 
+    def score(self, X=None, y=None, arff_file_path=None):
+        if arff_file_path:
+            X, y = self._get_data_from_arff(arff_file_path)
+        y_score = self._construct_y_score(y)
+
+        score_metric = Metric(self._scoring_function)
+        predictions = self.predict_proba(X) if score_metric.requires_probabilities else self.predict(X)
+        return score_metric.score(y_score, predictions)
+
     def _preprocess_arff(self, arff_file_path):
         X, y = self._get_data_from_arff(arff_file_path)
         steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
@@ -259,7 +281,7 @@ class Gama(object):
 
         self.X = X
         self.y_train = y
-        self._construct_y_score(y)
+        self.y_score = self._construct_y_score(y)
         self._fit_data = (X, y)
 
         time_left = self._max_total_time - preprocessing_sw.elapsed_time
@@ -311,7 +333,7 @@ class Gama(object):
         # This helps us use a wider variety of algorithms without constructing a grammar.
         # One should note that ideally imputation should not always be done since some methods work well without.
         # Secondly, the way imputation is done can also be dependent on the task. Median is generally not the best.
-        self._imputer = Imputer(strategy="median")
+        self._imputer = SimpleImputer(strategy="median")
         self._imputer.fit(X)
         if np.isnan(X).any():
             log.info("Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.")
@@ -321,9 +343,8 @@ class Gama(object):
 
     def _construct_y_score(self, y):
         if Metric(self._scoring_function).requires_probabilities:
-            self.y_score = OneHotEncoder().fit_transform(y.reshape(-1, 1)).todense()
-        else:
-            self.y_score = y
+            return OneHotEncoder(categories='auto').fit_transform(y.reshape(-1, 1)).todense()
+        return y
 
     def _search_phase(self, X, y, warm_start=False, restart_criteria=None, timeout=1e6):
         """ Invoke the evolutionary algorithm, populate `final_pop` regardless of termination. """

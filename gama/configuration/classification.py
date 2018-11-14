@@ -90,10 +90,10 @@ clf_config = {
     },
 
     LogisticRegression: {
-        'penalty': ["l1", "l2"],
+        'penalty': ['l2'],
         'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25.],
         'dual': [False, True],
-        'param_check': [lambda params: not params['dual'] or params['penalty'] == "l2"]
+        'solver': ['lbfgs']
     },
 
     Binarizer: {

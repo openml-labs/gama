@@ -77,7 +77,7 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
                 current_population.append(individual)
                 if len(current_population) > max_population_size:
                     to_remove = toolbox.eliminate(current_population, 1)
-                    log_parseable_event(log, TOKENS.EA_REMOVE_IND, to_remove)
+                    log_parseable_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
                     current_population.remove(to_remove[0])
                     if elimination_callback:
                         _safe_outside_call(partial(elimination_callback, to_remove[0]), exceed_timeout)
