@@ -89,6 +89,32 @@ def random_valid_mutation_in_place(individual: Individual, primitive_set: dict) 
 
 
 def crossover(individual1: Individual, individual2: Individual) -> None:
+    other_primitives = list(map(lambda primitive_node: primitive_node._primitive, individual2.primitives))
+    shared_primitives = [p for p in individual1.primitives if p._primitive in other_primitives]
+    both_at_least_length_2 = len(other_primitives) >= 2 and len(list(individual1.primitives)) >= 2
+
+    crossover_choices = []
+    if shared_primitives:
+        crossover_choices.append(crossover_terminals)
+    if both_at_least_length_2:
+        crossover_choices.append(crossover_primitives)
+
+    random.choice(crossover_choices)(individual1, individual2)
+
+
+def crossover_primitives(individual1: Individual, individual2: Individual) -> None:
     parent_node_1 = random.choice(list(individual1.primitives)[:-1])
     parent_node_2 = random.choice(list(individual2.primitives)[:-1])
     parent_node_1._data_node, parent_node_2._data_node = parent_node_2._data_node, parent_node_1._data_node
+
+
+def crossover_terminals(individual1: Individual, individual2: Individual) -> None:
+    shared_primitives = []
+    for primitive_node in individual1.primitives:
+        for primitive_node_2 in individual2.primitives:
+            if primitive_node._primitive == primitive_node_2._primitive:
+                shared_primitives.append((primitive_node, primitive_node_2))
+
+    ind1_primitive, ind2_primitive = random.choice(shared_primitives)
+    ind1_primitive.terminals = [(t1, t2)[int(random.random()*2)]
+                                for (t1, t2) in zip(ind1_primitive._terminals, ind2_primitive._terminals)]
