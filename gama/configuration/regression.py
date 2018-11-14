@@ -4,7 +4,7 @@ from sklearn.cluster import FeatureAgglomeration
 from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, PolynomialFeatures, RobustScaler, \
     StandardScaler, Binarizer
 from sklearn.kernel_approximation import Nystroem, RBFSampler
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, FastICA
 from sklearn.feature_selection import SelectFwe, SelectPercentile, VarianceThreshold, f_regression
 
 
@@ -80,5 +80,77 @@ reg_config = {
         'min_samples_split': range(2, 21),
         'min_samples_leaf': range(1, 21),
         'bootstrap': [True, False]
+    },
+
+
+    # Preprocesssors
+    Binarizer: {
+        'threshold': np.arange(0.0, 1.01, 0.05)
+    },
+
+    FastICA: {
+        'tol': np.arange(0.0, 1.01, 0.05)
+    },
+
+    FeatureAgglomeration: {
+        'linkage': ['ward', 'complete', 'average'],
+        'affinity': ['euclidean', 'l1', 'l2', 'manhattan', 'cosine', 'precomputed'],
+        'param_check': [lambda params: (not params['linkage'] == "ward") or params['affinity'] == "euclidean"]
+    },
+
+    MaxAbsScaler: {
+    },
+
+    MinMaxScaler: {
+    },
+
+    Normalizer: {
+        'norm': ['l1', 'l2', 'max']
+    },
+
+    Nystroem: {
+        'kernel': ['rbf', 'cosine', 'chi2', 'laplacian', 'polynomial', 'poly', 'linear', 'additive_chi2', 'sigmoid'],
+        'gamma': np.arange(0.0, 1.01, 0.05),
+        'n_components': range(1, 11)
+    },
+
+    PCA: {
+        'svd_solver': ['randomized'],
+        'iterated_power': range(1, 11)
+    },
+
+    PolynomialFeatures: {
+        'degree': [2],
+        'include_bias': [False],
+        'interaction_only': [False]
+    },
+
+    RBFSampler: {
+        'gamma': np.arange(0.0, 1.01, 0.05)
+    },
+
+    RobustScaler: {
+    },
+
+    StandardScaler: {
+    },
+
+    # Selectors
+    SelectFwe: {
+        'alpha': np.arange(0, 0.05, 0.001),
+        'score_func': {
+            f_regression: None
+        }
+    },
+
+    SelectPercentile: {
+        'percentile': range(1, 100),
+        'score_func': {
+            f_regression: None
+        }
+    },
+
+    VarianceThreshold: {
+        'threshold': np.arange(0.05, 1.01, 0.05)
     }
 }
