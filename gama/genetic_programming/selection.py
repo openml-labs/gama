@@ -1,5 +1,7 @@
 import random
+import numpy
 
+from gama.utilities.generic.paretofront import ParetoFront
 from deap import tools
 
 
@@ -15,6 +17,32 @@ def create_from_population2(operator_shell, pop, n, cxpb, mutpb):
             ind1 = operator_shell.mutate(ind1)
         offspring.append(ind1)
     return offspring
+
+
+def select_from_pareto(population, select_n, pareto_fronts_n):
+    pareto_fronts = []
+    population_left = population
+    while len(pareto_fronts) != pareto_fronts_n:
+        pareto_fronts.append(ParetoFront(start_list=population_left, get_values_fn=lambda ind: ind.fitness.wvalues))
+        population_left = [ind for ind in population_left if ind not in pareto_fronts[-1]]
+        if len(population_left) == 0 and len(pareto_fronts) != pareto_fronts_n:
+            # log.debug("Desired amount of pareto fronts could not be constructed.")
+            break
+
+    selected_individuals = []
+    for _ in range(select_n):
+        if len(pareto_fronts) == 1:
+            selected_front = pareto_fronts[0]
+        elif len(pareto_fronts) == 2:
+            selected_front = numpy.random.choice(pareto_fronts, p=[2/3, 1/3])
+        elif len(pareto_fronts) > 2:
+            n = len(pareto_fronts)
+            selected_front = numpy.random.choice(pareto_fronts, p=[1/2**i for i in range(1, n)] + [1/2**(n-1)])
+        else:
+            raise RuntimeError("Did not create any pareto front.")
+
+        selected_individuals.append(random.choice(selected_front))
+    return selected_individuals
 
 
 def eliminate_NSGA(pop, n):
