@@ -6,15 +6,6 @@ Make sure to check out the [documentation](https://pgijsbers.github.io/gama/).
 [![Build Status](https://travis-ci.org/PGijsbers/gama.svg?branch=master)](https://travis-ci.org/PGijsbers/gama)
 [![codecov](https://codecov.io/gh/PGijsbers/gama/branch/master/graph/badge.svg)](https://codecov.io/gh/PGijsbers/gama)
 
-
-**WORK IN PROGRESS**
-
-Notice from author: 
-I am still working on getting things in order for a 'proper' public release.
-Things left to do:
- - Review and expand documentation
- - last round of refactoring, time permitting
-
 ## Installing GAMA
 Clone GAMA:
 
@@ -36,10 +27,12 @@ from gama import GamaClassifier
 X, y = load_digits(return_X_y=True)
 X_train, X_test, y_train, y_test= train_test_split(X, y, stratify=y, random_state=42)
 
-automl = GamaClassifier(max_total_time=300, n_jobs=4)
+automl = GamaClassifier(max_total_time=300, n_jobs=-1)
 automl.fit(X_train, y_train)
 predictions = automl.predict(X_test)
 print('accuracy', accuracy_score(y_test, predictions))
+# the `score` function outputs the score on the metric optimized towards (by default, `log_loss`)
+print('log_loss', 
 ```
 
 *note*: By default, GamaClassifier optimizes towards `log_loss`.
