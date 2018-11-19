@@ -8,7 +8,7 @@ If there are any questions you have that are not answered here, check the `issue
 If your question has not been answered there yet, please open a new issue and label with the question label.
 
 In the process, GAMA performs a search over *machine learning pipelines*.
-An example of a machine learnig pipeline would be to first perform data normalization and then use a decision tree classifier to make a prediction on the normalized data.
+An example of a machine learning pipeline would be to first perform data normalization and then use a nearest neighbor classifier to make a prediction on the normalized data.
 More formally, a *machine learning pipeline* is a sequence of one or more *components*.
 A *component* is an algorithm which performs either data transformation *or* a prediction.
 This means that components can be preprocessing algorithms such as PCA or standard scaling, or a predictor such as a decision tree or support vector machine.

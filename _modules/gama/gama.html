@@ -154,31 +154,32 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">import</span> <span class="nn">arff</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">deap</span> <span class="k">import</span> <span class="n">base</span><span class="p">,</span> <span class="n">creator</span><span class="p">,</span> <span class="n">tools</span><span class="p">,</span> <span class="n">gp</span>
-<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">Imputer</span><span class="p">,</span> <span class="n">OneHotEncoder</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">OneHotEncoder</span>
+<span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="k">import</span> <span class="n">SimpleImputer</span>
 
-<span class="kn">import</span> <span class="nn">gama.ea.evaluation</span>
-<span class="kn">from</span> <span class="nn">.ea.modified_deap</span> <span class="k">import</span> <span class="n">cxOnePoint</span>
-<span class="kn">from</span> <span class="nn">.ea</span> <span class="k">import</span> <span class="n">automl_gp</span>
-<span class="kn">from</span> <span class="nn">.ea.automl_gp</span> <span class="k">import</span> <span class="n">compile_individual</span><span class="p">,</span> <span class="n">pset_from_config</span><span class="p">,</span> <span class="n">generate_valid</span>
-<span class="kn">from</span> <span class="nn">gama.ea.mutation</span> <span class="k">import</span> <span class="n">random_valid_mutation</span>
-<span class="kn">from</span> <span class="nn">.ea.metrics</span> <span class="k">import</span> <span class="n">Metric</span>
+<span class="kn">import</span> <span class="nn">gama.genetic_programming.compilers.scikitlearn</span>
+<span class="kn">from</span> <span class="nn">gama.genetic_programming.algorithms.metrics</span> <span class="k">import</span> <span class="n">Metric</span>
 <span class="kn">from</span> <span class="nn">.utilities.observer</span> <span class="k">import</span> <span class="n">Observer</span>
 
-<span class="kn">from</span> <span class="nn">.ea.operations</span> <span class="k">import</span> <span class="n">create_from_population</span><span class="p">,</span> <span class="n">mate_new</span><span class="p">,</span> <span class="n">random_valid_mutation_new</span><span class="p">,</span> <span class="n">generate_new</span>
-<span class="kn">from</span> <span class="nn">.ea.async_ea</span> <span class="k">import</span> <span class="n">async_ea</span>
+<span class="kn">from</span> <span class="nn">gama.genetic_programming.algorithms.async_ea</span> <span class="k">import</span> <span class="n">async_ea</span>
 <span class="kn">from</span> <span class="nn">gama.utilities.generic.stopwatch</span> <span class="k">import</span> <span class="n">Stopwatch</span>
 <span class="kn">from</span> <span class="nn">gama.utilities.logging_utilities</span> <span class="k">import</span> <span class="n">TOKENS</span><span class="p">,</span> <span class="n">log_parseable_event</span>
 <span class="kn">from</span> <span class="nn">gama.utilities.preprocessing</span> <span class="k">import</span> <span class="n">define_preprocessing_steps</span>
+<span class="kn">from</span> <span class="nn">gama.genetic_programming.mutation</span> <span class="k">import</span> <span class="n">random_valid_mutation_in_place</span><span class="p">,</span> <span class="n">crossover</span>
+<span class="kn">from</span> <span class="nn">gama.genetic_programming.selection</span> <span class="k">import</span> <span class="n">create_from_population2</span><span class="p">,</span> <span class="n">eliminate_from_pareto</span>
+<span class="kn">from</span> <span class="nn">gama.genetic_programming.components</span> <span class="k">import</span> <span class="n">create_random_individual</span><span class="p">,</span> <span class="n">pset_from_config2</span>
+<span class="kn">from</span> <span class="nn">gama.genetic_programming.operator_set</span> <span class="k">import</span> <span class="n">OperatorSet</span>
+<span class="kn">from</span> <span class="nn">gama.genetic_programming.compilers.scikitlearn</span> <span class="k">import</span> <span class="n">compile_individual</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -187,14 +188,29 @@
 <span class="s2">                          did not terminate successfully.&quot;&quot;&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.1.0&#39;</span>
 
+<span class="k">for</span> <span class="n">module_to_ignore</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;sklearn&quot;</span><span class="p">,</span> <span class="s2">&quot;deap&quot;</span><span class="p">,</span> <span class="s2">&quot;numpy&quot;</span><span class="p">]:</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module_to_ignore</span><span class="p">)</span>
+
 
 <div class="viewcode-block" id="Gama"><a class="viewcode-back" href="../../generated/gama.html#gama.Gama">[docs]</a><span class="k">class</span> <span class="nc">Gama</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Wrapper for the DEAP toolbox logic surrounding the GP process as well as ensemble construction.</span>
+
+<span class="sd">    :param scoring: a string which specifies towards which objectives to optimize</span>
+<span class="sd">        The valid metrics depend on the type of task. Many scikit-learn metrics are available.</span>
+<span class="sd">        For classification, the following metrics are available:</span>
+<span class="sd">        &#39;accuracy&#39;, &#39;roc_auc&#39;, &#39;average_precision&#39;, &#39;log_loss&#39;, &#39;precision_macro&#39;, &#39;precision_micro&#39;,</span>
+<span class="sd">        &#39;precision_weighted&#39;, &#39;precision_samples&#39;, &#39;recall_macro&#39;, &#39;recall_micro&#39;, &#39;recall_samples&#39;, &#39;recall_weighted&#39;,</span>
+<span class="sd">        &#39;f1_macro&#39;, &#39;f1_micro&#39;, &#39;f1_samples&#39;, &#39;f1_weighted&#39;.</span>
+<span class="sd">        For regression, the following metrics are available:</span>
+<span class="sd">        &#39;explained_variance&#39;, &#39;r2&#39;, &#39;median_absolute_error&#39;, &#39;mean_squared_error&#39;, &#39;mean_squared_log_error&#39;, &#39;mean_absolute_error&#39;.</span>
+<span class="sd">        Whether to minimize or maximize is determined automatically (though can be overwritten by `optimize_strategy`.</span>
+<span class="sd">        However, you can instead also specify &#39;neg\_&#39;+metric (e.g. &#39;neg_log_loss&#39;) as metric to make it explicit.</span>
 
 <span class="sd">    :param objectives: a tuple which specifies towards which objectives to optimize</span>
 <span class="sd">        The valid metrics depend on the type of task. Many scikit-learn metrics are available.</span>
 <span class="sd">        Two additional metrics can also be chosen: `size` which represents the number of components in the pipeline,</span>
 <span class="sd">        and `time` which specifies the time it takes to train and validate a model.</span>
+<span class="sd">        If `scoring` is specified, it overwrites the first objective of `objectives`.</span>
 <span class="sd">        Currently the maximum arity is 2.</span>
 <span class="sd">        Example: (&#39;f1_macro&#39;, &#39;size&#39;) or (&#39;f1&#39;,)</span>
 
@@ -231,7 +247,8 @@
 <span class="sd">        models and their evaluation results will be stored. This facilitates a quick ensemble construction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">scoring</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">objectives</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;filled_in_by_child_class&#39;</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">),</span>
                  <span class="n">optimize_strategy</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
                  <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -278,6 +295,12 @@
             <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_message</span> <span class="o">+</span> <span class="s2">&quot; max_eval_time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">max_eval_time</span><span class="p">))</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">n_jobs</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">n_jobs</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">scoring</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">objectives</span> <span class="o">=</span> <span class="p">(</span><span class="n">scoring</span><span class="p">,</span> <span class="o">*</span><span class="n">objectives</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_best_pipeline</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fitted_pipelines</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_random_state</span> <span class="o">=</span> <span class="n">random_state</span>
@@ -308,37 +331,16 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_random_state</span><span class="p">)</span>
             <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_random_state</span><span class="p">)</span>
-        
-        <span class="n">pset</span><span class="p">,</span> <span class="n">parameter_checks</span> <span class="o">=</span> <span class="n">pset_from_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pset</span> <span class="o">=</span> <span class="n">pset</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">Toolbox</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="s2">&quot;FitnessMax&quot;</span> <span class="ow">in</span> <span class="n">creator</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
-            <span class="k">del</span> <span class="n">creator</span><span class="o">.</span><span class="n">FitnessMax</span>
-        <span class="k">if</span> <span class="s2">&quot;Individual&quot;</span> <span class="ow">in</span> <span class="n">creator</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
-            <span class="k">del</span> <span class="n">creator</span><span class="o">.</span><span class="n">Individual</span>
-        <span class="n">creator</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;FitnessMax&quot;</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Fitness</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">optimize_strategy</span><span class="p">)</span>
-        <span class="n">creator</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;Individual&quot;</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">PrimitiveTree</span><span class="p">,</span> <span class="n">fitness</span><span class="o">=</span><span class="n">creator</span><span class="o">.</span><span class="n">FitnessMax</span><span class="p">,</span> <span class="n">pset</span><span class="o">=</span><span class="n">pset</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;expr&quot;</span><span class="p">,</span> <span class="n">generate_valid</span><span class="p">,</span> <span class="n">pset</span><span class="o">=</span><span class="n">pset</span><span class="p">,</span> <span class="n">min_</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">toolbox</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;individual&quot;</span><span class="p">,</span> <span class="n">generate_new</span><span class="p">,</span> <span class="n">creator</span><span class="o">.</span><span class="n">Individual</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">expr</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;population&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">initRepeat</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">individual</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;compile&quot;</span><span class="p">,</span> <span class="n">compile_individual</span><span class="p">,</span> <span class="n">pset</span><span class="o">=</span><span class="n">pset</span><span class="p">,</span> <span class="n">parameter_checks</span><span class="o">=</span><span class="n">parameter_checks</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mate&quot;</span><span class="p">,</span> <span class="n">mate_new</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mutate&quot;</span><span class="p">,</span> <span class="n">random_valid_mutation_new</span><span class="p">,</span> <span class="n">pset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pset</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="n">create_from_population</span><span class="p">,</span> <span class="n">toolbox</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="p">,</span> <span class="n">cxpb</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">mutpb</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_objectives</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;select&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">selTournament</span><span class="p">,</span> <span class="n">tournsize</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;eliminate&quot;</span><span class="p">,</span> <span class="n">automl_gp</span><span class="o">.</span><span class="n">eliminate_worst</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_objectives</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;select&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">selNSGA2</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;eliminate&quot;</span><span class="p">,</span> <span class="n">automl_gp</span><span class="o">.</span><span class="n">eliminate_NSGA</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Objectives must be a tuple of length at most 2.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pset</span><span class="p">,</span> <span class="n">parameter_checks</span> <span class="o">=</span> <span class="n">pset_from_config2</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_operator_set</span> <span class="o">=</span> <span class="n">OperatorSet</span><span class="p">(</span>
+            <span class="n">mutate</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">random_valid_mutation_in_place</span><span class="p">,</span> <span class="n">primitive_set</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pset</span><span class="p">),</span>
+            <span class="n">mate</span><span class="o">=</span><span class="n">crossover</span><span class="p">,</span>
+            <span class="n">create_from_population</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">create_from_population2</span><span class="p">,</span> <span class="n">cxpb</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">mutpb</span><span class="o">=</span><span class="mf">0.8</span><span class="p">),</span>
+            <span class="n">create_new</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">create_random_individual</span><span class="p">,</span> <span class="n">primitive_set</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pset</span><span class="p">),</span>
+            <span class="n">compile_</span><span class="o">=</span><span class="n">compile_individual</span><span class="p">,</span>
+            <span class="n">eliminate</span><span class="o">=</span><span class="n">eliminate_from_pareto</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_data_from_arff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="p">,</span> <span class="n">split_last</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="c1"># load arff</span>
@@ -374,10 +376,19 @@
 <div class="viewcode-block" id="Gama.predict"><a class="viewcode-back" href="../../generated/gama.html#gama.Gama.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">(</span><span class="s1">&#39;predict is implemented by base classes.&#39;</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="Gama.score"><a class="viewcode-back" href="../../generated/gama.html#gama.Gama.score">[docs]</a>    <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">arff_file_path</span><span class="p">:</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data_from_arff</span><span class="p">(</span><span class="n">arff_file_path</span><span class="p">)</span>
+        <span class="n">y_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_y_score</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="n">score_metric</span> <span class="o">=</span> <span class="n">Metric</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_function</span><span class="p">)</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="k">if</span> <span class="n">score_metric</span><span class="o">.</span><span class="n">requires_probabilities</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">score_metric</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">y_score</span><span class="p">,</span> <span class="n">predictions</span><span class="p">)</span></div>
+
     <span class="k">def</span> <span class="nf">_preprocess_arff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="p">):</span>
         <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data_from_arff</span><span class="p">(</span><span class="n">arff_file_path</span><span class="p">)</span>
         <span class="n">steps</span> <span class="o">=</span> <span class="n">define_preprocessing_steps</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">max_extra_features_created</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_categories_for_one_hot</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;compile&quot;</span><span class="p">,</span> <span class="n">compile_individual</span><span class="p">,</span> <span class="n">pset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pset</span><span class="p">,</span> <span class="n">preprocessing_steps</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_operator_set</span><span class="o">.</span><span class="n">_compile</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">compile_individual</span><span class="p">,</span> <span class="n">preprocessing_steps</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
 
 <div class="viewcode-block" id="Gama.fit"><a class="viewcode-back" href="../../generated/gama.html#gama.Gama.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">warm_start</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_ensemble_n</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">restart_</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -433,7 +444,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y_train</span> <span class="o">=</span> <span class="n">y</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_construct_y_score</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_y_score</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fit_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
         <span class="n">time_left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_total_time</span> <span class="o">-</span> <span class="n">preprocessing_sw</span><span class="o">.</span><span class="n">elapsed_time</span>
@@ -485,7 +496,7 @@
         <span class="c1"># This helps us use a wider variety of algorithms without constructing a grammar.</span>
         <span class="c1"># One should note that ideally imputation should not always be done since some methods work well without.</span>
         <span class="c1"># Secondly, the way imputation is done can also be dependent on the task. Median is generally not the best.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_imputer</span> <span class="o">=</span> <span class="n">Imputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;median&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_imputer</span> <span class="o">=</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;median&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_imputer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.&quot;</span><span class="p">)</span>
@@ -495,9 +506,8 @@
 
     <span class="k">def</span> <span class="nf">_construct_y_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">Metric</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_function</span><span class="p">)</span><span class="o">.</span><span class="n">requires_probabilities</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">y_score</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">todense</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">y_score</span> <span class="o">=</span> <span class="n">y</span>
+            <span class="k">return</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">categories</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">todense</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">y</span>
 
     <span class="k">def</span> <span class="nf">_search_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">warm_start</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">restart_criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">1e6</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Invoke the evolutionary algorithm, populate `final_pop` regardless of termination. &quot;&quot;&quot;</span>
@@ -506,17 +516,18 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">warm_start</span><span class="p">:</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Warm-start enabled but no earlier fit. Using new generated population instead.&#39;</span><span class="p">)</span>
-            <span class="n">pop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">population</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pop_size</span><span class="p">)</span>
+            <span class="n">pop</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_operator_set</span><span class="o">.</span><span class="n">individual</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pop_size</span><span class="p">)]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;evaluate&quot;</span><span class="p">,</span> <span class="n">gama</span><span class="o">.</span><span class="n">ea</span><span class="o">.</span><span class="n">evaluation</span><span class="o">.</span><span class="n">evaluate_pipeline</span><span class="p">,</span>
-                               <span class="n">X</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">y_train</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_train</span><span class="p">,</span> <span class="n">y_score</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_score</span><span class="p">,</span>
-                               <span class="n">scoring</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_function</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_eval_time</span><span class="p">,</span>
-                               <span class="n">cache_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span><span class="p">)</span>
+        <span class="n">evaluate_individual</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">gama</span><span class="o">.</span><span class="n">genetic_programming</span><span class="o">.</span><span class="n">compilers</span><span class="o">.</span><span class="n">scikitlearn</span><span class="o">.</span><span class="n">evaluate_individual</span><span class="p">,</span>
+                                      <span class="n">operator_set</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_operator_set</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_operator_set</span><span class="o">.</span><span class="n">evaluate</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">evaluate_individual</span><span class="p">,</span>
+                                              <span class="n">X</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">y_train</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_train</span><span class="p">,</span> <span class="n">y_score</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_score</span><span class="p">,</span>
+                                              <span class="n">scoring</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_function</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_eval_time</span><span class="p">,</span>
+                                              <span class="n">cache_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span><span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">final_pop</span> <span class="o">=</span> <span class="n">async_ea</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_objectives</span><span class="p">,</span>
-                                 <span class="n">pop</span><span class="p">,</span>
-                                 <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="p">,</span>
+            <span class="n">final_pop</span> <span class="o">=</span> <span class="n">async_ea</span><span class="p">(</span><span class="n">pop</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">_operator_set</span><span class="p">,</span>
                                  <span class="n">evaluation_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_evaluation_completed</span><span class="p">,</span>
                                  <span class="n">restart_callback</span><span class="o">=</span><span class="n">restart_criteria</span><span class="p">,</span>
                                  <span class="n">max_time_seconds</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
@@ -529,7 +540,7 @@
         <span class="sd">&quot;&quot;&quot; Perform any necessary post processing, such as ensemble building. &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_best_pipeline</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_final_pop</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">ind</span><span class="p">:</span> <span class="n">ind</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">wvalues</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Best pipeline has fitness of </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_best_pipeline</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">wvalues</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_best_pipeline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_toolbox</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_best_pipeline</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_best_pipeline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator_set</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_best_pipeline</span><span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Pipeline </span><span class="si">{}</span><span class="s2">, steps: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_best_pipeline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_best_pipeline</span><span class="o">.</span><span class="n">steps</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_best_pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_train</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_build_fit_ensemble</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>

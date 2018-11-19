@@ -160,17 +160,28 @@
 <h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="gama.gama.Gama">
-<em class="property">class </em><code class="descclassname">gama.gama.</code><code class="descname">Gama</code><span class="sig-paren">(</span><em>objectives=('filled_in_by_child_class'</em>, <em>'size')</em>, <em>optimize_strategy=(1</em>, <em>-1)</em>, <em>config=None</em>, <em>random_state=None</em>, <em>population_size=50</em>, <em>max_total_time=3600</em>, <em>max_eval_time=300</em>, <em>n_jobs=1</em>, <em>verbosity=30</em>, <em>keep_analysis_log=True</em>, <em>cache_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/gama.html#Gama"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.gama.Gama" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">gama.gama.</code><code class="descname">Gama</code><span class="sig-paren">(</span><em>scoring=None</em>, <em>objectives=('filled_in_by_child_class'</em>, <em>'size')</em>, <em>optimize_strategy=(1</em>, <em>-1)</em>, <em>config=None</em>, <em>random_state=None</em>, <em>population_size=50</em>, <em>max_total_time=3600</em>, <em>max_eval_time=300</em>, <em>n_jobs=1</em>, <em>verbosity=30</em>, <em>keep_analysis_log=True</em>, <em>cache_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/gama.html#Gama"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.gama.Gama" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper for the DEAP toolbox logic surrounding the GP process as well as ensemble construction.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>scoring</strong> – a string which specifies towards which objectives to optimize
+The valid metrics depend on the type of task. Many scikit-learn metrics are available.
+For classification, the following metrics are available:
+‘accuracy’, ‘roc_auc’, ‘average_precision’, ‘log_loss’, ‘precision_macro’, ‘precision_micro’,
+‘precision_weighted’, ‘precision_samples’, ‘recall_macro’, ‘recall_micro’, ‘recall_samples’, ‘recall_weighted’,
+‘f1_macro’, ‘f1_micro’, ‘f1_samples’, ‘f1_weighted’.
+For regression, the following metrics are available:
+‘explained_variance’, ‘r2’, ‘median_absolute_error’, ‘mean_squared_error’, ‘mean_squared_log_error’, ‘mean_absolute_error’.
+Whether to minimize or maximize is determined automatically (though can be overwritten by <cite>optimize_strategy</cite>.
+However, you can instead also specify ‘neg_’+metric (e.g. ‘neg_log_loss’) as metric to make it explicit.</li>
 <li><strong>objectives</strong> – a tuple which specifies towards which objectives to optimize
 The valid metrics depend on the type of task. Many scikit-learn metrics are available.
 Two additional metrics can also be chosen: <cite>size</cite> which represents the number of components in the pipeline,
 and <cite>time</cite> which specifies the time it takes to train and validate a model.
+If <cite>scoring</cite> is specified, it overwrites the first objective of <cite>objectives</cite>.
 Currently the maximum arity is 2.
 Example: (‘f1_macro’, ‘size’) or (‘f1’,)</li>
 <li><strong>optimize_strategy</strong> – a tuple of the same arity as <cite>objectives</cite>

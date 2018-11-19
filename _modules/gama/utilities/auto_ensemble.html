@@ -158,7 +158,7 @@
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">OneHotEncoder</span>
 <span class="kn">import</span> <span class="nn">stopit</span>
 
-<span class="kn">from</span> <span class="nn">gama.ea.metrics</span> <span class="k">import</span> <span class="n">Metric</span><span class="p">,</span> <span class="n">classification_metrics</span><span class="p">,</span> <span class="n">MetricType</span>
+<span class="kn">from</span> <span class="nn">gama.genetic_programming.algorithms.metrics</span> <span class="k">import</span> <span class="n">Metric</span>
 <span class="kn">from</span> <span class="nn">gama.utilities.generic.function_dispatcher</span> <span class="k">import</span> <span class="n">FunctionDispatcher</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -395,7 +395,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span> <span class="o">=</span> <span class="n">label_encoder</span>
 
         <span class="c1"># For metrics that only require class labels, we still want to apply one-hot-encoding to average predictions.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_one_hot_encoder</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y_true</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_one_hot_encoder</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">categories</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y_true</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">requires_probabilities</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_y_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_one_hot_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y_true</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
