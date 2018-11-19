@@ -159,7 +159,7 @@ class MutationTestCase(unittest.TestCase):
         return int(np.ceil(np.log(max_error_rate) / np.log((n_mutations - 1) / n_mutations)))
 
     def _mutShrink_is_applied(self, original, mutated):
-        """ Checks if mutation was caused by `deap.gp.mutShrink`.
+        """ Checks if mutation was caused by `mut_shrink`.
 
         :param original: the pre-mutation individual
         :param mutated:  the post-mutation individual
@@ -173,7 +173,7 @@ class MutationTestCase(unittest.TestCase):
         return (True, None)
 
     def _mutInsert_is_applied(self, original, mutated):
-        """ Checks if mutation was caused by `deap.gp.mutInsert`.
+        """ Checks if mutation was caused by `mut_insert`.
 
         :param original: the pre-mutation individual
         :param mutated:  the post-mutation individual
