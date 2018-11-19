@@ -44,10 +44,22 @@ for module_to_ignore in ["sklearn", "deap", "numpy"]:
 class Gama(object):
     """ Wrapper for the DEAP toolbox logic surrounding the GP process as well as ensemble construction.
 
+    :param scoring: a string which specifies towards which objectives to optimize
+        The valid metrics depend on the type of task. Many scikit-learn metrics are available.
+        For classification, the following metrics are available:
+        'accuracy', 'roc_auc', 'average_precision', 'log_loss', 'precision_macro', 'precision_micro',
+        'precision_weighted', 'precision_samples', 'recall_macro', 'recall_micro', 'recall_samples', 'recall_weighted',
+        'f1_macro', 'f1_micro', 'f1_samples', 'f1_weighted'.
+        For regression, the following metrics are available:
+        'explained_variance', 'r2', 'median_absolute_error', 'mean_squared_error', 'mean_squared_log_error', 'mean_absolute_error'.
+        Whether to minimize or maximize is determined automatically (though can be overwritten by `optimize_strategy`.
+        However, you can instead also specify 'neg\_'+metric (e.g. 'neg_log_loss') as metric to make it explicit.
+
     :param objectives: a tuple which specifies towards which objectives to optimize
         The valid metrics depend on the type of task. Many scikit-learn metrics are available.
         Two additional metrics can also be chosen: `size` which represents the number of components in the pipeline,
         and `time` which specifies the time it takes to train and validate a model.
+        If `scoring` is specified, it overwrites the first objective of `objectives`.
         Currently the maximum arity is 2.
         Example: ('f1_macro', 'size') or ('f1',)
 
