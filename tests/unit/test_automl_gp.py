@@ -1,7 +1,7 @@
 import unittest
 
 from gama.genetic_programming.components import Individual
-from gama.genetic_programming.selection import eliminate_NSGA
+from gama.genetic_programming.selection import eliminate_from_pareto
 from gama.configuration.testconfiguration import clf_config
 from gama import GamaClassifier
 
@@ -66,13 +66,13 @@ class AutomlGpTestCase(unittest.TestCase):
 
     def test_eliminate_NSGA(self):
         self.individual_list[0].fitness.values = (2, -1)
-        self.individual_list[1].fitness.values = (1, -2)
+        self.individual_list[1].fitness.values = (4, -2)
         self.individual_list[2].fitness.values = (3, -1)
 
-        eliminated = eliminate_NSGA(pop=self.individual_list, n=1)
+        eliminated = [eliminate_from_pareto(pop=self.individual_list, n=1)]
         self.assertListEqual(eliminated, [self.individual_list[0]])
 
         # Check order independence
-        eliminated = eliminate_NSGA(pop=list(reversed(self.individual_list)), n=1)
+        eliminated = [eliminate_from_pareto(pop=list(reversed(self.individual_list)), n=1)]
         self.assertListEqual(eliminated, [self.individual_list[0]],
                              "Individual should be dominated regardless of order.")

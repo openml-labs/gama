@@ -45,5 +45,14 @@ def select_from_pareto(population, select_n, pareto_fronts_n):
     return selected_individuals
 
 
-def eliminate_NSGA(pop, n):
-    return tools.selNSGA2(pop, k=len(pop))[-n:]
+def eliminate_from_pareto(pop, n):
+    # TODO: pick selection/elimination strategies from literature.
+    # For now we only eliminate one at a time so this will do.
+    if n != 1:
+        raise NotImplemented("Currently only n=1 is supported.")
+
+    def inverse_fitness(ind):
+        return (-ind.fitness.wvalues[0], -ind.fitness.wvalues[1])
+
+    pareto_worst = ParetoFront(pop, inverse_fitness)
+    return random.choice(pareto_worst)

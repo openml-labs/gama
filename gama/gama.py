@@ -25,7 +25,7 @@ from gama.utilities.generic.stopwatch import Stopwatch
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.preprocessing import define_preprocessing_steps
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
-from gama.genetic_programming.selection import create_from_population2, eliminate_NSGA
+from gama.genetic_programming.selection import create_from_population2, eliminate_from_pareto
 from gama.genetic_programming.components import create_random_individual, pset_from_config2
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
@@ -176,7 +176,7 @@ class Gama(object):
             create_from_population=partial(create_from_population2, cxpb=0.2, mutpb=0.8),
             create_new=partial(create_random_individual, primitive_set=self._pset),
             compile_=compile_individual,
-            eliminate=eliminate_NSGA
+            eliminate=eliminate_from_pareto
         )
 
     def _get_data_from_arff(self, arff_file_path, split_last=True):
