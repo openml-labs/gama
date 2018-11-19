@@ -34,11 +34,13 @@ for name, score_fn in [('precision', metrics.precision_score),
 regression_metrics = dict(
     explained_variance=(metrics.explained_variance_score, False, True),
     r2=(metrics.r2_score, False, True),
-    neg_median_absolute_error=(metrics.median_absolute_error, False, False),
     neg_mean_absolute_error=(metrics.mean_absolute_error, False, False),
-    neg_mean_squared_error=(metrics.mean_squared_error, False, False),
+    mean_absolute_error=(metrics.mean_absolute_error, False, False),
     neg_mean_squared_log_error=(metrics.mean_squared_log_error, False, False),
+    mean_squared_log_error=(metrics.mean_squared_log_error, False, False),
+    neg_median_absolute_error=(metrics.median_absolute_error, False, False),
     median_absolute_error=(metrics.median_absolute_error, False, False),
+    neg_mean_squared_error=(metrics.mean_squared_error, False, False),
     mean_squared_error=(metrics.mean_squared_error, False, False)
 )
 
