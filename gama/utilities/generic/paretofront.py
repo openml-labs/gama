@@ -71,6 +71,12 @@ class ParetoFront(object):
         self._iterator_index += 1
         return self._front[self._iterator_index - 1]
 
+    def __len__(self):
+        return len(self._front)
+
+    def __getitem__(self, item):
+        return self._front[item]
+
     def __str__(self):
         return str(self._front)
 
