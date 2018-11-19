@@ -2,7 +2,6 @@ import random
 import numpy
 
 from gama.utilities.generic.paretofront import ParetoFront
-from deap import tools
 
 
 def create_from_population2(operator_shell, pop, n, cxpb, mutpb):
