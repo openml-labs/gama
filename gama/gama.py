@@ -37,12 +37,12 @@ STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           did not terminate successfully."""
 __version__ = '0.1.0'
 
-for module_to_ignore in ["sklearn", "deap", "numpy"]:
+for module_to_ignore in ["sklearn", "numpy"]:
     warnings.filterwarnings("ignore", module=module_to_ignore)
 
 
 class Gama(object):
-    """ Wrapper for the DEAP toolbox logic surrounding the GP process as well as ensemble construction.
+    """ Wrapper for the toolbox logic surrounding the GP process as well as ensemble construction.
 
     :param scoring: a string which specifies towards which objectives to optimize
         The valid metrics depend on the type of task. Many scikit-learn metrics are available.
