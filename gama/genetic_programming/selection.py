@@ -55,4 +55,4 @@ def eliminate_from_pareto(pop, n):
         return (-ind.fitness.wvalues[0], -ind.fitness.wvalues[1])
 
     pareto_worst = ParetoFront(pop, inverse_fitness)
-    return random.choice(pareto_worst)
+    return [random.choice(pareto_worst)]

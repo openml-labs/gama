@@ -69,10 +69,10 @@ class AutomlGpTestCase(unittest.TestCase):
         self.individual_list[1].fitness.values = (4, -2)
         self.individual_list[2].fitness.values = (3, -1)
 
-        eliminated = [eliminate_from_pareto(pop=self.individual_list, n=1)]
+        eliminated = eliminate_from_pareto(pop=self.individual_list, n=1)
         self.assertListEqual(eliminated, [self.individual_list[0]])
 
         # Check order independence
-        eliminated = [eliminate_from_pareto(pop=list(reversed(self.individual_list)), n=1)]
+        eliminated = eliminate_from_pareto(pop=list(reversed(self.individual_list)), n=1)
         self.assertListEqual(eliminated, [self.individual_list[0]],
                              "Individual should be dominated regardless of order.")
