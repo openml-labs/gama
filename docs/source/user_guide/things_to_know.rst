@@ -2,9 +2,9 @@
 
 Things To Know
 --------------
-GAMA is in its early stages and very much work in progress.
-Some things won't change, such as providing a scikit-learn like interface as well as ARFF support.
-However, many other things such as how search space configuration or even the search itself is done, can *and probably will* still change.
+GAMA is currently in development.
+This means things can change, from at the interface level to the optimization procedure level.
+However, we expect few changes that break old code, and will document them when we make them.
 
 Important Hyperparameters
 *************************
@@ -14,9 +14,11 @@ Finding the best defaults is always a work in progress, so if you run into issue
 
 Here is a selection that might be of particular interest that are accessed on initialization:
 
-**objectives**: states towards which metrics to optimize.
-Supplying a binary tuple allows for multi-objective optimization.
+**scoring**: states towards which metric to optimize
+Multi-objective optimization will optimize towards the metric specified by `scoring`, as well as minimizing pipeline length.
 Make sure to optimize towards the metric that reflects well what is important to you.
+Valid options include `roc_auc`, `accuracy` and `log_loss` for classification, and `mean_squared_error` and `r2` for regression.
+For more options see `API documentation <https://pgijsbers.github.io/gama/api/index.html#api>`_.
 
 **n_jobs**: determines how many processes can be run in parallel during `fit`.
 By default only one core is used. If you have more cores available, this has the most influence over how many
