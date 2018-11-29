@@ -9,18 +9,18 @@ from gama.utilities.auto_ensemble import EnsembleClassifier
 
 
 class GamaClassifier(Gama):
-    def __init__(self, config=None, objectives=('neg_log_loss', 'size'), *args, **kwargs):
+    def __init__(self, config=None, scoring='neg_log_loss', *args, **kwargs):
         if not config:
             # Do this to avoid the whole dictionary being included in the documentation.
             config = clf_config
-        if Metric(objectives[0]).requires_probabilities:
+        if Metric.from_string(scoring).requires_probabilities:
             # we don't want classifiers that do not have `predict_proba`, because then we have to
             # start doing one hot encodings of predictions etc.
             config = {alg: hp for (alg, hp) in config.items()
                       if not (inspect.isclass(alg) and issubclass(alg, ClassifierMixin)and not hasattr(alg(), 'predict_proba'))}
 
         self._label_encoder = None
-        super().__init__(*args, **kwargs, config=config, objectives=objectives)
+        super().__init__(*args, **kwargs, config=config, scoring=scoring)
 
     def predict(self, X=None, arff_file_path=None):
         """ Predict the target for input X.
@@ -51,7 +51,7 @@ class GamaClassifier(Gama):
         return self._label_encoder.transform(y)
 
     def _initialize_ensemble(self):
-        self.ensemble = EnsembleClassifier(self._scoring_function, self.y_train,
+        self.ensemble = EnsembleClassifier(self._metric, self.y_train,
                                            model_library_directory=self._cache_dir, n_jobs=self._n_jobs)
 
     def _build_fit_ensemble(self, ensemble_size, timeout):

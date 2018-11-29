@@ -21,7 +21,7 @@ class MutationTestCase(unittest.TestCase):
     def setUp(self):
         self.gama = GamaClassifier(random_state=0,
                                    config=clf_config,
-                                   objectives=('accuracy', 'size'),
+                                   scoring='accuracy',
                                    keep_analysis_log=False)
 
         self.ind_strings = [

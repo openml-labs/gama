@@ -51,10 +51,8 @@ def cross_val_predict_score(estimator, X, y_train, y_score, groups=None, scoring
     """
     if isinstance(scoring, Metric):
         metric = scoring
-    elif isinstance(scoring, str):
-        metric = Metric(scoring)
     else:
-        raise ValueError('Parameter `scoring` must be an instance of `str` or `gama.ea.metrics.Metric`, is {}.'
+        raise ValueError('Parameter `scoring` must be an instance of `metrics.Metric`, is {}.'
                          .format(type(scoring)))
 
     method = 'predict_proba' if metric.requires_probabilities else 'predict'

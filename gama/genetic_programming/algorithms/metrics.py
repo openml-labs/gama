@@ -1,5 +1,6 @@
 from enum import Enum
 from functools import partial
+from typing import Callable
 
 import numpy as np
 from sklearn import metrics
@@ -56,17 +57,16 @@ class MetricType(Enum):
 class Metric:
     """ A wrapper for a scoring function to provide additional meta-data. """
 
-    def __init__(self, metric_name):
-        if metric_name in regression_metrics:
-            self.task_type = MetricType.REGRESSION
-        elif metric_name in classification_metrics:
-            self.task_type = MetricType.CLASSIFICATION
-        else:
-            raise ValueError('Metric not known: {}.'.format(metric_name))
-
+    def __init__(self, metric_name: str,
+                 score_function: Callable,
+                 requires_probabilities: bool,
+                 maximize: bool,
+                 task_type: MetricType):
         self.name = metric_name
-        self._score_function, self.requires_probabilities, bigger_is_better = all_metrics[metric_name]
-        self._optimize_modifier = 1 if bigger_is_better else -1
+        self._score_function = score_function
+        self.requires_probabilities = requires_probabilities
+        self._optimize_modifier = 1 if maximize else -1
+        self.task_type = task_type
 
     def score(self, y_true, predictions):
         """ Score the predictions based on the metric.
@@ -96,3 +96,15 @@ class Metric:
     def maximizable_score(self, y_true, predictions):
         """ Calculates the score, but negated if necessary so that maximizing is always better. """
         return self._optimize_modifier * self.score(y_true, predictions)
+
+    @classmethod
+    def from_string(cls, metric_name: str):
+        if metric_name in regression_metrics:
+            task_type = MetricType.REGRESSION
+        elif metric_name in classification_metrics:
+            task_type = MetricType.CLASSIFICATION
+        else:
+            raise ValueError('Metric not known: {}.'.format(metric_name))
+
+        score_function, requires_probabilities, should_maximize = all_metrics[metric_name]
+        return cls(metric_name, score_function, requires_probabilities, should_maximize, task_type)

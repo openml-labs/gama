@@ -97,9 +97,8 @@ class Gama(object):
     """
 
     def __init__(self,
-                 scoring=None,
-                 objectives=('filled_in_by_child_class', 'size'),
-                 optimize_strategy=(1, -1),
+                 scoring='filled_in_by_child_class',
+                 regularize_length=True,
                  config=None,
                  random_state=None,
                  population_size=50,
@@ -130,11 +129,6 @@ class Gama(object):
                       if k not in ['self', 'config', 'gamalog', 'file_handler', 'stdout_streamhandler']])
         ))
 
-        if len(objectives) != len(optimize_strategy):
-            error_message = "Length of objectives should match length of optimize_strategy. " \
-                             "For each objective, an optimization strategy should be maximized."
-            log.error(error_message + " objectives: {}, optimize_strategy: {}".format(objectives, optimize_strategy))
-            raise ValueError(error_message)
         if max_total_time is None or max_total_time <= 0:
             error_message = "max_total_time should be greater than zero."
             log.error(error_message + " max_total_time: {}".format(max_total_time))
@@ -147,9 +141,6 @@ class Gama(object):
         if n_jobs == -1:
             n_jobs = multiprocessing.cpu_count()
 
-        if scoring is not None:
-            objectives = (scoring, *objectives[1:])
-
         self._best_pipeline = None
         self._fitted_pipelines = {}
         self._random_state = random_state
@@ -158,11 +149,11 @@ class Gama(object):
         self._max_eval_time = max_eval_time
         self._fit_data = None
         self._n_jobs = n_jobs
-        self._scoring_function = objectives[0]
         self._observer = None
-        self._objectives = objectives
         self.ensemble = None
         self._ensemble_fit = False
+
+        self._metric = Metric.from_string(scoring)
 
         default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
@@ -230,9 +221,8 @@ class Gama(object):
             X, y = self._get_data_from_arff(arff_file_path)
         y_score = self._construct_y_score(y)
 
-        score_metric = Metric(self._scoring_function)
-        predictions = self.predict_proba(X) if score_metric.requires_probabilities else self.predict(X)
-        return score_metric.score(y_score, predictions)
+        predictions = self.predict_proba(X) if self._metric.requires_probabilities else self.predict(X)
+        return self._metric.score(y_score, predictions)
 
     def _preprocess_arff(self, arff_file_path):
         X, y = self._get_data_from_arff(arff_file_path)
@@ -354,7 +344,7 @@ class Gama(object):
         return X, y
 
     def _construct_y_score(self, y):
-        if Metric(self._scoring_function).requires_probabilities:
+        if self._metric.requires_probabilities:
             return OneHotEncoder(categories='auto').fit_transform(y.reshape(-1, 1)).todense()
         return y
 
@@ -371,7 +361,7 @@ class Gama(object):
                                       operator_set=self._operator_set)
         self._operator_set.evaluate = partial(evaluate_individual,
                                               X=self.X, y_train=self.y_train, y_score=self.y_score,
-                                              scoring=self._scoring_function, timeout=self._max_eval_time,
+                                              scoring=self._metric, timeout=self._max_eval_time,
                                               cache_dir=self._cache_dir)
 
         try:

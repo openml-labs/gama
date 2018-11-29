@@ -4,10 +4,10 @@ from gama.utilities.auto_ensemble import EnsembleRegressor
 
 
 class GamaRegressor(Gama):
-    def __init__(self, config=None, objectives=('neg_mean_squared_error', 'size'), *args, **kwargs):
+    def __init__(self, config=None, scoring='neg_mean_squared_error', *args, **kwargs):
         if not config:
             config = reg_config
-        super().__init__(*args, **kwargs, config=config, objectives=objectives)
+        super().__init__(*args, **kwargs, config=config, scoring=scoring)
 
     def predict(self, X=None, arff_file_path=None):
         """ Predict the target for input X.
@@ -21,5 +21,5 @@ class GamaRegressor(Gama):
         return regressor.predict(X)
 
     def _initialize_ensemble(self):
-        self.ensemble = EnsembleRegressor(self._scoring_function, self.y_train,
+        self.ensemble = EnsembleRegressor(self._metric, self.y_train,
                                           model_library_directory=self._cache_dir, n_jobs=self._n_jobs)

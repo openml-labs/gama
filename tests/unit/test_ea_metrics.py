@@ -27,7 +27,7 @@ class MetricsTestCase(unittest.TestCase):
         pass
 
     def test_accuracy_numeric(self):
-        accuracy_metric = Metric('accuracy')
+        accuracy_metric = Metric.from_string('accuracy')
         self.assertEqual(accuracy_metric.score(self.y_true, self.y_true), 1.0)
         self.assertEqual(accuracy_metric.maximizable_score(self.y_true, self.y_true), 1.0)
 
@@ -35,7 +35,7 @@ class MetricsTestCase(unittest.TestCase):
         self.assertEqual(accuracy_metric.maximizable_score(self.y_true_str, self.y_1_mistake_str), 0.8)
 
     def test_accuracy_string(self):
-        accuracy_metric = Metric('accuracy')
+        accuracy_metric = Metric.from_string('accuracy')
         self.assertEqual(accuracy_metric.score(self.y_true_str, self.y_true_str), 1.0)
         self.assertEqual(accuracy_metric.maximizable_score(self.y_true_str, self.y_true_str), 1.0)
 
@@ -43,7 +43,7 @@ class MetricsTestCase(unittest.TestCase):
         self.assertEqual(accuracy_metric.maximizable_score(self.y_true_str, self.y_1_mistake_str), 0.8)
 
     def test_logloss_numeric(self):
-        accuracy_metric = Metric('log_loss')
+        accuracy_metric = Metric.from_string('log_loss')
         self.assertAlmostEquals(accuracy_metric.score(self.y_true_ohe, self.y_true_ohe), 0.0)
         self.assertAlmostEquals(accuracy_metric.maximizable_score(self.y_true_ohe, self.y_true_ohe), 0.0)
 
@@ -57,7 +57,7 @@ class MetricsTestCase(unittest.TestCase):
 
     def test_all_metrics_instantiate(self):
         for metric in all_metrics:
-            Metric(metric)
+            Metric.from_string(metric)
 
 
 if __name__ == '__main__':
