@@ -156,7 +156,7 @@ class Individual:
     def can_mate_with(self, other) -> bool:
         other_primitives = list(map(lambda primitive_node: primitive_node._primitive, other.primitives))
         shared_primitives = [p for p in self.primitives if p._primitive in other_primitives]
-        both_at_least_length_2 = len(other_primitives) >= 2 and len(list(self.primitives)) >= 2
+        both_at_least_length_2 = len(other_primitives) >= 2 and len(self.primitives) >= 2
         return both_at_least_length_2 or shared_primitives
 
     @classmethod
