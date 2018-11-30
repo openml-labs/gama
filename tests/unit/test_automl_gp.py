@@ -65,12 +65,13 @@ class AutomlGpTestCase(unittest.TestCase):
         self.assertEqual(len(list(self.individual_list[2].primitives)), 1)
 
     def test_eliminate_NSGA(self):
-        self.individual_list[0].fitness.values = (2, -1)
+        self.individual_list[0].fitness.values = (3, -2)
         self.individual_list[1].fitness.values = (4, -2)
         self.individual_list[2].fitness.values = (3, -1)
 
         eliminated = eliminate_from_pareto(pop=self.individual_list, n=1)
-        self.assertListEqual(eliminated, [self.individual_list[0]])
+        self.assertListEqual(eliminated, [self.individual_list[0]],
+                             "The element (3, -2) is dominated by both (3, -1)  and (4, -2) so should be eliminated.")
 
         # Check order independence
         eliminated = eliminate_from_pareto(pop=list(reversed(self.individual_list)), n=1)
