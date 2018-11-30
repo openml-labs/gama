@@ -100,18 +100,17 @@ class Individual:
         return """Individual {}\nPipeline: {}\nFitness: {}""".format(self._id, self.pipeline_str(), self.fitness)
 
     @property
-    def primitives(self) -> Generator[PrimitiveNode, None, None]:
-        yield self.main_node
+    def primitives(self) -> List[PrimitiveNode]:
+        primitives = [self.main_node]
         current_node = self.main_node._data_node
         while current_node != DATA_TERMINAL:
-            yield current_node
+            primitives.append(current_node)
             current_node = current_node._data_node
+        return primitives
 
     @property
-    def terminals(self) -> Generator[Terminal, None, None]:
-        for primitive in self.primitives:
-            for terminal in primitive._terminals:
-                yield terminal
+    def terminals(self) -> List[Terminal]:
+        return [terminal for primitive in self.primitives for terminal in primitive._terminals]
 
     def replace_terminal(self, position: int, new_terminal: Terminal):
         scan_position = 0
