@@ -30,7 +30,7 @@ def compile_individual(individual: Individual, parameter_checks=None, preprocess
     return Pipeline(list(reversed(steps)))
 
 
-def cross_val_predict_score(estimator, X, y_train, y_score, groups=None, scoring=None, cv=None, n_jobs=1, verbose=0,
+def cross_val_predict_score(estimator, X, y_train, y_score, groups=None, metrics=None, cv=None, n_jobs=1, verbose=0,
                             fit_params=None, pre_dispatch='2*n_jobs'):
     """ Return both the predictions and score of the estimator trained on the data given the cv strategy.
     # TODO: Add reference to underlying sklearn cross_val_predict for parameter descriptions.
@@ -41,7 +41,7 @@ def cross_val_predict_score(estimator, X, y_train, y_score, groups=None, scoring
     :param y_score: target in appropriate format for scoring (typically (N,K) for metrics based on class probabilities,
         (N,) otherwise).
     :param groups:
-    :param scoring:
+    :param scorers:
     :param cv:
     :param n_jobs:
     :param verbose:
@@ -49,16 +49,25 @@ def cross_val_predict_score(estimator, X, y_train, y_score, groups=None, scoring
     :param pre_dispatch:
     :return:
     """
-    if isinstance(scoring, Metric):
-        metric = scoring
-    else:
-        raise ValueError('Parameter `scoring` must be an instance of `metrics.Metric`, is {}.'
-                         .format(type(scoring)))
+    if not all(isinstance(metric, Metric) for metric in metrics):
+        raise ValueError('All `metrics` must be an instance of `metrics.Metric`, is {}.'
+                         .format([type(metric) for metric in metrics]))
 
-    method = 'predict_proba' if metric.requires_probabilities else 'predict'
+    # TODO: For mixed metrics, call `predict` instead of finding the highest probability
+    method = 'predict_proba' if any(metric.requires_probabilities for metric in metrics) else 'predict'
     predictions = cross_val_predict(estimator, X, y_train, groups, cv, n_jobs, verbose, fit_params, pre_dispatch, method)
-    score = metric.maximizable_score(y_score, predictions)
-    return predictions, score
+
+    scores = []
+    for metric in metrics:
+        if metric.requires_probabilities or predictions.ndim == 1:
+            # either the metric requires probabilities, which means `predictions` is of shape (N,K), or no metric
+            # requires probabilities, which means that `predictions` is of shape (N,).
+            scores.append(metric.maximizable_score(y_score, predictions))
+        else:
+            # case of a class-label metric while `predictions` are class probabilities
+            scores.append(metric.maximizable_score(y_train, predictions.argmax(axis=1)))
+
+    return predictions, scores
 
 
 def object_is_valid_pipeline(o):
@@ -69,16 +78,18 @@ def object_is_valid_pipeline(o):
             hasattr(o, 'steps'))
 
 
-def evaluate_individual(individual: Individual, operator_set: OperatorSet, *args, **kwargs):
+def evaluate_individual(individual: Individual, operator_set: OperatorSet, evaluate_pipeline_length, *args, **kwargs):
     pipeline = operator_set.compile(individual)
-    (score, start_datetime, evaluation_time, pipeline_length) = evaluate_pipeline(pipeline, *args, **kwargs)
-    individual.fitness.values = (score, pipeline_length)
+    (scores, start_datetime, evaluation_time) = evaluate_pipeline(pipeline, *args, **kwargs)
+    individual.fitness.values = scores
+    if evaluate_pipeline_length:
+        individual.fitness.values = (*individual.fitness.values, -len(individual.primitives))
     individual.fitness.start_time = start_datetime
     individual.fitness.time = evaluation_time
     return individual
 
 
-def evaluate_pipeline(pl, X, y_train, y_score, timeout, scoring='accuracy', cv=5, cache_dir=None, logger=None):
+def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5, cache_dir=None, logger=None):
     """ Evaluates a pipeline used k-Fold CV. """
     if not logger:
         logger = log
@@ -86,14 +97,14 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, scoring='accuracy', cv=5
     if not object_is_valid_pipeline(pl):
         return ValueError('Pipeline is not valid. Must not be None and have `fit`, `predict` and `steps`.')
 
+    scores = tuple([float('-inf')] * len(metrics))
     start_datetime = datetime.now()
     start = time.process_time()
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
-            prediction, score = cross_val_predict_score(pl, X, y_train, y_score, cv=cv, scoring=scoring)
+            prediction, scores = cross_val_predict_score(pl, X, y_train, y_score, cv=cv, metrics=metrics)
         except stopit.TimeoutException:
             # score not actually unused, because exception gets caught by the context manager.
-            score = float('-inf')
             raise
         except KeyboardInterrupt:
             raise
@@ -105,20 +116,18 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, scoring='accuracy', cv=5
 
             single_line_pipeline = str(pl).replace('\n', '')
             log_parseable_event(logger, TOKENS.EVALUATION_ERROR, start_datetime, single_line_pipeline, type(e), e)
-            score = -float("inf")
 
-    if cache_dir and score != -float("inf"):
+    if cache_dir and -float("inf") not in scores:
         pl_filename = str(uuid.uuid4())
 
         try:
             with open(os.path.join(cache_dir, pl_filename + '.pkl'), 'wb') as fh:
-                pickle.dump((pl, prediction, score), fh)
+                pickle.dump((pl, prediction, scores), fh)
         except FileNotFoundError:
             log.warning("File not found while saving predictions. This can happen in the multi-process case if the "
                         "cache gets deleted within `max_eval_time` of the end of the search process.", exc_info=True)
 
     evaluation_time = time.process_time() - start
-    pipeline_length = len(pl.steps)
 
     if c_mgr.state == c_mgr.INTERRUPTED:
         # A TimeoutException was raised, but not by the context manager.
@@ -127,14 +136,11 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, scoring='accuracy', cv=5
         raise stopit.utils.TimeoutException()
 
     if not c_mgr:
-        # For now we treat a eval timeout the same way as e.g. NaN exceptions.
-        fitness_values = (-float("inf"), start_datetime, timeout, pipeline_length)
+        # For now we treat an eval timeout the same way as e.g. NaN exceptions and use the default score.
         logger.info('Timeout encountered while evaluating pipeline.')
-
         single_line_pipeline = ''.join(str(pl).split('\n'))
         log_parseable_event(logger, TOKENS.EVALUATION_TIMEOUT, start_datetime, single_line_pipeline)
         logger.debug("Timeout after {}s: {}".format(timeout, pl))
-    else:
-        fitness_values = (score, start_datetime, evaluation_time, pipeline_length)
 
+    fitness_values = (scores, start_datetime, evaluation_time)
     return fitness_values

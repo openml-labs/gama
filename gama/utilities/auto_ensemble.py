@@ -92,7 +92,7 @@ class Ensemble(object):
             log.warning("The ensemble already contained models. Overwriting the ensemble.")
             self._models = {}
 
-        sorted_ensembles = sorted(self.model_library, key=lambda m: -m.validation_score)
+        sorted_ensembles = reversed(sorted(self.model_library, key=lambda m: m.validation_score))
 
         # Since the model library only features unique models, we do not need to check for duplicates here.
         selected_models = list(sorted_ensembles)[:n]
@@ -213,10 +213,10 @@ def load_predictions(cache_dir, prediction_transformation=None):
                 # to a restart/timeout. I can not find specifications saying that any interrupt of pickle.dump leads
                 # to 0-sized files, but in practice this seems to case so far. TODO: Find verification, or fix proper.
                 with open(os.path.join(cache_dir, file), 'rb') as fh:
-                    pl, predictions, score = pickle.load(fh)
+                    pl, predictions, scores = pickle.load(fh)
                 if prediction_transformation:
                     predictions = prediction_transformation(predictions)
-                models.append(Model(str(pl), pl, predictions, score))
+                models.append(Model(str(pl), pl, predictions, scores))
     return models
 
 

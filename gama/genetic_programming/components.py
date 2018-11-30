@@ -73,14 +73,6 @@ class Fitness:
         self.start_time = None
         self.time = None
 
-    @property
-    def wvalues(self):
-        return self.values[0], self.values[1]*-1
-
-    def dominates(self, other):
-        return ((self.wvalues[0] >= other.wvalues[0] and self.wvalues[1] >= other.wvalues[1])
-                and (self.wvalues[0] > other.wvalues[0] or self.wvalues[1] > other.wvalues[1]))
-
 
 class Individual:
     """ A collection of PrimitiveNodes which together specify a machine learning pipeline. """

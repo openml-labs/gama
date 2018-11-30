@@ -21,5 +21,5 @@ class GamaRegressor(Gama):
         return regressor.predict(X)
 
     def _initialize_ensemble(self):
-        self.ensemble = EnsembleRegressor(self._metric, self.y_train,
+        self.ensemble = EnsembleRegressor(self._metrics[0], self.y_train,
                                           model_library_directory=self._cache_dir, n_jobs=self._n_jobs)

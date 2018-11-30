@@ -1,7 +1,7 @@
 import random
 import logging
 import os
-from collections import defaultdict
+from collections import defaultdict, Iterable
 import datetime
 import multiprocessing
 import shutil
@@ -141,19 +141,19 @@ class Gama(object):
         if n_jobs == -1:
             n_jobs = multiprocessing.cpu_count()
 
-        self._best_pipeline = None
         self._fitted_pipelines = {}
         self._random_state = random_state
         self._pop_size = population_size
         self._max_total_time = max_total_time
         self._max_eval_time = max_eval_time
-        self._fit_data = None
         self._n_jobs = n_jobs
+        self._regularize_length = regularize_length
+        self._best_pipeline = None
+        self._fit_data = None
         self._observer = None
         self.ensemble = None
         self._ensemble_fit = False
-
-        self._metric = Metric.from_string(scoring)
+        self._metrics = self._scoring_to_metric(scoring)
 
         default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
@@ -181,6 +181,21 @@ class Gama(object):
             compile_=compile_individual,
             eliminate=eliminate_from_pareto
         )
+
+    def _scoring_to_metric(self, scoring):
+        if isinstance(scoring, str):
+            return tuple([Metric.from_string(scoring)])
+        elif isinstance(scoring, Metric):
+            return tuple([scoring])
+        elif isinstance(scoring, Iterable):
+            if all(isinstance(scorer, Metric) for scorer in scoring):
+                return scoring
+            elif all(isinstance(scorer, str) for scorer in scoring):
+                return tuple([Metric.from_string(scorer) for scorer in scoring])
+            else:
+                raise ValueError("Iterable of mixed types for `scoring` currently not supported.")
+        else:
+            raise ValueError("scoring must be a string, Metric or Iterable (of strings or Metrics).")
 
     def _get_data_from_arff(self, arff_file_path, split_last=True):
         # load arff
@@ -221,8 +236,9 @@ class Gama(object):
             X, y = self._get_data_from_arff(arff_file_path)
         y_score = self._construct_y_score(y)
 
-        predictions = self.predict_proba(X) if self._metric.requires_probabilities else self.predict(X)
-        return self._metric.score(y_score, predictions)
+        # TODO: return multiple scores if multiple metrics specified. Avoid code duplication with `cross_val_predict_score`
+        predictions = self.predict_proba(X) if self._metrics[0].requires_probabilities else self.predict(X)
+        return self._metrics[0].score(y_score, predictions)
 
     def _preprocess_arff(self, arff_file_path):
         X, y = self._get_data_from_arff(arff_file_path)
@@ -344,7 +360,7 @@ class Gama(object):
         return X, y
 
     def _construct_y_score(self, y):
-        if self._metric.requires_probabilities:
+        if any(metric.requires_probabilities for metric in self._metrics):
             return OneHotEncoder(categories='auto').fit_transform(y.reshape(-1, 1)).todense()
         return y
 
@@ -358,10 +374,11 @@ class Gama(object):
             pop = [self._operator_set.individual() for _ in range(self._pop_size)]
 
         evaluate_individual = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
+                                      evaluate_pipeline_length=self._regularize_length,
                                       operator_set=self._operator_set)
         self._operator_set.evaluate = partial(evaluate_individual,
                                               X=self.X, y_train=self.y_train, y_score=self.y_score,
-                                              scoring=self._metric, timeout=self._max_eval_time,
+                                              metrics=self._metrics, timeout=self._max_eval_time,
                                               cache_dir=self._cache_dir)
 
         try:
@@ -377,8 +394,8 @@ class Gama(object):
 
     def _postprocess_phase(self, n, timeout=1e6):
         """ Perform any necessary post processing, such as ensemble building. """
-        self._best_pipeline = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.wvalues)))[0]
-        log.info("Best pipeline has fitness of {}".format(self._best_pipeline.fitness.wvalues))
+        self._best_pipeline = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values)))[0]
+        log.info("Best pipeline has fitness of {}".format(self._best_pipeline.fitness.values))
         self._best_pipeline = self._operator_set.compile(self._best_pipeline)
         log.info("Pipeline {}, steps: {}".format(self._best_pipeline, self._best_pipeline.steps))
         self._best_pipeline.fit(self.X, self.y_train)
@@ -414,7 +431,6 @@ class Gama(object):
             self._ensemble_fit = True
         except Exception as e:
             log.warning("Error during auto ensemble: {}".format(e))
-
 
     def delete_cache(self):
         """ Removes the cache folder and all files associated to this instance. """

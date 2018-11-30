@@ -4,7 +4,6 @@ from sklearn.preprocessing import LabelEncoder
 
 from .gama import Gama
 from gama.configuration.classification import clf_config
-from gama.genetic_programming.algorithms.metrics import Metric
 from gama.utilities.auto_ensemble import EnsembleClassifier
 
 
@@ -13,7 +12,9 @@ class GamaClassifier(Gama):
         if not config:
             # Do this to avoid the whole dictionary being included in the documentation.
             config = clf_config
-        if Metric.from_string(scoring).requires_probabilities:
+
+        self._metrics = self._scoring_to_metric(scoring)
+        if any(metric.requires_probabilities for metric in self._metrics):
             # we don't want classifiers that do not have `predict_proba`, because then we have to
             # start doing one hot encodings of predictions etc.
             config = {alg: hp for (alg, hp) in config.items()
@@ -51,7 +52,7 @@ class GamaClassifier(Gama):
         return self._label_encoder.transform(y)
 
     def _initialize_ensemble(self):
-        self.ensemble = EnsembleClassifier(self._metric, self.y_train,
+        self.ensemble = EnsembleClassifier(self._metrics[0], self.y_train,
                                            model_library_directory=self._cache_dir, n_jobs=self._n_jobs)
 
     def _build_fit_ensemble(self, ensemble_size, timeout):

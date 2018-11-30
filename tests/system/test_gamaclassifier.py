@@ -80,7 +80,7 @@ class GamaClassifierSystemTestCase(unittest.TestCase):
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
 
-        gama = GamaClassifier(random_state=0, max_total_time=60, objectives=(metric, 'size'))
+        gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric)
         with Stopwatch() as sw:
             gama.fit(X_train, y_train, auto_ensemble_n=5)
 
@@ -141,7 +141,7 @@ class GamaClassifierSystemTestCase(unittest.TestCase):
         X_train[1:300:2, 0] = X_train[2:300:5, 1] = float("NaN")
         X_test[1:100:2, 0] = X_test[2:100:5, 1] = float("NaN")
 
-        gama = GamaClassifier(random_state=0, max_total_time=60, objectives=(metric, 'size'))
+        gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric)
         with Stopwatch() as sw:
             gama.fit(X_train, y_train, auto_ensemble_n=5)
 
@@ -181,7 +181,7 @@ class GamaClassifierARFFSystemTestCase(unittest.TestCase):
     def _test_dataset_problem(self, data, metric):
         train_path = 'tests/data/{}_train.arff'.format(data['name'])
         test_path = 'tests/data/{}_test.arff'.format(data['name'])
-        gama = GamaClassifier(random_state=0, max_total_time=60, objectives=(metric, 'size'))
+        gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric)
 
         X, y = data['load'](return_X_y=True)
         X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)

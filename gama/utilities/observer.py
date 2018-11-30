@@ -8,8 +8,8 @@ log = logging.getLogger(__name__)
 class Observer(object):
     
     def __init__(self, id_):
-        self._overall_pareto_front = ParetoFront(get_values_fn=lambda ind: ind.fitness.wvalues)
-        self._current_pareto_front = ParetoFront(get_values_fn=lambda ind: ind.fitness.wvalues)
+        self._overall_pareto_front = ParetoFront(get_values_fn=lambda ind: ind.fitness.values)
+        self._current_pareto_front = ParetoFront(get_values_fn=lambda ind: ind.fitness.values)
 
         self._pareto_callbacks = []
 
@@ -21,27 +21,27 @@ class Observer(object):
     def _record_individual(self, ind):
         with open(self._evaluation_filename, 'a') as fh:
             to_record = [str(ind.fitness.time),
-                         str(ind.fitness.wvalues[0]),
-                         str(ind.fitness.wvalues[1]),
+                         str(ind.fitness.values[0]),
+                         str(ind.fitness.values[1]),
                          str(ind)]
             fh.write(';'.join(to_record) + '\n')
 
     def update(self, ind):
-        log.debug("Evaluation;{:.4f};{};{}".format(ind.fitness.time, ind.fitness.wvalues, ind))
+        log.debug("Evaluation;{:.4f};{};{}".format(ind.fitness.time, ind.fitness.values, ind))
         self._individuals.append(ind)
         self._record_individual(ind)
 
         updated = self._current_pareto_front.update(ind)
         if updated:
             self._individuals_since_last_pareto_update = 0
-            log.info("Current pareto-front updated with individual with wvalues {}.".format(ind.fitness.wvalues))
+            log.info("Current pareto-front updated with individual with wvalues {}.".format(ind.fitness.values))
         else:
             self._individuals_since_last_pareto_update += 1
 
         updated = self._overall_pareto_front.update(ind)
         if updated:
             self._update_pareto_front(ind)
-            log.info("Overall pareto-front updated with individual with wvalues {}.".format(ind.fitness.wvalues))
+            log.info("Overall pareto-front updated with individual with wvalues {}.".format(ind.fitness.values))
 
     def reset_current_pareto_front(self):
         self._current_pareto_front.clear()

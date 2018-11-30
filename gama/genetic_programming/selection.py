@@ -22,7 +22,7 @@ def select_from_pareto(population, select_n, pareto_fronts_n):
     pareto_fronts = []
     population_left = population
     while len(pareto_fronts) != pareto_fronts_n:
-        pareto_fronts.append(ParetoFront(start_list=population_left, get_values_fn=lambda ind: ind.fitness.wvalues))
+        pareto_fronts.append(ParetoFront(start_list=population_left, get_values_fn=lambda ind: ind.fitness.values))
         population_left = [ind for ind in population_left if ind not in pareto_fronts[-1]]
         if len(population_left) == 0 and len(pareto_fronts) != pareto_fronts_n:
             # log.debug("Desired amount of pareto fronts could not be constructed.")
@@ -51,7 +51,7 @@ def eliminate_from_pareto(pop, n):
         raise NotImplemented("Currently only n=1 is supported.")
 
     def inverse_fitness(ind):
-        return (-ind.fitness.wvalues[0], -ind.fitness.wvalues[1])
+        return [-value for value in ind.fitness.values]
 
     pareto_worst = ParetoFront(pop, inverse_fitness)
     return [random.choice(pareto_worst)]
