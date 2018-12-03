@@ -70,7 +70,7 @@ The following script manually sets up GAMA to print to stdout (and ignores the b
 Running the above script display the GAMA version used, and the hyperparameter values on initialization::
 
     Using GAMA version 0.1.0.
-    GamaClassifier(cache_dir=None,verbosity=None,n_jobs=1,max_eval_time=300,max_total_time=180,population_size=50,random_state=None,optimize_strategy=(1, -1),objectives=('neg_log_loss', 'size'))
+    GamaClassifier(cache_dir=None,verbosity=None,n_jobs=1,max_eval_time=300,max_total_time=180,population_size=50,random_state=None,scoring='neg_log_loss'))
 
 Actual values or hyperparameter names may vary depending on the version of GAMA you are using.
 Make sure to set *both* the log level of the log and the stream handler.
