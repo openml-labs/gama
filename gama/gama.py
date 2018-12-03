@@ -44,7 +44,10 @@ for module_to_ignore in ["sklearn", "numpy"]:
 class Gama(object):
     """ Wrapper for the toolbox logic surrounding the GP process as well as ensemble construction.
 
-    :param scoring: a string which specifies towards which objectives to optimize
+    :param scoring: string, Metric or tuple.
+        Specifies the/all metric(s) to optimize towards. A string will be converted to Metric. A tuple must
+        specify each metric with the same type (i.e. all str or all Metric).
+
         The valid metrics depend on the type of task. Many scikit-learn metrics are available.
         For classification, the following metrics are available:
         'accuracy', 'roc_auc', 'average_precision', 'log_loss', 'precision_macro', 'precision_micro',
@@ -55,17 +58,8 @@ class Gama(object):
         Whether to minimize or maximize is determined automatically (though can be overwritten by `optimize_strategy`.
         However, you can instead also specify 'neg\_'+metric (e.g. 'neg_log_loss') as metric to make it explicit.
 
-    :param objectives: a tuple which specifies towards which objectives to optimize
-        The valid metrics depend on the type of task. Many scikit-learn metrics are available.
-        Two additional metrics can also be chosen: `size` which represents the number of components in the pipeline,
-        and `time` which specifies the time it takes to train and validate a model.
-        If `scoring` is specified, it overwrites the first objective of `objectives`.
-        Currently the maximum arity is 2.
-        Example: ('f1_macro', 'size') or ('f1',)
-
-    :param optimize_strategy: a tuple of the same arity as `objectives`
-        Specifies for each objective whether you want to maximize (1) or minimize (-1) the objective.
-        Example: (1, -1).
+    :param regularize_length: bool.
+        If True, add pipeline length as an optimization metric (preferring short over long).
 
     :param config: a dictionary which specifies available components and their valid hyperparameter settings
         For more information, see :ref:`search_space_configuration`.
