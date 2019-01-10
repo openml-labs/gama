@@ -13,8 +13,7 @@ import warnings
 import arff
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder, Imputer
 
 import gama.genetic_programming.compilers.scikitlearn
 from gama.genetic_programming.algorithms.metrics import Metric
@@ -345,7 +344,7 @@ class Gama(object):
         # This helps us use a wider variety of algorithms without constructing a grammar.
         # One should note that ideally imputation should not always be done since some methods work well without.
         # Secondly, the way imputation is done can also be dependent on the task. Median is generally not the best.
-        self._imputer = SimpleImputer(strategy="median")
+        self._imputer = Imputer(strategy="median")
         self._imputer.fit(X)
         if np.isnan(X).any():
             log.info("Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.")
@@ -355,7 +354,7 @@ class Gama(object):
 
     def _construct_y_score(self, y):
         if any(metric.requires_probabilities for metric in self._metrics):
-            return OneHotEncoder(categories='auto').fit_transform(y.reshape(-1, 1)).todense()
+            return OneHotEncoder().fit_transform(y.reshape(-1, 1)).todense()
         return y
 
     def _search_phase(self, X, y, warm_start=False, restart_criteria=None, timeout=1e6):
