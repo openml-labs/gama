@@ -175,6 +175,9 @@ class Gama(object):
             eliminate=eliminate_from_pareto
         )
 
+    def clean_pipeline_string(self, p):
+        return str(p)
+
     def _scoring_to_metric(self, scoring):
         if isinstance(scoring, str):
             return tuple([Metric.from_string(scoring)])
