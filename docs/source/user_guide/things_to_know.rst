@@ -80,7 +80,7 @@ Log Visualization
 
 When using the default hyperparameters, GAMA will produce a log file called `gama.log`.
 This log file is structured so that important events are easy to parse.
-For an example and easy way to visualize information from the log file, take a look at [this notebook](https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb).
+For an example and easy way to visualize information from the log file, take a look at `this notebook <https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb>`_.
 
 Events and Observers
 ********************
