@@ -24,7 +24,7 @@ def _safe_outside_call(fn, timeout):
         log.warning("Exception during callback.", exc_info=True)
         pass
     if timeout():
-        log.warning("Time exceeded during callback, but exception was swallowed.")
+        log.info("Time exceeded during callback, but exception was swallowed.")
         raise stopit.utils.TimeoutException
 
 
