@@ -75,6 +75,12 @@ Running the above script display the GAMA version used, and the hyperparameter v
 Actual values or hyperparameter names may vary depending on the version of GAMA you are using.
 Make sure to set *both* the log level of the log and the stream handler.
 
+An overview the log levels:
+ - **debug**: messages for developers and computers. This includes output required for log visualization (see next section). Expect a lot of output.
+ - **info**: general information about the optimization process.
+ - **warning**: serious errors that do not prohibit GAMA from running to completion (but results could be suboptimal).
+ - **error**: errors which prevent GAMA from running to completion.
+
 Log Visualization
 *****************
 
