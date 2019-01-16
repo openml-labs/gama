@@ -224,17 +224,19 @@ For ease of use, GAMA provides a <cite>fit</cite>, <cite>predict</cite> and <cit
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">log_loss</span><span class="p">,</span> <span class="n">accuracy_score</span>
 <span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
 
-<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-<span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
-<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">keep_analysis_log</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting `fit` which will take roughly 3 minutes.&quot;</span><span class="p">)</span>
+    <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
-<span class="n">label_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-<span class="n">probability_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+    <span class="n">label_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+    <span class="n">probability_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;accuracy:&#39;</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">label_predictions</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;log loss:&#39;</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">probability_predictions</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;accuracy:&#39;</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">label_predictions</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;log loss:&#39;</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">probability_predictions</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Should take 3 minutes to run and give the output below (exact performance might differ):</p>
@@ -251,15 +253,17 @@ For ease of use, GAMA provides a <cite>fit</cite>, <cite>predict</cite> and <cit
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">mean_squared_error</span>
 <span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaRegressor</span>
 
-<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_boston</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_boston</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-<span class="n">automl</span> <span class="o">=</span> <span class="n">GamaRegressor</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
-<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaRegressor</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">keep_analysis_log</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting `fit` which will take roughly 3 minutes.&quot;</span><span class="p">)</span>
+    <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
-<span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+    <span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MSE:&#39;</span><span class="p">,</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MSE:&#39;</span><span class="p">,</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Should take 3 minutes to run and give the output below (exact performance might differ):</p>
@@ -270,7 +274,7 @@ For ease of use, GAMA provides a <cite>fit</cite>, <cite>predict</cite> and <cit
 </div>
 <div class="section" id="using-arff-files">
 <h3>Using ARFF files<a class="headerlink" href="#using-arff-files" title="Permalink to this headline">¶</a></h3>
-<p>GAMA supports data in ARFF files directly, utilizing extra information given, such as which features are categorical.
+<p>GAMA supports data in <a class="reference external" href="https://www.cs.waikato.ac.nz/ml/weka/arff.html">ARFF</a> files directly, utilizing extra information given, such as which features are categorical.
 In the example below, make sure to replace the file paths to the ARFF files to be used.
 The example script can be run by using e.g.
 <a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_train.arff">breast_cancer_train.arff</a> and
@@ -278,14 +282,25 @@ The example script can be run by using e.g.
 The target should always be specified as the last column.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
 
-<span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
-<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">arff_file_path</span><span class="o">=</span><span class="s1">&#39;your_train_data.arff&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Make sure you adjust the file path if not executed from the examples directory.&quot;</span><span class="p">)</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="s2">&quot;../tests/data/breast_cancer_</span><span class="si">{}</span><span class="s2">.arff&quot;</span>
 
-<span class="n">label_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">arff_file_path</span><span class="o">=</span><span class="s1">&#39;your_test_data.arff&#39;</span><span class="p">)</span>
-<span class="n">probability_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">arff_file_path</span><span class="o">=</span><span class="s1">&#39;your_test_data.arff&#39;</span><span class="p">)</span>
+    <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">keep_analysis_log</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting `fit` which will take roughly 3 minutes.&quot;</span><span class="p">)</span>
+    <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">arff_file_path</span><span class="o">=</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;train&#39;</span><span class="p">))</span>
+
+    <span class="n">label_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">arff_file_path</span><span class="o">=</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">))</span>
+    <span class="n">probability_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">arff_file_path</span><span class="o">=</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>The GamaRegressor also has ARFF support.</p>
+<p>The advantage of using an ARFF file over something like a numpy-array, is that attribute types are specified.
+When supplying only numpy-arrays (e.g. through <cite>fit(X, y)</cite>), GAMA can not know if a particular feature is ordinal or numeric.
+This means that GAMA might use a wrong feature transformation for the data (e.g. one-hot encoding on a numeric feature or scaling on a categorical feature).
+Note that this is not unique to GAMA, but any framework which accepts numeric input without meta-data.</p>
+<p>Unfortunately the <cite>date</cite> and <cite>string</cite> formats the ARFF file allows is not (fully) supported in GAMA yet,
+for the latest news, see <a class="reference external" href="https://github.com/PGijsbers/gama/issues/2">issue#2</a>.</p>
 </div>
 </div>
 <div class="section" id="things-to-know">
@@ -343,17 +358,27 @@ The following script manually sets up GAMA to print to stdout (and ignores the b
 </div>
 <p>Running the above script display the GAMA version used, and the hyperparameter values on initialization:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Using</span> <span class="n">GAMA</span> <span class="n">version</span> <span class="mf">0.1</span><span class="o">.</span><span class="mf">0.</span>
-<span class="n">GamaClassifier</span><span class="p">(</span><span class="n">cache_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">verbosity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">max_eval_time</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span><span class="n">population_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span><span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">optimize_strategy</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="n">objectives</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;neg_log_loss&#39;</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">))</span>
+<span class="n">GamaClassifier</span><span class="p">(</span><span class="n">cache_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">verbosity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">max_eval_time</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span><span class="n">population_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span><span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">scoring</span><span class="o">=</span><span class="s1">&#39;neg_log_loss&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Actual values or hyperparameter names may vary depending on the version of GAMA you are using.
 Make sure to set <em>both</em> the log level of the log and the stream handler.</p>
+<dl class="docutils">
+<dt>An overview the log levels:</dt>
+<dd><ul class="first last simple">
+<li><strong>debug</strong>: messages for developers and computers. This includes output required for log visualization (see next section). Expect a lot of output.</li>
+<li><strong>info</strong>: general information about the optimization process.</li>
+<li><strong>warning</strong>: serious errors that do not prohibit GAMA from running to completion (but results could be suboptimal).</li>
+<li><strong>error</strong>: errors which prevent GAMA from running to completion.</li>
+</ul>
+</dd>
+</dl>
 </div>
 <div class="section" id="log-visualization">
 <h3>Log Visualization<a class="headerlink" href="#log-visualization" title="Permalink to this headline">¶</a></h3>
 <p>When using the default hyperparameters, GAMA will produce a log file called <cite>gama.log</cite>.
 This log file is structured so that important events are easy to parse.
-For an example and easy way to visualize information from the log file, take a look at [this notebook](<a class="reference external" href="https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb">https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb</a>).</p>
+For an example and easy way to visualize information from the log file, take a look at <a class="reference external" href="https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb">this notebook</a>.</p>
 </div>
 <div class="section" id="events-and-observers">
 <h3>Events and Observers<a class="headerlink" href="#events-and-observers" title="Permalink to this headline">¶</a></h3>
@@ -399,7 +424,7 @@ For reference, a minimal example search space configuration can look like this:<
 <blockquote>
 <div>By defining a hyperparameter at the top level, you can reference it as hyperparameter for any specific algorithm.
 To do so, identify it with the same name and set its possible values to an empty list (see <cite>alpha</cite> in the example).
-The benefit of doing is that multiple algorithms can a hyperparameter space that is defined only once.
+The benefit of doing is that multiple algorithms can share a hyperparameter space that is defined only once.
 Additionally, in evolution this makes it possible to know which hyperparameter values can be crossed over between
 different algorithms.</div></blockquote>
 <ul class="simple">
@@ -408,7 +433,7 @@ different algorithms.</div></blockquote>
 <blockquote>
 <div>The dictionary specifies the hyperparameters by name and their possible values as list.
 All hyperparameters specified should be taken as arguments for the algorithm’s initialization.
-A hyperparameter specified at the top level of the dictionary shares a name with a hyperparameter of the algorithm.
+A hyperparameter specified at the top level of the dictionary can share a name with a hyperparameter of the algorithm.
 To use the values provided by the shared hyperparameter, set the possible values to an empty list.
 If a list of values is provided instead, it will not use the shared hyperparameter values.</div></blockquote>
 </div>
@@ -462,7 +487,19 @@ Auto-sklearn won ChaLearn AutoML challenge 1 and 2.</p>
 </div>
 <div class="section" id="other-packages">
 <h3>Other packages<a class="headerlink" href="#other-packages" title="Permalink to this headline">¶</a></h3>
-<p>[I will provide a link here]</p>
+<p>There a lot of other hyperparameter optimization and AutoML frameworks out there.
+A nice overview of papers and projects is gathered at <a class="reference external" href="https://github.com/hibayesian/awesome-automl-papers#projects">this Github repo</a>.</p>
+<p>The back-end of GAMA features a genetic programming module.
+More familiar developers might see that it very closely follows the design of <a class="reference external" href="https://github.com/DEAP/deap">DEAP</a>, a package that is also used by TPOT.
+This is not by coincidence, but because up until recently GAMA used DEAP instead.
+There two main reasons for reimplementation were:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Legibility. It was sometimes hard to tell exactly what was going on with mutation operators. This stems from the fact that DEAP expects many primitives with different return types. This makes terminals easily replacable by new trees. For GAMA, all of the hyperparameters were defined by their own types which can not be defined by subtrees.</li>
+<li>Serializability of individuals. DEAP generates classes to define the terminals, and uses Python class inheritance to determine suitability of input/output types. Serializing of generated classes can become an issue with multi-processing (e.g. having to first compile them to scikit-learn pipelines before sending them to a different process).</li>
+</ul>
+</div></blockquote>
+<p>In the future, the genetic programming module of GAMA might (and probably will) deviate more from DEAP’s architecture as new insights are gained.</p>
 </div>
 </div>
 </div>

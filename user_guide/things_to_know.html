@@ -205,17 +205,27 @@ The following script manually sets up GAMA to print to stdout (and ignores the b
 </div>
 <p>Running the above script display the GAMA version used, and the hyperparameter values on initialization:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Using</span> <span class="n">GAMA</span> <span class="n">version</span> <span class="mf">0.1</span><span class="o">.</span><span class="mf">0.</span>
-<span class="n">GamaClassifier</span><span class="p">(</span><span class="n">cache_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">verbosity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">max_eval_time</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span><span class="n">population_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span><span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">optimize_strategy</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="n">objectives</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;neg_log_loss&#39;</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">))</span>
+<span class="n">GamaClassifier</span><span class="p">(</span><span class="n">cache_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">verbosity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">max_eval_time</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span><span class="n">population_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span><span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">scoring</span><span class="o">=</span><span class="s1">&#39;neg_log_loss&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Actual values or hyperparameter names may vary depending on the version of GAMA you are using.
 Make sure to set <em>both</em> the log level of the log and the stream handler.</p>
+<dl class="docutils">
+<dt>An overview the log levels:</dt>
+<dd><ul class="first last simple">
+<li><strong>debug</strong>: messages for developers and computers. This includes output required for log visualization (see next section). Expect a lot of output.</li>
+<li><strong>info</strong>: general information about the optimization process.</li>
+<li><strong>warning</strong>: serious errors that do not prohibit GAMA from running to completion (but results could be suboptimal).</li>
+<li><strong>error</strong>: errors which prevent GAMA from running to completion.</li>
+</ul>
+</dd>
+</dl>
 </div>
 <div class="section" id="log-visualization">
 <h2>Log Visualization<a class="headerlink" href="#log-visualization" title="Permalink to this headline">¶</a></h2>
 <p>When using the default hyperparameters, GAMA will produce a log file called <cite>gama.log</cite>.
 This log file is structured so that important events are easy to parse.
-For an example and easy way to visualize information from the log file, take a look at [this notebook](<a class="reference external" href="https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb">https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb</a>).</p>
+For an example and easy way to visualize information from the log file, take a look at <a class="reference external" href="https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb">this notebook</a>.</p>
 </div>
 <div class="section" id="events-and-observers">
 <h2>Events and Observers<a class="headerlink" href="#events-and-observers" title="Permalink to this headline">¶</a></h2>

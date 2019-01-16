@@ -170,7 +170,7 @@
 <li class="toctree-l2"><a class="reference internal" href="gama.ea.html#gama-ea-evaluation-module">gama.ea.evaluation module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gama.ea.html#gama-ea-modified-deap-module">gama.ea.modified_deap module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gama.ea.html#gama-ea-mutation-module">gama.ea.mutation module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gama.ea.html#module-gama.ea">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gama.ea.html#module-contents">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="gama.utilities.html">gama.utilities package</a><ul>
@@ -209,7 +209,7 @@
 <span id="gama-gamaclassifier-module"></span><h2>gama.GamaClassifier module<a class="headerlink" href="#module-gama.GamaClassifier" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="gama.GamaClassifier.GamaClassifier">
-<em class="property">class </em><code class="descclassname">gama.GamaClassifier.</code><code class="descname">GamaClassifier</code><span class="sig-paren">(</span><em>config=None</em>, <em>objectives=('neg_log_loss'</em>, <em>'size')</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaClassifier.html#GamaClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.GamaClassifier.GamaClassifier" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">gama.GamaClassifier.</code><code class="descname">GamaClassifier</code><span class="sig-paren">(</span><em>config=None</em>, <em>scoring='neg_log_loss'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaClassifier.html#GamaClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.GamaClassifier.GamaClassifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#gama.gama.Gama" title="gama.gama.Gama"><code class="xref py py-class docutils literal"><span class="pre">gama.gama.Gama</span></code></a></p>
 <dl class="method">
 <dt id="gama.GamaClassifier.GamaClassifier.predict">
@@ -253,7 +253,7 @@ first dimension of X, and K is the number of class labels found in <cite>y</cite
 <span id="gama-gamaregressor-module"></span><h2>gama.GamaRegressor module<a class="headerlink" href="#module-gama.GamaRegressor" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="gama.GamaRegressor.GamaRegressor">
-<em class="property">class </em><code class="descclassname">gama.GamaRegressor.</code><code class="descname">GamaRegressor</code><span class="sig-paren">(</span><em>config=None</em>, <em>objectives=('neg_mean_squared_error'</em>, <em>'size')</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaRegressor.html#GamaRegressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.GamaRegressor.GamaRegressor" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">gama.GamaRegressor.</code><code class="descname">GamaRegressor</code><span class="sig-paren">(</span><em>config=None</em>, <em>scoring='neg_mean_squared_error'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaRegressor.html#GamaRegressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.GamaRegressor.GamaRegressor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#gama.gama.Gama" title="gama.gama.Gama"><code class="xref py py-class docutils literal"><span class="pre">gama.gama.Gama</span></code></a></p>
 <dl class="method">
 <dt id="gama.GamaRegressor.GamaRegressor.predict">
@@ -279,16 +279,18 @@ first dimension of X.</td>
 <span id="gama-gama-module"></span><h2>gama.gama module<a class="headerlink" href="#module-gama.gama" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="gama.gama.Gama">
-<em class="property">class </em><code class="descclassname">gama.gama.</code><code class="descname">Gama</code><span class="sig-paren">(</span><em>scoring=None</em>, <em>objectives=('filled_in_by_child_class'</em>, <em>'size')</em>, <em>optimize_strategy=(1</em>, <em>-1)</em>, <em>config=None</em>, <em>random_state=None</em>, <em>population_size=50</em>, <em>max_total_time=3600</em>, <em>max_eval_time=300</em>, <em>n_jobs=1</em>, <em>verbosity=30</em>, <em>keep_analysis_log=True</em>, <em>cache_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/gama.html#Gama"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.gama.Gama" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">gama.gama.</code><code class="descname">Gama</code><span class="sig-paren">(</span><em>scoring='filled_in_by_child_class'</em>, <em>regularize_length=True</em>, <em>config=None</em>, <em>random_state=None</em>, <em>population_size=50</em>, <em>max_total_time=3600</em>, <em>max_eval_time=300</em>, <em>n_jobs=1</em>, <em>verbosity=30</em>, <em>keep_analysis_log=True</em>, <em>cache_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/gama.html#Gama"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.gama.Gama" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
-<p>Wrapper for the DEAP toolbox logic surrounding the GP process as well as ensemble construction.</p>
+<p>Wrapper for the toolbox logic surrounding the GP process as well as ensemble construction.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>scoring</strong> – a string which specifies towards which objectives to optimize
-The valid metrics depend on the type of task. Many scikit-learn metrics are available.
+<li><strong>scoring</strong> – <p>string, Metric or tuple.
+Specifies the/all metric(s) to optimize towards. A string will be converted to Metric. A tuple must
+specify each metric with the same type (i.e. all str or all Metric).</p>
+<p>The valid metrics depend on the type of task. Many scikit-learn metrics are available.
 For classification, the following metrics are available:
 ‘accuracy’, ‘roc_auc’, ‘average_precision’, ‘log_loss’, ‘precision_macro’, ‘precision_micro’,
 ‘precision_weighted’, ‘precision_samples’, ‘recall_macro’, ‘recall_micro’, ‘recall_samples’, ‘recall_weighted’,
@@ -296,17 +298,10 @@ For classification, the following metrics are available:
 For regression, the following metrics are available:
 ‘explained_variance’, ‘r2’, ‘median_absolute_error’, ‘mean_squared_error’, ‘mean_squared_log_error’, ‘mean_absolute_error’.
 Whether to minimize or maximize is determined automatically (though can be overwritten by <cite>optimize_strategy</cite>.
-However, you can instead also specify ‘neg_’+metric (e.g. ‘neg_log_loss’) as metric to make it explicit.</li>
-<li><strong>objectives</strong> – a tuple which specifies towards which objectives to optimize
-The valid metrics depend on the type of task. Many scikit-learn metrics are available.
-Two additional metrics can also be chosen: <cite>size</cite> which represents the number of components in the pipeline,
-and <cite>time</cite> which specifies the time it takes to train and validate a model.
-If <cite>scoring</cite> is specified, it overwrites the first objective of <cite>objectives</cite>.
-Currently the maximum arity is 2.
-Example: (‘f1_macro’, ‘size’) or (‘f1’,)</li>
-<li><strong>optimize_strategy</strong> – a tuple of the same arity as <cite>objectives</cite>
-Specifies for each objective whether you want to maximize (1) or minimize (-1) the objective.
-Example: (1, -1).</li>
+However, you can instead also specify ‘neg_’+metric (e.g. ‘neg_log_loss’) as metric to make it explicit.</p>
+</li>
+<li><strong>regularize_length</strong> – bool.
+If True, add pipeline length as an optimization metric (preferring short over long).</li>
 <li><strong>config</strong> – a dictionary which specifies available components and their valid hyperparameter settings
 For more information, see <a class="reference internal" href="../user_guide/index.html#search-space-configuration"><span class="std std-ref">GAMA Search Space Configuration</span></a>.</li>
 <li><strong>random_state</strong> – integer or None (default=None)
