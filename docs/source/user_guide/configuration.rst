@@ -32,7 +32,7 @@ At the top level, allowed key types are:
 * `string`, with a list as value. It specifies the name of a hyperparameter with its possible values.
  By defining a hyperparameter at the top level, you can reference it as hyperparameter for any specific algorithm.
  To do so, identify it with the same name and set its possible values to an empty list (see `alpha` in the example).
- The benefit of doing is that multiple algorithms can a hyperparameter space that is defined only once.
+ The benefit of doing is that multiple algorithms can share a hyperparameter space that is defined only once.
  Additionally, in evolution this makes it possible to know which hyperparameter values can be crossed over between
  different algorithms.
 
