@@ -16,7 +16,7 @@ The target should always be specified as the last column.
 
 The GamaRegressor also has ARFF support.
 
-The advantage over using an ARFF file over something like a numpy-array, is that attribute types are specified.
+The advantage of using an ARFF file over something like a numpy-array, is that attribute types are specified.
 When supplying only numpy-arrays (e.g. through `fit(X, y)`), GAMA can not know if a particular feature is ordinal or numeric.
 This means that GAMA might use a wrong feature transformation for the data (e.g. one-hot encoding on a numeric feature or scaling on a categorical feature).
 Note that this is not unique to GAMA, but any framework which accepts numeric input without meta-data.
