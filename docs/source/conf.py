@@ -26,6 +26,16 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..\..'))
 
+# -- Copying Example files over -------------------------------------------
+import shutil
+example_dir = '../../examples'
+example_doc_dir = './user_guide/examples'
+for file in os.listdir(example_dir):
+    source_path = os.path.join(example_dir, file)
+    dest_path = os.path.join(example_doc_dir, file)
+    shutil.copyfile(source_path, dest_path)
+
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
