@@ -39,6 +39,6 @@ At the top level, allowed key types are:
 * `class`, with a dictionary as value. The key specifies the algorithm, calling it should instantiate the algorithm.
  The dictionary specifies the hyperparameters by name and their possible values as list.
  All hyperparameters specified should be taken as arguments for the algorithm's initialization.
- A hyperparameter specified at the top level of the dictionary shares a name with a hyperparameter of the algorithm.
+ A hyperparameter specified at the top level of the dictionary can share a name with a hyperparameter of the algorithm.
  To use the values provided by the shared hyperparameter, set the possible values to an empty list.
  If a list of values is provided instead, it will not use the shared hyperparameter values.
