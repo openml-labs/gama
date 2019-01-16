@@ -17,7 +17,7 @@ Move to the GAMA directory (`cd gama`) and install:
 All done!
 
 ## Minimal Example
-The following example uses AutoML to find a machine learning pipeline to classify images of digits.
+The following example uses AutoML to find a machine learning pipeline that classifies breast cancer as malign or benign.
 See the documentation for examples in 
 [classification](https://pgijsbers.github.io/gama/user_guide/index.html#classification),
 [regression](https://pgijsbers.github.io/gama/user_guide/index.html#regression),
