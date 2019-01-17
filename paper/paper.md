@@ -35,7 +35,7 @@ A machine learning pipeline contains data preprocessing as well as a machine lea
 GAMA can also combine multiple tuned machine learning pipelines together into an ensemble, which on average should help model performance.
 At the moment, GAMA is restricted to classification and regression problems on tabular data.
 
-In addition to its general use AutoML functionality, GAMA aims to serve AutoML researches as well.
+In addition to its general use AutoML functionality, GAMA aims to serve AutoML researchers as well.
 During the optimization process, GAMA keeps an extensive log of progress made.
 Using this log, insight can be obtained on the behaviour of the population of pipelines.
 It can answer questions such as which mutation operator is most effective, how fitness changes over time, and how much time each algorithm takes.
