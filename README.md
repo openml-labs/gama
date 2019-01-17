@@ -19,7 +19,7 @@ In addition to its general use AutoML functionality, GAMA aims to serve AutoML r
 During the optimization process, GAMA keeps an extensive log of progress made.
 Using this log, insight can be obtained on the behaviour of the population of pipelines.
 For example, it can produce a graph that shows pipeline fitness over time:
-![graph of fitness over time](https://raw.githubusercontent.com/PGijsbers/gama/images/fitnessgraph.png)
+![graph of fitness over time](https://raw.githubusercontent.com/PGijsbers/gama/master/images/fitnessgraph.png)
 
 For more examples and information on the visualization, see [this notebook](https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb).
 
