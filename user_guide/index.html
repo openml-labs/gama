@@ -405,6 +405,19 @@ The defaults are found in
 <a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/configuration/classification.py">classification.py</a> and
 <a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/configuration/regression.py">regression.py</a>
 for the GamaClassifier and GamaRegressor, respectively.</p>
+<dl class="docutils">
+<dt>A sample of algorithms that GAMA uses by default:</dt>
+<dd><ul class="first last simple">
+<li><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html">logistic regression</a></li>
+<li><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html">random forest classifier</a></li>
+<li><a class="reference external" href="https://scikit-learn.org/stable/modules/naive_bayes.html">naive bayes</a></li>
+<li><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC">support vector machines</a></li>
+<li><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html">PCA</a></li>
+<li><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.Normalizer.html">normalization</a></li>
+<li><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html">ICA</a></li>
+</ul>
+</dd>
+</dl>
 <p>The search space configuration is a python dictionary.
 For reference, a minimal example search space configuration can look like this:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.naive_bayes</span> <span class="k">import</span> <span class="n">BernoulliNB</span>
