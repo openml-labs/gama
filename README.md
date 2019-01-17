@@ -6,6 +6,23 @@ Make sure to check out the [documentation](https://pgijsbers.github.io/gama/).
 [![Build Status](https://travis-ci.org/PGijsbers/gama.svg?branch=master)](https://travis-ci.org/PGijsbers/gama)
 [![codecov](https://codecov.io/gh/PGijsbers/gama/branch/master/graph/badge.svg)](https://codecov.io/gh/PGijsbers/gama)
 
+-----------------------------------------------------------------------------------------------------------------------
+
+GAMA is an AutoML package for end-users and AutoML researchers.
+It uses genetic programming to efficiently generate optimized machine learning pipelines given specific input data and resource constraints.
+A machine learning pipeline contains data preprocessing (e.g. PCA, Forward Feature Selection) as well as a machine learning algorithm (e.g. Logistic Regression, Random Forests), with fine-tuned hyperparameter settings (e.g. number of trees in a Random Forest).
+
+GAMA can also combine multiple tuned machine learning pipelines together into an ensemble, which on average should help model performance.
+At the moment, GAMA is restricted to classification and regression problems on tabular data.
+
+In addition to its general use AutoML functionality, GAMA aims to serve AutoML researchers as well.
+During the optimization process, GAMA keeps an extensive log of progress made.
+Using this log, insight can be obtained on the behaviour of the population of pipelines.
+For example, it can produce a graph that shows pipeline fitness over time:
+![graph of fitness over time](https://raw.githubusercontent.com/PGijsbers/gama/images/fitnessgraph.png)
+
+For more examples and information on the visualization, see [this notebook](https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb).
+
 ## Installing GAMA
 Clone GAMA:
 
@@ -22,7 +39,7 @@ See the documentation for examples in
 [classification](https://pgijsbers.github.io/gama/user_guide/index.html#classification),
 [regression](https://pgijsbers.github.io/gama/user_guide/index.html#regression),
 using [ARFF as input](https://pgijsbers.github.io/gama/user_guide/index.html#using-arff-files).
-```
+```python
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import log_loss, accuracy_score
