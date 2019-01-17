@@ -39,6 +39,12 @@ In addition to its general use AutoML functionality, GAMA aims to serve AutoML r
 During the optimization process, GAMA keeps an extensive log of progress made.
 Using this log, insight can be obtained on the behaviour of the population of pipelines.
 It can answer questions such as which mutation operator is most effective, how fitness changes over time, and how much time each algorithm takes.
+For example, Figure 1 shows fitness over time (in blue) and pipeline length over time (in red), and is (simplified) output that can be generated from the analysis log.
+
+![A simplified visualization of the optimization process based on log data.
+The blue line indicates the moving average of performance over time (left y-axis, higher is better).
+The red line represents the moving average of number of steps in the pipeline over time (right y axis, lower is better).
+](https://raw.githubusercontent.com/PGijsbers/gama/master/images/fitnessgraph.png)
 
 # Related Work
 
