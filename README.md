@@ -10,7 +10,7 @@ Make sure to check out the [documentation](https://pgijsbers.github.io/gama/).
 
 GAMA is an AutoML package for end-users and AutoML researchers.
 It uses genetic programming to efficiently generate optimized machine learning pipelines given specific input data and resource constraints.
-A machine learning pipeline contains data preprocessing (e.g. PCA, Forward Feature Selection) as well as a machine learning algorithm (e.g. Logistic Regression, Random Forests), with fine-tuned hyperparameter settings (e.g. number of trees in a Random Forest).
+A machine learning pipeline contains data preprocessing (e.g. PCA, normalization) as well as a machine learning algorithm (e.g. Logistic Regression, Random Forests), with fine-tuned hyperparameter settings (e.g. number of trees in a Random Forest).
 
 GAMA can also combine multiple tuned machine learning pipelines together into an ensemble, which on average should help model performance.
 At the moment, GAMA is restricted to classification and regression problems on tabular data.

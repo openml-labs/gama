@@ -14,6 +14,15 @@ The defaults are found in
 `regression.py <https://github.com/PGijsbers/gama/tree/master/gama/configuration/regression.py>`_
 for the GamaClassifier and GamaRegressor, respectively.
 
+A sample of algorithms that GAMA uses by default:
+ - `logistic regression <https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html>`_
+ - `random forest classifier <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html>`_
+ - `naive bayes <https://scikit-learn.org/stable/modules/naive_bayes.html>`_
+ - `support vector machines <https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC>`_
+ - `PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_
+ - `normalization <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.Normalizer.html>`_
+ - `ICA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html>`_
+
 The search space configuration is a python dictionary.
 For reference, a minimal example search space configuration can look like this::
 
