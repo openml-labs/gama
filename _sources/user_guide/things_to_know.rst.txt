@@ -1,5 +1,7 @@
 :orphan:
 
+.. default-role:: code
+
 Things To Know
 --------------
 GAMA is currently in development.
@@ -103,3 +105,18 @@ It is also possible to programmatically receive updates of the optimization proc
     automl.fit(X, y)
 
 This can be used to create useful observers, such as one that keeps track of the Pareto front or visualizes progress.
+
+Generated Files
+***************
+
+GAMA will create some files during the optimization process. Here is an overview of produced files:
+
+**Folder: '{DATE}_{STARTTIME}_GAMA'**: This folder is used to save results from evaluations during the optimization process.
+The files in this folders are needed to create an ensemble of pipelines in the post-processing phase of GAMA.
+You can specify the name of this folder with the `cache_dir` hyperparameter when initializing a GAMA object.
+By default, this folders gets deleted after the `fit` call is done.
+In order to preserve this folder (e.g. to later construct different ensembles or later analysis), specify `keep_cache=True` when calling `fit`.
+
+**File: gama.log**: This file contains all information about the optimization process, and by default is not removed.
+As described in `Log Visualization`_ this file can be used to generate visualizations about the optimization process.
+If you wish to have the file be automatically deleted, specify `keep_analysis_log=False` when initializing a GAMA object, as per the `Examples`_.

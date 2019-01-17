@@ -161,18 +161,18 @@ However, we expect few changes that break old code, and will document them when 
 Finding the best defaults is always a work in progress, so if you run into issues, try tuning some of them.</p>
 <p>Here is a selection that might be of particular interest that are accessed on initialization:</p>
 <p><strong>scoring</strong>: states towards which metric to optimize
-Multi-objective optimization will optimize towards the metric specified by <cite>scoring</cite>, as well as minimizing pipeline length.
+Multi-objective optimization will optimize towards the metric specified by <code class="code docutils literal"><span class="pre">scoring</span></code>, as well as minimizing pipeline length.
 Make sure to optimize towards the metric that reflects well what is important to you.
-Valid options include <cite>roc_auc</cite>, <cite>accuracy</cite> and <cite>log_loss</cite> for classification, and <cite>mean_squared_error</cite> and <cite>r2</cite> for regression.
+Valid options include <code class="code docutils literal"><span class="pre">roc_auc</span></code>, <code class="code docutils literal"><span class="pre">accuracy</span></code> and <code class="code docutils literal"><span class="pre">log_loss</span></code> for classification, and <code class="code docutils literal"><span class="pre">mean_squared_error</span></code> and <code class="code docutils literal"><span class="pre">r2</span></code> for regression.
 For more options see <a class="reference external" href="https://pgijsbers.github.io/gama/api/index.html#api">API documentation</a>.</p>
-<p><strong>n_jobs</strong>: determines how many processes can be run in parallel during <cite>fit</cite>.
+<p><strong>n_jobs</strong>: determines how many processes can be run in parallel during <code class="code docutils literal"><span class="pre">fit</span></code>.
 By default only one core is used. If you have more cores available, this has the most influence over how many
 machine learning pipelines can be evaluated.</p>
 <p><strong>max_total_time</strong>: the maximum time in seconds that GAMA should aim to use to construct a model from the data.
 By default GAMA uses one hour. For large datasets, more time may be needed to get useful results.</p>
 <p><strong>max_eval_time</strong>: the maximum time in seconds that GAMA is allowed to use to evaluate a single machine learning pipeline.
 By default GAMA uses five minutes. For large datasets, more time may be needed to get useful results.</p>
-<p>The <cite>fit</cite> function can also be supplied with some optional hyperparameters:</p>
+<p>The <code class="code docutils literal"><span class="pre">fit</span></code> function can also be supplied with some optional hyperparameters:</p>
 <p><strong>auto_ensemble_n</strong>: This hyperparameter specifies the number of models to include in the final ensemble.
 The final ensemble may contain duplicates as a form of assigning weights.</p>
 <p><strong>keep_cache</strong>: During the optimization process, each model evaluated is stored alongside its predictions.
@@ -183,10 +183,10 @@ Normally, this cache is deleted automatically, but should you wish to keep it, y
 <h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
 <p>GAMA makes use of the default Python <a class="reference external" href="https://docs.python.org/3.5/library/logging.html">logging</a> module.
 The log can be captured at different levels, and handled by one of several StreamHandlers.</p>
-<p>The most common use cases would be to write a comprehensive log to file, as well as print important messages to <cite>stdout</cite>.
-Both of these cases are directly supported by GAMA through the <cite>verbosity</cite> and <cite>keep_analysis_log</cite> hyperparameters.
-The level of <cite>verbosity</cite> defines what level messages should be written to <cite>stdout</cite>, and is by default set to <cite>logging.WARNING</cite>.
-The <cite>keep_analysis_log</cite> sets whether or not to write <em>all</em> log output to file (<cite>logging.DEBUG</cite> level).</p>
+<p>The most common use cases would be to write a comprehensive log to file, as well as print important messages to <code class="code docutils literal"><span class="pre">stdout</span></code>.
+Both of these cases are directly supported by GAMA through the <code class="code docutils literal"><span class="pre">verbosity</span></code> and <code class="code docutils literal"><span class="pre">keep_analysis_log</span></code> hyperparameters.
+The level of <code class="code docutils literal"><span class="pre">verbosity</span></code> defines what level messages should be written to <code class="code docutils literal"><span class="pre">stdout</span></code>, and is by default set to <code class="code docutils literal"><span class="pre">logging.WARNING</span></code>.
+The <code class="code docutils literal"><span class="pre">keep_analysis_log</span></code> sets whether or not to write <em>all</em> log output to file (<code class="code docutils literal"><span class="pre">logging.DEBUG</span></code> level).</p>
 <p>However, the logging module offers you great flexibility on making your own variations.
 The following script manually sets up GAMA to print to stdout (and ignores the built-in):</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
@@ -223,7 +223,7 @@ Make sure to set <em>both</em> the log level of the log and the stream handler.<
 </div>
 <div class="section" id="log-visualization">
 <h2>Log Visualization<a class="headerlink" href="#log-visualization" title="Permalink to this headline">¶</a></h2>
-<p>When using the default hyperparameters, GAMA will produce a log file called <cite>gama.log</cite>.
+<p>When using the default hyperparameters, GAMA will produce a log file called <code class="code docutils literal"><span class="pre">gama.log</span></code>.
 This log file is structured so that important events are easy to parse.
 For an example and easy way to visualize information from the log file, take a look at <a class="reference external" href="https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb">this notebook</a>.</p>
 </div>
@@ -241,6 +241,18 @@ For an example and easy way to visualize information from the log file, take a l
 </pre></div>
 </div>
 <p>This can be used to create useful observers, such as one that keeps track of the Pareto front or visualizes progress.</p>
+</div>
+<div class="section" id="generated-files">
+<h2>Generated Files<a class="headerlink" href="#generated-files" title="Permalink to this headline">¶</a></h2>
+<p>GAMA will create some files during the optimization process. Here is an overview of produced files:</p>
+<p><strong>Folder: ‘{DATE}_{STARTTIME}_GAMA’</strong>: This folder is used to save results from evaluations during the optimization process.
+The files in this folders are needed to create an ensemble of pipelines in the post-processing phase of GAMA.
+You can specify the name of this folder with the <code class="code docutils literal"><span class="pre">cache_dir</span></code> hyperparameter when initializing a GAMA object.
+By default, this folders gets deleted after the <code class="code docutils literal"><span class="pre">fit</span></code> call is done.
+In order to preserve this folder (e.g. to later construct different ensembles or later analysis), specify <code class="code docutils literal"><span class="pre">keep_cache=True</span></code> when calling <code class="code docutils literal"><span class="pre">fit</span></code>.</p>
+<p><strong>File: gama.log</strong>: This file contains all information about the optimization process, and by default is not removed.
+As described in <a class="reference internal" href="#log-visualization">Log Visualization</a> this file can be used to generate visualizations about the optimization process.
+If you wish to have the file be automatically deleted, specify <code class="code docutils literal"><span class="pre">keep_analysis_log=False</span></code> when initializing a GAMA object, as per the <a href="#id2"><span class="problematic" id="id3">`Examples`_</span></a>.</p>
 </div>
 </div>
 
