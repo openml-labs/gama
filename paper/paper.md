@@ -33,6 +33,7 @@ GAMA is an AutoML package for end-users and AutoML researchers.
 It uses genetic programming to efficiently generate optimized machine learning pipelines given specific input data and resource constraints.
 A machine learning pipeline contains data preprocessing as well as a machine learning algorithm, with fine-tuned hyperparameter settings.
 By default, GAMA uses scikit-learn [@scikit-learn] implementations for preprocessing (e.g. Normalizer, PCA, ICA) and learners (e.g. Gaussian Naive Bayes, Support Vector Machine, Random Forest).
+
 GAMA can also combine multiple tuned machine learning pipelines together into an ensemble, which on average should help model performance.
 At the moment, GAMA is restricted to classification and regression problems on tabular data.
 
