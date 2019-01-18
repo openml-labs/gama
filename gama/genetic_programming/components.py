@@ -26,9 +26,11 @@ class Terminal:
             return str(self.value)
 
     def __str__(self):
+        """ e.g. "tol=0.5" """
         return "{}={}".format(self.output, self.str_format_value())
 
     def __repr__(self):
+        """ e.g. "FastICA.tol=0.5". Note that if the hyperparameter is shared across primitives, there is no prefix. """
         return "{}={}".format(self._identifier, self.str_format_value())
 
 
@@ -41,9 +43,11 @@ class Primitive:
         self._identifier = identifier
 
     def __str__(self):
+        """ e.g. "FastICA" """
         return self._identifier.__name__
 
     def __repr__(self):
+        """ e.g. "FastICA" """
         return self._identifier.__name__
 
 
@@ -56,6 +60,12 @@ class PrimitiveNode:
         self._terminals = sorted(terminals, key=lambda t: str(t))
 
     def __str__(self):
+        """ Recursively stringify all primitive nodes (primitive and hyperparameters).
+
+        Examples: - "GaussianNB(data)"
+                  - "BernoulliNB(data, alpha=1.0)"
+                  - "BernoulliNB(FastICA(data, tol=0.5), alpha=1.0)"
+        """
         if self._terminals:
             terminal_str = ", ".join([repr(terminal) for terminal in self._terminals])
             return "{}({}, {})".format(self._primitive, str(self._data_node), terminal_str)
@@ -63,6 +73,8 @@ class PrimitiveNode:
             return "{}({})".format(self._primitive, str(self._data_node))
 
     def copy(self):
+        """ Makes a copy that is shallow w.r.t. Primitive and Terminal (they are treated as immutable), but deep
+        w.r.t. PrimitiveNodes. """
         data_node_copy = self._data_node if self._data_node == DATA_TERMINAL else self._data_node.copy()
         return PrimitiveNode(primitive=self._primitive, data_node=data_node_copy, terminals=self._terminals.copy())
 
@@ -83,6 +95,7 @@ class Individual:
         self._id = uuid.uuid4()
 
     def pipeline_str(self):
+        """ e.g. "BernoulliNB(Binarizer(data, Binarizer.threshold=0.6), BernoulliNB.alpha=1.0)" """
         return str(self.main_node)
 
     def __eq__(self, other):
@@ -105,6 +118,11 @@ class Individual:
         return [terminal for primitive in self.primitives for terminal in primitive._terminals]
 
     def replace_terminal(self, position: int, new_terminal: Terminal):
+        """ Replace the terminal at `position` by `new_terminal`.
+
+        The old terminal is the one found at `position` in self.terminals.
+        The `new_terminal` and old terminal must share output type.
+        """
         scan_position = 0
         for primitive in self.primitives:
             if scan_position + len(primitive._terminals) > position:
@@ -123,6 +141,11 @@ class Individual:
             raise ValueError("Position {} is out of range with {} terminals.".format(position, scan_position))
 
     def replace_primitive(self, position: int, new_primitive: PrimitiveNode):
+        """ Replace the PrimitiveNode at `position` by `new_primitive`.
+
+        The old PrimitiveNode is the one found at `position` in self.primitives.
+        The `new_primitive` and old PrimitiveNode must share output type.
+        """
         last_primitive = None
         for i, primitive_node in enumerate(self.primitives):
             if i == position:
@@ -146,8 +169,11 @@ class Individual:
         return Individual(main_node=self.main_node.copy())
 
     def can_mate_with(self, other) -> bool:
+        """ True if `self` and `other` share at least one primitive or both have at least two primitives, else false."""
         other_primitives = list(map(lambda primitive_node: primitive_node._primitive, other.primitives))
+        # Shared primitives mean they can exchange terminals
         shared_primitives = [p for p in self.primitives if p._primitive in other_primitives]
+        # Both at least two primitives means they can swap primitives
         both_at_least_length_2 = len(other_primitives) >= 2 and len(self.primitives) >= 2
         return both_at_least_length_2 or shared_primitives
 
@@ -279,20 +305,3 @@ def create_random_individual(primitive_set: dict, min_length: int=1, max_length:
         last_primitive_node = primitive_node
 
     return Individual(learner_node)
-
-
-if __name__ == '__main__':
-    from gama.genetic_programming.components import PrimitiveNode, pset_from_config, Individual, create_random_individual
-    from gama.configuration.classification import clf_config
-    pset, param = pset_from_config(clf_config)
-    from gama.genetic_programming.mutation import mut_replace_primitive
-
-    ind = create_random_individual(pset)
-    print(str(ind))
-    mut_replace_primitive(ind, pset)
-    print(str(ind))
-    i2 = ind.copy_as_new()
-    print(str(i2))
-    mut_replace_primitive(ind, pset)
-    print(str(ind))
-    print(str(i2))
