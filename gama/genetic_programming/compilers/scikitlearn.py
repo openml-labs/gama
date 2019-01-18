@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 
 def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
     hyperparameters = {terminal.output: terminal.value for terminal in primitive_node._terminals}
-    return primitive_node._primitive._identifier(**hyperparameters)
+    return primitive_node._primitive.identifier(**hyperparameters)
 
 
 def compile_individual(individual: Individual, parameter_checks=None, preprocessing_steps=None) -> Pipeline:
