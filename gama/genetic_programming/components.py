@@ -1,6 +1,6 @@
 from collections import defaultdict
 import random
-from typing import List, Generator, Callable
+from typing import List, Callable, NamedTuple
 import uuid
 
 import sklearn
@@ -9,13 +9,11 @@ import sklearn
 DATA_TERMINAL = 'data'
 
 
-class Terminal:
+class Terminal(NamedTuple):
     """ Specifies a specific value for a specific type or input, e.g. a value for a hyperparameter for an algorithm. """
-
-    def __init__(self, value, output: str, identifier: str):
-        self.value = value
-        self.output = output
-        self._identifier = identifier
+    value: object
+    output: str
+    identifier: str
 
     def str_format_value(self):
         if isinstance(self.value, str):
@@ -31,11 +29,12 @@ class Terminal:
 
     def __repr__(self):
         """ e.g. "FastICA.tol=0.5". Note that if the hyperparameter is shared across primitives, there is no prefix. """
-        return "{}={}".format(self._identifier, self.str_format_value())
+        return "{}={}".format(self.identifier, self.str_format_value())
 
 
 class Primitive:
     """ Defines an operator which takes input and produces output, e.g. a preprocessing or classification algorithm. """
+    __slots__ = ['input', 'output', '_identifier']
 
     def __init__(self, input_: List[str], output: str, identifier: Callable):
         self.input = input_
@@ -127,14 +126,14 @@ class Individual:
         for primitive in self.primitives:
             if scan_position + len(primitive._terminals) > position:
                 terminal_to_be_replaced = primitive._terminals[position - scan_position]
-                if terminal_to_be_replaced._identifier == new_terminal._identifier:
+                if terminal_to_be_replaced.identifier == new_terminal.identifier:
                     primitive._terminals[position - scan_position] = new_terminal
                     return
                 else:
                     raise ValueError("New terminal does not share output type with the one at position {}."
                                      "Old: {}. New: {}.".format(position,
-                                                                terminal_to_be_replaced._identifier,
-                                                                new_terminal._identifier))
+                                                                terminal_to_be_replaced.identifier,
+                                                                new_terminal.identifier))
             else:
                 scan_position += len(primitive._terminals)
         if scan_position < position:
@@ -195,10 +194,10 @@ class Individual:
                 terminal_set = terminal_set[2:]  # 2 is because string starts with ', '
                 terminals = [find_terminal(primitive_set, terminal_string)
                              for terminal_string in terminal_set.split(', ')]
-            if not all([required_terminal in map(lambda t: t._identifier, terminals)
+            if not all([required_terminal in map(lambda t: t.identifier, terminals)
                         for required_terminal in primitive.input]):
                 missing = [required_terminal for required_terminal in primitive.input
-                           if required_terminal not in map(lambda t: t._identifier, terminals)]
+                           if required_terminal not in map(lambda t: t.identifier, terminals)]
                 raise ValueError("Individual does not define all required terminals for primitive {}. Missing: {}."
                                  .format(primitive, missing))
             last_node = PrimitiveNode(primitive, last_node, terminals)
