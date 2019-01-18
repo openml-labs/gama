@@ -56,6 +56,9 @@ Auto-sklearn won ChaLearn AutoML challenge 1 and 2.
 Other packages
 **************
 
+There a lot of other hyperparameter optimization and AutoML frameworks out there.
+A nice overview of papers and projects is gathered at `this Github repo <https://github.com/hibayesian/awesome-automl-papers#projects>`_.
+
 The back-end of GAMA features a genetic programming module.
 More familiar developers might see that it very closely follows the design of `DEAP <https://github.com/DEAP/deap>`_, a package that is also used by TPOT.
 This is not by coincidence, but because up until recently GAMA used DEAP instead.

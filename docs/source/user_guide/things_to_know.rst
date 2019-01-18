@@ -1,5 +1,7 @@
 :orphan:
 
+.. default-role:: code
+
 Things To Know
 --------------
 GAMA is currently in development.
@@ -75,12 +77,18 @@ Running the above script display the GAMA version used, and the hyperparameter v
 Actual values or hyperparameter names may vary depending on the version of GAMA you are using.
 Make sure to set *both* the log level of the log and the stream handler.
 
+An overview the log levels:
+ - **debug**: messages for developers and computers. This includes output required for log visualization (see next section). Expect a lot of output.
+ - **info**: general information about the optimization process.
+ - **warning**: serious errors that do not prohibit GAMA from running to completion (but results could be suboptimal).
+ - **error**: errors which prevent GAMA from running to completion.
+
 Log Visualization
 *****************
 
 When using the default hyperparameters, GAMA will produce a log file called `gama.log`.
 This log file is structured so that important events are easy to parse.
-For an example and easy way to visualize information from the log file, take a look at [this notebook](https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb).
+For an example and easy way to visualize information from the log file, take a look at `this notebook <https://github.com/PGijsbers/gama/blob/master/notebooks/GAMA%20Log%20Parser.ipynb>`_.
 
 Events and Observers
 ********************
@@ -97,3 +105,18 @@ It is also possible to programmatically receive updates of the optimization proc
     automl.fit(X, y)
 
 This can be used to create useful observers, such as one that keeps track of the Pareto front or visualizes progress.
+
+Generated Files
+***************
+
+GAMA will create some files during the optimization process. Here is an overview of produced files:
+
+**Folder: '{DATE}_{STARTTIME}_GAMA'**: This folder is used to save results from evaluations during the optimization process.
+The files in this folders are needed to create an ensemble of pipelines in the post-processing phase of GAMA.
+You can specify the name of this folder with the `cache_dir` hyperparameter when initializing a GAMA object.
+By default, this folders gets deleted after the `fit` call is done.
+In order to preserve this folder (e.g. to later construct different ensembles or later analysis), specify `keep_cache=True` when calling `fit`.
+
+**File: gama.log**: This file contains all information about the optimization process, and by default is not removed.
+As described in `Log Visualization`_ this file can be used to generate visualizations about the optimization process.
+If you wish to have the file be automatically deleted, specify `keep_analysis_log=False` when initializing a GAMA object, as per the `Examples`_.

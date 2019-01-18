@@ -9,12 +9,12 @@ from .components import Individual, DATA_TERMINAL, random_primitive_node
 
 
 def mut_replace_terminal(individual: Individual, primitive_set: dict) -> None:
-    terminals = list([(i, t) for i, t in enumerate(individual.terminals) if len(primitive_set[t._identifier]) > 1])
+    terminals = list([(i, t) for i, t in enumerate(individual.terminals) if len(primitive_set[t.identifier]) > 1])
     if len(terminals) == 0:
         raise ValueError("Individual has no terminals or no terminals suitable for mutation.")
 
     terminal_index, old_terminal = random.choice(terminals)
-    acceptable_new_terminals = [t for t in primitive_set[old_terminal._identifier] if t.value != old_terminal.value]
+    acceptable_new_terminals = [t for t in primitive_set[old_terminal.identifier] if t.value != old_terminal.value]
     new_terminal = random.choice(acceptable_new_terminals)
     individual.replace_terminal(terminal_index, new_terminal)
 
@@ -79,7 +79,7 @@ def random_valid_mutation_in_place(individual: Individual, primitive_set: dict) 
     available_mutations = [mut_replace_primitive, mut_insert]
     if len(list(individual.primitives)) > 1:
         available_mutations.append(mut_shrink)
-    if len([t for t in individual.terminals if len(primitive_set[t._identifier]) > 1]):
+    if len([t for t in individual.terminals if len(primitive_set[t.identifier]) > 1]):
         available_mutations.append(mut_replace_terminal)
 
     mut_fn = random.choice(available_mutations)

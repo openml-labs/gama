@@ -106,7 +106,7 @@ class Ensemble(object):
         """ Adds a specific model to the ensemble or increases its weight if it already is contained. """
         model, weight = self._models.pop(model.pipeline, (model, 0))
         self._models[model.pipeline] = (model, weight + add_weight)
-        log.info("Assigned a weight of {} to model {}".format(weight + add_weight, model.name))
+        log.debug("Assigned a weight of {} to model {}".format(weight + add_weight, model.name))
 
     def expand_ensemble(self, n):
         """ Adds new models to the ensemble based on earlier given data.

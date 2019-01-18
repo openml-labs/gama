@@ -7,7 +7,9 @@ log = logging.getLogger(__name__)
 
 class Observer(object):
     
-    def __init__(self, id_):
+    def __init__(self, id_, with_log=False):
+        self._with_log = with_log
+
         self._overall_pareto_front = ParetoFront(get_values_fn=lambda ind: ind.fitness.values)
         self._current_pareto_front = ParetoFront(get_values_fn=lambda ind: ind.fitness.values)
 
@@ -29,7 +31,8 @@ class Observer(object):
     def update(self, ind):
         log.debug("Evaluation;{:.4f};{};{}".format(ind.fitness.time, ind.fitness.values, ind))
         self._individuals.append(ind)
-        self._record_individual(ind)
+        if self._with_log:
+            self._record_individual(ind)
 
         updated = self._current_pareto_front.update(ind)
         if updated:
