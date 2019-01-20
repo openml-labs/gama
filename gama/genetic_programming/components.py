@@ -5,46 +5,56 @@ import uuid
 
 import sklearn
 
-
 DATA_TERMINAL = 'data'
 
-
-class Terminal(NamedTuple):
-    """ Specifies a specific value for a specific type or input, e.g. a value for a hyperparameter for an algorithm. """
-    value: object
-    output: str
-    identifier: str
-
-    def str_format_value(self):
-        if isinstance(self.value, str):
-            return "'{}'".format(self.value)
-        elif callable(self.value):
-            return "{}".format(self.value.__name__)
-        else:
-            return str(self.value)
-
-    def __str__(self):
-        """ e.g. "tol=0.5" """
-        return "{}={}".format(self.output, self.str_format_value())
-
-    def __repr__(self):
-        """ e.g. "FastICA.tol=0.5". Note that if the hyperparameter is shared across primitives, there is no prefix. """
-        return "{}={}".format(self.identifier, self.str_format_value())
+# Specifies a specific value for a specific type or input, e.g. a value for a hyperparameter for an algorithm.
+Terminal = NamedTuple("Terminal",
+                      [("value", object),
+                       ("output", str),
+                       ("identifier", str)])
 
 
-class Primitive(NamedTuple):
-    """ Defines an operator which takes input and produces output, e.g. a preprocessing or classification algorithm. """
-    input: List[str]
-    output: str
-    identifier: Callable
+def str_format_terminal_value(terminal) -> str:
+    if isinstance(terminal.value, str):
+        return "'{}'".format(terminal.value)
+    elif callable(terminal.value):
+        return "{}".format(terminal.value.__name__)
+    else:
+        return str(terminal.value)
 
-    def __str__(self):
-        """ e.g. "FastICA" """
-        return self.identifier.__name__
 
-    def __repr__(self):
-        """ e.g. "FastICA" """
-        return self.identifier.__name__
+def terminal__str__(terminal) -> str:
+    """ e.g. "tol=0.5" """
+    return "{}={}".format(terminal.output, str_format_terminal_value(terminal))
+
+
+def terminal__repr__(terminal) -> str:
+    """ e.g. "FastICA.tol=0.5". Note that if the hyperparameter is shared across primitives, there is no prefix. """
+    return "{}={}".format(terminal.identifier, str_format_terminal_value(terminal))
+
+
+Terminal.__str__ = terminal__str__
+Terminal.__repr__ = terminal__repr__
+
+# Defines an operator which takes input and produces output, e.g. a preprocessing or classification algorithm.
+Primitive = NamedTuple("Primitive",
+                       [("input", List[str]),
+                        ("output", str),
+                        ("identifier", Callable)])
+
+
+def primitive__str__(primitive) -> str:
+    """ e.g. "FastICA" """
+    return primitive.identifier.__name__
+
+
+def primitive__repr__(primitive) -> str:
+    """ e.g. "FastICA" """
+    return primitive.identifier.__name__
+
+
+Primitive.__str__ = primitive__str__
+Primitive.__repr__ = primitive__repr__
 
 
 class PrimitiveNode:
@@ -178,7 +188,7 @@ class Individual:
         # below assumes that left parenthesis is never part of a parameter name or value.
         primitives = string.split('(')[:-1]
         terminal_start_index = string.index(DATA_TERMINAL)
-        terminals_string = string[terminal_start_index+len(DATA_TERMINAL):]
+        terminals_string = string[terminal_start_index + len(DATA_TERMINAL):]
         terminal_sets = terminals_string.split(')')[:-1]
 
         last_node = DATA_TERMINAL
@@ -253,10 +263,10 @@ def pset_from_config2(configuration):
                     # This allows users to define illegal hyperparameter combinations, but is not a terminal.
                     parameter_checks[key.__name__] = param_values[0]
                 else:
-                    hyperparameter_types.append(key.__name__+'.'+name)
+                    hyperparameter_types.append(key.__name__ + '.' + name)
                     for value in param_values:
-                        pset[key.__name__+'.'+name].append(
-                            Terminal(value=value, output=name, identifier=key.__name__+'.'+name))
+                        pset[key.__name__ + '.' + name].append(
+                            Terminal(value=value, output=name, identifier=key.__name__ + '.' + name))
 
             # After registering the hyperparameter types, we can register the operator itself.
             transformer_tags = ["DATA_PREPROCESSING", "FEATURE_SELECTION", "DATA_TRANSFORMATION"]
@@ -283,14 +293,14 @@ def random_terminals_for_primitive(primitive_set: dict, primitive: Primitive):
     return [random.choice(primitive_set[needed_terminal_type]) for needed_terminal_type in primitive.input]
 
 
-def random_primitive_node(output_type: str, primitive_set: dict, exclude: Primitive=None):
+def random_primitive_node(output_type: str, primitive_set: dict, exclude: Primitive = None):
     """ Create a PrimitiveNode with a Primitive of specified output_type, with random terminals. """
     primitive = random.choice([p for p in primitive_set[output_type] if p != exclude])
     terminals = random_terminals_for_primitive(primitive_set, primitive)
     return PrimitiveNode(primitive, data_node=DATA_TERMINAL, terminals=terminals)
 
 
-def create_random_individual(primitive_set: dict, min_length: int=1, max_length: int=3) -> Individual:
+def create_random_individual(primitive_set: dict, min_length: int = 1, max_length: int = 3) -> Individual:
     individual_length = random.randint(min_length, max_length)
     learner_node = random_primitive_node(output_type='prediction', primitive_set=primitive_set)
     last_primitive_node = learner_node
