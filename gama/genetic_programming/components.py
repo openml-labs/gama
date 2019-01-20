@@ -213,17 +213,19 @@ class Individual:
         return cls(last_node)
 
 
-def find_primitive(primitive_set: dict, primitive_string: str):
+def find_primitive(primitive_set: dict, primitive_string: str) -> Primitive:
+    """ Find the Primitive that matches `primitive_string` in `primitive_set`. """
     all_primitives = primitive_set[DATA_TERMINAL] + primitive_set['prediction']
     return [p for p in all_primitives if repr(p) == primitive_string][0]
 
 
-def find_terminal(primitive_set: dict, terminal_string: str):
+def find_terminal(primitive_set: dict, terminal_string: str) -> Terminal:
+    """ Find the Terminal that matches `terminal_string` in `primitive_set`. """
     terminal_return_type, terminal_value = terminal_string.split('=')
     return [t for t in primitive_set[terminal_return_type] if repr(t) == terminal_string][0]
 
 
-def pset_from_config2(configuration):
+def pset_from_config(configuration):
     """ Create a pset for the given configuration dictionary.
 
     Given a configuration dictionary specifying operators (e.g. sklearn
@@ -291,11 +293,12 @@ def pset_from_config2(configuration):
     return pset, parameter_checks
 
 
-def random_terminals_for_primitive(primitive_set: dict, primitive: Primitive):
+def random_terminals_for_primitive(primitive_set: dict, primitive: Primitive) -> List[Terminal]:
+    """ Return a list with a Terminal matching each terminal type the Primitive requires. """
     return [random.choice(primitive_set[needed_terminal_type]) for needed_terminal_type in primitive.input]
 
 
-def random_primitive_node(output_type: str, primitive_set: dict, exclude: Primitive = None):
+def random_primitive_node(output_type: str, primitive_set: dict, exclude: Primitive = None) -> PrimitiveNode:
     """ Create a PrimitiveNode with a Primitive of specified output_type, with random terminals. """
     primitive = random.choice([p for p in primitive_set[output_type] if p != exclude])
     terminals = random_terminals_for_primitive(primitive_set, primitive)
@@ -303,6 +306,7 @@ def random_primitive_node(output_type: str, primitive_set: dict, exclude: Primit
 
 
 def create_random_individual(primitive_set: dict, min_length: int = 1, max_length: int = 3) -> Individual:
+    """ Create an individual with at least `min_length` Primitives and at most `max_length` Primitives. """
     individual_length = random.randint(min_length, max_length)
     learner_node = random_primitive_node(output_type='prediction', primitive_set=primitive_set)
     last_primitive_node = learner_node

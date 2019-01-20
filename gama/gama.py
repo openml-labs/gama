@@ -26,7 +26,7 @@ from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.preprocessing import define_preprocessing_steps
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
 from gama.genetic_programming.selection import create_from_population, eliminate_from_pareto
-from gama.genetic_programming.components import create_random_individual, pset_from_config2
+from gama.genetic_programming.components import create_random_individual, pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
 
@@ -166,7 +166,7 @@ class Gama(object):
             random.seed(self._random_state)
             np.random.seed(self._random_state)
 
-        self._pset, parameter_checks = pset_from_config2(config)
+        self._pset, parameter_checks = pset_from_config(config)
         self._operator_set = OperatorSet(
             mutate=partial(random_valid_mutation_in_place, primitive_set=self._pset),
             mate=crossover,
