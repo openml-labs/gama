@@ -10,8 +10,7 @@ from sklearn.model_selection import cross_val_predict
 from sklearn.pipeline import Pipeline
 
 from gama.genetic_programming.algorithms.metrics import Metric
-
-from gama.genetic_programming.components import Individual, PrimitiveNode
+from gama.genetic_programming.components import Individual, PrimitiveNode, Fitness
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.utilities.logging_utilities import MultiprocessingLogger, log_parseable_event, TOKENS
 
@@ -81,11 +80,9 @@ def object_is_valid_pipeline(o):
 def evaluate_individual(individual: Individual, operator_set: OperatorSet, evaluate_pipeline_length, *args, **kwargs):
     pipeline = operator_set.compile(individual)
     (scores, start_datetime, evaluation_time) = evaluate_pipeline(pipeline, *args, **kwargs)
-    individual.fitness.values = scores
     if evaluate_pipeline_length:
-        individual.fitness.values = (*individual.fitness.values, -len(individual.primitives))
-    individual.fitness.start_time = start_datetime
-    individual.fitness.time = evaluation_time
+        scores = (*scores, -len(individual.primitives))
+    individual.fitness = Fitness(scores, start_datetime, evaluation_time)
     return individual
 
 

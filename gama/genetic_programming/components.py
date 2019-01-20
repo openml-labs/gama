@@ -1,6 +1,15 @@
+"""
+Defines the building blocks for individuals, in short these are the types:
+- Terminal. Definition of a specific value for a specific hyperparameter. Immutable.
+- Primitive. Definition of a specific algorithm; defined by Terminal input, output type and operation. Immutable.
+- PrimitiveNode. An instanciated Primitive with specific Terminals. Mutable for easy operations (e.g. mutation).
+- Individual. A sequence of PrimitiveNodes that together form a pipeline.
+    - Fitness. Stores information about the evaluation of the individual.
+
+"""
 from collections import defaultdict
 import random
-from typing import List, Callable, NamedTuple
+from typing import List, Callable, NamedTuple, Tuple
 import uuid
 
 import sklearn
@@ -38,7 +47,7 @@ Terminal.__repr__ = terminal__repr__
 
 # Defines an operator which takes input and produces output, e.g. a preprocessing or classification algorithm.
 Primitive = NamedTuple("Primitive",
-                       [("input", List[str]),
+                       [("input", Tuple[str]),
                         ("output", str),
                         ("identifier", Callable)])
 
@@ -48,13 +57,13 @@ def primitive__str__(primitive) -> str:
     return primitive.identifier.__name__
 
 
-def primitive__repr__(primitive) -> str:
-    """ e.g. "FastICA" """
-    return primitive.identifier.__name__
-
-
 Primitive.__str__ = primitive__str__
-Primitive.__repr__ = primitive__repr__
+Primitive.__repr__ = primitive__str__
+
+Fitness = NamedTuple("Fitness",
+                     [("values", Tuple),
+                      ("start_time", int),
+                      ("time", int)])
 
 
 class PrimitiveNode:
@@ -84,18 +93,11 @@ class PrimitiveNode:
         return PrimitiveNode(primitive=self._primitive, data_node=data_node_copy, terminals=self._terminals.copy())
 
 
-class Fitness:
-    def __init__(self):
-        self.values = None
-        self.start_time = None
-        self.time = None
-
-
 class Individual:
     """ A collection of PrimitiveNodes which together specify a machine learning pipeline. """
 
     def __init__(self, main_node: PrimitiveNode):
-        self.fitness = Fitness()
+        self.fitness = None
         self.main_node = main_node
         self._id = uuid.uuid4()
 
