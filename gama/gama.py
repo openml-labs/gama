@@ -36,7 +36,7 @@ log = logging.getLogger(__name__)
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
                           did not terminate successfully."""
-__version__ = '0.1.0'
+__version__ = '19.01.0'
 
 for module_to_ignore in ["sklearn", "numpy"]:
     warnings.filterwarnings("ignore", module=module_to_ignore)

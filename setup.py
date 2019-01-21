@@ -13,7 +13,7 @@ requirements = [
 
 setup(
     name='gama',
-    version='0.1dev',
+    version='19.01.0',
     description='A package for automated machine learning based on scikit-learn.',
     long_description='',
     long_description_content_type='text/markdown',
