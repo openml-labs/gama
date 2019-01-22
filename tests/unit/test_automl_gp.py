@@ -65,9 +65,9 @@ class AutomlGpTestCase(unittest.TestCase):
         self.assertEqual(len(list(self.individual_list[2].primitives)), 1)
 
     def test_eliminate_NSGA(self):
-        self.individual_list[0].fitness = Fitness((3, -2), 0, 0)
-        self.individual_list[1].fitness = Fitness((4, -2), 0, 0)
-        self.individual_list[2].fitness = Fitness((3, -1), 0, 0)
+        self.individual_list[0].fitness = Fitness((3, -2), 0, 0, 0)
+        self.individual_list[1].fitness = Fitness((4, -2), 0, 0, 0)
+        self.individual_list[2].fitness = Fitness((3, -1), 0, 0, 0)
 
         eliminated = eliminate_from_pareto(pop=self.individual_list, n=1)
         self.assertListEqual(eliminated, [self.individual_list[0]],

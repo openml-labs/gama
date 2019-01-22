@@ -29,7 +29,7 @@ class Observer(object):
             fh.write(';'.join(to_record) + '\n')
 
     def update(self, ind):
-        log.debug("Evaluation;{:.4f};{};{}".format(ind.fitness.time, ind.fitness.values, ind))
+        log.debug("Evaluation;{:.4f};{};{}".format(ind.fitness.wallclock_time, ind.fitness.values, ind))
         self._individuals.append(ind)
         if self._with_log:
             self._record_individual(ind)
