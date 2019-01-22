@@ -10,8 +10,7 @@ from sklearn.model_selection import cross_val_predict
 from sklearn.pipeline import Pipeline
 
 from gama.genetic_programming.algorithms.metrics import Metric
-
-from gama.genetic_programming.components import Individual, PrimitiveNode
+from gama.genetic_programming.components import Individual, PrimitiveNode, Fitness
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.utilities.logging_utilities import MultiprocessingLogger, log_parseable_event, TOKENS
 
@@ -80,12 +79,10 @@ def object_is_valid_pipeline(o):
 
 def evaluate_individual(individual: Individual, operator_set: OperatorSet, evaluate_pipeline_length, *args, **kwargs):
     pipeline = operator_set.compile(individual)
-    (scores, start_datetime, evaluation_time) = evaluate_pipeline(pipeline, *args, **kwargs)
-    individual.fitness.values = scores
+    (scores, start_datetime, wallclock_time, process_time) = evaluate_pipeline(pipeline, *args, **kwargs)
     if evaluate_pipeline_length:
-        individual.fitness.values = (*individual.fitness.values, -len(individual.primitives))
-    individual.fitness.start_time = start_datetime
-    individual.fitness.time = evaluation_time
+        scores = (*scores, -len(individual.primitives))
+    individual.fitness = Fitness(scores, start_datetime, wallclock_time, process_time)
     return individual
 
 
@@ -127,7 +124,8 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5
             log.warning("File not found while saving predictions. This can happen in the multi-process case if the "
                         "cache gets deleted within `max_eval_time` of the end of the search process.", exc_info=True)
 
-    evaluation_time = time.process_time() - start
+    process_time = time.process_time() - start
+    wallclock_time = (datetime.now() - start_datetime).total_seconds()
 
     if c_mgr.state == c_mgr.INTERRUPTED:
         # A TimeoutException was raised, but not by the context manager.
@@ -142,5 +140,5 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5
         log_parseable_event(logger, TOKENS.EVALUATION_TIMEOUT, start_datetime, single_line_pipeline)
         logger.debug("Timeout after {}s: {}".format(timeout, pl))
 
-    fitness_values = (scores, start_datetime, evaluation_time)
+    fitness_values = (scores, start_datetime, wallclock_time, process_time)
     return fitness_values

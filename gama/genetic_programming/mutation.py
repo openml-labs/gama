@@ -5,7 +5,8 @@ Each mutation function takes an individual and either returns a different indivi
 import random
 from typing import Callable
 
-from .components import Individual, DATA_TERMINAL, random_primitive_node
+from .components import Individual, DATA_TERMINAL
+from .operations import random_primitive_node
 
 
 def mut_replace_terminal(individual: Individual, primitive_set: dict) -> None:

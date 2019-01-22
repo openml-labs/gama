@@ -4,7 +4,7 @@ import time
 
 import stopit
 
-from gama.utilities.logging_utilities import TOKENS, log_parseable_event, default_time_format
+from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.logging_utilities import MultiprocessingLogger
 from gama.utilities.generic.function_dispatcher import FunctionDispatcher
 
@@ -62,7 +62,8 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
                 if n_jobs > 1:
                     logger.flush_to_log(log)
                 log_parseable_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
-                                    individual.fitness.time, individual.fitness.values, individual._id, individual.pipeline_str())
+                                    individual.fitness.wallclock_time, individual.fitness.process_time,
+                                    individual.fitness.values, individual._id, individual.pipeline_str())
 
                 if evaluation_callback:
                     _safe_outside_call(partial(evaluation_callback, individual), exceed_timeout)
