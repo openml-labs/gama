@@ -32,7 +32,6 @@ def compile_individual(individual: Individual, parameter_checks=None, preprocess
 def cross_val_predict_score(estimator, X, y_train, y_score, groups=None, metrics=None, cv=None, n_jobs=1, verbose=0,
                             fit_params=None, pre_dispatch='2*n_jobs'):
     """ Return both the predictions and score of the estimator trained on the data given the cv strategy.
-    # TODO: Add reference to underlying sklearn cross_val_predict for parameter descriptions.
 
     :param estimator: the estimator to evaluate
     :param X:
