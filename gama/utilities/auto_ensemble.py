@@ -151,8 +151,9 @@ class Ensemble(object):
             raise ValueError("timeout must be greater than 0.")
 
         self._fit_models = []
-        fit_dispatcher = FunctionDispatcher(self._n_jobs, fit_and_weight)
-        with stopit.ThreadingTimeout(timeout) as c_mgr:
+
+        with stopit.ThreadingTimeout(timeout) as c_mgr,\
+                FunctionDispatcher(self._n_jobs, fit_and_weight) as fit_dispatcher:
             fit_dispatcher.start()
             for (model, weight) in self._models.values():
                 fit_dispatcher.queue_evaluation((model.pipeline, X, y, weight))
@@ -162,8 +163,6 @@ class Ensemble(object):
                 pipeline, weight = output
                 if weight > 0:
                     self._fit_models.append((pipeline, weight))
-
-        fit_dispatcher.stop()
 
         if not c_mgr:
             log.info("Fitting of ensemble stopped early.")

@@ -71,6 +71,14 @@ class FunctionDispatcher(object):
         self._job_map = {}
         self._child_processes = []
 
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()
+        return False  # do not suppress any exceptions.
+
     def start(self):
         """ Start child processes. """
         if self._child_processes:
