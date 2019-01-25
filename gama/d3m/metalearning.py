@@ -1,10 +1,12 @@
 from collections import Counter
+import logging
 import numpy as np
 import pickle
 import os
 
 from ..genetic_programming.operations import create_seeded_individual
 
+log = logging.getLogger(__name__)
 
 def calculate_meta_features(X, y):
     n_instances, n_features = X.shape
@@ -57,6 +59,7 @@ def SVC_features(individual):
 def GradientBoosting_features(individual):
     gbc_node = individual.main_node
     criterion_encoder = dict(friedman_mse=0, mae=1, mse=2)
+    log.warning(','.join([t.output+'='+str(t.value) for t in gbc_node._terminals]))
     return [
         criterion_encoder[[t.value for t in gbc_node._terminals if t.output == 'criterion'][0]],
         [t.value for t in gbc_node._terminals if t.output == 'learning_rate'][0],
