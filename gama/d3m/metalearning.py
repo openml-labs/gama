@@ -109,7 +109,11 @@ def generate_warm_start_pop(X, y, primitive_set, n_each=5):
 
     for learner, feature_fn in learners:
         model = load_model(learner)
-        learner_prim = [p for p in primitive_set['prediction'] if learner in str(p)][0]
+        learner_prim = [p for p in primitive_set['prediction'] if learner in str(p)]
+        if len(learner_prim) > 0:
+            learner_prim = learner_prim[0]
+        else:
+            continue
         candidate_inds = [create_seeded_individual(primitive_set, learner_prim, max_length=1) for _ in range(100)]
         candidate_configs = [feature_fn(ind) for ind in candidate_inds]
         best_indices = pick_best(metafeatures, candidate_configs, model, n_each)
