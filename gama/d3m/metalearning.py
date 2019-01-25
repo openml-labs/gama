@@ -109,6 +109,7 @@ def generate_warm_start_pop(X, y, primitive_set, n_each=5):
 
     for learner, feature_fn in learners:
         model = load_model(learner)
+        model.n_jobs = 1  # compatibility between 0.19 and 0.20
         learner_prim = [p for p in primitive_set['prediction'] if learner in str(p)]
         if len(learner_prim) > 0:
             learner_prim = learner_prim[0]
