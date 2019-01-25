@@ -63,7 +63,7 @@ def GradientBoosting_features(individual):
         criterion_encoder[[t.value for t in gbc_node._terminals if t.output == 'criterion'][0]],
         [t.value for t in gbc_node._terminals if t.output == 'learning_rate'][0],
         [t.value for t in gbc_node._terminals if t.output == 'max_depth'][0],
-        [t.value for t in gbc_node._terminals if t.output == 'max_features'][0],
+        1.0,  # max features not supported in d3m wrapper
         [t.value for t in gbc_node._terminals if t.output == 'min_impurity_decrease'][0],
         [t.value for t in gbc_node._terminals if t.output == 'min_samples_leaf'][0],
         [t.value for t in gbc_node._terminals if t.output == 'min_samples_split'][0],
