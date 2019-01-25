@@ -63,6 +63,11 @@ clf_config = {
 
     GradientBoostingClassifier: {
         'n_estimators': [100],
+        'criterion': ["friedman_mse"],
+        'validation_fraction': [0.1],
+        'validation_tol': [1e-4],
+        'min_weight_fraction_leaf': [0.],
+        'min_weight_impurity_decrease': [0.],
         'learning_rate': [1e-3, 1e-2, 1e-1, 0.5, 1.],
         'max_depth': range(1, 11),
         'min_samples_split': range(2, 21),
