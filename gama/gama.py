@@ -29,6 +29,7 @@ from gama.genetic_programming.operations import create_random_individual
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
+from gama.d3m.metalearning import generate_warm_start_pop
 
 log = logging.getLogger(__name__)
 
@@ -369,6 +370,8 @@ class Gama(object):
             if warm_start:
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = [self._operator_set.individual() for _ in range(self._pop_size)]
+            warm_start_pop = generate_warm_start_pop(X, y, self._pset)
+            pop = warm_start_pop + pop[len(warm_start_pop):]
 
         evaluate_individual = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
                                       evaluate_pipeline_length=self._regularize_length,

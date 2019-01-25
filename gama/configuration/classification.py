@@ -4,7 +4,7 @@ from sklearn.naive_bayes import GaussianNB, BernoulliNB, MultinomialNB
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier, GradientBoostingClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import LinearSVC
+from sklearn.svm import LinearSVC, SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.cluster import FeatureAgglomeration
 from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, PolynomialFeatures, RobustScaler, \
@@ -23,6 +23,16 @@ clf_config = {
     'min_samples_leaf': range(1, 21),
 
     # Classifiers
+    SVC: {
+        'C': [2**i for i in range(-5, 6)],
+        'kernel': ['rbf', 'poly', 'sigmoid'],
+        'degree': range(1, 6),
+        'gamma': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10],
+        'coef0': np.arange(-1, 1.01, 0.2),
+        'shrinking': [True, False],
+        'tol': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
+    },
+
     GaussianNB: {
     },
 
@@ -65,9 +75,9 @@ clf_config = {
         'n_estimators': [100],
         'criterion': ["friedman_mse"],
         'validation_fraction': [0.1],
-        'validation_tol': [1e-4],
+        'tol': [1e-4],
         'min_weight_fraction_leaf': [0.],
-        'min_weight_impurity_decrease': [0.],
+        'min_impurity_decrease': [0.],
         'learning_rate': [1e-3, 1e-2, 1e-1, 0.5, 1.],
         'max_depth': range(1, 11),
         'min_samples_split': range(2, 21),
@@ -80,18 +90,6 @@ clf_config = {
         'n_neighbors': range(1, 51),
         'weights': ["uniform", "distance"],
         'p': [1, 2]
-    },
-
-    LinearSVC: {
-        'penalty': ["l1", "l2"],
-        'loss': ["hinge", "squared_hinge"],
-        'dual': [False, True],
-        'tol': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1],
-        'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25.],
-        'param_check': [lambda params: (not params['dual'] or params['penalty'] == "l2")
-                                       and not (params['penalty'] == "l1" and params['loss'] == "hinge")
-                                       and not (
-                    params['penalty'] == "l2" and params['loss'] == "hinge" and not params['dual'])]
     },
 
     LogisticRegression: {
