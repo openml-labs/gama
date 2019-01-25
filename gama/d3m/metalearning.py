@@ -59,7 +59,6 @@ def SVC_features(individual):
 def GradientBoosting_features(individual):
     gbc_node = individual.main_node
     criterion_encoder = dict(friedman_mse=0, mae=1, mse=2)
-    log.warning(','.join([t.output+'='+str(t.value) for t in gbc_node._terminals]))
     return [
         criterion_encoder[[t.value for t in gbc_node._terminals if t.output == 'criterion'][0]],
         [t.value for t in gbc_node._terminals if t.output == 'learning_rate'][0],
@@ -71,8 +70,8 @@ def GradientBoosting_features(individual):
         [t.value for t in gbc_node._terminals if t.output == 'min_weight_fraction_leaf'][0],
         [t.value for t in gbc_node._terminals if t.output == 'n_estimators'][0],
         [t.value for t in gbc_node._terminals if t.output == 'subsample'][0],
-        [t.value for t in gbc_node._terminals if t.output == 'tol'][0],
-        [t.value for t in gbc_node._terminals if t.output == 'validation_fraction'][0]
+        1e-4, # tol
+        0.1 # validation fraction
         ]
 
 
