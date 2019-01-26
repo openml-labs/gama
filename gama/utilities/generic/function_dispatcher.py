@@ -155,3 +155,8 @@ class FunctionDispatcher(object):
 
         input_ = self._job_map.pop(identifier)
         return identifier, output, input_
+
+    def get_all_results(self):
+        """ Keep returning results one by one until queue is empty. """
+        while len(self._job_map) > 0:
+            yield self.get_next_result()
