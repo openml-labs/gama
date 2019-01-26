@@ -129,17 +129,13 @@ class FunctionDispatcher(object):
         # Using timeout prevents the stopit.Timeout exception from being received.
         # When waiting with sleep, we don't want to wait too long, but we never know when a pipeline
         # would finish evaluating.
-        last_get_successful = True
         while True:
             try:
-                if not last_get_successful:
-                    time.sleep(0.1)  # seconds
-
                 identifier, fitness = self._output_queue.get(block=False)
                 return identifier, fitness
 
             except queue.Empty:
-                last_get_successful = False
+                time.sleep(0.1)  # seconds
                 continue
 
     def get_next_result(self):
