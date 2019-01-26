@@ -83,8 +83,8 @@ class Gama(object):
         The amount of parallel processes that may be created to speed up `fit`. If this number
         is zero or negative, it will be set to the amount of cores.
 
-    :param verbosity: integer (default=0)
-        Does nothing right now. Follow progress of optimization by tracking the log.
+    :param verbosity: integer (default=logging.WARNING)
+        Sets the level of log messages to be automatically output to terminal.
 
     :param cache_dir: string or None (default=None)
         The directory in which to keep the cache during `fit`. In this directory,
