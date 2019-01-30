@@ -177,22 +177,27 @@
 <span class="kn">from</span> <span class="nn">gama.utilities.preprocessing</span> <span class="k">import</span> <span class="n">define_preprocessing_steps</span>
 <span class="kn">from</span> <span class="nn">gama.genetic_programming.mutation</span> <span class="k">import</span> <span class="n">random_valid_mutation_in_place</span><span class="p">,</span> <span class="n">crossover</span>
 <span class="kn">from</span> <span class="nn">gama.genetic_programming.selection</span> <span class="k">import</span> <span class="n">create_from_population</span><span class="p">,</span> <span class="n">eliminate_from_pareto</span>
-<span class="kn">from</span> <span class="nn">gama.genetic_programming.components</span> <span class="k">import</span> <span class="n">create_random_individual</span><span class="p">,</span> <span class="n">pset_from_config2</span>
+<span class="kn">from</span> <span class="nn">gama.genetic_programming.operations</span> <span class="k">import</span> <span class="n">create_random_individual</span>
+<span class="kn">from</span> <span class="nn">gama.configuration.parser</span> <span class="k">import</span> <span class="n">pset_from_config</span>
 <span class="kn">from</span> <span class="nn">gama.genetic_programming.operator_set</span> <span class="k">import</span> <span class="n">OperatorSet</span>
 <span class="kn">from</span> <span class="nn">gama.genetic_programming.compilers.scikitlearn</span> <span class="k">import</span> <span class="n">compile_individual</span>
+
+<span class="c1">#  `gamalog` is for the entire gama module and submodules.</span>
+<span class="n">gamalog</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;gama&#39;</span><span class="p">)</span>
+<span class="n">gamalog</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="n">STR_NO_OPTIMAL_PIPELINE</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;Gama did not yet establish an optimal pipeline.</span>
 <span class="s2">                          This can be because `fit` was not yet called, or</span>
 <span class="s2">                          did not terminate successfully.&quot;&quot;&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.1.0&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;19.01.0&#39;</span>
 
 <span class="k">for</span> <span class="n">module_to_ignore</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;sklearn&quot;</span><span class="p">,</span> <span class="s2">&quot;numpy&quot;</span><span class="p">]:</span>
     <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module_to_ignore</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Gama"><a class="viewcode-back" href="../../generated/gama.html#gama.Gama">[docs]</a><span class="k">class</span> <span class="nc">Gama</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Gama"><a class="viewcode-back" href="../../generated/gama.html#gama.gama.Gama">[docs]</a><span class="k">class</span> <span class="nc">Gama</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Wrapper for the toolbox logic surrounding the GP process as well as ensemble construction.</span>
 
 <span class="sd">    :param scoring: string, Metric or tuple.</span>
@@ -254,9 +259,6 @@
                  <span class="n">keep_analysis_log</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">cache_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
-        <span class="c1">#  gamalog is for the entire gama module and submodules.</span>
-        <span class="n">gamalog</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;gama&#39;</span><span class="p">)</span>
-        <span class="n">gamalog</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">verbosity</span> <span class="o">&gt;=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
             <span class="n">stdout_streamhandler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
             <span class="n">stdout_streamhandler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">verbosity</span><span class="p">)</span>
@@ -317,7 +319,7 @@
             <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_random_state</span><span class="p">)</span>
             <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_random_state</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pset</span><span class="p">,</span> <span class="n">parameter_checks</span> <span class="o">=</span> <span class="n">pset_from_config2</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pset</span><span class="p">,</span> <span class="n">parameter_checks</span> <span class="o">=</span> <span class="n">pset_from_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_operator_set</span> <span class="o">=</span> <span class="n">OperatorSet</span><span class="p">(</span>
             <span class="n">mutate</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">random_valid_mutation_in_place</span><span class="p">,</span> <span class="n">primitive_set</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pset</span><span class="p">),</span>
             <span class="n">mate</span><span class="o">=</span><span class="n">crossover</span><span class="p">,</span>
@@ -373,10 +375,10 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Must specify either X or arff_file_path.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">X</span>
 
-<div class="viewcode-block" id="Gama.predict"><a class="viewcode-back" href="../../generated/gama.html#gama.Gama.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Gama.predict"><a class="viewcode-back" href="../../generated/gama.html#gama.gama.Gama.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">(</span><span class="s1">&#39;predict is implemented by base classes.&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Gama.score"><a class="viewcode-back" href="../../generated/gama.html#gama.Gama.score">[docs]</a>    <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Gama.score"><a class="viewcode-back" href="../../generated/gama.html#gama.gama.Gama.score">[docs]</a>    <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">arff_file_path</span><span class="p">:</span>
             <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data_from_arff</span><span class="p">(</span><span class="n">arff_file_path</span><span class="p">)</span>
         <span class="n">y_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_y_score</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -391,7 +393,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_operator_set</span><span class="o">.</span><span class="n">_compile</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">compile_individual</span><span class="p">,</span> <span class="n">preprocessing_steps</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
 
-<div class="viewcode-block" id="Gama.fit"><a class="viewcode-back" href="../../generated/gama.html#gama.Gama.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">warm_start</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_ensemble_n</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">restart_</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Gama.fit"><a class="viewcode-back" href="../../generated/gama.html#gama.gama.Gama.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arff_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">warm_start</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auto_ensemble_n</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">restart_</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Find and fit a model to predict target y from X.</span>
 
 <span class="sd">        Various possible machine learning pipelines will be fit to the (X,y) data.</span>
@@ -578,7 +580,7 @@
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Error during auto ensemble: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 
-<div class="viewcode-block" id="Gama.delete_cache"><a class="viewcode-back" href="../../generated/gama.html#gama.Gama.delete_cache">[docs]</a>    <span class="k">def</span> <span class="nf">delete_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Gama.delete_cache"><a class="viewcode-back" href="../../generated/gama.html#gama.gama.Gama.delete_cache">[docs]</a>    <span class="k">def</span> <span class="nf">delete_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Removes the cache folder and all files associated to this instance. &quot;&quot;&quot;</span>
         <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span><span class="p">)</span></div>
 
@@ -586,7 +588,7 @@
         <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subscribers</span><span class="p">[</span><span class="s1">&#39;evaluation_completed&#39;</span><span class="p">]:</span>
             <span class="n">callback</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Gama.evaluation_completed"><a class="viewcode-back" href="../../generated/gama.html#gama.Gama.evaluation_completed">[docs]</a>    <span class="k">def</span> <span class="nf">evaluation_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+<div class="viewcode-block" id="Gama.evaluation_completed"><a class="viewcode-back" href="../../generated/gama.html#gama.gama.Gama.evaluation_completed">[docs]</a>    <span class="k">def</span> <span class="nf">evaluation_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Register a callback function that is called when new evaluation is completed.</span>
 
 <span class="sd">        :param fn: Function to call when a pipeline is evaluated. Expected signature is: ind -&gt; None</span>
