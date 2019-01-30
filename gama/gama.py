@@ -200,10 +200,9 @@ class Gama(object):
         attribute_names, data_types = zip(*arff_dict['attributes'])
         data = pd.DataFrame(arff_dict['data'], columns=attribute_names)
         for attribute_name, dtype in arff_dict['attributes']:
-            # if dtype.lower() in ['real', 'numeric']:  probably interpreted correctly.
+            # 'real' and 'numeric' are probably interpreted correctly, date support needs to be added.
             if isinstance(dtype, list):
                 data[attribute_name] = data[attribute_name].astype('category')
-            # TODO: add date support
 
         if split_last:
             return data.iloc[:, :-1], data.iloc[:, -1]
