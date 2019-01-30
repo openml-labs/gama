@@ -54,7 +54,6 @@ def cross_val_predict_score(estimator, X, y_train, y_score, groups=None, metrics
     # TODO: For mixed metrics, call `predict` instead of finding the highest probability
     method = 'predict_proba' if any(metric.requires_probabilities for metric in metrics) else 'predict'
     predictions = cross_val_predict(estimator, X, y_train, groups, cv, n_jobs, verbose, fit_params, pre_dispatch, method)
-    print(predictions.shape)
     if predictions.shape[1] == 1:
         predictions = predictions.squeeze()
 
