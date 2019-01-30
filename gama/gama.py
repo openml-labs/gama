@@ -193,7 +193,6 @@ class Gama(object):
             raise ValueError("scoring must be a string, Metric or Iterable (of strings or Metrics).")
 
     def _get_data_from_arff(self, arff_file_path, split_last=True):
-        # load arff
         with open(arff_file_path, 'r') as arff_file:
             arff_dict = arff.load(arff_file)
 
