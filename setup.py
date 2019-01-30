@@ -13,8 +13,8 @@ requirements = [
 
 setup(
     name='gama',
-    version='19.01.0.d3m',
-    description='A package for automated machine learning based on scikit-learn.',
+    version='19.01.0',
+    description='A package for automated machine learning based on scikit-learn. d3m-version',
     long_description='',
     long_description_content_type='text/markdown',
     author='Pieter Gijsbers',
