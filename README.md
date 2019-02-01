@@ -63,3 +63,21 @@ if __name__ == '__main__':
     print('log_loss', automl.score(X_test, y_test))
 ```
 *note*: By default, GamaClassifier optimizes towards `log_loss`.
+
+## Citing
+If you want to cite GAMA, please use [our JOSS publication](http://joss.theoj.org/papers/10.21105/joss.01132).
+```latex
+@article{Gijsbers2019,
+  doi = {10.21105/joss.01132},
+  url = {https://doi.org/10.21105/joss.01132},
+  year  = {2019},
+  month = {jan},
+  publisher = {The Open Journal},
+  volume = {4},
+  number = {33},
+  pages = {1132},
+  author = {Pieter Gijsbers and Joaquin Vanschoren},
+  title = {{GAMA}: Genetic Automated Machine learning Assistant},
+  journal = {Journal of Open Source Software}
+}
+```
