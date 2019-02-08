@@ -90,6 +90,10 @@ class Gama(object):
     :param verbosity: integer (default=0)
         Does nothing right now. Follow progress of optimization by tracking the log.
 
+    :param keep_analysis_log: str or False. (default='gama.log')
+        If non-empty str, specifies the path (and name) where the log should be stored, e.g. /output/gama.log.
+        If empty str or False, no log is stored.
+
     :param cache_dir: string or None (default=None)
         The directory in which to keep the cache during `fit`. In this directory,
         models and their evaluation results will be stored. This facilitates a quick ensemble construction.
@@ -105,7 +109,7 @@ class Gama(object):
                  max_eval_time=300,
                  n_jobs=1,
                  verbosity=logging.WARNING,
-                 keep_analysis_log=True,
+                 keep_analysis_log='gama.log',
                  cache_dir=None):
 
         if verbosity >= logging.DEBUG:
@@ -114,7 +118,7 @@ class Gama(object):
             gamalog.addHandler(stdout_streamhandler)
 
         if keep_analysis_log:
-            file_handler = logging.FileHandler('gama.log')
+            file_handler = logging.FileHandler(keep_analysis_log)
             file_handler.setLevel(logging.DEBUG)
             gamalog.addHandler(file_handler)
 
