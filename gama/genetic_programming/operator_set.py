@@ -36,7 +36,8 @@ class OperatorSet:
                 return individual, log_args
         else:
             log.debug("Could not create a new individual from 50 iterations of {}".format(operator.__name__))
-            return individual, log_args  # return as if new.. TODO: guarantee actual new (even if not through operator).
+            # For progress on solving this, see #11
+            return individual, log_args
 
     def mate(self, individual1: Individual, individual2: Individual, *args, **kwargs):
         def mate_with_log():

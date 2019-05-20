@@ -41,13 +41,13 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
     start_time = time.time()
     max_population_size = len(start_population)
     logger = MultiprocessingLogger() if n_jobs > 1 else log
-    evaluation_dispatcher = FunctionDispatcher(n_jobs, partial(toolbox.evaluate, logger=logger))
-    evaluation_dispatcher.start()
 
     def exceed_timeout():
         return (time.time() - start_time) > max_time_seconds
 
-    with stopit.ThreadingTimeout(max_time_seconds) as c_mgr:
+    with stopit.ThreadingTimeout(max_time_seconds) as c_mgr,\
+            FunctionDispatcher(n_jobs, partial(toolbox.evaluate, logger=logger)) as evaluation_dispatcher:
+
         should_restart = True
         while should_restart:
             should_restart = False
@@ -89,10 +89,6 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
             evaluation_dispatcher.restart()
 
-    # If the function is terminated early by way of a KeyboardInterrupt, there is no need to communicate to the
-    # evaluation processes to shut down, since they handle the KeyboardInterrupt directly.
-    # The function should not be terminated early by way of another exception, if it does, it should crash loud.
-    evaluation_dispatcher.stop()
     if not c_mgr:
         log.info('Asynchronous EA terminated because maximum time has elapsed.'
                  '{} individuals have been evaluated.'.format(ind_no))

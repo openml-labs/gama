@@ -87,8 +87,8 @@ class Gama(object):
         The amount of parallel processes that may be created to speed up `fit`. If this number
         is zero or negative, it will be set to the amount of cores.
 
-    :param verbosity: integer (default=0)
-        Does nothing right now. Follow progress of optimization by tracking the log.
+    :param verbosity: integer (default=logging.WARNING)
+        Sets the level of log messages to be automatically output to terminal.
 
     :param keep_analysis_log: str or False. (default='gama.log')
         If non-empty str, specifies the path (and name) where the log should be stored, e.g. /output/gama.log.
@@ -198,17 +198,15 @@ class Gama(object):
             raise ValueError("scoring must be a string, Metric or Iterable (of strings or Metrics).")
 
     def _get_data_from_arff(self, arff_file_path, split_last=True):
-        # load arff
         with open(arff_file_path, 'r') as arff_file:
             arff_dict = arff.load(arff_file)
 
         attribute_names, data_types = zip(*arff_dict['attributes'])
         data = pd.DataFrame(arff_dict['data'], columns=attribute_names)
         for attribute_name, dtype in arff_dict['attributes']:
-            # if dtype.lower() in ['real', 'numeric']:  probably interpreted correctly.
+            # 'real' and 'numeric' are probably interpreted correctly, date support needs to be added.
             if isinstance(dtype, list):
                 data[attribute_name] = data[attribute_name].astype('category')
-            # TODO: add date support
 
         if split_last:
             return data.iloc[:, :-1], data.iloc[:, -1]

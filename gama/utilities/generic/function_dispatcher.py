@@ -71,6 +71,14 @@ class FunctionDispatcher(object):
         self._job_map = {}
         self._child_processes = []
 
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()
+        return False  # do not suppress any exceptions.
+
     def start(self):
         """ Start child processes. """
         if self._child_processes:
@@ -121,17 +129,13 @@ class FunctionDispatcher(object):
         # Using timeout prevents the stopit.Timeout exception from being received.
         # When waiting with sleep, we don't want to wait too long, but we never know when a pipeline
         # would finish evaluating.
-        last_get_successful = True
         while True:
             try:
-                if not last_get_successful:
-                    time.sleep(0.1)  # seconds
-
                 identifier, fitness = self._output_queue.get(block=False)
                 return identifier, fitness
 
             except queue.Empty:
-                last_get_successful = False
+                time.sleep(0.1)  # seconds
                 continue
 
     def get_next_result(self):
@@ -151,3 +155,8 @@ class FunctionDispatcher(object):
 
         input_ = self._job_map.pop(identifier)
         return identifier, output, input_
+
+    def get_all_results(self):
+        """ Keep returning results one by one until queue is empty. """
+        while len(self._job_map) > 0:
+            yield self.get_next_result()
