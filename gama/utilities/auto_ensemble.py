@@ -183,9 +183,9 @@ class Ensemble(object):
         # TODO add internal rank of pipeline
         if not self._models:
             return "Ensemble with no models."
-        ensemble_str = "Ensemble of {} unique pipelines.\nW\tScore\tPipeline\n".format(len(self._models))
-        for (model, weight) in self._models.values():
-            ensemble_str += "{}\t{:.4f}\t{}\n".format(weight, model.validation_score, model.name)
+        ensemble_str = "Ensemble of {} unique pipelines.\nR\tW\tScore\tPipeline\n".format(len(self._models))
+        for i, (model, weight) in enumerate(sorted(self._models.values(), key=lambda x: x[0].validation_score)):
+            ensemble_str += "{}\t{}\t{:.4f}\t{}\n".format(i, weight, model.validation_score[0], model.name)
         return ensemble_str
 
     def __getstate__(self):

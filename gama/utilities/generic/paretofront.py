@@ -8,10 +8,7 @@ class ParetoFront(object):
             function that takes an item and returns a tuple of values such that each should be maximized.
             If left None, it is assumed that items are already tuples of which each value should be maximized.
         """
-        if get_values_fn:
-            self._get_values_fn = get_values_fn
-        else:
-            self._get_values_fn = lambda x: x
+        self._get_values_fn = get_values_fn
 
         self._front = []
         if start_list:
@@ -19,6 +16,12 @@ class ParetoFront(object):
                 self.update(item)
 
         self._iterator_index = 0
+
+    def _get_item_value(self, item):
+        if self._get_values_fn is not None:
+            return self._get_values_fn(item)
+        else:
+            return item
 
     def update(self, new_item):
         """ Updates the Pareto front with new_item if it dominates any current item in the Pareto front.
@@ -31,8 +34,8 @@ class ParetoFront(object):
             self._front.append(new_item)
             return True
 
-        values = self._get_values_fn(new_item)
-        old_arity = len(self._get_values_fn(self._front[0]))
+        values = self._get_item_value(new_item)
+        old_arity = len(self._get_item_value(self._front[0]))
         if old_arity != len(values):
             raise ValueError("Arity of added tuple must match that of the ones in the Pareto front. Front tuples have "
                              "arity {} and new tuple has arity {}.".format(len(self._front[0]), len(values)))
@@ -41,7 +44,7 @@ class ParetoFront(object):
 
         # Check for each point whether new_item dominates it, it gets dominated, or neither.
         for old_item in self._front:
-            old_values = self._get_values_fn(old_item)
+            old_values = self._get_item_value(old_item)
             if all(v1 <= v2 for v1, v2 in zip(values, old_values)):
                 # old_item dominates this new_item
                 return False
@@ -81,5 +84,7 @@ class ParetoFront(object):
         return str(self._front)
 
     def __repr__(self):
-        # TODO: Add notification of non-standard `self._get_values_fn`.
-        return 'ParetoFront({})'.format(str(self._front))
+        if self._get_values_fn is None:
+            return 'ParetoFront({})'.format(str(self._front))
+        else:
+            return 'ParetoFront({}, get_values_fn="{}")'.format(str(self._front), self._get_values_fn.__name__)

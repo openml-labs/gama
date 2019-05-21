@@ -234,7 +234,6 @@ class Gama(object):
             X, y = self._get_data_from_arff(arff_file_path)
         y_score = self._construct_y_score(y)
 
-        # TODO: return multiple scores if multiple metrics specified. Avoid code duplication with `cross_val_predict_score`
         predictions = self.predict_proba(X) if self._metrics[0].requires_probabilities else self.predict(X)
         return self._metrics[0].score(y_score, predictions)
 
@@ -271,7 +270,7 @@ class Gama(object):
             criteria is met.
         """
 
-        ensemble_ratio = 0.1  # fraction of time left after preprocessing that reserved for postprocessing
+        ensemble_ratio = 0.3  # fraction of time left after preprocessing that reserved for postprocessing
 
         def restart_criteria():
             restart = self._observer._individuals_since_last_pareto_update > 400
