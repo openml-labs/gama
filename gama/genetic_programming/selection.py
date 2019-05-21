@@ -44,7 +44,6 @@ def select_from_pareto(population, select_n, pareto_fronts_n):
 
 
 def eliminate_from_pareto(pop, n):
-    # TODO: pick selection/elimination strategies from literature.
     # For now we only eliminate one at a time so this will do.
     if n != 1:
         raise NotImplemented("Currently only n=1 is supported.")
