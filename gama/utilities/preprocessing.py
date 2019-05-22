@@ -27,7 +27,7 @@ def define_preprocessing_steps(X_df, max_extra_features_created=None, max_catego
             else:
                 pass  # Binary category or constant feature.
 
-    one_hot_encoder = ce.OneHotEncoder(cols=one_hot_columns, impute_missing=False, handle_unknown='ignore')
+    one_hot_encoder = ce.OneHotEncoder(cols=one_hot_columns, handle_unknown='ignore')
     target_encoder = ce.TargetEncoder(cols=target_encoding_columns, handle_unknown='ignore')
     imputer = Imputer(strategy='median')
 
