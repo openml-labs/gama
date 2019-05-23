@@ -19,7 +19,7 @@ class TimeKeeper:
         """ Return time remaining in seconds. """
         if self.total_time > 0:
             return self.total_time - sum(self.activity_durations.values())
-        raise ValueError("Time Remaining only available if `total_time` was set on init.")
+        raise RuntimeError("Time Remaining only available if `total_time` was set on init.")
 
     @contextmanager
     def start_activity(self, activity: str) -> Iterator[Stopwatch]:
