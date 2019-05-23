@@ -20,7 +20,7 @@ from .utilities.observer import Observer
 
 from gama.data import X_y_from_arff
 from gama.genetic_programming.algorithms.async_ea import async_ea
-from gama.utilities.generic.stopwatch import Stopwatch
+from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.preprocessing import define_preprocessing_steps, heuristic_numpy_to_dataframe
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
@@ -147,6 +147,7 @@ class Gama(object):
         self._max_eval_time = max_eval_time
         self._n_jobs = n_jobs
         self._regularize_length = regularize_length
+        self._time_manager = TimeKeeper(max_total_time)
         self._best_pipeline = None
         self._fit_data = None
         self._observer = None
@@ -219,6 +220,33 @@ class Gama(object):
         predictions = self.predict_proba(X) if self._metrics[0].requires_probabilities else self.predict(X)
         return self._metrics[0].score(y_score, predictions)
 
+    def _preprocess(self, X=None, y=None, arff_file_path=None):
+        if type(X) != type(y) and not (isinstance(X, pd.DataFrame) and isinstance(y, pd.Series)):
+            raise TypeError("X and y must be of the same type or respectively pd.DataFrame and pd.Series.")
+        if not isinstance(X, (type(None), np.ndarray, pd.DataFrame)):
+            raise TypeError("X must be either None, np.ndarray or pd.DataFrame.")
+
+        with self._time_manager.start_activity('preprocessing') as preprocessing_sw:
+            if arff_file_path is not None:
+                X, y = X_y_from_arff(arff_file_path)
+            elif isinstance(X, np.ndarray):
+                X = heuristic_numpy_to_dataframe(X)
+                y = pd.Series(y)
+            # else is already properly typed df/series
+
+            if y.isnull().any():
+                log.info("Target vector has been found to contain NaN-labels, these rows will be ignored.")
+                X, y = X.loc[~y.isnull(), :], y[~y.isnull()]
+
+            steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
+            self._operator_set._compile = partial(compile_individual, preprocessing_steps=steps)
+
+            if hasattr(self, '_encode_labels'):
+                y = self._encode_labels(y)
+
+        log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
+        return X, y
+
     def fit(self, X=None, y=None, arff_file_path=None, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
         """ Find and fit a model to predict target y from X.
 
@@ -245,11 +273,6 @@ class Gama(object):
         :param restart_: bool. Indicates whether or not the search should be restarted when a specific restart
             criteria is met.
         """
-        if type(X) != type(y) and not (isinstance(X, pd.DataFrame) and isinstance(y, pd.Series)):
-            raise TypeError("X and y must be of the same type or respectively pd.DataFrame and pd.Series.")
-        if not isinstance(X, (type(None), np.ndarray, pd.DataFrame)):
-            raise TypeError("X must be either None, np.ndarray or pd.DataFrame.")
-
         ensemble_ratio = 0.3  # fraction of time left after preprocessing that reserved for postprocessing
 
         def restart_criteria():
@@ -259,46 +282,21 @@ class Gama(object):
                 self._observer.reset_current_pareto_front()
             return restart and restart_
 
-        with Stopwatch() as preprocessing_sw:
-            if arff_file_path is not None:
-                X, y = X_y_from_arff(arff_file_path)
-            elif isinstance(X, np.ndarray):
-                X = heuristic_numpy_to_dataframe(X)
-                y = pd.Series(y)
-            # else is already properly typed df/series
-
-            if y.isnull().any():
-                log.info("Target vector has been found to contain NaN-labels, these rows will be ignored.")
-                X, y = X.loc[~y.isnull(), :], y[~y.isnull()]
-
-            steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
-            self._operator_set._compile = partial(compile_individual, preprocessing_steps=steps)
-
-            if hasattr(self, '_encode_labels'):
-                y = self._encode_labels(y)
-
-        log.info("Preprocessing took {:.4f}s. Moving on to search phase.".format(preprocessing_sw.elapsed_time))
-        log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
+        X, y = self._preprocess(X, y, arff_file_path)
 
         self.X = X
         self.y_train = y
         self.y_score = self._construct_y_score(y)
         self._fit_data = (X, y)
 
-        time_left = self._max_total_time - preprocessing_sw.elapsed_time
+        fit_time = int((1 - ensemble_ratio) * self._time_manager.total_time_remaining)
 
-        fit_time = int((1 - ensemble_ratio) * time_left)
-
-        with Stopwatch() as search_sw:
+        with self._time_manager.start_activity('search') as search_sw:
             self._search_phase(X, y, warm_start, restart_criteria=restart_criteria, timeout=fit_time)
-        log.info("Search phase took {:.4f}s. Moving on to post processing.".format(search_sw.elapsed_time))
         log_parseable_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
 
-        time_left = time_left - search_sw.elapsed_time
-
-        with Stopwatch() as post_sw:
-            self._postprocess_phase(auto_ensemble_n, timeout=time_left)
-        log.info("Postprocessing took {:.4f}s.".format(post_sw.elapsed_time))
+        with self._time_manager.start_activity('postprocess') as post_sw:
+            self._postprocess_phase(auto_ensemble_n, timeout=self._time_manager.total_time_remaining)
         log_parseable_event(log, TOKENS.POSTPROCESSING_END, post_sw.elapsed_time)
 
         if not keep_cache:
