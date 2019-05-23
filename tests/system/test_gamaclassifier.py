@@ -76,7 +76,7 @@ class GamaClassifierSystemTestCase(unittest.TestCase):
         X, y = data['load'](return_X_y=True)
         if labelled_y:
             databunch = data['load']()
-            y = [databunch.target_names[c_i] for c_i in databunch.target]
+            y = np.asarray([databunch.target_names[c_i] for c_i in databunch.target])
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
 

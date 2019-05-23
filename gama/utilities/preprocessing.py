@@ -1,4 +1,5 @@
 import category_encoders as ce
+import numpy as np
 import pandas as pd
 from sklearn.preprocessing import Imputer
 
@@ -32,3 +33,12 @@ def define_preprocessing_steps(X_df, max_extra_features_created=None, max_catego
     imputer = Imputer(strategy='median')
 
     return [one_hot_encoder, target_encoder, imputer]
+
+
+def heuristic_numpy_to_dataframe(X: np.ndarray, max_unique_values_cat: int=10) -> pd.DataFrame:
+    """ Transform a numpy array to a typed pd.DataFrame. """
+    X_df = pd.DataFrame(X)
+    for column, n_unique in X_df.nunique(dropna=True).items():
+        if n_unique <= max_unique_values_cat:
+            X_df[column] = X_df[column].astype('category')
+    return X_df
