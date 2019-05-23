@@ -10,7 +10,6 @@ import sys
 import time
 import warnings
 
-import arff
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
@@ -20,6 +19,7 @@ import gama.genetic_programming.compilers.scikitlearn
 from gama.genetic_programming.algorithms.metrics import Metric
 from .utilities.observer import Observer
 
+from gama.data import get_data_from_arff
 from gama.genetic_programming.algorithms.async_ea import async_ea
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
@@ -197,22 +197,6 @@ class Gama(object):
         else:
             raise ValueError("scoring must be a string, Metric or Iterable (of strings or Metrics).")
 
-    def _get_data_from_arff(self, arff_file_path, split_last=True):
-        with open(arff_file_path, 'r') as arff_file:
-            arff_dict = arff.load(arff_file)
-
-        attribute_names, data_types = zip(*arff_dict['attributes'])
-        data = pd.DataFrame(arff_dict['data'], columns=attribute_names)
-        for attribute_name, dtype in arff_dict['attributes']:
-            # 'real' and 'numeric' are probably interpreted correctly, date support needs to be added.
-            if isinstance(dtype, list):
-                data[attribute_name] = data[attribute_name].astype('category')
-
-        if split_last:
-            return data.iloc[:, :-1], data.iloc[:, -1]
-        else:
-            return data
-
     def _preprocess_predict_X(self, X=None, arff_file_path=None):
         if X is not None:
             if hasattr(X, 'values') and hasattr(X, 'astype'):
@@ -231,14 +215,14 @@ class Gama(object):
 
     def score(self, X=None, y=None, arff_file_path=None):
         if arff_file_path:
-            X, y = self._get_data_from_arff(arff_file_path)
+            X, y = get_data_from_arff(arff_file_path)
         y_score = self._construct_y_score(y)
 
         predictions = self.predict_proba(X) if self._metrics[0].requires_probabilities else self.predict(X)
         return self._metrics[0].score(y_score, predictions)
 
     def _preprocess_arff(self, arff_file_path):
-        X, y = self._get_data_from_arff(arff_file_path)
+        X, y = get_data_from_arff(arff_file_path)
         steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
         self._operator_set._compile = partial(compile_individual, preprocessing_steps=steps)
         return X, y
@@ -280,15 +264,13 @@ class Gama(object):
             return restart and restart_
 
         with Stopwatch() as preprocessing_sw:
-            if arff_file_path:
+            if arff_file_path is not None:
                 X, y = self._preprocess_arff(arff_file_path)
-
-            if hasattr(self, '_encode_labels'):
-                if isinstance(y, pd.Series):
-                    y = np.asarray(y)
-                y = self._encode_labels(y)
-
-            if not arff_file_path:
+                if hasattr(self, '_encode_labels'):
+                    if isinstance(y, pd.Series):
+                        y = np.asarray(y)
+                    y = self._encode_labels(y)
+            else:
                 X, y = self._preprocess_numpy(X, y)
 
         log.info("Preprocessing took {:.4f}s. Moving on to search phase.".format(preprocessing_sw.elapsed_time))
