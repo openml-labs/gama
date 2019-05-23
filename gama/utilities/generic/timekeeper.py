@@ -8,6 +8,7 @@ log = logging.getLogger(__name__)
 
 
 class TimeKeeper:
+    """ Simple object that helps keep track of time over multiple activities. """
 
     def __init__(self, total_time: int=0):
         self.activity_durations = {}
