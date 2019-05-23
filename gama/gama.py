@@ -13,7 +13,6 @@ import warnings
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.impute import SimpleImputer
 
 import gama.genetic_programming.compilers.scikitlearn
 from gama.genetic_programming.algorithms.metrics import Metric
@@ -23,7 +22,7 @@ from gama.data import X_y_from_arff
 from gama.genetic_programming.algorithms.async_ea import async_ea
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
-from gama.utilities.preprocessing import define_preprocessing_steps
+from gama.utilities.preprocessing import define_preprocessing_steps, heuristic_numpy_to_dataframe
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
 from gama.genetic_programming.selection import create_from_population, eliminate_from_pareto
 from gama.genetic_programming.operations import create_random_individual
@@ -31,7 +30,7 @@ from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
 
-#  `gamalog` is for the entire gama module and submodules.
+# `gamalog` is for the entire gama module and submodules.
 gamalog = logging.getLogger('gama')
 gamalog.setLevel(logging.DEBUG)
 
@@ -198,16 +197,15 @@ class Gama(object):
             raise ValueError("scoring must be a string, Metric or Iterable (of strings or Metrics).")
 
     def _preprocess_predict_X(self, X=None, arff_file_path=None):
-        if X is not None:
-            if hasattr(X, 'values') and hasattr(X, 'astype'):
-                X = X.astype(np.float64).values
-            if np.isnan(X).any() and self._imputer is not None:
-                log.info("Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.")
-                X = self._imputer.transform(X)
-        elif arff_file_path is not None:
-            X, y = self._preprocess_arff(arff_file_path)
-        else:
+        if isinstance(arff_file_path, str):
+            X, _ = X_y_from_arff(arff_file_path)
+        elif isinstance(X, np.ndarray):
+            X = pd.DataFrame(X)
+            for col in self.X.columns:
+                X[col] = X[col].astype(self.X[col].dtype)
+        elif X is None:
             raise ValueError("Must specify either X or arff_file_path.")
+
         return X
 
     def predict(self, X=None, arff_file_path=None):
@@ -220,12 +218,6 @@ class Gama(object):
 
         predictions = self.predict_proba(X) if self._metrics[0].requires_probabilities else self.predict(X)
         return self._metrics[0].score(y_score, predictions)
-
-    def _preprocess_arff(self, arff_file_path):
-        X, y = X_y_from_arff(arff_file_path)
-        steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
-        self._operator_set._compile = partial(compile_individual, preprocessing_steps=steps)
-        return X, y
 
     def fit(self, X=None, y=None, arff_file_path=None, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
         """ Find and fit a model to predict target y from X.
@@ -253,6 +245,10 @@ class Gama(object):
         :param restart_: bool. Indicates whether or not the search should be restarted when a specific restart
             criteria is met.
         """
+        if type(X) != type(y) and not (isinstance(X, pd.DataFrame) and isinstance(y, pd.Series)):
+            raise TypeError("X and y must be of the same type or respectively pd.DataFrame and pd.Series.")
+        if not isinstance(X, (type(None), np.ndarray, pd.DataFrame)):
+            raise TypeError("X must be either None, np.ndarray or pd.DataFrame.")
 
         ensemble_ratio = 0.3  # fraction of time left after preprocessing that reserved for postprocessing
 
@@ -265,13 +261,21 @@ class Gama(object):
 
         with Stopwatch() as preprocessing_sw:
             if arff_file_path is not None:
-                X, y = self._preprocess_arff(arff_file_path)
-                if hasattr(self, '_encode_labels'):
-                    if isinstance(y, pd.Series):
-                        y = np.asarray(y)
-                    y = self._encode_labels(y)
-            else:
-                X, y = self._preprocess_numpy(X, y)
+                X, y = X_y_from_arff(arff_file_path)
+            elif isinstance(X, np.ndarray):
+                X = heuristic_numpy_to_dataframe(X)
+                y = pd.Series(y)
+            # else is already properly typed df/series
+
+            if y.isnull().any():
+                log.info("Target vector has been found to contain NaN-labels, these rows will be ignored.")
+                X, y = X.loc[~y.isnull(), :], y[~y.isnull()]
+
+            steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
+            self._operator_set._compile = partial(compile_individual, preprocessing_steps=steps)
+
+            if hasattr(self, '_encode_labels'):
+                y = self._encode_labels(y)
 
         log.info("Preprocessing took {:.4f}s. Moving on to search phase.".format(preprocessing_sw.elapsed_time))
         log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
@@ -300,43 +304,6 @@ class Gama(object):
         if not keep_cache:
             log.debug("Deleting cache.")
             self.delete_cache()
-
-    def _preprocess_numpy(self, X, y):
-        """  Preprocess X and y such that scikit-learn pipelines can be evaluated on it.
-
-        Preprocessing currently transforms the input into float64 numpy arrays.
-        Any row that has a NaN y-value gets removed. Any remaining NaNs in X get imputed.
-
-        :param X: Input data, DataFrame or numpy array with shape (sample, features)
-        :param y: True labels for each sample
-        :return: Preprocessed versions of X and y.
-        """
-        if hasattr(X, 'values') and hasattr(X, 'astype'):
-            X = X.astype(np.float64).values
-        if hasattr(y, 'values') and hasattr(y, 'astype'):
-            y = y.astype(np.float64).values
-        if isinstance(y, list):
-            y = np.asarray(y)
-
-        # For now there is no support for semi-supervised learning, so remove all instances with unknown targets.
-        nan_targets = np.isnan(y)
-        if nan_targets.any():
-            log.info("Target vector y has been found to contain NaN-labels. All NaN entries will be ignored because "
-                     "supervised learning is not (yet) supported.")
-            X = X[~nan_targets, :]
-            y = y[~nan_targets]
-
-        # For now we always impute if there are missing values, and we always impute with median.
-        # This helps us use a wider variety of algorithms without constructing a grammar.
-        # One should note that ideally imputation should not always be done since some methods work well without.
-        # Secondly, the way imputation is done can also be dependent on the task. Median is generally not the best.
-        self._imputer = SimpleImputer(strategy="median")
-        self._imputer.fit(X)
-        if np.isnan(X).any():
-            log.info("Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.")
-            X = self._imputer.transform(X)
-
-        return X, y
 
     def _construct_y_score(self, y):
         if any(metric.requires_probabilities for metric in self._metrics):
