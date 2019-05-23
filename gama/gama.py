@@ -19,7 +19,7 @@ import gama.genetic_programming.compilers.scikitlearn
 from gama.genetic_programming.algorithms.metrics import Metric
 from .utilities.observer import Observer
 
-from gama.data import get_data_from_arff
+from gama.data import X_y_from_arff
 from gama.genetic_programming.algorithms.async_ea import async_ea
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
@@ -215,14 +215,14 @@ class Gama(object):
 
     def score(self, X=None, y=None, arff_file_path=None):
         if arff_file_path:
-            X, y = get_data_from_arff(arff_file_path)
+            X, y = X_y_from_arff(arff_file_path)
         y_score = self._construct_y_score(y)
 
         predictions = self.predict_proba(X) if self._metrics[0].requires_probabilities else self.predict(X)
         return self._metrics[0].score(y_score, predictions)
 
     def _preprocess_arff(self, arff_file_path):
-        X, y = get_data_from_arff(arff_file_path)
+        X, y = X_y_from_arff(arff_file_path)
         steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
         self._operator_set._compile = partial(compile_individual, preprocessing_steps=steps)
         return X, y
