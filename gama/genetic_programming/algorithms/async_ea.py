@@ -5,6 +5,7 @@ import time
 
 import stopit
 
+from gama.utilities.generic.async_executor import AsyncExecutor
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.logging_utilities import MultiprocessingLogger
 
@@ -47,8 +48,7 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
     evaluate_log = partial(toolbox.evaluate, logger=logger)
     futures = set()
-    async_executor = concurrent.futures.ProcessPoolExecutor(n_jobs)
-    with stopit.ThreadingTimeout(max_time_seconds) as c_mgr:
+    with stopit.ThreadingTimeout(max_time_seconds) as c_mgr, AsyncExecutor(n_jobs) as async:
         should_restart = True
         while should_restart:
             should_restart = False
@@ -56,7 +56,7 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
             log.info('Starting EA with new population.')
             for individual in start_population:
-                futures.add(async_executor.submit(evaluate_log, individual))
+                futures.add(async.submit(evaluate_log, individual))
 
             for ind_no in range(max_n_evaluations):
                 completed, futures = concurrent.futures.wait(futures, return_when='FIRST_COMPLETED')
@@ -86,14 +86,7 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
                     if len(current_population) > 1:
                         new_individual = toolbox.create(current_population, 1)[0]
-                        futures.add(async_executor.submit(evaluate_log, new_individual))
-
-        for future in futures:
-            future.cancel()
-
-    for pid, process in async_executor._processes.items():
-        process.terminate()
-    async_executor.shutdown(wait=False)
+                        futures.add(async.submit(evaluate_log, new_individual))
 
     if not c_mgr:
         log.info('Asynchronous EA terminated because maximum time has elapsed.'

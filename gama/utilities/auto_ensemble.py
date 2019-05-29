@@ -8,6 +8,7 @@ import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 import stopit
 
+from gama.utilities.generic.async_executor import AsyncExecutor
 from gama.genetic_programming.algorithms.metrics import Metric
 
 log = logging.getLogger(__name__)
@@ -153,10 +154,9 @@ class Ensemble(object):
         self._fit_models = []
         futures = set()
 
-        async_executor = concurrent.futures.ProcessPoolExecutor(self._n_jobs)
-        with stopit.ThreadingTimeout(timeout) as c_mgr:
+        with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncExecutor(self._n_jobs) as async:
             for (model, weight) in self._models.values():
-                futures.add(async_executor.submit(fn=fit_and_weight, args=(model.pipeline, X, y, weight)))
+                futures.add(async.submit(fn=fit_and_weight, args=(model.pipeline, X, y, weight)))
 
             while len(futures) > 0:
                 completed, futures = concurrent.futures.wait(futures, return_when='FIRST_COMPLETED')
@@ -164,12 +164,6 @@ class Ensemble(object):
                     pipeline, weight = future.result()
                     if weight > 0:
                         self._fit_models.append((pipeline, weight))
-
-        for future in futures:
-            future.cancel()
-        for pid, process in async_executor._processes.items():
-            process.terminate()
-        async_executor.shutdown(wait=False)
 
         if not c_mgr:
             log.info("Fitting of ensemble stopped early.")
