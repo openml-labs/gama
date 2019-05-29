@@ -92,7 +92,8 @@ class GamaClassifierSystemTestCase(unittest.TestCase):
 
         # Majority classifier on this split achieves 0.6293706293706294
         accuracy = accuracy_score(y_test, class_predictions)
-        print(data['name'], metric, 'accuracy:', accuracy)
+        print("{data} {metric} {actual_score:.4f} (base: {base_score:.4f})".format(
+            data=data['name'], metric=metric, actual_score=accuracy, base_score=data['base_accuracy']))
         self.assertGreaterEqual(accuracy, data['base_accuracy'],
                                 'predictions should be at least as good as majority class.')
 
@@ -103,7 +104,8 @@ class GamaClassifierSystemTestCase(unittest.TestCase):
 
         # Majority classifier on this split achieves 12.80138131184662
         logloss = log_loss(y_test, class_probabilities)
-        print(data['name'], metric, 'log-loss:', logloss)
+        print("{data} {metric} {actual_score:.4f} (base: {base_score:.4f})".format(
+            data=data['name'], metric=metric, actual_score=logloss, base_score=data['base_log_loss']))
         self.assertLessEqual(logloss, data['base_log_loss'],
                              'predictions should be at least as good as majority class.')
 
@@ -153,7 +155,8 @@ class GamaClassifierSystemTestCase(unittest.TestCase):
 
         # Majority classifier on this split achieves 0.6293706293706294
         accuracy = accuracy_score(y_test, class_predictions)
-        print(data['name'], metric, 'accuracy:', accuracy)
+        print("{data} {metric} {actual_score:.4f} (base: {base_score:.4f})".format(
+            data=data['name'], metric=metric, actual_score=accuracy, base_score=data['base_accuracy']))
         self.assertGreaterEqual(accuracy, data['base_accuracy'],
                                 'predictions should be at least as good as majority class.')
 
@@ -164,7 +167,8 @@ class GamaClassifierSystemTestCase(unittest.TestCase):
 
         # Majority classifier on this split achieves 12.80138131184662
         logloss = log_loss(y_test, class_probabilities)
-        print(data['name'], metric, 'log-loss:', logloss)
+        print("{data} {metric} {actual_score:.4f} (base: {base_score:.4f})".format(
+            data=data['name'], metric=metric, actual_score=accuracy, base_score=data['base_accuracy']))
         self.assertLessEqual(logloss, data['base_log_loss'],
                              'predictions should be at least as good as majority class.')
 
@@ -197,7 +201,8 @@ class GamaClassifierARFFSystemTestCase(unittest.TestCase):
         self.assertEqual(class_predictions.shape, (data['test_size'],), 'predict should return (N,) shaped array.')
 
         accuracy = accuracy_score(y_test, class_predictions)
-        print(data['name'], metric, 'accuracy:', accuracy)
+        print("{data} {metric} {actual_score:.4f} (base: {base_score:.4f})".format(
+            data=data['name'], metric=metric, actual_score=accuracy, base_score=data['base_accuracy']))
         self.assertGreaterEqual(accuracy, data['base_accuracy'],
                                 'predictions should be at least as good as majority class.')
 
@@ -208,7 +213,8 @@ class GamaClassifierARFFSystemTestCase(unittest.TestCase):
                          'predict_proba should return (N,K) shaped array.')
 
         logloss = log_loss(y_test, class_probabilities)
-        print(data['name'], metric, 'log-loss:', logloss)
+        print("{data} {metric} {actual_score:.4f} (base: {base_score:.4f})".format(
+            data=data['name'], metric=metric, actual_score=accuracy, base_score=data['base_accuracy']))
         self.assertLessEqual(logloss, data['base_log_loss'],
                              'predictions should be at least as good as majority class.')
 
