@@ -151,12 +151,12 @@ class Ensemble(object):
             raise ValueError("timeout must be greater than 0.")
 
         self._fit_models = []
-        futures = []
+        futures = set()
 
-        with stopit.ThreadingTimeout(timeout) as c_mgr,\
-                concurrent.futures.ProcessPoolExecutor(self._n_jobs) as async_executor:
+        async_executor = concurrent.futures.ProcessPoolExecutor(self._n_jobs)
+        with stopit.ThreadingTimeout(timeout) as c_mgr:
             for (model, weight) in self._models.values():
-                futures.append(async_executor.submit(fn=fit_and_weight, args={model.pipeline, X, y, weight}))
+                futures.add(async_executor.submit(fn=fit_and_weight, args=(model.pipeline, X, y, weight)))
 
             while len(futures) > 0:
                 completed, futures = concurrent.futures.wait(futures, return_when='FIRST_COMPLETED')
@@ -164,6 +164,12 @@ class Ensemble(object):
                     pipeline, weight = future.result()
                     if weight > 0:
                         self._fit_models.append((pipeline, weight))
+
+        for future in futures:
+            future.cancel()
+        for pid, process in async_executor._processes.items():
+            process.terminate()
+        async_executor.shutdown(wait=False)
 
         if not c_mgr:
             log.info("Fitting of ensemble stopped early.")

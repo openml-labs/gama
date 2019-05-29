@@ -91,7 +91,6 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
         for future in futures:
             future.cancel()
 
-    log.info('end ea')
     for pid, process in async_executor._processes.items():
         process.terminate()
     async_executor.shutdown(wait=False)
