@@ -1,4 +1,5 @@
 from collections import namedtuple
+import concurrent.futures
 import os
 import pickle
 import logging
@@ -8,7 +9,6 @@ from sklearn.preprocessing import OneHotEncoder
 import stopit
 
 from gama.genetic_programming.algorithms.metrics import Metric
-from gama.utilities.generic.function_dispatcher import FunctionDispatcher
 
 log = logging.getLogger(__name__)
 Model = namedtuple("Model", ['name', 'pipeline', 'predictions', 'validation_score'])
@@ -151,18 +151,19 @@ class Ensemble(object):
             raise ValueError("timeout must be greater than 0.")
 
         self._fit_models = []
+        futures = []
 
         with stopit.ThreadingTimeout(timeout) as c_mgr,\
-                FunctionDispatcher(self._n_jobs, fit_and_weight) as fit_dispatcher:
-            fit_dispatcher.start()
+                concurrent.futures.ProcessPoolExecutor(self._n_jobs) as async_executor:
             for (model, weight) in self._models.values():
-                fit_dispatcher.queue_evaluation((model.pipeline, X, y, weight))
+                futures.append(async_executor.submit(fn=fit_and_weight, args={model.pipeline, X, y, weight}))
 
-            for _ in self._models.values():
-                _, output, __ = fit_dispatcher.get_next_result()
-                pipeline, weight = output
-                if weight > 0:
-                    self._fit_models.append((pipeline, weight))
+            while len(futures) > 0:
+                completed, futures = concurrent.futures.wait(futures, return_when='FIRST_COMPLETED')
+                for future in completed:
+                    pipeline, weight = future.result()
+                    if weight > 0:
+                        self._fit_models.append((pipeline, weight))
 
         if not c_mgr:
             log.info("Fitting of ensemble stopped early.")
