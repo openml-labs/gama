@@ -17,7 +17,9 @@ class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
     """
     def __exit__(self, exc_type, exc_val, exc_tb):
         print('terminating child processes')
-        for pid, process in self._processes.items():
+        # Looping over self._processes.items() will result in `RuntimeError: dictionary changed size during iteration`
+        processes = list(self._processes.values())
+        for process in processes:
             process.terminate()
         self.shutdown()
         return False
