@@ -60,7 +60,9 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
                 futures.add(async.submit(evaluate_log, individual))
 
             for ind_no in range(max_n_evaluations):
-                completed, futures = concurrent.futures.wait(futures, return_when='FIRST_COMPLETED')
+                completed = set()
+                while len(completed) == 0:
+                    completed, futures = concurrent.futures.wait(futures, return_when='FIRST_COMPLETED', timeout=.05)
                 logger.flush_to_log(log)
                 for individual in [future.result() for future in completed]:
                     log_parseable_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
