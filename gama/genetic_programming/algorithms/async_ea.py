@@ -48,8 +48,7 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
     evaluate_log = partial(toolbox.evaluate, logger=logger)
     futures = set()
-    async = AsyncExecutor(n_jobs)
-    with stopit.ThreadingTimeout(max_time_seconds) as c_mgr:
+    with stopit.ThreadingTimeout(max_time_seconds) as c_mgr, AsyncExecutor(n_jobs) as async:
         should_restart = True
         while should_restart:
             should_restart = False
@@ -60,9 +59,7 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
                 futures.add(async.submit(evaluate_log, individual))
 
             for ind_no in range(max_n_evaluations):
-                completed = set()
-                while len(completed) == 0:
-                    completed, futures = concurrent.futures.wait(futures, return_when='FIRST_COMPLETED', timeout=.05)
+                completed, futures = async.wait_first(futures)
                 logger.flush_to_log(log)
                 for individual in [future.result() for future in completed]:
                     log_parseable_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
@@ -90,7 +87,6 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
                     if len(current_population) > 1:
                         new_individual = toolbox.create(current_population, 1)[0]
                         futures.add(async.submit(evaluate_log, new_individual))
-    async.__exit__(None, None, None)
 
     if not c_mgr:
         log.info('Asynchronous EA terminated because maximum time has elapsed.'

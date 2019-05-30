@@ -1,7 +1,7 @@
-from concurrent.futures import ProcessPoolExecutor
+import concurrent.futures
 
 
-class AsyncExecutor(ProcessPoolExecutor):
+class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
     """ ContextManager for ProcessPoolExecutor which on exit terminates subprocesses and does not wait on shutdown.
 
     By default, when concurrent.futures.ProcessPoolExecutor is used as a context manager, on exiting the context
@@ -21,3 +21,17 @@ class AsyncExecutor(ProcessPoolExecutor):
             process.terminate()
         self.shutdown(wait=False)
         return False
+
+    def wait_first(self, futures, poll_time=.05):
+        """ Wait for the first future in `futures` to complete through blocking calls every `poll_time` seconds.
+
+        When waiting for futures, one should use ``concurrent.futures.wait``.
+        Unfortunately, this is a blocking call, even if `timeout` is specified.
+        This results in stopit's TimeoutException (and probably KeyboardInterrupt) being ignored.
+        This `wait` patches it breaking a single blocking call up into multiple small ones,
+        as any exceptions raised will be able to be handled in between the blocking calls.
+        """
+        done, not_done = set(), futures
+        while len(done) == 0:
+            done, not_done = concurrent.futures.wait(not_done, return_when='FIRST_COMPLETED', timeout=poll_time)
+        return done, not_done

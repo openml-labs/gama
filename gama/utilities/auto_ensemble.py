@@ -159,7 +159,7 @@ class Ensemble(object):
                 futures.add(async.submit(fn=fit_and_weight, args=(model.pipeline, X, y, weight)))
 
             while len(futures) > 0:
-                completed, futures = concurrent.futures.wait(futures, return_when='FIRST_COMPLETED')
+                completed, futures = async.wait_first(futures)
                 for future in completed:
                     pipeline, weight = future.result()
                     if weight > 0:
