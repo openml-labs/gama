@@ -15,7 +15,8 @@ class GamaSystemTestCase(unittest.TestCase):
     """ Contain complete system tests for Gama. """
     
     def setUp(self):
-        self.gama = GamaClassifier(random_state=0, max_total_time=120)
+        import logging
+        self.gama = GamaClassifier(random_state=0, max_total_time=120, verbosity=logging.DEBUG)
     
     def tearDown(self):
         pass
