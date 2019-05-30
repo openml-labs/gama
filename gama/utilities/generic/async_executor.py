@@ -19,7 +19,7 @@ class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
         print('terminating child processes')
         for pid, process in self._processes.items():
             process.terminate()
-        self.shutdown(wait=False)
+        self.shutdown()
         return False
 
     def wait_first(self, futures, poll_time=.05):
