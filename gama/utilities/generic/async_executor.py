@@ -20,3 +20,4 @@ class AsyncExecutor(ProcessPoolExecutor):
         for pid, process in self._processes.items():
             process.terminate()
         self.shutdown(wait=False)
+        return False
