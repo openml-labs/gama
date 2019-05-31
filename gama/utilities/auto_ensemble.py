@@ -157,8 +157,8 @@ class Ensemble(object):
 
         print("Start fit")
         with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncExecutor(self._n_jobs) as async:
-            print("Queue fit")
             c = [(model, weight) for model, weight in self._models.values()]
+            print("Queue fit")
             for (model, weight) in c:
                 futures.add(async.submit(fn=fit_and_weight, args=(model.pipeline, X, y, weight)))
             print("Getting Results")
