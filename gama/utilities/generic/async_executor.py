@@ -19,9 +19,9 @@ class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
         print('terminating child processes')
         # Looping over self._processes.items() will result in `RuntimeError: dictionary changed size during iteration`
         processes = list(self._processes.values())
+        self.shutdown(wait=False)
         for process in processes:
             process.terminate()
-        self.shutdown()
         return False
 
     def wait_first(self, futures, poll_time=.05):
