@@ -160,7 +160,7 @@ class Ensemble(object):
             c = [(model, weight) for model, weight in self._models.values()]
             print("Queue fit")
             for (model, weight) in c:
-                futures.add(async.schedule(fit_and_weight, args=(model.pipeline, X, y, weight)))
+                futures.add(async.schedule(fit_and_weight, args=((model.pipeline, X, y, weight))))
             print("Getting Results")
 
             while len(futures) > 0:
