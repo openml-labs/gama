@@ -48,3 +48,4 @@ class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
     def submit(self, fn, *args, **kwargs):
         f = super().submit(fn, *args, **kwargs)
         self._futures.append(f)
+        return f
