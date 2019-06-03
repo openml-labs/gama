@@ -171,8 +171,8 @@ class Ensemble(object):
                         self._fit_models.append((pipeline, weight))
 
         async.stop()
-        for future in futures:
-            future.cancel()
+        #for future in futures:
+        #    future.cancel()
 
         if not c_mgr:
             log.info("Fitting of ensemble stopped early.")

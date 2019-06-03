@@ -89,8 +89,8 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
                         futures.add(async.schedule(evaluate_log, (new_individual,)))
 
     async.stop()
-    for future in futures:
-        future.cancel()
+    #for future in futures:
+    #    future.cancel()
 
     if not c_mgr:
         log.info('Asynchronous EA terminated because maximum time has elapsed.'
