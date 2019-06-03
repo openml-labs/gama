@@ -56,7 +56,7 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
     evaluate_log = partial(toolbox.evaluate, logger=logger)
 
-    evaluate_log = do_nothing
+    #evaluate_log = do_nothing
     futures = set()
     async = pebble.ProcessPool(n_jobs)
     with stopit.ThreadingTimeout(max_time_seconds) as c_mgr:

@@ -80,9 +80,10 @@ def object_is_valid_pipeline(o):
 
 def evaluate_individual(individual: Individual, operator_set: OperatorSet, evaluate_pipeline_length, *args, **kwargs):
     pipeline = operator_set.compile(individual)
-    (scores, start_datetime, wallclock_time, process_time) = evaluate_pipeline(pipeline, *args, **kwargs)
-    if evaluate_pipeline_length:
-        scores = (*scores, -len(individual.primitives))
+    #(scores, start_datetime, wallclock_time, process_time) = evaluate_pipeline(pipeline, *args, **kwargs)
+    (scores, start_datetime, wallclock_time, process_time) = (0.9, 2), datetime.now(), datetime.now(), datetime.now()
+    #if evaluate_pipeline_length:
+    #    scores = (*scores, -len(individual.primitives))
     individual.fitness = Fitness(scores, start_datetime, wallclock_time, process_time)
     return individual
 
