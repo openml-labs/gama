@@ -6,6 +6,7 @@ from gama.utilities.generic.paretofront import ParetoFront
 
 def create_from_population(operator_shell, pop, n, cxpb, mutpb):
     """ Creates n new individuals based on the population. Can apply both crossover and mutation. """
+    return [operator_shell.individual()]
     offspring = []
     for _ in range(n):
         ind1, ind2 = random.sample(pop, k=2)
