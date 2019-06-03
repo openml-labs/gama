@@ -29,9 +29,11 @@ def _safe_outside_call(fn, timeout):
         log.info("Time exceeded during callback, but exception was swallowed.")
         raise stopit.utils.TimeoutException
 
-def do_nothing():
+def do_nothing(individual):
     import time
+    import datetime
     time.sleep(9)
+    individual.fitness = Fitness((0.9, 2), datetime.datetime.now(), datetime.datetime.now(), datetime.datetime.now())
     return 3
 
 
@@ -65,8 +67,7 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
             log.info('Starting EA with new population.')
             for individual in start_population:
-                #futures.add(async.schedule(evaluate_log, (individual,)))
-                futures.add(async.schedule(evaluate_log))
+                futures.add(async.schedule(evaluate_log, (individual,)))
 
             for ind_no in range(max_n_evaluations):
                 completed, futures = AsyncExecutor.wait_first(futures)
@@ -98,8 +99,7 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
                         if len(current_population) > 1:
 
                             new_individual = toolbox.create(current_population, 1)[0]
-                        #futures.add(async.schedule(evaluate_log, (new_individual,)))
-                    futures.add(async.schedule(evaluate_log))
+                    futures.add(async.schedule(evaluate_log, (individual,)))
                     current_population.append(start_population[0])
                     current_population[0].fitness = Fitness((0.9, 2), None, None, None)
 
