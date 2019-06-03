@@ -96,8 +96,8 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
                             _safe_outside_call(partial(elimination_callback, to_remove[0]), exceed_timeout)
 
                     if len(current_population) > 1:
-                        #new_individual = toolbox.create(current_population, 1)[0]
-                        new_individual = toolbox.individual()
+                        new_individual = toolbox.create(current_population, 1)[0]
+                        #new_individual = toolbox.individual()
                         futures.add(async.schedule(evaluate_log, (new_individual,)))
                     #current_population.append(start_population[0])
                     #current_population[0].fitness = Fitness((0.9, 2), None, None, None)

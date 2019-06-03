@@ -10,9 +10,10 @@ def create_from_population(operator_shell, pop, n, cxpb, mutpb):
     for _ in range(n):
         ind1, ind2 = random.sample(pop, k=2)
         if random.random() < cxpb and ind1.can_mate_with(ind2):
+            print('mating!')
             ind1 = operator_shell.mate(ind1, ind2)
-        else:
-            ind1 = operator_shell.mutate(ind1)
+        #else:
+        #ind1 = operator_shell.mutate(ind1)
         offspring.append(ind1)
     return offspring
 
