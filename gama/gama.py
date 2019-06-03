@@ -343,7 +343,7 @@ class Gama(object):
         self._best_pipeline = self._operator_set.compile(self._best_pipeline)
         log.info("Pipeline {}, steps: {}".format(self._best_pipeline, self._best_pipeline.steps))
         self._best_pipeline.fit(self.X, self.y_train)
-        if n > 1:
+        if False:#n > 1:
             self._build_fit_ensemble(n, timeout=timeout)
 
     def _initialize_ensemble(self):
