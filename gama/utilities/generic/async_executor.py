@@ -15,6 +15,10 @@ class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
 
     As far as I know, there is no proper way to shutdown these child processes without accessing internal variables.
     """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._futures = []
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         print('terminating child processes')
         # Looping over self._processes.items() will result in `RuntimeError: dictionary changed size during iteration`
@@ -22,6 +26,9 @@ class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
         self.shutdown(wait=False)
         #for process in processes:
         #    process.terminate()
+        for future in self._futures:
+            if not future.done():
+                future.cancel()
         return False
 
     def wait_first(self, futures, poll_time=.05):
@@ -37,3 +44,7 @@ class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
         while len(done) == 0:
             done, not_done = concurrent.futures.wait(not_done, return_when='FIRST_COMPLETED', timeout=poll_time)
         return done, not_done
+
+    def submit(self, fn, *args, **kwargs):
+        f = super().submit(fn, *args, **kwargs)
+        self._futures.append(f)
