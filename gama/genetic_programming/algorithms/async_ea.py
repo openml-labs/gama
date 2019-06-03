@@ -8,6 +8,7 @@ import pebble
 from gama.utilities.generic.async_executor import AsyncExecutor
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.logging_utilities import MultiprocessingLogger
+from gama.genetic_programming.components import Fitness
 
 log = logging.getLogger(__name__)
 
@@ -28,6 +29,11 @@ def _safe_outside_call(fn, timeout):
         log.info("Time exceeded during callback, but exception was swallowed.")
         raise stopit.utils.TimeoutException
 
+def do_nothing():
+    import time
+    time.sleep(9)
+    return 3
+
 
 def async_ea(start_population, toolbox, evaluation_callback=None, restart_callback=None,
              elimination_callback=None, max_n_evaluations=10000, max_time_seconds=1e7, n_jobs=1):
@@ -47,6 +53,8 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
         return (time.time() - start_time) > max_time_seconds
 
     evaluate_log = partial(toolbox.evaluate, logger=logger)
+
+    evaluate_log = do_nothing
     futures = set()
     async = pebble.ProcessPool(n_jobs)
     with stopit.ThreadingTimeout(max_time_seconds) as c_mgr:
@@ -57,37 +65,43 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
             log.info('Starting EA with new population.')
             for individual in start_population:
-                futures.add(async.schedule(evaluate_log, (individual,)))
+                #futures.add(async.schedule(evaluate_log, (individual,)))
+                futures.add(async.schedule(evaluate_log))
 
             for ind_no in range(max_n_evaluations):
                 completed, futures = AsyncExecutor.wait_first(futures)
                 logger.flush_to_log(log)
                 for individual in [future.result() for future in completed]:
-                    log_parseable_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
-                                        individual.fitness.wallclock_time, individual.fitness.process_time,
-                                        individual.fitness.values, individual._id, individual.pipeline_str())
+                    if False:
+                        log_parseable_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
+                                            individual.fitness.wallclock_time, individual.fitness.process_time,
+                                            individual.fitness.values, individual._id, individual.pipeline_str())
 
-                    if evaluation_callback:
-                        _safe_outside_call(partial(evaluation_callback, individual), exceed_timeout)
+                        if evaluation_callback:
+                            _safe_outside_call(partial(evaluation_callback, individual), exceed_timeout)
 
-                    should_restart = (restart_callback is not None and restart_callback())
-                    if should_restart:
-                        log.info("Restart criterion met. Restarting with new random population.")
-                        log_parseable_event(log, TOKENS.EA_RESTART, ind_no)
-                        start_population = [toolbox.individual() for _ in range(max_population_size)]
-                        break
+                        should_restart = (restart_callback is not None and restart_callback())
+                        if should_restart:
+                            log.info("Restart criterion met. Restarting with new random population.")
+                            log_parseable_event(log, TOKENS.EA_RESTART, ind_no)
+                            start_population = [toolbox.individual() for _ in range(max_population_size)]
+                            break
 
-                    current_population.append(individual)
-                    if len(current_population) > max_population_size:
-                        to_remove = toolbox.eliminate(current_population, 1)
-                        log_parseable_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
-                        current_population.remove(to_remove[0])
-                        if elimination_callback:
-                            _safe_outside_call(partial(elimination_callback, to_remove[0]), exceed_timeout)
+                        current_population.append(individual)
+                        if len(current_population) > max_population_size:
+                            to_remove = toolbox.eliminate(current_population, 1)
+                            log_parseable_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
+                            current_population.remove(to_remove[0])
+                            if elimination_callback:
+                                _safe_outside_call(partial(elimination_callback, to_remove[0]), exceed_timeout)
 
-                    if len(current_population) > 1:
-                        new_individual = toolbox.create(current_population, 1)[0]
-                        futures.add(async.schedule(evaluate_log, (new_individual,)))
+                        if len(current_population) > 1:
+
+                            new_individual = toolbox.create(current_population, 1)[0]
+                        #futures.add(async.schedule(evaluate_log, (new_individual,)))
+                    futures.add(async.schedule(evaluate_log))
+                    current_population.append(start_population[0])
+                    current_population[0].fitness = Fitness((0.9, 2), None, None, None)
 
     for future in futures:
         future.cancel()
