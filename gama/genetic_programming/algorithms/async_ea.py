@@ -73,22 +73,22 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
                 completed, futures = AsyncExecutor.wait_first(futures)
                 logger.flush_to_log(log)
                 for individual in [future.result() for future in completed]:
+                    log_parseable_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
+                                        individual.fitness.wallclock_time, individual.fitness.process_time,
+                                        individual.fitness.values, individual._id, individual.pipeline_str())
+
+                    if evaluation_callback:
+                        _safe_outside_call(partial(evaluation_callback, individual), exceed_timeout)
+
+                    should_restart = (restart_callback is not None and restart_callback())
+                    if should_restart:
+                        log.info("Restart criterion met. Restarting with new random population.")
+                        log_parseable_event(log, TOKENS.EA_RESTART, ind_no)
+                        start_population = [toolbox.individual() for _ in range(max_population_size)]
+                        break
+
+                    current_population.append(individual)
                     if False:
-                        log_parseable_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
-                                            individual.fitness.wallclock_time, individual.fitness.process_time,
-                                            individual.fitness.values, individual._id, individual.pipeline_str())
-
-                        if evaluation_callback:
-                            _safe_outside_call(partial(evaluation_callback, individual), exceed_timeout)
-
-                        should_restart = (restart_callback is not None and restart_callback())
-                        if should_restart:
-                            log.info("Restart criterion met. Restarting with new random population.")
-                            log_parseable_event(log, TOKENS.EA_RESTART, ind_no)
-                            start_population = [toolbox.individual() for _ in range(max_population_size)]
-                            break
-
-                        current_population.append(individual)
                         if len(current_population) > max_population_size:
                             to_remove = toolbox.eliminate(current_population, 1)
                             log_parseable_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
@@ -99,8 +99,8 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
                         if len(current_population) > 1:
 
                             new_individual = toolbox.create(current_population, 1)[0]
-                    futures.add(async.schedule(evaluate_log, (individual,)))
-                    current_population.append(start_population[0])
+                            futures.add(async.schedule(evaluate_log, (individual,)))
+                    #current_population.append(start_population[0])
                     current_population[0].fitness = Fitness((0.9, 2), None, None, None)
 
     for future in futures:
