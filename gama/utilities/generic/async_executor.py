@@ -31,7 +31,7 @@ class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
                 future.cancel()
         return False
 
-    def wait_first(self, futures, poll_time=.05):
+    def wait_first(futures, poll_time=.05):
         """ Wait for the first future in `futures` to complete through blocking calls every `poll_time` seconds.
 
         When waiting for futures, one should use ``concurrent.futures.wait``.

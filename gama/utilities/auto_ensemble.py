@@ -1,5 +1,4 @@
 from collections import namedtuple
-import concurrent.futures
 import os
 import pickle
 import logging
@@ -7,6 +6,7 @@ import logging
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 import stopit
+import pebble
 
 from gama.utilities.generic.async_executor import AsyncExecutor
 from gama.genetic_programming.algorithms.metrics import Metric
@@ -156,15 +156,15 @@ class Ensemble(object):
         futures = set()
 
         print("Start fit")
-        with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncExecutor(self._n_jobs) as async:
+        with stopit.ThreadingTimeout(timeout) as c_mgr, pebble.ProcessPool(self._n_jobs) as async:
             c = [(model, weight) for model, weight in self._models.values()]
             print("Queue fit")
             for (model, weight) in c:
-                futures.add(async.submit(fn=fit_and_weight, args=(model.pipeline, X, y, weight)))
+                futures.add(async.schedule(fit_and_weight, args=(model.pipeline, X, y, weight)))
             print("Getting Results")
 
             while len(futures) > 0:
-                completed, futures = async.wait_first(futures)
+                completed, futures = AsyncExecutor.wait_first(futures)
                 for future in completed:
                     pipeline, weight = future.result()
                     if weight > 0:

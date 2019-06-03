@@ -8,7 +8,8 @@ requirements = [
     'scikit-learn==0.20.0',
     'stopit>=1.1.1',
     'liac-arff>=2.2.2',
-    'category-encoders>=1.2.8'
+    'category-encoders>=1.2.8',
+    'pebble==4.3.10'
 ]
 
 setup(

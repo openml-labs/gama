@@ -1,9 +1,9 @@
-import concurrent.futures
 import logging
 from functools import partial
 import time
 
 import stopit
+import pebble
 
 from gama.utilities.generic.async_executor import AsyncExecutor
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
@@ -48,7 +48,7 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
     evaluate_log = partial(toolbox.evaluate, logger=logger)
     futures = set()
-    with stopit.ThreadingTimeout(max_time_seconds) as c_mgr, AsyncExecutor(n_jobs) as async:
+    with stopit.ThreadingTimeout(max_time_seconds) as c_mgr, pebble.ProcessPool(n_jobs) as async:
         should_restart = True
         while should_restart:
             should_restart = False
@@ -56,10 +56,10 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
             log.info('Starting EA with new population.')
             for individual in start_population:
-                futures.add(async.submit(evaluate_log, individual))
+                futures.add(async.schedule(evaluate_log, (individual,)))
 
             for ind_no in range(max_n_evaluations):
-                completed, futures = async.wait_first(futures)
+                completed, futures = AsyncExecutor.wait_first(futures)
                 logger.flush_to_log(log)
                 for individual in [future.result() for future in completed]:
                     log_parseable_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
@@ -86,7 +86,7 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
                     if len(current_population) > 1:
                         new_individual = toolbox.create(current_population, 1)[0]
-                        futures.add(async.submit(evaluate_log, new_individual))
+                        futures.add(async.schedule(evaluate_log, (new_individual,)))
 
     for future in futures:
         future.cancel()
