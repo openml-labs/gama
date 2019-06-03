@@ -156,7 +156,8 @@ class Ensemble(object):
         futures = set()
 
         print("Start fit")
-        with stopit.ThreadingTimeout(timeout) as c_mgr, pebble.ProcessPool(self._n_jobs) as async:
+        async = pebble.ProcessPool(self._n_jobs)
+        with stopit.ThreadingTimeout(timeout) as c_mgr:
             c = [(model, weight) for model, weight in self._models.values()]
             print("Queue fit")
             for (model, weight) in c:
