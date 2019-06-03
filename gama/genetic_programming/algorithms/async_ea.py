@@ -88,20 +88,19 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
                         break
 
                     current_population.append(individual)
-                    if False:
-                        if len(current_population) > max_population_size:
-                            to_remove = toolbox.eliminate(current_population, 1)
-                            log_parseable_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
-                            current_population.remove(to_remove[0])
-                            if elimination_callback:
-                                _safe_outside_call(partial(elimination_callback, to_remove[0]), exceed_timeout)
+                    if len(current_population) > max_population_size:
+                        to_remove = toolbox.eliminate(current_population, 1)
+                        log_parseable_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
+                        current_population.remove(to_remove[0])
+                        if elimination_callback:
+                            _safe_outside_call(partial(elimination_callback, to_remove[0]), exceed_timeout)
 
-                        if len(current_population) > 1:
-
-                            new_individual = toolbox.create(current_population, 1)[0]
-                            futures.add(async.schedule(evaluate_log, (individual,)))
+                    if len(current_population) > 1:
+                        #new_individual = toolbox.create(current_population, 1)[0]
+                        new_individual = toolbox.individual()
+                        futures.add(async.schedule(evaluate_log, (new_individual,)))
                     #current_population.append(start_population[0])
-                    current_population[0].fitness = Fitness((0.9, 2), None, None, None)
+                    #current_population[0].fitness = Fitness((0.9, 2), None, None, None)
 
     for future in futures:
         future.cancel()

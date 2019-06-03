@@ -80,10 +80,10 @@ def object_is_valid_pipeline(o):
 
 def evaluate_individual(individual: Individual, operator_set: OperatorSet, evaluate_pipeline_length, *args, **kwargs):
     pipeline = operator_set.compile(individual)
-    #(scores, start_datetime, wallclock_time, process_time) = evaluate_pipeline(pipeline, *args, **kwargs)
-    (scores, start_datetime, wallclock_time, process_time) = (0.9, 2), datetime.now(), datetime.now(), datetime.now()
-    #if evaluate_pipeline_length:
-    #    scores = (*scores, -len(individual.primitives))
+    (scores, start_datetime, wallclock_time, process_time) = evaluate_pipeline(pipeline, *args, **kwargs)
+    #(scores, start_datetime, wallclock_time, process_time) = (0.9, 2), datetime.now(), datetime.now(), datetime.now()
+    if evaluate_pipeline_length:
+        scores = (*scores, -len(individual.primitives))
     individual.fitness = Fitness(scores, start_datetime, wallclock_time, process_time)
     return individual
 
@@ -123,7 +123,7 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5
             with open(os.path.join(cache_dir, pl_filename + '.pkl'), 'wb') as fh:
                 pickle.dump((pl, prediction, scores), fh)
         except FileNotFoundError:
-            log.warning("File not found while saving predictions. This can happen in the multi-process case if the "
+            log.debug("File not found while saving predictions. This can happen in the multi-process case if the "
                         "cache gets deleted within `max_eval_time` of the end of the search process.", exc_info=True)
 
     process_time = time.process_time() - start
