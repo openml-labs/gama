@@ -379,7 +379,14 @@ class Gama(object):
 
     def delete_cache(self):
         """ Removes the cache folder and all files associated to this instance. """
-        shutil.rmtree(self._cache_dir)
+        while os.path.exists(self._cache_dir):
+            try:
+                log.info("Attempting to delete {}".format(self._cache_dir))
+                shutil.rmtree(self._cache_dir)
+            except OSError as e:
+                if "The directory is not empty" not in str(e):
+                    log.warning("Did not delete due to:", exc_info=True)
+                # else ignore silently. This can occur if an evaluation process writes to cache.
 
     def _on_evaluation_completed(self, ind):
         for callback in self._subscribers['evaluation_completed']:
