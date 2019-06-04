@@ -86,7 +86,7 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
                     if len(current_population) > 1:
                         new_individual = toolbox.create(current_population, 1)[0]
-                        async.submit(evaluate_log, new_individual)
+                        futures.add(async.submit(evaluate_log, new_individual))
 
     if not c_mgr:
         log.info('Asynchronous EA terminated because maximum time has elapsed.'
