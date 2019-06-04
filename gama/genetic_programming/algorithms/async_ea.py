@@ -6,7 +6,7 @@ import stopit
 
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.logging_utilities import MultiprocessingLogger
-from gama.utilities.generic.function_dispatcher import FunctionDispatcher
+from gama.utilities.generic.async_executor import AsyncExecutor, wait_first_complete
 
 log = logging.getLogger(__name__)
 
@@ -40,27 +40,26 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
     start_time = time.time()
     max_population_size = len(start_population)
-    logger = MultiprocessingLogger() if n_jobs > 1 else log
+    logger = MultiprocessingLogger()
 
     def exceed_timeout():
         return (time.time() - start_time) > max_time_seconds
 
-    with stopit.ThreadingTimeout(max_time_seconds) as c_mgr,\
-            FunctionDispatcher(n_jobs, partial(toolbox.evaluate, logger=logger)) as evaluation_dispatcher:
+    evaluate_log = partial(toolbox.evaluate, logger=logger)
+    futures = set()
 
+    with stopit.ThreadingTimeout(max_time_seconds) as c_mgr, AsyncExecutor(n_jobs) as async:
         should_restart = True
         while should_restart:
             should_restart = False
             current_population = []
-
             log.info('Starting EA with new population.')
             for individual in start_population:
-                evaluation_dispatcher.queue_evaluation(individual)
+                futures.add(async.submit(evaluate_log, individual))
 
             for ind_no in range(max_n_evaluations):
-                _, individual, _ = evaluation_dispatcher.get_next_result()
-                if n_jobs > 1:
-                    logger.flush_to_log(log)
+                done, futures = wait_first_complete(futures)
+                logger.flush_to_log(log)
                 log_parseable_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
                                     individual.fitness.wallclock_time, individual.fitness.process_time,
                                     individual.fitness.values, individual._id, individual.pipeline_str())
@@ -85,9 +84,7 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
                 if len(current_population) > 1:
                     new_individual = toolbox.create(current_population, 1)[0]
-                    evaluation_dispatcher.queue_evaluation(new_individual)
-
-            evaluation_dispatcher.restart()
+                    async.submit(evaluate_log, new_individual)
 
     if not c_mgr:
         log.info('Asynchronous EA terminated because maximum time has elapsed.'
