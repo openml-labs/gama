@@ -35,7 +35,7 @@ class OperatorSet:
                 self._seen_individuals[str(individual.main_node)] = individual
                 return individual, log_args
         else:
-            log.debug("Could not create a new individual from 50 iterations of {}".format(operator.__name__))
+            #log.debug("Could not create a new individual from 50 iterations of {}".format(operator.__name__))
             # For progress on solving this, see #11
             return individual, log_args
 
