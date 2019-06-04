@@ -100,7 +100,9 @@ def crossover(individual1: Individual, individual2: Individual) -> None:
     if both_at_least_length_2:
         crossover_choices.append(crossover_primitives)
 
-    random.choice(crossover_choices)(individual1, individual2)
+    crossover_fn = random.choice(crossover_choices)
+    #print(crossover_fn.__name__)
+    crossover_fn(individual1, individual2)
 
 
 def crossover_primitives(individual1: Individual, individual2: Individual) -> None:

@@ -54,6 +54,7 @@ class OperatorSet:
         def mutate_with_log():
             new_individual = individual.copy_as_new()
             mutator = self._mutate(new_individual, *args, **kwargs)
+            #print(mutator.__name__)
             log_args = [TOKENS.MUTATION, new_individual._id, individual._id, mutator.__name__]
             return new_individual, log_args
 
