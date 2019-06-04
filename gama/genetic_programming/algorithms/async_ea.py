@@ -3,12 +3,10 @@ from functools import partial
 import time
 
 import stopit
-import pebble
 
 from gama.utilities.generic.async_executor import AsyncExecutor
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.logging_utilities import MultiprocessingLogger
-from gama.genetic_programming.components import Fitness
 
 log = logging.getLogger(__name__)
 
@@ -28,13 +26,6 @@ def _safe_outside_call(fn, timeout):
     if timeout():
         log.info("Time exceeded during callback, but exception was swallowed.")
         raise stopit.utils.TimeoutException
-
-def do_nothing(individual):
-    import time
-    import datetime
-    time.sleep(9)
-    individual.fitness = Fitness((0.9, 2), datetime.datetime.now(), datetime.datetime.now(), datetime.datetime.now())
-    return 3
 
 
 def async_ea(start_population, toolbox, evaluation_callback=None, restart_callback=None,
@@ -56,10 +47,8 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
     evaluate_log = partial(toolbox.evaluate, logger=logger)
 
-    #evaluate_log = do_nothing
     futures = set()
-    async = pebble.ProcessPool(n_jobs)
-    with stopit.ThreadingTimeout(max_time_seconds) as c_mgr:
+    with stopit.ThreadingTimeout(max_time_seconds) as c_mgr, AsyncExecutor(n_jobs) as async:
         should_restart = True
         while should_restart:
             should_restart = False
@@ -67,7 +56,7 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
             log.info('Starting EA with new population.')
             for individual in start_population:
-                futures.add(async.schedule(evaluate_log, (individual,)))
+                futures.add(async.submit(evaluate_log, individual))
 
             for ind_no in range(max_n_evaluations):
                 completed, futures = AsyncExecutor.wait_first(futures)
@@ -97,14 +86,7 @@ def async_ea(start_population, toolbox, evaluation_callback=None, restart_callba
 
                     if len(current_population) > 1:
                         new_individual = toolbox.create(current_population, 1)[0]
-                        #new_individual = toolbox.individual()
-                        futures.add(async.schedule(evaluate_log, (new_individual,)))
-                    #current_population.append(start_population[0])
-                    #current_population[0].fitness = Fitness((0.9, 2), None, None, None)
-
-    for future in futures:
-        future.cancel()
-    async.stop()
+                        futures.add(async.submit(evaluate_log, new_individual))
 
     if not c_mgr:
         log.info('Asynchronous EA terminated because maximum time has elapsed.'

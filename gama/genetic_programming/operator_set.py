@@ -47,7 +47,7 @@ class OperatorSet:
             return new_individual1, log_args
 
         individual, log_args = self.try_until_new(mate_with_log)
-        #log_parseable_event(log, *log_args)
+        log_parseable_event(log, *log_args)
         return individual
 
     def mutate(self, individual: Individual, *args, **kwargs):
