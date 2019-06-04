@@ -128,7 +128,10 @@ class Individual:
 def find_primitive(primitive_set: dict, primitive_string: str) -> Primitive:
     """ Find the Primitive that matches `primitive_string` in `primitive_set`. """
     all_primitives = primitive_set[DATA_TERMINAL] + primitive_set['prediction']
-    return [p for p in all_primitives if repr(p) == primitive_string][0]
+    results = [p for p in all_primitives if repr(p) == primitive_string]
+    if results == []:
+        raise ValueError("Primitive {} not found in primitive set".format(primitive_string))
+    return results[0]
 
 
 def find_terminal(primitive_set: dict, terminal_string: str) -> Terminal:

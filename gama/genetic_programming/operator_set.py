@@ -42,7 +42,7 @@ class OperatorSet:
     def mate(self, individual1: Individual, individual2: Individual, *args, **kwargs):
         def mate_with_log():
             new_individual1, new_individual2 = individual1.copy_as_new(), individual2.copy_as_new()
-            self._mate(new_individual1, new_individual2, *args, **kwargs)
+            #self._mate(new_individual1, new_individual2, *args, **kwargs)
             log_args = [TOKENS.CROSSOVER, new_individual1._id, individual1._id, individual2._id]
             return new_individual1, log_args
 
@@ -53,9 +53,9 @@ class OperatorSet:
     def mutate(self, individual: Individual, *args, **kwargs):
         def mutate_with_log():
             new_individual = individual.copy_as_new()
-            mutator = self._mutate(new_individual, *args, **kwargs)
+            #mutator = self._mutate(new_individual, *args, **kwargs)
             #print(mutator.__name__)
-            log_args = [TOKENS.MUTATION, new_individual._id, individual._id, mutator.__name__]
+            log_args = [TOKENS.MUTATION, new_individual._id, individual._id, 'dummy']# mutator.__name__]
             return new_individual, log_args
 
         individual, log_args = self.try_until_new(mutate_with_log)
