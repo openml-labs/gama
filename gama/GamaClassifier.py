@@ -32,7 +32,11 @@ class GamaClassifier(Gama):
         """
         X = self._preprocess_predict_X(X, arff_file_path)
         classifier = self.ensemble if self._ensemble_fit else self._best_pipeline
-        return classifier.predict(X)
+        y = classifier.predict(X)
+        # Decode the predicted labels - necessary only if ensemble is not used.
+        if y[0] not in self._label_encoder.classes_:
+            y = self._label_encoder.inverse_transform(y)
+        return y
 
     def predict_proba(self, X=None, arff_file_path=None):
         """ Predict the class probabilities for input X.
