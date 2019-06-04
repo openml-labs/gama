@@ -122,7 +122,7 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5
             with open(os.path.join(cache_dir, pl_filename + '.pkl'), 'wb') as fh:
                 pickle.dump((pl, prediction, scores), fh)
         except FileNotFoundError:
-            log.warning("File not found while saving predictions. This can happen in the multi-process case if the "
+            log.debug("File not found while saving predictions. This can happen in the multi-process case if the "
                         "cache gets deleted within `max_eval_time` of the end of the search process.", exc_info=True)
 
     process_time = time.process_time() - start
