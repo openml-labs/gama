@@ -32,7 +32,7 @@ class OperatorSet:
         for _ in range(self._max_retry):
             individual, log_args = operator(*args, **kwargs)
             if str(individual.main_node) not in self._seen_individuals:
-                self._seen_individuals[str(individual.main_node)] = individual
+                #self._seen_individuals[str(individual.main_node)] = individual
                 return individual, log_args
         else:
             log.debug("Could not create a new individual from 50 iterations of {}".format(operator.__name__))
