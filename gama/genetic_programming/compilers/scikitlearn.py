@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 
 import stopit
-from sklearn.model_selection import cross_val_predict
+from sklearn.model_selection import cross_val_predict, ShuffleSplit
 from sklearn.pipeline import Pipeline
 
 from gama.genetic_programming.algorithms.metrics import Metric
@@ -29,30 +29,19 @@ def compile_individual(individual: Individual, parameter_checks=None, preprocess
     return Pipeline(list(reversed(steps)))
 
 
-def cross_val_predict_score(estimator, X, y_train, y_score, groups=None, metrics=None, cv=None, n_jobs=1, verbose=0,
-                            fit_params=None, pre_dispatch='2*n_jobs'):
+def cross_val_predict_score(estimator, X, y_train, y_score, metrics=None, **kwargs):
     """ Return both the predictions and score of the estimator trained on the data given the cv strategy.
 
-    :param estimator: the estimator to evaluate
-    :param X:
     :param y_train: target in appropriate format for training (typically (N,))
     :param y_score: target in appropriate format for scoring (typically (N,K) for metrics based on class probabilities,
         (N,) otherwise).
-    :param groups:
-    :param scorers:
-    :param cv:
-    :param n_jobs:
-    :param verbose:
-    :param fit_params:
-    :param pre_dispatch:
-    :return:
     """
     if not all(isinstance(metric, Metric) for metric in metrics):
         raise ValueError('All `metrics` must be an instance of `metrics.Metric`, is {}.'
                          .format([type(metric) for metric in metrics]))
 
     method = 'predict_proba' if any(metric.requires_probabilities for metric in metrics) else 'predict'
-    predictions = cross_val_predict(estimator, X, y_train, groups, cv, n_jobs, verbose, fit_params, pre_dispatch, method)
+    predictions = cross_val_predict(estimator, X, y_train, method=method, **kwargs)
 
     if predictions.ndim == 2 and predictions.shape[1] == 1:
         predictions = predictions.squeeze()
@@ -78,16 +67,15 @@ def object_is_valid_pipeline(o):
             hasattr(o, 'steps'))
 
 
-def evaluate_individual(individual: Individual, operator_set: OperatorSet, evaluate_pipeline_length, *args, **kwargs):
-    pipeline = operator_set.compile(individual)
-    (scores, start_datetime, wallclock_time, process_time) = evaluate_pipeline(pipeline, *args, **kwargs)
+def evaluate_individual(individual: Individual, evaluate_pipeline_length, *args, **kwargs):
+    (scores, start_datetime, wallclock_time, process_time) = evaluate_pipeline(individual.pipeline, *args, **kwargs)
     if evaluate_pipeline_length:
         scores = (*scores, -len(individual.primitives))
     individual.fitness = Fitness(scores, start_datetime, wallclock_time, process_time)
     return individual
 
 
-def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5, cache_dir=None, logger=None):
+def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5, cache_dir=None, logger=None, subset=None):
     """ Evaluates a pipeline used k-Fold CV. """
     if not logger:
         logger = log
@@ -100,6 +88,10 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5
     start = time.process_time()
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
+            if isinstance(subset, int) and subset < len(y_train):
+                idx, _ = next(ShuffleSplit(n_splits=1, train_size=len(y_train) - subset, random_state=0).split(X))
+                X, y_train, y_score = X[idx, :], y_train[idx], y_score[idx]
+
             prediction, scores = cross_val_predict_score(pl, X, y_train, y_score, cv=cv, metrics=metrics)
         except stopit.TimeoutException:
             # score not actually unused, because exception gets caught by the context manager.

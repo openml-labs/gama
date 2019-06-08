@@ -62,13 +62,11 @@ class OperatorSet:
         return individual
 
     def individual(self, *args, **kwargs):
-        return self._create_new(*args, **kwargs)
+        expression = self._create_new(*args, **kwargs)
+        return Individual(expression, to_pipeline=self._compile)
 
     def create(self, *args, **kwargs):
         return self._create_from_population(self, *args, **kwargs)
-
-    def compile(self, *args, **kwargs):
-        return self._compile(*args, **kwargs)
 
     def eliminate(self, *args, **kwargs):
         return self._eliminate(*args, **kwargs)
