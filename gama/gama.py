@@ -318,8 +318,7 @@ class Gama(object):
             pop = [self._operator_set.individual() for _ in range(self._pop_size)]
 
         evaluate_individual = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
-                                      evaluate_pipeline_length=self._regularize_length,
-                                      operator_set=self._operator_set)
+                                      evaluate_pipeline_length=self._regularize_length)
         self._operator_set.evaluate = partial(evaluate_individual,
                                               X=self.X, y_train=self.y_train, y_score=self.y_score,
                                               metrics=self._metrics, timeout=self._max_eval_time,
@@ -338,9 +337,9 @@ class Gama(object):
 
     def _postprocess_phase(self, n, timeout=1e6):
         """ Perform any necessary post processing, such as ensemble building. """
-        self._best_pipeline = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values)))[0]
-        log.info("Best pipeline has fitness of {}".format(self._best_pipeline.fitness.values))
-        self._best_pipeline = self._operator_set.compile(self._best_pipeline)
+        self._best_individual = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values)))[0]
+        log.info("Best pipeline has fitness of {}".format(self._best_individual.fitness.values))
+        self._best_pipeline = self._best_individual.pipeline
         log.info("Pipeline {}, steps: {}".format(self._best_pipeline, self._best_pipeline.steps))
         self._best_pipeline.fit(self.X, self.y_train)
         if n > 1:
