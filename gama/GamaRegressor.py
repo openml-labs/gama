@@ -21,5 +21,9 @@ class GamaRegressor(Gama):
         return regressor.predict(X)
 
     def _initialize_ensemble(self):
-        self.ensemble = EnsembleRegressor(self._metrics[0], self.y_train,
+        y = self.y_train
+        # y may be a DataFrame.  If so, flatten it.
+        if y.ndim != 1:
+            y = y.squeeze()
+        self.ensemble = EnsembleRegressor(self._metrics[0], y,
                                           model_library_directory=self._cache_dir, n_jobs=self._n_jobs)

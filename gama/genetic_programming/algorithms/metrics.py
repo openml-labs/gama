@@ -78,10 +78,13 @@ class Metric:
         # Scikit-learn metrics can be very flexible with their input, interpreting a list as class labels for one
         # metric, while interpreting it as class probability for the positive class for another.
         # We want to force clear and early errors to avoid accidentally working with the wrong data/interpretation.
-        if not isinstance(y_true, np.ndarray):
-            raise TypeError('y_true must be a numpy array.')
-        if not isinstance(predictions, np.ndarray):
-            raise TypeError('predictions must be a numpy array.')
+
+        # Unfortunately, D3M pipelines force DataFrames throughout.  Disabling this check until we can
+        # come up with a more general solution.
+#        if not isinstance(y_true, np.ndarray):
+#            raise TypeError('y_true must be a numpy array.')
+#        if not isinstance(predictions, np.ndarray):
+#            raise TypeError('predictions must be a numpy array.')
 
         required_dimensionality = 2 if self.requires_probabilities else 1
         if predictions.ndim != required_dimensionality:

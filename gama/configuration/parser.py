@@ -52,19 +52,23 @@ def pset_from_config(configuration):
                             Terminal(value=value, output=name, identifier=key.__name__ + '.' + name))
 
             # After registering the hyperparameter types, we can register the operator itself.
-            transformer_tags = ["DATA_PREPROCESSING", "FEATURE_SELECTION", "DATA_TRANSFORMATION"]
-            if (issubclass(key, sklearn.base.TransformerMixin) or
-                    (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] in transformer_tags)):
-                pset[DATA_TERMINAL].append(Primitive(input=hyperparameter_types, output=DATA_TERMINAL, identifier=key))
-            elif (issubclass(key, sklearn.base.ClassifierMixin) or
-                  (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] == "CLASSIFICATION")):
-                pset["prediction"].append(Primitive(input=hyperparameter_types, output="prediction", identifier=key))
-            elif (issubclass(key, sklearn.base.RegressorMixin) or
-                  (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] == "REGRESSION")):
-                pset["prediction"].append(Primitive(input=hyperparameter_types, output="prediction", identifier=key))
+            if hasattr(key, 'pclass'):
+                transformer_tags = ["DATA_PREPROCESSING", "FEATURE_SELECTION", "DATA_TRANSFORMATION", "FEATURE_EXTRACTION"]
+                family = key.pclass.metadata.query()['primitive_family']
+                if family in transformer_tags:
+                    pset[DATA_TERMINAL].append(Primitive(input=hyperparameter_types, output=DATA_TERMINAL, identifier=key))
+                elif family == 'CLASSIFICATION' or family == 'REGRESSION':
+                    pset["prediction"].append(Primitive(input=hyperparameter_types, output="prediction", identifier=key))
+                else:
+                    raise TypeError("{} has unknown family '{}'".format(key, family))
             else:
-                raise TypeError("Expected {} to be either subclass of "
-                                "TransformerMixin, RegressorMixin or ClassifierMixin.".format(key))
+                if issubclass(key, sklearn.base.TransformerMixin):
+                    pset[DATA_TERMINAL].append(Primitive(input=hyperparameter_types, output=DATA_TERMINAL, identifier=key))
+                elif issubclass(key, sklearn.base.ClassifierMixin) or issubclass(key, sklearn.base.RegressorMixin):
+                    pset["prediction"].append(Primitive(input=hyperparameter_types, output="prediction", identifier=key))
+                else:
+                    raise TypeError("Expected {} to be either subclass of "
+                                    "TransformerMixin, RegressorMixin or ClassifierMixin.".format(key))
         else:
             raise TypeError('Encountered unknown type as key in dictionary.'
                             'Keys in the configuration should be str or class.')

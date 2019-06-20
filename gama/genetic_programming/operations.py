@@ -43,3 +43,23 @@ def create_seeded_individual(primitive_set: dict, main: Primitive, min_length: i
         last_primitive_node = primitive_node
 
     return Individual(learner_node)
+
+
+def create_individual_by_rule(primitive_set, grammar_manager, rule_name):
+    pipeline = grammar_manager.generate(rule_name)
+    learner = last = None
+    for emission in reversed(pipeline):
+        primitive = emission.primitive
+        terminals = random_terminals_for_primitive(primitive_set, primitive)
+        if emission.parameters is not None:
+            for p,v in emission.parameters.items():
+                tindex = primitive.input.index(p)
+                if tindex >= 0:
+                    terminals[tindex] = v
+        pnode = PrimitiveNode(primitive, data_node=DATA_TERMINAL, terminals=terminals)
+        if learner is None:
+            learner = pnode
+        if last is not None:
+            last._data_node = pnode
+        last = pnode
+    return Individual(learner)

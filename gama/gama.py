@@ -23,9 +23,11 @@ from gama.genetic_programming.algorithms.async_ea import async_ea
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.preprocessing import define_preprocessing_steps
+from gama.utilities.plgen.manager import Manager
+from gama.utilities.plgen.library import GamaPsetLibrary
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
 from gama.genetic_programming.selection import create_from_population, eliminate_from_pareto
-from gama.genetic_programming.operations import create_random_individual
+from gama.genetic_programming.operations import create_random_individual, create_individual_by_rule
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
@@ -97,6 +99,12 @@ class Gama(object):
     :param cache_dir: string or None (default=None)
         The directory in which to keep the cache during `fit`. In this directory,
         models and their evaluation results will be stored. This facilitates a quick ensemble construction.
+
+    :param grammar_file_name: string or None (default=None)
+        The name of a grammar file to use in generating and validating individuals.
+
+    :param rule_name: string or None (default=None)
+        The name of a grammar rule to use in generating and validating individuals.
     """
 
     def __init__(self,
@@ -110,7 +118,9 @@ class Gama(object):
                  n_jobs=1,
                  verbosity=logging.WARNING,
                  keep_analysis_log='gama.log',
-                 cache_dir=None):
+                 cache_dir=None,
+                 grammar_file_name=None,
+                 rule_name=None):
 
         if verbosity >= logging.DEBUG:
             stdout_streamhandler = logging.StreamHandler(sys.stdout)
@@ -173,11 +183,21 @@ class Gama(object):
             np.random.seed(self._random_state)
 
         self._pset, parameter_checks = pset_from_config(config)
+
+        if grammar_file_name is not None:
+            library = GamaPsetLibrary(self._pset)
+            self._grammar_manager = Manager(library=library)
+            self._grammar_manager.parse_file(grammar_file_name)
+            self._grammar_rule_name = rule_name
+            individual_creator = partial(create_individual_by_rule, primitive_set=self._pset,
+                                         grammar_manager=self._grammar_manager, rule_name=rule_name)
+        else:
+            individual_creator = partial(create_random_individual, primitive_set=self._pset)
         self._operator_set = OperatorSet(
             mutate=partial(random_valid_mutation_in_place, primitive_set=self._pset),
             mate=crossover,
             create_from_population=partial(create_from_population, cxpb=0.2, mutpb=0.8),
-            create_new=partial(create_random_individual, primitive_set=self._pset),
+            create_new=individual_creator,
             compile_=compile_individual,
             eliminate=eliminate_from_pareto
         )
@@ -249,7 +269,8 @@ class Gama(object):
         self._operator_set._compile = partial(compile_individual, preprocessing_steps=steps)
         return X, y
 
-    def fit(self, X=None, y=None, arff_file_path=None, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
+    def fit(self, X=None, y=None, arff_file_path=None, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False,
+            d3m_mode=True):
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -274,6 +295,8 @@ class Gama(object):
             after the optimizatio process.
         :param restart_: bool. Indicates whether or not the search should be restarted when a specific restart
             criteria is met.
+        :param d3m_mode: bool. Signals whether fit is being run in D3M context.  If so, we assume that various
+            kinds of preprocessing have already been performed and leave the inputs as D3M Dataframes.
         """
 
         ensemble_ratio = 0.1  # fraction of time left after preprocessing that reserved for postprocessing
@@ -285,27 +308,31 @@ class Gama(object):
                 self._observer.reset_current_pareto_front()
             return restart and restart_
 
-        with Stopwatch() as preprocessing_sw:
-            if arff_file_path:
-                X, y = self._preprocess_arff(arff_file_path)
+        if not d3m_mode:
+            with Stopwatch() as preprocessing_sw:
+                if arff_file_path:
+                    X, y = self._preprocess_arff(arff_file_path)
 
-            if hasattr(self, '_encode_labels'):
-                if isinstance(y, pd.Series):
-                    y = np.asarray(y)
-                y = self._encode_labels(y)
+                if hasattr(self, '_encode_labels'):
+                    if isinstance(y, pd.Series):
+                        y = np.asarray(y)
+                    y = self._encode_labels(y)
 
-            if not arff_file_path:
-                X, y = self._preprocess_numpy(X, y)
+                if not arff_file_path:
+                    X, y = self._preprocess_numpy(X, y)
 
-        log.info("Preprocessing took {:.4f}s. Moving on to search phase.".format(preprocessing_sw.elapsed_time))
-        log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
+            log.info("Preprocessing took {:.4f}s. Moving on to search phase.".format(preprocessing_sw.elapsed_time))
+            log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
 
         self.X = X
         self.y_train = y
         self.y_score = self._construct_y_score(y)
         self._fit_data = (X, y)
 
-        time_left = self._max_total_time - preprocessing_sw.elapsed_time
+        if d3m_mode:
+            time_left = self._max_total_time
+        else:
+            time_left = self._max_total_time - preprocessing_sw.elapsed_time
 
         fit_time = int((1 - ensemble_ratio) * time_left)
 
@@ -365,6 +392,8 @@ class Gama(object):
     def _construct_y_score(self, y):
         if any(metric.requires_probabilities for metric in self._metrics):
             return OneHotEncoder().fit_transform(y.reshape(-1, 1)).todense()
+        if len(y.shape) > 1:
+            y = y.squeeze()
         return y
 
     def _search_phase(self, X, y, warm_start=False, restart_criteria=None, timeout=1e6):
@@ -375,8 +404,8 @@ class Gama(object):
             if warm_start:
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = [self._operator_set.individual() for _ in range(self._pop_size)]
-            warm_start_pop = generate_warm_start_pop(X, y, self._pset)
-            pop = warm_start_pop + pop[len(warm_start_pop):]
+#            warm_start_pop = generate_warm_start_pop(X, y, self._pset)
+#            pop = warm_start_pop + pop[len(warm_start_pop):]
 
         evaluate_individual = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
                                       evaluate_pipeline_length=self._regularize_length,
@@ -433,6 +462,8 @@ class Gama(object):
             log.info('Building ensemble took {}s. Fitting ensemble with timeout {}s.'.format(build_time, timeout))
 
             X, y = self._fit_data
+            if len(y.shape) > 1:
+                y = y.squeeze()
             self.ensemble.fit(X, y, timeout=timeout)
             self._ensemble_fit = True
         except Exception as e:
