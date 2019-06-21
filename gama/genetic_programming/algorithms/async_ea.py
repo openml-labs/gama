@@ -28,7 +28,7 @@ def _safe_outside_call(fn, timeout):
         raise stopit.utils.TimeoutException
 
 
-def async_ea(start_population, toolbox, evaluation_callback=None, restart_callback=None,
+def async_ea(toolbox, start_population, evaluation_callback=None, restart_callback=None,
              elimination_callback=None, max_n_evaluations=10000, max_time_seconds=1e7, n_jobs=1):
     if max_time_seconds <= 0 or max_time_seconds > 3e6:
         raise ValueError("'max_time_seconds' must be greater than 0 and less than or equal to 3e6, but was {}."

@@ -318,25 +318,26 @@ class Gama(object):
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = [self._operator_set.individual() for _ in range(self._pop_size)]
 
-        evaluate_individual = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
-                                      evaluate_pipeline_length=self._regularize_length)
-        self._operator_set.evaluate = partial(evaluate_individual,
-                                              X=self.X, y_train=self.y_train, y_score=self.y_score,
-                                              metrics=self._metrics, timeout=self._max_eval_time,
-                                              cache_dir=self._cache_dir)
-        self._operator_set.evaluate = partial(evaluate_on_rung, evaluate_pipeline_length=False,
-                                           X=self.X, y_train=self.y_train, y_score=self.y_score,
-                                           timeout=self._max_eval_time, metrics=self._metrics)
+        evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self.X, y_train=self.y_train, y_score=self.y_score,
+                             timeout=self._max_eval_time, metrics=self._metrics, cache_dir=self._cache_dir)
 
         try:
-            #final_pop = async_ea(pop,
-            #                     self._operator_set,
-            #                     evaluation_callback=self._on_evaluation_completed,
-            #                     restart_callback=restart_criteria,
-            #                     max_time_seconds=timeout,
-            #                     n_jobs=self._n_jobs)
-            final_pop = asha(self._operator_set, pop, maximum_resource=len(X))
+            if False:
+                self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
+                                                      **evaluate_args)
+                final_pop = async_ea(pop,
+                                    self._operator_set,
+                                    evaluation_callback=self._on_evaluation_completed,
+                                    restart_callback=restart_criteria,
+                                    max_time_seconds=timeout,
+                                    n_jobs=self._n_jobs)
+            else:
+                self._operator_set.evaluate = partial(evaluate_on_rung, **evaluate_args)
+                final_pop = asha(self._operator_set, pop, maximum_resource=len(X),
+                                 evaluation_callback=self._on_evaluation_completed,
+                                 max_time_seconds=timeout)
             self._final_pop = final_pop
+            log.debug([str(i) for i in self._final_pop])
         except KeyboardInterrupt:
             log.info('Search phase terminated because of Keyboard Interrupt.')
 

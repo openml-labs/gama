@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 
 
 class OperatorSet:
-    """ Provides a thin layer for ea operators for logging and safety. """
+    """ Provides a thin layer for ea operators for logging, callbacks and safety. """
 
     def __init__(self, mutate, mate, create_from_population, create_new, compile_, eliminate, max_retry=50):
         """
@@ -26,6 +26,7 @@ class OperatorSet:
         self._safe_compile = None
         self._eliminate = eliminate
         self._max_retry = max_retry
+        self._evaluate = None
 
         self._seen_individuals = {}
 

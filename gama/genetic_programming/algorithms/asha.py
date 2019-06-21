@@ -1,7 +1,9 @@
 import logging
 import math
+import time
+from functools import partial
 
-from stopit import ThreadingTimeout
+import stopit
 
 from gama.utilities.generic.async_executor import AsyncExecutor, wait_first_complete
 from gama.genetic_programming.compilers.scikitlearn import evaluate_individual
@@ -15,8 +17,30 @@ TODO:
 log = logging.getLogger(__name__)
 
 
-def asha(operations, start_candidates=None, timeout=300,  # General Search Hyperparameters
+def _safe_outside_call(fn, timeout):
+    """ Calls fn and log any exception it raises without reraising, except for TimeoutException. """
+    try:
+        fn()
+    except stopit.utils.TimeoutException:
+        raise
+    except Exception:
+        # We actually want to catch any other exception here, because the callback code can be
+        # arbitrary (it can be provided by users). This excuses the catch-all Exception.
+        # Note that KeyboardInterrupts are not exceptions and get elevated to the caller.
+        log.warning("Exception during callback.", exc_info=True)
+        pass
+    if timeout():
+        log.info("Time exceeded during callback, but exception was swallowed.")
+        raise stopit.utils.TimeoutException
+
+
+def asha(operations, start_candidates=None, max_time_seconds=300, evaluation_callback=None,  # General Search Hyperparameters
          reduction_factor=3, minimum_resource=100, maximum_resource=1700, minimum_early_stopping_rate=1):  # Algorithm Specific
+    start_time = time.time()
+
+    def exceed_timeout():
+        return (time.time() - start_time) > max_time_seconds
+
     # Note that here we index the rungs by all possible rungs (0..ceil(log_eta(R/r))), and ignore the first
     # minimum_early_stopping_rate rungs. This contrasts the paper where rung 0 refers to the first used one.
     max_rung = math.ceil(math.log(maximum_resource/minimum_resource, reduction_factor))
@@ -45,7 +69,7 @@ def asha(operations, start_candidates=None, timeout=300,  # General Search Hyper
             return operations.individual(), minimum_early_stopping_rate
 
     futures = set()
-    with AsyncExecutor() as async_, ThreadingTimeout(timeout) as timer:
+    with AsyncExecutor() as async_, stopit.ThreadingTimeout(max_time_seconds) as timer:
         def start_new_job():
             individual, rung = get_job()
             futures.add(async_.submit(operations.evaluate, individual, rung, subsample=resource_for_rung[rung]))
@@ -58,6 +82,8 @@ def asha(operations, start_candidates=None, timeout=300,  # General Search Hyper
             for loss, individual, rung in [future.result() for future in done]:
                 individuals_by_rung[rung].append((loss, individual))
                 start_new_job()
+                if evaluation_callback is not None:
+                    _safe_outside_call(partial(evaluation_callback, individual), exceed_timeout)
 
     highest_rung_reached = max(rung for rung, individuals in individuals_by_rung.items() if individuals != [])
     for rung, individuals in individuals_by_rung.items():
@@ -65,8 +91,8 @@ def asha(operations, start_candidates=None, timeout=300,  # General Search Hyper
     if highest_rung_reached != max(rungs):
         raise RuntimeWarning("Highest rung not reached.")
     if not timer:
-        log.info('Asynchronous EA terminated because maximum time has elapsed.'
-                 '{} individuals have been evaluated.'.format(ind_no))
+        log.info('ASHA terminated because maximum time has elapsed.'
+                 '{} individuals have been evaluated.'.format(sum(map(len, individuals_by_rung.values()))))
 
     return list(map(lambda p: p[1], individuals_by_rung[highest_rung_reached]))
 
