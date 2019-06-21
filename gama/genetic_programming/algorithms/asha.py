@@ -1,11 +1,11 @@
-from functools import partial
 import logging
 import math
 
+from stopit import ThreadingTimeout
+
 from gama.utilities.generic.async_executor import AsyncExecutor, wait_first_complete
 from gama.genetic_programming.compilers.scikitlearn import evaluate_individual
-from gama.genetic_programming.algorithms.metrics import Metric
-from gama.utilities.preprocessing import define_preprocessing_steps
+
 """
 TODO:
  - instead of list, use a min-heap by rung.
@@ -45,7 +45,7 @@ def asha(operations, start_candidates=None, timeout=300,  # General Search Hyper
             return operations.individual(), minimum_early_stopping_rate
 
     futures = set()
-    with AsyncExecutor() as async_:
+    with AsyncExecutor() as async_, ThreadingTimeout(timeout) as timer:
         def start_new_job():
             individual, rung = get_job()
             futures.add(async_.submit(operations.evaluate, individual, rung, subsample=resource_for_rung[rung]))
@@ -53,7 +53,7 @@ def asha(operations, start_candidates=None, timeout=300,  # General Search Hyper
         for _ in range(8):
             start_new_job()
 
-        for _ in range(100):
+        while sum(map(len, individuals_by_rung.values())) < 100:
             done, futures = wait_first_complete(futures)
             for loss, individual, rung in [future.result() for future in done]:
                 individuals_by_rung[rung].append((loss, individual))
@@ -64,6 +64,9 @@ def asha(operations, start_candidates=None, timeout=300,  # General Search Hyper
         log.info('[{}] {}'.format(rung, len(individuals)))
     if highest_rung_reached != max(rungs):
         raise RuntimeWarning("Highest rung not reached.")
+    if not timer:
+        log.info('Asynchronous EA terminated because maximum time has elapsed.'
+                 '{} individuals have been evaluated.'.format(ind_no))
 
     return list(map(lambda p: p[1], individuals_by_rung[highest_rung_reached]))
 
