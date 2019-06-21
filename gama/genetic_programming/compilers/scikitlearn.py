@@ -75,7 +75,7 @@ def evaluate_individual(individual: Individual, evaluate_pipeline_length, *args,
     return individual
 
 
-def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5, cache_dir=None, logger=None, subset=None):
+def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5, cache_dir=None, logger=None, subsample=None):
     """ Evaluates a pipeline used k-Fold CV. """
     if not logger:
         logger = log
@@ -83,14 +83,15 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5
     if not object_is_valid_pipeline(pl):
         return ValueError('Pipeline is not valid. Must not be None and have `fit`, `predict` and `steps`.')
 
+    draw_subsample = (isinstance(subsample, int) and subsample < len(y_train))
     scores = tuple([float('-inf')] * len(metrics))
     start_datetime = datetime.now()
     start = time.process_time()
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
-            if isinstance(subset, int) and subset < len(y_train):
-                idx, _ = next(ShuffleSplit(n_splits=1, train_size=len(y_train) - subset, random_state=0).split(X))
-                X, y_train, y_score = X[idx, :], y_train[idx], y_score[idx]
+            if draw_subsample:
+                idx, _ = next(ShuffleSplit(n_splits=1, train_size=subsample, random_state=0).split(X))
+                X, y_train, y_score = X.iloc[idx, :], y_train[idx], y_score[idx]
 
             prediction, scores = cross_val_predict_score(pl, X, y_train, y_score, cv=cv, metrics=metrics)
         except stopit.TimeoutException:
@@ -107,15 +108,14 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5
             single_line_pipeline = str(pl).replace('\n', '')
             log_parseable_event(logger, TOKENS.EVALUATION_ERROR, start_datetime, single_line_pipeline, type(e), e)
 
-    if cache_dir and -float("inf") not in scores:
+    if cache_dir and -float("inf") not in scores and not draw_subsample:
         pl_filename = str(uuid.uuid4())
-
         try:
             with open(os.path.join(cache_dir, pl_filename + '.pkl'), 'wb') as fh:
                 pickle.dump((pl, prediction, scores), fh)
         except FileNotFoundError:
             log.debug("File not found while saving predictions. This can happen in the multi-process case if the "
-                        "cache gets deleted within `max_eval_time` of the end of the search process.", exc_info=True)
+                      "cache gets deleted within `max_eval_time` of the end of the search process.", exc_info=True)
 
     process_time = time.process_time() - start
     wallclock_time = (datetime.now() - start_datetime).total_seconds()
