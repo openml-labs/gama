@@ -23,6 +23,7 @@ class OperatorSet:
         self._create_from_population = create_from_population
         self._create_new = create_new
         self._compile = compile_
+        self._safe_compile = None
         self._eliminate = eliminate
         self._max_retry = max_retry
 
@@ -63,7 +64,8 @@ class OperatorSet:
 
     def individual(self, *args, **kwargs):
         expression = self._create_new(*args, **kwargs)
-        return Individual(expression, to_pipeline=self._compile)
+        compile_ = self._safe_compile if self._safe_compile is not None else self._compile
+        return Individual(expression, to_pipeline=compile_)
 
     def create(self, *args, **kwargs):
         return self._create_from_population(self, *args, **kwargs)

@@ -20,6 +20,7 @@ from .utilities.observer import Observer
 
 from gama.data import X_y_from_arff
 from gama.genetic_programming.algorithms.async_ea import async_ea
+from gama.genetic_programming.algorithms.asha import asha, evaluate_on_rung
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.preprocessing import define_preprocessing_steps, heuristic_numpy_to_dataframe
@@ -239,7 +240,7 @@ class Gama(object):
                 X, y = X.loc[~y.isnull(), :], y[~y.isnull()]
 
             steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
-            self._operator_set._compile = partial(compile_individual, preprocessing_steps=steps)
+            self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
 
             if hasattr(self, '_encode_labels'):
                 y = self._encode_labels(y)
@@ -323,14 +324,18 @@ class Gama(object):
                                               X=self.X, y_train=self.y_train, y_score=self.y_score,
                                               metrics=self._metrics, timeout=self._max_eval_time,
                                               cache_dir=self._cache_dir)
+        self._operator_set.evaluate = partial(evaluate_on_rung, evaluate_pipeline_length=False,
+                                           X=self.X, y_train=self.y_train, y_score=self.y_score,
+                                           timeout=self._max_eval_time, metrics=self._metrics)
 
         try:
-            final_pop = async_ea(pop,
-                                 self._operator_set,
-                                 evaluation_callback=self._on_evaluation_completed,
-                                 restart_callback=restart_criteria,
-                                 max_time_seconds=timeout,
-                                 n_jobs=self._n_jobs)
+            #final_pop = async_ea(pop,
+            #                     self._operator_set,
+            #                     evaluation_callback=self._on_evaluation_completed,
+            #                     restart_callback=restart_criteria,
+            #                     max_time_seconds=timeout,
+            #                     n_jobs=self._n_jobs)
+            final_pop = asha(self._operator_set, pop, maximum_resource=len(X))
             self._final_pop = final_pop
         except KeyboardInterrupt:
             log.info('Search phase terminated because of Keyboard Interrupt.')
