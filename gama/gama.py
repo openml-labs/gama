@@ -155,6 +155,7 @@ class Gama(object):
         self.ensemble = None
         self._ensemble_fit = False
         self._metrics = self._scoring_to_metric(scoring)
+        self._use_asha = False
 
         default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
@@ -322,15 +323,14 @@ class Gama(object):
                              timeout=self._max_eval_time, metrics=self._metrics, cache_dir=self._cache_dir)
 
         try:
-            if False:
+            if not self._use_asha:
                 self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
                                                       **evaluate_args)
-                final_pop = async_ea(pop,
-                                    self._operator_set,
-                                    evaluation_callback=self._on_evaluation_completed,
-                                    restart_callback=restart_criteria,
-                                    max_time_seconds=timeout,
-                                    n_jobs=self._n_jobs)
+                final_pop = async_ea(self._operator_set, pop,
+                                     evaluation_callback=self._on_evaluation_completed,
+                                     restart_callback=restart_criteria,
+                                     max_time_seconds=timeout,
+                                     n_jobs=self._n_jobs)
             else:
                 self._operator_set.evaluate = partial(evaluate_on_rung, **evaluate_args)
                 final_pop = asha(self._operator_set, pop, maximum_resource=len(X),
