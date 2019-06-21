@@ -46,23 +46,22 @@ def asha(operations, start_candidates=None, timeout=300,  # General Search Hyper
 
     futures = set()
     with AsyncExecutor() as async_:
-        for _ in range(8):
+        def start_new_job():
             individual, rung = get_job()
             futures.add(async_.submit(operations.evaluate, individual, rung, subsample=resource_for_rung[rung]))
+
+        for _ in range(8):
+            start_new_job()
 
         for _ in range(100):
             done, futures = wait_first_complete(futures)
             for loss, individual, rung in [future.result() for future in done]:
                 individuals_by_rung[rung].append((loss, individual))
-                print("[{}] {}: {}".format(rung, individual.pipeline_str(), loss))
-            individual, rung = get_job()
-            print("Putting individual in rung {}".format(rung))
-            n = minimum_resource * (reduction_factor ** (minimum_early_stopping_rate + rung))
-            futures.add(async_.submit(operations.evaluate, individual, rung, subsample=n))
+                start_new_job()
 
     highest_rung_reached = max(rung for rung, individuals in individuals_by_rung.items() if individuals != [])
     for rung, individuals in individuals_by_rung.items():
-        print('[{}] {}'.format(rung, len(individuals)))
+        log.info('[{}] {}'.format(rung, len(individuals)))
     if highest_rung_reached != max(rungs):
         raise RuntimeWarning("Highest rung not reached.")
 
@@ -72,17 +71,3 @@ def asha(operations, start_candidates=None, timeout=300,  # General Search Hyper
 def evaluate_on_rung(individual, rung, *args, **kwargs):
     individual = evaluate_individual(individual, *args, **kwargs)
     return individual.fitness.values[0], individual, rung
-
-
-if __name__ == '__main__':
-    from gama import GamaClassifier
-    from sklearn.datasets import load_digits
-    g = GamaClassifier()
-    X, y = load_digits(return_X_y=True)
-
-    steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
-    g._operator_set._safe_compile = partial(g._operator_set._compile, preprocessing_steps=steps)
-    g._operator_set.evaluate = partial(evaluate_on_rung, evaluate_pipeline_length=False, X=X, y_train=y, y_score=y, timeout=300, metrics=[Metric.from_string('accuracy')])
-    start_pop = [g._operator_set.individual() for _ in range(10)]
-    pipeline = asha(g._operator_set, start_candidates=start_pop)
-    print(pipeline)
