@@ -48,5 +48,5 @@ class TimeKeeperUnitTestCase(unittest.TestCase):
             time.sleep(activity_length)
 
         time.sleep(1)
-        self.assertAlmostEqual(activity_length, timekeeper.activity_durations['part one'], places=self._round_error)
+        self.assertAlmostEqual(activity_length, timekeeper.activities[-1].stopwatch.elapsed_time, places=self._round_error)
         self.assertAlmostEqual(total_time - activity_length, timekeeper.total_time_remaining, places=self._round_error)
