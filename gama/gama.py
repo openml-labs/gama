@@ -13,6 +13,7 @@ import warnings
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
+import stopit
 
 import gama.genetic_programming.compilers.scikitlearn
 from gama.genetic_programming.algorithms.metrics import Metric
@@ -155,7 +156,7 @@ class Gama(object):
         self.ensemble = None
         self._ensemble_fit = False
         self._metrics = self._scoring_to_metric(scoring)
-        self._use_asha = False
+        self._use_asha = True
 
         default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
@@ -181,7 +182,8 @@ class Gama(object):
             create_from_population=partial(create_from_population, cxpb=0.2, mutpb=0.8),
             create_new=partial(create_random_expression, primitive_set=self._pset),
             compile_=compile_individual,
-            eliminate=eliminate_from_pareto
+            eliminate=eliminate_from_pareto,
+            evaluate_callback=self._on_evaluation_completed
         )
 
     def _scoring_to_metric(self, scoring):
@@ -293,11 +295,12 @@ class Gama(object):
 
         fit_time = int((1 - ensemble_ratio) * self._time_manager.total_time_remaining)
 
-        with self._time_manager.start_activity('search') as search_sw:
+        with self._time_manager.start_activity('search', time_limit=fit_time) as search_sw:
             self._search_phase(X, y, warm_start, restart_criteria=restart_criteria, timeout=fit_time)
         log_parseable_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
 
-        with self._time_manager.start_activity('postprocess') as post_sw:
+        with self._time_manager.start_activity('postprocess',
+                                               time_limit=int(self._time_manager.total_time_remaining)) as post_sw:
             self._postprocess_phase(auto_ensemble_n, timeout=self._time_manager.total_time_remaining)
         log_parseable_event(log, TOKENS.POSTPROCESSING_END, post_sw.elapsed_time)
 
@@ -327,14 +330,12 @@ class Gama(object):
                 self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
                                                       **evaluate_args)
                 final_pop = async_ea(self._operator_set, pop,
-                                     evaluation_callback=self._on_evaluation_completed,
                                      restart_callback=restart_criteria,
                                      max_time_seconds=timeout,
                                      n_jobs=self._n_jobs)
             else:
                 self._operator_set.evaluate = partial(evaluate_on_rung, **evaluate_args)
                 final_pop = asha(self._operator_set, pop, maximum_resource=len(X),
-                                 evaluation_callback=self._on_evaluation_completed,
                                  max_time_seconds=timeout)
             self._final_pop = final_pop
             log.debug([str(i) for i in self._final_pop])
@@ -393,9 +394,25 @@ class Gama(object):
                     log.warning("Did not delete due to:", exc_info=True)
                 # else ignore silently. This can occur if an evaluation process writes to cache.
 
+    def _safe_outside_call(self, fn):
+        """ Calls fn and log any exception it raises without reraising, except for TimeoutException. """
+        try:
+            fn()
+        except stopit.utils.TimeoutException:
+            raise
+        except Exception:
+            # We actually want to catch any other exception here, because the callback code can be
+            # arbitrary (it can be provided by users). This excuses the catch-all Exception.
+            # Note that KeyboardInterrupts are not exceptions and get elevated to the caller.
+            log.warning("Exception during callback.", exc_info=True)
+            pass
+        if self._time_manager.current_activity.exceeded_limit:
+            log.info("Time exceeded during callback, but exception was swallowed.")
+            raise stopit.utils.TimeoutException
+
     def _on_evaluation_completed(self, ind):
         for callback in self._subscribers['evaluation_completed']:
-            callback(ind)
+            self._safe_outside_call(partial(callback, ind))
 
     def evaluation_completed(self, fn):
         """ Register a callback function that is called when new evaluation is completed.

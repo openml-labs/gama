@@ -2,7 +2,6 @@ import uuid
 from typing import List, Callable
 from .primitive_node import PrimitiveNode
 from .terminal import DATA_TERMINAL, Terminal
-from .primitive import Primitive
 
 
 class Individual:

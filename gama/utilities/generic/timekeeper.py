@@ -9,8 +9,18 @@ log = logging.getLogger(__name__)
 
 class Activity(NamedTuple):
     name: str
-    time_limit: Optional[int]
     stopwatch: Stopwatch
+    time_limit: Optional[int] = None
+    
+    @property
+    def time_left(self) -> float:
+        """ Time left in seconds. Raises a TypeError if `time_limit` was not specified. """
+        return self.time_limit - self.stopwatch.elapsed_time
+
+    @property
+    def exceeded_limit(self) -> float:
+        """ True iff a limit was specified and its exceeded. False iff there is time left or no limit was specified. """
+        return (self.time_limit is not None) and (self.time_limit - self.stopwatch.elapsed_time < 0)
 
 
 class TimeKeeper:
@@ -36,22 +46,12 @@ class TimeKeeper:
         else:
             raise RuntimeError("No activity in progress.")
 
-    @property
-    def current_activity_time_left(self) -> float:
-        """ Return time left in seconds for current activity if a time limit was indicated. """
-        if self.current_activity is not None and self.current_activity.time_limit is not None:
-            return self.current_activity.time_limit - self.current_activity.stopwatch.elapsed_time
-        elif self.current_activity is None:
-            raise RuntimeError("No activity in progress.")
-        else:
-            raise RuntimeError("No time limit specified for activity {}.")
-
     @contextmanager
     def start_activity(self, activity: str, time_limit: Optional[int] = None) -> Iterator[Stopwatch]:
         """ Mark the start of a new activity and automatically time its duration.
             TimeManager does not currently support nested activities. """
         with Stopwatch() as sw:
-            self.current_activity = Activity(activity, time_limit, sw)
+            self.current_activity = Activity(activity, sw, time_limit)
             self.activities.append(self.current_activity)
             yield sw
         self.current_activity = None
