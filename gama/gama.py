@@ -156,7 +156,7 @@ class Gama(object):
         self.ensemble = None
         self._ensemble_fit = False
         self._metrics = self._scoring_to_metric(scoring)
-        self._use_asha = True
+        self._use_asha = False
 
         default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
@@ -324,23 +324,26 @@ class Gama(object):
 
         evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self.X, y_train=self.y_train, y_score=self.y_score,
                              timeout=self._max_eval_time, metrics=self._metrics, cache_dir=self._cache_dir)
+        final_pop = []
 
         try:
-            if not self._use_asha:
-                self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
-                                                      **evaluate_args)
-                final_pop = async_ea(self._operator_set, pop,
-                                     restart_callback=restart_criteria,
-                                     max_time_seconds=timeout,
-                                     n_jobs=self._n_jobs)
-            else:
-                self._operator_set.evaluate = partial(evaluate_on_rung, **evaluate_args)
-                final_pop = asha(self._operator_set, pop, maximum_resource=len(X),
-                                 max_time_seconds=timeout)
-            self._final_pop = final_pop
-            log.debug([str(i) for i in self._final_pop])
+            with stopit.ThreadingTimeout(timeout) as timeout_context:
+                if not self._use_asha:
+                    self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
+                                                          **evaluate_args)
+                    final_pop = async_ea(self._operator_set, output=final_pop, start_population=pop,
+                                         restart_callback=restart_criteria,
+                                         max_time_seconds=timeout,
+                                         n_jobs=self._n_jobs)
+                else:
+                    self._operator_set.evaluate = partial(evaluate_on_rung, **evaluate_args)
+                    final_pop = asha(self._operator_set, output=final_pop, start_candidates=pop, maximum_resource=len(X))
+                log.debug([str(i) for i in self._final_pop])
         except KeyboardInterrupt:
             log.info('Search phase terminated because of Keyboard Interrupt.')
+
+        self._final_pop = final_pop
+        log.info('Search phase evaluated {} individuals.'.format(len(final_pop)))
 
     def _postprocess_phase(self, n, timeout=1e6):
         """ Perform any necessary post processing, such as ensemble building. """

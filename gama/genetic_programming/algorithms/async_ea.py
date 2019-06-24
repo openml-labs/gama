@@ -11,7 +11,7 @@ from gama.utilities.generic.async_executor import AsyncExecutor, wait_first_comp
 log = logging.getLogger(__name__)
 
 
-def async_ea(toolbox, start_population, restart_callback=None, max_n_evaluations=10000, max_time_seconds=1e7, n_jobs=1):
+def async_ea(toolbox, output, start_population, restart_callback=None, max_n_evaluations=10000, max_time_seconds=1e7, n_jobs=1):
     if max_time_seconds <= 0 or max_time_seconds > 3e6:
         raise ValueError("'max_time_seconds' must be greater than 0 and less than or equal to 3e6, but was {}."
                          .format(max_time_seconds))
@@ -26,11 +26,13 @@ def async_ea(toolbox, start_population, restart_callback=None, max_n_evaluations
     evaluate_log = partial(toolbox.evaluate, logger=logger)
     futures = set()
 
-    with stopit.ThreadingTimeout(max_time_seconds) as c_mgr, AsyncExecutor(n_jobs) as async:
+    current_population = output
+
+    with AsyncExecutor(n_jobs) as async:
         should_restart = True
         while should_restart:
             should_restart = False
-            current_population = []
+            current_population[:] = []
             log.info('Starting EA with new population.')
             for individual in start_population:
                 futures.add(async.submit(evaluate_log, individual))
@@ -61,7 +63,4 @@ def async_ea(toolbox, start_population, restart_callback=None, max_n_evaluations
                         new_individual = toolbox.create(current_population, 1)[0]
                         futures.add(async.submit(evaluate_log, new_individual))
 
-    if not c_mgr:
-        log.info('Asynchronous EA terminated because maximum time has elapsed.'
-                 '{} individuals have been evaluated.'.format(ind_no))
     return current_population

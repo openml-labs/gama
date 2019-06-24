@@ -1,10 +1,12 @@
 import logging
 import math
+from typing import List
 
 import stopit
 
 from gama.utilities.generic.async_executor import AsyncExecutor
 from gama.genetic_programming.compilers.scikitlearn import evaluate_individual
+from gama.genetic_programming.components.individual import Individual
 
 """
 TODO:
@@ -15,7 +17,7 @@ TODO:
 log = logging.getLogger(__name__)
 
 
-def asha(operations, start_candidates=None, max_time_seconds=300,  # General Search Hyperparameters
+def asha(operations, output: List[Individual], start_candidates=None,  # General Search Hyperparameters
          reduction_factor=3, minimum_resource=100, maximum_resource=1700, minimum_early_stopping_rate=1):  # Algorithm Specific
     # Note that here we index the rungs by all possible rungs (0..ceil(log_eta(R/r))), and ignore the first
     # minimum_early_stopping_rate rungs. This contrasts the paper where rung 0 refers to the first used one.
@@ -45,28 +47,28 @@ def asha(operations, start_candidates=None, max_time_seconds=300,  # General Sea
             return operations.individual(), minimum_early_stopping_rate
 
     futures = set()
-    with AsyncExecutor() as async_, stopit.ThreadingTimeout(max_time_seconds) as timer:
-        def start_new_job():
-            individual, rung = get_job()
-            futures.add(async_.submit(operations.evaluate, individual, rung, subsample=resource_for_rung[rung]))
+    try:
+        with AsyncExecutor() as async_:
+            def start_new_job():
+                individual, rung = get_job()
+                futures.add(async_.submit(operations.evaluate, individual, rung, subsample=resource_for_rung[rung]))
 
-        for _ in range(8):
-            start_new_job()
-
-        while sum(map(len, individuals_by_rung.values())) < 100:
-            done, futures = operations.wait_first_complete(futures)
-            for individual, loss, rung in [future.result() for future in done]:
-                individuals_by_rung[rung].append((loss, individual))
+            for _ in range(8):
                 start_new_job()
 
-    highest_rung_reached = max(rung for rung, individuals in individuals_by_rung.items() if individuals != [])
-    for rung, individuals in individuals_by_rung.items():
-        log.info('[{}] {}'.format(rung, len(individuals)))
-    if highest_rung_reached != max(rungs):
-        raise RuntimeWarning("Highest rung not reached.")
-    if not timer:
-        log.info('ASHA terminated because maximum time has elapsed.'
-                 '{} individuals have been evaluated.'.format(sum(map(len, individuals_by_rung.values()))))
+            while sum(map(len, individuals_by_rung.values())) < 100:
+                done, futures = operations.wait_first_complete(futures)
+                for individual, loss, rung in [future.result() for future in done]:
+                    individuals_by_rung[rung].append((loss, individual))
+                    start_new_job()
+
+            highest_rung_reached = max(rungs)
+    except stopit.TimeoutException:
+        highest_rung_reached = max(rung for rung, individuals in individuals_by_rung.items() if individuals != [])
+        for rung, individuals in individuals_by_rung.items():
+            log.info('[{}] {}'.format(rung, len(individuals)))
+        if highest_rung_reached != max(rungs):
+            raise RuntimeWarning("Highest rung not reached.")
 
     return list(map(lambda p: p[1], individuals_by_rung[highest_rung_reached]))
 
