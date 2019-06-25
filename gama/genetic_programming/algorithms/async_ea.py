@@ -28,14 +28,14 @@ def async_ea(toolbox, output, start_population, restart_callback=None, max_n_eva
 
     current_population = output
 
-    with AsyncExecutor(n_jobs) as async:
+    with AsyncExecutor(n_jobs) as async_:
         should_restart = True
         while should_restart:
             should_restart = False
             current_population[:] = []
             log.info('Starting EA with new population.')
             for individual in start_population:
-                futures.add(async.submit(evaluate_log, individual))
+                futures.add(async_.submit(evaluate_log, individual))
 
             for ind_no in range(max_n_evaluations):
                 done, futures = toolbox.wait_first_complete(futures)
@@ -61,6 +61,6 @@ def async_ea(toolbox, output, start_population, restart_callback=None, max_n_eva
 
                     if len(current_population) > 1:
                         new_individual = toolbox.create(current_population, 1)[0]
-                        futures.add(async.submit(evaluate_log, new_individual))
+                        futures.add(async_.submit(evaluate_log, new_individual))
 
     return current_population
