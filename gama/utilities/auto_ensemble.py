@@ -152,9 +152,9 @@ class Ensemble(object):
 
         self._fit_models = []
         futures = set()
-        with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncExecutor(self._n_jobs) as async:
+        with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncExecutor(self._n_jobs) as async_:
             for (model, weight) in self._models.values():
-                futures.add(async.submit(fit_and_weight, (model.pipeline, X, y, weight)))
+                futures.add(async_.submit(fit_and_weight, (model.pipeline, X, y, weight)))
 
             for _ in self._models.values():
                 done, futures = wait_first_complete(futures)

@@ -50,7 +50,9 @@ class AutomlGpTestCase(unittest.TestCase):
             LinearSVC.tol=1e-05)"""
         ]
 
-        self.individual_list = [Individual.from_string(''.join(ind_str.split()).replace(',', ', '), self.gama._pset)
+        self.individual_list = [Individual.from_string(''.join(ind_str.split()).replace(',', ', '),
+                                                       self.gama._pset,
+                                                       self.gama._operator_set._compile)
                                 for ind_str in self.ind_strings]
 
     def tearDown(self):

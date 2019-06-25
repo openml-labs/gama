@@ -28,3 +28,43 @@ class PrimitiveNode:
         """ Make a shallow copy w.r.t. Primitive/Terminal (they are immutable), but deep w.r.t. PrimitiveNodes. """
         data_node_copy = self._data_node if self._data_node == DATA_TERMINAL else self._data_node.copy()
         return PrimitiveNode(primitive=self._primitive, data_node=data_node_copy, terminals=self._terminals.copy())
+
+    @classmethod
+    def from_string(cls, string: str, primitive_set: dict):
+        # General form is A(B(C(data[, C.param=value, ...])[, B.param=value, ...])[, A.param=value, ...])
+        # below assumes that left parenthesis is never part of a parameter name or value.
+        primitives = string.split('(')[:-1]
+        terminal_start_index = string.index(DATA_TERMINAL)
+        terminals_string = string[terminal_start_index + len(DATA_TERMINAL):]
+        terminal_sets = terminals_string.split(')')[:-1]
+
+        last_node = DATA_TERMINAL
+        for primitive_string, terminal_set in zip(reversed(primitives), terminal_sets):
+            primitive = find_primitive(primitive_set, primitive_string)
+            if terminal_set == '':
+                terminals = []
+            else:
+                terminal_set = terminal_set[2:]  # 2 is because string starts with ', '
+                terminals = [find_terminal(primitive_set, terminal_string)
+                             for terminal_string in terminal_set.split(', ')]
+            if not all([required_terminal in map(lambda t: t.identifier, terminals)
+                        for required_terminal in primitive.input]):
+                missing = [required_terminal for required_terminal in primitive.input
+                           if required_terminal not in map(lambda t: t.identifier, terminals)]
+                raise ValueError("Individual does not define all required terminals for primitive {}. Missing: {}."
+                                 .format(primitive, missing))
+            last_node = cls(primitive, last_node, terminals)
+
+        return last_node
+
+
+def find_primitive(primitive_set: dict, primitive_string: str) -> Primitive:
+    """ Find the Primitive that matches `primitive_string` in `primitive_set`. """
+    all_primitives = primitive_set[DATA_TERMINAL] + primitive_set['prediction']
+    return [p for p in all_primitives if repr(p) == primitive_string][0]
+
+
+def find_terminal(primitive_set: dict, terminal_string: str) -> Terminal:
+    """ Find the Terminal that matches `terminal_string` in `primitive_set`. """
+    terminal_return_type, terminal_value = terminal_string.split('=')
+    return [t for t in primitive_set[terminal_return_type] if repr(t) == terminal_string][0]

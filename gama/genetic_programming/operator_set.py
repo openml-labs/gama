@@ -1,15 +1,17 @@
+from collections import Sequence
 import logging
 
 from gama.utilities.logging_utilities import log_parseable_event, TOKENS
+from gama.utilities.generic.async_executor import wait_first_complete
 from .components import Individual
 
 log = logging.getLogger(__name__)
 
 
 class OperatorSet:
-    """ Provides a thin layer for ea operators for logging and safety. """
+    """ Provides a thin layer for ea operators for logging, callbacks and safety. """
 
-    def __init__(self, mutate, mate, create_from_population, create_new, compile_, eliminate, max_retry=50):
+    def __init__(self, mutate, mate, create_from_population, create_new, compile_, eliminate, evaluate_callback, max_retry=50):
         """
 
         :param mutate:
@@ -23,10 +25,21 @@ class OperatorSet:
         self._create_from_population = create_from_population
         self._create_new = create_new
         self._compile = compile_
+        self._safe_compile = None
         self._eliminate = eliminate
         self._max_retry = max_retry
+        self._evaluate = None
+        self._evaluate_callback = evaluate_callback
 
         self._seen_individuals = {}
+
+    def wait_first_complete(self, *args, **kwargs):
+        done, not_done = wait_first_complete(*args, **kwargs)
+        for result in [future.result() for future in done]:
+            individual = result if not isinstance(result, Sequence) else result[0]
+            if self._evaluate_callback is not None:
+                self._evaluate_callback(individual)
+        return done, not_done
 
     def try_until_new(self, operator, *args, **kwargs):
         for _ in range(self._max_retry):
@@ -62,13 +75,12 @@ class OperatorSet:
         return individual
 
     def individual(self, *args, **kwargs):
-        return self._create_new(*args, **kwargs)
+        expression = self._create_new(*args, **kwargs)
+        compile_ = self._safe_compile if self._safe_compile is not None else self._compile
+        return Individual(expression, to_pipeline=compile_)
 
     def create(self, *args, **kwargs):
         return self._create_from_population(self, *args, **kwargs)
-
-    def compile(self, *args, **kwargs):
-        return self._compile(*args, **kwargs)
 
     def eliminate(self, *args, **kwargs):
         return self._eliminate(*args, **kwargs)

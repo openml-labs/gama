@@ -13,6 +13,7 @@ import warnings
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
+import stopit
 
 import gama.genetic_programming.compilers.scikitlearn
 from gama.genetic_programming.algorithms.metrics import Metric
@@ -20,12 +21,13 @@ from .utilities.observer import Observer
 
 from gama.data import X_y_from_arff
 from gama.genetic_programming.algorithms.async_ea import async_ea
+from gama.genetic_programming.algorithms.asha import asha, evaluate_on_rung
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.preprocessing import define_preprocessing_steps, heuristic_numpy_to_dataframe
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
 from gama.genetic_programming.selection import create_from_population, eliminate_from_pareto
-from gama.genetic_programming.operations import create_random_individual
+from gama.genetic_programming.operations import create_random_expression
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
@@ -154,6 +156,7 @@ class Gama(object):
         self.ensemble = None
         self._ensemble_fit = False
         self._metrics = self._scoring_to_metric(scoring)
+        self._use_asha = False
 
         default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
@@ -177,9 +180,10 @@ class Gama(object):
             mutate=partial(random_valid_mutation_in_place, primitive_set=self._pset),
             mate=crossover,
             create_from_population=partial(create_from_population, cxpb=0.2, mutpb=0.8),
-            create_new=partial(create_random_individual, primitive_set=self._pset),
+            create_new=partial(create_random_expression, primitive_set=self._pset),
             compile_=compile_individual,
-            eliminate=eliminate_from_pareto
+            eliminate=eliminate_from_pareto,
+            evaluate_callback=self._on_evaluation_completed
         )
 
     def _scoring_to_metric(self, scoring):
@@ -239,7 +243,7 @@ class Gama(object):
                 X, y = X.loc[~y.isnull(), :], y[~y.isnull()]
 
             steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
-            self._operator_set._compile = partial(compile_individual, preprocessing_steps=steps)
+            self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
 
             if hasattr(self, '_encode_labels'):
                 y = self._encode_labels(y)
@@ -291,11 +295,12 @@ class Gama(object):
 
         fit_time = int((1 - ensemble_ratio) * self._time_manager.total_time_remaining)
 
-        with self._time_manager.start_activity('search') as search_sw:
+        with self._time_manager.start_activity('search', time_limit=fit_time) as search_sw:
             self._search_phase(X, y, warm_start, restart_criteria=restart_criteria, timeout=fit_time)
         log_parseable_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
 
-        with self._time_manager.start_activity('postprocess') as post_sw:
+        with self._time_manager.start_activity('postprocess',
+                                               time_limit=int(self._time_manager.total_time_remaining)) as post_sw:
             self._postprocess_phase(auto_ensemble_n, timeout=self._time_manager.total_time_remaining)
         log_parseable_event(log, TOKENS.POSTPROCESSING_END, post_sw.elapsed_time)
 
@@ -317,30 +322,34 @@ class Gama(object):
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = [self._operator_set.individual() for _ in range(self._pop_size)]
 
-        evaluate_individual = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
-                                      evaluate_pipeline_length=self._regularize_length,
-                                      operator_set=self._operator_set)
-        self._operator_set.evaluate = partial(evaluate_individual,
-                                              X=self.X, y_train=self.y_train, y_score=self.y_score,
-                                              metrics=self._metrics, timeout=self._max_eval_time,
-                                              cache_dir=self._cache_dir)
+        evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self.X, y_train=self.y_train, y_score=self.y_score,
+                             timeout=self._max_eval_time, metrics=self._metrics, cache_dir=self._cache_dir)
+        final_pop = []
 
         try:
-            final_pop = async_ea(pop,
-                                 self._operator_set,
-                                 evaluation_callback=self._on_evaluation_completed,
-                                 restart_callback=restart_criteria,
-                                 max_time_seconds=timeout,
-                                 n_jobs=self._n_jobs)
-            self._final_pop = final_pop
+            with stopit.ThreadingTimeout(timeout):
+                if not self._use_asha:
+                    self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
+                                                          **evaluate_args)
+                    final_pop = async_ea(self._operator_set, output=final_pop, start_population=pop,
+                                         restart_callback=restart_criteria,
+                                         max_time_seconds=timeout,
+                                         n_jobs=self._n_jobs)
+                else:
+                    self._operator_set.evaluate = partial(evaluate_on_rung, **evaluate_args)
+                    final_pop = asha(self._operator_set, output=final_pop, start_candidates=pop, maximum_resource=len(X))
+                log.debug([str(i) for i in self._final_pop])
         except KeyboardInterrupt:
             log.info('Search phase terminated because of Keyboard Interrupt.')
 
+        self._final_pop = final_pop
+        log.info('Search phase evaluated {} individuals.'.format(len(final_pop)))
+
     def _postprocess_phase(self, n, timeout=1e6):
         """ Perform any necessary post processing, such as ensemble building. """
-        self._best_pipeline = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values)))[0]
-        log.info("Best pipeline has fitness of {}".format(self._best_pipeline.fitness.values))
-        self._best_pipeline = self._operator_set.compile(self._best_pipeline)
+        self._best_individual = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values)))[0]
+        log.info("Best pipeline has fitness of {}".format(self._best_individual.fitness.values))
+        self._best_pipeline = self._best_individual.pipeline
         log.info("Pipeline {}, steps: {}".format(self._best_pipeline, self._best_pipeline.steps))
         self._best_pipeline.fit(self.X, self.y_train)
         if n > 1:
@@ -388,9 +397,25 @@ class Gama(object):
                     log.warning("Did not delete due to:", exc_info=True)
                 # else ignore silently. This can occur if an evaluation process writes to cache.
 
+    def _safe_outside_call(self, fn):
+        """ Calls fn and log any exception it raises without reraising, except for TimeoutException. """
+        try:
+            fn()
+        except stopit.utils.TimeoutException:
+            raise
+        except Exception:
+            # We actually want to catch any other exception here, because the callback code can be
+            # arbitrary (it can be provided by users). This excuses the catch-all Exception.
+            # Note that KeyboardInterrupts are not exceptions and get elevated to the caller.
+            log.warning("Exception during callback.", exc_info=True)
+            pass
+        if self._time_manager.current_activity.exceeded_limit:
+            log.info("Time exceeded during callback, but exception was swallowed.")
+            raise stopit.utils.TimeoutException
+
     def _on_evaluation_completed(self, ind):
         for callback in self._subscribers['evaluation_completed']:
-            callback(ind)
+            self._safe_outside_call(partial(callback, ind))
 
     def evaluation_completed(self, fn):
         """ Register a callback function that is called when new evaluation is completed.

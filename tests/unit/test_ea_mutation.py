@@ -47,7 +47,9 @@ class MutationTestCase(unittest.TestCase):
         ]
 
         self.individuals = {
-            ind_str: Individual.from_string(''.join(ind_str.split()).replace(',', ', '), self.gama._pset)
+            ind_str: Individual.from_string(''.join(ind_str.split()).replace(',', ', '),
+                                            self.gama._pset,
+                                            self.gama._operator_set._compile)
             for ind_str in self.ind_strings
         }
 
