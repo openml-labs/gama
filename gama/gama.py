@@ -327,7 +327,7 @@ class Gama(object):
         final_pop = []
 
         try:
-            with stopit.ThreadingTimeout(timeout) as timeout_context:
+            with stopit.ThreadingTimeout(timeout):
                 if not self._use_asha:
                     self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
                                                           **evaluate_args)
