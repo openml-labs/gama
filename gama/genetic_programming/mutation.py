@@ -128,6 +128,9 @@ def shared_terminals(individual1: Individual, individual2: Individual,
         Tuple[int, Terminal, int, Terminal] if `with_indices` is True,
             each int specifies the index of the Terminal directly after.
     """
+    if value_match not in ['different', 'equal', 'all']:
+        raise ValueError(f"`value_match` must be one of 'all', 'equal' or 'different' but is '{value_match}'.")
+
     for i, ind1_term in enumerate(individual1.terminals):
         for j, ind2_term in enumerate(individual2.terminals):
             if ind1_term.identifier == ind2_term.identifier:

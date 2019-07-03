@@ -1,13 +1,18 @@
 import pytest
 
 from gama.genetic_programming.components import Individual
-from gama.genetic_programming.mutation import crossover, crossover_primitives, crossover_terminals
+from gama.genetic_programming.mutation import crossover, crossover_primitives, crossover_terminals, shared_terminals
 from gama import GamaClassifier
 
 
 @pytest.fixture
 def pset():
     return GamaClassifier()._pset
+
+
+@pytest.fixture
+def GaussianNB(pset):
+    return Individual.from_string("GaussianNB(data)", pset, None)
 
 
 @pytest.fixture
@@ -18,7 +23,6 @@ def BernoulliNBStandardScaler(pset):
         None
     )
 
-
 @pytest.fixture
 def MultinomialNBRobustScaler(pset):
     return Individual.from_string(
@@ -26,6 +30,18 @@ def MultinomialNBRobustScaler(pset):
         pset,
         None
     )
+
+
+def test_shared_terminals(BernoulliNBStandardScaler, MultinomialNBRobustScaler, GaussianNB):
+    assert 0 == len(list(shared_terminals(BernoulliNBStandardScaler, BernoulliNBStandardScaler, value_match='different')))
+    assert 2 == len(list(shared_terminals(BernoulliNBStandardScaler, BernoulliNBStandardScaler, value_match='equal')))
+    assert 2 == len(list(shared_terminals(BernoulliNBStandardScaler, BernoulliNBStandardScaler, value_match='all')))
+
+    assert 1 == len(list(shared_terminals(BernoulliNBStandardScaler, MultinomialNBRobustScaler, value_match='different')))
+    assert 1 == len(list(shared_terminals(BernoulliNBStandardScaler, MultinomialNBRobustScaler, value_match='equal')))
+    assert 2 == len(list(shared_terminals(BernoulliNBStandardScaler, MultinomialNBRobustScaler, value_match='all')))
+
+    assert 0 == len(list(shared_terminals(BernoulliNBStandardScaler, GaussianNB, value_match='all')))
 
 
 def test_crossover_primitives(BernoulliNBStandardScaler, MultinomialNBRobustScaler):
