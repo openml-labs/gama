@@ -110,12 +110,17 @@ def crossover_primitives(individual1: Individual, individual2: Individual) -> No
 
 
 def crossover_terminals(individual1: Individual, individual2: Individual) -> None:
-    shared_primitives = []
-    for primitive_node in individual1.primitives:
-        for primitive_node_2 in individual2.primitives:
-            if primitive_node._primitive == primitive_node_2._primitive:
-                shared_primitives.append((primitive_node, primitive_node_2))
+    shared_terminals = []
+    # Because one Terminal can occur in a pipeline multiple times, we need to keep track of the specific index
+    for i, ind1_term in enumerate(individual1.terminals):
+        for j, ind2_term in enumerate(individual2.terminals):
+            if ind1_term.identifier == ind2_term.identifier and ind1_term.value != ind2_term.value:
+                shared_terminals.append((i, ind1_term, j, ind2_term))
 
-    ind1_primitive, ind2_primitive = random.choice(shared_primitives)
-    ind1_primitive.terminals = [(t1, t2)[int(random.random()*2)]
-                                for (t1, t2) in zip(ind1_primitive._terminals, ind2_primitive._terminals)]
+    if len(shared_terminals) == 0:
+        raise ValueError(f"All common terminal types (if any) have the same value."
+                         f"Ind1={individual1.pipeline_str()} | Ind2={individual2.pipeline_str()}")
+
+    i, ind1_term, j, ind2_term = random.choice(shared_terminals)
+    individual1.replace_terminal(j, ind2_term)
+    individual2.replace_terminal(i, ind1_term)
