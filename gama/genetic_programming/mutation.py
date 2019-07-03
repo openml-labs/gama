@@ -90,14 +90,10 @@ def random_valid_mutation_in_place(individual: Individual, primitive_set: dict) 
 
 
 def crossover(individual1: Individual, individual2: Individual) -> None:
-    other_primitives = list(map(lambda primitive_node: primitive_node._primitive, individual2.primitives))
-    shared_primitives = [p for p in individual1.primitives if p._primitive in other_primitives]
-    both_at_least_length_2 = len(other_primitives) >= 2 and len(list(individual1.primitives)) >= 2
-
     crossover_choices = []
-    if shared_primitives:
+    if list(shared_terminals(individual1, individual2)) != []:
         crossover_choices.append(crossover_terminals)
-    if both_at_least_length_2:
+    if len(list(individual1.primitives)) >= 2 and len(list(individual2.primitives)) >= 2:
         crossover_choices.append(crossover_primitives)
 
     random.choice(crossover_choices)(individual1, individual2)
