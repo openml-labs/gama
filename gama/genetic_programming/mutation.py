@@ -3,7 +3,7 @@ Contains mutation functions for genetic programming.
 Each mutation function takes an individual and either returns a different individual, or None.
 """
 import random
-from typing import Callable
+from typing import Callable, Iterable
 
 from .components import Individual, DATA_TERMINAL
 from .operations import random_primitive_node
@@ -109,18 +109,39 @@ def crossover_primitives(individual1: Individual, individual2: Individual) -> No
     parent_node_1._data_node, parent_node_2._data_node = parent_node_2._data_node, parent_node_1._data_node
 
 
-def crossover_terminals(individual1: Individual, individual2: Individual) -> None:
-    shared_terminals = []
-    # Because one Terminal can occur in a pipeline multiple times, we need to keep track of the specific index
+def shared_terminals(individual1: Individual, individual2: Individual,
+                     with_indices: bool=True, value_match: str='different') -> Iterable:
+    """ Finds all shared Terminals between two Individuals.
+
+    :param individual1: Individual
+    :param individual2: Individual
+    :param with_indices: bool (default=True)
+        If True, also return the indices of the Terminals w.r.t. the Individual.
+    :param value_match: str (default='different')
+        Indicates with matches to return, based on terminal values.
+        Accepted values are:
+         - 'different': only return shared terminals which have different values from each other
+         - 'equal': only return shared terminals which have equal values from each other
+         - 'all': return all shared terminals regardless of value
+    :return: sequence of tuples with both Terminals, with the Terminal from Individual1 first.
+        Tuple[Terminal, Terminal] if `with_indices` is False
+        Tuple[int, Terminal, int, Terminal] if `with_indices` is True,
+            each int specifies the index of the Terminal directly after.
+    """
     for i, ind1_term in enumerate(individual1.terminals):
         for j, ind2_term in enumerate(individual2.terminals):
-            if ind1_term.identifier == ind2_term.identifier and ind1_term.value != ind2_term.value:
-                shared_terminals.append((i, ind1_term, j, ind2_term))
+            if ind1_term.identifier == ind2_term.identifier:
+                if ((value_match == 'different' and ind1_term.value == ind2_term.value)
+                        or (value_match == 'equal' and ind1_term.value != ind2_term.value)):
+                    continue
+                if with_indices:
+                    yield (i, ind1_term, j, ind2_term)
+                else:
+                    yield (ind1_term, ind2_term)
 
-    if len(shared_terminals) == 0:
-        raise ValueError(f"All common terminal types (if any) have the same value."
-                         f"Ind1={individual1.pipeline_str()} | Ind2={individual2.pipeline_str()}")
 
-    i, ind1_term, j, ind2_term = random.choice(shared_terminals)
+def crossover_terminals(individual1: Individual, individual2: Individual) -> None:
+    candidates = list(shared_terminals(individual1, individual2, with_indices=True, value_match='different'))
+    i, ind1_term, j, ind2_term = random.choice(candidates)
     individual1.replace_terminal(j, ind2_term)
     individual2.replace_terminal(i, ind1_term)
