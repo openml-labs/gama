@@ -61,10 +61,17 @@ class PrimitiveNode:
 def find_primitive(primitive_set: dict, primitive_string: str) -> Primitive:
     """ Find the Primitive that matches `primitive_string` in `primitive_set`. """
     all_primitives = primitive_set[DATA_TERMINAL] + primitive_set['prediction']
-    return [p for p in all_primitives if repr(p) == primitive_string][0]
+    try:
+        return [p for p in all_primitives if repr(p) == primitive_string][0]
+    except IndexError:
+        raise IndexError(f"Could not find Primitive of type '{primitive_string}'.")
+
 
 
 def find_terminal(primitive_set: dict, terminal_string: str) -> Terminal:
     """ Find the Terminal that matches `terminal_string` in `primitive_set`. """
     terminal_return_type, terminal_value = terminal_string.split('=')
-    return [t for t in primitive_set[terminal_return_type] if repr(t) == terminal_string][0]
+    try:
+        return [t for t in primitive_set[terminal_return_type] if repr(t) == terminal_string][0]
+    except IndexError:
+        raise IndexError(f"Could not find Terminal of type '{terminal_string}'.")
