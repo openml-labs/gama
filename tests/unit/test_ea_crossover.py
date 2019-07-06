@@ -7,7 +7,9 @@ from gama import GamaClassifier
 
 @pytest.fixture
 def pset():
-    return GamaClassifier()._pset
+    gc = GamaClassifier()
+    gc.delete_cache()
+    return gc._pset
 
 
 @pytest.fixture
