@@ -1,30 +1,5 @@
-import pytest
-
-from gama.genetic_programming.components import Individual
 from gama.genetic_programming.mutation import crossover, crossover_primitives, crossover_terminals, shared_terminals
-from gama import GamaClassifier
-
-
-@pytest.fixture
-def pset():
-    gc = GamaClassifier()
-    gc.delete_cache()
-    return gc._pset
-
-
-@pytest.fixture
-def GaussianNB(pset):
-    return Individual.from_string("GaussianNB(data)", pset, None)
-
-
-@pytest.fixture
-def BernoulliNBStandardScaler(pset):
-    return Individual.from_string("BernoulliNB(StandardScaler(data), alpha=0.1, fit_prior=True)", pset, None)
-
-
-@pytest.fixture
-def MultinomialNBRobustScaler(pset):
-    return Individual.from_string("MultinomialNB(RobustScaler(data), alpha=1.0, fit_prior=True)", pset, None)
+from .unit_fixtures import pset, BernoulliNBStandardScaler, MultinomialNBRobustScaler, GaussianNB
 
 
 def test_shared_terminals(BernoulliNBStandardScaler, MultinomialNBRobustScaler, GaussianNB):
