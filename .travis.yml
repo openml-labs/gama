@@ -8,7 +8,7 @@ env:
   - TEST_SUITE=system
 
 install:
-  - pip install -e '.[test]'
+  - pip install -e '.[develop]'
 script:
   - pip list
   - pytest --cov=gama -sv tests.$TEST_SUITE
