@@ -96,15 +96,6 @@ class Individual:
         """ Make a deep copy of the individual, but with fitness set to None and assign a new id. """
         return Individual(main_node=self.main_node.copy(), to_pipeline=self._to_pipeline)
 
-    def can_mate_with(self, other) -> bool:
-        """ True if `self` and `other` share at least one primitive or both have at least two primitives, else false."""
-        other_primitives = list(map(lambda primitive_node: primitive_node._primitive, other.primitives))
-        # Shared primitives mean they can exchange terminals
-        shared_primitives = [p for p in self.primitives if p._primitive in other_primitives]
-        # Both at least two primitives means they can swap primitives
-        both_at_least_length_2 = len(other_primitives) >= 2 and len(self.primitives) >= 2
-        return both_at_least_length_2 or shared_primitives
-
     @classmethod
     def from_string(cls, string: str, primitive_set: dict, to_pipeline: Callable):
         expression = PrimitiveNode.from_string(string, primitive_set)

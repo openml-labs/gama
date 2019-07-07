@@ -11,6 +11,10 @@ requirements = [
     'category-encoders>=1.2.8'
 ]
 
+test_requirements = [
+    'pytest'
+]
+
 setup(
     name='gama',
     version='19.01.0',
@@ -22,5 +26,6 @@ setup(
     url='https://github.com/PGijsbers/GAMA',
     packages=find_packages(exclude=['tests']),
     install_requires=requirements,
+    tests_require=test_requirements,
     python_requires='>=3.5.0'
 )

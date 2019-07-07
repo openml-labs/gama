@@ -3,7 +3,7 @@ Contains mutation functions for genetic programming.
 Each mutation function takes an individual and either returns a different individual, or None.
 """
 import random
-from typing import Callable, Iterable
+from typing import Callable, Iterable, List
 
 from .components import Individual, DATA_TERMINAL
 from .operations import random_primitive_node
@@ -89,13 +89,20 @@ def random_valid_mutation_in_place(individual: Individual, primitive_set: dict) 
     return mut_fn
 
 
-def crossover(individual1: Individual, individual2: Individual) -> None:
+def valid_crossover_functions(individual1: Individual, individual2: Individual) -> List[Callable]:
+    """ Return all crossover functions which can produce a new individual from the given two individuals. """
     crossover_choices = []
     if list(shared_terminals(individual1, individual2)) != []:
         crossover_choices.append(crossover_terminals)
     if len(list(individual1.primitives)) >= 2 and len(list(individual2.primitives)) >= 2:
         crossover_choices.append(crossover_primitives)
+    return crossover_choices
 
+
+def crossover(individual1: Individual, individual2: Individual) -> None:
+    crossover_choices = valid_crossover_functions(individual1, individual2)
+    if len(crossover_choices) == 0:
+        raise ValueError(f"{individual1.pipeline_str()} and {individual2.pipeline_str()} can't mate.")
     random.choice(crossover_choices)(individual1, individual2)
 
 
@@ -142,5 +149,5 @@ def shared_terminals(individual1: Individual, individual2: Individual,
 def crossover_terminals(individual1: Individual, individual2: Individual) -> None:
     candidates = list(shared_terminals(individual1, individual2, with_indices=True, value_match='different'))
     i, ind1_term, j, ind2_term = random.choice(candidates)
-    individual1.replace_terminal(j, ind2_term)
-    individual2.replace_terminal(i, ind1_term)
+    individual1.replace_terminal(i, ind2_term)
+    individual2.replace_terminal(j, ind1_term)
