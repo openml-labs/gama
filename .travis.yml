@@ -11,6 +11,6 @@ install:
   - pip install -e .[test]
 script:
   - pip list
-  - pytest --cov=gama -sv tests.$TEST_SUITE
+  - pytest --cov=gama -sv tests/$TEST_SUITE/
 after_success:
  - bash <(curl -s https://codecov.io/bash)
