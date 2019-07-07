@@ -12,7 +12,9 @@ requirements = [
 ]
 
 test_requirements = [
-    'pytest'
+    'pytest',
+    'codecov',
+    'pytest-cov'
 ]
 
 setup(
