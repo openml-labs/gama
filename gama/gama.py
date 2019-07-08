@@ -333,7 +333,7 @@ class Gama(object):
             if warm_start:
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = [self._operator_set.individual() for _ in range(self._pop_size)]
-            warm_start_pop = generate_warm_start_pop(X, y, self._pset)
+            warm_start_pop = generate_warm_start_pop(X, y, self._pset, self._operator_set._safe_compile)
             pop = warm_start_pop + pop[len(warm_start_pop):]
 
         evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self.X, y_train=self.y_train, y_score=self.y_score,

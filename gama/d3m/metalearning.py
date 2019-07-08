@@ -4,11 +4,14 @@ import numpy as np
 import pickle
 import os
 
-from ..genetic_programming.operations import create_seeded_individual
+from ..genetic_programming.operations import create_seeded_expression
+from ..genetic_programming.components import Individual
 
 log = logging.getLogger(__name__)
 
+
 def calculate_meta_features(X, y):
+    X = X.values.astype(float)
     n_instances, n_features = X.shape
     dimensionality = n_features / n_instances
 
@@ -102,7 +105,7 @@ def load_model(learner):
         return pickle.load(fh)
 
 
-def generate_warm_start_pop(X, y, primitive_set, n_each=5):
+def generate_warm_start_pop(X, y, primitive_set, compile_, n_each=5):
     warm_start_pop = []
     metafeatures = calculate_meta_features(X, y)
     learners = [('SVC', SVC_features),
@@ -117,7 +120,8 @@ def generate_warm_start_pop(X, y, primitive_set, n_each=5):
             learner_prim = learner_prim[0]
         else:
             continue
-        candidate_inds = [create_seeded_individual(primitive_set, learner_prim, max_length=1) for _ in range(100)]
+        candidate_inds = [Individual(create_seeded_expression(primitive_set, learner_prim, max_length=1),
+                                     compile_) for _ in range(100)]
         candidate_configs = [feature_fn(ind) for ind in candidate_inds]
         best_indices = pick_best(metafeatures, candidate_configs, model, n_each)
         warm_start_pop += [candidate_inds[i] for i in best_indices]

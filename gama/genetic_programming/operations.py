@@ -28,7 +28,7 @@ def create_random_expression(primitive_set: dict, min_length: int = 1, max_lengt
     return learner_node
 
 
-def create_seeded_individual(primitive_set: dict, main: Primitive, min_length: int = 1, max_length: int = 3) -> Individual:
+def create_seeded_expression(primitive_set: dict, main: Primitive, min_length: int = 1, max_length: int = 3) -> Individual:
     """ Create an individual with at least `min_length` Primitives and at most `max_length` Primitives that
         has `main` as learner node. """
     individual_length = random.randint(min_length, max_length)
@@ -41,4 +41,4 @@ def create_seeded_individual(primitive_set: dict, main: Primitive, min_length: i
         last_primitive_node._data_node = primitive_node
         last_primitive_node = primitive_node
 
-    return Individual(learner_node)
+    return learner_node

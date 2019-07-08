@@ -76,11 +76,11 @@ def _test_dataset_problem(data, metric, labelled_y=False, arff=False):
         class_probabilities = gama.predict_proba(arff_file_path=test_path)
     else:
         X, y = data['load'](return_X_y=True)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
         if labelled_y:
             databunch = data['load']()
-            y = np.asarray([databunch.target_names[c_i] for c_i in databunch.target])
-
-        X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
+            y_train = np.asarray([databunch.target_names[c_i] for c_i in y_train])
+            y_test = np.asarray([databunch.target_names[c_i] for c_i in y_test])
 
         with Stopwatch() as sw:
             gama.fit(X_train, y_train, auto_ensemble_n=5)
