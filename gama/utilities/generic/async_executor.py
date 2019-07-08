@@ -1,5 +1,7 @@
 import concurrent.futures
+import logging
 
+log = logging.getLogger(__name__)
 
 class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
     """ ContextManager for ProcessPoolExecutor which on exit terminates subprocesses and does not wait on shutdown.
@@ -20,6 +22,7 @@ class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
         self._futures = []
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        log.info("Shutting down AsyncExecutor.")
         child_processes = list(self._processes.items())
         self.shutdown(wait=False)
         for future in self._futures:
@@ -27,6 +30,7 @@ class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
                 future.cancel()
         for pid, process in child_processes:
             process.terminate()
+        log.info("Returning control.")
         return False
 
     def submit(self, fn, *args, **kwargs):

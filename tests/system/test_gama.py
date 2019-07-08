@@ -1,3 +1,4 @@
+import logging
 import pytest
 
 from sklearn.datasets import load_digits
@@ -8,7 +9,7 @@ from gama import GamaClassifier
 
 @pytest.fixture
 def gamaclassifier():
-    gc = GamaClassifier()
+    gc = GamaClassifier(verbosity=logging.DEBUG)
     yield gc
     gc.delete_cache()
 
