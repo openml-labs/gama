@@ -9,7 +9,7 @@ from gama import GamaClassifier
 
 @pytest.fixture
 def gamaclassifier():
-    gc = GamaClassifier(verbosity=logging.DEBUG)
+    gc = GamaClassifier(verbosity=logging.DEBUG, random_state=0, max_total_time=120)
     yield gc
     gc.delete_cache()
 
@@ -26,14 +26,10 @@ def _gama_on_digits(gama):
 
 
 def test_full_system_single_core(gamaclassifier):
-    gamaclassifier._random_state = 0
     gamaclassifier._n_jobs = 1
-    gamaclassifier._max_total_time = 120
     _gama_on_digits(gamaclassifier)
 
 
 def test_full_system_multi_core():
-    gamaclassifier._random_state = 0
     gamaclassifier._n_jobs = 2
-    gamaclassifier._max_total_time = 120
     _gama_on_digits(gamaclassifier)
