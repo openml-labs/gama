@@ -29,6 +29,6 @@ def test_full_system_single_core(gamaclassifier):
     _gama_on_digits(gamaclassifier)
 
 
-def test_full_system_multi_core():
+def test_full_system_multi_core(gamaclassifier):
     gamaclassifier._n_jobs = 2
     _gama_on_digits(gamaclassifier)
