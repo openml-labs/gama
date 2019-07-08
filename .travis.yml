@@ -8,10 +8,9 @@ env:
   - TEST_SUITE=system
 
 install:
-  - pip install coverage
-  - python setup.py install
+  - pip install -e .[test]
 script:
   - pip list
-  - nosetests -s -v --with-coverage --cover-package=gama tests.$TEST_SUITE
+  - pytest --cov=gama -sv tests/$TEST_SUITE/
 after_success:
  - bash <(curl -s https://codecov.io/bash)

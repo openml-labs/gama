@@ -2,6 +2,7 @@ import random
 import numpy
 
 from gama.utilities.generic.paretofront import ParetoFront
+from gama.genetic_programming.mutation import valid_crossover_functions
 
 
 def create_from_population(operator_shell, pop, n, cxpb, mutpb):
@@ -9,7 +10,7 @@ def create_from_population(operator_shell, pop, n, cxpb, mutpb):
     offspring = []
     for _ in range(n):
         ind1, ind2 = random.sample(pop, k=2)
-        if random.random() < cxpb and ind1.can_mate_with(ind2):
+        if random.random() < cxpb and len(valid_crossover_functions(ind1, ind2)) > 0:
             ind1 = operator_shell.mate(ind1, ind2)
         else:
             ind1 = operator_shell.mutate(ind1)
