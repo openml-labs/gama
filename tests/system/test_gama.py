@@ -9,7 +9,7 @@ from gama import GamaClassifier
 
 @pytest.fixture
 def gamaclassifier():
-    gc = GamaClassifier(verbosity=logging.DEBUG, random_state=0, max_total_time=120)
+    gc = GamaClassifier(random_state=0, max_total_time=120)
     yield gc
     gc.delete_cache()
 
