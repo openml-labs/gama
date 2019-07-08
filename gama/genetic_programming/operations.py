@@ -45,8 +45,8 @@ def create_seeded_individual(primitive_set: dict, main: Primitive, min_length: i
     return Individual(learner_node)
 
 
-def create_individual_by_rule(primitive_set, grammar_manager, rule_name):
-    pipeline = grammar_manager.generate(rule_name)
+def create_individual_by_rule(primitive_set, rule):
+    pipeline = rule.generate()
     learner = last = None
     for emission in reversed(pipeline):
         primitive = emission.primitive

@@ -1,6 +1,6 @@
 from d3m import index
 from gama.genetic_programming.components import DATA_TERMINAL
-
+from gama.genetic_programming.components.primitive_node import PrimitiveNode
 
 class Library(object):
 
@@ -41,6 +41,9 @@ class Library(object):
         raise NotImplementedError()
 
     def primitive_metadata(self, primitive):
+        raise NotImplementedError()
+
+    def primitive_has_parameters(self, primitive, params):
         raise NotImplementedError()
 
 
@@ -92,7 +95,10 @@ class GamaPsetLibrary(Library):
         return None
 
     def _d3m_primitive(self, primitive):
-        return primitive[2].pclass
+        if isinstance(primitive, PrimitiveNode):
+            return primitive._primitive[2].pclass
+        else:
+            return primitive[2].pclass
 
     def primitive_name(self, primitive):
         return self._d3m_primitive(primitive).__name__
@@ -106,5 +112,12 @@ class GamaPsetLibrary(Library):
     def primitive_metadata(self, primitive):
         return self._d3m_primitive(primitive).metadata.query()
 
-
+    def primitive_has_parameters(self, primitive, params):
+        for param, pval in params.iterms():
+            try:
+                terminal = next((t for t in primitive._terminals if t.output == param))
+                return terminal.value == pval
+            except ValueError:
+                return False
+        return True
 

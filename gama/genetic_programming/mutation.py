@@ -117,5 +117,5 @@ def crossover_terminals(individual1: Individual, individual2: Individual) -> Non
                 shared_primitives.append((primitive_node, primitive_node_2))
 
     ind1_primitive, ind2_primitive = random.choice(shared_primitives)
-    ind1_primitive.terminals = [(t1, t2)[int(random.random()*2)]
-                                for (t1, t2) in zip(ind1_primitive._terminals, ind2_primitive._terminals)]
+    ind1_primitive._terminals = [(t1, t2)[int(random.random()*2)]
+                                 for (t1, t2) in zip(ind1_primitive._terminals, ind2_primitive._terminals)]

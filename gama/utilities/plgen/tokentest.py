@@ -32,7 +32,12 @@ class LiteralTokenTest(TokenTest):
         return set(Emission(primitive=p, parameters=params) for p in prims)
 
     def matches(self, primitive):
-        return self.name in self.parent.library.primitive_path(primitive)
+        if self.name not in self.parent.library.primitive_path(primitive):
+            return False
+        if hasattr(self, 'parameters'):
+            if not self.parent.library.primitive_has_parameters(primitive, self.parameters):
+                return False
+        return True
 
     def dump(self, indent=0):
         print("%sLIT %s" % ((' ' * indent), self.name))
@@ -48,7 +53,12 @@ class SpecTokenTest(TokenTest):
         return set(Emission(primitive=p, parameters=params) for p in prims)
 
     def matches(self, primitive):
-        return self.parent.library.primitive_has_type(primitive, self.name, self.items)
+        if not self.parent.library.primitive_has_type(primitive, self.name, self.items):
+            return False
+        if hasattr(self, 'parameters'):
+            if not self.parent.library.primitive_has_parameters(primitive, self.parameters):
+                return False
+        return True
 
     def dump(self, indent=0):
         print("%SPEC %s" % ((' ' * indent), self.name))

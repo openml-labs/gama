@@ -26,6 +26,8 @@ from gama.utilities.preprocessing import define_preprocessing_steps
 from gama.utilities.plgen.manager import Manager
 from gama.utilities.plgen.library import GamaPsetLibrary
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
+from gama.genetic_programming.conformant_mutation import random_valid_mutation_in_place as conformant_mutation
+from gama.genetic_programming.conformant_mutation import crossover as conformant_crossover
 from gama.genetic_programming.selection import create_from_population, eliminate_from_pareto
 from gama.genetic_programming.operations import create_random_individual, create_individual_by_rule
 from gama.configuration.parser import pset_from_config
@@ -189,13 +191,21 @@ class Gama(object):
             self._grammar_manager = Manager(library=library)
             self._grammar_manager.parse_file(grammar_file_name)
             self._grammar_rule_name = rule_name
-            individual_creator = partial(create_individual_by_rule, primitive_set=self._pset,
-                                         grammar_manager=self._grammar_manager, rule_name=rule_name)
+            self._grammar_rule = self._grammar_manager.get_fa(rule_name)
+            individual_creator = partial(create_individual_by_rule, primitive_set=self._pset, rule=self._grammar_rule)
+            # Turning off the grammar checking of individuals generated through reproduction
+            # TODO: Debug grammar checking for reproduction
+#            mutate = partial(conformant_mutation, primitive_set=self._pset, rule=self._grammar_rule)
+#            mate = partial(conformant_crossover, rule=self._grammar_manager)
+            mutate = partial(random_valid_mutation_in_place, primitive_set=self._pset)
+            mate = crossover
         else:
             individual_creator = partial(create_random_individual, primitive_set=self._pset)
+            mutate = partial(random_valid_mutation_in_place, primitive_set=self._pset)
+            mate = crossover
         self._operator_set = OperatorSet(
-            mutate=partial(random_valid_mutation_in_place, primitive_set=self._pset),
-            mate=crossover,
+            mutate=mutate,
+            mate=mate,
             create_from_population=partial(create_from_population, cxpb=0.2, mutpb=0.8),
             create_new=individual_creator,
             compile_=compile_individual,
