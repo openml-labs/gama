@@ -3,7 +3,7 @@ Contains mutation functions for genetic programming.
 Each mutation function takes an individual and either returns a different individual, or None.
 """
 import random
-from typing import Callable
+from typing import Callable, Iterable, List
 
 from .components import Individual, DATA_TERMINAL
 from .operations import random_primitive_node
@@ -89,17 +89,20 @@ def random_valid_mutation_in_place(individual: Individual, primitive_set: dict) 
     return mut_fn
 
 
-def crossover(individual1: Individual, individual2: Individual) -> None:
-    other_primitives = list(map(lambda primitive_node: primitive_node._primitive, individual2.primitives))
-    shared_primitives = [p for p in individual1.primitives if p._primitive in other_primitives]
-    both_at_least_length_2 = len(other_primitives) >= 2 and len(list(individual1.primitives)) >= 2
-
+def valid_crossover_functions(individual1: Individual, individual2: Individual) -> List[Callable]:
+    """ Return all crossover functions which can produce a new individual from the given two individuals. """
     crossover_choices = []
-    if shared_primitives:
+    if list(shared_terminals(individual1, individual2)) != []:
         crossover_choices.append(crossover_terminals)
-    if both_at_least_length_2:
+    if len(list(individual1.primitives)) >= 2 and len(list(individual2.primitives)) >= 2:
         crossover_choices.append(crossover_primitives)
+    return crossover_choices
 
+
+def crossover(individual1: Individual, individual2: Individual) -> None:
+    crossover_choices = valid_crossover_functions(individual1, individual2)
+    if len(crossover_choices) == 0:
+        raise ValueError(f"{individual1.pipeline_str()} and {individual2.pipeline_str()} can't mate.")
     random.choice(crossover_choices)(individual1, individual2)
 
 
@@ -109,13 +112,42 @@ def crossover_primitives(individual1: Individual, individual2: Individual) -> No
     parent_node_1._data_node, parent_node_2._data_node = parent_node_2._data_node, parent_node_1._data_node
 
 
-def crossover_terminals(individual1: Individual, individual2: Individual) -> None:
-    shared_primitives = []
-    for primitive_node in individual1.primitives:
-        for primitive_node_2 in individual2.primitives:
-            if primitive_node._primitive == primitive_node_2._primitive:
-                shared_primitives.append((primitive_node, primitive_node_2))
+def shared_terminals(individual1: Individual, individual2: Individual,
+                     with_indices: bool=True, value_match: str='different') -> Iterable:
+    """ Finds all shared Terminals between two Individuals.
 
-    ind1_primitive, ind2_primitive = random.choice(shared_primitives)
-    ind1_primitive.terminals = [(t1, t2)[int(random.random()*2)]
-                                for (t1, t2) in zip(ind1_primitive._terminals, ind2_primitive._terminals)]
+    :param individual1: Individual
+    :param individual2: Individual
+    :param with_indices: bool (default=True)
+        If True, also return the indices of the Terminals w.r.t. the Individual.
+    :param value_match: str (default='different')
+        Indicates with matches to return, based on terminal values.
+        Accepted values are:
+         - 'different': only return shared terminals which have different values from each other
+         - 'equal': only return shared terminals which have equal values from each other
+         - 'all': return all shared terminals regardless of value
+    :return: sequence of tuples with both Terminals, with the Terminal from Individual1 first.
+        Tuple[Terminal, Terminal] if `with_indices` is False
+        Tuple[int, Terminal, int, Terminal] if `with_indices` is True,
+            each int specifies the index of the Terminal directly after.
+    """
+    if value_match not in ['different', 'equal', 'all']:
+        raise ValueError(f"`value_match` must be one of 'all', 'equal' or 'different' but is '{value_match}'.")
+
+    for i, ind1_term in enumerate(individual1.terminals):
+        for j, ind2_term in enumerate(individual2.terminals):
+            if ind1_term.identifier == ind2_term.identifier:
+                if ((value_match == 'different' and ind1_term.value == ind2_term.value)
+                        or (value_match == 'equal' and ind1_term.value != ind2_term.value)):
+                    continue
+                if with_indices:
+                    yield (i, ind1_term, j, ind2_term)
+                else:
+                    yield (ind1_term, ind2_term)
+
+
+def crossover_terminals(individual1: Individual, individual2: Individual) -> None:
+    candidates = list(shared_terminals(individual1, individual2, with_indices=True, value_match='different'))
+    i, ind1_term, j, ind2_term = random.choice(candidates)
+    individual1.replace_terminal(i, ind2_term)
+    individual2.replace_terminal(j, ind1_term)

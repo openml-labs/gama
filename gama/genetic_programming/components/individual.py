@@ -1,17 +1,26 @@
 import uuid
-from typing import List
+from typing import List, Callable
 from .primitive_node import PrimitiveNode
 from .terminal import DATA_TERMINAL, Terminal
-from .primitive import Primitive
 
 
 class Individual:
     """ A collection of PrimitiveNodes which together specify a machine learning pipeline. """
 
-    def __init__(self, main_node: PrimitiveNode):
+    def __init__(self, main_node: PrimitiveNode, to_pipeline: Callable):
+        """
+
+        :param main_node: The first node of the individual (the estimator node).
+        :param to_pipeline: Callable. A function which can convert this individual into a machine learning pipeline.
+        """
         self.fitness = None
         self.main_node = main_node
         self._id = uuid.uuid4()
+        self._to_pipeline = to_pipeline
+
+    @property
+    def pipeline(self):
+        return self._to_pipeline(self)
 
     def pipeline_str(self):
         """ e.g. "BernoulliNB(Binarizer(data, Binarizer.threshold=0.6), BernoulliNB.alpha=1.0)" """
@@ -85,53 +94,9 @@ class Individual:
 
     def copy_as_new(self):
         """ Make a deep copy of the individual, but with fitness set to None and assign a new id. """
-        return Individual(main_node=self.main_node.copy())
-
-    def can_mate_with(self, other) -> bool:
-        """ True if `self` and `other` share at least one primitive or both have at least two primitives, else false."""
-        other_primitives = list(map(lambda primitive_node: primitive_node._primitive, other.primitives))
-        # Shared primitives mean they can exchange terminals
-        shared_primitives = [p for p in self.primitives if p._primitive in other_primitives]
-        # Both at least two primitives means they can swap primitives
-        both_at_least_length_2 = len(other_primitives) >= 2 and len(self.primitives) >= 2
-        return both_at_least_length_2 or shared_primitives
+        return Individual(main_node=self.main_node.copy(), to_pipeline=self._to_pipeline)
 
     @classmethod
-    def from_string(cls, string: str, primitive_set: dict):
-        # General form is A(B(C(data[, C.param=value, ...])[, B.param=value, ...])[, A.param=value, ...])
-        # below assumes that left parenthesis is never part of a parameter name or value.
-        primitives = string.split('(')[:-1]
-        terminal_start_index = string.index(DATA_TERMINAL)
-        terminals_string = string[terminal_start_index + len(DATA_TERMINAL):]
-        terminal_sets = terminals_string.split(')')[:-1]
-
-        last_node = DATA_TERMINAL
-        for primitive_string, terminal_set in zip(reversed(primitives), terminal_sets):
-            primitive = find_primitive(primitive_set, primitive_string)
-            if terminal_set == '':
-                terminals = []
-            else:
-                terminal_set = terminal_set[2:]  # 2 is because string starts with ', '
-                terminals = [find_terminal(primitive_set, terminal_string)
-                             for terminal_string in terminal_set.split(', ')]
-            if not all([required_terminal in map(lambda t: t.identifier, terminals)
-                        for required_terminal in primitive.input]):
-                missing = [required_terminal for required_terminal in primitive.input
-                           if required_terminal not in map(lambda t: t.identifier, terminals)]
-                raise ValueError("Individual does not define all required terminals for primitive {}. Missing: {}."
-                                 .format(primitive, missing))
-            last_node = PrimitiveNode(primitive, last_node, terminals)
-
-        return cls(last_node)
-
-
-def find_primitive(primitive_set: dict, primitive_string: str) -> Primitive:
-    """ Find the Primitive that matches `primitive_string` in `primitive_set`. """
-    all_primitives = primitive_set[DATA_TERMINAL] + primitive_set['prediction']
-    return [p for p in all_primitives if repr(p) == primitive_string][0]
-
-
-def find_terminal(primitive_set: dict, terminal_string: str) -> Terminal:
-    """ Find the Terminal that matches `terminal_string` in `primitive_set`. """
-    terminal_return_type, terminal_value = terminal_string.split('=')
-    return [t for t in primitive_set[terminal_return_type] if repr(t) == terminal_string][0]
+    def from_string(cls, string: str, primitive_set: dict, to_pipeline: Callable):
+        expression = PrimitiveNode.from_string(string, primitive_set)
+        return cls(expression, to_pipeline=to_pipeline)

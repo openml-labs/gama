@@ -10,28 +10,34 @@ import sys
 import time
 import warnings
 
-import arff
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder, Imputer
+from sklearn.preprocessing import OneHotEncoder
+import stopit
 
 import gama.genetic_programming.compilers.scikitlearn
 from gama.genetic_programming.algorithms.metrics import Metric
 from .utilities.observer import Observer
 
+from gama.data import X_y_from_arff
 from gama.genetic_programming.algorithms.async_ea import async_ea
-from gama.utilities.generic.stopwatch import Stopwatch
+from gama.genetic_programming.algorithms.asha import asha, evaluate_on_rung
+from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
-from gama.utilities.preprocessing import define_preprocessing_steps
+from gama.utilities.preprocessing import define_preprocessing_steps, heuristic_numpy_to_dataframe
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
 from gama.genetic_programming.selection import create_from_population, eliminate_from_pareto
-from gama.genetic_programming.operations import create_random_individual
+from gama.genetic_programming.operations import create_random_expression
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
 from gama.d3m.metalearning import generate_warm_start_pop
 
 #  `gamalog` is for the entire gama module and submodules.
+gamalog = logging.getLogger('gama')
+gamalog.setLevel(logging.DEBUG)
+
+# `gamalog` is for the entire gama module and submodules.
 gamalog = logging.getLogger('gama')
 gamalog.setLevel(logging.DEBUG)
 
@@ -87,8 +93,12 @@ class Gama(object):
         The amount of parallel processes that may be created to speed up `fit`. If this number
         is zero or negative, it will be set to the amount of cores.
 
-    :param verbosity: integer (default=0)
-        Does nothing right now. Follow progress of optimization by tracking the log.
+    :param verbosity: integer (default=logging.WARNING)
+        Sets the level of log messages to be automatically output to terminal.
+
+    :param keep_analysis_log: str or False. (default='gama.log')
+        If non-empty str, specifies the path (and name) where the log should be stored, e.g. /output/gama.log.
+        If empty str or False, no log is stored.
 
     :param keep_analysis_log: str or False. (default='gama.log')
         If non-empty str, specifies the path (and name) where the log should be stored, e.g. /output/gama.log.
@@ -148,12 +158,14 @@ class Gama(object):
         self._max_eval_time = max_eval_time
         self._n_jobs = n_jobs
         self._regularize_length = regularize_length
+        self._time_manager = TimeKeeper(max_total_time)
         self._best_pipeline = None
         self._fit_data = None
         self._observer = None
         self.ensemble = None
         self._ensemble_fit = False
         self._metrics = self._scoring_to_metric(scoring)
+        self._use_asha = False
 
         default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
@@ -177,9 +189,10 @@ class Gama(object):
             mutate=partial(random_valid_mutation_in_place, primitive_set=self._pset),
             mate=crossover,
             create_from_population=partial(create_from_population, cxpb=0.2, mutpb=0.8),
-            create_new=partial(create_random_individual, primitive_set=self._pset),
+            create_new=partial(create_random_expression, primitive_set=self._pset),
             compile_=compile_individual,
-            eliminate=eliminate_from_pareto
+            eliminate=eliminate_from_pareto,
+            evaluate_callback=self._on_evaluation_completed
         )
 
     def clean_pipeline_string(self, p):
@@ -200,35 +213,16 @@ class Gama(object):
         else:
             raise ValueError("scoring must be a string, Metric or Iterable (of strings or Metrics).")
 
-    def _get_data_from_arff(self, arff_file_path, split_last=True):
-        # load arff
-        with open(arff_file_path, 'r') as arff_file:
-            arff_dict = arff.load(arff_file)
-
-        attribute_names, data_types = zip(*arff_dict['attributes'])
-        data = pd.DataFrame(arff_dict['data'], columns=attribute_names)
-        for attribute_name, dtype in arff_dict['attributes']:
-            # if dtype.lower() in ['real', 'numeric']:  probably interpreted correctly.
-            if isinstance(dtype, list):
-                data[attribute_name] = data[attribute_name].astype('category')
-            # TODO: add date support
-
-        if split_last:
-            return data.iloc[:, :-1], data.iloc[:, -1]
-        else:
-            return data
-
     def _preprocess_predict_X(self, X=None, arff_file_path=None):
-        if X is not None:
-            if hasattr(X, 'values') and hasattr(X, 'astype'):
-                X = X.astype(np.float64).values
-            if np.isnan(X).any() and self._imputer is not None:
-                log.info("Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.")
-                X = self._imputer.transform(X)
-        elif arff_file_path is not None:
-            X, y = self._preprocess_arff(arff_file_path)
-        else:
+        if isinstance(arff_file_path, str):
+            X, _ = X_y_from_arff(arff_file_path)
+        elif isinstance(X, np.ndarray):
+            X = pd.DataFrame(X)
+            for col in self.X.columns:
+                X[col] = X[col].astype(self.X[col].dtype)
+        elif X is None:
             raise ValueError("Must specify either X or arff_file_path.")
+
         return X
 
     def predict(self, X=None, arff_file_path=None):
@@ -236,17 +230,37 @@ class Gama(object):
 
     def score(self, X=None, y=None, arff_file_path=None):
         if arff_file_path:
-            X, y = self._get_data_from_arff(arff_file_path)
+            X, y = X_y_from_arff(arff_file_path)
         y_score = self._construct_y_score(y)
 
-        # TODO: return multiple scores if multiple metrics specified. Avoid code duplication with `cross_val_predict_score`
         predictions = self.predict_proba(X) if self._metrics[0].requires_probabilities else self.predict(X)
         return self._metrics[0].score(y_score, predictions)
 
-    def _preprocess_arff(self, arff_file_path):
-        X, y = self._get_data_from_arff(arff_file_path)
-        steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
-        self._operator_set._compile = partial(compile_individual, preprocessing_steps=steps)
+    def _preprocess(self, X=None, y=None, arff_file_path=None):
+        if type(X) != type(y) and not (isinstance(X, pd.DataFrame) and isinstance(y, pd.Series)):
+            raise TypeError("X and y must be of the same type or respectively pd.DataFrame and pd.Series.")
+        if not isinstance(X, (type(None), np.ndarray, pd.DataFrame)):
+            raise TypeError("X must be either None, np.ndarray or pd.DataFrame.")
+
+        with self._time_manager.start_activity('preprocessing') as preprocessing_sw:
+            if arff_file_path is not None:
+                X, y = X_y_from_arff(arff_file_path)
+            elif isinstance(X, np.ndarray):
+                X = heuristic_numpy_to_dataframe(X)
+                y = pd.Series(y)
+            # else is already properly typed df/series
+
+            if y.isnull().any():
+                log.info("Target vector has been found to contain NaN-labels, these rows will be ignored.")
+                X, y = X.loc[~y.isnull(), :], y[~y.isnull()]
+
+            steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
+            self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
+
+            if hasattr(self, '_encode_labels'):
+                y = self._encode_labels(y)
+
+        log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
         return X, y
 
     def fit(self, X=None, y=None, arff_file_path=None, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
@@ -275,8 +289,7 @@ class Gama(object):
         :param restart_: bool. Indicates whether or not the search should be restarted when a specific restart
             criteria is met.
         """
-
-        ensemble_ratio = 0.1  # fraction of time left after preprocessing that reserved for postprocessing
+        ensemble_ratio = 0.3  # fraction of time left after preprocessing that reserved for postprocessing
 
         def restart_criteria():
             restart = self._observer._individuals_since_last_pareto_update > 400
@@ -285,82 +298,27 @@ class Gama(object):
                 self._observer.reset_current_pareto_front()
             return restart and restart_
 
-        with Stopwatch() as preprocessing_sw:
-            if arff_file_path:
-                X, y = self._preprocess_arff(arff_file_path)
-
-            if hasattr(self, '_encode_labels'):
-                if isinstance(y, pd.Series):
-                    y = np.asarray(y)
-                y = self._encode_labels(y)
-
-            if not arff_file_path:
-                X, y = self._preprocess_numpy(X, y)
-
-        log.info("Preprocessing took {:.4f}s. Moving on to search phase.".format(preprocessing_sw.elapsed_time))
-        log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
+        X, y = self._preprocess(X, y, arff_file_path)
 
         self.X = X
         self.y_train = y
         self.y_score = self._construct_y_score(y)
         self._fit_data = (X, y)
 
-        time_left = self._max_total_time - preprocessing_sw.elapsed_time
+        fit_time = int((1 - ensemble_ratio) * self._time_manager.total_time_remaining)
 
-        fit_time = int((1 - ensemble_ratio) * time_left)
-
-        with Stopwatch() as search_sw:
+        with self._time_manager.start_activity('search', time_limit=fit_time) as search_sw:
             self._search_phase(X, y, warm_start, restart_criteria=restart_criteria, timeout=fit_time)
-        log.info("Search phase took {:.4f}s. Moving on to post processing.".format(search_sw.elapsed_time))
         log_parseable_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
 
-        time_left = time_left - search_sw.elapsed_time
-
-        with Stopwatch() as post_sw:
-            self._postprocess_phase(auto_ensemble_n, timeout=time_left)
-        log.info("Postprocessing took {:.4f}s.".format(post_sw.elapsed_time))
+        with self._time_manager.start_activity('postprocess',
+                                               time_limit=int(self._time_manager.total_time_remaining)) as post_sw:
+            self._postprocess_phase(auto_ensemble_n, timeout=self._time_manager.total_time_remaining)
         log_parseable_event(log, TOKENS.POSTPROCESSING_END, post_sw.elapsed_time)
 
         if not keep_cache:
             log.debug("Deleting cache.")
             self.delete_cache()
-
-    def _preprocess_numpy(self, X, y):
-        """  Preprocess X and y such that scikit-learn pipelines can be evaluated on it.
-
-        Preprocessing currently transforms the input into float64 numpy arrays.
-        Any row that has a NaN y-value gets removed. Any remaining NaNs in X get imputed.
-
-        :param X: Input data, DataFrame or numpy array with shape (sample, features)
-        :param y: True labels for each sample
-        :return: Preprocessed versions of X and y.
-        """
-        if hasattr(X, 'values') and hasattr(X, 'astype'):
-            X = X.astype(np.float64).values
-        if hasattr(y, 'values') and hasattr(y, 'astype'):
-            y = y.astype(np.float64).values
-        if isinstance(y, list):
-            y = np.asarray(y)
-
-        # For now there is no support for semi-supervised learning, so remove all instances with unknown targets.
-        nan_targets = np.isnan(y)
-        if nan_targets.any():
-            log.info("Target vector y has been found to contain NaN-labels. All NaN entries will be ignored because "
-                     "supervised learning is not (yet) supported.")
-            X = X[~nan_targets, :]
-            y = y[~nan_targets]
-
-        # For now we always impute if there are missing values, and we always impute with median.
-        # This helps us use a wider variety of algorithms without constructing a grammar.
-        # One should note that ideally imputation should not always be done since some methods work well without.
-        # Secondly, the way imputation is done can also be dependent on the task. Median is generally not the best.
-        self._imputer = Imputer(strategy="median")
-        self._imputer.fit(X)
-        if np.isnan(X).any():
-            log.info("Feature matrix X has been found to contain NaN-labels. Data will be imputed using median.")
-            X = self._imputer.transform(X)
-
-        return X, y
 
     def _construct_y_score(self, y):
         if any(metric.requires_probabilities for metric in self._metrics):
@@ -378,30 +336,34 @@ class Gama(object):
             warm_start_pop = generate_warm_start_pop(X, y, self._pset)
             pop = warm_start_pop + pop[len(warm_start_pop):]
 
-        evaluate_individual = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
-                                      evaluate_pipeline_length=self._regularize_length,
-                                      operator_set=self._operator_set)
-        self._operator_set.evaluate = partial(evaluate_individual,
-                                              X=self.X, y_train=self.y_train, y_score=self.y_score,
-                                              metrics=self._metrics, timeout=self._max_eval_time,
-                                              cache_dir=self._cache_dir)
+        evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self.X, y_train=self.y_train, y_score=self.y_score,
+                             timeout=self._max_eval_time, metrics=self._metrics, cache_dir=self._cache_dir)
+        final_pop = []
 
         try:
-            final_pop = async_ea(pop,
-                                 self._operator_set,
-                                 evaluation_callback=self._on_evaluation_completed,
-                                 restart_callback=restart_criteria,
-                                 max_time_seconds=timeout,
-                                 n_jobs=self._n_jobs)
-            self._final_pop = final_pop
+            with stopit.ThreadingTimeout(timeout):
+                if not self._use_asha:
+                    self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
+                                                          **evaluate_args)
+                    final_pop = async_ea(self._operator_set, output=final_pop, start_population=pop,
+                                         restart_callback=restart_criteria,
+                                         max_time_seconds=timeout,
+                                         n_jobs=self._n_jobs)
+                else:
+                    self._operator_set.evaluate = partial(evaluate_on_rung, **evaluate_args)
+                    final_pop = asha(self._operator_set, output=final_pop, start_candidates=pop, maximum_resource=len(X))
+                log.debug([str(i) for i in self._final_pop])
         except KeyboardInterrupt:
             log.info('Search phase terminated because of Keyboard Interrupt.')
 
+        self._final_pop = final_pop
+        log.info('Search phase evaluated {} individuals.'.format(len(final_pop)))
+
     def _postprocess_phase(self, n, timeout=1e6):
         """ Perform any necessary post processing, such as ensemble building. """
-        self._best_pipeline = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values)))[0]
-        log.info("Best pipeline has fitness of {}".format(self._best_pipeline.fitness.values))
-        self._best_pipeline = self._operator_set.compile(self._best_pipeline)
+        self._best_individual = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values)))[0]
+        log.info("Best pipeline has fitness of {}".format(self._best_individual.fitness.values))
+        self._best_pipeline = self._best_individual.pipeline
         log.info("Pipeline {}, steps: {}".format(self._best_pipeline, self._best_pipeline.steps))
         self._best_pipeline.fit(self.X, self.y_train)
         if n > 1:
@@ -440,11 +402,34 @@ class Gama(object):
 
     def delete_cache(self):
         """ Removes the cache folder and all files associated to this instance. """
-        shutil.rmtree(self._cache_dir)
+        while os.path.exists(self._cache_dir):
+            try:
+                log.info("Attempting to delete {}".format(self._cache_dir))
+                shutil.rmtree(self._cache_dir)
+            except OSError as e:
+                if "The directory is not empty" not in str(e):
+                    log.warning("Did not delete due to:", exc_info=True)
+                # else ignore silently. This can occur if an evaluation process writes to cache.
+
+    def _safe_outside_call(self, fn):
+        """ Calls fn and log any exception it raises without reraising, except for TimeoutException. """
+        try:
+            fn()
+        except stopit.utils.TimeoutException:
+            raise
+        except Exception:
+            # We actually want to catch any other exception here, because the callback code can be
+            # arbitrary (it can be provided by users). This excuses the catch-all Exception.
+            # Note that KeyboardInterrupts are not exceptions and get elevated to the caller.
+            log.warning("Exception during callback.", exc_info=True)
+            pass
+        if self._time_manager.current_activity.exceeded_limit:
+            log.info("Time exceeded during callback, but exception was swallowed.")
+            raise stopit.utils.TimeoutException
 
     def _on_evaluation_completed(self, ind):
         for callback in self._subscribers['evaluation_completed']:
-            callback(ind)
+            self._safe_outside_call(partial(callback, ind))
 
     def evaluation_completed(self, fn):
         """ Register a callback function that is called when new evaluation is completed.

@@ -1,41 +1,28 @@
 import time
-import unittest
-
+import pytest
 from gama.utilities.generic.stopwatch import Stopwatch
 
 
-def stopwatch_test_suite():
-    test_cases = [StopwatchUnitTestCase]
-    return unittest.TestSuite(map(unittest.TestLoader().loadTestsFromTestCase, test_cases))
+ROUND_ERROR = 0.01
 
 
-class StopwatchUnitTestCase(unittest.TestCase):
+def test_stopwatch_initialization_zero():
+    """ Test that elapsed time is 0 if stopwatch is not started yet. """
+    sw = Stopwatch()
+    assert pytest.approx(0, abs=ROUND_ERROR) == sw.elapsed_time
 
-    def setUp(self):
-        self._margin = 0.005  # seconds
 
-    def tearDown(self):
-        pass
-
-    def test_stopwatch_initialization_zero(self):
-        """ Test that elapsed time is 0 if stopwatch is not started yet. """
-        sw = Stopwatch()
-        self.assertEqual(sw.elapsed_time, 0)
-
-    def test_stopwatch_elapsed_time_while_running(self):
-        """ Tests that elapsed_time increments as expected while running. """
-        with Stopwatch() as sw:
-            self.assertGreaterEqual(sw.elapsed_time, 0)
-            self.assertLess(sw.elapsed_time, 1)
-
-            time.sleep(1)
-            self.assertGreaterEqual(sw.elapsed_time, 1 - self._margin)
-            self.assertLess(sw.elapsed_time, 2)
-
-    def test_stopwatch_elapsed_time_after_running(self):
-        """ Tests that time elapsed is stored after exiting the context. """
-        with Stopwatch() as sw:
-            time.sleep(1)
+def test_stopwatch_elapsed_time_while_running():
+    """ Tests that elapsed_time increments as expected while running. """
+    with Stopwatch() as sw:
+        assert pytest.approx(0, abs=ROUND_ERROR) == sw.elapsed_time
         time.sleep(1)
-        self.assertGreaterEqual(sw.elapsed_time, 1 - self._margin)
-        self.assertLess(sw.elapsed_time, 2)
+        assert pytest.approx(1, abs=ROUND_ERROR) == sw.elapsed_time
+
+
+def test_stopwatch_elapsed_time_after_running():
+    """ Tests that time elapsed is stored after exiting the context. """
+    with Stopwatch() as sw:
+        time.sleep(1)
+    time.sleep(1)
+    assert pytest.approx(1, abs=ROUND_ERROR) == sw.elapsed_time

@@ -8,7 +8,7 @@ from sklearn.preprocessing import OneHotEncoder
 import stopit
 
 from gama.genetic_programming.algorithms.metrics import Metric
-from gama.utilities.generic.function_dispatcher import FunctionDispatcher
+from gama.utilities.generic.async_executor import AsyncExecutor, wait_first_complete
 
 log = logging.getLogger(__name__)
 Model = namedtuple("Model", ['name', 'pipeline', 'predictions', 'validation_score'])
@@ -151,19 +151,17 @@ class Ensemble(object):
             raise ValueError("timeout must be greater than 0.")
 
         self._fit_models = []
-        fit_dispatcher = FunctionDispatcher(self._n_jobs, fit_and_weight)
-        with stopit.ThreadingTimeout(timeout) as c_mgr:
-            fit_dispatcher.start()
+        futures = set()
+        with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncExecutor(self._n_jobs) as async_:
             for (model, weight) in self._models.values():
-                fit_dispatcher.queue_evaluation((model.pipeline, X, y, weight))
+                futures.add(async_.submit(fit_and_weight, (model.pipeline, X, y, weight)))
 
             for _ in self._models.values():
-                _, output, __ = fit_dispatcher.get_next_result()
-                pipeline, weight = output
-                if weight > 0:
-                    self._fit_models.append((pipeline, weight))
-
-        fit_dispatcher.stop()
+                done, futures = wait_first_complete(futures)
+                for future in done:
+                    pipeline, weight = future.result()
+                    if weight > 0:
+                        self._fit_models.append((pipeline, weight))
 
         if not c_mgr:
             log.info("Fitting of ensemble stopped early.")
@@ -181,12 +179,11 @@ class Ensemble(object):
         return sum(weighted_predictions) / self._total_fit_weights()
 
     def __str__(self):
-        # TODO add internal rank of pipeline
         if not self._models:
             return "Ensemble with no models."
-        ensemble_str = "Ensemble of {} unique pipelines.\nW\tScore\tPipeline\n".format(len(self._models))
-        for (model, weight) in self._models.values():
-            ensemble_str += "{}\t{:.4f}\t{}\n".format(weight, model.validation_score, model.name)
+        ensemble_str = "Ensemble of {} unique pipelines.\nR\tW\tScore\tPipeline\n".format(len(self._models))
+        for i, (model, weight) in enumerate(sorted(self._models.values(), key=lambda x: x[0].validation_score)):
+            ensemble_str += "{}\t{}\t{:.4f}\t{}\n".format(i, weight, model.validation_score[0], model.name)
         return ensemble_str
 
     def __getstate__(self):
@@ -211,7 +208,7 @@ def load_predictions(cache_dir, prediction_transformation=None):
             if os.stat(file_name).st_size > 0:
                 # We check file size, because writing to disk may be interrupted if the process was terminated due
                 # to a restart/timeout. I can not find specifications saying that any interrupt of pickle.dump leads
-                # to 0-sized files, but in practice this seems to case so far. TODO: Find verification, or fix proper.
+                # to 0-sized files, but in practice this seems to case so far.
                 with open(os.path.join(cache_dir, file), 'rb') as fh:
                     pl, predictions, scores = pickle.load(fh)
                 if prediction_transformation:
