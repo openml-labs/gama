@@ -4,8 +4,21 @@ from pebble import ProcessPool
 
 
 class AsyncPool(ProcessPool):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._futures = []
+
+    def schedule(self, *args, **kwargs):
+        future = super().schedule(*args, **kwargs)
+        self._futures.append(future)
+        return future
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.stop()
+        for future in self._futures:
+            if not future.done():
+                future.cancel()
         self.join()
         return False
 
