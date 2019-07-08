@@ -1,10 +1,9 @@
 import logging
 from functools import partial
 
-from pebble import ProcessPool
-
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.logging_utilities import MultiprocessingLogger
+from gama.utilities.generic.async_executor import AsyncPool
 
 
 log = logging.getLogger(__name__)
@@ -27,7 +26,8 @@ def async_ea(toolbox, output, start_population, restart_callback=None, max_n_eva
 
     current_population = output
 
-    with ProcessPool(n_jobs) as async_:
+    with AsyncPool(n_jobs) as async_:
+
         should_restart = True
         while should_restart:
             should_restart = False

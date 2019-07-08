@@ -1,5 +1,14 @@
 import concurrent.futures
 
+from pebble import ProcessPool
+
+
+class AsyncPool(ProcessPool):
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()
+        self.join()
+        return False
+
 
 class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
     """ ContextManager for ProcessPoolExecutor which on exit terminates subprocesses and does not wait on shutdown.

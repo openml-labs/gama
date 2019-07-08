@@ -8,7 +8,7 @@ from sklearn.preprocessing import OneHotEncoder
 import stopit
 
 from gama.genetic_programming.algorithms.metrics import Metric
-from gama.utilities.generic.async_executor import AsyncExecutor, wait_first_complete
+from gama.utilities.generic.async_executor import AsyncExecutor, wait_first_complete, AsyncPool
 
 log = logging.getLogger(__name__)
 Model = namedtuple("Model", ['name', 'pipeline', 'predictions', 'validation_score'])
@@ -152,9 +152,9 @@ class Ensemble(object):
 
         self._fit_models = []
         futures = set()
-        with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncExecutor(self._n_jobs) as async_:
+        with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncPool(self._n_jobs) as async_:
             for (model, weight) in self._models.values():
-                futures.add(async_.submit(fit_and_weight, (model.pipeline, X, y, weight)))
+                futures.add(async_.schedule(fit_and_weight, (model.pipeline, X, y, weight)))
 
             for _ in self._models.values():
                 done, futures = wait_first_complete(futures)
