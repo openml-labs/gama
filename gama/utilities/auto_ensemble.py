@@ -17,7 +17,7 @@ Model = namedtuple("Model", ['name', 'pipeline', 'predictions', 'validation_scor
 
 class Ensemble(object):
 
-    def __init__(self, metric, y_true: pd.Series,
+    def __init__(self, metric, y: pd.Series,
                  model_library=None, model_library_directory=None,
                  shrink_on_pickle=True, n_jobs=1):
         """
@@ -25,7 +25,7 @@ class Ensemble(object):
         If model_library is specified, model_library_directory is ignored.
 
         :param metric: string or `gama.ea.metrics.Metric`. Metric to optimize the ensemble towards.
-        :param y_true: the true labels for the predictions made by the models in the library.
+        :param y: the true labels for the predictions made by the models in the library.
         :param model_library: A list of models from which an ensemble can be built.
         :param model_library_directory: a directory containing results of model evaluations.
         :param shrink_on_pickle: if True, remove memory-intensive attributes that are required during fit,
@@ -44,16 +44,15 @@ class Ensemble(object):
         if model_library is not None and model_library_directory is not None:
             log.warning("model_library_directory will be ignored because model_library is also specified.")
 
-        if not isinstance(y_true, pd.Series):
-            raise TypeError(f"`y_true` must be of type pandas.Series but is {type(y_true)}.")
+        if not isinstance(y, pd.Series):
+            raise TypeError(f"`y_true` must be of type pandas.Series but is {type(y)}.")
 
         self._metric = metric
         self._model_library_directory = model_library_directory
         self._model_library = model_library if model_library is not None else []
         self._shrink_on_pickle = shrink_on_pickle
         self._n_jobs = n_jobs
-        self._y_true = y_true
-        self._y_score = y_true
+        self._y = y
         self._prediction_transformation = None
 
         self._fit_models = None
@@ -69,6 +68,9 @@ class Ensemble(object):
             log.info("Loaded model library of size {} from disk.".format(len(self._model_library)))
 
         return self._model_library
+
+    def _ensemble_validation_score(self, prediction_to_validate=None):
+        raise NotImplementedError("Must be implemented by child class.")
 
     def _total_fit_weights(self):
         return sum([weight for (model, weight) in self._fit_models])
@@ -242,7 +244,7 @@ class EnsembleClassifier(Ensemble):
         self._label_encoder = label_encoder
 
         # For metrics that only require class labels, we still want to apply one-hot-encoding to average predictions.
-        y_as_squeezed_array = self._y_true.values.reshape(-1, 1)
+        y_as_squeezed_array = y_true.values.reshape(-1, 1)
         self._one_hot_encoder = OneHotEncoder(categories='auto').fit(y_as_squeezed_array)
 
         if self._metric.requires_probabilities:
@@ -290,7 +292,7 @@ class EnsembleRegressor(Ensemble):
     def _ensemble_validation_score(self, prediction_to_validate=None):
         if prediction_to_validate is None:
             prediction_to_validate = self._averaged_validation_predictions()
-        return self._metric.maximizable_score(self._y_score, prediction_to_validate)
+        return self._metric.maximizable_score(self._y, prediction_to_validate)
 
     def predict(self, X):
         return self._get_weighted_mean_predictions(X)

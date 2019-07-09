@@ -9,7 +9,7 @@ from functools import partial
 import sys
 import time
 import warnings
-from typing import Tuple, Callable
+from typing import Tuple, Callable, Union
 
 import pandas as pd
 import numpy as np
@@ -204,28 +204,31 @@ class Gama(object):
         else:
             raise ValueError("scoring must be a string, Metric or Iterable (of strings or Metrics).")
 
-    def _preprocess_predict_X(self, X=None, arff_file_path=None):
-        if isinstance(arff_file_path, str):
-            X, _ = X_y_from_arff(arff_file_path)
-        elif isinstance(X, np.ndarray):
+    def _predict(self, x: pd.DataFrame):
+        raise NotImplemented('_predict is implemented by base classes.')
+
+    def predict(self, X: Union[pd.DataFrame, np.ndarray]):
+        if isinstance(X, np.ndarray):
             X = pd.DataFrame(X)
             for col in self._X.columns:
                 X[col] = X[col].astype(self._X[col].dtype)
-        elif X is None:
-            raise ValueError("Must specify either X or arff_file_path.")
+        return self._predict(X)
 
-        return X
+    def predict_arff(self, arff_file_path: str):
+        if not isinstance(arff_file_path, str):
+            raise TypeError(f"`arff_file_path` must be of type `str` but is of type {type(arff_file_path)}")
+        X, _ = X_y_from_arff(arff_file_path)
+        return self._predict(X)
 
-    def predict(self, X=None, arff_file_path=None):
-        raise NotImplemented('predict is implemented by base classes.')
+    def score(self, x: Union[pd.DataFrame, np.ndarray], y: pd.Series):
+        y_score = self._construct_y_score(y)
+        predictions = self.predict_proba(x) if self._metrics[0].requires_probabilities else self.predict(x)
+        return self._metrics[0].score(y_score, predictions)
 
-    def score(self, X=None, y=None, arff_file_path=None):
+    def score_arff(self, arff_file_path: str):
         if arff_file_path:
             X, y = X_y_from_arff(arff_file_path)
-        y_score = self._construct_y_score(y)
-
-        predictions = self.predict_proba(X) if self._metrics[0].requires_probabilities else self.predict(X)
-        return self._metrics[0].score(y_score, predictions)
+        return self.score(X, y)
 
     def _preprocess(self, X, y) -> Tuple[pd.DataFrame, pd.Series]:
         if not isinstance(X, (np.ndarray, pd.DataFrame)):

@@ -71,7 +71,7 @@ def _test_dataset_problem(data, metric, labelled_y=False, arff=False):
         y_test = [str(val) for val in y_test]
 
         with Stopwatch() as sw:
-            gama.fit(arff_file_path=train_path, auto_ensemble_n=5)
+            gama.fit_arff(train_path, auto_ensemble_n=5)
         class_predictions = gama.predict(arff_file_path=test_path)
         class_probabilities = gama.predict_proba(arff_file_path=test_path)
     else:
