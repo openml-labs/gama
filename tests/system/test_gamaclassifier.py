@@ -1,6 +1,4 @@
 """ Contains full system tests for GamaClassifier """
-import unittest
-
 import numpy as np
 from sklearn.datasets import load_wine, load_breast_cancer
 from sklearn.model_selection import train_test_split
@@ -8,6 +6,9 @@ from sklearn.metrics import accuracy_score, log_loss
 
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama import GamaClassifier
+
+import warnings
+warnings.filterwarnings("error")
 
 FIT_TIME_MARGIN = 1.1
 
@@ -71,9 +72,9 @@ def _test_dataset_problem(data, metric, labelled_y=False, arff=False):
         y_test = [str(val) for val in y_test]
 
         with Stopwatch() as sw:
-            gama.fit(arff_file_path=train_path, auto_ensemble_n=5)
-        class_predictions = gama.predict(arff_file_path=test_path)
-        class_probabilities = gama.predict_proba(arff_file_path=test_path)
+            gama.fit_arff(train_path, auto_ensemble_n=5)
+        class_predictions = gama.predict_arff(test_path)
+        class_probabilities = gama.predict_proba_arff(test_path)
     else:
         X, y = data['load'](return_X_y=True)
         if labelled_y:

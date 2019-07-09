@@ -3,6 +3,7 @@ import os
 import pickle
 import logging
 
+import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 import stopit
@@ -16,7 +17,7 @@ Model = namedtuple("Model", ['name', 'pipeline', 'predictions', 'validation_scor
 
 class Ensemble(object):
 
-    def __init__(self, metric, y_true,
+    def __init__(self, metric, y: pd.Series,
                  model_library=None, model_library_directory=None,
                  shrink_on_pickle=True, n_jobs=1):
         """
@@ -24,7 +25,7 @@ class Ensemble(object):
         If model_library is specified, model_library_directory is ignored.
 
         :param metric: string or `gama.ea.metrics.Metric`. Metric to optimize the ensemble towards.
-        :param y_true: the true labels for the predictions made by the models in the library.
+        :param y: the true labels for the predictions made by the models in the library.
         :param model_library: A list of models from which an ensemble can be built.
         :param model_library_directory: a directory containing results of model evaluations.
         :param shrink_on_pickle: if True, remove memory-intensive attributes that are required during fit,
@@ -43,16 +44,15 @@ class Ensemble(object):
         if model_library is not None and model_library_directory is not None:
             log.warning("model_library_directory will be ignored because model_library is also specified.")
 
-        if not y_true.ndim == 1:
-            raise ValueError("Expect y_true to be of shape (N,)")
+        if not isinstance(y, pd.Series):
+            raise TypeError(f"`y_true` must be of type pandas.Series but is {type(y)}.")
 
         self._metric = metric
         self._model_library_directory = model_library_directory
         self._model_library = model_library if model_library is not None else []
         self._shrink_on_pickle = shrink_on_pickle
         self._n_jobs = n_jobs
-        self._y_true = y_true
-        self._y_score = y_true
+        self._y = y
         self._prediction_transformation = None
 
         self._fit_models = None
@@ -68,6 +68,9 @@ class Ensemble(object):
             log.info("Loaded model library of size {} from disk.".format(len(self._model_library)))
 
         return self._model_library
+
+    def _ensemble_validation_score(self, prediction_to_validate=None):
+        raise NotImplementedError("Must be implemented by child class.")
 
     def _total_fit_weights(self):
         return sum([weight for (model, weight) in self._fit_models])
@@ -241,10 +244,11 @@ class EnsembleClassifier(Ensemble):
         self._label_encoder = label_encoder
 
         # For metrics that only require class labels, we still want to apply one-hot-encoding to average predictions.
-        self._one_hot_encoder = OneHotEncoder(categories='auto').fit(self._y_true.reshape(-1, 1))
+        y_as_squeezed_array = y_true.values.reshape(-1, 1)
+        self._one_hot_encoder = OneHotEncoder(categories='auto').fit(y_as_squeezed_array)
 
         if self._metric.requires_probabilities:
-            self._y_score = self._one_hot_encoder.transform(self._y_true.reshape(-1, 1)).toarray()
+            self._y = self._one_hot_encoder.transform(y_as_squeezed_array).toarray()
         else:
             def one_hot_encode_predictions(predictions):
                 return self._one_hot_encoder.transform(predictions.reshape(-1, 1))
@@ -256,11 +260,11 @@ class EnsembleClassifier(Ensemble):
             prediction_to_validate = self._averaged_validation_predictions()
 
         if self._metric.requires_probabilities:
-            return self._metric.maximizable_score(self._y_score, prediction_to_validate)
+            return self._metric.maximizable_score(self._y, prediction_to_validate)
         else:
             # argmax returns (N, 1) matrix, need to squeeze it to (N,) for scoring.
-            class_predictions = np.argmax(prediction_to_validate, axis=1).A.ravel()
-            return self._metric.maximizable_score(self._y_score, class_predictions)
+            class_predictions = np.argmax(prediction_to_validate.toarray(), axis=1)
+            return self._metric.maximizable_score(self._y, class_predictions)
 
     def predict(self, X):
         if self._metric.requires_probabilities:
@@ -288,7 +292,7 @@ class EnsembleRegressor(Ensemble):
     def _ensemble_validation_score(self, prediction_to_validate=None):
         if prediction_to_validate is None:
             prediction_to_validate = self._averaged_validation_predictions()
-        return self._metric.maximizable_score(self._y_score, prediction_to_validate)
+        return self._metric.maximizable_score(self._y, prediction_to_validate)
 
     def predict(self, X):
         return self._get_weighted_mean_predictions(X)
