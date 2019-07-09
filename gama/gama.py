@@ -284,14 +284,15 @@ class Gama(object):
                     ) -> Tuple[pd.DataFrame, pd.Series]:
         if not isinstance(X, (np.ndarray, pd.DataFrame)):
             raise TypeError("X must be either np.ndarray or pd.DataFrame.")
-        if not isinstance(y, (np.ndarray, pd.DataFrame, pd.Series)):
+        if not isinstance(y, (np.ndarray, pd.Series)):
             raise TypeError("y must be either np.ndarray or pd.Series.")
 
         with self._time_manager.start_activity('preprocessing') as preprocessing_sw:
             # Internally X is always a pd.DataFrame and y is always a pd.Series
             if isinstance(X, np.ndarray):
                 X = heuristic_numpy_to_dataframe(X)
-            if hasattr(self, '_encode_labels') and not isinstance(y, pd.DataFrame):
+
+            if hasattr(self, '_encode_labels'):
                 # This will return a numpy array
                 y = self._encode_labels(y)
             if isinstance(y, np.ndarray):
@@ -351,11 +352,13 @@ class Gama(object):
                 self._observer.reset_current_pareto_front()
             return restart and restart_
 
-        self._X, self._y = self._preprocess(X, y)
-        self._classes = list(set(self._y))
         if d3m_mode:
             # Pipelines should not be prepended with automatic imputation/encoding.
             self._operator_set._safe_compile = None
+            self._X, self._y = X, y
+        else:
+            self._X, self._y = self._preprocess(X, y)
+        self._classes = list(set(self._y))
 
         fit_time = int((1 - ensemble_ratio) * self._time_manager.total_time_remaining)
 

@@ -38,7 +38,7 @@ class GamaClassifier(Gama):
         classifier = self.ensemble if self._ensemble_fit else self._best_pipeline
         y = classifier.predict(x)
         # Decode the predicted labels - necessary only if ensemble is not used.
-        if y[0] not in self._label_encoder.classes_:
+        if self._label_encoder is not None and y[0] not in self._label_encoder.classes_:
             y = self._label_encoder.inverse_transform(y)
         return y
 

@@ -44,6 +44,8 @@ class Ensemble(object):
         if model_library is not None and model_library_directory is not None:
             log.warning("model_library_directory will be ignored because model_library is also specified.")
 
+        if isinstance(y, pd.DataFrame):
+            y = y[y.columns[0]]
         if not isinstance(y, pd.Series):
             raise TypeError(f"`y_true` must be of type pandas.Series but is {type(y)}.")
 
