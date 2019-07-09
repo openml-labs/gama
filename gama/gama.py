@@ -9,6 +9,7 @@ from functools import partial
 import sys
 import time
 import warnings
+from typing import Tuple, Callable
 
 import pandas as pd
 import numpy as np
@@ -151,12 +152,14 @@ class Gama(object):
         self._regularize_length = regularize_length
         self._time_manager = TimeKeeper(max_total_time)
         self._best_pipeline = None
-        self._fit_data = None
         self._observer = None
         self.ensemble = None
-        self._ensemble_fit = False
+        self._ensemble_fit: bool = False
         self._metrics = self._scoring_to_metric(scoring)
-        self._use_asha = False
+        self._use_asha: bool = False
+        self._X: pd.DataFrame = None
+        self._y: pd.Series = None
+        self._y_score = None
 
         default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
@@ -206,8 +209,8 @@ class Gama(object):
             X, _ = X_y_from_arff(arff_file_path)
         elif isinstance(X, np.ndarray):
             X = pd.DataFrame(X)
-            for col in self.X.columns:
-                X[col] = X[col].astype(self.X[col].dtype)
+            for col in self._X.columns:
+                X[col] = X[col].astype(self._X[col].dtype)
         elif X is None:
             raise ValueError("Must specify either X or arff_file_path.")
 
@@ -224,19 +227,21 @@ class Gama(object):
         predictions = self.predict_proba(X) if self._metrics[0].requires_probabilities else self.predict(X)
         return self._metrics[0].score(y_score, predictions)
 
-    def _preprocess(self, X=None, y=None, arff_file_path=None):
-        if type(X) != type(y) and not (isinstance(X, pd.DataFrame) and isinstance(y, pd.Series)):
-            raise TypeError("X and y must be of the same type or respectively pd.DataFrame and pd.Series.")
-        if not isinstance(X, (type(None), np.ndarray, pd.DataFrame)):
-            raise TypeError("X must be either None, np.ndarray or pd.DataFrame.")
+    def _preprocess(self, X, y) -> Tuple[pd.DataFrame, pd.Series]:
+        if not isinstance(X, (np.ndarray, pd.DataFrame)):
+            raise TypeError("X must be either np.ndarray or pd.DataFrame.")
+        if not isinstance(y, (np.ndarray, pd.Series)):
+            raise TypeError("y must be either np.ndarray or pd.Series.")
 
         with self._time_manager.start_activity('preprocessing') as preprocessing_sw:
-            if arff_file_path is not None:
-                X, y = X_y_from_arff(arff_file_path)
-            elif isinstance(X, np.ndarray):
+            # Internally X is always a pd.DataFrame and y is always a pd.Series
+            if isinstance(X, np.ndarray):
                 X = heuristic_numpy_to_dataframe(X)
+            if hasattr(self, '_encode_labels'):
+                # This will return a numpy array
+                y = self._encode_labels(y)
+            if isinstance(y, np.ndarray):
                 y = pd.Series(y)
-            # else is already properly typed df/series
 
             if y.isnull().any():
                 log.info("Target vector has been found to contain NaN-labels, these rows will be ignored.")
@@ -245,13 +250,20 @@ class Gama(object):
             steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
             self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
 
-            if hasattr(self, '_encode_labels'):
-                y = self._encode_labels(y)
-
         log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
         return X, y
 
-    def fit(self, X=None, y=None, arff_file_path=None, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
+    def fit_arff(self, arff_file_path: str, *args, **kwargs):
+        """ Find and fit a model to predict the target column (last) from other columns.
+
+        :param arff_file_path: string
+            Path to an ARFF file containing the training data.
+            The last column is always taken to be the target.
+        """
+        X, y = X_y_from_arff(arff_file_path)
+        self.fit(X, y, *args, **kwargs)
+
+    def fit(self, X=None, y=None, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -261,15 +273,10 @@ class Gama(object):
         After the search termination condition is met, the best found pipeline
         configuration is then used to train a final model on all provided data.
 
-        Must either specify *both* `X` and `y`, or `arff_file_path`.
-
-        :param X: Numpy Array (optional), shape = [n_samples, n_features]
+        :param X: Numpy Array, shape = [n_samples, n_features]
             Training data. All elements must be able to be converted to float.
-        :param y: Numpy Array (optional), shape = [n_samples,]
+        :param y: Numpy Array, shape = [n_samples,]
             Target values.
-        :param arff_file_path: string (optional).
-            Path to an ARFF file containing the training data.
-            The last column is always taken to be the target.
         :param warm_start: bool. Indicates the optimization should continue using the last individuals of the
             previous `fit` call.
         :param auto_ensemble_n: positive integer. The number of models to include in the ensemble which is built
@@ -286,17 +293,13 @@ class Gama(object):
                 self._observer.reset_current_pareto_front()
             return restart and restart_
 
-        X, y = self._preprocess(X, y, arff_file_path)
-
-        self.X = X
-        self.y_train = y
-        self.y_score = self._construct_y_score(y)
-        self._fit_data = (X, y)
+        self._X, self._y = self._preprocess(X, y)
+        self._y_score = self._construct_y_score(y)
 
         fit_time = int((1 - ensemble_ratio) * self._time_manager.total_time_remaining)
 
         with self._time_manager.start_activity('search', time_limit=fit_time) as search_sw:
-            self._search_phase(X, y, warm_start, restart_criteria=restart_criteria, timeout=fit_time)
+            self._search_phase(warm_start, restart_criteria=restart_criteria, timeout=fit_time)
         log_parseable_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
 
         with self._time_manager.start_activity('postprocess',
@@ -308,12 +311,12 @@ class Gama(object):
             log.debug("Deleting cache.")
             self.delete_cache()
 
-    def _construct_y_score(self, y):
+    def _construct_y_score(self, y: pd.Series):
         if any(metric.requires_probabilities for metric in self._metrics):
             return OneHotEncoder(categories='auto').fit_transform(y.reshape(-1, 1)).todense()
         return y
 
-    def _search_phase(self, X, y, warm_start=False, restart_criteria=None, timeout=1e6):
+    def _search_phase(self, warm_start: bool=False, restart_criteria: Callable=None, timeout: int=1e6):
         """ Invoke the evolutionary algorithm, populate `final_pop` regardless of termination. """
         if warm_start and self._final_pop is not None:
             pop = self._final_pop
@@ -322,7 +325,7 @@ class Gama(object):
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = [self._operator_set.individual() for _ in range(self._pop_size)]
 
-        evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self.X, y_train=self.y_train, y_score=self.y_score,
+        evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self._X, y_train=self._y, y_score=self._y_score,
                              timeout=self._max_eval_time, metrics=self._metrics, cache_dir=self._cache_dir)
         final_pop = []
 
@@ -337,7 +340,8 @@ class Gama(object):
                                          n_jobs=self._n_jobs)
                 else:
                     self._operator_set.evaluate = partial(evaluate_on_rung, **evaluate_args)
-                    final_pop = asha(self._operator_set, output=final_pop, start_candidates=pop, maximum_resource=len(X))
+                    final_pop = asha(self._operator_set, output=final_pop,
+                                     start_candidates=pop, maximum_resource=len(self._X))
                 log.debug([str(i) for i in self._final_pop])
         except KeyboardInterrupt:
             log.info('Search phase terminated because of Keyboard Interrupt.')
@@ -351,7 +355,7 @@ class Gama(object):
         log.info("Best pipeline has fitness of {}".format(self._best_individual.fitness.values))
         self._best_pipeline = self._best_individual.pipeline
         log.info("Pipeline {}, steps: {}".format(self._best_pipeline, self._best_pipeline.steps))
-        self._best_pipeline.fit(self.X, self.y_train)
+        self._best_pipeline.fit(self._X, self._y)
         if n > 1:
             self._build_fit_ensemble(n, timeout=timeout)
 
@@ -380,8 +384,7 @@ class Gama(object):
             timeout = timeout - build_time
             log.info('Building ensemble took {}s. Fitting ensemble with timeout {}s.'.format(build_time, timeout))
 
-            X, y = self._fit_data
-            self.ensemble.fit(X, y, timeout=timeout)
+            self.ensemble.fit(self._X, self._y, timeout=timeout)
             self._ensemble_fit = True
         except Exception as e:
             log.warning("Error during auto ensemble: {}".format(e))

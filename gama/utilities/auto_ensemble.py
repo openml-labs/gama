@@ -241,13 +241,13 @@ class EnsembleClassifier(Ensemble):
         self._label_encoder = label_encoder
 
         # For metrics that only require class labels, we still want to apply one-hot-encoding to average predictions.
-        self._one_hot_encoder = OneHotEncoder(categories='auto').fit(self._y_true.reshape(-1, 1))
+        self._one_hot_encoder = OneHotEncoder(categories='auto').fit(self._y_true.values.reshape(-1, 1))
 
         if self._metric.requires_probabilities:
-            self._y_score = self._one_hot_encoder.transform(self._y_true.reshape(-1, 1)).toarray()
+            self._y_score = self._one_hot_encoder.transform(self._y_true.values.reshape(-1, 1)).toarray()
         else:
             def one_hot_encode_predictions(predictions):
-                return self._one_hot_encoder.transform(predictions.reshape(-1, 1))
+                return self._one_hot_encoder.transform(predictions.values.reshape(-1, 1))
 
             self._prediction_transformation = one_hot_encode_predictions
 

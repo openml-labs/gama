@@ -56,7 +56,7 @@ class GamaClassifier(Gama):
         return self._label_encoder.transform(y)
 
     def _initialize_ensemble(self):
-        self.ensemble = EnsembleClassifier(self._metrics[0], self.y_train,
+        self.ensemble = EnsembleClassifier(self._metrics[0], self._y,
                                            model_library_directory=self._cache_dir, n_jobs=self._n_jobs)
 
     def _build_fit_ensemble(self, ensemble_size, timeout):
