@@ -51,7 +51,8 @@ class Ensemble(object):
         self._model_library = model_library if model_library is not None else []
         self._shrink_on_pickle = shrink_on_pickle
         self._n_jobs = n_jobs
-        self._y_true = y_true
+        # This may be a pandas series.  Make sure its an np array to make downstream code happy
+        self._y_true = np.array(y_true)
         self._y_score = y_true
         self._prediction_transformation = None
 
@@ -131,7 +132,7 @@ class Ensemble(object):
                     best_addition, best_addition_score = model, candidate_ensemble_score
 
             self._add_model(best_addition)
-            log.debug('Ensemble size {} , best score: {}'.format(self._total_model_weights(), best_addition_score))
+            log.info('Ensemble size {} , best score: {}'.format(self._total_model_weights(), best_addition_score))
 
         return self
 
@@ -241,7 +242,7 @@ class EnsembleClassifier(Ensemble):
         self._label_encoder = label_encoder
 
         # For metrics that only require class labels, we still want to apply one-hot-encoding to average predictions.
-        self._one_hot_encoder = OneHotEncoder().fit(self._y_true.reshape(-1, 1))
+        self._one_hot_encoder = OneHotEncoder(categories='auto').fit(self._y_true.reshape(-1, 1))
 
         if self._metric.requires_probabilities:
             self._y_score = self._one_hot_encoder.transform(self._y_true.reshape(-1, 1)).toarray()
@@ -250,6 +251,9 @@ class EnsembleClassifier(Ensemble):
                 return self._one_hot_encoder.transform(predictions.reshape(-1, 1))
 
             self._prediction_transformation = one_hot_encode_predictions
+            # Dayne added.  Predictions were getting encoded, but ground truth was not
+            self._y_score = self._one_hot_encoder.transform(self._y_true.reshape(-1, 1)).toarray()
+
 
     def _ensemble_validation_score(self, prediction_to_validate=None):
         if prediction_to_validate is None:

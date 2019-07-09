@@ -20,14 +20,19 @@ from gama.genetic_programming.algorithms.metrics import Metric
 from .utilities.observer import Observer
 
 from gama.data import X_y_from_arff
+from gama.genetic_programming.components import Individual
 from gama.genetic_programming.algorithms.async_ea import async_ea
 from gama.genetic_programming.algorithms.asha import asha, evaluate_on_rung
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.preprocessing import define_preprocessing_steps, heuristic_numpy_to_dataframe
+from gama.utilities.plgen.manager import Manager
+from gama.utilities.plgen.library import GamaPsetLibrary
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
+from gama.genetic_programming.conformant_mutation import random_valid_mutation_in_place as conformant_mutation
+from gama.genetic_programming.conformant_mutation import crossover as conformant_crossover
 from gama.genetic_programming.selection import create_from_population, eliminate_from_pareto
-from gama.genetic_programming.operations import create_random_expression
+from gama.genetic_programming.operations import create_random_expression, create_expression_by_rule
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
@@ -107,6 +112,12 @@ class Gama(object):
     :param cache_dir: string or None (default=None)
         The directory in which to keep the cache during `fit`. In this directory,
         models and their evaluation results will be stored. This facilitates a quick ensemble construction.
+
+    :param grammar_file_name: string or None (default=None)
+        The name of a grammar file to use in generating and validating individuals.
+
+    :param rule_name: string or None (default=None)
+        The name of a grammar rule to use in generating and validating individuals.
     """
 
     def __init__(self,
@@ -120,7 +131,9 @@ class Gama(object):
                  n_jobs=1,
                  verbosity=logging.WARNING,
                  keep_analysis_log='gama.log',
-                 cache_dir=None):
+                 cache_dir=None,
+                 grammar_file_name=None,
+                 rule_name=None):
 
         if verbosity >= logging.DEBUG:
             stdout_streamhandler = logging.StreamHandler(sys.stdout)
@@ -185,11 +198,32 @@ class Gama(object):
             np.random.seed(self._random_state)
 
         self._pset, parameter_checks = pset_from_config(config)
+
+        if grammar_file_name is not None:
+            library = GamaPsetLibrary(self._pset)
+            self._grammar_manager = Manager(library=library)
+            self._grammar_manager.parse_file(grammar_file_name)
+            self._grammar_rule_name = rule_name
+            self._grammar_rule = self._grammar_manager.get_fa(rule_name)
+            expression_creator = partial(create_expression_by_rule, primitive_set=self._pset, rule=self._grammar_rule)
+            def individual_creator():
+                return Individual(expression_creator(),  )
+            individual_creator = partial(Individual, expression_creator)
+            # Turning off the grammar checking of individuals generated through reproduction
+            # TODO: Debug grammar checking for reproduction
+#            mutate = partial(conformant_mutation, primitive_set=self._pset, rule=self._grammar_rule)
+#            mate = partial(conformant_crossover, rule=self._grammar_manager)
+            mutate = partial(random_valid_mutation_in_place, primitive_set=self._pset)
+            mate = crossover
+        else:
+            individual_creator = partial(create_random_expression, primitive_set=self._pset)
+            mutate = partial(random_valid_mutation_in_place, primitive_set=self._pset)
+            mate = crossover
         self._operator_set = OperatorSet(
-            mutate=partial(random_valid_mutation_in_place, primitive_set=self._pset),
-            mate=crossover,
+            mutate=mutate,
+            mate=mate,
             create_from_population=partial(create_from_population, cxpb=0.2, mutpb=0.8),
-            create_new=partial(create_random_expression, primitive_set=self._pset),
+            create_new=individual_creator,
             compile_=compile_individual,
             eliminate=eliminate_from_pareto,
             evaluate_callback=self._on_evaluation_completed
@@ -263,7 +297,8 @@ class Gama(object):
         log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
         return X, y
 
-    def fit(self, X=None, y=None, arff_file_path=None, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
+    def fit(self, X=None, y=None, arff_file_path=None, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False,
+            d3m_mode=True):
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -288,6 +323,8 @@ class Gama(object):
             after the optimizatio process.
         :param restart_: bool. Indicates whether or not the search should be restarted when a specific restart
             criteria is met.
+        :param d3m_mode: bool. Signals whether fit is being run in D3M context.  If so, we assume that various
+            kinds of preprocessing have already been performed and leave the inputs as D3M Dataframes.
         """
         ensemble_ratio = 0.3  # fraction of time left after preprocessing that reserved for postprocessing
 
@@ -323,6 +360,8 @@ class Gama(object):
     def _construct_y_score(self, y):
         if any(metric.requires_probabilities for metric in self._metrics):
             return OneHotEncoder().fit_transform(y.reshape(-1, 1)).todense()
+        if len(y.shape) > 1:
+            y = y.squeeze()
         return y
 
     def _search_phase(self, X, y, warm_start=False, restart_criteria=None, timeout=1e6):
@@ -333,8 +372,8 @@ class Gama(object):
             if warm_start:
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = [self._operator_set.individual() for _ in range(self._pop_size)]
-            warm_start_pop = generate_warm_start_pop(X, y, self._pset, self._operator_set._safe_compile)
-            pop = warm_start_pop + pop[len(warm_start_pop):]
+           # warm_start_pop = generate_warm_start_pop(X, y, self._pset)
+           # pop = warm_start_pop + pop[len(warm_start_pop):]
 
         evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self.X, y_train=self.y_train, y_score=self.y_score,
                              timeout=self._max_eval_time, metrics=self._metrics, cache_dir=self._cache_dir)
@@ -395,6 +434,8 @@ class Gama(object):
             log.info('Building ensemble took {}s. Fitting ensemble with timeout {}s.'.format(build_time, timeout))
 
             X, y = self._fit_data
+            if len(y.shape) > 1:
+                y = y.squeeze()
             self.ensemble.fit(X, y, timeout=timeout)
             self._ensemble_fit = True
         except Exception as e:

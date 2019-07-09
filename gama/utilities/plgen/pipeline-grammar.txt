@@ -1,0 +1,12 @@
+
+tr:    DatasetTextReader
+todf:  dataset_to_dataframe
+cp:    column_parser
+eattr: extract_columns_by_semantic_types(semantic_types=[foo])
+cond:  Conditioner(ensure_numeric=True)
+
+transformer: family{ FEATURE_SELECTION DATA_PREPROCESSING DATA_TRANFORMATION }
+predictor: family{ CLASSIFICATION REGRESSION }
+
+single_table -> tr todf @cp eattr cond transformer{0,3} predictor
+
