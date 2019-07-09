@@ -1,3 +1,5 @@
+import pandas as pd
+
 from .gama import Gama
 from gama.configuration.regression import reg_config
 from gama.utilities.auto_ensemble import EnsembleRegressor
@@ -9,21 +11,16 @@ class GamaRegressor(Gama):
             config = reg_config
         super().__init__(*args, **kwargs, config=config, scoring=scoring)
 
-    def predict(self, X=None, arff_file_path=None):
+    def _predict(self, x: pd.DataFrame):
         """ Predict the target for input X.
 
-        :param X: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
+        :param x: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
         :return: a numpy array with predictions. The array is of shape (N,) where N is the length of the
             first dimension of X.
         """
-        X = self._preprocess_predict_X(X)
         regressor = self.ensemble if self._ensemble_fit else self._best_pipeline
-        return regressor.predict(X)
+        return regressor.predict(x)
 
     def _initialize_ensemble(self):
-        y = self.y_train
-        # y may be a DataFrame.  If so, flatten it.
-        if y.ndim != 1:
-            y = y.squeeze()
-        self.ensemble = EnsembleRegressor(self._metrics[0], y,
+        self.ensemble = EnsembleRegressor(self._metrics[0], self._y,
                                           model_library_directory=self._cache_dir, n_jobs=self._n_jobs)

@@ -3,6 +3,7 @@ from functools import partial
 from typing import Callable
 
 import numpy as np
+import pandas as pd
 from sklearn import metrics
 
 """
@@ -80,11 +81,11 @@ class Metric:
         # We want to force clear and early errors to avoid accidentally working with the wrong data/interpretation.
 
         # Unfortunately, D3M pipelines force DataFrames throughout.  Disabling this check until we can
-        # come up with a more general solution.
-#        if not isinstance(y_true, np.ndarray):
-#            raise TypeError('y_true must be a numpy array.')
-#        if not isinstance(predictions, np.ndarray):
-#            raise TypeError('predictions must be a numpy array.')
+        # come up with a more general solution. Pieter: `y` should now be converted to pandas series.
+        if not isinstance(y_true, (np.ndarray, pd.Series)):
+            raise TypeError('y_true must be a numpy array.')
+        if not isinstance(predictions, (np.ndarray, pd.Series)):
+            raise TypeError('predictions must be a numpy array.')
 
         required_dimensionality = 2 if self.requires_probabilities else 1
         if predictions.ndim != required_dimensionality:
