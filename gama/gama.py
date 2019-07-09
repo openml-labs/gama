@@ -211,7 +211,7 @@ class Gama(object):
             expression_creator = partial(create_expression_by_rule, primitive_set=self._pset, rule=self._grammar_rule)
             def individual_creator():
                 return Individual(expression_creator(),  )
-            individual_creator = partial(Individual, expression_creator)
+            individual_creator = expression_creator
             # Turning off the grammar checking of individuals generated through reproduction
             # TODO: Debug grammar checking for reproduction
 #            mutate = partial(conformant_mutation, primitive_set=self._pset, rule=self._grammar_rule)
