@@ -82,7 +82,7 @@ class Metric:
 
         # Unfortunately, D3M pipelines force DataFrames throughout.  Disabling this check until we can
         # come up with a more general solution. Pieter: `y` should now be converted to pandas series.
-        if not isinstance(y_true, (np.ndarray, pd.Series)):
+        if not isinstance(y_true, (np.ndarray, pd.Series, pd.DataFrame)):
             raise TypeError('y_true must be a numpy array.')
         if not isinstance(predictions, (np.ndarray, pd.Series)):
             raise TypeError('predictions must be a numpy array.')

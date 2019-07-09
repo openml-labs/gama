@@ -5,6 +5,7 @@ import time
 import uuid
 from datetime import datetime
 
+import pandas as pd
 import stopit
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import cross_val_predict, ShuffleSplit
@@ -47,6 +48,10 @@ def cross_val_predict_score(estimator, X, y_train, metrics=None, **kwargs):
         predictions = predictions.squeeze()
 
     scores = []
+    if isinstance(y_train, pd.DataFrame):
+        # Metrics want to work with Series, for d3m the target vector is a pd.DataFrame
+        y_train = y_train[y_train.columns[0]]
+
     for metric in metrics:
         if metric.requires_probabilities:
             # `predictions` are of shape (N,K) and the ground truth should be formatted accordingly
