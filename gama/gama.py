@@ -291,7 +291,7 @@ class Gama(object):
             # Internally X is always a pd.DataFrame and y is always a pd.Series
             if isinstance(X, np.ndarray):
                 X = heuristic_numpy_to_dataframe(X)
-            if hasattr(self, '_encode_labels') and not isinstance(pd.DataFrame):
+            if hasattr(self, '_encode_labels') and not isinstance(y, pd.DataFrame):
                 # This will return a numpy array
                 y = self._encode_labels(y)
             if isinstance(y, np.ndarray):
@@ -299,7 +299,7 @@ class Gama(object):
                     y = np.argmax(y, axis=1)
                 y = pd.Series(y)
 
-            if y.isnull().any():
+            if not isinstance(y, pd.DataFrame) and y.isnull().any():
                 log.info("Target vector has been found to contain NaN-labels, these rows will be ignored.")
                 X, y = X.loc[~y.isnull(), :], y[~y.isnull()]
 
