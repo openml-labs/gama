@@ -291,12 +291,9 @@ class Gama(object):
             # Internally X is always a pd.DataFrame and y is always a pd.Series
             if isinstance(X, np.ndarray):
                 X = heuristic_numpy_to_dataframe(X)
-            if hasattr(self, '_encode_labels'):
+            if hasattr(self, '_encode_labels') and not isinstance(pd.DataFrame):
                 # This will return a numpy array
                 y = self._encode_labels(y)
-            if isinstance(y, pd.DataFrame):
-                log.info("`y` is supplied as pandas.DataFrame, assuming the first column contains target values.")
-                y = y[y.columns[0]]
             if isinstance(y, np.ndarray):
                 if y.ndim == 2 and y.shape[1] > 1:
                     y = np.argmax(y, axis=1)
