@@ -1,7 +1,7 @@
 import category_encoders as ce
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import Imputer
+from sklearn.impute import SimpleImputer
 
 
 def define_preprocessing_steps(X_df, max_extra_features_created=None, max_categories_for_one_hot=10):
@@ -30,7 +30,7 @@ def define_preprocessing_steps(X_df, max_extra_features_created=None, max_catego
 
     one_hot_encoder = ce.OneHotEncoder(cols=one_hot_columns, handle_unknown='ignore')
     target_encoder = ce.TargetEncoder(cols=target_encoding_columns, handle_unknown='ignore')
-    imputer = Imputer(strategy='median')
+    imputer = SimpleImputer(strategy='median')
 
     return [one_hot_encoder, target_encoder, imputer]
 

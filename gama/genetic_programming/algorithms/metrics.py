@@ -3,6 +3,7 @@ from functools import partial
 from typing import Callable
 
 import numpy as np
+import pandas as pd
 from sklearn import metrics
 
 """
@@ -78,9 +79,9 @@ class Metric:
         # Scikit-learn metrics can be very flexible with their input, interpreting a list as class labels for one
         # metric, while interpreting it as class probability for the positive class for another.
         # We want to force clear and early errors to avoid accidentally working with the wrong data/interpretation.
-        if not isinstance(y_true, np.ndarray):
+        if not isinstance(y_true, (np.ndarray, pd.Series)):
             raise TypeError('y_true must be a numpy array.')
-        if not isinstance(predictions, np.ndarray):
+        if not isinstance(predictions, (np.ndarray, pd.Series)):
             raise TypeError('predictions must be a numpy array.')
 
         required_dimensionality = 2 if self.requires_probabilities else 1

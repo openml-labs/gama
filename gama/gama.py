@@ -9,7 +9,7 @@ from functools import partial
 import sys
 import time
 import warnings
-from typing import Tuple, Callable, Union
+from typing import Tuple, Callable, Union, List
 
 import pandas as pd
 import numpy as np
@@ -159,7 +159,7 @@ class Gama(object):
         self._use_asha: bool = False
         self._X: pd.DataFrame = None
         self._y: pd.Series = None
-        self._y_score = None
+        self._classes: List = []
 
         default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
@@ -220,17 +220,22 @@ class Gama(object):
         X, _ = X_y_from_arff(arff_file_path)
         return self._predict(X)
 
-    def score(self, x: Union[pd.DataFrame, np.ndarray], y: pd.Series):
-        y_score = self._construct_y_score(y)
+    def score(self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]):
+        if self._metrics[0].requires_probabilities:
+            if isinstance(y, pd.Series) or y.ndim == 1:
+                encoder = OneHotEncoder().fit(np.asarray(self._classes).reshape(-1, 1))
+                y = encoder.transform(y)
+        elif isinstance(y, np.ndarray) and y.ndim == 2:
+            y = np.argmax(y, axis=0)
         predictions = self.predict_proba(x) if self._metrics[0].requires_probabilities else self.predict(x)
-        return self._metrics[0].score(y_score, predictions)
+        return self._metrics[0].score(y, predictions)
 
     def score_arff(self, arff_file_path: str):
-        if arff_file_path:
-            X, y = X_y_from_arff(arff_file_path)
+        X, y = X_y_from_arff(arff_file_path)
         return self.score(X, y)
 
-    def _preprocess(self, X, y) -> Tuple[pd.DataFrame, pd.Series]:
+    def _preprocess(self, X: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]
+                    ) -> Tuple[pd.DataFrame, pd.Series]:
         if not isinstance(X, (np.ndarray, pd.DataFrame)):
             raise TypeError("X must be either np.ndarray or pd.DataFrame.")
         if not isinstance(y, (np.ndarray, pd.Series)):
@@ -244,6 +249,8 @@ class Gama(object):
                 # This will return a numpy array
                 y = self._encode_labels(y)
             if isinstance(y, np.ndarray):
+                if y.ndim == 2 and y.shape[1] > 1:
+                    y = np.argmax(y, axis=1)
                 y = pd.Series(y)
 
             if y.isnull().any():
@@ -266,7 +273,7 @@ class Gama(object):
         X, y = X_y_from_arff(arff_file_path)
         self.fit(X, y, *args, **kwargs)
 
-    def fit(self, X=None, y=None, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
+    def fit(self, X, y, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -297,7 +304,7 @@ class Gama(object):
             return restart and restart_
 
         self._X, self._y = self._preprocess(X, y)
-        self._y_score = self._construct_y_score(y)
+        self._classes = list(set(self._y))
 
         fit_time = int((1 - ensemble_ratio) * self._time_manager.total_time_remaining)
 
@@ -314,11 +321,6 @@ class Gama(object):
             log.debug("Deleting cache.")
             self.delete_cache()
 
-    def _construct_y_score(self, y: pd.Series):
-        if any(metric.requires_probabilities for metric in self._metrics):
-            return OneHotEncoder(categories='auto').fit_transform(y.reshape(-1, 1)).todense()
-        return y
-
     def _search_phase(self, warm_start: bool=False, restart_criteria: Callable=None, timeout: int=1e6):
         """ Invoke the evolutionary algorithm, populate `final_pop` regardless of termination. """
         if warm_start and self._final_pop is not None:
@@ -328,7 +330,7 @@ class Gama(object):
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = [self._operator_set.individual() for _ in range(self._pop_size)]
 
-        evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self._X, y_train=self._y, y_score=self._y_score,
+        evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self._X, y_train=self._y,
                              timeout=self._max_eval_time, metrics=self._metrics, cache_dir=self._cache_dir)
         final_pop = []
 
@@ -390,7 +392,7 @@ class Gama(object):
             self.ensemble.fit(self._X, self._y, timeout=timeout)
             self._ensemble_fit = True
         except Exception as e:
-            log.warning("Error during auto ensemble: {}".format(e))
+            log.warning("Error during auto ensemble: {}".format(e), exc_info=True)
 
     def delete_cache(self):
         """ Removes the cache folder and all files associated to this instance. """

@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime
 
 import stopit
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import cross_val_predict, ShuffleSplit
 from sklearn.pipeline import Pipeline
 
@@ -29,18 +30,17 @@ def compile_individual(individual: Individual, parameter_checks=None, preprocess
     return Pipeline(list(reversed(steps)))
 
 
-def cross_val_predict_score(estimator, X, y_train, y_score, metrics=None, **kwargs):
+def cross_val_predict_score(estimator, X, y_train, metrics=None, **kwargs):
     """ Return both the predictions and score of the estimator trained on the data given the cv strategy.
 
     :param y_train: target in appropriate format for training (typically (N,))
-    :param y_score: target in appropriate format for scoring (typically (N,K) for metrics based on class probabilities,
-        (N,) otherwise).
     """
     if not all(isinstance(metric, Metric) for metric in metrics):
         raise ValueError('All `metrics` must be an instance of `metrics.Metric`, is {}.'
                          .format([type(metric) for metric in metrics]))
 
-    method = 'predict_proba' if any(metric.requires_probabilities for metric in metrics) else 'predict'
+    predictions_are_probabilities = any(metric.requires_probabilities for metric in metrics)
+    method = 'predict_proba' if predictions_are_probabilities else 'predict'
     predictions = cross_val_predict(estimator, X, y_train, method=method, **kwargs)
 
     if predictions.ndim == 2 and predictions.shape[1] == 1:
@@ -48,13 +48,16 @@ def cross_val_predict_score(estimator, X, y_train, y_score, metrics=None, **kwar
 
     scores = []
     for metric in metrics:
-        if metric.requires_probabilities or predictions.ndim == 1:
-            # either the metric requires probabilities, which means `predictions` is of shape (N,K), or no metric
-            # requires probabilities, which means that `predictions` is of shape (N,).
-            scores.append(metric.maximizable_score(y_score, predictions))
-        else:
-            # case of a class-label metric while `predictions` are class probabilities
+        if metric.requires_probabilities:
+            # `predictions` are of shape (N,K) and the ground truth should be formatted accordingly
+            y_ohe = OneHotEncoder().fit_transform(y_train.values.reshape(-1, 1)).toarray()
+            scores.append(metric.maximizable_score(y_ohe, predictions))
+        elif predictions_are_probabilities:
+            # Metric requires no probabilities, but probabilities were predicted.
             scores.append(metric.maximizable_score(y_train, predictions.argmax(axis=1)))
+        else:
+            # No metric requires probabilities, so `predictions` is an array of labels.
+            scores.append(metric.maximizable_score(y_train, predictions))
 
     return predictions, scores
 
@@ -75,7 +78,7 @@ def evaluate_individual(individual: Individual, evaluate_pipeline_length, *args,
     return individual
 
 
-def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5, cache_dir=None, logger=None, subsample=None):
+def evaluate_pipeline(pl, X, y_train, timeout, metrics='accuracy', cv=5, cache_dir=None, logger=None, subsample=None):
     """ Evaluates a pipeline used k-Fold CV. """
     if not logger:
         logger = log
@@ -91,9 +94,9 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5
         try:
             if draw_subsample:
                 idx, _ = next(ShuffleSplit(n_splits=1, train_size=subsample, random_state=0).split(X))
-                X, y_train, y_score = X.iloc[idx, :], y_train[idx], y_score[idx]
+                X, y_train = X.iloc[idx, :], y_train[idx]
 
-            prediction, scores = cross_val_predict_score(pl, X, y_train, y_score, cv=cv, metrics=metrics)
+            prediction, scores = cross_val_predict_score(pl, X, y_train, cv=cv, metrics=metrics)
         except stopit.TimeoutException:
             # score not actually unused, because exception gets caught by the context manager.
             raise

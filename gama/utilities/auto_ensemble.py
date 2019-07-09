@@ -248,10 +248,10 @@ class EnsembleClassifier(Ensemble):
         self._one_hot_encoder = OneHotEncoder(categories='auto').fit(y_as_squeezed_array)
 
         if self._metric.requires_probabilities:
-            self._y_score = self._one_hot_encoder.transform(y_as_squeezed_array).toarray()
+            self._y = self._one_hot_encoder.transform(y_as_squeezed_array).toarray()
         else:
             def one_hot_encode_predictions(predictions):
-                return self._one_hot_encoder.transform(predictions.values.reshape(-1, 1))
+                return self._one_hot_encoder.transform(predictions.reshape(-1, 1))
 
             self._prediction_transformation = one_hot_encode_predictions
 
@@ -260,11 +260,11 @@ class EnsembleClassifier(Ensemble):
             prediction_to_validate = self._averaged_validation_predictions()
 
         if self._metric.requires_probabilities:
-            return self._metric.maximizable_score(self._y_score, prediction_to_validate)
+            return self._metric.maximizable_score(self._y, prediction_to_validate)
         else:
             # argmax returns (N, 1) matrix, need to squeeze it to (N,) for scoring.
-            class_predictions = np.argmax(prediction_to_validate, axis=1).A.ravel()
-            return self._metric.maximizable_score(self._y_score, class_predictions)
+            class_predictions = np.argmax(prediction_to_validate.toarray(), axis=1)
+            return self._metric.maximizable_score(self._y, class_predictions)
 
     def predict(self, X):
         if self._metric.requires_probabilities:
