@@ -9,11 +9,10 @@ from functools import partial
 import sys
 import time
 import warnings
-from typing import Tuple, Callable, Union, List
+from typing import Callable, Union, List
 
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder
 import stopit
 
 import gama.genetic_programming.compilers.scikitlearn
@@ -25,7 +24,7 @@ from gama.genetic_programming.algorithms.async_ea import async_ea
 from gama.genetic_programming.algorithms.asha import asha, evaluate_on_rung
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
-from gama.utilities.preprocessing import define_preprocessing_steps, heuristic_numpy_to_dataframe
+from gama.utilities.preprocessing import define_preprocessing_steps, format_x_y
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
 from gama.genetic_programming.selection import create_from_population, eliminate_from_pareto
 from gama.genetic_programming.operations import create_random_expression
@@ -132,13 +131,11 @@ class Gama(object):
         ))
 
         if max_total_time is None or max_total_time <= 0:
-            error_message = "max_total_time should be greater than zero."
-            log.error(error_message + " max_total_time: {}".format(max_total_time))
-            raise ValueError(error_message)
-        if max_eval_time is not None and max_eval_time <= 0:
-            error_message = "max_eval_time should be greater than zero, or None."
-            log.error(error_message + " max_eval_time: {}".format(max_eval_time))
-            raise ValueError(error_message)
+            raise ValueError(f"max_total_time should be integer greater than zero but is {max_total_time}.")
+        if max_eval_time is None or max_eval_time <= 0:
+            raise ValueError(f"max_eval_time should be integer greater than zero but is {max_eval_time}.")
+        if n_jobs < -1:
+            raise ValueError(f"n_jobs should be -1 or positive integer but is {n_jobs}.")
 
         if n_jobs == -1:
             n_jobs = multiprocessing.cpu_count()
@@ -158,7 +155,7 @@ class Gama(object):
         self._metrics = self._scoring_to_metric(scoring)
         self._use_asha: bool = False
         self._X: pd.DataFrame = None
-        self._y: pd.Series = None
+        self._y: pd.DataFrame = None
         self._classes: List = []
 
         default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
@@ -221,47 +218,12 @@ class Gama(object):
         return self._predict(X)
 
     def score(self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]):
-        if self._metrics[0].requires_probabilities:
-            if isinstance(y, pd.Series) or y.ndim == 1:
-                encoder = OneHotEncoder().fit(np.asarray(self._classes).reshape(-1, 1))
-                y = encoder.transform(y)
-        elif isinstance(y, np.ndarray) and y.ndim == 2:
-            y = np.argmax(y, axis=0)
         predictions = self.predict_proba(x) if self._metrics[0].requires_probabilities else self.predict(x)
         return self._metrics[0].score(y, predictions)
 
     def score_arff(self, arff_file_path: str):
         X, y = X_y_from_arff(arff_file_path)
         return self.score(X, y)
-
-    def _preprocess(self, X: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]
-                    ) -> Tuple[pd.DataFrame, pd.Series]:
-        if not isinstance(X, (np.ndarray, pd.DataFrame)):
-            raise TypeError("X must be either np.ndarray or pd.DataFrame.")
-        if not isinstance(y, (np.ndarray, pd.Series)):
-            raise TypeError("y must be either np.ndarray or pd.Series.")
-
-        with self._time_manager.start_activity('preprocessing') as preprocessing_sw:
-            # Internally X is always a pd.DataFrame and y is always a pd.Series
-            if isinstance(X, np.ndarray):
-                X = heuristic_numpy_to_dataframe(X)
-            if hasattr(self, '_encode_labels'):
-                # This will return a numpy array
-                y = self._encode_labels(y)
-            if isinstance(y, np.ndarray):
-                if y.ndim == 2 and y.shape[1] > 1:
-                    y = np.argmax(y, axis=1)
-                y = pd.Series(y)
-
-            if y.isnull().any():
-                log.info("Target vector has been found to contain NaN-labels, these rows will be ignored.")
-                X, y = X.loc[~y.isnull(), :], y[~y.isnull()]
-
-            steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
-            self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
-
-        log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
-        return X, y
 
     def fit_arff(self, arff_file_path: str, *args, **kwargs):
         """ Find and fit a model to predict the target column (last) from other columns.
@@ -273,7 +235,13 @@ class Gama(object):
         X, y = X_y_from_arff(arff_file_path)
         self.fit(X, y, *args, **kwargs)
 
-    def fit(self, X, y, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False):
+    def fit(self,
+            x: Union[pd.DataFrame, np.ndarray],
+            y: Union[pd.DataFrame, pd.Series, np.ndarray],
+            warm_start: bool=False,
+            auto_ensemble_n: int=25,
+            restart_: bool=False,
+            keep_cache: bool=False):
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -283,16 +251,18 @@ class Gama(object):
         After the search termination condition is met, the best found pipeline
         configuration is then used to train a final model on all provided data.
 
-        :param X: Numpy Array, shape = [n_samples, n_features]
+        :param x: pandas.DataFrame or numpy.ndarray, shape = [n_samples, n_features]
             Training data. All elements must be able to be converted to float.
-        :param y: Numpy Array, shape = [n_samples,]
-            Target values.
+        :param y: pandas.DataFrame, pandas.Series or numpy.ndarray, shape = [n_samples,]
+            Target values. If a DataFrame is provided, it is assumed the first column contains target values.
         :param warm_start: bool. Indicates the optimization should continue using the last individuals of the
             previous `fit` call.
         :param auto_ensemble_n: positive integer. The number of models to include in the ensemble which is built
             after the optimizatio process.
-        :param restart_: bool. Indicates whether or not the search should be restarted when a specific restart
-            criteria is met.
+        :param restart_: bool (default=False)
+            Indicates whether or not the search should be restarted when a specific restart criteria is met.
+        :param keep_cache: bool (default=False)
+            If True, keep the cache directory and its content after fitting is complete. Otherwise delete it.
         """
         ensemble_ratio = 0.3  # fraction of time left after preprocessing that reserved for postprocessing
 
@@ -303,8 +273,13 @@ class Gama(object):
                 self._observer.reset_current_pareto_front()
             return restart and restart_
 
-        self._X, self._y = self._preprocess(X, y)
-        self._classes = list(set(self._y))
+        with self._time_manager.start_activity('preprocessing') as preprocessing_sw:
+            self._X, self._y = format_x_y(x, y)
+            self._classes = list(set(self._y))
+            steps = define_preprocessing_steps(self._X, max_extra_features_created=None, max_categories_for_one_hot=10)
+            self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
+
+        log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
 
         fit_time = int((1 - ensemble_ratio) * self._time_manager.total_time_remaining)
 
