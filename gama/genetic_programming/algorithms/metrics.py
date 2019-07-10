@@ -1,6 +1,7 @@
 from enum import Enum
 from functools import partial
 from typing import Callable
+import math
 
 import numpy as np
 import pandas as pd
@@ -33,6 +34,12 @@ for name, score_fn in [('precision', metrics.precision_score),
         qualified_score_fn = partial(score_fn, average=average)
         classification_metrics[qualified_name] = (qualified_score_fn, False, True)
 
+
+def rmse(*args, **kwargs):
+    mse = metrics.mean_squared_error(*args, **kwargs)
+    return math.sqrt(mse)
+
+
 regression_metrics = dict(
     explained_variance=(metrics.explained_variance_score, False, True),
     r2=(metrics.r2_score, False, True),
@@ -43,7 +50,9 @@ regression_metrics = dict(
     neg_median_absolute_error=(metrics.median_absolute_error, False, False),
     median_absolute_error=(metrics.median_absolute_error, False, False),
     neg_mean_squared_error=(metrics.mean_squared_error, False, False),
-    mean_squared_error=(metrics.mean_squared_error, False, False)
+    mean_squared_error=(metrics.mean_squared_error, False, False),
+    neg_root_mean_squared_error=(rmse, False, False),
+    root_mean_squared_error=(rmse, False, False)
 )
 
 all_metrics = {**classification_metrics, **regression_metrics}
