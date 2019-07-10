@@ -221,12 +221,6 @@ class Gama(object):
         return self._predict(X)
 
     def score(self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]):
-        if self._metrics[0].requires_probabilities:
-            if isinstance(y, pd.Series) or y.ndim == 1:
-                encoder = OneHotEncoder().fit(np.asarray(self._classes).reshape(-1, 1))
-                y = encoder.transform(y)
-        elif isinstance(y, np.ndarray) and y.ndim == 2:
-            y = np.argmax(y, axis=0)
         predictions = self.predict_proba(x) if self._metrics[0].requires_probabilities else self.predict(x)
         return self._metrics[0].score(y, predictions)
 

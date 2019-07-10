@@ -83,22 +83,6 @@ class Metric:
             raise TypeError('y_true must be a numpy array, pandas series or pandas dataframe.')
         if not isinstance(predictions, (np.ndarray, pd.Series, pd.DataFrame)):
             raise TypeError('predictions must be a numpy array, pandas series or pandas dataframe.')
-
-        required_dimensionality = 2 if self.requires_probabilities else 1
-        if required_dimensionality == 1:
-            # In case predictions are supplied as (N, 1) instead of (N,) convert.
-            if y_true.ndim == 2 and y_true.shape[1] == 1:
-                y_true = y_true.squeeze()
-            if predictions.ndim == 2 and predictions.shape[1] == 1:
-                predictions = predictions.squeeze()
-
-        if predictions.ndim != required_dimensionality:
-            raise ValueError('Metric {} requires predictions with dimensionality {}, found {} (shape{}).'
-                             .format(self.name, required_dimensionality, predictions.ndim, predictions.shape))
-        if y_true.ndim != required_dimensionality:
-            raise ValueError('Metric {} requires y_true with dimensionality {}, found {} (shape{}).'
-                             .format(self.name, required_dimensionality, y_true.ndim, y_true.shape))
-
         return self._score_function(y_true, predictions)
 
     def maximizable_score(self, y_true, predictions):
