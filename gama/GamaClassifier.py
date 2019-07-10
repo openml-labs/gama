@@ -82,6 +82,14 @@ class GamaClassifier(Gama):
         X, _ = X_y_from_arff(arff_file_path)
         return self._predict_proba(X)
 
+    def fit(self, x, y, *args, **kwargs):
+        self._label_encoder = LabelEncoder().fit(y)
+        y_ = y.squeeze() if isinstance(y, pd.DataFrame) else y
+        if any([isinstance(yi, str) for yi in y_]):
+            # If target values are `str` we encode them or scikit-learn will complain.
+            y = self._label_encoder.transform(y_)
+        super().fit(x, y, *args, **kwargs)
+
     def _encode_labels(self, y):
         self._label_encoder = LabelEncoder().fit(y)
         return self._label_encoder.transform(y)

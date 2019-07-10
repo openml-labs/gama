@@ -1,5 +1,4 @@
 import itertools
-import numpy as np
 import pandas as pd
 import pytest
 
@@ -23,21 +22,16 @@ def test_reproducible_initialization():
 
 
 def test_format_x_y(gamaclassifier):
-    """ Tests that X and y data correctly get converted to (pd.DataFrame, pd.Series). """
+    """ Tests that X and y data correctly get converted to (pd.DataFrame, pd.DataFrame). """
     def well_formatted_x_y(x, y):
         assert isinstance(x, pd.DataFrame)
-        assert isinstance(y, pd.Series)
+        assert isinstance(y, pd.DataFrame)
         assert len(x) == len(y)
-        assert y.dtype == np.dtype('int64')
 
     from sklearn.datasets import load_digits
     X_np, y_np = load_digits(return_X_y=True)
     X_df, y_df = pd.DataFrame(X_np), pd.DataFrame(y_np)
-    y_str = np.asarray([str(yi) for yi in y_np])
     y_series = pd.Series(y_np)
 
-    for X, y in itertools.product([X_np, X_df], [y_np, y_series, y_df, y_str]):
+    for X, y in itertools.product([X_np, X_df], [y_np, y_series, y_df]):
         well_formatted_x_y(*gamaclassifier._format_x_y(X, y))
-
-
-

@@ -79,12 +79,19 @@ class Metric:
         # Scikit-learn metrics can be very flexible with their input, interpreting a list as class labels for one
         # metric, while interpreting it as class probability for the positive class for another.
         # We want to force clear and early errors to avoid accidentally working with the wrong data/interpretation.
-        if not isinstance(y_true, (np.ndarray, pd.Series)):
-            raise TypeError('y_true must be a numpy array.')
-        if not isinstance(predictions, (np.ndarray, pd.Series)):
-            raise TypeError('predictions must be a numpy array.')
+        if not isinstance(y_true, (np.ndarray, pd.Series, pd.DataFrame)):
+            raise TypeError('y_true must be a numpy array, pandas series or pandas dataframe.')
+        if not isinstance(predictions, (np.ndarray, pd.Series, pd.DataFrame)):
+            raise TypeError('predictions must be a numpy array, pandas series or pandas dataframe.')
 
         required_dimensionality = 2 if self.requires_probabilities else 1
+        if required_dimensionality == 1:
+            # In case predictions are supplied as (N, 1) instead of (N,) convert.
+            if y_true.ndim == 2 and y_true.shape[1] == 1:
+                y_true = y_true.squeeze()
+            if predictions.ndim == 2 and predictions.shape[1] == 1:
+                predictions = predictions.squeeze()
+
         if predictions.ndim != required_dimensionality:
             raise ValueError('Metric {} requires predictions with dimensionality {}, found {} (shape{}).'
                              .format(self.name, required_dimensionality, predictions.ndim, predictions.shape))

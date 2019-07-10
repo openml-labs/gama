@@ -1,5 +1,7 @@
 """ Contains full system tests for GamaClassifier """
 import numpy as np
+import pandas as pd
+from typing import Type
 from sklearn.datasets import load_wine, load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, log_loss
@@ -61,7 +63,15 @@ diabetes_arff = dict(
 )
 
 
-def _test_dataset_problem(data, metric, labelled_y=False, arff=False):
+def _test_dataset_problem(data, metric, arff: bool=False, y_type: Type=pd.DataFrame):
+    """
+
+    :param data:
+    :param metric:
+    :param arff:
+    :param y_type: pd.DataFrame, pd.Series, np.ndarray or str
+    :return:
+    """
     gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric)
     if arff:
         train_path = 'tests/data/{}_train.arff'.format(data['name'])
@@ -77,9 +87,11 @@ def _test_dataset_problem(data, metric, labelled_y=False, arff=False):
         class_probabilities = gama.predict_proba_arff(test_path)
     else:
         X, y = data['load'](return_X_y=True)
-        if labelled_y:
+        if y_type == str:
             databunch = data['load']()
             y = np.asarray([databunch.target_names[c_i] for c_i in databunch.target])
+        if y_type in [pd.Series, pd.DataFrame]:
+            y = y_type(y)
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
 
@@ -130,12 +142,12 @@ def test_multiclass_classification_logloss():
 
 def test_string_label_classification_accuracy():
     """ GamaClassifier can work with string-like target labels when using predict-metric from numpy data. """
-    _test_dataset_problem(breast_cancer, 'accuracy', labelled_y=True)
+    _test_dataset_problem(breast_cancer, 'accuracy', y_type=str)
 
 
 def test_string_label_classification_log_loss():
     """ GamaClassifier can work with string-type target labels when using predict-proba metric from numpy data. """
-    _test_dataset_problem(breast_cancer, 'log_loss', labelled_y=True)
+    _test_dataset_problem(breast_cancer, 'log_loss', y_type=str)
 
 
 def test_binary_classification_accuracy_arff():

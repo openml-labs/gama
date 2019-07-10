@@ -158,7 +158,7 @@ class Gama(object):
         self._metrics = self._scoring_to_metric(scoring)
         self._use_asha: bool = False
         self._X: pd.DataFrame = None
-        self._y: pd.Series = None
+        self._y: pd.DataFrame = None
         self._classes: List = []
 
         default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
@@ -235,29 +235,24 @@ class Gama(object):
         return self.score(X, y)
 
     def _format_x_y(self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.DataFrame, pd.Series, np.ndarray]
-                    ) -> Tuple[pd.DataFrame, pd.Series]:
+                    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """ Takes various types of (X,y) data and converts it into a (pd.DataFrame, pd.Series) tuple. """
         if not isinstance(x, (np.ndarray, pd.DataFrame)):
             raise TypeError("X must be either np.ndarray or pd.DataFrame.")
         if not isinstance(y, (np.ndarray, pd.Series, pd.DataFrame)):
             raise TypeError("y must be np.ndarray, pd.Series or pd.DataFrame.")
 
-        # Internally X is always a pd.DataFrame and y is always a pd.Series
+        # Internally X and y are always a pd.DataFrame
         if isinstance(x, np.ndarray):
             x = heuristic_numpy_to_dataframe(x)
-        if isinstance(y, pd.DataFrame):
-            y = y[y.columns[0]]
-        if hasattr(self, '_encode_labels'):
-            # This will return a numpy array
-            y = self._encode_labels(y)
-        if isinstance(y, np.ndarray):
-            if y.ndim == 2 and y.shape[1] > 1:
-                y = np.argmax(y, axis=1)
-            y = pd.Series(y)
+        if isinstance(y, np.ndarray) and y.ndim == 2 and y.shape[1] > 1:
+            y = np.argmax(y, axis=1)
+        if not isinstance(y, pd.DataFrame):
+            y = pd.DataFrame(y)
 
-        if y.isnull().any():
+        if y.isnull().any().any():
             log.info("Target vector has been found to contain NaN-labels, these rows will be ignored.")
-            x, y = x.loc[~y.isnull(), :], y[~y.isnull()]
+            x, y = x.loc[~y.isnull(), :], y[~y.isnull(), :]
         return x, y
 
     def fit_arff(self, arff_file_path: str, *args, **kwargs):
@@ -311,7 +306,7 @@ class Gama(object):
         with self._time_manager.start_activity('preprocessing') as preprocessing_sw:
             self._X, self._y = self._format_x_y(x, y)
             self._classes = list(set(self._y))
-            steps = define_preprocessing_steps(x, max_extra_features_created=None, max_categories_for_one_hot=10)
+            steps = define_preprocessing_steps(self._X, max_extra_features_created=None, max_categories_for_one_hot=10)
             self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
 
         log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
