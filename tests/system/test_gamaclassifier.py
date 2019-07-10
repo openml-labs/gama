@@ -1,7 +1,9 @@
 """ Contains full system tests for GamaClassifier """
 import numpy as np
 import pandas as pd
+import pytest
 from typing import Type
+
 from sklearn.datasets import load_wine, load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, log_loss
@@ -63,7 +65,7 @@ diabetes_arff = dict(
 )
 
 
-def _test_dataset_problem(data, metric, arff: bool=False, y_type: Type=pd.DataFrame):
+def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.DataFrame):
     """
 
     :param data:
@@ -118,6 +120,9 @@ def _test_dataset_problem(data, metric, arff: bool=False, y_type: Type=pd.DataFr
     logloss = log_loss(y_test, class_probabilities)
     print(data['name'], metric, 'log-loss:', logloss)
     assert data['base_log_loss'] >= logloss, 'predictions should be at least as good as majority class.'
+
+    score_to_match = logloss if metric == 'log_loss' else accuracy
+    assert score_to_match == pytest.approx(gama.score(X_test, y_test))
 
 
 def test_binary_classification_accuracy():
