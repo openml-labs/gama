@@ -155,26 +155,6 @@ def test_string_label_classification_log_loss():
     _test_dataset_problem(breast_cancer, 'log_loss', y_type=str)
 
 
-def test_binary_classification_accuracy_arff():
-    """ GamaClassifier can do binary classification with predict metric. """
-    _test_dataset_problem(breast_cancer, 'accuracy', arff=True)
-
-
-def test_binary_classification_logloss_arff():
-    """ GamaClassifier can do binary classification with predict-proba metric. """
-    _test_dataset_problem(breast_cancer, 'log_loss', arff=True)
-
-
-def test_multiclass_classification_accuracy_arff():
-    """ GamaClassifier can do multi-class with predict metric. """
-    _test_dataset_problem(wine, 'accuracy', arff=True)
-
-
-def test_multiclass_classification_logloss_arff():
-    """ GamaClassifier can do multi-class with predict-proba metric. """
-    _test_dataset_problem(wine, 'log_loss', arff=True)
-
-
 def test_missing_value_classification_arff():
     """ GamaClassifier handles missing data. """
     _test_dataset_problem(breast_cancer_missing, 'log_loss', arff=True)
