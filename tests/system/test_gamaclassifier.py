@@ -87,6 +87,7 @@ def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.D
             gama.fit_arff(train_path, auto_ensemble_n=5)
         class_predictions = gama.predict_arff(test_path)
         class_probabilities = gama.predict_proba_arff(test_path)
+        gama_score = gama.score_arff(test_path)
     else:
         X, y = data['load'](return_X_y=True)
         if y_type == str:
@@ -101,6 +102,7 @@ def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.D
             gama.fit(X_train, y_train, auto_ensemble_n=5)
         class_predictions = gama.predict(X_test)
         class_probabilities = gama.predict_proba(X_test)
+        gama_score = gama.score(X_test, y_test)
 
     assert 60 * FIT_TIME_MARGIN > sw.elapsed_time, 'fit must stay within 110% of allotted time.'
 
@@ -122,7 +124,7 @@ def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.D
     assert data['base_log_loss'] >= logloss, 'predictions should be at least as good as majority class.'
 
     score_to_match = logloss if metric == 'log_loss' else accuracy
-    assert score_to_match == pytest.approx(gama.score(X_test, y_test))
+    assert score_to_match == pytest.approx(gama_score)
 
 
 def test_binary_classification_accuracy():
