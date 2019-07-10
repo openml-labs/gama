@@ -9,7 +9,7 @@ from functools import partial
 import sys
 import time
 import warnings
-from typing import Tuple, Callable, Union, List
+from typing import Callable, Union, List
 
 import pandas as pd
 import numpy as np
@@ -25,7 +25,7 @@ from gama.genetic_programming.algorithms.async_ea import async_ea
 from gama.genetic_programming.algorithms.asha import asha, evaluate_on_rung
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.utilities.logging_utilities import TOKENS, log_parseable_event
-from gama.utilities.preprocessing import define_preprocessing_steps, heuristic_numpy_to_dataframe
+from gama.utilities.preprocessing import define_preprocessing_steps, format_x_y
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
 from gama.genetic_programming.selection import create_from_population, eliminate_from_pareto
 from gama.genetic_programming.operations import create_random_expression
@@ -234,27 +234,6 @@ class Gama(object):
         X, y = X_y_from_arff(arff_file_path)
         return self.score(X, y)
 
-    def _format_x_y(self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.DataFrame, pd.Series, np.ndarray]
-                    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        """ Takes various types of (X,y) data and converts it into a (pd.DataFrame, pd.Series) tuple. """
-        if not isinstance(x, (np.ndarray, pd.DataFrame)):
-            raise TypeError("X must be either np.ndarray or pd.DataFrame.")
-        if not isinstance(y, (np.ndarray, pd.Series, pd.DataFrame)):
-            raise TypeError("y must be np.ndarray, pd.Series or pd.DataFrame.")
-
-        # Internally X and y are always a pd.DataFrame
-        if isinstance(x, np.ndarray):
-            x = heuristic_numpy_to_dataframe(x)
-        if isinstance(y, np.ndarray) and y.ndim == 2 and y.shape[1] > 1:
-            y = np.argmax(y, axis=1)
-        if not isinstance(y, pd.DataFrame):
-            y = pd.DataFrame(y)
-
-        if y.isnull().any().any():
-            log.info("Target vector has been found to contain NaN-labels, these rows will be ignored.")
-            x, y = x.loc[~y.isnull(), :], y[~y.isnull(), :]
-        return x, y
-
     def fit_arff(self, arff_file_path: str, *args, **kwargs):
         """ Find and fit a model to predict the target column (last) from other columns.
 
@@ -304,7 +283,7 @@ class Gama(object):
             return restart and restart_
 
         with self._time_manager.start_activity('preprocessing') as preprocessing_sw:
-            self._X, self._y = self._format_x_y(x, y)
+            self._X, self._y = format_x_y(x, y)
             self._classes = list(set(self._y))
             steps = define_preprocessing_steps(self._X, max_extra_features_created=None, max_categories_for_one_hot=10)
             self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)

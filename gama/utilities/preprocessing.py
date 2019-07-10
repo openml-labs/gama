@@ -1,7 +1,11 @@
+import logging
+from typing import Tuple, Union, Type
 import category_encoders as ce
 import numpy as np
 import pandas as pd
 from sklearn.impute import SimpleImputer
+
+log = logging.getLogger(__name__)
 
 
 def define_preprocessing_steps(X_df, max_extra_features_created=None, max_categories_for_one_hot=10):
@@ -42,3 +46,45 @@ def heuristic_numpy_to_dataframe(X: np.ndarray, max_unique_values_cat: int=10) -
         if n_unique <= max_unique_values_cat:
             X_df[column] = X_df[column].astype('category')
     return X_df
+
+
+def format_x_y(x: Union[pd.DataFrame, np.ndarray], y: Union[pd.DataFrame, pd.Series, np.ndarray],
+               y_type: Type=pd.Series, remove_unlabeled: bool = True
+               ) -> Tuple[pd.DataFrame, Union[pd.DataFrame, pd.Series]]:
+    """ Takes various types of (X,y) data and converts it into a (pd.DataFrame, pd.Series) tuple.
+
+    :param x: pd.DataFrame of np.ndarray
+    :param y: pd.DataFrame, pd.Series or np.ndarray
+    :param y_type: Type (default=pd.Series)
+    :param remove_unlabeled: bool (default=True)
+        If true, remove all rows associated with unlabeled data (NaN in y).
+    :return:
+        X and y, where X is formatted as pd.DataFrame and y is formatted as `y_type`.
+    """
+    if not isinstance(x, (np.ndarray, pd.DataFrame)):
+        raise TypeError("X must be either np.ndarray or pd.DataFrame.")
+    if not isinstance(y, (np.ndarray, pd.Series, pd.DataFrame)):
+        raise TypeError("y must be np.ndarray, pd.Series or pd.DataFrame.")
+
+    if isinstance(x, np.ndarray):
+        x = heuristic_numpy_to_dataframe(x)
+    if isinstance(y, np.ndarray) and y.ndim == 2 and y.shape[1] > 1:
+        y = np.argmax(y, axis=1)
+
+    if y_type == pd.Series:
+        if isinstance(y, pd.DataFrame):
+            y = y.squeeze()
+        elif isinstance(y, np.ndarray):
+            y = pd.Series(y)
+    elif y_type == pd.DataFrame:
+        y = pd.DataFrame(y)
+    else:
+        raise ValueError(f"`y_type` must be one of [pandas.Series, pandas.DataFrame] but is {y_type}.")
+
+    if remove_unlabeled:
+        unlabeled = y[y.columns[0]].isnull() if isinstance(y, pd.DataFrame) else y.isnull()
+        if unlabeled.isnull().any():
+            log.info("Target vector has been found to contain NaN-labels, these rows will be ignored.")
+            x, y = x.loc[~y.isnull(), :], y[~y.isnull(), :]
+
+    return x, y

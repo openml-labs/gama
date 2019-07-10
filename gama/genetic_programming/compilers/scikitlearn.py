@@ -5,6 +5,8 @@ import time
 import uuid
 from datetime import datetime
 
+import pandas as pd
+import numpy as np
 import stopit
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import cross_val_predict, ShuffleSplit
