@@ -13,7 +13,6 @@ from typing import Callable, Union, List
 
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder
 import stopit
 
 import gama.genetic_programming.compilers.scikitlearn
@@ -132,13 +131,11 @@ class Gama(object):
         ))
 
         if max_total_time is None or max_total_time <= 0:
-            error_message = "max_total_time should be greater than zero."
-            log.error(error_message + " max_total_time: {}".format(max_total_time))
-            raise ValueError(error_message)
-        if max_eval_time is not None and max_eval_time <= 0:
-            error_message = "max_eval_time should be greater than zero, or None."
-            log.error(error_message + " max_eval_time: {}".format(max_eval_time))
-            raise ValueError(error_message)
+            raise ValueError(f"max_total_time should be integer greater than zero but is {max_total_time}.")
+        if max_eval_time is None or max_eval_time <= 0:
+            raise ValueError(f"max_eval_time should be integer greater than zero but is {max_eval_time}.")
+        if n_jobs < -1:
+            raise ValueError(f"n_jobs should be -1 or positive integer but is {n_jobs}.")
 
         if n_jobs == -1:
             n_jobs = multiprocessing.cpu_count()
