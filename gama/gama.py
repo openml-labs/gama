@@ -288,7 +288,7 @@ class Gama(object):
             auto_ensemble_n: int=25,
             restart_: bool=False,
             keep_cache: bool=False,
-            d3m_mode: bool=True):
+            d3m_mode: bool=False):
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.

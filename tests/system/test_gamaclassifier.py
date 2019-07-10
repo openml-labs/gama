@@ -1,12 +1,9 @@
 """ Contains full system tests for GamaClassifier """
 import numpy as np
 import pandas as pd
-<<<<<<< HEAD
-=======
 import pytest
 from typing import Type
 
->>>>>>> develop
 from sklearn.datasets import load_wine, load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, log_loss
@@ -134,10 +131,6 @@ def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.D
 def test_binary_classification_accuracy():
     """ GamaClassifier can do binary classification with predict metric from numpy data. """
     _test_dataset_problem(breast_cancer, 'accuracy')
-
-def test_binary_classification_accuracy_df():
-    """ GamaClassifier can do binary classification with predict metric from numpy data. """
-    _test_dataset_problem(breast_cancer, 'accuracy', dataframe=True)
 
 
 def test_binary_classification_logloss():
