@@ -23,7 +23,7 @@ from gama.data import X_y_from_arff
 from gama.genetic_programming.algorithms.async_ea import async_ea
 from gama.genetic_programming.algorithms.asha import asha, evaluate_on_rung
 from gama.utilities.generic.timekeeper import TimeKeeper
-from gama.utilities.logging_utilities import TOKENS, log_parseable_event
+from gama.utilities.logging_utilities import TOKENS, log_parseable_event, register_stream_log, register_file_log
 from gama.utilities.preprocessing import define_preprocessing_steps, format_x_y
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
 from gama.genetic_programming.selection import create_from_population, eliminate_from_pareto
@@ -113,15 +113,9 @@ class Gama(object):
                  keep_analysis_log='gama.log',
                  cache_dir=None):
 
-        if verbosity >= logging.DEBUG:
-            stdout_streamhandler = logging.StreamHandler(sys.stdout)
-            stdout_streamhandler.setLevel(verbosity)
-            gamalog.addHandler(stdout_streamhandler)
-
+        register_stream_log(verbosity)
         if keep_analysis_log:
-            file_handler = logging.FileHandler(keep_analysis_log)
-            file_handler.setLevel(logging.DEBUG)
-            gamalog.addHandler(file_handler)
+            register_file_log(keep_analysis_log)
 
         log.info('Using GAMA version {}.'.format(__version__))
         log.info('{}({})'.format(
@@ -322,11 +316,11 @@ class Gama(object):
                     self._operator_set.evaluate = partial(evaluate_on_rung, **evaluate_args)
                     final_pop = asha(self._operator_set, output=final_pop,
                                      start_candidates=pop, maximum_resource=len(self._X))
-                log.debug([str(i) for i in self._final_pop])
         except KeyboardInterrupt:
             log.info('Search phase terminated because of Keyboard Interrupt.')
 
         self._final_pop = final_pop
+        log.debug([str(i) for i in self._final_pop])
         log.info('Search phase evaluated {} individuals.'.format(len(final_pop)))
 
     def _postprocess_phase(self, n, timeout=1e6):

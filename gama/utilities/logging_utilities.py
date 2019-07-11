@@ -2,7 +2,30 @@ import itertools
 import logging
 import multiprocessing as mp
 import queue
+import sys
 from datetime import datetime
+
+gamalog = logging.getLogger('gama')
+
+
+def register_stream_log(verbosity):
+    previously_registered_handler = [handler for handler in gamalog.handlers if hasattr(handler, 'tag')]
+    if len(previously_registered_handler) > 0:
+        gamalog.debug("Removing handlers registered by previous GAMA instances.")
+        gamalog.handlers = [handler for handler in gamalog.handlers if not hasattr(handler, 'tag')]
+
+    stdout_streamhandler = logging.StreamHandler(sys.stdout)
+    stdout_streamhandler.tag = 'machine_set'
+    stdout_streamhandler.setLevel(verbosity)
+    gamalog.addHandler(stdout_streamhandler)
+
+
+def register_file_log(filename):
+    if not any([handler for handler in gamalog.handlers
+                if isinstance(handler, logging.FileHandler) and filename in handler.baseFilename]):
+        file_handler = logging.FileHandler(filename)
+        file_handler.setLevel(logging.DEBUG)
+        gamalog.addHandler(file_handler)
 
 
 class MultiprocessingLogger(object):

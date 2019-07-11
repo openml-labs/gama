@@ -56,7 +56,7 @@ def asha(operations, output: List[Individual], start_candidates=None,  # General
             for _ in range(8):
                 start_new_job()
 
-            while sum(map(len, individuals_by_rung.values())) < 100:
+            while sum(map(len, individuals_by_rung.values())) < 3000:
                 done, futures = operations.wait_first_complete(futures)
                 for individual, loss, rung in [future.result() for future in done]:
                     individuals_by_rung[rung].append((loss, individual))
@@ -64,11 +64,13 @@ def asha(operations, output: List[Individual], start_candidates=None,  # General
 
             highest_rung_reached = max(rungs)
     except stopit.TimeoutException:
+        log.info('ASHA ended due to timeout.')
         highest_rung_reached = max(rung for rung, individuals in individuals_by_rung.items() if individuals != [])
-        for rung, individuals in individuals_by_rung.items():
-            log.info('[{}] {}'.format(rung, len(individuals)))
         if highest_rung_reached != max(rungs):
             raise RuntimeWarning("Highest rung not reached.")
+    finally:
+        for rung, individuals in individuals_by_rung.items():
+            log.info('[{}] {}'.format(rung, len(individuals)))
 
     return list(map(lambda p: p[1], individuals_by_rung[highest_rung_reached]))
 
