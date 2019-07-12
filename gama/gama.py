@@ -32,10 +32,6 @@ from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
 
-# `gamalog` is for the entire gama module and submodules.
-gamalog = logging.getLogger('gama')
-gamalog.setLevel(logging.DEBUG)
-
 log = logging.getLogger(__name__)
 
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.

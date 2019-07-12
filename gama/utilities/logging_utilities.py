@@ -5,27 +5,78 @@ import queue
 import sys
 from datetime import datetime
 
-gamalog = logging.getLogger('gama')
+MACHINE_LOG_LEVEL = 5
+TIME_FORMAT = '%Y-%m-%d %H:%M:%S,%f'
+
+
+class TOKENS:
+    EVALUATION_RESULT = 'EVAL'
+    EVALUATION_ERROR = 'EVAL_ERR'
+    SEARCH_END = 'S_END'
+    PREPROCESSING_END = 'PRE_END'
+    POSTPROCESSING_END = 'POST_END'
+    EA_RESTART = 'EA_RST'
+    EA_REMOVE_IND = 'RMV_IND'
+    EVALUATION_TIMEOUT = 'EVAL_TO'
+    MUTATION = 'IND_MUT'
+    CROSSOVER = "IND_CX"
+
+
+gama_log = logging.getLogger('gama')
+gama_log.setLevel(MACHINE_LOG_LEVEL)  # We also produce log messages below DEBUG level (machine parseable).
 
 
 def register_stream_log(verbosity):
-    previously_registered_handler = [handler for handler in gamalog.handlers if hasattr(handler, 'tag')]
+    previously_registered_handler = [handler for handler in gama_log.handlers if hasattr(handler, 'tag')]
     if len(previously_registered_handler) > 0:
-        gamalog.debug("Removing handlers registered by previous GAMA instances.")
-        gamalog.handlers = [handler for handler in gamalog.handlers if not hasattr(handler, 'tag')]
+        gama_log.debug("Removing handlers registered by previous GAMA instances.")
+        gama_log.handlers = [handler for handler in gama_log.handlers if not hasattr(handler, 'tag')]
 
     stdout_streamhandler = logging.StreamHandler(sys.stdout)
     stdout_streamhandler.tag = 'machine_set'
     stdout_streamhandler.setLevel(verbosity)
-    gamalog.addHandler(stdout_streamhandler)
+    gama_log.addHandler(stdout_streamhandler)
 
 
 def register_file_log(filename):
-    if not any([handler for handler in gamalog.handlers
+    if not any([handler for handler in gama_log.handlers
                 if isinstance(handler, logging.FileHandler) and filename in handler.baseFilename]):
         file_handler = logging.FileHandler(filename)
-        file_handler.setLevel(logging.DEBUG)
-        gamalog.addHandler(file_handler)
+        file_handler.setLevel(5)
+        gama_log.addHandler(file_handler)
+
+
+def default_time_format(datetime_):
+    return datetime_.strftime(TIME_FORMAT)#[:-3]
+
+
+def log_parseable_event(log_, token, *args):
+    args = [default_time_format(arg) if isinstance(arg, datetime) else arg for arg in args]
+    start = "PLE;{};".format(token)
+    attrs = ';'.join([str(arg) for arg in args])
+    end = ';' + default_time_format(datetime.now()) + ';END!'
+    log_.log(level=MACHINE_LOG_LEVEL, msg=start+attrs+end)
+
+
+class Event:
+
+    def __init__(self, start, end, token):
+        self.start_time = start
+        self.end_time = end
+        self.token = token
+
+    @property
+    def duration(self):
+        return (self.end_time - self.start_time).total_seconds()
+
+    @classmethod
+    def from_string(cls, string):
+        token, *args = string.split('PLE;')[1].split(';END!')[0].split(';')
+        if 'EVAL' in token:
+            start, end, pl, *args = args
+
+        datetime.strptime(start, TIME_FORMAT)
+        return cls(token, start, end)
 
 
 class MultiprocessingLogger(object):
@@ -60,52 +111,3 @@ class MultiprocessingLogger(object):
 
         if i > 0:
             log.debug("Flushed {} log messages.".format(i))
-
-
-class TOKENS:
-    EVALUATION_RESULT = 'EVAL'
-    EVALUATION_ERROR = 'EVAL_ERR'
-    SEARCH_END = 'S_END'
-    PREPROCESSING_END = 'PRE_END'
-    POSTPROCESSING_END = 'POST_END'
-    EA_RESTART = 'EA_RST'
-    EA_REMOVE_IND = 'RMV_IND'
-    EVALUATION_TIMEOUT = 'EVAL_TO'
-    MUTATION = 'IND_MUT'
-    CROSSOVER = "IND_CX"
-
-
-def default_time_format(datetime_):
-    return datetime_.strftime(TIME_FORMAT)#[:-3]
-
-
-def log_parseable_event(log_, token, *args):
-    args = [default_time_format(arg) if isinstance(arg, datetime) else arg for arg in args]
-    start = "PLE;{};".format(token)
-    attrs = ';'.join([str(arg) for arg in args])
-    end = ';' + default_time_format(datetime.now()) + ';END!'
-    log_.debug(start+attrs+end)
-
-
-TIME_FORMAT = '%Y-%m-%d %H:%M:%S,%f'
-
-
-class Event:
-
-    def __init__(self, start, end, token):
-        self.start_time = start
-        self.end_time = end
-        self.token = token
-
-    @property
-    def duration(self):
-        return (self.end_time - self.start_time).total_seconds()
-
-    @classmethod
-    def from_string(cls, string):
-        token, *args = string.split('PLE;')[1].split(';END!')[0].split(';')
-        if 'EVAL' in token:
-            start, end, pl, *args = args
-
-        datetime.strptime(start, TIME_FORMAT)
-        return cls(token, start, end)
