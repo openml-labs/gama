@@ -1,12 +1,9 @@
 import logging
 from functools import partial
-import time
 
-import stopit
-
-from gama.utilities.logging_utilities import TOKENS, log_parseable_event
-from gama.utilities.logging_utilities import MultiprocessingLogger
-from gama.utilities.generic.async_executor import AsyncExecutor, wait_first_complete
+from gama.logging.machine_logging import TOKENS, log_parseable_event
+from gama.logging.utility_functions import MultiprocessingLogger
+from gama.utilities.generic.async_executor import AsyncExecutor
 
 log = logging.getLogger(__name__)
 

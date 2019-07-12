@@ -4,7 +4,7 @@ from typing import List
 
 import stopit
 
-from gama.utilities.logging_utilities import log_parseable_event, TOKENS
+from gama.logging.machine_logging import TOKENS, log_parseable_event
 from gama.utilities.generic.async_executor import AsyncExecutor
 from gama.genetic_programming.compilers.scikitlearn import evaluate_individual
 from gama.genetic_programming.components.individual import Individual

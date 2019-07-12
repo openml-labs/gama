@@ -1,7 +1,7 @@
 from collections import Sequence
 import logging
 
-from gama.utilities.logging_utilities import log_parseable_event, TOKENS
+from gama.logging.machine_logging import TOKENS, log_parseable_event
 from gama.utilities.generic.async_executor import wait_first_complete
 from .components import Individual
 

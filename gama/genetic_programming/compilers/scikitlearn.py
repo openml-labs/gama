@@ -5,8 +5,6 @@ import time
 import uuid
 from datetime import datetime
 
-import pandas as pd
-import numpy as np
 import stopit
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import cross_val_predict, ShuffleSplit
@@ -14,8 +12,8 @@ from sklearn.pipeline import Pipeline
 
 from gama.genetic_programming.algorithms.metrics import Metric
 from gama.genetic_programming.components import Individual, PrimitiveNode, Fitness
-from gama.genetic_programming.operator_set import OperatorSet
-from gama.utilities.logging_utilities import MultiprocessingLogger, log_parseable_event, TOKENS
+from gama.logging.utility_functions import MultiprocessingLogger
+from gama.logging.machine_logging import TOKENS, log_parseable_event
 
 log = logging.getLogger(__name__)
 

@@ -6,7 +6,6 @@ import datetime
 import multiprocessing
 import shutil
 from functools import partial
-import sys
 import time
 import warnings
 from typing import Callable, Union, List
@@ -23,7 +22,8 @@ from gama.data import X_y_from_arff
 from gama.genetic_programming.algorithms.async_ea import async_ea
 from gama.genetic_programming.algorithms.asha import asha, evaluate_on_rung
 from gama.utilities.generic.timekeeper import TimeKeeper
-from gama.utilities.logging_utilities import TOKENS, log_parseable_event, register_stream_log, register_file_log
+from gama.logging.utility_functions import register_stream_log, register_file_log
+from gama.logging.machine_logging import TOKENS, log_parseable_event
 from gama.utilities.preprocessing import define_preprocessing_steps, format_x_y
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
 from gama.genetic_programming.selection import create_from_population, eliminate_from_pareto
