@@ -23,7 +23,7 @@ from gama.genetic_programming.algorithms.async_ea import async_ea
 from gama.genetic_programming.algorithms.asha import asha, evaluate_on_rung
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.logging.utility_functions import register_stream_log, register_file_log
-from gama.logging.machine_logging import TOKENS, log_parseable_event
+from gama.logging.machine_logging import TOKENS, log_event
 from gama.utilities.preprocessing import define_preprocessing_steps, format_x_y
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
 from gama.genetic_programming.selection import create_from_population, eliminate_from_pareto
@@ -269,18 +269,18 @@ class Gama(object):
             steps = define_preprocessing_steps(self._X, max_extra_features_created=None, max_categories_for_one_hot=10)
             self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
 
-        log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
+        log_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
 
         fit_time = int((1 - ensemble_ratio) * self._time_manager.total_time_remaining)
 
         with self._time_manager.start_activity('search', time_limit=fit_time) as search_sw:
             self._search_phase(warm_start, restart_criteria=restart_criteria, timeout=fit_time)
-        log_parseable_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
+        log_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
 
         with self._time_manager.start_activity('postprocess',
                                                time_limit=int(self._time_manager.total_time_remaining)) as post_sw:
             self._postprocess_phase(auto_ensemble_n, timeout=self._time_manager.total_time_remaining)
-        log_parseable_event(log, TOKENS.POSTPROCESSING_END, post_sw.elapsed_time)
+        log_event(log, TOKENS.POSTPROCESSING_END, post_sw.elapsed_time)
 
         if not keep_cache:
             log.debug("Deleting cache.")

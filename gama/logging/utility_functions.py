@@ -10,8 +10,9 @@ gama_log = logging.getLogger('gama')
 def register_stream_log(verbosity):
     previously_registered_handler = [handler for handler in gama_log.handlers if hasattr(handler, 'tag')]
     if len(previously_registered_handler) > 0:
-        gama_log.debug("Removing handlers registered by previous GAMA instances.")
-        gama_log.handlers = [handler for handler in gama_log.handlers if not hasattr(handler, 'tag')]
+        gama_log.debug("Removing StreamHandlers registered by previous GAMA instance(s).")
+        gama_log.handlers = [handler for handler in gama_log.handlers
+                             if not (hasattr(handler, 'tag') and isinstance(handler, logging.StreamHandler))]
 
     stdout_streamhandler = logging.StreamHandler(sys.stdout)
     stdout_streamhandler.tag = 'machine_set'
@@ -20,11 +21,15 @@ def register_stream_log(verbosity):
 
 
 def register_file_log(filename):
-    if not any([handler for handler in gama_log.handlers
-                if isinstance(handler, logging.FileHandler) and filename in handler.baseFilename]):
-        file_handler = logging.FileHandler(filename)
-        file_handler.setLevel(5)
-        gama_log.addHandler(file_handler)
+    if any([isinstance(handler, logging.FileHandler) and hasattr(handler, 'tag') for handler in gama_log.handlers]):
+        gama_log.debug("Removing FileHandlers registered by previous GAMA instance(s).")
+        gama_log.handlers = [handler for handler in gama_log.handlers
+                             if not (hasattr(handler, 'tag') and isinstance(handler, logging.FileHandler))]
+
+    file_handler = logging.FileHandler(filename)
+    file_handler.tag = 'machine_set'
+    file_handler.setLevel(5)
+    gama_log.addHandler(file_handler)
 
 
 class MultiprocessingLogger(object):

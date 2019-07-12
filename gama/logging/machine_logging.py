@@ -1,7 +1,12 @@
 """ Module to facility logging in machine parsable format. """
 from datetime import datetime
+from typing import Iterable, List
 
 from gama.logging import TIME_FORMAT, MACHINE_LOG_LEVEL
+
+PLE_START = 'PLE'
+PLE_END = 'END!'
+PLE_DELIM = ';'
 
 
 class TOKENS:
@@ -17,16 +22,63 @@ class TOKENS:
     CROSSOVER = "IND_CX"
 
 
-def default_time_format(datetime_):
+def default_time_format(datetime_: datetime):
     return datetime_.strftime(TIME_FORMAT)#[:-3]
 
 
-def log_parseable_event(log_, token, *args):
+def log_event(log_, token: str, *args):
+    """ Writes the described event to the machine log level formatted for later parsing. """
     args = [default_time_format(arg) if isinstance(arg, datetime) else arg for arg in args]
-    start = "PLE;{};".format(token)
-    attrs = ';'.join([str(arg) for arg in args])
-    end = ';' + default_time_format(datetime.now()) + ';END!'
-    log_.log(level=MACHINE_LOG_LEVEL, msg=start+attrs+end)
+    attrs = f'{PLE_DELIM}'.join([str(arg) for arg in args])
+    message = f'{PLE_DELIM}'.join([PLE_START, token, attrs, default_time_format(datetime.now()), PLE_END])
+    log_.log(level=MACHINE_LOG_LEVEL, msg=message)
+
+
+def parse_optimization(lines: List[str]) -> 'OptimizationReport':
+    """ Parse all parsable log events for one gama instance. """
+    # Only keep 'parsable log event' lines, discard their delimiters.
+    log = [line.split(PLE_DELIM)[1:-1] for line in lines
+           if line.startswith(PLE_START) and line.endswith(f"{PLE_END}\n")]
+
+    def log_for_token(token_to_match):
+        token_lines = []
+        try:
+            for line in log:
+                token, *args, time = line
+                if token == token_to_match:
+                    token_lines.append((*args, time))
+        except ValueError:
+            raise Exception(str(line))
+        return token_lines
+
+    evaluation_lines = log_for_token(TOKENS.EVALUATION_RESULT)
+    # Fitness represented in Tuples  (!Not necessarily - based on metrics)
+    scores = [float(info[3].split(',')[0][1:]) for info in evaluation_lines]
+    return OptimizationReport(scores)
+
+
+def parse_log(logfile: str) -> Iterable['OptimizationReport']:
+    """ Parse all optimization traces for one gama log. """
+    with open(logfile, 'r') as fh:
+        log = fh.readlines()
+
+    start_indices = [i for i, line in enumerate(log) if line.startswith('Using GAMA version')] + [-1]
+    # One log can store multiple optimization traces. Most easily separated by messages logged on initialization.
+    for start_this, start_next in zip(start_indices, start_indices[1:]):
+        yield parse_optimization(log[start_this:start_next])
+
+
+class OptimizationReport:
+    def __init__(self, scores):
+        self.evaluations = scores
+
+    @property
+    def max_over_iterations(self):
+        best_so_far = float('-inf')
+        for score in self.evaluations:
+            if score > best_so_far:
+                best_so_far = score
+            yield best_so_far
 
 
 class Event:

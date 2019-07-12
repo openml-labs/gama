@@ -4,7 +4,7 @@ from typing import List
 
 import stopit
 
-from gama.logging.machine_logging import TOKENS, log_parseable_event
+from gama.logging.machine_logging import TOKENS, log_event
 from gama.utilities.generic.async_executor import AsyncExecutor
 from gama.genetic_programming.compilers.scikitlearn import evaluate_individual
 from gama.genetic_programming.components.individual import Individual
@@ -57,14 +57,14 @@ def asha(operations, output: List[Individual], start_candidates=None,  # General
             for _ in range(8):
                 start_new_job()
 
-            while sum(map(len, individuals_by_rung.values())) < 3000:
+            while sum(map(len, individuals_by_rung.values())) < 10_000:
                 done, futures = operations.wait_first_complete(futures)
                 for individual, loss, rung in [future.result() for future in done]:
                     individuals_by_rung[rung].append((loss, individual))
                     if rung == max(rungs):
-                        log_parseable_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
-                                            individual.fitness.wallclock_time, individual.fitness.process_time,
-                                            individual.fitness.values, individual._id, individual.pipeline_str())
+                        log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
+                                  individual.fitness.wallclock_time, individual.fitness.process_time,
+                                  individual.fitness.values, individual._id, individual.pipeline_str())
                     start_new_job()
 
             highest_rung_reached = max(rungs)
