@@ -100,6 +100,9 @@ class MultiprocessingLogger(object):
     def error(self, msg):
         self._queue.put((logging.WARNING, msg))
 
+    def log(self, level, msg):
+        self._queue.put((level, msg))
+
     def flush_to_log(self, log):
         # According to the official documentation, Queue.Empty is not reliable, so we just poll the queue until empty.
         for i in itertools.count():
