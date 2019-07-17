@@ -26,7 +26,7 @@ from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.utilities.plgen.manager import Manager
 from gama.utilities.plgen.library import GamaPsetLibrary
 from gama.logging.utility_functions import register_stream_log, register_file_log
-from gama.logging.machine_logging import TOKENS, log_event
+from gama.logging.machine_logging import TOKENS, log_event, MACHINE_LOG_LEVEL
 from gama.utilities.preprocessing import define_preprocessing_steps, format_x_y
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
 from gama.genetic_programming.conformant_mutation import random_valid_mutation_in_place as conformant_mutation
@@ -40,7 +40,7 @@ from gama.d3m.metalearning import generate_warm_start_pop
 
 #  `gamalog` is for the entire gama module and submodules.
 gamalog = logging.getLogger('gama')
-gamalog.setLevel(logging.DEBUG)
+gamalog.setLevel(MACHINE_LOG_LEVEL)
 
 log = logging.getLogger(__name__)
 
