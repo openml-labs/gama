@@ -4,6 +4,7 @@ from typing import List
 
 import stopit
 
+from gama.logging.machine_logging import TOKENS, log_event
 from gama.utilities.generic.async_executor import AsyncExecutor
 from gama.genetic_programming.compilers.scikitlearn import evaluate_individual
 from gama.genetic_programming.components.individual import Individual
@@ -56,19 +57,25 @@ def asha(operations, output: List[Individual], start_candidates=None,  # General
             for _ in range(8):
                 start_new_job()
 
-            while sum(map(len, individuals_by_rung.values())) < 100:
+            while sum(map(len, individuals_by_rung.values())) < 10_000:
                 done, futures = operations.wait_first_complete(futures)
                 for individual, loss, rung in [future.result() for future in done]:
                     individuals_by_rung[rung].append((loss, individual))
+                    if rung == max(rungs):
+                        log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
+                                  individual.fitness.wallclock_time, individual.fitness.process_time,
+                                  individual.fitness.values, individual._id, individual.pipeline_str())
                     start_new_job()
 
             highest_rung_reached = max(rungs)
     except stopit.TimeoutException:
+        log.info('ASHA ended due to timeout.')
         highest_rung_reached = max(rung for rung, individuals in individuals_by_rung.items() if individuals != [])
-        for rung, individuals in individuals_by_rung.items():
-            log.info('[{}] {}'.format(rung, len(individuals)))
         if highest_rung_reached != max(rungs):
             raise RuntimeWarning("Highest rung not reached.")
+    finally:
+        for rung, individuals in individuals_by_rung.items():
+            log.info('[{}] {}'.format(rung, len(individuals)))
 
     return list(map(lambda p: p[1], individuals_by_rung[highest_rung_reached]))
 

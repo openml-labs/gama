@@ -1,12 +1,9 @@
 import logging
 from functools import partial
-import time
 
-import stopit
-
-from gama.utilities.logging_utilities import TOKENS, log_parseable_event
-from gama.utilities.logging_utilities import MultiprocessingLogger
-from gama.utilities.generic.async_executor import AsyncExecutor, wait_first_complete
+from gama.logging.machine_logging import TOKENS, log_event
+from gama.logging.utility_functions import MultiprocessingLogger
+from gama.utilities.generic.async_executor import AsyncExecutor
 
 log = logging.getLogger(__name__)
 
@@ -42,21 +39,21 @@ def async_ea(toolbox, output, start_population, restart_callback=None, max_n_eva
                 logger.flush_to_log(log)
                 for future in done:
                     individual = future.result()
-                    log_parseable_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
-                                        individual.fitness.wallclock_time, individual.fitness.process_time,
-                                        individual.fitness.values, individual._id, individual.pipeline_str())
+                    log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
+                              individual.fitness.wallclock_time, individual.fitness.process_time,
+                              individual.fitness.values, individual._id, individual.pipeline_str())
 
                     should_restart = (restart_callback is not None and restart_callback())
                     if should_restart:
                         log.info("Restart criterion met. Restarting with new random population.")
-                        log_parseable_event(log, TOKENS.EA_RESTART, ind_no)
+                        log_event(log, TOKENS.EA_RESTART, ind_no)
                         start_population = [toolbox.individual() for _ in range(max_population_size)]
                         break
 
                     current_population.append(individual)
                     if len(current_population) > max_population_size:
                         to_remove = toolbox.eliminate(current_population, 1)
-                        log_parseable_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
+                        log_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
                         current_population.remove(to_remove[0])
 
                     if len(current_population) > 1:

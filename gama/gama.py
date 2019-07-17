@@ -6,7 +6,6 @@ import datetime
 import multiprocessing
 import shutil
 from functools import partial
-import sys
 import time
 import warnings
 from typing import Callable, Union, List
@@ -24,9 +23,10 @@ from gama.genetic_programming.components import Individual
 from gama.genetic_programming.algorithms.async_ea import async_ea
 from gama.genetic_programming.algorithms.asha import asha, evaluate_on_rung
 from gama.utilities.generic.timekeeper import TimeKeeper
-from gama.utilities.logging_utilities import TOKENS, log_parseable_event
 from gama.utilities.plgen.manager import Manager
 from gama.utilities.plgen.library import GamaPsetLibrary
+from gama.logging.utility_functions import register_stream_log, register_file_log
+from gama.logging.machine_logging import TOKENS, log_event
 from gama.utilities.preprocessing import define_preprocessing_steps, format_x_y
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
 from gama.genetic_programming.conformant_mutation import random_valid_mutation_in_place as conformant_mutation
@@ -39,10 +39,6 @@ from gama.genetic_programming.compilers.scikitlearn import compile_individual
 from gama.d3m.metalearning import generate_warm_start_pop
 
 #  `gamalog` is for the entire gama module and submodules.
-gamalog = logging.getLogger('gama')
-gamalog.setLevel(logging.DEBUG)
-
-# `gamalog` is for the entire gama module and submodules.
 gamalog = logging.getLogger('gama')
 gamalog.setLevel(logging.DEBUG)
 
@@ -135,15 +131,9 @@ class Gama(object):
                  grammar_file_name=None,
                  rule_name=None):
 
-        if verbosity >= logging.DEBUG:
-            stdout_streamhandler = logging.StreamHandler(sys.stdout)
-            stdout_streamhandler.setLevel(verbosity)
-            gamalog.addHandler(stdout_streamhandler)
-
+        register_stream_log(verbosity)
         if keep_analysis_log:
-            file_handler = logging.FileHandler(keep_analysis_log)
-            file_handler.setLevel(logging.DEBUG)
-            gamalog.addHandler(file_handler)
+            register_file_log(keep_analysis_log)
 
         log.info('Using GAMA version {}.'.format(__version__))
         log.info('{}({})'.format(
@@ -330,18 +320,18 @@ class Gama(object):
                 steps = define_preprocessing_steps(self._X, max_extra_features_created=None, max_categories_for_one_hot=10)
                 self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
 
-        log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
+        log_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
 
         fit_time = int((1 - ensemble_ratio) * self._time_manager.total_time_remaining)
 
         with self._time_manager.start_activity('search', time_limit=fit_time) as search_sw:
             self._search_phase(warm_start, restart_criteria=restart_criteria, timeout=fit_time)
-        log_parseable_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
+        log_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
 
         with self._time_manager.start_activity('postprocess',
                                                time_limit=int(self._time_manager.total_time_remaining)) as post_sw:
             self._postprocess_phase(auto_ensemble_n, timeout=self._time_manager.total_time_remaining)
-        log_parseable_event(log, TOKENS.POSTPROCESSING_END, post_sw.elapsed_time)
+        log_event(log, TOKENS.POSTPROCESSING_END, post_sw.elapsed_time)
 
         if not keep_cache:
             log.debug("Deleting cache.")
@@ -375,12 +365,12 @@ class Gama(object):
                     self._operator_set.evaluate = partial(evaluate_on_rung, **evaluate_args)
                     final_pop = asha(self._operator_set, output=final_pop,
                                      start_candidates=pop, maximum_resource=len(self._X))
-                log.debug([str(i) for i in self._final_pop])
         except KeyboardInterrupt:
             log.info('Search phase terminated because of Keyboard Interrupt.')
 
         self._final_pop = final_pop
-        log.info('Search phase evaluated {} individuals.'.format(len(final_pop)))
+        log.debug([str(i) for i in self._final_pop])
+        log.info(f'Search phase evaluated {len(self._observer._individuals)} individuals.')
 
     def _postprocess_phase(self, n, timeout=1e6):
         """ Perform any necessary post processing, such as ensemble building. """
