@@ -10,6 +10,7 @@ class Observer(object):
     def __init__(self, id_, with_log=False):
         self._with_log = with_log
 
+        self._multiple_pareto_fronts = False
         self._overall_pareto_front = ParetoFront(get_values_fn=lambda ind: ind.fitness.values)
         self._current_pareto_front = ParetoFront(get_values_fn=lambda ind: ind.fitness.values)
 
@@ -42,13 +43,14 @@ class Observer(object):
             self._individuals_since_last_pareto_update += 1
 
         updated = self._overall_pareto_front.update(ind)
-        if updated:
+        if updated and self._multiple_pareto_fronts:
             self._update_pareto_front(ind)
             log.info("Overall pareto-front updated with individual with wvalues {}.".format(ind.fitness.values))
 
     def reset_current_pareto_front(self):
         self._current_pareto_front.clear()
         self._individuals_since_last_pareto_update = 0
+        self._multiple_pareto_fronts = True
 
     def best_n(self, n):
         """ Return the best n individuals observed based on the first optimization criterion.

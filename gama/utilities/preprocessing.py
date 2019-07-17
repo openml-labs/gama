@@ -77,7 +77,8 @@ def format_x_y(x: Union[pd.DataFrame, np.ndarray], y: Union[pd.DataFrame, pd.Ser
         elif isinstance(y, np.ndarray):
             y = pd.Series(y)
     elif y_type == pd.DataFrame:
-        y = pd.DataFrame(y)
+        if not isinstance(y, pd.DataFrame):
+            y = pd.DataFrame(y)
     else:
         raise ValueError(f"`y_type` must be one of [pandas.Series, pandas.DataFrame] but is {y_type}.")
 

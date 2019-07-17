@@ -5,8 +5,6 @@ import time
 import uuid
 from datetime import datetime
 
-import pandas as pd
-import numpy as np
 import stopit
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import cross_val_predict, ShuffleSplit
@@ -14,8 +12,8 @@ from sklearn.pipeline import Pipeline
 
 from gama.genetic_programming.algorithms.metrics import Metric
 from gama.genetic_programming.components import Individual, PrimitiveNode, Fitness
-from gama.genetic_programming.operator_set import OperatorSet
-from gama.utilities.logging_utilities import MultiprocessingLogger, log_parseable_event, TOKENS
+from gama.logging.utility_functions import MultiprocessingLogger
+from gama.logging.machine_logging import TOKENS, log_event
 
 log = logging.getLogger(__name__)
 
@@ -111,7 +109,7 @@ def evaluate_pipeline(pl, X, y_train, timeout, metrics='accuracy', cv=5, cache_d
                 logger.debug('{} encountered while evaluating pipeline.'.format(type(e)), exc_info=True)
 
             single_line_pipeline = str(pl).replace('\n', '')
-            log_parseable_event(logger, TOKENS.EVALUATION_ERROR, start_datetime, single_line_pipeline, type(e), e)
+            log_event(logger, TOKENS.EVALUATION_ERROR, start_datetime, single_line_pipeline, type(e), e)
 
     if cache_dir and -float("inf") not in scores and not draw_subsample:
         pl_filename = str(uuid.uuid4())
@@ -135,7 +133,7 @@ def evaluate_pipeline(pl, X, y_train, timeout, metrics='accuracy', cv=5, cache_d
         # For now we treat an eval timeout the same way as e.g. NaN exceptions and use the default score.
         logger.info('Timeout encountered while evaluating pipeline.')
         single_line_pipeline = ''.join(str(pl).split('\n'))
-        log_parseable_event(logger, TOKENS.EVALUATION_TIMEOUT, start_datetime, single_line_pipeline)
+        log_event(logger, TOKENS.EVALUATION_TIMEOUT, start_datetime, single_line_pipeline)
         logger.debug("Timeout after {}s: {}".format(timeout, pl))
 
     fitness_values = (scores, start_datetime, wallclock_time, process_time)
