@@ -317,7 +317,7 @@ class Gama(object):
 
         self._final_pop = final_pop
         log.debug([str(i) for i in self._final_pop])
-        log.info('Search phase evaluated {} individuals.'.format(len(final_pop)))
+        log.info(f'Search phase evaluated {len(self._observer._individuals)} individuals.')
 
     def _postprocess_phase(self, n, timeout=1e6):
         """ Perform any necessary post processing, such as ensemble building. """
