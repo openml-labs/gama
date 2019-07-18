@@ -1,6 +1,9 @@
 """ Contains full system tests for GamaClassifier """
 import numpy as np
 import pandas as pd
+import pytest
+from typing import Type
+
 from sklearn.datasets import load_wine, load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, log_loss
@@ -62,7 +65,16 @@ diabetes_arff = dict(
 )
 
 
-def _test_dataset_problem(data, metric, labelled_y=False, arff=False, dataframe=False):
+
+def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.DataFrame):
+    """
+
+    :param data:
+    :param metric:
+    :param arff:
+    :param y_type: pd.DataFrame, pd.Series, np.ndarray or str
+    :return:
+    """
     gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric)
     if arff:
         train_path = 'tests/data/{}_train.arff'.format(data['name'])
@@ -76,23 +88,22 @@ def _test_dataset_problem(data, metric, labelled_y=False, arff=False, dataframe=
             gama.fit_arff(train_path, auto_ensemble_n=5)
         class_predictions = gama.predict_arff(test_path)
         class_probabilities = gama.predict_proba_arff(test_path)
+        gama_score = gama.score_arff(test_path)
     else:
         X, y = data['load'](return_X_y=True)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
-        if labelled_y:
+        if y_type == str:
             databunch = data['load']()
-            y_train = np.asarray([databunch.target_names[c_i] for c_i in y_train])
-            y_test = np.asarray([databunch.target_names[c_i] for c_i in y_test])
-        if dataframe:
-            X_train = pd.DataFrame(X_train)
-            X_test = pd.DataFrame(X_test)
-            y_train = pd.DataFrame(y_train)
-            y_test = pd.DataFrame(y_test)
+            y = np.asarray([databunch.target_names[c_i] for c_i in databunch.target])
+        if y_type in [pd.Series, pd.DataFrame]:
+            y = y_type(y)
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
 
         with Stopwatch() as sw:
             gama.fit(X_train, y_train, auto_ensemble_n=5)
         class_predictions = gama.predict(X_test)
         class_probabilities = gama.predict_proba(X_test)
+        gama_score = gama.score(X_test, y_test)
 
     assert 60 * FIT_TIME_MARGIN > sw.elapsed_time, 'fit must stay within 110% of allotted time.'
 
@@ -113,14 +124,13 @@ def _test_dataset_problem(data, metric, labelled_y=False, arff=False, dataframe=
     print(data['name'], metric, 'log-loss:', logloss)
     assert data['base_log_loss'] >= logloss, 'predictions should be at least as good as majority class.'
 
+    score_to_match = logloss if metric == 'log_loss' else accuracy
+    assert score_to_match == pytest.approx(gama_score)
+
 
 def test_binary_classification_accuracy():
     """ GamaClassifier can do binary classification with predict metric from numpy data. """
     _test_dataset_problem(breast_cancer, 'accuracy')
-
-def test_binary_classification_accuracy_df():
-    """ GamaClassifier can do binary classification with predict metric from numpy data. """
-    _test_dataset_problem(breast_cancer, 'accuracy', dataframe=True)
 
 
 def test_binary_classification_logloss():
@@ -140,32 +150,12 @@ def test_multiclass_classification_logloss():
 
 def test_string_label_classification_accuracy():
     """ GamaClassifier can work with string-like target labels when using predict-metric from numpy data. """
-    _test_dataset_problem(breast_cancer, 'accuracy', labelled_y=True)
+    _test_dataset_problem(breast_cancer, 'accuracy', y_type=str)
 
 
 def test_string_label_classification_log_loss():
     """ GamaClassifier can work with string-type target labels when using predict-proba metric from numpy data. """
-    _test_dataset_problem(breast_cancer, 'log_loss', labelled_y=True)
-
-
-def test_binary_classification_accuracy_arff():
-    """ GamaClassifier can do binary classification with predict metric. """
-    _test_dataset_problem(breast_cancer, 'accuracy', arff=True)
-
-
-def test_binary_classification_logloss_arff():
-    """ GamaClassifier can do binary classification with predict-proba metric. """
-    _test_dataset_problem(breast_cancer, 'log_loss', arff=True)
-
-
-def test_multiclass_classification_accuracy_arff():
-    """ GamaClassifier can do multi-class with predict metric. """
-    _test_dataset_problem(wine, 'accuracy', arff=True)
-
-
-def test_multiclass_classification_logloss_arff():
-    """ GamaClassifier can do multi-class with predict-proba metric. """
-    _test_dataset_problem(wine, 'log_loss', arff=True)
+    _test_dataset_problem(breast_cancer, 'log_loss', y_type=str)
 
 
 def test_missing_value_classification_arff():

@@ -1,14 +1,17 @@
 import pytest
 
+import pandas as pd
 from sklearn.datasets import load_digits
+from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, log_loss
 
 from gama import GamaClassifier
 
 
 @pytest.fixture
 def gamaclassifier():
-    gc = GamaClassifier(random_state=0, max_total_time=120)
+    gc = GamaClassifier(random_state=0, max_total_time=60)
     yield gc
     gc.delete_cache()
 
@@ -21,7 +24,12 @@ def _gama_on_digits(gama):
     gama.fit(X_train, y_train)
 
     # Add checks
-    gama.predict(X_test)
+    y_pred = gama.predict(X_test)
+    y_proba = gama.predict_proba(X_test)
+
+    assert log_loss(y_test, y_proba) == gama.score(X_test, y_test)
+    assert log_loss(y_test, y_proba) == gama.score(X_test, pd.Series(y_test))
+    assert log_loss(y_test, y_proba) == gama.score(X_test, LabelEncoder().fit_transform(y_test.reshape(-1, 1)))
 
 
 def test_full_system_single_core(gamaclassifier):

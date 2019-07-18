@@ -6,14 +6,12 @@ import datetime
 import multiprocessing
 import shutil
 from functools import partial
-import sys
 import time
 import warnings
-from typing import Tuple, Callable, Union, List
+from typing import Callable, Union, List
 
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder
 import stopit
 
 import gama.genetic_programming.compilers.scikitlearn
@@ -25,10 +23,11 @@ from gama.genetic_programming.components import Individual
 from gama.genetic_programming.algorithms.async_ea import async_ea
 from gama.genetic_programming.algorithms.asha import asha, evaluate_on_rung
 from gama.utilities.generic.timekeeper import TimeKeeper
-from gama.utilities.logging_utilities import TOKENS, log_parseable_event
-from gama.utilities.preprocessing import define_preprocessing_steps, heuristic_numpy_to_dataframe
 from gama.utilities.plgen.manager import Manager
 from gama.utilities.plgen.library import GamaPsetLibrary
+from gama.logging.utility_functions import register_stream_log, register_file_log
+from gama.logging.machine_logging import TOKENS, log_event, MACHINE_LOG_LEVEL
+from gama.utilities.preprocessing import define_preprocessing_steps, format_x_y
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
 from gama.genetic_programming.conformant_mutation import random_valid_mutation_in_place as conformant_mutation
 from gama.genetic_programming.conformant_mutation import crossover as conformant_crossover
@@ -41,11 +40,7 @@ from gama.d3m.metalearning import generate_warm_start_pop
 
 #  `gamalog` is for the entire gama module and submodules.
 gamalog = logging.getLogger('gama')
-gamalog.setLevel(logging.DEBUG)
-
-# `gamalog` is for the entire gama module and submodules.
-gamalog = logging.getLogger('gama')
-gamalog.setLevel(logging.DEBUG)
+gamalog.setLevel(MACHINE_LOG_LEVEL)
 
 log = logging.getLogger(__name__)
 
@@ -136,15 +131,9 @@ class Gama(object):
                  grammar_file_name=None,
                  rule_name=None):
 
-        if verbosity >= logging.DEBUG:
-            stdout_streamhandler = logging.StreamHandler(sys.stdout)
-            stdout_streamhandler.setLevel(verbosity)
-            gamalog.addHandler(stdout_streamhandler)
-
+        register_stream_log(verbosity)
         if keep_analysis_log:
-            file_handler = logging.FileHandler(keep_analysis_log)
-            file_handler.setLevel(logging.DEBUG)
-            gamalog.addHandler(file_handler)
+            register_file_log(keep_analysis_log)
 
         log.info('Using GAMA version {}.'.format(__version__))
         log.info('{}({})'.format(
@@ -154,13 +143,11 @@ class Gama(object):
         ))
 
         if max_total_time is None or max_total_time <= 0:
-            error_message = "max_total_time should be greater than zero."
-            log.error(error_message + " max_total_time: {}".format(max_total_time))
-            raise ValueError(error_message)
-        if max_eval_time is not None and max_eval_time <= 0:
-            error_message = "max_eval_time should be greater than zero, or None."
-            log.error(error_message + " max_eval_time: {}".format(max_eval_time))
-            raise ValueError(error_message)
+            raise ValueError(f"max_total_time should be integer greater than zero but is {max_total_time}.")
+        if max_eval_time is None or max_eval_time <= 0:
+            raise ValueError(f"max_eval_time should be integer greater than zero but is {max_eval_time}.")
+        if n_jobs < -1:
+            raise ValueError(f"n_jobs should be -1 or positive integer but is {n_jobs}.")
 
         if n_jobs == -1:
             n_jobs = multiprocessing.cpu_count()
@@ -180,7 +167,7 @@ class Gama(object):
         self._metrics = self._scoring_to_metric(scoring)
         self._use_asha: bool = False
         self._X: pd.DataFrame = None
-        self._y: pd.Series = None
+        self._y: pd.DataFrame = None
         self._classes: List = []
 
         default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
@@ -267,48 +254,12 @@ class Gama(object):
         return self._predict(X)
 
     def score(self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]):
-        if self._metrics[0].requires_probabilities:
-            if isinstance(y, pd.Series) or y.ndim == 1:
-                encoder = OneHotEncoder().fit(np.asarray(self._classes).reshape(-1, 1))
-                y = encoder.transform(y)
-        elif isinstance(y, np.ndarray) and y.ndim == 2:
-            y = np.argmax(y, axis=0)
         predictions = self.predict_proba(x) if self._metrics[0].requires_probabilities else self.predict(x)
         return self._metrics[0].score(y, predictions)
 
     def score_arff(self, arff_file_path: str):
         X, y = X_y_from_arff(arff_file_path)
         return self.score(X, y)
-
-    def _preprocess(self, X: Union[pd.DataFrame, np.ndarray], y: Union[pd.DataFrame, pd.Series, np.ndarray]
-                    ) -> Tuple[pd.DataFrame, pd.Series]:
-        if not isinstance(X, (np.ndarray, pd.DataFrame)):
-            raise TypeError("X must be either np.ndarray or pd.DataFrame.")
-        if not isinstance(y, (np.ndarray, pd.Series)):
-            raise TypeError("y must be either np.ndarray or pd.Series.")
-
-        with self._time_manager.start_activity('preprocessing') as preprocessing_sw:
-            # Internally X is always a pd.DataFrame and y is always a pd.Series
-            if isinstance(X, np.ndarray):
-                X = heuristic_numpy_to_dataframe(X)
-
-            if hasattr(self, '_encode_labels'):
-                # This will return a numpy array
-                y = self._encode_labels(y)
-            if isinstance(y, np.ndarray):
-                if y.ndim == 2 and y.shape[1] > 1:
-                    y = np.argmax(y, axis=1)
-                y = pd.Series(y)
-
-            if not isinstance(y, pd.DataFrame) and y.isnull().any():
-                log.info("Target vector has been found to contain NaN-labels, these rows will be ignored.")
-                X, y = X.loc[~y.isnull(), :], y[~y.isnull()]
-
-            steps = define_preprocessing_steps(X, max_extra_features_created=None, max_categories_for_one_hot=10)
-            self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
-
-        log_parseable_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
-        return X, y
 
     def fit_arff(self, arff_file_path: str, *args, **kwargs):
         """ Find and fit a model to predict the target column (last) from other columns.
@@ -320,7 +271,14 @@ class Gama(object):
         X, y = X_y_from_arff(arff_file_path)
         self.fit(X, y, *args, **kwargs)
 
-    def fit(self, X, y, warm_start=False, auto_ensemble_n=25, restart_=False, keep_cache=False, d3m_mode: bool=True):
+    def fit(self,
+            x: Union[pd.DataFrame, np.ndarray],
+            y: Union[pd.DataFrame, pd.Series, np.ndarray],
+            warm_start: bool=False,
+            auto_ensemble_n: int=25,
+            restart_: bool=False,
+            keep_cache: bool=False,
+            d3m_mode: bool=False):
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -330,16 +288,18 @@ class Gama(object):
         After the search termination condition is met, the best found pipeline
         configuration is then used to train a final model on all provided data.
 
-        :param X: Numpy Array, shape = [n_samples, n_features]
+        :param x: pandas.DataFrame or numpy.ndarray, shape = [n_samples, n_features]
             Training data. All elements must be able to be converted to float.
-        :param y: Numpy Array, shape = [n_samples,]
-            Target values.
+        :param y: pandas.DataFrame, pandas.Series or numpy.ndarray, shape = [n_samples,]
+            Target values. If a DataFrame is provided, it is assumed the first column contains target values.
         :param warm_start: bool. Indicates the optimization should continue using the last individuals of the
             previous `fit` call.
         :param auto_ensemble_n: positive integer. The number of models to include in the ensemble which is built
             after the optimizatio process.
-        :param restart_: bool. Indicates whether or not the search should be restarted when a specific restart
-            criteria is met.
+        :param restart_: bool (default=False)
+            Indicates whether or not the search should be restarted when a specific restart criteria is met.
+        :param keep_cache: bool (default=False)
+            If True, keep the cache directory and its content after fitting is complete. Otherwise delete it.
         :param d3m_mode: bool. Signals whether fit is being run in D3M context.  If so, we assume that various
             kinds of preprocessing have already been performed and leave the inputs as D3M Dataframes.
         """
@@ -352,24 +312,26 @@ class Gama(object):
                 self._observer.reset_current_pareto_front()
             return restart and restart_
 
-        if d3m_mode:
-            # Pipelines should not be prepended with automatic imputation/encoding.
-            self._operator_set._safe_compile = None
-            self._X, self._y = X, y
-        else:
-            self._X, self._y = self._preprocess(X, y)
-        self._classes = list(set(self._y))
+        with self._time_manager.start_activity('preprocessing') as preprocessing_sw:
+            y_type = pd.DataFrame if d3m_mode else pd.Series
+            self._X, self._y = format_x_y(x, y, y_type)
+            self._classes = list(set(self._y))
+            if not d3m_mode:
+                steps = define_preprocessing_steps(self._X, max_extra_features_created=None, max_categories_for_one_hot=10)
+                self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
+
+        log_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
 
         fit_time = int((1 - ensemble_ratio) * self._time_manager.total_time_remaining)
 
         with self._time_manager.start_activity('search', time_limit=fit_time) as search_sw:
             self._search_phase(warm_start, restart_criteria=restart_criteria, timeout=fit_time)
-        log_parseable_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
+        log_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
 
         with self._time_manager.start_activity('postprocess',
                                                time_limit=int(self._time_manager.total_time_remaining)) as post_sw:
             self._postprocess_phase(auto_ensemble_n, timeout=self._time_manager.total_time_remaining)
-        log_parseable_event(log, TOKENS.POSTPROCESSING_END, post_sw.elapsed_time)
+        log_event(log, TOKENS.POSTPROCESSING_END, post_sw.elapsed_time)
 
         if not keep_cache:
             log.debug("Deleting cache.")
@@ -403,12 +365,12 @@ class Gama(object):
                     self._operator_set.evaluate = partial(evaluate_on_rung, **evaluate_args)
                     final_pop = asha(self._operator_set, output=final_pop,
                                      start_candidates=pop, maximum_resource=len(self._X))
-                log.debug([str(i) for i in self._final_pop])
         except KeyboardInterrupt:
             log.info('Search phase terminated because of Keyboard Interrupt.')
 
         self._final_pop = final_pop
-        log.info('Search phase evaluated {} individuals.'.format(len(final_pop)))
+        log.debug([str(i) for i in self._final_pop])
+        log.info(f'Search phase evaluated {len(self._observer._individuals)} individuals.')
 
     def _postprocess_phase(self, n, timeout=1e6):
         """ Perform any necessary post processing, such as ensemble building. """

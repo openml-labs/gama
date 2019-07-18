@@ -1,6 +1,7 @@
 from enum import Enum
 from functools import partial
 from typing import Callable
+import math
 
 import numpy as np
 import pandas as pd
@@ -33,6 +34,12 @@ for name, score_fn in [('precision', metrics.precision_score),
         qualified_score_fn = partial(score_fn, average=average)
         classification_metrics[qualified_name] = (qualified_score_fn, False, True)
 
+
+def rmse(*args, **kwargs):
+    mse = metrics.mean_squared_error(*args, **kwargs)
+    return math.sqrt(mse)
+
+
 regression_metrics = dict(
     explained_variance=(metrics.explained_variance_score, False, True),
     r2=(metrics.r2_score, False, True),
@@ -43,7 +50,9 @@ regression_metrics = dict(
     neg_median_absolute_error=(metrics.median_absolute_error, False, False),
     median_absolute_error=(metrics.median_absolute_error, False, False),
     neg_mean_squared_error=(metrics.mean_squared_error, False, False),
-    mean_squared_error=(metrics.mean_squared_error, False, False)
+    mean_squared_error=(metrics.mean_squared_error, False, False),
+    neg_root_mean_squared_error=(rmse, False, False),
+    root_mean_squared_error=(rmse, False, False)
 )
 
 all_metrics = {**classification_metrics, **regression_metrics}
@@ -79,22 +88,10 @@ class Metric:
         # Scikit-learn metrics can be very flexible with their input, interpreting a list as class labels for one
         # metric, while interpreting it as class probability for the positive class for another.
         # We want to force clear and early errors to avoid accidentally working with the wrong data/interpretation.
-
-        # Unfortunately, D3M pipelines force DataFrames throughout.  Disabling this check until we can
-        # come up with a more general solution. Pieter: `y` should now be converted to pandas series.
         if not isinstance(y_true, (np.ndarray, pd.Series, pd.DataFrame)):
-            raise TypeError('y_true must be a numpy array.')
-        if not isinstance(predictions, (np.ndarray, pd.Series)):
-            raise TypeError('predictions must be a numpy array.')
-
-        required_dimensionality = 2 if self.requires_probabilities else 1
-        if predictions.ndim != required_dimensionality:
-            raise ValueError('Metric {} requires predictions with dimensionality {}, found {} (shape{}).'
-                             .format(self.name, required_dimensionality, predictions.ndim, predictions.shape))
-        if y_true.ndim != required_dimensionality:
-            raise ValueError('Metric {} requires y_true with dimensionality {}, found {} (shape{}).'
-                             .format(self.name, required_dimensionality, y_true.ndim, y_true.shape))
-
+            raise TypeError('y_true must be a numpy array, pandas series or pandas dataframe.')
+        if not isinstance(predictions, (np.ndarray, pd.Series, pd.DataFrame)):
+            raise TypeError('predictions must be a numpy array, pandas series or pandas dataframe.')
         return self._score_function(y_true, predictions)
 
     def maximizable_score(self, y_true, predictions):
