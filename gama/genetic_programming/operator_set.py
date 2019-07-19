@@ -1,6 +1,8 @@
 from collections import Sequence
 import logging
+from concurrent.futures.process import BrokenProcessPool
 
+import stopit
 from gama.logging.machine_logging import TOKENS, log_event
 from gama.utilities.generic.async_executor import wait_first_complete
 from .components import Individual
@@ -35,7 +37,13 @@ class OperatorSet:
 
     def wait_first_complete(self, *args, **kwargs):
         done, not_done = wait_first_complete(*args, **kwargs)
-        for result in [future.result() for future in done]:
+        try:
+            results = [future.result() for future in done]
+        except BrokenProcessPool as e:
+            log.warning("Broken Process Pool while retrieving results.", exc_info=True)
+            raise stopit.TimeoutException
+
+        for result in results:
             individual = result if not isinstance(result, Sequence) else result[0]
             if self._evaluate_callback is not None:
                 self._evaluate_callback(individual)
