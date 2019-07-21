@@ -32,6 +32,7 @@ from gama.genetic_programming.operations import create_random_expression
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
+from gama.postprocessing import post_process, FitBest, Ensemble, NoPostProcessing
 
 log = logging.getLogger(__name__)
 
@@ -142,12 +143,12 @@ class Gama(object):
         self._best_pipeline = None
         self._observer = None
         self.ensemble = None
-        self._ensemble_fit: bool = False
         self._metrics = scoring_to_metric(scoring)
         self._use_asha: bool = False
         self._X: pd.DataFrame = None
         self._y: pd.DataFrame = None
         self._classes: List = []
+        self.model: object = None
 
         default_cache_dir = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{str(uuid.uuid4())[:4]}_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
@@ -240,7 +241,12 @@ class Gama(object):
         :param keep_cache: bool (default=False)
             If True, keep the cache directory and its content after fitting is complete. Otherwise delete it.
         """
-        ensemble_ratio = 0.3  # fraction of time left after preprocessing that reserved for postprocessing
+        if auto_ensemble_n == 0:
+            postprocessing = NoPostProcessing
+        elif auto_ensemble_n == 1:
+            postprocessing = FitBest
+        else:
+            postprocessing = Ensemble
 
         def restart_criteria():
             restart = self._observer._individuals_since_last_pareto_update > 400
@@ -257,7 +263,7 @@ class Gama(object):
 
         log_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
 
-        fit_time = int((1 - ensemble_ratio) * self._time_manager.total_time_remaining)
+        fit_time = int((1 - postprocessing.time_fraction) * self._time_manager.total_time_remaining)
 
         with self._time_manager.start_activity('search', time_limit=fit_time) as search_sw:
             self._search_phase(warm_start, restart_criteria=restart_criteria, timeout=fit_time)
@@ -265,7 +271,11 @@ class Gama(object):
 
         with self._time_manager.start_activity('postprocess',
                                                time_limit=int(self._time_manager.total_time_remaining)) as post_sw:
-            self._postprocess_phase(auto_ensemble_n, timeout=self._time_manager.total_time_remaining)
+            best_individual = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values)))[0]
+            self.model = post_process(self, postprocessing,
+                                      ensemble_size=auto_ensemble_n,
+                                      timeout=self._time_manager.total_time_remaining,
+                                      best=best_individual)
         log_event(log, TOKENS.POSTPROCESSING_END, post_sw.elapsed_time)
 
         if not keep_cache:
@@ -305,45 +315,8 @@ class Gama(object):
         log.debug([str(i) for i in self._final_pop])
         log.info(f'Search phase evaluated {len(self._observer._individuals)} individuals.')
 
-    def _postprocess_phase(self, n, timeout=1e6):
-        """ Perform any necessary post processing, such as ensemble building. """
-        self._best_individual = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values)))[0]
-        log.info("Best pipeline has fitness of {}".format(self._best_individual.fitness.values))
-        self._best_pipeline = self._best_individual.pipeline
-        log.info("Pipeline {}, steps: {}".format(self._best_pipeline, self._best_pipeline.steps))
-        self._best_pipeline.fit(self._X, self._y)
-        if n > 1:
-            self._build_fit_ensemble(n, timeout=timeout)
-
     def _initialize_ensemble(self):
         raise NotImplementedError('_initialize_ensemble should be implemented by a child class.')
-
-    def _build_fit_ensemble(self, ensemble_size, timeout):
-        start_build = time.time()
-        try:
-            log.debug('Building ensemble.')
-            self._initialize_ensemble()
-
-            # Starting with more models in the ensemble should help against overfitting, but depending on the total
-            # ensemble size, it might leave too little room to calibrate the weights or add new models. So we have
-            # some adaptive defaults (for now).
-            if ensemble_size <= 10:
-                self.ensemble.build_initial_ensemble(1)
-            else:
-                self.ensemble.build_initial_ensemble(10)
-
-            remainder = ensemble_size - self.ensemble._total_model_weights()
-            if remainder > 0:
-                self.ensemble.expand_ensemble(remainder)
-
-            build_time = time.time() - start_build
-            timeout = timeout - build_time
-            log.info('Building ensemble took {}s. Fitting ensemble with timeout {}s.'.format(build_time, timeout))
-
-            self.ensemble.fit(self._X, self._y, timeout=timeout)
-            self._ensemble_fit = True
-        except Exception as e:
-            log.warning("Error during auto ensemble: {}".format(e), exc_info=True)
 
     def delete_cache(self):
         """ Removes the cache folder and all files associated to this instance. """

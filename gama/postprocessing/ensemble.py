@@ -2,13 +2,15 @@ from collections import namedtuple
 import os
 import pickle
 import logging
+import time
+from typing import Optional
 
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 import stopit
 
-from gama.genetic_programming.algorithms.metrics import Metric
+from gama.genetic_programming.algorithms.metrics import Metric, MetricType
 from gama.utilities.generic.async_executor import AsyncExecutor, wait_first_complete
 
 log = logging.getLogger(__name__)
@@ -296,3 +298,41 @@ class EnsembleRegressor(Ensemble):
 
     def predict(self, X):
         return self._get_weighted_mean_predictions(X)
+
+
+def build_fit_ensemble(x, y, ensemble_size: int, timeout: int,
+                       metric: Metric, cache: str, n_jobs: int, encoder: Optional[object]=None) -> Ensemble:
+    """ Construct an Ensemble of models from cache, optimizing for metric and fit to (x, y). """
+    start_build = time.time()
+
+    log.debug('Building ensemble.')
+    if metric.task_type == MetricType.CLASSIFICATION:
+        ensemble = EnsembleClassifier(metric, y, model_library_directory=cache, n_jobs=n_jobs)
+        ensemble._label_encoder = encoder
+    elif metric.task_type == MetricType.REGRESSION:
+        ensemble = EnsembleRegressor(metric, y, model_library_directory=cache, n_jobs=n_jobs)
+    else:
+        raise ValueError(f"Unknown metric task type {metric.task_type}")
+
+    try:
+        # Starting with more models in the ensemble should help against overfitting, but depending on the total
+        # ensemble size, it might leave too little room to calibrate the weights or add new models. So we have
+        # some adaptive defaults (for now).
+        if ensemble_size <= 10:
+            ensemble.build_initial_ensemble(1)
+        else:
+            ensemble.build_initial_ensemble(10)
+
+        remainder = ensemble_size - ensemble._total_model_weights()
+        if remainder > 0:
+            ensemble.expand_ensemble(remainder)
+
+        build_time = time.time() - start_build
+        timeout = timeout - build_time
+        log.info(f'Building ensemble took {build_time}s. Fitting ensemble with timeout {timeout}s.')
+
+        ensemble.fit(x, y, timeout)
+    except Exception as e:
+        log.warning(f"Error during auto ensemble: {e}", exc_info=True)
+
+    return ensemble
