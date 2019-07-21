@@ -10,6 +10,7 @@ from .gama import Gama
 from gama.data import X_y_from_arff
 from gama.configuration.classification import clf_config
 from gama.utilities.auto_ensemble import EnsembleClassifier
+from gama.genetic_programming.algorithms.metrics import scoring_to_metric
 
 
 class GamaClassifier(Gama):
@@ -18,7 +19,7 @@ class GamaClassifier(Gama):
             # Do this to avoid the whole dictionary being included in the documentation.
             config = clf_config
 
-        self._metrics = self._scoring_to_metric(scoring)
+        self._metrics = scoring_to_metric(scoring)
         if any(metric.requires_probabilities for metric in self._metrics):
             # we don't want classifiers that do not have `predict_proba`, because then we have to
             # start doing one hot encodings of predictions etc.

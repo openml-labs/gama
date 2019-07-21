@@ -1,7 +1,7 @@
 import random
 import logging
 import os
-from collections import defaultdict, Iterable
+from collections import defaultdict
 import datetime
 import multiprocessing
 import shutil
@@ -15,7 +15,7 @@ import numpy as np
 import stopit
 
 import gama.genetic_programming.compilers.scikitlearn
-from gama.genetic_programming.algorithms.metrics import Metric
+from gama.genetic_programming.algorithms.metrics import scoring_to_metric
 from .utilities.observer import Observer
 
 from gama.data import X_y_from_arff
@@ -142,7 +142,7 @@ class Gama(object):
         self._observer = None
         self.ensemble = None
         self._ensemble_fit: bool = False
-        self._metrics = self._scoring_to_metric(scoring)
+        self._metrics = scoring_to_metric(scoring)
         self._use_asha: bool = False
         self._X: pd.DataFrame = None
         self._y: pd.DataFrame = None
@@ -175,21 +175,6 @@ class Gama(object):
             eliminate=eliminate_from_pareto,
             evaluate_callback=self._on_evaluation_completed
         )
-
-    def _scoring_to_metric(self, scoring):
-        if isinstance(scoring, str):
-            return tuple([Metric.from_string(scoring)])
-        elif isinstance(scoring, Metric):
-            return tuple([scoring])
-        elif isinstance(scoring, Iterable):
-            if all(isinstance(scorer, Metric) for scorer in scoring):
-                return scoring
-            elif all(isinstance(scorer, str) for scorer in scoring):
-                return tuple([Metric.from_string(scorer) for scorer in scoring])
-            else:
-                raise ValueError("Iterable of mixed types for `scoring` currently not supported.")
-        else:
-            raise ValueError("scoring must be a string, Metric or Iterable (of strings or Metrics).")
 
     def _predict(self, x: pd.DataFrame):
         raise NotImplemented('_predict is implemented by base classes.')
