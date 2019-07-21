@@ -13,6 +13,7 @@ requirements = [
 
 test_requirements = [
     'pytest',
+    'pytest-mock',
     'codecov',
     'pytest-cov'
 ]
