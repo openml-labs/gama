@@ -9,6 +9,7 @@ from functools import partial
 import time
 import warnings
 from typing import Callable, Union, List
+import uuid
 
 import pandas as pd
 import numpy as np
@@ -148,7 +149,7 @@ class Gama(object):
         self._y: pd.DataFrame = None
         self._classes: List = []
 
-        default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
+        default_cache_dir = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{str(uuid.uuid4())[:4]}_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
         if not os.path.isdir(self._cache_dir):
             os.mkdir(self._cache_dir)

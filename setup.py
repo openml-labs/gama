@@ -14,6 +14,7 @@ requirements = [
 test_requirements = [
     'pytest',
     'pytest-mock',
+    'pytest-xdist',
     'codecov',
     'pytest-cov'
 ]
