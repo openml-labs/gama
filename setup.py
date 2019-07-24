@@ -12,7 +12,7 @@ requirements = [
 ]
 
 test_requirements = [
-    'pytest',
+    'pytest>=4.4.0',
     'pytest-mock',
     'pytest-xdist',
     'codecov',
