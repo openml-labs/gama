@@ -2,6 +2,7 @@ import logging
 import os
 import pickle
 import time
+from typing import Iterable
 import uuid
 from datetime import datetime
 
@@ -23,7 +24,7 @@ def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
     return primitive_node._primitive.identifier(**hyperparameters)
 
 
-def compile_individual(individual: Individual, parameter_checks=None, preprocessing_steps=None) -> Pipeline:
+def compile_individual(individual: Individual, parameter_checks=None, preprocessing_steps: Iterable[object]=None) -> Pipeline:
     steps = [(str(i), primitive_node_to_sklearn(primitive)) for i, primitive in enumerate(individual.primitives)]
     if preprocessing_steps:
         steps = steps + [(str(i), step) for (i, step) in enumerate(reversed(preprocessing_steps), start=len(steps))]

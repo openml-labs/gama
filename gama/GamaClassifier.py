@@ -9,7 +9,7 @@ from sklearn.preprocessing import LabelEncoder
 from .gama import Gama
 from gama.data import X_y_from_arff
 from gama.configuration.classification import clf_config
-from gama.utilities.auto_ensemble import EnsembleClassifier
+from gama.genetic_programming.algorithms.metrics import scoring_to_metric
 
 
 class GamaClassifier(Gama):
@@ -18,7 +18,7 @@ class GamaClassifier(Gama):
             # Do this to avoid the whole dictionary being included in the documentation.
             config = clf_config
 
-        self._metrics = self._scoring_to_metric(scoring)
+        self._metrics = scoring_to_metric(scoring)
         if any(metric.requires_probabilities for metric in self._metrics):
             # we don't want classifiers that do not have `predict_proba`, because then we have to
             # start doing one hot encodings of predictions etc.
@@ -35,8 +35,7 @@ class GamaClassifier(Gama):
         :return: a numpy array with predictions. The array is of shape (N,) where N is the length of the
             first dimension of X.
         """
-        classifier = self.ensemble if self._ensemble_fit else self._best_pipeline
-        y = classifier.predict(x)
+        y = self.model.predict(x)
         # Decode the predicted labels - necessary only if ensemble is not used.
         if y[0] not in self._label_encoder.classes_:
             y = self._label_encoder.inverse_transform(y)
@@ -51,8 +50,7 @@ class GamaClassifier(Gama):
         :return: a numpy array with class probabilities. The array is of shape (N, K) where N is the length of the
             first dimension of X, and K is the number of class labels found in `y` of `fit`.
         """
-        classifier = self.ensemble if self._ensemble_fit else self._best_pipeline
-        return classifier.predict_proba(x)
+        return self.model.predict_proba(x)
 
     def predict_proba(self, X: Union[pd.DataFrame, np.ndarray]):
         """ Predict the class probabilities for input X.
@@ -93,11 +91,3 @@ class GamaClassifier(Gama):
     def _encode_labels(self, y):
         self._label_encoder = LabelEncoder().fit(y)
         return self._label_encoder.transform(y)
-
-    def _initialize_ensemble(self):
-        self.ensemble = EnsembleClassifier(self._metrics[0], self._y,
-                                           model_library_directory=self._cache_dir, n_jobs=self._n_jobs)
-
-    def _build_fit_ensemble(self, ensemble_size, timeout):
-        super()._build_fit_ensemble(ensemble_size, timeout)
-        self.ensemble._label_encoder = self._label_encoder

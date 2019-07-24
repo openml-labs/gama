@@ -1,6 +1,6 @@
 from enum import Enum
 from functools import partial
-from typing import Callable
+from typing import Callable, Iterable, Tuple, Union, Dict
 
 import numpy as np
 import pandas as pd
@@ -33,7 +33,7 @@ for name, score_fn in [('precision', metrics.precision_score),
         qualified_score_fn = partial(score_fn, average=average)
         classification_metrics[qualified_name] = (qualified_score_fn, False, True)
 
-regression_metrics = dict(
+regression_metrics: Dict[str, Tuple[Callable, bool, bool]] = dict(
     explained_variance=(metrics.explained_variance_score, False, True),
     r2=(metrics.r2_score, False, True),
     neg_mean_absolute_error=(metrics.mean_absolute_error, False, False),
@@ -51,8 +51,8 @@ all_metrics = {**classification_metrics, **regression_metrics}
 
 class MetricType(Enum):
     """ Metric types supported by GAMA. """
-    CLASSIFICATION = 1
-    REGRESSION = 2
+    CLASSIFICATION: int = 1
+    REGRESSION: int = 2
 
 
 class Metric:
@@ -69,7 +69,7 @@ class Metric:
         self._optimize_modifier = 1 if maximize else -1
         self.task_type = task_type
 
-    def score(self, y_true, predictions):
+    def score(self, y_true, predictions) -> float:
         """ Score the predictions based on the metric.
 
         :param y_true: numpy array of shape (N,K) if metric relies on class probabilities, (N,) otherwise.
@@ -90,7 +90,7 @@ class Metric:
         return self._optimize_modifier * self.score(y_true, predictions)
 
     @classmethod
-    def from_string(cls, metric_name: str):
+    def from_string(cls, metric_name: str) -> 'Metric':
         if metric_name in regression_metrics:
             task_type = MetricType.REGRESSION
         elif metric_name in classification_metrics:
@@ -100,3 +100,15 @@ class Metric:
 
         score_function, requires_probabilities, should_maximize = all_metrics[metric_name]
         return cls(metric_name, score_function, requires_probabilities, should_maximize, task_type)
+
+
+def scoring_to_metric(scoring: Union[str, Metric, Iterable[str], Iterable[Metric]]) -> Tuple[Metric]:
+    if isinstance(scoring, str):
+        return tuple([Metric.from_string(scoring)])
+    elif isinstance(scoring, Metric):
+        return tuple([scoring])
+    elif (isinstance(scoring, Iterable)
+            and all([isinstance(scorer, Metric) or isinstance(scorer, str) for scorer in scoring])):
+        return tuple([scorer if isinstance(scorer, Metric) else Metric.from_string(scorer) for scorer in scoring])
+    else:
+        raise ValueError("scoring must be a string, Metric or Iterable (of strings or Metrics).")
