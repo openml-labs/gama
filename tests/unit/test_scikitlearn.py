@@ -6,7 +6,8 @@ from sklearn.metrics import accuracy_score, log_loss
 from sklearn.preprocessing import OneHotEncoder
 
 from gama.genetic_programming.algorithms.metrics import scoring_to_metric
-from gama.genetic_programming.compilers.scikitlearn import cross_val_predict_score, evaluate_individual, compile_individual, evaluate_pipeline
+from gama.genetic_programming.compilers.scikitlearn import \
+    cross_val_predict_score, evaluate_individual, compile_individual, evaluate_pipeline
 
 from .unit_fixtures import pset, BernoulliNBStandardScaler
 
@@ -56,3 +57,13 @@ def test_compile_individual(BernoulliNBStandardScaler):
     assert isinstance(extended_pipeline.steps[0][1], MinMaxScaler)
     assert isinstance(extended_pipeline.steps[1][1], StandardScaler)
     assert isinstance(extended_pipeline.steps[2][1], BernoulliNB)
+
+
+def test_evaluate_pipeline(BernoulliNBStandardScaler):
+    x, y = load_iris(return_X_y=True)
+    x, y = pd.DataFrame(x), pd.Series(y)
+
+    scores, start, wallclock, process = evaluate_pipeline(
+        BernoulliNBStandardScaler.pipeline, x, y, timeout=60,
+        metrics=scoring_to_metric('accuracy'))
+    assert 1 == len(scores)
