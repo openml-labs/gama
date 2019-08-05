@@ -10,7 +10,7 @@ import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 import stopit
 
-from gama.genetic_programming.algorithms.metrics import Metric, MetricType
+from gama.utilities.metrics import Metric, MetricType
 from gama.utilities.generic.async_executor import AsyncExecutor, wait_first_complete
 
 log = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ class Ensemble(object):
 
     def __init__(self, metric, y: pd.DataFrame,
                  model_library=None, model_library_directory=None,
-                 shrink_on_pickle=True, n_jobs=1):
+                 shrink_on_pickle=True):
         """
         Either model_library or model_library_directory must be specified.
         If model_library is specified, model_library_directory is ignored.
@@ -32,7 +32,6 @@ class Ensemble(object):
         :param model_library_directory: a directory containing results of model evaluations.
         :param shrink_on_pickle: if True, remove memory-intensive attributes that are required during fit,
                                  but not predict, before pickling
-        :param n_jobs: the number of jobs to run in parallel when fitting the final ensemble.
         :param label_encoder: a LabelEncoder which can decode the model predictions to desired labels.
         """
         if isinstance(metric, str):
@@ -53,7 +52,6 @@ class Ensemble(object):
         self._model_library_directory = model_library_directory
         self._model_library = model_library if model_library is not None else []
         self._shrink_on_pickle = shrink_on_pickle
-        self._n_jobs = n_jobs
         self._y = y
         self._prediction_transformation = None
 
@@ -157,7 +155,7 @@ class Ensemble(object):
 
         self._fit_models = []
         futures = set()
-        with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncExecutor(self._n_jobs) as async_:
+        with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncExecutor() as async_:
             for (model, weight) in self._models.values():
                 futures.add(async_.submit(fit_and_weight, (model.pipeline, X, y, weight)))
 
@@ -301,16 +299,16 @@ class EnsembleRegressor(Ensemble):
 
 
 def build_fit_ensemble(x, y, ensemble_size: int, timeout: int,
-                       metric: Metric, cache: str, n_jobs: int, encoder: Optional[object]=None) -> Ensemble:
+                       metric: Metric, cache: str, encoder: Optional[object]=None) -> Ensemble:
     """ Construct an Ensemble of models from cache, optimizing for metric and fit to (x, y). """
     start_build = time.time()
 
     log.debug('Building ensemble.')
     if metric.task_type == MetricType.CLASSIFICATION:
-        ensemble = EnsembleClassifier(metric, y, model_library_directory=cache, n_jobs=n_jobs)
+        ensemble = EnsembleClassifier(metric, y, model_library_directory=cache)
         ensemble._label_encoder = encoder
     elif metric.task_type == MetricType.REGRESSION:
-        ensemble = EnsembleRegressor(metric, y, model_library_directory=cache, n_jobs=n_jobs)
+        ensemble = EnsembleRegressor(metric, y, model_library_directory=cache)
     else:
         raise ValueError(f"Unknown metric task type {metric.task_type}")
 

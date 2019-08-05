@@ -5,11 +5,10 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, log_loss
 from sklearn.preprocessing import OneHotEncoder
 
-from gama.genetic_programming.algorithms.metrics import scoring_to_metric
+from gama.utilities.metrics import scoring_to_metric
 from gama.genetic_programming.compilers.scikitlearn import \
     cross_val_predict_score, evaluate_individual, compile_individual, evaluate_pipeline
-
-from .unit_fixtures import pset, BernoulliNBStandardScaler
+from tests.unit.unit_fixtures import BernoulliNBStandardScaler, pset
 
 
 def test_cross_val_predict_score():

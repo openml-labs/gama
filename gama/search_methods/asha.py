@@ -4,6 +4,7 @@ from typing import List
 
 import stopit
 
+from gama.search_methods import _check_base_search_hyperparameters
 from gama.logging.machine_logging import TOKENS, log_event
 from gama.utilities.generic.async_executor import AsyncExecutor
 from gama.genetic_programming.compilers.scikitlearn import evaluate_individual
@@ -20,6 +21,7 @@ log = logging.getLogger(__name__)
 
 def asha(operations, output: List[Individual], start_candidates=None,  # General Search Hyperparameters
          reduction_factor=3, minimum_resource=100, maximum_resource=1700, minimum_early_stopping_rate=1):  # Algorithm Specific
+    _check_base_search_hyperparameters(operations, output, start_candidates)
     # Note that here we index the rungs by all possible rungs (0..ceil(log_eta(R/r))), and ignore the first
     # minimum_early_stopping_rate rungs. This contrasts the paper where rung 0 refers to the first used one.
     max_rung = math.ceil(math.log(maximum_resource/minimum_resource, reduction_factor))

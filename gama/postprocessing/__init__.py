@@ -59,7 +59,6 @@ def post_process(gama: 'Gama', method: PostProcessing, **kwargs) -> object:
         x=gama._X,
         y=gama._y,
         cache=gama._cache_dir,
-        n_jobs=gama._n_jobs,
         metric=gama._metrics[0],
         encoder=gama._label_encoder if hasattr(gama, '_label_encoder') else None
     )

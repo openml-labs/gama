@@ -3,10 +3,8 @@ import logging
 import os
 from collections import defaultdict
 import datetime
-import multiprocessing
 import shutil
 from functools import partial
-import time
 import warnings
 from typing import Callable, Union, List
 import uuid
@@ -16,12 +14,12 @@ import numpy as np
 import stopit
 
 import gama.genetic_programming.compilers.scikitlearn
-from gama.genetic_programming.algorithms.metrics import scoring_to_metric
+from gama.utilities.metrics import scoring_to_metric
 from .utilities.observer import Observer
 
 from gama.data import X_y_from_arff
-from gama.genetic_programming.algorithms.async_ea import async_ea
-from gama.genetic_programming.algorithms.asha import asha, evaluate_on_rung
+from gama.search_methods.async_ea import async_ea
+from gama.search_methods.asha import asha, evaluate_on_rung
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.logging.utility_functions import register_stream_log, register_file_log
 from gama.logging.machine_logging import TOKENS, log_event
@@ -33,6 +31,7 @@ from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
 from gama.postprocessing import post_process, FitBest, Ensemble, NoPostProcessing
+from gama.utilities.generic.async_executor import AsyncExecutor
 
 log = logging.getLogger(__name__)
 
@@ -82,9 +81,10 @@ class Gama(object):
     :param max_eval_time: positive integer or None (default=300)
         Time in seconds that can be used to evaluate any one single individual.
 
-    :param n_jobs: integer (default=1)
-        The amount of parallel processes that may be created to speed up `fit`. If this number
-        is zero or negative, it will be set to the amount of cores.
+    :param n_jobs: integer (default=-1)
+        The amount of parallel processes that may be created to speed up `fit`.
+        Accepted values are positive integers or -1.
+        If -1 is specified, multiprocessing.cpu_count() processes are created.
 
     :param verbosity: integer (default=logging.WARNING)
         Sets the level of log messages to be automatically output to terminal.
@@ -106,7 +106,7 @@ class Gama(object):
                  population_size=50,
                  max_total_time=3600,
                  max_eval_time=300,
-                 n_jobs=1,
+                 n_jobs=-1,
                  verbosity=logging.WARNING,
                  keep_analysis_log='gama.log',
                  cache_dir=None):
@@ -126,18 +126,17 @@ class Gama(object):
             raise ValueError(f"max_total_time should be integer greater than zero but is {max_total_time}.")
         if max_eval_time is None or max_eval_time <= 0:
             raise ValueError(f"max_eval_time should be integer greater than zero but is {max_eval_time}.")
-        if n_jobs < -1:
+        if n_jobs < -1 or n_jobs == 0:
             raise ValueError(f"n_jobs should be -1 or positive integer but is {n_jobs}.")
-
-        if n_jobs == -1:
-            n_jobs = multiprocessing.cpu_count()
+        elif n_jobs != -1:
+            # AsyncExecutor defaults to using multiprocessing.cpu_count(), i.e. n_jobs=-1
+            AsyncExecutor.n_jobs = n_jobs
 
         self._fitted_pipelines = {}
         self._random_state = random_state
         self._pop_size = population_size
         self._max_total_time = max_total_time
         self._max_eval_time = max_eval_time
-        self._n_jobs = n_jobs
         self._regularize_length = regularize_length
         self._time_manager = TimeKeeper(max_total_time)
         self._best_pipeline = None
@@ -301,9 +300,7 @@ class Gama(object):
                     self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
                                                           **evaluate_args)
                     final_pop = async_ea(self._operator_set, output=final_pop, start_population=pop,
-                                         restart_callback=restart_criteria,
-                                         max_time_seconds=timeout,
-                                         n_jobs=self._n_jobs)
+                                         restart_callback=restart_criteria)
                 else:
                     self._operator_set.evaluate = partial(evaluate_on_rung, **evaluate_args)
                     final_pop = asha(self._operator_set, output=final_pop,

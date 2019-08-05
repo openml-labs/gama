@@ -1,6 +1,7 @@
 import logging
 from functools import partial
 
+from gama.search_methods import _check_base_search_hyperparameters
 from gama.logging.machine_logging import TOKENS, log_event
 from gama.logging.utility_functions import MultiprocessingLogger
 from gama.utilities.generic.async_executor import AsyncExecutor
@@ -8,14 +9,10 @@ from gama.utilities.generic.async_executor import AsyncExecutor
 log = logging.getLogger(__name__)
 
 
-def async_ea(toolbox, output, start_population, restart_callback=None, max_n_evaluations=10000, max_time_seconds=1e7, n_jobs=1):
-    if max_time_seconds <= 0 or max_time_seconds > 3e6:
-        raise ValueError("'max_time_seconds' must be greater than 0 and less than or equal to 3e6, but was {}."
-                         .format(max_time_seconds))
+def async_ea(toolbox, output, start_population, restart_callback=None, max_n_evaluations=10000):
+    _check_base_search_hyperparameters(toolbox, output, start_population)
     if max_n_evaluations <= 0:
         raise ValueError("'n_evaluations' must be non-negative, but was {}.".format(max_n_evaluations))
-    if n_jobs <= 0:
-        raise ValueError("'n_jobs' must be non-negative, but was {}.".format(n_jobs))
 
     max_population_size = len(start_population)
     logger = MultiprocessingLogger()
@@ -25,7 +22,7 @@ def async_ea(toolbox, output, start_population, restart_callback=None, max_n_eva
 
     current_population = output
 
-    with AsyncExecutor(n_jobs) as async_:
+    with AsyncExecutor() as async_:
         should_restart = True
         while should_restart:
             should_restart = False
@@ -39,10 +36,6 @@ def async_ea(toolbox, output, start_population, restart_callback=None, max_n_eva
                 logger.flush_to_log(log)
                 for future in done:
                     individual = future.result()
-                    log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
-                              individual.fitness.wallclock_time, individual.fitness.process_time,
-                              individual.fitness.values, individual._id, individual.pipeline_str())
-
                     should_restart = (restart_callback is not None and restart_callback())
                     if should_restart:
                         log.info("Restart criterion met. Restarting with new random population.")

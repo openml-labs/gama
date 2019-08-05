@@ -9,7 +9,7 @@ from sklearn.preprocessing import LabelEncoder
 from .gama import Gama
 from gama.data import X_y_from_arff
 from gama.configuration.classification import clf_config
-from gama.genetic_programming.algorithms.metrics import scoring_to_metric
+from gama.utilities.metrics import scoring_to_metric
 
 
 class GamaClassifier(Gama):
