@@ -24,7 +24,6 @@ class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
         if 'max_workers' not in kwargs and len(args) == 0:
             # if it is not, we use the class-default
             kwargs['max_workers'] = AsyncExecutor.n_jobs
-            print(f'using {AsyncExecutor.n_jobs} jobs.')
         super().__init__(*args, **kwargs)
         self._futures = []
 

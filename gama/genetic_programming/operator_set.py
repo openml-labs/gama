@@ -1,4 +1,4 @@
-from collections import Sequence
+from collections.abc import Sequence
 import logging
 
 from gama.logging.machine_logging import TOKENS, log_event

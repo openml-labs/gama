@@ -9,12 +9,12 @@ from gama.utilities.generic.async_executor import AsyncExecutor
 log = logging.getLogger(__name__)
 
 
-def async_ea(toolbox, output, start_population, restart_callback=None, max_n_evaluations=10000):
-    _check_base_search_hyperparameters(toolbox, output, start_population)
+def async_ea(toolbox, output, start_candidates, restart_callback=None, max_n_evaluations=10000):
+    _check_base_search_hyperparameters(toolbox, output, start_candidates)
     if max_n_evaluations <= 0:
         raise ValueError("'n_evaluations' must be non-negative, but was {}.".format(max_n_evaluations))
 
-    max_population_size = len(start_population)
+    max_population_size = len(start_candidates)
     logger = MultiprocessingLogger()
 
     evaluate_log = partial(toolbox.evaluate, logger=logger)
@@ -28,7 +28,7 @@ def async_ea(toolbox, output, start_population, restart_callback=None, max_n_eva
             should_restart = False
             current_population[:] = []
             log.info('Starting EA with new population.')
-            for individual in start_population:
+            for individual in start_candidates:
                 futures.add(async_.submit(evaluate_log, individual))
 
             for ind_no in range(max_n_evaluations):
@@ -40,7 +40,7 @@ def async_ea(toolbox, output, start_population, restart_callback=None, max_n_eva
                     if should_restart:
                         log.info("Restart criterion met. Restarting with new random population.")
                         log_event(log, TOKENS.EA_RESTART, ind_no)
-                        start_population = [toolbox.individual() for _ in range(max_population_size)]
+                        start_candidates = [toolbox.individual() for _ in range(max_population_size)]
                         break
 
                     current_population.append(individual)

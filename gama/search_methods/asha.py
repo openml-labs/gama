@@ -1,3 +1,4 @@
+from functools import partial
 import logging
 import math
 from typing import List
@@ -7,7 +8,6 @@ import stopit
 from gama.search_methods import _check_base_search_hyperparameters
 from gama.logging.machine_logging import TOKENS, log_event
 from gama.utilities.generic.async_executor import AsyncExecutor
-from gama.genetic_programming.compilers.scikitlearn import evaluate_individual
 from gama.genetic_programming.components.individual import Individual
 
 """
@@ -22,6 +22,8 @@ log = logging.getLogger(__name__)
 def asha(operations, output: List[Individual], start_candidates=None,  # General Search Hyperparameters
          reduction_factor=3, minimum_resource=100, maximum_resource=1700, minimum_early_stopping_rate=1):  # Algorithm Specific
     _check_base_search_hyperparameters(operations, output, start_candidates)
+    evaluate = partial(evaluate_on_rung, evaluate_individual=operations.evaluate)
+
     # Note that here we index the rungs by all possible rungs (0..ceil(log_eta(R/r))), and ignore the first
     # minimum_early_stopping_rate rungs. This contrasts the paper where rung 0 refers to the first used one.
     max_rung = math.ceil(math.log(maximum_resource/minimum_resource, reduction_factor))
@@ -54,7 +56,7 @@ def asha(operations, output: List[Individual], start_candidates=None,  # General
         with AsyncExecutor() as async_:
             def start_new_job():
                 individual, rung = get_job()
-                futures.add(async_.submit(operations.evaluate, individual, rung, subsample=resource_for_rung[rung]))
+                futures.add(async_.submit(evaluate, individual, rung, subsample=resource_for_rung[rung]))
 
             for _ in range(8):
                 start_new_job()
@@ -82,6 +84,6 @@ def asha(operations, output: List[Individual], start_candidates=None,  # General
     return list(map(lambda p: p[1], individuals_by_rung[highest_rung_reached]))
 
 
-def evaluate_on_rung(individual, rung, *args, **kwargs):
+def evaluate_on_rung(individual, rung, evaluate_individual, *args, **kwargs):
     individual = evaluate_individual(individual, *args, **kwargs)
     return individual, individual.fitness.values[0], rung

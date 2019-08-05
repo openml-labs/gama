@@ -8,6 +8,7 @@ from sklearn.datasets import load_wine, load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, log_loss
 
+from gama.search_methods import asha, async_ea
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama import GamaClassifier
 
@@ -65,7 +66,7 @@ diabetes_arff = dict(
 )
 
 
-def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.DataFrame):
+def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.DataFrame, search=async_ea.async_ea):
     """
 
     :param data:
@@ -74,7 +75,7 @@ def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.D
     :param y_type: pd.DataFrame, pd.Series, np.ndarray or str
     :return:
     """
-    gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric)
+    gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric, search_method=search, n_jobs=1)
     if arff:
         train_path = 'tests/data/{}_train.arff'.format(data['name'])
         test_path = 'tests/data/{}_test.arff'.format(data['name'])
@@ -130,6 +131,11 @@ def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.D
 def test_binary_classification_accuracy():
     """ GamaClassifier can do binary classification with predict metric from numpy data. """
     _test_dataset_problem(breast_cancer, 'accuracy')
+
+
+# def test_binary_classification_accuracy_asha():
+#     """ GamaClassifier can do binary classification with predict metric from numpy data using ASHA search. """
+#     _test_dataset_problem(breast_cancer, 'accuracy', search=asha.asha)
 
 
 def test_binary_classification_logloss():

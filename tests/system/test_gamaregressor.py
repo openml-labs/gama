@@ -22,7 +22,7 @@ def _test_dataset_problem(data, metric):
     X, y = data['load'](return_X_y=True)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
 
-    gama = GamaRegressor(random_state=0, max_total_time=60, scoring=metric)
+    gama = GamaRegressor(random_state=0, max_total_time=60, scoring=metric, n_jobs=1)
     with Stopwatch() as sw:
         gama.fit(X_train, y_train, auto_ensemble_n=5)
 

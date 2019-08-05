@@ -109,7 +109,8 @@ class Gama(object):
                  n_jobs=-1,
                  verbosity=logging.WARNING,
                  keep_analysis_log='gama.log',
-                 cache_dir=None):
+                 cache_dir=None,
+                 search_method=async_ea):
 
         register_stream_log(verbosity)
         if keep_analysis_log:
@@ -148,6 +149,7 @@ class Gama(object):
         self._y: pd.DataFrame = None
         self._classes: List = []
         self.model: object = None
+        self._search_method = search_method
 
         default_cache_dir = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{str(uuid.uuid4())[:4]}_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
@@ -216,7 +218,6 @@ class Gama(object):
             y: Union[pd.DataFrame, pd.Series, np.ndarray],
             warm_start: bool=False,
             auto_ensemble_n: int=25,
-            restart_: bool=False,
             keep_cache: bool=False):
         """ Find and fit a model to predict target y from X.
 
@@ -235,8 +236,6 @@ class Gama(object):
             previous `fit` call.
         :param auto_ensemble_n: positive integer. The number of models to include in the ensemble which is built
             after the optimizatio process.
-        :param restart_: bool (default=False)
-            Indicates whether or not the search should be restarted when a specific restart criteria is met.
         :param keep_cache: bool (default=False)
             If True, keep the cache directory and its content after fitting is complete. Otherwise delete it.
         """
@@ -246,13 +245,6 @@ class Gama(object):
             postprocessing = FitBest
         else:
             postprocessing = Ensemble
-
-        def restart_criteria():
-            restart = self._observer._individuals_since_last_pareto_update > 400
-            if restart and restart_:
-                log.info("Continuing search with new population.")
-                self._observer.reset_current_pareto_front()
-            return restart and restart_
 
         with self._time_manager.start_activity('preprocessing') as preprocessing_sw:
             self._X, self._y = format_x_y(x, y)
@@ -265,7 +257,7 @@ class Gama(object):
         fit_time = int((1 - postprocessing.time_fraction) * self._time_manager.total_time_remaining)
 
         with self._time_manager.start_activity('search', time_limit=fit_time) as search_sw:
-            self._search_phase(warm_start, restart_criteria=restart_criteria, timeout=fit_time)
+            self._search_phase(warm_start, timeout=fit_time)
         log_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
 
         with self._time_manager.start_activity('postprocess',
@@ -281,7 +273,7 @@ class Gama(object):
             log.debug("Deleting cache.")
             self.delete_cache()
 
-    def _search_phase(self, warm_start: bool=False, restart_criteria: Callable=None, timeout: int=1e6):
+    def _search_phase(self, warm_start: bool = False, timeout: int = 1e6):
         """ Invoke the evolutionary algorithm, populate `final_pop` regardless of termination. """
         if warm_start and self._final_pop is not None:
             pop = self._final_pop
@@ -292,19 +284,13 @@ class Gama(object):
 
         evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self._X, y_train=self._y,
                              timeout=self._max_eval_time, metrics=self._metrics, cache_dir=self._cache_dir)
+        self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
+                                              **evaluate_args)
         final_pop = []
 
         try:
             with stopit.ThreadingTimeout(timeout):
-                if not self._use_asha:
-                    self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
-                                                          **evaluate_args)
-                    final_pop = async_ea(self._operator_set, output=final_pop, start_population=pop,
-                                         restart_callback=restart_criteria)
-                else:
-                    self._operator_set.evaluate = partial(evaluate_on_rung, **evaluate_args)
-                    final_pop = asha(self._operator_set, output=final_pop,
-                                     start_candidates=pop, maximum_resource=len(self._X))
+                final_pop = self._search_method(self._operator_set, output=final_pop, start_candidates=pop)
         except KeyboardInterrupt:
             log.info('Search phase terminated because of Keyboard Interrupt.')
 
