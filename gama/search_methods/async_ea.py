@@ -39,18 +39,43 @@ class AsyncEA(BaseSearch):
         self.output = async_ea(operations, self.output, start_candidates, **hyperparameters)
 
 
-def async_ea(toolbox, output, start_candidates, restart_callback=None, max_n_evaluations=10000, population_size: int = 50):
-    _check_base_search_hyperparameters(toolbox, output, start_candidates)
-    if max_n_evaluations <= 0:
-        raise ValueError("'n_evaluations' must be non-negative, but was {}.".format(max_n_evaluations))
+def async_ea(
+        operations: OperatorSet,
+        output: List[Individual],
+        start_candidates: List[Individual],
+        restart_callback: Optional[Callable] = None,
+        max_n_evaluations: Optional[int] = None,
+        population_size: int = 50) -> List[Individual]:
+    """ Perform asynchronous evolutionary optimization given the evolutionary operators in `operations`.
+    
+    :param operations: OperatorSet
+        An operator set with `evaluate`, `create`, `individual` and `eliminate` functions.
+    :param output: List[Individual]
+        A list which contains the set of best found individuals during search.
+    :param start_candidates: List[Individual]
+        A list with candidate individuals which should be used to start search from.
+    :param restart_callback: Optional[Callable] (default=None)
+        A function with signature () -> bool which returns True if search should be restarted.
+    :param max_n_evaluations: Optional[int] (default=None)
+        If specified, only a maximum of `max_n_evaluations` individuals are evaluated.
+        If None, the algorithm will be run indefinitely.
+    :param population_size: int (default=50)
+        Maximum number of individuals in the population at any time.
+    :return: List[Individual]
+        The individuals currently in the population.
+    """
+    _check_base_search_hyperparameters(operations, output, start_candidates)
+    if max_n_evaluations is not None and max_n_evaluations <= 0:
+        raise ValueError("'n_evaluations' must be non-negative or None, but was {}.".format(max_n_evaluations))
 
-    max_population_size = len(start_candidates)
+    max_population_size = population_size
     logger = MultiprocessingLogger()
 
-    evaluate_log = partial(toolbox.evaluate, logger=logger)
+    evaluate_log = partial(operations.evaluate, logger=logger)
     futures = set()
 
     current_population = output
+    n_evaluated_individuals = 0
 
     with AsyncExecutor() as async_:
         should_restart = True
@@ -61,26 +86,27 @@ def async_ea(toolbox, output, start_candidates, restart_callback=None, max_n_eva
             for individual in start_candidates:
                 futures.add(async_.submit(evaluate_log, individual))
 
-            for ind_no in range(max_n_evaluations):
-                done, futures = toolbox.wait_first_complete(futures)
+            while (max_n_evaluations is None) or (n_evaluated_individuals < max_n_evaluations):
+                done, futures = operations.wait_first_complete(futures)
                 logger.flush_to_log(log)
                 for future in done:
                     individual = future.result()
-                    should_restart = (restart_callback is not None and restart_callback())
-                    if should_restart:
-                        log.info("Restart criterion met. Restarting with new random population.")
-                        log_event(log, TOKENS.EA_RESTART, ind_no)
-                        start_candidates = [toolbox.individual() for _ in range(max_population_size)]
-                        break
-
                     current_population.append(individual)
                     if len(current_population) > max_population_size:
-                        to_remove = toolbox.eliminate(current_population, 1)
+                        to_remove = operations.eliminate(current_population, 1)
                         log_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
                         current_population.remove(to_remove[0])
 
                     if len(current_population) > 1:
-                        new_individual = toolbox.create(current_population, 1)[0]
+                        new_individual = operations.create(current_population, 1)[0]
                         futures.add(async_.submit(evaluate_log, new_individual))
+
+                should_restart = (restart_callback is not None and restart_callback())
+                n_evaluated_individuals += len(done)
+                if should_restart:
+                    log.info("Restart criterion met. Restarting with new random population.")
+                    log_event(log, TOKENS.EA_RESTART, n_evaluated_individuals)
+                    start_candidates = [operations.individual() for _ in range(max_population_size)]
+                    break
 
     return current_population

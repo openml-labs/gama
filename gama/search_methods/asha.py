@@ -40,6 +40,8 @@ class AsynchronousSuccessiveHalving(BaseSearch):
         self.output = []
 
     def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time: int):
+        # `maximum_resource` is the number of samples used in the highest rung.
+        # this typically should be the number of samples in the (training) dataset.
         set_value, default_value = self.hyperparameters['maximum_resource']
         self.hyperparameters['maximum_resource'] = (set_value, len(y))
 
@@ -49,8 +51,33 @@ class AsynchronousSuccessiveHalving(BaseSearch):
         self.output = asha(operations, start_candidates=start_candidates, **hyperparameters)
 
 
-def asha(operations, start_candidates=None,  # General Search Hyperparameters
-         reduction_factor=3, minimum_resource=100, maximum_resource=1700, minimum_early_stopping_rate=1):  # Algorithm Specific
+def asha(operations: OperatorSet,
+         start_candidates: List[Individual],
+         reduction_factor: int = 3,
+         minimum_resource: int = 100,
+         maximum_resource: int = 100_000,
+         minimum_early_stopping_rate: int = 1,
+         maximum_max_rung_evaluations: Optional[int] = None) -> List[Individual]:
+    """ Asynchronous Halving Algorithm by Li et al. (paper: https://arxiv.org/abs/1810.05934)
+
+    :param operations: OperatorSet
+        An operator set with `evaluate` and `individual` functions.
+    :param start_candidates: List[Individual]
+        A list which contains the set of best found individuals during search.
+    :param reduction_factor: int (default=3)
+        Reduction factor of candidates between each rung.
+    :param minimum_resource: int (default=100)
+        Number of samples to use in the lowest rung.
+    :param maximum_resource: int (defualt=100_000)
+        Number of samples to use in the top rung. This should not exceed the number of samples in the data.
+    :param minimum_early_stopping_rate: int (default=1)
+        Number of lowest rungs to skip.
+    :param maximum_max_rung_evaluations: Optional[int] (default=None)
+        Maximum number of individuals to evaluate on the max rung.
+        If None, the algorithm will be run indefinitely.
+    :return: List[Individual]
+        All individuals of the highest rung in which at least one individual has been evaluated.
+    """
     evaluate = partial(evaluate_on_rung, evaluate_individual=operations.evaluate)
 
     # Note that here we index the rungs by all possible rungs (0..ceil(log_eta(R/r))), and ignore the first
@@ -60,7 +87,7 @@ def asha(operations, start_candidates=None,  # General Search Hyperparameters
     resource_for_rung = {rung: min(minimum_resource * (reduction_factor ** rung), maximum_resource) for rung in rungs}
 
     # Should we just use lists of lists/heaps instead?
-    individuals_by_rung = {rung: [] for rung in reversed(rungs)}  # Highest rungs first is how we typically access them
+    individuals_by_rung = {rung: [] for rung in reversed(rungs)}  # Highest rungs first is how we typically iterate them
     promoted_individuals = {rung: [] for rung in reversed(rungs)}
 
     def get_job():
@@ -90,7 +117,8 @@ def asha(operations, start_candidates=None,  # General Search Hyperparameters
             for _ in range(8):
                 start_new_job()
 
-            while sum(map(len, individuals_by_rung.values())) < 10_000:
+            while ((maximum_max_rung_evaluations is None)
+                   or (len(individuals_by_rung[max_rung]) < maximum_max_rung_evaluations)):
                 done, futures = operations.wait_first_complete(futures)
                 for individual, loss, rung in [future.result() for future in done]:
                     individuals_by_rung[rung].append((loss, individual))

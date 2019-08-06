@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 
@@ -20,16 +20,36 @@ class RandomSearch(BaseSearch):
         random_search(operations, self.output, start_candidates)
 
 
-def random_search(toolbox, output, start_candidates):
-    _check_base_search_hyperparameters(toolbox, output, start_candidates)
+def random_search(
+        operations: OperatorSet,
+        output: List[Individual],
+        start_candidates: List[Individual],
+        max_evaluations: Optional[int] = None) -> List[Individual]:
+    """ Perform random search over all possible pipelines.
+
+    :param operations: OperatorSet
+        An operator set with `evaluate` and `individual` functions.
+    :param output: List[Individual]
+        A list which contains the found individuals during search.
+    :param start_candidates: List[Individual]
+        A list with candidate individuals to evaluate first.
+    :param max_evaluations: Optional[int] (default=None)
+        If specified, only a maximum of `max_evaluations` individuals are evaluated.
+        If None, the algorithm will be run indefinitely.
+    :return: List[Individual]
+        All evaluated individuals.
+    """
+    _check_base_search_hyperparameters(operations, output, start_candidates)
 
     futures = set()
     with AsyncExecutor() as async_:
         for individual in start_candidates:
-            futures.add(async_.submit(toolbox.evaluate, individual))
+            futures.add(async_.submit(operations.evaluate, individual))
 
-        while True:
-            done, not_done = toolbox.wait_first_complete(futures)
+        while (max_evaluations is None) or (len(output) < max_evaluations):
+            done, not_done = operations.wait_first_complete(futures)
             for future in done:
                 output.append(future.result())
-                futures.add(async_.submit(toolbox.evaluate, toolbox.individual()))
+                futures.add(async_.submit(operations.evaluate, operations.individual()))
+
+    return output
