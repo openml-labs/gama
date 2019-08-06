@@ -1,15 +1,44 @@
 import logging
 from functools import partial
+from typing import Optional, Any, Tuple, Dict, List, Callable
 
+import pandas as pd
+
+from gama.genetic_programming.components import Individual
+from gama.genetic_programming.operator_set import OperatorSet
 from gama.search_methods import _check_base_search_hyperparameters
 from gama.logging.machine_logging import TOKENS, log_event
 from gama.logging.utility_functions import MultiprocessingLogger
+from gama.search_methods.base_search import BaseSearch
 from gama.utilities.generic.async_executor import AsyncExecutor
 
 log = logging.getLogger(__name__)
 
 
-def async_ea(toolbox, output, start_candidates, restart_callback=None, max_n_evaluations=10000):
+class AsyncEA(BaseSearch):
+
+    def __init__(self,
+                 population_size: Optional[int] = None,
+                 max_n_evaluations: Optional[int] = None,
+                 restart_callback: Optional[Callable] = None):
+        # maps hyperparameter -> (set value, default)
+        self.hyperparameters: Dict[str, Tuple[Any, Any]] = dict(
+            population_size=(population_size, 50),
+            restart_callback=(restart_callback, None),
+            max_n_evaluations=(max_n_evaluations, 10_000)
+        )
+        self.output = []
+
+    def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time: int):
+        pass
+
+    def search(self, operations: OperatorSet, start_candidates: List[Individual]):
+        hyperparameters = {parameter: set_value if set_value is not None else default
+                           for parameter, (set_value, default) in self.hyperparameters.items()}
+        self.output = async_ea(operations, self.output, start_candidates, **hyperparameters)
+
+
+def async_ea(toolbox, output, start_candidates, restart_callback=None, max_n_evaluations=10000, population_size: int = 50):
     _check_base_search_hyperparameters(toolbox, output, start_candidates)
     if max_n_evaluations <= 0:
         raise ValueError("'n_evaluations' must be non-negative, but was {}.".format(max_n_evaluations))

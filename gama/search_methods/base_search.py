@@ -12,7 +12,7 @@ class BaseSearch(ABC):
     def __init__(self):
         # hyperparameters can be used to safe/process search hyperparameters
         self.hyperparameters: Dict[str, Tuple[Any, Any]] = dict()
-        self.output = List[Individual]
+        self.output: List[Individual] = []
 
     def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time: int):
         # updates self.hyperparameters defaults

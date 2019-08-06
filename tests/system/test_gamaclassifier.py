@@ -9,6 +9,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, log_loss
 
 from gama.search_methods import asha, async_ea
+from gama.search_methods.asha import AsynchronousSuccessiveHalving
+from gama.search_methods.async_ea import AsyncEA
+from gama.search_methods.base_search import BaseSearch
+from gama.search_methods.random_search import RandomSearch
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama import GamaClassifier
 
@@ -66,8 +70,13 @@ diabetes_arff = dict(
 )
 
 
-def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.DataFrame, search=None,
-                          missing_values: bool = False):
+def _test_dataset_problem(
+        data,
+        metric: str,
+        arff: bool = False,
+        y_type: Type = pd.DataFrame,
+        search: BaseSearch = AsyncEA(),
+        missing_values: bool = False):
     """
 
     :param data:
@@ -77,7 +86,7 @@ def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.D
     :return:
     """
     gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric, search_method=search, n_jobs=1,
-                          cache_dir=f"{data['name']}_arff_{arff}_metric_{metric}")
+                          cache_dir=f"{data['name']}_arff_{arff}_m_{metric}_y_{y_type.__name__}")
     if arff:
         train_path = 'tests/data/{}_train.arff'.format(data['name'])
         test_path = 'tests/data/{}_test.arff'.format(data['name'])
@@ -141,7 +150,12 @@ def test_binary_classification_accuracy():
 
 def test_binary_classification_accuracy_asha():
     """ GamaClassifier can do binary classification with predict metric from numpy data using ASHA search. """
-    _test_dataset_problem(breast_cancer, 'accuracy', search=asha.AsynchronousSuccessiveHalving())
+    _test_dataset_problem(breast_cancer, 'accuracy', search=AsynchronousSuccessiveHalving())
+
+
+def test_binary_classification_accuracy_random_search():
+    """ GamaClassifier can do binary classification with predict metric from numpy data using ASHA search. """
+    _test_dataset_problem(breast_cancer, 'accuracy', search=RandomSearch())
 
 
 def test_binary_classification_logloss():

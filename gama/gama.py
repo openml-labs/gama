@@ -20,7 +20,7 @@ from gama.utilities.metrics import scoring_to_metric
 from .utilities.observer import Observer
 
 from gama.data import X_y_from_arff
-from gama.search_methods.async_ea import async_ea
+from gama.search_methods.async_ea import async_ea, AsyncEA
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.logging.utility_functions import register_stream_log, register_file_log
 from gama.logging.machine_logging import TOKENS, log_event
@@ -109,7 +109,7 @@ class Gama(ABC):
                  verbosity: int = logging.WARNING,
                  keep_analysis_log: Optional[str] = 'gama.log',
                  cache_dir: Optional[str] = None,
-                 search_method: BaseSearch = async_ea):
+                 search_method: BaseSearch = AsyncEA()):
 
         register_stream_log(verbosity)
         if keep_analysis_log is not None:
