@@ -1,3 +1,4 @@
+from abc import ABC
 import random
 import logging
 import os
@@ -6,7 +7,7 @@ import datetime
 import shutil
 from functools import partial
 import warnings
-from typing import Callable, Union, List
+from typing import Callable, Union, List, Tuple, Optional, Dict
 import uuid
 
 import pandas as pd
@@ -19,7 +20,6 @@ from .utilities.observer import Observer
 
 from gama.data import X_y_from_arff
 from gama.search_methods.async_ea import async_ea
-from gama.search_methods.asha import asha, evaluate_on_rung
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.logging.utility_functions import register_stream_log, register_file_log
 from gama.logging.machine_logging import TOKENS, log_event
@@ -32,6 +32,7 @@ from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
 from gama.postprocessing import post_process, FitBest, Ensemble, NoPostProcessing
 from gama.utilities.generic.async_executor import AsyncExecutor
+from gama.utilities.metrics import Metric
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ for module_to_ignore in ["sklearn", "numpy"]:
     warnings.filterwarnings("ignore", module=module_to_ignore)
 
 
-class Gama(object):
+class Gama(ABC):
     """ Wrapper for the toolbox logic surrounding the GP process as well as ensemble construction.
 
     :param scoring: string, Metric or tuple.
@@ -57,9 +58,10 @@ class Gama(object):
         'precision_weighted', 'precision_samples', 'recall_macro', 'recall_micro', 'recall_samples', 'recall_weighted',
         'f1_macro', 'f1_micro', 'f1_samples', 'f1_weighted'.
         For regression, the following metrics are available:
-        'explained_variance', 'r2', 'median_absolute_error', 'mean_squared_error', 'mean_squared_log_error', 'mean_absolute_error'.
-        Whether to minimize or maximize is determined automatically (though can be overwritten by `optimize_strategy`.
-        However, you can instead also specify 'neg\_'+metric (e.g. 'neg_log_loss') as metric to make it explicit.
+        'explained_variance', 'r2', 'median_absolute_error', 'mean_squared_error',
+        'mean_squared_log_error', 'mean_absolute_error'.
+        Whether to minimize or maximize is determined automatically (though can be overwritten by `optimize_strategy`).
+        However, you can instead also specify 'neg_'+metric (e.g. 'neg_log_loss') as metric to make it explicit.
 
     :param regularize_length: bool.
         If True, add pipeline length as an optimization metric (preferring short over long).
@@ -71,9 +73,6 @@ class Gama(object):
         If an integer is passed, this will be the seed for the random number generators used in the process.
         However, with `n_jobs > 1`, there will be randomization introduced by multi-processing.
         For reproducible results, set this and use `n_jobs=1`.
-
-    :param population_size: positive integer (default=50)
-        Number of individuals to keep in the population at any one time.
 
     :param max_total_time: positive integer (default=3600)
         Time in seconds that can be used for the `fit` call.
@@ -89,7 +88,7 @@ class Gama(object):
     :param verbosity: integer (default=logging.WARNING)
         Sets the level of log messages to be automatically output to terminal.
 
-    :param keep_analysis_log: str or False. (default='gama.log')
+    :param keep_analysis_log: str or None. (default='gama.log')
         If non-empty str, specifies the path (and name) where the log should be stored, e.g. /output/gama.log.
         If empty str or False, no log is stored.
 
@@ -99,21 +98,20 @@ class Gama(object):
     """
 
     def __init__(self,
-                 scoring='filled_in_by_child_class',
-                 regularize_length=True,
-                 config=None,
-                 random_state=None,
-                 population_size=50,
-                 max_total_time=3600,
-                 max_eval_time=300,
-                 n_jobs=-1,
-                 verbosity=logging.WARNING,
-                 keep_analysis_log='gama.log',
-                 cache_dir=None,
-                 search_method=async_ea):
+                 scoring: Union[str, Metric, Tuple[Union[str, Metric], ...]] = 'filled_in_by_child_class',
+                 regularize_length: bool = True,
+                 config: Dict = None,
+                 random_state: int = None,
+                 max_total_time: Optional[int] = 3600,
+                 max_eval_time: Optional[int] = 300,
+                 n_jobs: int = -1,
+                 verbosity: int = logging.WARNING,
+                 keep_analysis_log: Optional[str] = 'gama.log',
+                 cache_dir: Optional[str] = None,
+                 search_method: Callable = async_ea):
 
         register_stream_log(verbosity)
-        if keep_analysis_log:
+        if keep_analysis_log is not None:
             register_file_log(keep_analysis_log)
 
         log.info('Using GAMA version {}.'.format(__version__))
@@ -133,40 +131,31 @@ class Gama(object):
             # AsyncExecutor defaults to using multiprocessing.cpu_count(), i.e. n_jobs=-1
             AsyncExecutor.n_jobs = n_jobs
 
-        self._fitted_pipelines = {}
         self._random_state = random_state
-        self._pop_size = population_size
         self._max_total_time = max_total_time
         self._max_eval_time = max_eval_time
-        self._regularize_length = regularize_length
         self._time_manager = TimeKeeper(max_total_time)
-        self._best_pipeline = None
-        self._observer = None
-        self.ensemble = None
-        self._metrics = scoring_to_metric(scoring)
-        self._use_asha: bool = False
-        self._X: pd.DataFrame = None
-        self._y: pd.DataFrame = None
-        self._classes: List = []
-        self.model: object = None
-        self._search_method = search_method
+        self._metrics: Tuple[Metric] = scoring_to_metric(scoring)
+        self._regularize_length = regularize_length
 
         default_cache_dir = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{str(uuid.uuid4())[:4]}_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
         if not os.path.isdir(self._cache_dir):
             os.mkdir(self._cache_dir)
 
-        self._imputer = None
-        self._evaluated_individuals = {}
-        self._final_pop = None
-        self._subscribers = defaultdict(list)
-
-        self._observer = Observer(self._cache_dir)
-        self.evaluation_completed(self._observer.update)
-        
         if self._random_state is not None:
             random.seed(self._random_state)
             np.random.seed(self._random_state)
+
+        self._X: pd.DataFrame = None
+        self._y: pd.DataFrame = None
+        self.model: object = None
+        self._search_method: Callable = search_method
+        self._final_pop = None
+
+        self._subscribers = defaultdict(list)
+        self._observer = Observer(self._cache_dir)
+        self.evaluation_completed(self._observer.update)
 
         self._pset, parameter_checks = pset_from_config(config)
         self._operator_set = OperatorSet(
@@ -182,12 +171,12 @@ class Gama(object):
     def _predict(self, x: pd.DataFrame):
         raise NotImplemented('_predict is implemented by base classes.')
 
-    def predict(self, X: Union[pd.DataFrame, np.ndarray]):
-        if isinstance(X, np.ndarray):
-            X = pd.DataFrame(X)
+    def predict(self, x: Union[pd.DataFrame, np.ndarray]):
+        if isinstance(x, np.ndarray):
+            x = pd.DataFrame(x)
             for col in self._X.columns:
-                X[col] = X[col].astype(self._X[col].dtype)
-        return self._predict(X)
+                x[col] = x[col].astype(self._X[col].dtype)
+        return self._predict(x)
 
     def predict_arff(self, arff_file_path: str):
         if not isinstance(arff_file_path, str):
@@ -216,9 +205,9 @@ class Gama(object):
     def fit(self,
             x: Union[pd.DataFrame, np.ndarray],
             y: Union[pd.DataFrame, pd.Series, np.ndarray],
-            warm_start: bool=False,
-            auto_ensemble_n: int=25,
-            keep_cache: bool=False):
+            warm_start: bool = False,
+            auto_ensemble_n: int = 25,
+            keep_cache: bool = False):
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -248,7 +237,6 @@ class Gama(object):
 
         with self._time_manager.start_activity('preprocessing') as preprocessing_sw:
             self._X, self._y = format_x_y(x, y)
-            self._classes = list(set(self._y))
             steps = define_preprocessing_steps(self._X, max_extra_features_created=None, max_categories_for_one_hot=10)
             self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
 
@@ -280,7 +268,7 @@ class Gama(object):
         else:
             if warm_start:
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
-            pop = [self._operator_set.individual() for _ in range(self._pop_size)]
+            pop = [self._operator_set.individual() for _ in range(50)]
 
         evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self._X, y_train=self._y,
                              timeout=self._max_eval_time, metrics=self._metrics, cache_dir=self._cache_dir)

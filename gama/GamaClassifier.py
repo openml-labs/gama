@@ -52,20 +52,20 @@ class GamaClassifier(Gama):
         """
         return self.model.predict_proba(x)
 
-    def predict_proba(self, X: Union[pd.DataFrame, np.ndarray]):
+    def predict_proba(self, x: Union[pd.DataFrame, np.ndarray]):
         """ Predict the class probabilities for input X.
 
         Predict target for X, using the best found pipeline(s) during the `fit` call.
 
-        :param X: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
+        :param x: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
         :return: a numpy array with class probabilities. The array is of shape (N, K) where N is the length of the
             first dimension of X, and K is the number of class labels found in `y` of `fit`.
         """
-        if isinstance(X, np.ndarray):
-            X = pd.DataFrame(X)
+        if isinstance(x, np.ndarray):
+            x = pd.DataFrame(x)
             for col in self._X.columns:
-                X[col] = X[col].astype(self._X[col].dtype)
-        return self._predict_proba(X)
+                x[col] = x[col].astype(self._X[col].dtype)
+        return self._predict_proba(x)
 
     def predict_proba_arff(self, arff_file_path: str):
         """ Predict the class probabilities for input in the arff_file, must have empty target column.

@@ -1,3 +1,5 @@
+from abc import ABC
+
 import pandas as pd
 
 from .gama import Gama
