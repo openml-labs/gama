@@ -21,6 +21,7 @@ class AsyncEA(BaseSearch):
                  population_size: Optional[int] = None,
                  max_n_evaluations: Optional[int] = None,
                  restart_callback: Optional[Callable] = None):
+        super().__init__()
         # maps hyperparameter -> (set value, default)
         self.hyperparameters: Dict[str, Tuple[Any, Any]] = dict(
             population_size=(population_size, 50),

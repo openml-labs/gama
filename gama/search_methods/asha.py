@@ -29,6 +29,7 @@ class AsynchronousSuccessiveHalving(BaseSearch):
                  minimum_resource: Optional[int] = None,
                  maximum_resource: Optional[int] = None,
                  minimum_early_stopping_rate: Optional[int] = None):
+        super().__init__()
         # maps hyperparameter -> (set value, default)
         self.hyperparameters: Dict[str, Tuple[Any, Any]] = dict(
             reduction_factor=(reduction_factor, 3),
