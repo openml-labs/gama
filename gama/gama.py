@@ -15,6 +15,7 @@ import numpy as np
 import stopit
 
 import gama.genetic_programming.compilers.scikitlearn
+from gama.search_methods.base_search import BaseSearch
 from gama.utilities.metrics import scoring_to_metric
 from .utilities.observer import Observer
 
@@ -108,7 +109,7 @@ class Gama(ABC):
                  verbosity: int = logging.WARNING,
                  keep_analysis_log: Optional[str] = 'gama.log',
                  cache_dir: Optional[str] = None,
-                 search_method: Callable = async_ea):
+                 search_method: BaseSearch = async_ea):
 
         register_stream_log(verbosity)
         if keep_analysis_log is not None:
@@ -147,10 +148,10 @@ class Gama(ABC):
             random.seed(self._random_state)
             np.random.seed(self._random_state)
 
-        self._X: pd.DataFrame = None
-        self._y: pd.DataFrame = None
+        self._X: Optional[pd.DataFrame] = None
+        self._y: Optional[pd.DataFrame] = None
         self.model: object = None
-        self._search_method: Callable = search_method
+        self._search_method: BaseSearch = search_method
         self._final_pop = None
 
         self._subscribers = defaultdict(list)
@@ -274,15 +275,15 @@ class Gama(ABC):
                              timeout=self._max_eval_time, metrics=self._metrics, cache_dir=self._cache_dir)
         self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
                                               **evaluate_args)
-        final_pop = []
 
         try:
             with stopit.ThreadingTimeout(timeout):
-                final_pop = self._search_method(self._operator_set, output=final_pop, start_candidates=pop)
+                self._search_method.dynamic_defaults(self._X, self._y, timeout)
+                self._search_method.search(self._operator_set, start_candidates=pop)
         except KeyboardInterrupt:
             log.info('Search phase terminated because of Keyboard Interrupt.')
 
-        self._final_pop = final_pop
+        self._final_pop = self._search_method.output
         log.debug([str(i) for i in self._final_pop])
         log.info(f'Search phase evaluated {len(self._observer._individuals)} individuals.')
 

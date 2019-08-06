@@ -1,10 +1,13 @@
 from functools import partial
 import logging
 import math
-from typing import List
+from typing import List, Optional, Dict, Tuple, Any
 
+import pandas as pd
 import stopit
 
+from gama.genetic_programming.operator_set import OperatorSet
+from gama.search_methods.base_search import BaseSearch
 from gama.search_methods import _check_base_search_hyperparameters
 from gama.logging.machine_logging import TOKENS, log_event
 from gama.utilities.generic.async_executor import AsyncExecutor
@@ -19,9 +22,34 @@ TODO:
 log = logging.getLogger(__name__)
 
 
-def asha(operations, output: List[Individual], start_candidates=None,  # General Search Hyperparameters
+class AsynchronousSuccessiveHalving(BaseSearch):
+
+    def __init__(self,
+                 reduction_factor: Optional[int] = None,
+                 minimum_resource: Optional[int] = None,
+                 maximum_resource: Optional[int] = None,
+                 minimum_early_stopping_rate: Optional[int] = None):
+        # maps hyperparameter -> (set value, default)
+        self.hyperparameters: Dict[str, Tuple[Any, Any]] = dict(
+            reduction_factor=(reduction_factor, 3),
+            minimum_resource=(minimum_resource, 100),
+            maximum_resource=(maximum_resource, 100_000),
+            minimum_early_stopping_rate=(minimum_early_stopping_rate, 1),
+        )
+        self.output = []
+
+    def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time: int):
+        set_value, default_value = self.hyperparameters['maximum_resource']
+        self.hyperparameters['maximum_resource'] = (set_value, len(y))
+
+    def search(self, operations: OperatorSet, start_candidates: List[Individual]):
+        hyperparameters = {parameter: set_value if set_value is not None else default
+                           for parameter, (set_value, default) in self.hyperparameters.items()}
+        self.output = asha(operations, start_candidates=start_candidates, **hyperparameters)
+
+
+def asha(operations, start_candidates=None,  # General Search Hyperparameters
          reduction_factor=3, minimum_resource=100, maximum_resource=1700, minimum_early_stopping_rate=1):  # Algorithm Specific
-    _check_base_search_hyperparameters(operations, output, start_candidates)
     evaluate = partial(evaluate_on_rung, evaluate_individual=operations.evaluate)
 
     # Note that here we index the rungs by all possible rungs (0..ceil(log_eta(R/r))), and ignore the first
@@ -81,7 +109,7 @@ def asha(operations, output: List[Individual], start_candidates=None,  # General
         for rung, individuals in individuals_by_rung.items():
             log.info('[{}] {}'.format(rung, len(individuals)))
 
-    return list(map(lambda p: p[1], individuals_by_rung[highest_rung_reached]))
+        return list(map(lambda p: p[1], individuals_by_rung[highest_rung_reached]))
 
 
 def evaluate_on_rung(individual, rung, evaluate_individual, *args, **kwargs):

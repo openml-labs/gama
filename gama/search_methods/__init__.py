@@ -35,5 +35,4 @@ def _check_base_search_hyperparameters(
     if not all(isinstance(x, Individual) for x in start_candidates):
         raise TypeError(f"Each element in 'start_population' must be Individual.")
 
-
 #__all__ = [asha, async_ea, random_search, _check_base_search_hyperparameters]

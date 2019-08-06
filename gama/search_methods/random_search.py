@@ -6,7 +6,7 @@ from gama.utilities.generic.async_executor import AsyncExecutor
 log = logging.getLogger(__name__)
 
 
-def random_search(toolbox, output, start_candidates, restart_callback=None, max_n_evaluations=10000, n_jobs=1):
+def random_search(toolbox, output, start_candidates, max_n_evaluations=10000):
     _check_base_search_hyperparameters(toolbox, output, start_candidates)
 
     futures = set()

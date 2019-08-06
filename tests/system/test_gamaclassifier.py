@@ -66,7 +66,7 @@ diabetes_arff = dict(
 )
 
 
-def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.DataFrame, search=async_ea.async_ea,
+def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.DataFrame, search=None,
                           missing_values: bool = False):
     """
 
@@ -139,9 +139,9 @@ def test_binary_classification_accuracy():
     _test_dataset_problem(breast_cancer, 'accuracy')
 
 
-# def test_binary_classification_accuracy_asha():
-#     """ GamaClassifier can do binary classification with predict metric from numpy data using ASHA search. """
-#     _test_dataset_problem(breast_cancer, 'accuracy', search=asha.asha)
+def test_binary_classification_accuracy_asha():
+    """ GamaClassifier can do binary classification with predict metric from numpy data using ASHA search. """
+    _test_dataset_problem(breast_cancer, 'accuracy', search=asha.AsynchronousSuccessiveHalving())
 
 
 def test_binary_classification_logloss():
