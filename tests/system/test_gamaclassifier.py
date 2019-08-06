@@ -66,7 +66,8 @@ diabetes_arff = dict(
 )
 
 
-def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.DataFrame, search=async_ea.async_ea):
+def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.DataFrame, search=async_ea.async_ea,
+                          missing_values: bool = False):
     """
 
     :param data:
@@ -75,7 +76,8 @@ def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.D
     :param y_type: pd.DataFrame, pd.Series, np.ndarray or str
     :return:
     """
-    gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric, search_method=search, n_jobs=1)
+    gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric, search_method=search, n_jobs=1,
+                          cache_dir=f"{data['name']}_arff_{arff}_metric_{metric}")
     if arff:
         train_path = 'tests/data/{}_train.arff'.format(data['name'])
         test_path = 'tests/data/{}_test.arff'.format(data['name'])
@@ -98,6 +100,9 @@ def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.D
             y = y_type(y)
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
+        if missing_values:
+            X_train[1:300:2, 0] = X_train[2:300:5, 1] = float("NaN")
+            X_test[1:100:2, 0] = X_test[2:100:5, 1] = float("NaN")
 
         with Stopwatch() as sw:
             gama.fit(X_train, y_train, auto_ensemble_n=5)
@@ -126,6 +131,7 @@ def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.D
 
     score_to_match = logloss if metric == 'log_loss' else accuracy
     assert score_to_match == pytest.approx(gama_score)
+    gama.delete_cache()
 
 
 def test_binary_classification_accuracy():
@@ -170,35 +176,4 @@ def test_missing_value_classification_arff():
 
 def test_missing_value_classification():
     """ GamaClassifier handles missing data from numpy data. """
-    data = breast_cancer
-    metric = 'log_loss'
-
-    X, y = data['load'](return_X_y=True)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
-    X_train[1:300:2, 0] = X_train[2:300:5, 1] = float("NaN")
-    X_test[1:100:2, 0] = X_test[2:100:5, 1] = float("NaN")
-
-    gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric)
-    with Stopwatch() as sw:
-        gama.fit(X_train, y_train, auto_ensemble_n=5)
-
-    assert 60 * FIT_TIME_MARGIN >= sw.elapsed_time, 'fit must stay within 110% of allotted time.'
-
-    class_predictions = gama.predict(X_test)
-    assert isinstance(class_predictions, np.ndarray), 'predictions should be numpy arrays.'
-    assert (data['test_size'],) == class_predictions.shape, 'predict should return (N,) shaped array.'
-
-    # Majority classifier on this split achieves 0.6293706293706294
-    accuracy = accuracy_score(y_test, class_predictions)
-    print(data['name'], metric, 'accuracy:', accuracy)
-    assert data['base_accuracy'] <= accuracy, 'predictions should be at least as good as majority class.'
-
-    class_probabilities = gama.predict_proba(X_test)
-    assert isinstance(class_probabilities, np.ndarray), 'probability predictions should be numpy arrays.'
-    assert (data['test_size'], data['n_classes']) == class_probabilities.shape, ('predict_proba should return'
-                                                                                 ' (N,K) shaped array.')
-
-    # Majority classifier on this split achieves 12.80138131184662
-    logloss = log_loss(y_test, class_probabilities)
-    print(data['name'], metric, 'log-loss:', logloss)
-    assert data['base_log_loss'] >= logloss, 'predictions should be at least as good as majority class.'
+    _test_dataset_problem(breast_cancer_missing, 'log_loss', missing_values=True)
