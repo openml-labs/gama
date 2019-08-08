@@ -68,7 +68,7 @@ def asha(operations: OperatorSet,
         Reduction factor of candidates between each rung.
     :param minimum_resource: int (default=100)
         Number of samples to use in the lowest rung.
-    :param maximum_resource: int (defualt=100_000)
+    :param maximum_resource: int (default=100_000)
         Number of samples to use in the top rung. This should not exceed the number of samples in the data.
     :param minimum_early_stopping_rate: int (default=1)
         Number of lowest rungs to skip.

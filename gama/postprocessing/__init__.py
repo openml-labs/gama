@@ -31,7 +31,7 @@ NoPostProcessing = PostProcessing(
     require=[],
     arguments={},
     time_fraction=0,
-    function_=lambda x: None  # To satisfy type checker
+    function_=lambda: None  # To satisfy type checker
 )
 
 

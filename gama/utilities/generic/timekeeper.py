@@ -1,7 +1,8 @@
 from contextlib import contextmanager
-from typing import Iterator, Optional, NamedTuple
+from typing import Iterator, Optional, NamedTuple, List, Any
 import logging
 
+from gama.logging.machine_logging import log_event, TOKENS
 from .stopwatch import Stopwatch
 
 log = logging.getLogger(__name__)
@@ -47,12 +48,31 @@ class TimeKeeper:
             raise RuntimeError("No activity in progress.")
 
     @contextmanager
-    def start_activity(self, activity: str, time_limit: Optional[int] = None) -> Iterator[Stopwatch]:
+    def start_activity(self,
+                       activity: str,
+                       time_limit: Optional[int] = None,
+                       activity_meta: Optional[List[Any]] = None) -> Iterator[Stopwatch]:
         """ Mark the start of a new activity and automatically time its duration.
-            TimeManager does not currently support nested activities. """
+            TimeManager does not currently support nested activities.
+
+        :param activity: str
+            Name of the activity for reference in current activity or later look-ups.
+        :param time_limit: int
+            Intended time limit of the activity in seconds. Used to calculate time remaining.
+        :param activity_meta: List[Any]
+            Any additional information about the activity to be logged.
+        :return:
+            A context manager, which when exited notes the end of the started activity.
+        """
+        if activity_meta is None:
+            activity_meta = []
+        log_event(log, TOKENS.PHASE_START, activity, *activity_meta)
+
         with Stopwatch() as sw:
             self.current_activity = Activity(activity, sw, time_limit)
             self.activities.append(self.current_activity)
             yield sw
         self.current_activity = None
+
+        log_event(log, TOKENS.PHASE_END, activity, *activity_meta)
         log.info("{} took {:.4f}s.".format(activity, sw.elapsed_time))

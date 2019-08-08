@@ -12,14 +12,20 @@ PLE_DELIM = ';'
 class TOKENS:
     EVALUATION_RESULT = 'EVAL'
     EVALUATION_ERROR = 'EVAL_ERR'
-    SEARCH_END = 'S_END'
-    PREPROCESSING_END = 'PRE_END'
-    POSTPROCESSING_END = 'POST_END'
+    PHASE_START = 'PS'
+    PHASE_END = 'PE'
     EA_RESTART = 'EA_RST'
     EA_REMOVE_IND = 'RMV_IND'
     EVALUATION_TIMEOUT = 'EVAL_TO'
     MUTATION = 'IND_MUT'
     CROSSOVER = "IND_CX"
+
+    @classmethod
+    def values(cls) -> List[str]:
+        """ Return a list of each possible TOKENS value. """
+        # skips default dunder attributes like __module__
+        return [getattr(cls, attribute) for attribute in vars(cls)
+                if not (attribute.startswith('__') and attribute.endswith('__'))]
 
 
 def default_time_format(datetime_: datetime):
@@ -34,51 +40,38 @@ def log_event(log_, token: str, *args):
     log_.log(level=MACHINE_LOG_LEVEL, msg=message)
 
 
-def parse_optimization(lines: List[str]) -> 'OptimizationReport':
-    """ Parse all parsable log events for one gama instance. """
-    # Only keep 'parsable log event' lines, discard their delimiters.
-    log = [line.split(PLE_DELIM)[1:-1] for line in lines
-           if line.startswith(PLE_START) and line.endswith(f"{PLE_END}\n")]
-
-    def log_for_token(token_to_match):
-        token_lines = []
-        try:
-            for line in log:
-                token, *args, time = line
-                if token == token_to_match:
-                    token_lines.append((*args, time))
-        except ValueError:
-            raise Exception(str(line))
-        return token_lines
-
-    evaluation_lines = log_for_token(TOKENS.EVALUATION_RESULT)
-    # Fitness represented in Tuples  (!Not necessarily - based on metrics)
-    scores = [float(info[3].split(',')[0][1:]) for info in evaluation_lines]
-    return OptimizationReport(scores)
-
-
-def parse_log(logfile: str) -> Iterable['OptimizationReport']:
-    """ Parse all optimization traces for one gama log. """
-    with open(logfile, 'r') as fh:
-        log = fh.readlines()
-
-    start_indices = [i for i, line in enumerate(log) if line.startswith('Using GAMA version')] + [-1]
-    # One log can store multiple optimization traces. Most easily separated by messages logged on initialization.
-    for start_this, start_next in zip(start_indices, start_indices[1:]):
-        yield parse_optimization(log[start_this:start_next])
+# def parse_optimization(lines: List[str]) -> 'GamaReport':
+#     """ Parse all parsable log events for one gama instance. """
+#     # Only keep 'parsable log event' lines, discard their delimiters.
+#     log = [line.split(PLE_DELIM)[1:-1] for line in lines
+#            if line.startswith(PLE_START) and line.endswith(f"{PLE_END}\n")]
+#
+#     def log_for_token(token_to_match):
+#         token_lines = []
+#         try:
+#             for line in log:
+#                 token, *args, time = line
+#                 if token == token_to_match:
+#                     token_lines.append((*args, time))
+#         except ValueError:
+#             raise Exception(str(line))
+#         return token_lines
+#
+#     evaluation_lines = log_for_token(TOKENS.EVALUATION_RESULT)
+#     # Fitness represented in Tuples  (!Not necessarily - based on metrics)
+#     scores = [float(info[3].split(',')[0][1:]) for info in evaluation_lines]
+#     return GamaReport(scores)
 
 
-class OptimizationReport:
-    def __init__(self, scores):
-        self.evaluations = scores
-
-    @property
-    def max_over_iterations(self):
-        best_so_far = float('-inf')
-        for score in self.evaluations:
-            if score > best_so_far:
-                best_so_far = score
-            yield best_so_far
+# def parse_log(logfile: str) -> Iterable['GamaReport']:
+#     """ Parse all optimization traces for one gama log. """
+#     with open(logfile, 'r') as fh:
+#         log = fh.readlines()
+#
+#     start_indices = [i for i, line in enumerate(log) if line.startswith('Using GAMA version')] + [-1]
+#     # One log can store multiple optimization traces. Most easily separated by messages logged on initialization.
+#     for start_this, start_next in zip(start_indices, start_indices[1:]):
+#         yield parse_optimization(log[start_this:start_next])
 
 
 class Event:

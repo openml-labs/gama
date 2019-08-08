@@ -236,27 +236,25 @@ class Gama(ABC):
         else:
             postprocessing = Ensemble
 
-        with self._time_manager.start_activity('preprocessing') as preprocessing_sw:
+        with self._time_manager.start_activity('preprocessing', activity_meta=['default']):
             self._X, self._y = format_x_y(x, y)
             steps = define_preprocessing_steps(self._X, max_extra_features_created=None, max_categories_for_one_hot=10)
             self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
 
-        log_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
-
         fit_time = int((1 - postprocessing.time_fraction) * self._time_manager.total_time_remaining)
 
-        with self._time_manager.start_activity('search', time_limit=fit_time) as search_sw:
+        with self._time_manager.start_activity('search', time_limit=fit_time,
+                                               activity_meta=[self._search_method.__class__.__name__]):
             self._search_phase(warm_start, timeout=fit_time)
-        log_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
 
         with self._time_manager.start_activity('postprocess',
-                                               time_limit=int(self._time_manager.total_time_remaining)) as post_sw:
+                                               time_limit=int(self._time_manager.total_time_remaining),
+                                               activity_meta=[postprocessing.name]):
             best_individual = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values)))[0]
             self.model = post_process(self, postprocessing,
                                       ensemble_size=auto_ensemble_n,
                                       timeout=self._time_manager.total_time_remaining,
                                       best=best_individual)
-        log_event(log, TOKENS.POSTPROCESSING_END, post_sw.elapsed_time)
 
         if not keep_cache:
             log.debug("Deleting cache.")
