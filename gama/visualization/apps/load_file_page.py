@@ -44,5 +44,5 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
         content_type, content_string = list_of_contents.split(',')
         decoded = base64.b64decode(content_string).decode('utf-8')
         log_lines = decoded.splitlines()
-        return single_report_page(log_lines)
+        return single_report_page(log_lines, list_of_names)
     return load_file_page

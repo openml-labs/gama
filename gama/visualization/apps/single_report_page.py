@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 from gama.logging.GamaReport import GamaReport
 
 
-def single_report_page(log_lines: List[str]):
+def single_report_page(log_lines: List[str], log_name: str):
     """ Generates a html page with dash visualizing"""
     report = GamaReport(log_lines=log_lines)
 
@@ -22,7 +22,7 @@ def single_report_page(log_lines: List[str]):
     graph = go.Scatter(
         name=f'GAMA',
         x=report.evaluations.n,
-        y=report.evaluations.metric_0_cummax,
+        y=report.evaluations[f'{report.metrics[0]}_cummax'],
         mode='lines'
     )
 
@@ -33,7 +33,11 @@ def single_report_page(log_lines: List[str]):
             id='optimization-graph',
             figure={
                 'data': [graph],
-                'layout': {'title': 'metric_0_cummax over iterations'}
-            }
+                'layout': {
+                    'title': f'{log_name}',
+                    'xaxis': {'title': f'n'},
+                    'yaxis': {'title': f'{report.metrics[0]}'}
+                }
+            },
         )
     ])

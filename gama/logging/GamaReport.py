@@ -27,13 +27,30 @@ class GamaReport:
             with open(logfile, 'r') as fh:
                 log_lines = [line.rstrip() for line in fh.readlines()]
 
+        self.metrics = _find_metric_configuration(log_lines)
+
         # Find the Parseable Log Events and discard their start/end tokens.
         ple_lines = [line.split(PLE_DELIM)[1:-1] for line in log_lines
                      if line.startswith(PLE_START) and line.endswith(f'{PLE_END}')]
         events_by_type = {token: [event for line_token, *event in ple_lines if token == line_token]
                           for token in TOKENS.values()}
-        self.evaluations: pd.DataFrame = _evaluations_to_dataframe(events_by_type[TOKENS.EVALUATION_RESULT])
+        self.evaluations: pd.DataFrame = _evaluations_to_dataframe(events_by_type[TOKENS.EVALUATION_RESULT],
+                                                                   metric_names=self.metrics)
         self.phases: List[Tuple[str, str, float]] = _find_phase_information(events_by_type)
+
+
+def _find_metric_configuration(log_lines: List[str]) -> List[str]:
+    # Can line logging init call searching for e.g. 'GamaClassifier(' but right now the location is static anyway.
+    init_line = log_lines[1]
+    # E.g.: GamaRegressor(scoring=neg_mean_squared_error,regularize_length=True, ...)
+    _, arguments = init_line.split('(')
+    scoring, regularize_length, *_ = arguments.split(',')
+    _, metric = scoring.split('=')
+    _, regularize = regularize_length.split('=')
+    if bool(regularize):
+        return [metric, 'length']
+    else:
+        return [metric]
 
 
 def _find_phase_information(events_by_type: Dict[str, List[str]]) -> List[Tuple[str, str, float]]:
