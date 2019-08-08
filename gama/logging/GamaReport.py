@@ -76,11 +76,11 @@ def _evaluations_to_dataframe(evaluation_lines: List[List[str]],
         time, duration, process_duration, fitness, id_, pipeline_str, log_time = line
         # Fitness logged as '(metric1, metric2, ..., metriclast)'
         metrics_values = [float(value) for value in fitness[1:-1].split(',')]
-        evaluations.append([i, time, duration, *metrics_values])
+        evaluations.append([i, time, duration, *metrics_values, pipeline_str])
 
     if metric_names is None:
         metric_names = [f'metric_{m_i}' for m_i in range(len(metrics_values))]
-    column_names = ['n', 'start', 'duration', *metric_names]
+    column_names = ['n', 'start', 'duration', *metric_names, 'pipeline']
     df = pd.DataFrame(evaluations, columns=column_names)
     for metric in metric_names:
         df[f'{metric}_cummax'] = df[metric].cummax()
