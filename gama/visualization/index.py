@@ -7,6 +7,7 @@ from gama.visualization.apps.load_file_page import load_file_page
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
+    html.H1(children="GAMA Dashboard", style={'textAlign': 'center'}),
     html.Div(id='page-content')
 ])
 

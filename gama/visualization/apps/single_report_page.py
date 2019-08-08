@@ -27,8 +27,7 @@ def single_report_page(log_lines: List[str], log_name: str):
     )
 
     return html.Div(children=[
-        html.H1(children="GAMA Dashboard"),
-        html.Div(children=phases_summary),
+        html.Div(children=phases_summary, style={'textAlign': 'center'}),
         dcc.Graph(
             id='optimization-graph',
             figure={

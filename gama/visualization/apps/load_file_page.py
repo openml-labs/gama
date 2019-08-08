@@ -10,7 +10,6 @@ from gama.visualization.apps.single_report_page import single_report_page
 
 
 load_file_page = html.Div([
-    html.H1(children="GAMA Dashboard"),
     html.Div(children="Please select a log file to visualize:"),
     dcc.Upload(
         id='upload-data',
