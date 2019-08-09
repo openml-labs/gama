@@ -282,7 +282,7 @@ class Gama(ABC):
             log.info('Search phase terminated because of Keyboard Interrupt.')
 
         self._final_pop = self._search_method.output
-        log.debug([str(i) for i in self._final_pop])
+        log.debug([str(i) for i in self._final_pop[:100]])
         log.info(f'Search phase evaluated {len(self._observer._individuals)} individuals.')
 
     def _initialize_ensemble(self):
