@@ -47,7 +47,7 @@ def random_search(
             futures.add(async_.submit(operations.evaluate, individual))
 
         while (max_evaluations is None) or (len(output) < max_evaluations):
-            done, not_done = operations.wait_first_complete(futures)
+            done, futures = operations.wait_first_complete(futures)
             for future in done:
                 output.append(future.result())
                 futures.add(async_.submit(operations.evaluate, operations.individual()))
