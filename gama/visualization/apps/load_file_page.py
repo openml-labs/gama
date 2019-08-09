@@ -7,6 +7,7 @@ import dash_html_components as html
 
 from gama.visualization.app import app
 from gama.visualization.apps.aggregate_report_page import aggregate_report_page
+from gama.visualization.apps.dashboard_page import dashboard_page
 from gama.visualization.apps.single_report_page import single_report_page
 
 
@@ -44,7 +45,7 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
             content_type, content_string = list_of_contents[0].split(',')
             decoded = base64.b64decode(content_string).decode('utf-8')
             log_lines = decoded.splitlines()
-            return single_report_page(log_lines, list_of_names)
+            return dashboard_page(log_lines, list_of_names)
         else:
             logs = []
             for loc in list_of_contents:

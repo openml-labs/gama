@@ -2,6 +2,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 from gama.visualization.app import app
+from gama.visualization.apps.dashboard_page import dashboard_page
 from gama.visualization.apps.load_file_page import load_file_page
 
 
@@ -13,5 +14,5 @@ app.layout = html.Div([
 
 
 if __name__ == '__main__':
-    app.layout['page-content'].children = load_file_page
+    app.layout['page-content'].children = dashboard_page
     app.run_server(debug=True)
