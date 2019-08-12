@@ -3,7 +3,6 @@ import dash_html_components as html
 
 from gama.visualization.app import app
 from gama.visualization.apps.dashboard_page import dashboard_page
-from gama.visualization.apps.load_file_page import load_file_page
 
 
 app.layout = html.Div([
