@@ -12,9 +12,9 @@ from gama.logging.GamaReport import GamaReport
 
 reports = {}
 
-
 dashboard_graph = dcc.Graph(id='dashboard-graph')
 
+third_width = {'width': '30%', 'display': 'inline-block'}
 graph_settings_container = html.Div(
     id='graph-settings-container',
     children=[
@@ -24,10 +24,42 @@ graph_settings_container = html.Div(
                 {'label': 'separate', 'value': 'separate-line'},
                 {'label': 'aggregate', 'value': 'aggregate'}
             ],
-            value='separate-line'
+            value='separate-line',
+            style={'width': '10%', 'display': 'inline-block'}
+        ),
+        html.Div([
+            html.Label('x-axis'),
+            dcc.Dropdown(id='x-axis-metric')
+            ],
+            style=third_width
+        ),
+        html.Div([
+            html.Label('y-axis'),
+            dcc.Dropdown(id='y-axis-metric')
+        ],
+            style=third_width
+        ),
+        html.Div([
+            html.Label('plot type'),
+            dcc.Dropdown(
+                id='plot-type',
+                options=[
+                    {'label': 'scatter', 'value': 'markers'},
+                    {'label': 'line', 'value': 'lines'}
+                ],
+                value='lines'
+            )],
+            style=third_width
         )
     ]
 )
+# options = [{'label': metric, 'value': metric}
+#            for metric in report.evaluations.columns],
+# value = f'n'
+#
+# options = [{'label': metric, 'value': metric}
+#            for metric in report.evaluations.columns],
+# value = f'{report.metrics[0]}_cummax'
 
 visualization_container = html.Div(
     id='visualization-container',
@@ -89,20 +121,42 @@ def individual_plots(logs, xaxis, yaxis, mode):
     return plots
 
 
+@app.callback([Output('x-axis-metric', 'options'),
+               Output('x-axis-metric', 'value'),
+               Output('y-axis-metric', 'options'),
+               Output('y-axis-metric', 'value')],
+              [Input('select-log-checklist', 'value')],
+              [State('x-axis-metric', 'value'),
+               State('y-axis-metric', 'value')])
+def update_valid_axis_options(logs: List[str], x_value: str, y_value: str):
+    if logs is None or logs == []:
+        return [], None, [], None
+    shared_attributes = set(attribute
+                            for logname, report in reports.items()
+                            for attribute in report.evaluations.columns
+                            if logname in logs)
+    dropdown_options = [{'label': att, 'value': att} for att in shared_attributes]
+    x_value = x_value if x_value is not None else 'n'
+    y_value = y_value if y_value is not None else f'{reports[logs[0]].metrics[0]}_cummax'
+    return dropdown_options, x_value, dropdown_options, y_value
+
+
 @app.callback(Output('dashboard-graph', 'figure'),
               [Input('select-log-checklist', 'value'),
-               Input('sep-agg-radio', 'value')])
-def update_graph(logs: List[str], mode: str = 'separate-line', xaxis: str = 'n', yaxis: Optional[str] = None):
-    if logs is None or logs == []:
+               Input('sep-agg-radio', 'value'),
+               Input('x-axis-metric', 'value'),
+               Input('y-axis-metric', 'value'),
+               Input('plot-type', 'value')])
+def update_graph(logs: List[str], aggregate: str = 'separate-line', xaxis: str = None, yaxis: str = None, mode: str=None):
+    print(logs, aggregate, xaxis, yaxis, mode)
+    if logs is None or logs == [] or xaxis is None or yaxis is None:
         title = 'Load and select a log on the right'
         plots = []
     else:
-        title = f'{mode} plot of {len(logs)} logs'
-        if yaxis is None:
-            yaxis = f'{reports[logs[0]].metrics[0]}_cummax'
-        if mode == 'separate-line':
-            plots = individual_plots(logs, xaxis, yaxis, mode='lines')
-        if mode == 'aggregate':
+        title = f'{aggregate} plot of {len(logs)} logs'
+        if aggregate == 'separate-line':
+            plots = individual_plots(logs, xaxis, yaxis, mode=mode)
+        if aggregate == 'aggregate':
             plots = aggregate_plot(logs, xaxis, yaxis)
     return {
         'data': plots,
