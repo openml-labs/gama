@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Callable
+from typing import List, Callable, Optional
 from .primitive_node import PrimitiveNode
 from .terminal import DATA_TERMINAL, Terminal
 
@@ -7,11 +7,13 @@ from .terminal import DATA_TERMINAL, Terminal
 class Individual:
     """ A collection of PrimitiveNodes which together specify a machine learning pipeline. """
 
-    def __init__(self, main_node: PrimitiveNode, to_pipeline: Callable):
+    def __init__(self, main_node: PrimitiveNode, to_pipeline: Optional[Callable] = None):
         """
 
         :param main_node: The first node of the individual (the estimator node).
-        :param to_pipeline: Callable. A function which can convert this individual into a machine learning pipeline.
+        :param to_pipeline: Callable.
+         A function which can convert this individual into a machine learning pipeline.
+         If not provided, the `pipeline` property will be unavailable.
         """
         self.fitness = None
         self.main_node = main_node
@@ -20,6 +22,8 @@ class Individual:
 
     @property
     def pipeline(self):
+        if self._to_pipeline is None:
+            raise AttributeError("`pipeline` not available because `to_pipeline` was not set on __init__.")
         return self._to_pipeline(self)
 
     @property
@@ -102,6 +106,6 @@ class Individual:
         return Individual(main_node=self.main_node.copy(), to_pipeline=self._to_pipeline)
 
     @classmethod
-    def from_string(cls, string: str, primitive_set: dict, to_pipeline: Callable):
+    def from_string(cls, string: str, primitive_set: dict, to_pipeline: Optional[Callable] = None):
         expression = PrimitiveNode.from_string(string, primitive_set)
         return cls(expression, to_pipeline=to_pipeline)

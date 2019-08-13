@@ -3,21 +3,18 @@ from typing import List
 
 import dash_core_components as dcc
 import dash_html_components as html
-import plotly.graph_objects as go
 from dash.dependencies import Input, Output, State
-import pandas as pd
 
-from gama.configuration.classification import clf_config
-from gama.configuration.parser import pset_from_config, merge_configurations
-from gama.configuration.regression import reg_config
-from gama.genetic_programming.components import Individual
 from gama.visualization.app import app
 from gama.logging.GamaReport import GamaReport
+from gama.visualization.apps.plotting import individual_plot, aggregate_plot
 
 reports = {}
 
-pset, _ = pset_from_config(merge_configurations(clf_config, reg_config))
 
+###########################################################
+#                      LEFT COLUMN                        #
+###########################################################
 dashboard_graph = dcc.Graph(id='dashboard-graph')
 
 third_width = {'width': '30%', 'display': 'inline-block'}
@@ -67,60 +64,47 @@ visualization_container = html.Div(
     style={'float': 'left', 'width': '85%'}
 )
 
+###########################################################
+#                      RIGHT COLUMN                       #
+###########################################################
+upload_box = dcc.Upload(
+    id='upload-box',
+    children=html.Div([html.A('Select or drop log(s).')]),
+    style={
+        'width': '100%',
+        'height': '60px',
+        'lineHeight': '60px',
+        'borderWidth': '1px',
+        'borderStyle': 'dashed',
+        'borderRadius': '5px',
+        'textAlign': 'center'
+    },
+    multiple=True
+)
 
-def aggregate_plot(logs, xaxis, yaxis):
-    reports_to_combine = [reports[log] for log in logs]
-    concat_df = pd.concat([report.evaluations for report in reports_to_combine])
-    concat_df = concat_df[concat_df[yaxis] != -float('inf')]
-    agg_df = concat_df.groupby(by=xaxis).agg({yaxis: ['mean', 'std']}).reset_index()
-    agg_df.columns = [xaxis, yaxis, 'std']
-    upper_bound = go.Scatter(
-        name=f'UB',
-        x=agg_df[xaxis],
-        y=agg_df[yaxis] + agg_df['std'],
-        mode='lines',
-        marker=dict(color="#444"),
-        line=dict(width=0),
-        fillcolor='rgba(68, 68, 68, 0.3)',
-        fill='tonexty'
-    )
+file_select = dcc.Checklist(id='select-log-checklist')
 
-    mean_performance = go.Scatter(
-        name=f'Mean',
-        x=agg_df[xaxis],
-        y=agg_df[yaxis],
-        mode='lines',
-        line=dict(color='rgb(31, 119, 180)'),
-        fillcolor='rgba(68, 68, 68, 0.3)',
-        fill='tonexty'
-    )
+report_select_container = html.Div(
+    id='report-select-container',
+    children=[upload_box, file_select],
+    style={'width': '14%', 'float': 'right', 'padding-right': '1%'}
+)
 
-    lower_bound = go.Scatter(
-        name=f'LB',
-        x=agg_df[xaxis],
-        y=agg_df[yaxis] - agg_df['std'],
-        mode='lines',
-        marker=dict(color="#444"),
-        line=dict(width=0)
-    )
-    aggregate_data = [lower_bound, mean_performance, upper_bound]
-    return aggregate_data
+###########################################################
+#                      Main Page                          #
+###########################################################
+dashboard_page = html.Div(
+    id='dashboard-main',
+    children=[
+        visualization_container,
+        report_select_container
+    ]
+)
 
 
-def individual_plots(logs, xaxis, yaxis, mode):
-    plots = []
-    for log in logs:
-        plots.append(go.Scatter(
-            name=f'{log}',
-            x=reports[log].evaluations[xaxis],
-            y=reports[log].evaluations[yaxis],
-            text=[Individual.from_string(pipeline, pset, None).short_name
-                  for pipeline in reports[log].evaluations.pipeline],
-            mode=mode
-        ))
-    return plots
-
-
+###########################################################
+#                      Callbacks                          #
+###########################################################
 @app.callback([Output('x-axis-metric', 'options'),
                Output('x-axis-metric', 'value'),
                Output('y-axis-metric', 'options'),
@@ -155,9 +139,9 @@ def update_graph(logs: List[str], aggregate: str = 'separate-line', xaxis: str =
     else:
         title = f'{aggregate} plot of {len(logs)} logs'
         if aggregate == 'separate-line':
-            plots = individual_plots(logs, xaxis, yaxis, mode=mode)
+            plots = [individual_plot(reports[log], xaxis, yaxis, mode) for log in logs]
         if aggregate == 'aggregate':
-            plots = aggregate_plot(logs, xaxis, yaxis)
+            plots = aggregate_plot([reports[log] for log in logs], xaxis, yaxis)
     return {
         'data': plots,
         'layout': {
@@ -169,57 +153,15 @@ def update_graph(logs: List[str], aggregate: str = 'separate-line', xaxis: str =
     }
 
 
-###########################################################
-#                      RIGHT COLUMN                       #
-###########################################################
-
-
 @app.callback(Output('select-log-checklist', 'options'),
               [Input('upload-box', 'contents')],
-              [State('upload-box', 'filename'),
-               State('upload-box', 'last_modified')])
-def load_logs(list_of_contents, list_of_names, list_of_dates):
+              [State('upload-box', 'filename')])
+def load_logs(list_of_contents, list_of_names):
     if list_of_contents is not None:
         for content, filename in zip(list_of_contents, list_of_names):
             content_type, content_string = content.split(',')
             decoded = base64.b64decode(content_string).decode('utf-8')
             log_lines = decoded.splitlines()
-            reports[filename] = GamaReport(log_lines=log_lines)
+            reports[filename] = GamaReport(log_lines=log_lines, name=filename)
         return [{'label': logname, 'value': logname} for logname in reports]
     return []
-
-
-upload_box = dcc.Upload(
-    id='upload-box',
-    children=html.Div([html.A('Select or drop log(s).')]),
-    style={
-        'width': '100%',
-        'height': '60px',
-        'lineHeight': '60px',
-        'borderWidth': '1px',
-        'borderStyle': 'dashed',
-        'borderRadius': '5px',
-        'textAlign': 'center'
-    },
-    multiple=True
-)
-
-#file_select = html.Select(id='select-log-list', children=[html.Div('a')])
-file_select = dcc.Checklist(id='select-log-checklist')
-
-report_select_container = html.Div(
-    id='report-select-container',
-    children=[upload_box, file_select],
-    style={'width': '14%', 'float': 'right', 'padding-right': '1%'}
-)
-
-###########################################################
-#                      Main Page                          #
-###########################################################
-dashboard_page = html.Div(
-    id='dashboard-main',
-    children=[
-        visualization_container,
-        report_select_container
-    ]
-)
