@@ -6,6 +6,50 @@ from plotly import graph_objects as go
 from gama.logging.GamaReport import GamaReport
 
 
+def plot_preset_graph(reports: List[GamaReport], preset: str):
+    plots = []
+    layout = {}
+
+    first_metric = f'{reports[0].metrics[0]}'
+    first_metric_max = f'{first_metric}_cummax'
+
+    if preset == 'best_over_n':
+        plots = [individual_plot(report, 'n', first_metric_max, 'lines')
+                 for report in reports]
+        layout = dict(
+            title='Best score by iteration',
+            xaxis=dict(title='n'),
+            yaxis=dict(title=f'max {first_metric}'),
+            hovermode='closest'
+        )
+    elif preset == 'size_vs_metric':
+        plots = [individual_plot(report, first_metric, 'length', 'markers')
+                 for report in reports]
+        layout = dict(
+            title=f'Size vs {first_metric}',
+            xaxis=dict(title=first_metric),
+            yaxis=dict(title='pipeline length'),
+            hovermode='closest'
+        )
+    elif preset == 'number_pipeline_by_size':
+        for report in reports:
+            size_counts = report.evaluations.length.value_counts()
+            plots.append(go.Bar(
+                x=size_counts.index.values,
+                y=size_counts.values,
+                name=report.name)
+            )
+        layout = dict(
+            title=f'Number of pipelines by size',
+            xaxis=dict(title='pipeline length'),
+            yaxis=dict(title='pipeline count')
+        )
+    return {
+        'data': plots,
+        'layout': layout
+    }
+
+
 def individual_plot(report: GamaReport, x_axis: str, y_axis: str, mode: str):
     """
 
