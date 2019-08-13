@@ -59,13 +59,6 @@ graph_settings_container = html.Div(
         )
     ]
 )
-# options = [{'label': metric, 'value': metric}
-#            for metric in report.evaluations.columns],
-# value = f'n'
-#
-# options = [{'label': metric, 'value': metric}
-#            for metric in report.evaluations.columns],
-# value = f'{report.metrics[0]}_cummax'
 
 visualization_container = html.Div(
     id='visualization-container',
@@ -170,7 +163,8 @@ def update_graph(logs: List[str], aggregate: str = 'separate-line', xaxis: str =
         'layout': {
             'title': title,
             'xaxis': {'title': f'{xaxis}'},
-            'yaxis': {'title': f'{yaxis}'}
+            'yaxis': {'title': f'{yaxis}'},
+            'hovermode': 'closest' if mode == 'markers' else 'x'
         }
     }
 
