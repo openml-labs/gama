@@ -1,5 +1,5 @@
 import base64
-from typing import List, Optional
+from typing import List
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -7,10 +7,16 @@ import plotly.graph_objects as go
 from dash.dependencies import Input, Output, State
 import pandas as pd
 
+from gama.configuration.classification import clf_config
+from gama.configuration.parser import pset_from_config, merge_configurations
+from gama.configuration.regression import reg_config
+from gama.genetic_programming.components import Individual
 from gama.visualization.app import app
 from gama.logging.GamaReport import GamaReport
 
 reports = {}
+
+pset, _ = pset_from_config(merge_configurations(clf_config, reg_config))
 
 dashboard_graph = dcc.Graph(id='dashboard-graph')
 
@@ -115,7 +121,8 @@ def individual_plots(logs, xaxis, yaxis, mode):
             name=f'{log}',
             x=reports[log].evaluations[xaxis],
             y=reports[log].evaluations[yaxis],
-            #text=reports[log].evaluations.pipeline,
+            text=[Individual.from_string(pipeline, pset, None).short_name
+                  for pipeline in reports[log].evaluations.pipeline],
             mode=mode
         ))
     return plots
@@ -190,7 +197,7 @@ def load_logs(list_of_contents, list_of_names, list_of_dates):
 
 upload_box = dcc.Upload(
     id='upload-box',
-    children=html.Div([html.A('Select or drop file(s).')]),
+    children=html.Div([html.A('Select or drop log(s).')]),
     style={
         'width': '100%',
         'height': '60px',
@@ -203,6 +210,7 @@ upload_box = dcc.Upload(
     multiple=True
 )
 
+#file_select = html.Select(id='select-log-list', children=[html.Div('a')])
 file_select = dcc.Checklist(id='select-log-checklist')
 
 report_select_container = html.Div(

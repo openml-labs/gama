@@ -22,15 +22,14 @@ class Individual:
     def pipeline(self):
         return self._to_pipeline(self)
 
+    @property
+    def short_name(self):
+        """ e.g. "Binarizer>BernoulliNB" """
+        return '>'.join([str(primitive._primitive) for primitive in reversed(self.primitives)])
+
     def pipeline_str(self):
         """ e.g. "BernoulliNB(Binarizer(data, Binarizer.threshold=0.6), BernoulliNB.alpha=1.0)" """
         return str(self.main_node)
-
-    def __eq__(self, other):
-        return isinstance(other, Individual) and other._id == self._id
-
-    def __str__(self):
-        return """Individual {}\nPipeline: {}\nFitness: {}""".format(self._id, self.pipeline_str(), self.fitness)
 
     @property
     def primitives(self) -> List[PrimitiveNode]:
@@ -44,6 +43,12 @@ class Individual:
     @property
     def terminals(self) -> List[Terminal]:
         return [terminal for primitive in self.primitives for terminal in primitive._terminals]
+
+    def __eq__(self, other):
+        return isinstance(other, Individual) and other._id == self._id
+
+    def __str__(self):
+        return """Individual {}\nPipeline: {}\nFitness: {}""".format(self._id, self.pipeline_str(), self.fitness)
 
     def replace_terminal(self, position: int, new_terminal: Terminal):
         """ Replace the terminal at `position` by `new_terminal`.
