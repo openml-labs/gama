@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 from typing import List, Optional, Tuple, Dict
 
 import pandas as pd
@@ -54,13 +55,9 @@ class GamaReport:
                                                                    metric_names=self.metrics)
         self.phases: List[Tuple[str, str, float]] = _find_phase_information(events_by_type)
 
-    @property
-    def individuals(self) -> Dict[str, Individual]:
-        """ Currently only supported for default configurations. """
-        if self._individuals is None:
-            self._individuals = {id_: Individual.from_string(pipeline, pset)
-                                 for id_, pipeline in zip(self.evaluations.id, self.evaluations.pipeline)}
-        return self._individuals
+        # This can take a while for long logs (e.g. ~1sec for 10k individuals)
+        self.individuals: Dict[str, Individual] = {id_: Individual.from_string(pipeline, pset)
+                             for id_, pipeline in zip(self.evaluations.id, self.evaluations.pipeline)}
 
 
 def _find_metric_configuration(log_lines: List[str]) -> List[str]:
@@ -100,7 +97,7 @@ def _evaluations_to_dataframe(evaluation_lines: List[List[str]],
         time, duration, process_duration, fitness, id_, pipeline_str, log_time = line
         # Fitness logged as '(metric1, metric2, ..., metriclast)'
         metrics_values = [float(value) for value in fitness[1:-1].split(',')]
-        evaluations.append([i, time, duration, *metrics_values, pipeline_str, id_])
+        evaluations.append([i, time, float(duration), *metrics_values, pipeline_str, id_])
 
     if metric_names is None:
         metric_names = [f'metric_{m_i}' for m_i in range(len(metrics_values))]
@@ -109,4 +106,7 @@ def _evaluations_to_dataframe(evaluation_lines: List[List[str]],
     for metric in metric_names:
         df[f'{metric}_cummax'] = df[metric].cummax()
 
+    df.start = pd.to_datetime(df.start)
+    df.duration = pd.to_timedelta(df.duration, unit='s')
+    df['relative_end'] = ((df.start + df.duration) - df.start.min()).dt.total_seconds()
     return df

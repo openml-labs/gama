@@ -134,23 +134,17 @@ dashboard_page = html.Div(
 #                      Callbacks                          #
 ###########################################################
 @app.callback([Output('x-axis-metric', 'options'),
-               Output('x-axis-metric', 'value'),
-               Output('y-axis-metric', 'options'),
-               Output('y-axis-metric', 'value')],
-              [Input('select-log-checklist', 'value')],
-              [State('x-axis-metric', 'value'),
-               State('y-axis-metric', 'value')])
-def update_valid_axis_options(logs: List[str], x_value: str, y_value: str):
+               Output('y-axis-metric', 'options')],
+              [Input('select-log-checklist', 'value')])
+def update_valid_axis_options(logs: List[str]):
     if logs is None or logs == []:
-        return [], None, [], None
+        return [], []
     shared_attributes = set(attribute
                             for logname, report in reports.items()
                             for attribute in report.evaluations.columns
                             if logname in logs)
     dropdown_options = [{'label': att, 'value': att} for att in shared_attributes]
-    x_value = x_value if x_value is not None else 'n'
-    y_value = y_value if y_value is not None else f'{reports[logs[0]].metrics[0]}_cummax'
-    return dropdown_options, x_value, dropdown_options, y_value
+    return dropdown_options, dropdown_options
 
 
 @app.callback(Output('dashboard-graph', 'figure'),

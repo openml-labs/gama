@@ -7,9 +7,11 @@ from gama.logging.GamaReport import GamaReport
 
 
 def plot_preset_graph(reports: List[GamaReport], preset: str):
+    if reports == []:
+        return {}
+
     plots = []
     layout = {}
-
     first_metric = f'{reports[0].metrics[0]}'
     first_metric_max = f'{first_metric}_cummax'
 
@@ -19,6 +21,15 @@ def plot_preset_graph(reports: List[GamaReport], preset: str):
         layout = dict(
             title='Best score by iteration',
             xaxis=dict(title='n'),
+            yaxis=dict(title=f'max {first_metric}'),
+            hovermode='closest'
+        )
+    elif preset == 'best_over_time':
+        plots = [individual_plot(report, 'relative_end', first_metric_max, 'lines')
+                 for report in reports]
+        layout = dict(
+            title=f'Best score over time',
+            xaxis=dict(title='time (s)'),
             yaxis=dict(title=f'max {first_metric}'),
             hovermode='closest'
         )
@@ -34,9 +45,25 @@ def plot_preset_graph(reports: List[GamaReport], preset: str):
     elif preset == 'number_pipeline_by_size':
         for report in reports:
             size_counts = report.evaluations.length.value_counts()
+            size_ratio = size_counts / len(report.individuals)
             plots.append(go.Bar(
-                x=size_counts.index.values,
-                y=size_counts.values,
+                x=size_ratio.index.values,
+                y=size_ratio.values,
+                name=report.name)
+            )
+        layout = dict(
+            title=f'Number of pipelines by size',
+            xaxis=dict(title='pipeline length'),
+            yaxis=dict(title='pipeline count')
+        )
+    elif preset == 'number_pipeline_by_learner':
+        for report in reports:
+            main_learners = [str(ind.main_node._primitive) for ind in report.individuals.values()]
+            learner_counts = pd.Series(main_learners).value_counts()
+            learner_ratio = learner_counts / len(report.individuals)
+            plots.append(go.Bar(
+                x=learner_ratio.index.values,
+                y=learner_ratio.values,
                 name=report.name)
             )
         layout = dict(
