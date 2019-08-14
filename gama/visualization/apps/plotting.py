@@ -52,7 +52,7 @@ def plot_preset_graph(reports: List[GamaReport], preset: str):
                 name=report.name)
             )
         layout = dict(
-            title=f'Number of pipelines by size',
+            title=f'Ratio of pipelines by size',
             xaxis=dict(title='pipeline length'),
             yaxis=dict(title='pipeline count')
         )
@@ -67,9 +67,9 @@ def plot_preset_graph(reports: List[GamaReport], preset: str):
                 name=report.name)
             )
         layout = dict(
-            title=f'Number of pipelines by size',
+            title=f'Ratio of pipelines by learner',
             xaxis=dict(title='pipeline length'),
-            yaxis=dict(title='pipeline count')
+            yaxis=dict(title='learner')
         )
     return {
         'data': plots,
