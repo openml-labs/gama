@@ -112,7 +112,10 @@ def asha(operations: OperatorSet,
         with AsyncExecutor() as async_:
             def start_new_job():
                 individual, rung = get_job()
-                futures.add(async_.submit(evaluate, individual, rung, subsample=resource_for_rung[rung]))
+                time_penalty_for_rung = resource_for_rung[rung] / max(resource_for_rung.values())
+                futures.add(async_.submit(evaluate, individual, rung,
+                                          subsample=resource_for_rung[rung],
+                                          timeout=min(10 + (time_penalty_for_rung * 600), 600)))
 
             for _ in range(8):
                 start_new_job()
