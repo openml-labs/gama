@@ -11,46 +11,63 @@ from gama.visualization.apps.plotting import individual_plot, aggregate_plot, pl
 
 reports = {}
 
-
 ###########################################################
-#                      LEFT COLUMN                        #
+#                      HEADER BOX                         #
 ###########################################################
-dashboard_graph = dcc.Graph(id='dashboard-graph')
-
 presets = [
     {'label': '#Pipeline by learner', 'value': 'number_pipeline_by_learner'},
     {'label': '#Pipeline by size', 'value': 'number_pipeline_by_size'},
     {'label': 'Best score over time', 'value': 'best_over_time'},
     {'label': 'Best score over iterations', 'value': 'best_over_n'},
     {'label': 'Size vs Metric', 'value': 'size_vs_metric'},
+    {'label': 'Evaluation Times', 'value': 'evaluation_times_dist'},
     {'label': 'Custom', 'value': 'custom'},
 ]
-preset_control_container = html.Div(
-    id='preset-control-container',
+
+preset_container = html.Div(
+    id='preset-container',
     children=[
         html.Div('Visualization Presets'),
-        dcc.RadioItems(
-            id='preset-radio',
+        dcc.Dropdown(
+            id='preset-dropdown',
             options=presets,
-            value='best_over_n'
+            value='best_over_n',
+            style=dict(width='90%')
         )
     ],
-    style=dict(width='20%', display='inline-block')
+    style=dict(width='50%', display='inline-block', float='left')
 )
+
+sep_agg_radio = dcc.RadioItems(
+    id='sep-agg-radio',
+    options=[
+        {'label': 'separate', 'value': 'separate-line'},
+        {'label': 'aggregate', 'value': 'aggregate'}
+    ],
+    value='separate-line',
+    style={'width': '90%', 'display': 'inline-block'}
+)
+
+sep_agg_container = html.Div(
+    id='sep_agg_container',
+    children=[
+        html.Div('Style'),
+        sep_agg_radio
+    ],
+    style=dict(display='inline-block', width='50%', float='left')
+)
+
+dashboard_header = [preset_container, sep_agg_container]
+
+###########################################################
+#                      LEFT COLUMN                        #
+###########################################################
+dashboard_graph = dcc.Graph(id='dashboard-graph')
 
 third_width = {'width': '30%', 'display': 'inline-block'}
 plot_control_container = html.Div(
     id='plot-controls',
     children=[
-        dcc.RadioItems(
-            id='sep-agg-radio',
-            options=[
-                {'label': 'separate', 'value': 'separate-line'},
-                {'label': 'aggregate', 'value': 'aggregate'}
-            ],
-            value='separate-line',
-            style={'width': '10%', 'display': 'inline-block'}
-        ),
         html.Div([
             html.Label('x-axis'),
             dcc.Dropdown(id='x-axis-metric')
@@ -82,7 +99,7 @@ plot_control_container = html.Div(
 
 graph_settings_container = html.Div(
     id='graph-settings-container',
-    children=[preset_control_container, plot_control_container]
+    children=[plot_control_container]
 )
 
 visualization_container = html.Div(
@@ -95,26 +112,11 @@ visualization_container = html.Div(
 ###########################################################
 #                      RIGHT COLUMN                       #
 ###########################################################
-upload_box = dcc.Upload(
-    id='upload-box',
-    children=html.Div([html.A('Select or drop log(s).')]),
-    style={
-        'width': '100%',
-        'height': '60px',
-        'lineHeight': '60px',
-        'borderWidth': '1px',
-        'borderStyle': 'dashed',
-        'borderRadius': '5px',
-        'textAlign': 'center'
-    },
-    multiple=True
-)
-
 file_select = dcc.Checklist(id='select-log-checklist')
 
 report_select_container = html.Div(
     id='report-select-container',
-    children=[upload_box, file_select],
+    children=[file_select],
     style={'width': '14%', 'float': 'right', 'padding-right': '1%'}
 )
 
@@ -153,7 +155,7 @@ def update_valid_axis_options(logs: List[str]):
                Input('x-axis-metric', 'value'),
                Input('y-axis-metric', 'value'),
                Input('plot-type', 'value'),
-               Input('preset-radio', 'value')])
+               Input('preset-dropdown', 'value')])
 def update_graph(logs: List[str], aggregate: str = 'separate-line', xaxis: str = None, yaxis: str = None, mode: str = None, preset_value: str = None):
     print(logs, aggregate, xaxis, yaxis, mode, preset_value)
     if preset_value == 'custom':
@@ -196,7 +198,7 @@ def load_logs(list_of_contents, list_of_names):
 
 
 @app.callback(Output('plot-controls', 'style'),
-              [Input('preset-radio', 'value')],
+              [Input('preset-dropdown', 'value')],
               [State('plot-controls', 'style')])
 def toggle_plot_controls(preset, plot_controls_style):
     if preset == 'custom':

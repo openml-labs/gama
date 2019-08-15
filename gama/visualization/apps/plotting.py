@@ -2,6 +2,7 @@ from typing import List
 
 import pandas as pd
 from plotly import graph_objects as go
+import plotly.figure_factory as ff
 
 from gama.logging.GamaReport import GamaReport
 
@@ -70,6 +71,18 @@ def plot_preset_graph(reports: List[GamaReport], preset: str):
             title=f'Ratio of pipelines by learner',
             xaxis=dict(title='pipeline length'),
             yaxis=dict(title='learner')
+        )
+    elif preset == 'evaluation_times_dist':
+        for report in reports:
+            time_s = report.evaluations.duration.dt.total_seconds()
+            plots.append(go.Histogram(
+                x=time_s,
+                name=report.name)
+            )
+        layout = dict(
+            title=f'Pipeline Evaluation Times',
+            xaxis=dict(title='duration (s)'),
+            yaxis=dict(title='count')
         )
     return {
         'data': plots,
