@@ -1,5 +1,6 @@
+from collections import defaultdict
 from datetime import datetime
-from typing import List, Optional, Tuple, Dict
+from typing import List, Optional, Tuple, Dict, Callable
 
 import pandas as pd
 
@@ -48,8 +49,11 @@ class GamaReport:
         # Find the Parseable Log Events and discard their start/end tokens.
         ple_lines = [line.split(PLE_DELIM)[1:-1] for line in log_lines
                      if line.startswith(PLE_START) and line.endswith(f'{PLE_END}')]
-        events_by_type = {token: [event for line_token, *event in ple_lines if token == line_token]
-                          for token in TOKENS.values()}
+
+        events_by_type = defaultdict(list)
+        for token, *event in ple_lines:
+            events_by_type[token].append(event)
+
         self.evaluations: pd.DataFrame = _evaluations_to_dataframe(events_by_type[TOKENS.EVALUATION_RESULT],
                                                                    metric_names=self.metrics)
         self.phases: List[Tuple[str, str, float]] = _find_phase_information(events_by_type)
@@ -59,6 +63,9 @@ class GamaReport:
             id_: Individual.from_string(pipeline, pset)
             for id_, pipeline in zip(self.evaluations.id, self.evaluations.pipeline)
         }
+
+        parse_method_data: Dict[str, Callable] = defaultdict(lambda: lambda *args: None, ASHA=_ASHA_data_to_dataframe)
+        self.method_data = parse_method_data[self.search_method](events_by_type[self.search_method], self.metrics)
 
     @property
     def search_method(self):
@@ -114,4 +121,21 @@ def _evaluations_to_dataframe(evaluation_lines: List[List[str]],
     df.start = pd.to_datetime(df.start)
     df.duration = pd.to_timedelta(df.duration, unit='s')
     df['relative_end'] = ((df.start + df.duration) - df.start.min()).dt.total_seconds()
+    return df
+
+
+def _ASHA_data_to_dataframe(asha_lines: List[List[str]],
+                            metric_names: Optional[List[str]] = None) -> pd.DataFrame:
+    asha_data = []
+    for i, line in enumerate(asha_lines):
+        rung, duration, fitness, id_, pipeline_str, log_time = line
+        metrics_values = [float(value) for value in fitness[1:-1].split(',')]
+        asha_data.append([i, rung, float(duration), *metrics_values, pipeline_str, id_])
+
+    if metric_names is None:
+        metric_names = [f'metric_{m_i}' for m_i in range(len(metrics_values))]
+    column_names = ['n', 'rung', 'duration', *metric_names, 'pipeline', 'id']
+    df = pd.DataFrame(asha_data, columns=column_names)
+    df.duration = pd.to_timedelta(df.duration, unit='s')
+
     return df

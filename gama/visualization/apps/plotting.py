@@ -119,6 +119,35 @@ def plot_preset_graph(reports: List[GamaReport], aggregate_df: pd.DataFrame, pre
             xaxis=dict(title='duration (s)'),
             yaxis=dict(title='count')
         )
+    elif preset == 'n_by_rung':
+        for report in reports:
+            if report.search_method == 'ASHA':
+                count_by_rung = report.method_data.groupby(by='rung').n.count().reset_index()
+                plots.append(go.Bar(
+                    x=count_by_rung.rung,
+                    y=count_by_rung.n,
+                    name=report.name)
+                )
+        layout = dict(
+            title=f'#Evaluations by Rung',
+            xaxis=dict(title='rung'),
+            yaxis=dict(title='count')
+        )
+    elif preset == 'time_by_rung':
+        for report in reports:
+            if report.search_method == 'ASHA':
+                duration_by_rung = report.method_data.groupby(by='rung').duration.sum().reset_index()
+                duration_by_rung.duration = duration_by_rung.duration.dt.total_seconds()
+                plots.append(go.Bar(
+                    x=duration_by_rung.rung,
+                    y=duration_by_rung.duration,
+                    name=report.name)
+                )
+        layout = dict(
+            title=f'Time spent per Rung',
+            xaxis=dict(title='rung'),
+            yaxis=dict(title='time (s)')
+        )
     return {
         'data': plots,
         'layout': layout

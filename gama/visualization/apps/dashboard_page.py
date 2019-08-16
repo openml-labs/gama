@@ -23,6 +23,8 @@ presets = [
     {'label': 'Best score over iterations', 'value': 'best_over_n'},
     {'label': 'Size vs Metric', 'value': 'size_vs_metric'},
     {'label': 'Evaluation Times', 'value': 'evaluation_times_dist'},
+    {'label': 'Evaluations by Rung', 'value': 'n_by_rung'},
+    {'label': 'Time by Rung', 'value': 'time_by_rung'},
     {'label': 'Custom', 'value': 'custom'},
 ]
 
