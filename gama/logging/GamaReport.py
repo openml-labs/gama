@@ -1,5 +1,4 @@
 from datetime import datetime
-import time
 from typing import List, Optional, Tuple, Dict
 
 import pandas as pd
@@ -56,8 +55,14 @@ class GamaReport:
         self.phases: List[Tuple[str, str, float]] = _find_phase_information(events_by_type)
 
         # This can take a while for long logs (e.g. ~1sec for 10k individuals)
-        self.individuals: Dict[str, Individual] = {id_: Individual.from_string(pipeline, pset)
-                             for id_, pipeline in zip(self.evaluations.id, self.evaluations.pipeline)}
+        self.individuals: Dict[str, Individual] = {
+            id_: Individual.from_string(pipeline, pset)
+            for id_, pipeline in zip(self.evaluations.id, self.evaluations.pipeline)
+        }
+
+    @property
+    def search_method(self):
+        return self.phases[1][1]
 
 
 def _find_metric_configuration(log_lines: List[str]) -> List[str]:

@@ -1,6 +1,7 @@
 import base64
-from typing import List
+from typing import List, Dict, Optional
 
+import pandas as pd
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
@@ -10,6 +11,7 @@ from gama.logging.GamaReport import GamaReport
 from gama.visualization.apps.plotting import individual_plot, aggregate_plot, plot_preset_graph
 
 reports = {}
+aggregate_dataframe: Optional[pd.DataFrame] = None
 
 ###########################################################
 #                      HEADER BOX                         #
@@ -178,7 +180,7 @@ def update_graph(logs: List[str], aggregate: str = 'separate-line', xaxis: str =
             }
         }
     elif logs is not None:
-        return plot_preset_graph([reports[log] for log in logs], preset_value)
+        return plot_preset_graph([reports[log] for log in logs], aggregate_dataframe, preset_value, aggregate)
     else:
         return {}
 
@@ -187,12 +189,22 @@ def update_graph(logs: List[str], aggregate: str = 'separate-line', xaxis: str =
               [Input('upload-box', 'contents')],
               [State('upload-box', 'filename')])
 def load_logs(list_of_contents, list_of_names):
+    global aggregate_dataframe
     if list_of_contents is not None:
         for content, filename in zip(list_of_contents, list_of_names):
             content_type, content_string = content.split(',')
             decoded = base64.b64decode(content_string).decode('utf-8')
             log_lines = decoded.splitlines()
-            reports[filename] = GamaReport(log_lines=log_lines, name=filename)
+            report = GamaReport(log_lines=log_lines, name=filename)
+            reports[filename] = report
+
+            eval_copy = report.evaluations.copy()
+            eval_copy['search_method'] = report.search_method
+            if aggregate_dataframe is None:
+                aggregate_dataframe = eval_copy
+            else:
+                aggregate_dataframe = pd.concat([aggregate_dataframe, eval_copy])
+            print(report.search_method)
         return [{'label': logname, 'value': logname} for logname in reports]
     return []
 

@@ -1,13 +1,12 @@
-from typing import List
+from typing import List, Dict
 
 import pandas as pd
 from plotly import graph_objects as go
-import plotly.figure_factory as ff
 
 from gama.logging.GamaReport import GamaReport
 
 
-def plot_preset_graph(reports: List[GamaReport], preset: str):
+def plot_preset_graph(reports: List[GamaReport], aggregate_df: pd.DataFrame, preset: str, aggregate: str):
     if reports == []:
         return {}
 
@@ -17,8 +16,11 @@ def plot_preset_graph(reports: List[GamaReport], preset: str):
     first_metric_max = f'{first_metric}_cummax'
 
     if preset == 'best_over_n':
-        plots = [individual_plot(report, 'n', first_metric_max, 'lines')
-                 for report in reports]
+        if aggregate == 'separate-line':
+            plots = [individual_plot(report, 'n', first_metric_max, 'lines')
+                     for report in reports]
+        elif aggregate == 'aggregate':
+            plots = aggregate_plot(aggregate_df, 'n', first_metric_max)
         layout = dict(
             title='Best score by iteration',
             xaxis=dict(title='n'),
@@ -26,8 +28,11 @@ def plot_preset_graph(reports: List[GamaReport], preset: str):
             hovermode='closest'
         )
     elif preset == 'best_over_time':
-        plots = [individual_plot(report, 'relative_end', first_metric_max, 'lines')
-                 for report in reports]
+        if aggregate == 'separate-line':
+            plots = [individual_plot(report, 'relative_end', first_metric_max, 'lines')
+                     for report in reports]
+        elif aggregate == 'aggregate':
+            plots = aggregate_plot(aggregate_df, 'relative_end', first_metric_max)
         layout = dict(
             title=f'Best score over time',
             xaxis=dict(title='time (s)'),
@@ -35,8 +40,19 @@ def plot_preset_graph(reports: List[GamaReport], preset: str):
             hovermode='closest'
         )
     elif preset == 'size_vs_metric':
-        plots = [individual_plot(report, first_metric, 'length', 'markers')
-                 for report in reports]
+        if aggregate == 'separate-line':
+            plots = [individual_plot(report, first_metric, 'length', 'markers')
+                     for report in reports]
+        elif aggregate == 'aggregate':
+            plots = []
+            for method in aggregate_df.search_method.unique():
+                method_df = aggregate_df[aggregate_df.search_method == method]
+                plots.append(go.Scatter(
+                    x=method_df[first_metric],
+                    y=method_df.length,
+                    mode='markers',
+                    name=method
+                ))
         layout = dict(
             title=f'Size vs {first_metric}',
             xaxis=dict(title=first_metric),
@@ -44,14 +60,25 @@ def plot_preset_graph(reports: List[GamaReport], preset: str):
             hovermode='closest'
         )
     elif preset == 'number_pipeline_by_size':
-        for report in reports:
-            size_counts = report.evaluations.length.value_counts()
-            size_ratio = size_counts / len(report.individuals)
-            plots.append(go.Bar(
-                x=size_ratio.index.values,
-                y=size_ratio.values,
-                name=report.name)
-            )
+        if aggregate == 'separate-line':
+            for report in reports:
+                size_counts = report.evaluations.length.value_counts()
+                size_ratio = size_counts / len(report.individuals)
+                plots.append(go.Bar(
+                    x=size_ratio.index.values,
+                    y=size_ratio.values,
+                    name=report.name)
+                )
+        elif aggregate == 'aggregate':
+            for method in aggregate_df.search_method.unique():
+                results_for_method = aggregate_df[aggregate_df.search_method == method]
+                size_counts = results_for_method.length.value_counts()
+                size_ratio = size_counts / len(results_for_method)
+                plots.append(go.Bar(
+                    x=size_ratio.index.values,
+                    y=size_ratio.values,
+                    name=method)
+                )
         layout = dict(
             title=f'Ratio of pipelines by size',
             xaxis=dict(title='pipeline length'),
@@ -73,12 +100,20 @@ def plot_preset_graph(reports: List[GamaReport], preset: str):
             yaxis=dict(title='learner')
         )
     elif preset == 'evaluation_times_dist':
-        for report in reports:
-            time_s = report.evaluations.duration.dt.total_seconds()
-            plots.append(go.Histogram(
-                x=time_s,
-                name=report.name)
-            )
+        if aggregate == 'separate-line':
+            for report in reports:
+                time_s = report.evaluations.duration.dt.total_seconds()
+                plots.append(go.Histogram(
+                    x=time_s,
+                    name=report.name)
+                )
+        elif aggregate == 'aggregate':
+            for method in aggregate_df.search_method.unique():
+                time_s = aggregate_df[aggregate_df.search_method == method].duration.dt.total_seconds()
+                plots.append(go.Histogram(
+                    x=time_s,
+                    name=method)
+                )
         layout = dict(
             title=f'Pipeline Evaluation Times',
             xaxis=dict(title='duration (s)'),
@@ -109,47 +144,58 @@ def individual_plot(report: GamaReport, x_axis: str, y_axis: str, mode: str):
         )
 
 
-def aggregate_plot(reports_to_combine: List[GamaReport], x_axis: str, y_axis: str):
+def aggregate_plot(aggregate: pd.DataFrame, x_axis: str, y_axis: str):
     """ Creates an aggregate plot over multiple reports by calculating the mean and std of `y_axis` by `x_axis`.
 
-    :param reports_to_combine: reports of which to combine evaluations
+    :param aggregate: dataframe with all evaluations
     :param x_axis: column which is grouped by before aggregating `y_axis`
     :param y_axis: column over which to calculate the mean/std.
     :return:
         Three dash Scatter objects which respectively draw the lower bound, mean and upper bound.
     """
-    concat_df = pd.concat([report.evaluations for report in reports_to_combine])
-    concat_df = concat_df[concat_df[y_axis] != -float('inf')]
-    agg_df = concat_df.groupby(by=x_axis).agg({y_axis: ['mean', 'std']}).reset_index()
-    agg_df.columns = [x_axis, y_axis, 'std']
-    upper_bound = go.Scatter(
-        name=f'UB',
-        x=agg_df[x_axis],
-        y=agg_df[y_axis] + agg_df['std'],
-        mode='lines',
-        marker=dict(color="#444"),
-        line=dict(width=0),
-        fillcolor='rgba(68, 68, 68, 0.3)',
-        fill='tonexty'
-    )
+    colors = {0: 'rgba(255, 0, 0, {a})', 1: 'rgba(0, 255, 0, {a})', 2: 'rgba(0, 0, 255, {a})'}
 
-    mean_performance = go.Scatter(
-        name=f'Mean',
-        x=agg_df[x_axis],
-        y=agg_df[y_axis],
-        mode='lines',
-        line=dict(color='rgb(31, 119, 180)'),
-        fillcolor='rgba(68, 68, 68, 0.3)',
-        fill='tonexty'
-    )
+    # concat_df = pd.concat([report.evaluations for report in reports_to_combine])
+    # concat_df = concat_df[concat_df[y_axis] != -float('inf')]
+    # agg_df = concat_df.groupby(by=x_axis).agg({y_axis: ['mean', 'std']}).reset_index()
+    # agg_df.columns = [x_axis, y_axis, 'std']
+    aggregate_data = []
+    aggregate = aggregate[aggregate[y_axis] != -float('inf')]
+    for color_no, method in enumerate(aggregate.search_method.unique()):
+        agg_for_method = aggregate[aggregate.search_method == method]
+        agg_df = agg_for_method.groupby(by=x_axis).agg({y_axis: ['mean', 'std']}).reset_index()
+        agg_df.columns = [x_axis, y_axis, 'std']
+        soft_color = colors[color_no].format(a=0.2)
+        hard_color = colors[color_no].format(a=1.0)
 
-    lower_bound = go.Scatter(
-        name=f'LB',
-        x=agg_df[x_axis],
-        y=agg_df[y_axis] - agg_df['std'],
-        mode='lines',
-        marker=dict(color="#444"),
-        line=dict(width=0)
-    )
-    aggregate_data = [lower_bound, mean_performance, upper_bound]
+        upper_bound = go.Scatter(
+            x=agg_df[x_axis],
+            y=agg_df[y_axis] + agg_df['std'],
+            mode='lines',
+            marker=dict(color=soft_color),
+            line=dict(width=0),
+            fillcolor=soft_color,
+            fill='tonexty',
+            showlegend=False
+        )
+
+        mean_performance = go.Scatter(
+            name=method,
+            x=agg_df[x_axis],
+            y=agg_df[y_axis],
+            mode='lines',
+            line=dict(color=hard_color),
+            fillcolor=soft_color,
+            fill='tonexty'
+        )
+
+        lower_bound = go.Scatter(
+            x=agg_df[x_axis],
+            y=agg_df[y_axis] - agg_df['std'],
+            mode='lines',
+            marker=dict(color=soft_color),
+            line=dict(width=0),
+            showlegend=False
+        )
+        aggregate_data += [lower_bound, mean_performance, upper_bound]
     return aggregate_data
