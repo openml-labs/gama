@@ -20,6 +20,7 @@ TODO:
 """
 
 log = logging.getLogger(__name__)
+ASHA_LOG_TOKEN = 'ASHA'
 
 
 class AsynchronousSuccessiveHalving(BaseSearch):
@@ -125,10 +126,15 @@ def asha(operations: OperatorSet,
                 done, futures = operations.wait_first_complete(futures)
                 for individual, loss, rung in [future.result() for future in done]:
                     individuals_by_rung[rung].append((loss, individual))
+                    # Due to `evaluate` returning additional information (like the rung),
+                    # evaluations are not automatically logged, so we do it here.
+                    log_event(log, ASHA_LOG_TOKEN, rung, individual.fitness.wallclock_time,
+                              individual.fitness.values, individual._id, individual.pipeline_str())
                     if rung == max(rungs):
                         log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
                                   individual.fitness.wallclock_time, individual.fitness.process_time,
                                   individual.fitness.values, individual._id, individual.pipeline_str())
+
                     start_new_job()
 
             highest_rung_reached = max(rungs)
