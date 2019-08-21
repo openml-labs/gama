@@ -6,7 +6,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
-from gama.visualization.app import app
+from gama.visualization.app import dash_app
 from gama.logging.GamaReport import GamaReport
 from gama.visualization.apps.plotting import individual_plot, aggregate_plot, plot_preset_graph
 
@@ -139,9 +139,9 @@ dashboard_page = html.Div(
 ###########################################################
 #                      Callbacks                          #
 ###########################################################
-@app.callback([Output('x-axis-metric', 'options'),
-               Output('y-axis-metric', 'options')],
-              [Input('select-log-checklist', 'value')])
+@dash_app.callback([Output('x-axis-metric', 'options'),
+                    Output('y-axis-metric', 'options')],
+                   [Input('select-log-checklist', 'value')])
 def update_valid_axis_options(logs: List[str]):
     if logs is None or logs == []:
         return [], []
@@ -153,8 +153,8 @@ def update_valid_axis_options(logs: List[str]):
     return dropdown_options, dropdown_options
 
 
-@app.callback(Output('dashboard-graph', 'figure'),
-              [Input('select-log-checklist', 'value'),
+@dash_app.callback(Output('dashboard-graph', 'figure'),
+                   [Input('select-log-checklist', 'value'),
                Input('sep-agg-radio', 'value'),
                Input('x-axis-metric', 'value'),
                Input('y-axis-metric', 'value'),
@@ -187,9 +187,9 @@ def update_graph(logs: List[str], aggregate: str = 'separate-line', xaxis: str =
         return {}
 
 
-@app.callback(Output('select-log-checklist', 'options'),
-              [Input('upload-box', 'contents')],
-              [State('upload-box', 'filename')])
+@dash_app.callback(Output('select-log-checklist', 'options'),
+                   [Input('upload-box', 'contents')],
+                   [State('upload-box', 'filename')])
 def load_logs(list_of_contents, list_of_names):
     global aggregate_dataframe
     if list_of_contents is not None:
@@ -211,9 +211,9 @@ def load_logs(list_of_contents, list_of_names):
     return []
 
 
-@app.callback(Output('plot-controls', 'style'),
-              [Input('preset-dropdown', 'value')],
-              [State('plot-controls', 'style')])
+@dash_app.callback(Output('plot-controls', 'style'),
+                   [Input('preset-dropdown', 'value')],
+                   [State('plot-controls', 'style')])
 def toggle_plot_controls(preset, plot_controls_style):
     if preset == 'custom':
         plot_controls_style['display'] = 'inline-block'

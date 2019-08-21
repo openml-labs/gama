@@ -1,25 +1,43 @@
-from typing import NamedTuple, List, Dict, Callable, Any
+from typing import List, Dict, Callable, Any
 
 from .ensemble import build_fit_ensemble
 
 
-class PostProcessing(NamedTuple):
-    name: str  # recognizable name
-    require: List[str]  # Certain keywords that specify what to provide/cache
-    """
-    Permitted require keywords:
-     - best: the best individual
-     - cache: cache directory with predictions of all evaluated individuals
-     - n_jobs: number of allowed parallel jobs
-     - timeout: maximmum allowed time in seconds
-     - metric: the first metric for optimization
-     - x: the training features
-     - y: the training targets
-     - encoder: the encoder/decoder for target labels (only if classification)
-    """
-    arguments: Dict[str, Any]  # specifies arguments with which to call the post processing function
-    time_fraction: float  # fraction of total time to reserve for post processing
-    function_: Callable  # Callable with (**arguments)
+class PostProcessing:
+
+    def __init__(self,
+                 name: str,
+                 require: List[str],
+                 arguments: Dict[str, Any],
+                 time_fraction: float,
+                 post_processing_function: Callable):
+        """
+
+        :param name: str
+            a recognizable name
+        :param require: List[str]
+            Certain keywords that specify what to provide/cache
+            Permitted 'require' keywords:
+             - best: the best individual
+             - cache: cache directory with predictions of all evaluated individuals
+             - n_jobs: number of allowed parallel jobs
+             - timeout: maximum allowed time in seconds
+             - metric: the first metric for optimization
+             - x: the training features
+             - y: the training targets
+             - encoder: the encoder/decoder for target labels (only if classification)
+        :param arguments: Dict[str, Any]
+            specifies arguments with which to call the post processing function
+        :param time_fraction: float
+            fraction of total time to reserve for post processing
+        :param post_processing_function: Callable
+            Callable with (**arguments)
+        """
+        self.name: str = name
+        self.require: List[str] = require
+        self.arguments: Dict[str, Any] = arguments
+        self.time_fraction: float = time_fraction
+        self.function_: Callable = post_processing_function
 
 
 def fit_best(best, x, y):
@@ -31,7 +49,7 @@ NoPostProcessing = PostProcessing(
     require=[],
     arguments={},
     time_fraction=0,
-    function_=lambda: None  # To satisfy type checker
+    post_processing_function=lambda: None  # To satisfy type checker
 )
 
 
@@ -40,7 +58,7 @@ FitBest = PostProcessing(
     require=['best', 'x', 'y'],
     arguments={},
     time_fraction=0.1,
-    function_=fit_best
+    post_processing_function=fit_best
 )
 
 Ensemble = PostProcessing(
@@ -48,7 +66,7 @@ Ensemble = PostProcessing(
     require=['cache', 'x', 'y', 'n_jobs', 'timeout', 'metric', 'encoder'],
     arguments=dict(ensemble_size=25),
     time_fraction=0.3,
-    function_=build_fit_ensemble
+    post_processing_function=build_fit_ensemble
 )
 
 

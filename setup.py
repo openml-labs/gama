@@ -26,7 +26,7 @@ visualization_requirements = [
 
 setup(
     name='gama',
-    version='19.01.0',
+    version='19.08.0',
     description='A package for automated machine learning based on scikit-learn.',
     long_description='',
     long_description_content_type='text/markdown',

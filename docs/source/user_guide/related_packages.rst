@@ -61,7 +61,7 @@ A nice overview of papers and projects is gathered at `this Github repo <https:/
 
 The back-end of GAMA features a genetic programming module.
 More familiar developers might see that it very closely follows the design of `DEAP <https://github.com/DEAP/deap>`_, a package that is also used by TPOT.
-This is not by coincidence, but because up until recently GAMA used DEAP instead.
+This is not by coincidence, but because GAMA initially was built on DEAP.
 There two main reasons for reimplementation were:
  - Legibility. It was sometimes hard to tell exactly what was going on with mutation operators. This stems from the fact that DEAP expects many primitives with different return types. This makes terminals easily replacable by new trees. For GAMA, all of the hyperparameters were defined by their own types which can not be defined by subtrees.
  - Serializability of individuals. DEAP generates classes to define the terminals, and uses Python class inheritance to determine suitability of input/output types. Serializing of generated classes can become an issue with multi-processing (e.g. having to first compile them to scikit-learn pipelines before sending them to a different process).

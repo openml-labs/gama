@@ -1,7 +1,7 @@
 import dash_core_components as dcc
 import dash_html_components as html
 
-from gama.visualization.app import app
+from gama.visualization.app import dash_app
 from gama.visualization.apps.dashboard_page import dashboard_page, dashboard_header
 
 app_title = 'GAMA Dashboard'
@@ -37,14 +37,15 @@ top_bar = html.Div(
         upload_box,
  ])
 
-app.layout = html.Div([
+dash_app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     top_bar,
     html.Div(id='page-content')
 ])
 
+dash_app.layout['page-content'].children = dashboard_page
+dash_app.layout['header-box'].children = dashboard_header
+
 
 if __name__ == '__main__':
-    app.layout['page-content'].children = dashboard_page
-    app.layout['header-box'].children = dashboard_header
-    app.run_server(debug=True)
+    dash_app.run_server(debug=True)

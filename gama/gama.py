@@ -20,10 +20,9 @@ from gama.utilities.metrics import scoring_to_metric
 from .utilities.observer import Observer
 
 from gama.data import X_y_from_arff
-from gama.search_methods.async_ea import async_ea, AsyncEA
+from gama.search_methods.async_ea import AsyncEA
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.logging.utility_functions import register_stream_log, register_file_log
-from gama.logging.machine_logging import TOKENS, log_event
 from gama.utilities.preprocessing import define_preprocessing_steps, format_x_y
 from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
 from gama.genetic_programming.selection import create_from_population, eliminate_from_pareto

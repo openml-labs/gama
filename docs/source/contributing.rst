@@ -3,8 +3,9 @@ Contributing
 
 If you would like to contribute, get in touch!
 The best way to do this is through `Github Issues <https://github.com/PGijsbers/GAMA/issues>`_.
+We greatly appreciate contributions!
 
-If you are interested in adding or improving something unlisted, open a new issue first.
+If you are interested in adding or improving something unlisted, please open a new issue first.
 Describe the planned contribution to see if it fits within our vision of the package,
 and for discussion on its implementation.
 If you want to start working on an open issue, comment on the issue first to make sure no double work is done.

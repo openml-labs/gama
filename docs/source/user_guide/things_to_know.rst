@@ -23,7 +23,7 @@ Valid options include `roc_auc`, `accuracy` and `log_loss` for classification, a
 For more options see `API documentation <https://pgijsbers.github.io/gama/api/index.html#api>`_.
 
 **n_jobs**: determines how many processes can be run in parallel during `fit`.
-By default only one core is used. If you have more cores available, this has the most influence over how many
+By default only all cores are used. If you have more cores available, this has the most influence over how many
 machine learning pipelines can be evaluated.
 
 **max_total_time**: the maximum time in seconds that GAMA should aim to use to construct a model from the data.
