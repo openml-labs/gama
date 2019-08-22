@@ -34,7 +34,7 @@ You can install GAMA (and its dependencies) by cloning the repository and callin
    user_guide/index
    api/index
    releases
-   contributing
+   contributing/index
    citing
 
    :caption: Contents:
