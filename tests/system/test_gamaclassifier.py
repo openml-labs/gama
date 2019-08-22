@@ -8,6 +8,7 @@ from sklearn.datasets import load_wine, load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, log_loss
 
+from gama.postprocessing import EnsemblePostProcessing
 from gama.search_methods import asha, async_ea
 from gama.search_methods.asha import AsynchronousSuccessiveHalving
 from gama.search_methods.async_ea import AsyncEA
@@ -86,7 +87,8 @@ def _test_dataset_problem(
     :return:
     """
     gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric, search_method=search, n_jobs=1,
-                          cache_dir=f"{data['name']}_arff_{arff}_m_{metric}_y_{y_type.__name__}")
+                          cache_dir=f"{data['name']}_arff_{arff}_m_{metric}_y_{y_type.__name__}_s_{search.__class__.__name__}",
+                          post_processing_method=EnsemblePostProcessing(ensemble_size=5))
     if arff:
         train_path = 'tests/data/{}_train.arff'.format(data['name'])
         test_path = 'tests/data/{}_test.arff'.format(data['name'])
@@ -96,7 +98,7 @@ def _test_dataset_problem(
         y_test = [str(val) for val in y_test]
 
         with Stopwatch() as sw:
-            gama.fit_arff(train_path, auto_ensemble_n=5)
+            gama.fit_arff(train_path)
         class_predictions = gama.predict_arff(test_path)
         class_probabilities = gama.predict_proba_arff(test_path)
         gama_score = gama.score_arff(test_path)
@@ -114,7 +116,7 @@ def _test_dataset_problem(
             X_test[1:100:2, 0] = X_test[2:100:5, 1] = float("NaN")
 
         with Stopwatch() as sw:
-            gama.fit(X_train, y_train, auto_ensemble_n=5)
+            gama.fit(X_train, y_train)
         class_predictions = gama.predict(X_test)
         class_probabilities = gama.predict_proba(X_test)
         gama_score = gama.score(X_test, y_test)

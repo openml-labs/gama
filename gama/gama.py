@@ -7,7 +7,7 @@ import datetime
 import shutil
 from functools import partial
 import warnings
-from typing import Callable, Union, List, Tuple, Optional, Dict
+from typing import Union, Tuple, Optional, Dict
 import uuid
 
 import pandas as pd
@@ -30,7 +30,7 @@ from gama.genetic_programming.operations import create_random_expression
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
-from gama.postprocessing import post_process, FitBest, Ensemble, NoPostProcessing
+from gama.postprocessing import BestFitPostProcessing, EnsemblePostProcessing, NoPostProcessing, BasePostProcessing
 from gama.utilities.generic.async_executor import AsyncExecutor
 from gama.utilities.metrics import Metric
 
@@ -108,7 +108,8 @@ class Gama(ABC):
                  verbosity: int = logging.WARNING,
                  keep_analysis_log: Optional[str] = 'gama.log',
                  cache_dir: Optional[str] = None,
-                 search_method: BaseSearch = AsyncEA()):
+                 search_method: BaseSearch = AsyncEA(),
+                 post_processing_method: BasePostProcessing = BestFitPostProcessing()):
 
         register_stream_log(verbosity)
         if keep_analysis_log is not None:
@@ -137,6 +138,7 @@ class Gama(ABC):
         self._time_manager = TimeKeeper(max_total_time)
         self._metrics: Tuple[Metric] = scoring_to_metric(scoring)
         self._regularize_length = regularize_length
+        self._post_processing = post_processing_method
 
         default_cache_dir = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{str(uuid.uuid4())[:4]}_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
@@ -206,7 +208,6 @@ class Gama(ABC):
             x: Union[pd.DataFrame, np.ndarray],
             y: Union[pd.DataFrame, pd.Series, np.ndarray],
             warm_start: bool = False,
-            auto_ensemble_n: int = 25,
             keep_cache: bool = False):
         """ Find and fit a model to predict target y from X.
 
@@ -228,19 +229,13 @@ class Gama(ABC):
         :param keep_cache: bool (default=False)
             If True, keep the cache directory and its content after fitting is complete. Otherwise delete it.
         """
-        if auto_ensemble_n == 0:
-            postprocessing = NoPostProcessing
-        elif auto_ensemble_n == 1:
-            postprocessing = FitBest
-        else:
-            postprocessing = Ensemble
 
         with self._time_manager.start_activity('preprocessing', activity_meta=['default']):
             self._X, self._y = format_x_y(x, y)
             steps = define_preprocessing_steps(self._X, max_extra_features_created=None, max_categories_for_one_hot=10)
             self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
 
-        fit_time = int((1 - postprocessing.time_fraction) * self._time_manager.total_time_remaining)
+        fit_time = int((1 - self._post_processing.time_fraction) * self._time_manager.total_time_remaining)
 
         with self._time_manager.start_activity('search', time_limit=fit_time,
                                                activity_meta=[self._search_method.__class__.__name__]):
@@ -248,13 +243,12 @@ class Gama(ABC):
 
         with self._time_manager.start_activity('postprocess',
                                                time_limit=int(self._time_manager.total_time_remaining),
-                                               activity_meta=[postprocessing.name]):
-            best_individual = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values)))[0]
-            self.model = post_process(self, postprocessing,
-                                      ensemble_size=auto_ensemble_n,
-                                      timeout=self._time_manager.total_time_remaining,
-                                      best=best_individual)
-
+                                               activity_meta=[self._post_processing.__class__.__name__]):
+            best_individuals = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values)))
+            self._post_processing.dynamic_defaults(self)
+            self.model = self._post_processing.post_process(
+                self._X, self._y, self._time_manager.total_time_remaining, best_individuals
+            )
         if not keep_cache:
             log.debug("Deleting cache.")
             self.delete_cache()

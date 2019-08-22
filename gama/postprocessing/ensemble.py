@@ -3,18 +3,36 @@ import os
 import pickle
 import logging
 import time
-from typing import Optional
+from typing import Optional, List
 
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 import stopit
 
+from gama.genetic_programming.components import Individual
+from gama.postprocessing.base_post_processing import BasePostProcessing
 from gama.utilities.metrics import Metric, MetricType
 from gama.utilities.generic.async_executor import AsyncExecutor, wait_first_complete
 
 log = logging.getLogger(__name__)
 Model = namedtuple("Model", ['name', 'pipeline', 'predictions', 'validation_score'])
+
+
+class EnsemblePostProcessing(BasePostProcessing):
+
+    def __init__(self, time_fraction: float = 0.3, ensemble_size: int = 25):
+        super().__init__(time_fraction)
+        self.ensemble_size = ensemble_size
+        self.metric = None
+        self.cache = None
+
+    def dynamic_defaults(self, gama: 'Gama'):
+        self.metric = gama._metrics[0]
+        self.cache = gama._cache_dir
+
+    def post_process(self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]) -> 'model':
+        return build_fit_ensemble(x, y, self.ensemble_size, timeout, self.metric, self.cache)
 
 
 class Ensemble(object):
@@ -298,7 +316,7 @@ class EnsembleRegressor(Ensemble):
         return self._get_weighted_mean_predictions(X)
 
 
-def build_fit_ensemble(x, y, ensemble_size: int, timeout: int,
+def build_fit_ensemble(x, y, ensemble_size: int, timeout: float,
                        metric: Metric, cache: str, encoder: Optional[object]=None) -> Ensemble:
     """ Construct an Ensemble of models from cache, optimizing for metric and fit to (x, y). """
     start_build = time.time()

@@ -4,6 +4,7 @@ from sklearn.datasets import load_boston
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
+from gama.postprocessing import EnsemblePostProcessing
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama import GamaRegressor
 
@@ -21,7 +22,7 @@ boston = dict(
 
 def _test_gama_regressor(gama, X_train, X_test, y_train, y_test, data, metric):
     with Stopwatch() as sw:
-        gama.fit(X_train, y_train, auto_ensemble_n=5)
+        gama.fit(X_train, y_train)
 
     assert TOTAL_TIME_S * FIT_TIME_MARGIN >= sw.elapsed_time, 'fit must stay within 110% of allotted time.'
 
@@ -40,7 +41,8 @@ def _test_dataset_problem(data, metric):
     X, y = data['load'](return_X_y=True)
     split_data = train_test_split(X, y, random_state=0)
 
-    gama = GamaRegressor(random_state=0, max_total_time=TOTAL_TIME_S, scoring=metric, n_jobs=1, cache_dir=data['name'])
+    gama = GamaRegressor(random_state=0, max_total_time=TOTAL_TIME_S, scoring=metric, n_jobs=1, cache_dir=data['name'],
+                         post_processing_method=EnsemblePostProcessing(ensemble_size=5))
     _test_gama_regressor(gama, *split_data, data, metric)
 
 
