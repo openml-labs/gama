@@ -15,6 +15,7 @@ import numpy as np
 import stopit
 
 import gama.genetic_programming.compilers.scikitlearn
+from gama.logging.machine_logging import log_event, TOKENS
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.metrics import scoring_to_metric
 from .utilities.observer import Observer
@@ -115,12 +116,11 @@ class Gama(ABC):
         if keep_analysis_log is not None:
             register_file_log(keep_analysis_log)
 
+        arguments = ','.join(['{}={}'.format(k, v) for (k, v) in locals().items()
+                     if k not in ['self', 'config', 'gamalog', 'file_handler', 'stdout_streamhandler']])
         log.info('Using GAMA version {}.'.format(__version__))
-        log.info('{}({})'.format(
-            self.__class__.__name__,
-            ','.join(['{}={}'.format(k, v) for (k, v) in locals().items()
-                      if k not in ['self', 'config', 'gamalog', 'file_handler', 'stdout_streamhandler']])
-        ))
+        log.info('{}({})'.format(self.__class__.__name__, arguments))
+        log_event(log, TOKENS.INIT, [arguments])
 
         if max_total_time is None or max_total_time <= 0:
             raise ValueError(f"max_total_time should be integer greater than zero but is {max_total_time}.")

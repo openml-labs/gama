@@ -44,7 +44,6 @@ class GamaReport:
 
         self._individuals = None
         self.name = name if name is not None else (logfile if logfile is not None else 'nameless')
-        self.metrics = _find_metric_configuration(log_lines)
 
         # Find the Parseable Log Events and discard their start/end tokens.
         ple_lines = [line.split(PLE_DELIM)[1:-1] for line in log_lines
@@ -54,6 +53,7 @@ class GamaReport:
         for token, *event in ple_lines:
             events_by_type[token].append(event)
 
+        self.metrics = _find_metric_configuration(events_by_type[TOKENS.INIT])
         self.phases: List[Tuple[str, str, datetime, float]] = _find_phase_information(events_by_type)
         self.evaluations: pd.DataFrame = _evaluations_to_dataframe(events_by_type[TOKENS.EVALUATION_RESULT],
                                                                    metric_names=self.metrics,
@@ -73,12 +73,8 @@ class GamaReport:
         return self.phases[1][1]
 
 
-def _find_metric_configuration(log_lines: List[str]) -> List[str]:
-    # Can line logging init call searching for e.g. 'GamaClassifier(' but right now the location is static anyway.
-    init_line = log_lines[1]
-    # E.g.: GamaRegressor(scoring=neg_mean_squared_error,regularize_length=True, ...)
-    _, arguments = init_line.split('(')
-    scoring, regularize_length, *_ = arguments.split(',')
+def _find_metric_configuration(init_lines: List[List[str]]) -> List[str]:
+    scoring, regularize_length, *_ = init_lines[0][0].split(',')
     _, metric = scoring.split('=')
     _, regularize = regularize_length.split('=')
     if bool(regularize):
