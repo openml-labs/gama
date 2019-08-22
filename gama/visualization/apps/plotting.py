@@ -32,7 +32,7 @@ def plot_preset_graph(reports: List[GamaReport], aggregate_df: pd.DataFrame, pre
             plots = [individual_plot(report, 'relative_end', first_metric_max, 'lines')
                      for report in reports]
         elif aggregate == 'aggregate':
-            plots = aggregate_plot(aggregate_df, 'relative_end', first_metric_max)
+            plots = aggregate_best_over_time(aggregate_df, first_metric_max)
         layout = dict(
             title=f'Best score over time',
             xaxis=dict(title='time (s)'),
@@ -173,6 +173,64 @@ def individual_plot(report: GamaReport, x_axis: str, y_axis: str, mode: str):
         )
 
 
+def aggregate_best_over_time(aggregate: pd.DataFrame, y_axis: str):
+    # By method, find the best score per trace at each point in time.
+    # I'm sure there is a better way to do this...
+    colors = {0: 'rgba(255, 0, 0, {a})', 1: 'rgba(0, 255, 0, {a})', 2: 'rgba(0, 0, 255, {a})'}
+    soft_colors = {i: color.format(a=0.2) for i, color in colors.items()}
+    hard_colors = {i: color.format(a=1.0) for i, color in colors.items()}
+
+    aggregate_data = []
+    aggregate = aggregate[aggregate[y_axis] != -float('inf')]
+    for color_no, method in enumerate(aggregate.search_method.unique()):
+        method_agg = aggregate[aggregate.search_method == method]
+        all_end_times = method_agg.relative_end.unique()
+        end_time_series = pd.Series(sorted(all_end_times), name='relative_end')
+
+        scores_over_time = pd.DataFrame(end_time_series)
+        for log_no in method_agg.log_no.unique():
+            log_results = method_agg[method_agg.log_no == log_no]
+            best_for_log = pd.merge_asof(end_time_series, log_results[['relative_end', y_axis]], on='relative_end')
+            scores_over_time[f'log{log_no}'] = best_for_log[y_axis]
+        scores_over_time = scores_over_time.set_index('relative_end')
+        mean_scores = scores_over_time.mean(axis=1)
+        std_scores = scores_over_time.std(axis=1)
+        scores_over_time['mean'] = mean_scores
+        scores_over_time['std'] = std_scores
+
+        upper_bound = go.Scatter(
+            x=scores_over_time.index,
+            y=scores_over_time['mean'] + scores_over_time['std'],
+            mode='lines',
+            marker=dict(color=soft_colors[color_no]),
+            line=dict(width=0),
+            fillcolor=soft_colors[color_no],
+            fill='tonexty',
+            showlegend=False
+        )
+
+        mean_performance = go.Scatter(
+            name=method,
+            x=scores_over_time.index,
+            y=scores_over_time['mean'],
+            mode='lines',
+            line=dict(color=hard_colors[color_no]),
+            fillcolor=soft_colors[color_no],
+            fill='tonexty'
+        )
+
+        lower_bound = go.Scatter(
+            x=scores_over_time.index,
+            y=scores_over_time['mean'] - scores_over_time['std'],
+            mode='lines',
+            marker=dict(color=soft_colors[color_no]),
+            line=dict(width=0),
+            showlegend=False
+        )
+        aggregate_data += [lower_bound, mean_performance, upper_bound]
+    return aggregate_data
+
+
 def aggregate_plot(aggregate: pd.DataFrame, x_axis: str, y_axis: str):
     """ Creates an aggregate plot over multiple reports by calculating the mean and std of `y_axis` by `x_axis`.
 
@@ -183,6 +241,8 @@ def aggregate_plot(aggregate: pd.DataFrame, x_axis: str, y_axis: str):
         Three dash Scatter objects which respectively draw the lower bound, mean and upper bound.
     """
     colors = {0: 'rgba(255, 0, 0, {a})', 1: 'rgba(0, 255, 0, {a})', 2: 'rgba(0, 0, 255, {a})'}
+    soft_colors = {i: color.format(a=0.2) for i, color in colors.items()}
+    hard_colors = {i: color.format(a=1.0) for i, color in colors.items()}
 
     # concat_df = pd.concat([report.evaluations for report in reports_to_combine])
     # concat_df = concat_df[concat_df[y_axis] != -float('inf')]
@@ -194,16 +254,14 @@ def aggregate_plot(aggregate: pd.DataFrame, x_axis: str, y_axis: str):
         agg_for_method = aggregate[aggregate.search_method == method]
         agg_df = agg_for_method.groupby(by=x_axis).agg({y_axis: ['mean', 'std']}).reset_index()
         agg_df.columns = [x_axis, y_axis, 'std']
-        soft_color = colors[color_no].format(a=0.2)
-        hard_color = colors[color_no].format(a=1.0)
 
         upper_bound = go.Scatter(
             x=agg_df[x_axis],
             y=agg_df[y_axis] + agg_df['std'],
             mode='lines',
-            marker=dict(color=soft_color),
+            marker=dict(color=soft_colors[color_no]),
             line=dict(width=0),
-            fillcolor=soft_color,
+            fillcolor=soft_colors[color_no],
             fill='tonexty',
             showlegend=False
         )
@@ -213,8 +271,8 @@ def aggregate_plot(aggregate: pd.DataFrame, x_axis: str, y_axis: str):
             x=agg_df[x_axis],
             y=agg_df[y_axis],
             mode='lines',
-            line=dict(color=hard_color),
-            fillcolor=soft_color,
+            line=dict(color=hard_colors[color_no]),
+            fillcolor=soft_colors[color_no],
             fill='tonexty'
         )
 
@@ -222,7 +280,7 @@ def aggregate_plot(aggregate: pd.DataFrame, x_axis: str, y_axis: str):
             x=agg_df[x_axis],
             y=agg_df[y_axis] - agg_df['std'],
             mode='lines',
-            marker=dict(color=soft_color),
+            marker=dict(color=soft_colors[color_no]),
             line=dict(width=0),
             showlegend=False
         )

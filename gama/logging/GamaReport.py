@@ -54,9 +54,10 @@ class GamaReport:
         for token, *event in ple_lines:
             events_by_type[token].append(event)
 
+        self.phases: List[Tuple[str, str, datetime, float]] = _find_phase_information(events_by_type)
         self.evaluations: pd.DataFrame = _evaluations_to_dataframe(events_by_type[TOKENS.EVALUATION_RESULT],
-                                                                   metric_names=self.metrics)
-        self.phases: List[Tuple[str, str, float]] = _find_phase_information(events_by_type)
+                                                                   metric_names=self.metrics,
+                                                                   search_start=self.phases[1][2])
 
         # This can take a while for long logs (e.g. ~1sec for 10k individuals)
         self.individuals: Dict[str, Individual] = {
@@ -86,7 +87,7 @@ def _find_metric_configuration(log_lines: List[str]) -> List[str]:
         return [metric]
 
 
-def _find_phase_information(events_by_type: Dict[str, List[str]]) -> List[Tuple[str, str, float]]:
+def _find_phase_information(events_by_type: Dict[str, List[str]]) -> List[Tuple[str, str, datetime, float]]:
     """ For each phase (e.g. search), find the type used (e.g. ASHA) and its duration. """
     phases = ['preprocessing', 'search', 'postprocess']
     phase_info = []
@@ -97,12 +98,13 @@ def _find_phase_information(events_by_type: Dict[str, List[str]]) -> List[Tuple[
         _, _, start_time = start_phase
         _, algorithm, end_time = end_phase
         duration = (datetime.strptime(end_time, TIME_FORMAT) - datetime.strptime(start_time, TIME_FORMAT))
-        phase_info.append([phase, algorithm, duration.total_seconds()])
+        phase_info.append([phase, algorithm, datetime.strptime(start_time, TIME_FORMAT), duration.total_seconds()])
     return phase_info
 
 
 def _evaluations_to_dataframe(evaluation_lines: List[List[str]],
-                              metric_names: Optional[List[str]] = None) -> pd.DataFrame:
+                              metric_names: Optional[List[str]] = None,
+                              search_start: datetime = None) -> pd.DataFrame:
     """ Create a dataframe with all pipeline evaluations as parsed from EVAL events in the log. """
     evaluations = []
     for i, line in enumerate(evaluation_lines):
@@ -120,7 +122,8 @@ def _evaluations_to_dataframe(evaluation_lines: List[List[str]],
 
     df.start = pd.to_datetime(df.start)
     df.duration = pd.to_timedelta(df.duration, unit='s')
-    df['relative_end'] = ((df.start + df.duration) - df.start.min()).dt.total_seconds()
+    search_start = search_start if search_start is not None else df.start.min()
+    df['relative_end'] = ((df.start + df.duration) - search_start).dt.total_seconds()
     return df
 
 

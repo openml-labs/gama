@@ -203,8 +203,10 @@ def load_logs(list_of_contents, list_of_names):
             eval_copy = report.evaluations.copy()
             eval_copy['search_method'] = report.search_method
             if aggregate_dataframe is None:
+                eval_copy['log_no'] = 0
                 aggregate_dataframe = eval_copy
             else:
+                eval_copy['log_no'] = len(aggregate_dataframe['log_no'].unique())
                 aggregate_dataframe = pd.concat([aggregate_dataframe, eval_copy])
             print(report.search_method)
         return [{'label': logname, 'value': logname} for logname in reports]

@@ -16,7 +16,7 @@ class BaseSearch(ABC):
 
     def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time: int):
         # updates self.hyperparameters defaults
-        raise NotImplementedError("Must be implemented by base class.")
+        raise NotImplementedError("Must be implemented by child class.")
 
     def search(self, operations: OperatorSet, start_candidates: List[Individual]):
-        raise NotImplementedError("Must be implemented by base class.")
+        raise NotImplementedError("Must be implemented by child class.")
