@@ -12,4 +12,4 @@ class NoPostProcessing(BasePostProcessing):
         return None
 
 
-__all__ = [NoPostProcessing, BestFitPostProcessing, EnsemblePostProcessing]
+__all__ = ['NoPostProcessing', 'BestFitPostProcessing', 'EnsemblePostProcessing']

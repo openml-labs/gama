@@ -20,5 +20,5 @@ When you are finished, make sure all the unit tests work and the documentation i
 In the pull request, mention the issue that discusses the contribution and please mention any additional information
 that might be useful for reviewing the changes.
 
-.. include:: contributing.rst
+.. include:: contributing.inc
     :start-line: 1

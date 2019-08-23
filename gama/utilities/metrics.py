@@ -11,9 +11,11 @@ Scikit-learn does not have an option to return predictions and score at the same
 interpretation of scoring functions automatically make 'scorers' which train the model internally, also throwing
 away any predictions. So we need to make our own conversion of scoring string to function, predict, score, and return
 both. Construction of metric_strings copied with minor modifications from SCORERS of scikit-learn. See also:
+
 1. https://github.com/scikit-learn/scikit-learn/blob/a24c8b464d094d2c468a16ea9f8bf8d42d949f84/sklearn/metrics/scorer.py#L530
 2. https://stackoverflow.com/questions/41003897/scikit-learn-cross-validates-score-and-predictions-at-one-go
 """
+
 # name: (Score function, requires_probabilities, bool indicating if maximizing optimizes)
 classification_metrics = dict(
     accuracy=(metrics.accuracy_score, False, True),

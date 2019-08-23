@@ -123,13 +123,14 @@ def shared_terminals(individual1: Individual, individual2: Individual,
     :param value_match: str (default='different')
         Indicates with matches to return, based on terminal values.
         Accepted values are:
+
          - 'different': only return shared terminals which have different values from each other
          - 'equal': only return shared terminals which have equal values from each other
          - 'all': return all shared terminals regardless of value
     :return: sequence of tuples with both Terminals, with the Terminal from Individual1 first.
         Tuple[Terminal, Terminal] if `with_indices` is False
         Tuple[int, Terminal, int, Terminal] if `with_indices` is True,
-            each int specifies the index of the Terminal directly after.
+        each int specifies the index of the Terminal directly after.
     """
     if value_match not in ['different', 'equal', 'all']:
         raise ValueError(f"`value_match` must be one of 'all', 'equal' or 'different' but is '{value_match}'.")

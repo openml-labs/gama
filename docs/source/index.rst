@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. automodule::
+.. automodule:: gama
    :members:
    
 GAMA - Genetic Automated Machine learning Assistant
@@ -37,7 +37,6 @@ You can install GAMA (and its dependencies) by cloning the repository and callin
    contributing/index
    citing
 
-   :caption: Contents:
 
 
 To get a general understanding on how to work with GAMA, read the :ref:`user_guide_index`.

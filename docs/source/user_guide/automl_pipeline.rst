@@ -12,7 +12,7 @@ we will refer to a configuration of these AutoML components as an *AutoML Pipeli
 In GAMA we currently support flexibility in the AutoML pipeline in three stages: pre-processing, search and post-processing.
 
 Pre-processing
-*************
+**************
 
 
 Search Algorithms

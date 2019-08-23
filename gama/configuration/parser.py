@@ -12,6 +12,7 @@ def pset_from_config(configuration):
     Given a configuration dictionary specifying operators (e.g. sklearn
     estimators), their hyperparameters and values for each hyperparameter,
     create a gp.PrimitiveSetTyped that contains:
+
         - For each operator a primitive
         - For each possible hyperparameter-value combination a unique terminal
 

@@ -2,6 +2,7 @@
 This submodule contains the different search methods available in GAMA.
 All search methods share a set of common hyperparameters, in addition to ones unique to each method.
 The shared hyperparameters are:
+
  - toolbox
  - output: List[Individual]
     A list to be filled with all individuals still in consideration.
