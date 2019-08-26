@@ -33,7 +33,7 @@ def default_time_format(datetime_: datetime):
     return datetime_.strftime(TIME_FORMAT)#[:-3]
 
 
-def log_event(log_: object, token: object, args: object) -> object:
+def log_event(log_: object, token: object, *args: object) -> object:
     """ Writes the described event to the machine log level formatted for later parsing. """
     args = [default_time_format(arg) if isinstance(arg, datetime) else arg for arg in args]
     attrs = f'{PLE_DELIM}'.join([str(arg) for arg in args])
