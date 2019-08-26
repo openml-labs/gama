@@ -4,10 +4,8 @@ User Guide
 ===========
 GAMA is an AutoML tool which aims to automatically find the right machine learning algorithms to create the best possible data for your model.
 This page gives an introduction to basic components and concepts of GAMA.
-If there are any questions you have that are not answered here, check the `issue page <https://github.com/PGijsbers/GAMA/issues>`_.
-If your question has not been answered there yet, please open a new issue and label with the question label.
 
-In the process, GAMA performs a search over *machine learning pipelines*.
+GAMA performs a search over *machine learning pipelines*.
 An example of a machine learning pipeline would be to first perform data normalization and then use a nearest neighbor classifier to make a prediction on the normalized data.
 More formally, a *machine learning pipeline* is a sequence of one or more *components*.
 A *component* is an algorithm which performs either data transformation *or* a prediction.
@@ -21,11 +19,18 @@ For ease of use, GAMA provides a `fit`, `predict` and `predict_proba` function a
 
 .. include:: installation.rst
     :start-line: 1
+
+-----
+
 .. include:: examples.rst
     :start-line: 1
-.. include:: things_to_know.rst
+
+-----
+
+.. include:: hyperparameters.rst
     :start-line: 1
-.. include:: configuration.inc
-    :start-line: 1
+
+-----
+
 .. include:: related_packages.rst
     :start-line: 1

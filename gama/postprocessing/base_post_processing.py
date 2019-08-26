@@ -1,6 +1,8 @@
 from abc import ABC
-from typing import List
+from typing import List, Union
+
 import pandas as pd
+
 
 from gama.genetic_programming.components import Individual
 
@@ -18,12 +20,17 @@ class BasePostProcessing(ABC):
     def dynamic_defaults(self, gama: 'Gama'):
         pass
 
-    def post_process(self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]) -> 'model':
+    def post_process(
+            self,
+            x: pd.DataFrame,
+            y: Union[pd.DataFrame, pd.Series],
+            timeout: float,
+            selection: List[Individual]) -> 'model':
         """
 
-        :param x: pd.DataFrame
+        :param x: Union[pd.DataFrame]
             all training features
-        :param y: pd.Series
+        :param y: Union[pd.DataFrame, pd.Series]
             all training labels
         :param timeout: float
             allowed time in seconds for post-processing

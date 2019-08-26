@@ -8,38 +8,6 @@ GAMA is currently in development.
 This means things can change, from at the interface level to the optimization procedure level.
 However, we expect few changes that break old code, and will document them when we make them.
 
-Important Hyperparameters
-*************************
-
-GAMA has a lot of hyperparameters to tweak.
-Finding the best defaults is always a work in progress, so if you run into issues, try tuning some of them.
-
-Here is a selection that might be of particular interest that are accessed on initialization:
-
-**scoring**: states towards which metric to optimize
-Multi-objective optimization will optimize towards the metric specified by `scoring`, as well as minimizing pipeline length.
-Make sure to optimize towards the metric that reflects well what is important to you.
-Valid options include `roc_auc`, `accuracy` and `log_loss` for classification, and `mean_squared_error` and `r2` for regression.
-For more options see `API documentation <https://pgijsbers.github.io/gama/api/index.html#api>`_.
-
-**n_jobs**: determines how many processes can be run in parallel during `fit`.
-By default only all cores are used. If you have more cores available, this has the most influence over how many
-machine learning pipelines can be evaluated.
-
-**max_total_time**: the maximum time in seconds that GAMA should aim to use to construct a model from the data.
-By default GAMA uses one hour. For large datasets, more time may be needed to get useful results.
-
-**max_eval_time**: the maximum time in seconds that GAMA is allowed to use to evaluate a single machine learning pipeline.
-By default GAMA uses five minutes. For large datasets, more time may be needed to get useful results.
-
-The `fit` function can also be supplied with some optional hyperparameters:
-
-**auto_ensemble_n**: This hyperparameter specifies the number of models to include in the final ensemble.
-The final ensemble may contain duplicates as a form of assigning weights.
-
-**keep_cache**: During the optimization process, each model evaluated is stored alongside its predictions.
-This is needed for automatic ensemble construction.
-Normally, this cache is deleted automatically, but should you wish to keep it, you can specify it here.
 
 
 Logging

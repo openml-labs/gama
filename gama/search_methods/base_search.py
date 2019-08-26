@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import List, Dict, Tuple, Any
+from typing import List, Dict, Tuple, Any, Union
 
 import pandas as pd
 
@@ -14,7 +14,11 @@ class BaseSearch(ABC):
         self.hyperparameters: Dict[str, Tuple[Any, Any]] = dict()
         self.output: List[Individual] = []
 
-    def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time: int):
+    def dynamic_defaults(
+            self,
+            x: pd.DataFrame,
+            y: Union[pd.DataFrame, pd.Series],
+            time: int) -> None:
         # updates self.hyperparameters defaults
         raise NotImplementedError("Must be implemented by child class.")
 

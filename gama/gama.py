@@ -224,8 +224,6 @@ class Gama(ABC):
             Target values. If a DataFrame is provided, it is assumed the first column contains target values.
         :param warm_start: bool. Indicates the optimization should continue using the last individuals of the
             previous `fit` call.
-        :param auto_ensemble_n: positive integer. The number of models to include in the ensemble which is built
-            after the optimizatio process.
         :param keep_cache: bool (default=False)
             If True, keep the cache directory and its content after fitting is complete. Otherwise delete it.
         """
