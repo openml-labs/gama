@@ -8,7 +8,7 @@ from gama.configuration.classification import clf_config
 from gama.configuration.parser import pset_from_config, merge_configurations
 from gama.configuration.regression import reg_config
 from gama.genetic_programming.components import Individual
-from gama.logging.machine_logging import PLE_START, PLE_DELIM, PLE_END, TOKENS
+from gama.logging.machine_logging import PLE_START, PLE_DELIM, PLE_END, TOKENS, METHOD_TOKENS
 from gama.logging import TIME_FORMAT
 
 
@@ -65,8 +65,12 @@ class GamaReport:
             for id_, pipeline in zip(self.evaluations.id, self.evaluations.pipeline)
         }
 
-        parse_method_data: Dict[str, Callable] = defaultdict(lambda: lambda *args: None, ASHA=_ASHA_data_to_dataframe)
-        self.method_data = parse_method_data[self.search_method](events_by_type[self.search_method], self.metrics)
+        parse_method_data: Dict[str, Callable[..., pd.DataFrame]] = defaultdict(
+            lambda: lambda *args: None,
+            AsynchronousSuccessiveHalving=_ASHA_data_to_dataframe
+        )
+        method_token = METHOD_TOKENS[self.search_method]
+        self.method_data = parse_method_data[self.search_method](events_by_type[method_token], self.metrics)
 
     @property
     def search_method(self):

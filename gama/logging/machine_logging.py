@@ -29,6 +29,11 @@ class TOKENS:
                 if not (attribute.startswith('__') and attribute.endswith('__'))]
 
 
+METHOD_TOKENS = dict(
+    AsynchronousSuccessiveHalving='ASHA'
+)
+
+
 def default_time_format(datetime_: datetime):
     return datetime_.strftime(TIME_FORMAT)#[:-3]
 

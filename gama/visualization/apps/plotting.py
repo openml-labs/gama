@@ -121,7 +121,7 @@ def plot_preset_graph(reports: List[GamaReport], aggregate_df: pd.DataFrame, pre
         )
     elif preset == 'n_by_rung':
         for report in reports:
-            if report.search_method == 'ASHA':
+            if report.search_method == 'AsynchronousSuccessiveHalving':
                 count_by_rung = report.method_data.groupby(by='rung').n.count().reset_index()
                 plots.append(go.Bar(
                     x=count_by_rung.rung,
@@ -135,7 +135,7 @@ def plot_preset_graph(reports: List[GamaReport], aggregate_df: pd.DataFrame, pre
         )
     elif preset == 'time_by_rung':
         for report in reports:
-            if report.search_method == 'ASHA':
+            if report.search_method == 'AsynchronousSuccessiveHalving':
                 duration_by_rung = report.method_data.groupby(by='rung').duration.sum().reset_index()
                 duration_by_rung.duration = duration_by_rung.duration.dt.total_seconds()
                 plots.append(go.Bar(
