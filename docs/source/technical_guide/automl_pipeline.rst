@@ -1,5 +1,8 @@
 :orphan:
 
+.. _automl_pipeline:
+
+
 AutoML Pipeline
 ---------------
 
@@ -8,15 +11,7 @@ An important decision is picking the search algorithm, which performs search ove
 Another choice would be how to construct a model after search, e.g. by training the best pipeline or constructing an ensemble.
 Much like data processing algorithms can form a *machine learning pipeline*,
 we will refer to a configuration of these AutoML components as an *AutoML Pipeline*.
-In GAMA we currently support flexibility in the AutoML pipeline in three stages: pre-processing, search and post-processing.
-
-Pre-processing
-**************
-Support in pre-processing is currently limited to two options.
-
-* ``None``: no pre-processing will be performed.
-* ``Prepend Pipeline``: the first two steps in each machine learning pipeline will be imputation of missing values, and categorical encoding.
-
+In GAMA we currently support flexibility in the AutoML pipeline in two stages: search and post-processing.
 
 Search Algorithms
 *****************
@@ -35,7 +30,7 @@ The following post-processing steps are available:
 - ``Ensemble``: create an ensemble out of evaluated machine learning pipelines. This requires more time but can lead to better results.
 
 
-Configuring the pipeline
+Configuring the AutoML pipeline
 ************************
 
 By default 'prepend pipeline', 'Asynchronous EA' and 'FitBest' are chosen for pre-processing, search and post-processing, respectively.

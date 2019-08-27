@@ -69,7 +69,7 @@ class GamaReport:
             lambda: lambda *args: None,
             AsynchronousSuccessiveHalving=_ASHA_data_to_dataframe
         )
-        method_token = METHOD_TOKENS[self.search_method]
+        method_token = METHOD_TOKENS.get(self.search_method)
         self.method_data = parse_method_data[self.search_method](events_by_type[method_token], self.metrics)
 
     @property

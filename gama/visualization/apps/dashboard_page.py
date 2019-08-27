@@ -182,7 +182,8 @@ def update_graph(logs: List[str], aggregate: str = 'separate-line', xaxis: str =
             }
         }
     elif logs is not None:
-        return plot_preset_graph([reports[log] for log in logs], aggregate_dataframe, preset_value, aggregate)
+        filtered_aggregate = aggregate_dataframe[aggregate_dataframe.filename.isin(logs)]
+        return plot_preset_graph([reports[log] for log in logs], filtered_aggregate, preset_value, aggregate)
     else:
         return {}
 
@@ -204,11 +205,12 @@ def load_logs(list_of_contents, list_of_names):
             eval_copy['search_method'] = report.search_method
             if aggregate_dataframe is None:
                 eval_copy['log_no'] = 0
+                eval_copy['filename'] = filename
                 aggregate_dataframe = eval_copy
             else:
                 eval_copy['log_no'] = len(aggregate_dataframe['log_no'].unique())
+                eval_copy['filename'] = filename
                 aggregate_dataframe = pd.concat([aggregate_dataframe, eval_copy])
-            print(report.search_method)
         return [{'label': logname, 'value': logname} for logname in reports]
     return []
 

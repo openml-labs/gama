@@ -8,7 +8,9 @@ This section will cover more advanced usage of GAMA, in particular it covers:
 - A description of non-default AutoML steps and how to configure them.
 - An introduction to optimization traces and visualizing them.
 - Configuring the search space.
-- Hooking into GAMA.
+- GAMA's Events.
+
+----
 
 .. include:: automl_pipeline.rst
     :start-line: 1
@@ -28,3 +30,7 @@ This section will cover more advanced usage of GAMA, in particular it covers:
 .. include:: configuration.inc
     :start-line: 1
 
+----
+
+.. include:: events.rst
+    :start-line: 1

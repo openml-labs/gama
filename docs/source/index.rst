@@ -34,8 +34,7 @@ If there are any questions you have that are not answered by the documentation, 
 If your question has not been answered there either, please open a new issue and label with the question label.
 
 .. toctree::
-   :maxdepth: 2
-   :hidden:
+   :includehidden:
 
    user_guide/index
    technical_guide/index
