@@ -69,6 +69,5 @@ The documentation is generated with `Sphinx <https://www.sphinx-doc.org/en/maste
 Run::
 
     sphinx-build -b html docs\source docs\build
-    sphinx-apidoc -o docs/source/generated/ gama/
 
 The html pages are now in the ``gama\docs\build`` directory.

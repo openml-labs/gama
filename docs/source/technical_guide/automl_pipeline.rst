@@ -1,7 +1,5 @@
 :orphan:
 
-.. _automl_pipeline:
-
 
 AutoML Pipeline
 ---------------
@@ -31,7 +29,7 @@ The following post-processing steps are available:
 
 
 Configuring the AutoML pipeline
-************************
+*******************************
 
 By default 'prepend pipeline', 'Asynchronous EA' and 'FitBest' are chosen for pre-processing, search and post-processing, respectively.
 However, it is easy to change this, or to change the hyperparameters with which each component is used.

@@ -24,3 +24,21 @@ class BaseSearch(ABC):
 
     def search(self, operations: OperatorSet, start_candidates: List[Individual]):
         raise NotImplementedError("Must be implemented by child class.")
+
+
+def _check_base_search_hyperparameters(
+        toolbox,
+        output: List[Individual],
+        start_candidates: List[Individual]
+) -> None:
+    """ Checks that search hyperparameters are valid.
+
+    :param toolbox:
+    :param output:
+    :param start_candidates:
+    :return:
+    """
+    if not isinstance(start_candidates, list):
+        raise TypeError(f"'start_population' must be a list but was {type(start_candidates)}")
+    if not all(isinstance(x, Individual) for x in start_candidates):
+        raise TypeError(f"Each element in 'start_population' must be Individual.")

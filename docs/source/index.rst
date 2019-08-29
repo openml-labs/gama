@@ -3,9 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. automodule:: gama
-   :members:
-   
+
 GAMA - Genetic Automated Machine learning Assistant
 ===================================================
 

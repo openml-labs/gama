@@ -280,7 +280,12 @@ class Gama(ABC):
         raise NotImplementedError('_initialize_ensemble should be implemented by a child class.')
 
     def delete_cache(self):
-        """ Removes the cache folder and all files associated to this instance. """
+        """ Removes the cache folder and all files associated to this instance.
+
+        Returns
+        -------
+        None
+        """
         while os.path.exists(self._cache_dir):
             try:
                 log.info("Attempting to delete {}".format(self._cache_dir))

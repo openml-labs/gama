@@ -8,7 +8,6 @@ import stopit
 
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.search_methods.base_search import BaseSearch
-from gama.search_methods import _check_base_search_hyperparameters
 from gama.logging.machine_logging import TOKENS, log_event
 from gama.utilities.generic.async_executor import AsyncExecutor
 from gama.genetic_programming.components.individual import Individual
@@ -24,6 +23,20 @@ ASHA_LOG_TOKEN = 'ASHA'
 
 
 class AsynchronousSuccessiveHalving(BaseSearch):
+    """ Asynchronous Halving Algorithm by Li et al. (paper: https://arxiv.org/abs/1810.05934)
+
+    Parameters
+    ----------
+
+    reduction_factor: int, optional (default=3)
+        Reduction factor of candidates between each rung.
+    minimum_resource: int, optional (default=100)
+        Number of samples to use in the lowest rung.
+    maximum_resource: int, optional (default=number of samples in the dataset)
+        Number of samples to use in the top rung. This should not exceed the number of samples in the data.
+    minimum_early_stopping_rate: int (default=1)
+        Number of lowest rungs to skip.
+    """
 
     def __init__(self,
                  reduction_factor: Optional[int] = None,

@@ -53,7 +53,7 @@ An overview the log levels:
 Generated Files
 ***************
 
-GAMA will create some files during the optimization process. Here is an overview of produced files:
+GAMA can create some files during the optimization process. Here is an overview of produced files:
 
 **Folder `'{DATE}_{STARTTIME}_XXXX_GAMA'`**: (XXXX are random alphanumeric characters)
 This folder is used to save results from evaluations during the optimization process.
@@ -63,5 +63,6 @@ By default, this folders gets deleted after the `fit` call is done.
 In order to preserve this folder (e.g. to later construct different ensembles or later analysis), specify `keep_cache=True` when calling `fit`.
 
 **File: gama.log**: This file contains all information about the optimization process, and by default is not removed.
-As described in `Log Visualization`_ this file can be used to generate visualizations about the optimization process.
-If you wish to have the file be automatically deleted, specify `keep_analysis_log=False` when initializing a GAMA object, as per the `Examples`_.
+As described in :ref:`visualization` this file can be used to generate visualizations about the optimization process.
+You can use the `keep_analysis_log` hyperparameter to specify the desired location and name of the log,
+or set it to `None` to prevent it being produced in the first place.

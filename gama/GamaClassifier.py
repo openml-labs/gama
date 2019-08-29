@@ -31,9 +31,15 @@ class GamaClassifier(Gama):
     def _predict(self, x: pd.DataFrame):
         """ Predict the target for input X.
 
-        :param x: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
-        :return: a numpy array with predictions. The array is of shape (N,) where N is the length of the
-            first dimension of X.
+        Parameters
+        ----------
+        x: pandas.DataFrame
+            A dataframe with the same number of columns as the input to `fit`.
+
+        Returns
+        -------
+        numpy.ndarray
+            array with predictions of shape (N,) where N is the length of the first dimension of X.
         """
         y = self.model.predict(x)
         # Decode the predicted labels - necessary only if ensemble is not used.
@@ -46,20 +52,34 @@ class GamaClassifier(Gama):
 
         Predict target for x, using the best found pipeline(s) during the `fit` call.
 
-        :param x: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
-        :return: a numpy array with class probabilities. The array is of shape (N, K) where N is the length of the
-            first dimension of X, and K is the number of class labels found in `y` of `fit`.
+        Parameters
+        ----------
+        x: pandas.DataFrame
+            A dataframe with the same number of columns as the input to `fit`.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array of shape (N, K) with class probabilities where N is the length of the
+            first dimension of x, and K is the number of class labels found in `y` of `fit`.
         """
         return self.model.predict_proba(x)
 
     def predict_proba(self, x: Union[pd.DataFrame, np.ndarray]):
-        """ Predict the class probabilities for input X.
+        """ Predict the class probabilities for input x.
 
-        Predict target for X, using the best found pipeline(s) during the `fit` call.
+        Predict target for x, using the best found pipeline(s) during the `fit` call.
 
-        :param x: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
-        :return: a numpy array with class probabilities. The array is of shape (N, K) where N is the length of the
-            first dimension of X, and K is the number of class labels found in `y` of `fit`.
+        Parameters
+        ----------
+        x: pandas.DataFrame or numpy.ndarray
+            A dataframe or numpy array with the same number of columns as the input to `fit`.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array of shape (N, K) with class probabilities where N is the length of the
+            first dimension of x, and K is the number of class labels found in `y` of `fit`.
         """
         if isinstance(x, np.ndarray):
             x = pd.DataFrame(x)

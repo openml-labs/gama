@@ -1,39 +1,18 @@
 """
 This submodule contains the different search methods available in GAMA.
-All search methods share a set of common hyperparameters, in addition to ones unique to each method.
-The shared hyperparameters are:
 
- - toolbox
- - output: List[Individual]
-    A list to be filled with all individuals still in consideration.
- - start_population: List[Individual]
-    A list of individuals to be considered before all others.
+.. note::
+    You will notice an inconsistency between the signature default types and values,
+    and the one in the description. The signature has `Optional` values which default
+    to `None`. If left at `None`, they will default to the value specified in the description,
+    which may be a value based on data characteristics.
 
-Additionally, each search method should expect to be interrupted by a stopit.TimeoutException at any time.
-Preferably the `output` list is up-to-date at that time and no further handling is required (see Random Search).
-Alternatively, the exception can be caught so that the search algorithm can shut down elegantly when this happens,
-and the final list of individuals may be returned (see ASHA).
 """
-from typing import List
 
-from gama.genetic_programming.components import Individual
+from gama.search_methods.asha import AsynchronousSuccessiveHalving
+from gama.search_methods.async_ea import AsyncEA
+from gama.search_methods.random_search import RandomSearch
+from gama.search_methods.base_search import _check_base_search_hyperparameters
 
 
-def _check_base_search_hyperparameters(
-        toolbox,
-        output: List[Individual],
-        start_candidates: List[Individual]
-) -> None:
-    """ Checks that search hyperparameters are valid.
-
-    :param toolbox:
-    :param output:
-    :param start_candidates:
-    :return:
-    """
-    if not isinstance(start_candidates, list):
-        raise TypeError(f"'start_population' must be a list but was {type(start_candidates)}")
-    if not all(isinstance(x, Individual) for x in start_candidates):
-        raise TypeError(f"Each element in 'start_population' must be Individual.")
-
-#__all__ = [asha, async_ea, random_search, _check_base_search_hyperparameters]
+__all__ = ['AsynchronousSuccessiveHalving', 'AsyncEA', 'RandomSearch']

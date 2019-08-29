@@ -1,5 +1,7 @@
 :orphan:
 
+.. _visualization:
+
 
 Visualization
 -------------
@@ -47,30 +49,21 @@ Below you will find a description of each preset.
 
 Visualization presets include:
 
-* **#Pipeline by learner**
- A bar chart of the number of times each estimator is used as the final step in a machine learning pipeline.
+* **#Pipeline by learner** A bar chart of the number of times each estimator is used as the final step in a machine learning pipeline.
 
-* **#Pipeline by size**
- A bar chart of the distribution of the number of components per evaluated pipeline.
+* **#Pipeline by size** A bar chart of the distribution of the number of components per evaluated pipeline.
 
-* **Best score over time**
- The best score obtained by any individual pipeline at a given point in time.
+* **Best score over time** The best score obtained by any individual pipeline at a given point in time.
 
-* **Best score over iterations**
- The best score obtained by any individual pipeline at a given iteration.
+* **Best score over iterations** The best score obtained by any individual pipeline at a given iteration.
 
-* **Size vs Metric**
- A scatter plot where each pipeline is represented by a marker, gives an impression of the distribution of scores
- for evaluated pipelines of different lengths.
+* **Size vs Metric** A scatter plot where each pipeline is represented by a marker, gives an impression of the distribution of scores for evaluated pipelines of different lengths.
 
-* **Evaluation Times**
- A bar chart plotting the distribution of time required to evaluate pipelines during optimization.
+* **Evaluation Times** A bar chart plotting the distribution of time required to evaluate pipelines during optimization.
 
-* **Evaluations by Rung** (ASHA only)
- A bar chart plotting the number of evaluations at each ASHA rung.
+* **Evaluations by Rung** (ASHA only) A bar chart plotting the number of evaluations at each ASHA rung.
 
-* **Time by Rung** (ASHA only)
- A bar chart plotting the combined time used of all evaluations for each ASHA rung.
+* **Time by Rung** (ASHA only) A bar chart plotting the combined time used of all evaluations for each ASHA rung.
 
 Finally there is the **custom** option, which lets you define what to put on the axes.
 There is no support for aggregating logs in this mode.

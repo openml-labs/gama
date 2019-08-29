@@ -6,7 +6,6 @@ import pandas as pd
 
 from gama.genetic_programming.components import Individual
 from gama.genetic_programming.operator_set import OperatorSet
-from gama.search_methods import _check_base_search_hyperparameters
 from gama.logging.machine_logging import TOKENS, log_event
 from gama.logging.utility_functions import MultiprocessingLogger
 from gama.search_methods.base_search import BaseSearch
@@ -16,6 +15,20 @@ log = logging.getLogger(__name__)
 
 
 class AsyncEA(BaseSearch):
+    """ Perform asynchronous evolutionary optimization.
+
+    Parameters
+    ----------
+    population_size: int, optional (default=50)
+        Maximum number of individuals in the population at any time.
+
+    max_n_evaluations: int, optional (default=None)
+        If specified, only a maximum of `max_n_evaluations` individuals are evaluated.
+        If None, the algorithm will be run until interrupted by the user or a timeout.
+
+    restart_callback: Callable, optional (default=None)
+        A function with signature () -> `bool` which returns `True` if search should be restarted.
+    """
 
     def __init__(self,
                  population_size: Optional[int] = None,
@@ -26,7 +39,7 @@ class AsyncEA(BaseSearch):
         self.hyperparameters: Dict[str, Tuple[Any, Any]] = dict(
             population_size=(population_size, 50),
             restart_callback=(restart_callback, None),
-            max_n_evaluations=(max_n_evaluations, 10_000)
+            max_n_evaluations=(max_n_evaluations, None)
         )
         self.output = []
 
@@ -64,7 +77,6 @@ def async_ea(
     :return: List[Individual]
         The individuals currently in the population.
     """
-    _check_base_search_hyperparameters(operations, output, start_candidates)
     if max_n_evaluations is not None and max_n_evaluations <= 0:
         raise ValueError("'n_evaluations' must be non-negative or None, but was {}.".format(max_n_evaluations))
 

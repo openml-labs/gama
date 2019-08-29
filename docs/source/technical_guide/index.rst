@@ -17,13 +17,13 @@ This section will cover more advanced usage of GAMA, in particular it covers:
 
 ----
 
-.. include:: things_to_know.rst
+.. include:: logging.rst
     :start-line: 1
 
 ----
 
 .. include:: visualization.rst
-    :start-line: 1
+    :start-line: 5
 
 ----
 
