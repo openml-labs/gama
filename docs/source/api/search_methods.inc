@@ -1,10 +1,22 @@
 Search Methods
 --------------
 
-.. automodule:: gama.search_methods
-    :members:
-    :exclude-members: dynamic_defaults, search
+.. module:: gama.search_methods
 
+AsynchronousSuccessiveHalving
+*****************************
+
+.. autoclass:: AsynchronousSuccessiveHalving
+
+AsyncEA
+*******
+
+.. autoclass:: AsyncEA
+
+RandomSearch
+************
+
+.. autoclass:: RandomSearch
 
 Developer Note
 **************

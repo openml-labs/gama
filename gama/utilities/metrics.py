@@ -1,3 +1,17 @@
+""" This module defines the built-in metrics for GAMA.
+
+The valid metrics depend on the type of task. Many scikit-learn metrics are available.
+For classification, the following metrics are available:
+
+    - accuracy, roc_auc, average_precision, log_loss
+    - micro, macro, weighted and sample averages for precision, recall and f1 (e.g. f1_macro, precision_micro)
+
+For regression, the following metrics are available:
+
+    explained_variance, r2, median_absolute_error, mean_squared_error, mean_squared_log_error, mean_absolute_error
+
+Whether to minimize or maximize is determined automatically.
+"""
 from enum import Enum
 from functools import partial
 from typing import Callable, Iterable, Tuple, Union, Dict
@@ -16,7 +30,7 @@ both. Construction of metric_strings copied with minor modifications from SCORER
 2. https://stackoverflow.com/questions/41003897/scikit-learn-cross-validates-score-and-predictions-at-one-go
 """
 
-# name: (Score function, requires_probabilities, bool indicating if maximizing optimizes)
+# name: (Score function, bool: requires_probabilities, bool: maximizing optimizes)
 classification_metrics = dict(
     accuracy=(metrics.accuracy_score, False, True),
     roc_auc=(metrics.roc_auc_score, True, True),
@@ -53,8 +67,8 @@ all_metrics = {**classification_metrics, **regression_metrics}
 
 class MetricType(Enum):
     """ Metric types supported by GAMA. """
-    CLASSIFICATION: int = 1
-    REGRESSION: int = 2
+    CLASSIFICATION: int = 1  #: discrete target
+    REGRESSION: int = 2  #: continuous target
 
 
 class Metric:
@@ -65,6 +79,20 @@ class Metric:
                  requires_probabilities: bool,
                  maximize: bool,
                  task_type: MetricType):
+        """
+        Parameters
+        ----------
+        metric_name: str
+            Name of the metric.
+        score_function: Callable
+            Takes either predicted targets or predicted probabilities and the true target values to calculate a score.
+        requires_probabilities: bool
+            For classification metrics only, describes if the metric should be computed with predicted probabilities.
+        maximize: bool
+            If True, indicates that maximizing the score corresponds to better models.
+        task_type: MetricType
+            Type of the machine learning task.
+        """
         self.name = metric_name
         self._score_function = score_function
         self.requires_probabilities = requires_probabilities

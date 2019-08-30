@@ -1,4 +1,4 @@
-from gama.genetic_programming.mutation import crossover, crossover_primitives, crossover_terminals, shared_terminals
+from gama.genetic_programming.crossover import random_crossover, crossover_primitives, _shared_terminals, crossover_terminals
 from .unit_fixtures import pset, BernoulliNBStandardScaler, MultinomialNBRobustScaler, GaussianNB
 
 
@@ -7,15 +7,15 @@ def test_shared_terminals(BernoulliNBStandardScaler, MultinomialNBRobustScaler, 
     def cmp_len(n, generator):
         return n == len(list(generator))
 
-    assert cmp_len(0, shared_terminals(BernoulliNBStandardScaler, BernoulliNBStandardScaler, value_match='different'))
-    assert cmp_len(2, shared_terminals(BernoulliNBStandardScaler, BernoulliNBStandardScaler, value_match='equal'))
-    assert cmp_len(2, shared_terminals(BernoulliNBStandardScaler, BernoulliNBStandardScaler, value_match='all'))
+    assert cmp_len(0, _shared_terminals(BernoulliNBStandardScaler, BernoulliNBStandardScaler, value_match='different'))
+    assert cmp_len(2, _shared_terminals(BernoulliNBStandardScaler, BernoulliNBStandardScaler, value_match='equal'))
+    assert cmp_len(2, _shared_terminals(BernoulliNBStandardScaler, BernoulliNBStandardScaler, value_match='all'))
 
-    assert cmp_len(1, shared_terminals(BernoulliNBStandardScaler, MultinomialNBRobustScaler, value_match='different'))
-    assert cmp_len(1, shared_terminals(BernoulliNBStandardScaler, MultinomialNBRobustScaler, value_match='equal'))
-    assert cmp_len(2, shared_terminals(BernoulliNBStandardScaler, MultinomialNBRobustScaler, value_match='all'))
+    assert cmp_len(1, _shared_terminals(BernoulliNBStandardScaler, MultinomialNBRobustScaler, value_match='different'))
+    assert cmp_len(1, _shared_terminals(BernoulliNBStandardScaler, MultinomialNBRobustScaler, value_match='equal'))
+    assert cmp_len(2, _shared_terminals(BernoulliNBStandardScaler, MultinomialNBRobustScaler, value_match='all'))
 
-    assert cmp_len(0, shared_terminals(BernoulliNBStandardScaler, GaussianNB, value_match='all'))
+    assert cmp_len(0, _shared_terminals(BernoulliNBStandardScaler, GaussianNB, value_match='all'))
 
 
 def test_crossover_primitives(BernoulliNBStandardScaler, MultinomialNBRobustScaler):
@@ -44,7 +44,7 @@ def test_crossover(BernoulliNBStandardScaler, MultinomialNBRobustScaler):
     """ Two eligible individuals should produce two new individuals with crossover. """
     ind1_copy, ind2_copy = BernoulliNBStandardScaler.copy_as_new(), MultinomialNBRobustScaler.copy_as_new()
     # Cross-over is in-place
-    crossover(BernoulliNBStandardScaler, MultinomialNBRobustScaler)
+    random_crossover(BernoulliNBStandardScaler, MultinomialNBRobustScaler)
     # Both parents and children should be unique
     assert len({ind.pipeline_str() for ind in [
         BernoulliNBStandardScaler, MultinomialNBRobustScaler, ind1_copy, ind2_copy]}) == 4

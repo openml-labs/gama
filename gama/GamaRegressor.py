@@ -5,9 +5,14 @@ from gama.configuration.regression import reg_config
 
 
 class GamaRegressor(Gama):
-    """ Wrapper for the toolbox logic executing the AutoML pipeline for regression. """
+    """ Wrapper for the toolbox logic executing the AutoML pipeline for regression.
+    Same parameters as GamaClassifier. """
 
     def __init__(self, config=None, scoring='neg_mean_squared_error', *args, **kwargs):
+        """ """
+        # Empty docstring overwrites base __init__ doc string.
+        # Prevents duplication of the __init__ doc string on the API page.
+
         if not config:
             config = reg_config
         super().__init__(*args, **kwargs, config=config, scoring=scoring)
