@@ -10,6 +10,3 @@ API
     (see `issue #8 <https://github.com/PGijsbers/gama/issues/8>`_).
 
 .. include:: search_methods.inc
-
-.. automodule:: gama
-    :members:
