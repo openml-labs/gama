@@ -13,6 +13,7 @@ from gama.utilities.metrics import scoring_to_metric
 
 
 class GamaClassifier(Gama):
+    """ GAMA for (multi-class) classification problems. """
     def __init__(self, config=None, scoring='neg_log_loss', *args, **kwargs):
         if not config:
             # Do this to avoid the whole dictionary being included in the documentation.
@@ -101,6 +102,7 @@ class GamaClassifier(Gama):
         return self._predict_proba(X)
 
     def fit(self, x, y, *args, **kwargs):
+        """ Should use base class documentation. """
         y_ = y.squeeze() if isinstance(y, pd.DataFrame) else y
         self._label_encoder = LabelEncoder().fit(y_)
         if any([isinstance(yi, str) for yi in y_]):

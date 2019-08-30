@@ -47,9 +47,11 @@ for module_to_ignore in ["sklearn", "numpy"]:
 
 
 class Gama(ABC):
-    """ Wrapper for the toolbox logic surrounding the GP process as well as ensemble construction.
+    """ Wrapper for the toolbox logic surrounding executing the AutoML pipeline.
 
-    :param scoring: string, Metric or tuple.
+    Parameters
+    ----------
+    scoring: string, Metric or tuple.
         Specifies the/all metric(s) to optimize towards. A string will be converted to Metric. A tuple must
         specify each metric with the same type (i.e. all str or all Metric).
 
@@ -64,36 +66,36 @@ class Gama(ABC):
         Whether to minimize or maximize is determined automatically (though can be overwritten by `optimize_strategy`).
         However, you can instead also specify 'neg_'+metric (e.g. 'neg_log_loss') as metric to make it explicit.
 
-    :param regularize_length: bool.
+    regularize_length: bool.
         If True, add pipeline length as an optimization metric (preferring short over long).
 
-    :param config: a dictionary which specifies available components and their valid hyperparameter settings
+    config: a dictionary which specifies available components and their valid hyperparameter settings
         For more information, see :ref:`search_space_configuration`.
 
-    :param random_state:  integer or None (default=None)
+    random_state:  integer or None (default=None)
         If an integer is passed, this will be the seed for the random number generators used in the process.
         However, with `n_jobs > 1`, there will be randomization introduced by multi-processing.
         For reproducible results, set this and use `n_jobs=1`.
 
-    :param max_total_time: positive integer (default=3600)
+    max_total_time: positive integer (default=3600)
         Time in seconds that can be used for the `fit` call.
 
-    :param max_eval_time: positive integer or None (default=300)
+    max_eval_time: positive integer or None (default=300)
         Time in seconds that can be used to evaluate any one single individual.
 
-    :param n_jobs: integer (default=-1)
+    n_jobs: integer (default=-1)
         The amount of parallel processes that may be created to speed up `fit`.
         Accepted values are positive integers or -1.
         If -1 is specified, multiprocessing.cpu_count() processes are created.
 
-    :param verbosity: integer (default=logging.WARNING)
+    verbosity: integer (default=logging.WARNING)
         Sets the level of log messages to be automatically output to terminal.
 
-    :param keep_analysis_log: str or None. (default='gama.log')
+    keep_analysis_log: str or None. (default='gama.log')
         If non-empty str, specifies the path (and name) where the log should be stored, e.g. /output/gama.log.
         If empty str or False, no log is stored.
 
-    :param cache_dir: string or None (default=None)
+    cache_dir: string or None (default=None)
         The directory in which to keep the cache during `fit`. In this directory,
         models and their evaluation results will be stored. This facilitates a quick ensemble construction.
     """
@@ -174,6 +176,18 @@ class Gama(ABC):
         raise NotImplemented('_predict is implemented by base classes.')
 
     def predict(self, x: Union[pd.DataFrame, np.ndarray]):
+        """ Predict the target for input X.
+
+        Parameters
+        ----------
+        x: pandas.DataFrame or numpy.ndarray
+            A dataframe or array with the same number of columns as the input to `fit`.
+
+        Returns
+        -------
+        numpy.ndarray
+            array with predictions of shape (N,) where N is the length of the first dimension of X.
+        """
         if isinstance(x, np.ndarray):
             x = pd.DataFrame(x)
             for col in self._X.columns:
@@ -181,23 +195,64 @@ class Gama(ABC):
         return self._predict(x)
 
     def predict_arff(self, arff_file_path: str):
+        """ Predict the target for input found in the ARFF file.
+
+        Parameters
+        ----------
+        arff_file_path: str
+            An ARFF file with the same columns as the one that used in fit.
+            The target column is ignored (but must be present).
+
+        Returns
+        -------
+        numpy.ndarray
+            array with predictions for each row in the ARFF file.
+        """
         if not isinstance(arff_file_path, str):
             raise TypeError(f"`arff_file_path` must be of type `str` but is of type {type(arff_file_path)}")
         X, _ = X_y_from_arff(arff_file_path)
         return self._predict(X)
 
-    def score(self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]):
+    def score(self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]) -> float:
+        """ Calculate the score of the model according to the `scoring` metric and input (x, y).
+
+        Parameters
+        ----------
+        x: pandas.DataFrame or numpy.ndarray
+            Data to predict target values for.
+        y: pandas.Series or numpy.ndarray
+            True values for the target.
+
+        Returns
+        -------
+        float
+            The score obtained on the given test data according to the `scoring` metric.
+        """
         predictions = self.predict_proba(x) if self._metrics[0].requires_probabilities else self.predict(x)
         return self._metrics[0].score(y, predictions)
 
-    def score_arff(self, arff_file_path: str):
+    def score_arff(self, arff_file_path: str) -> float:
+        """ Calculate the score of the model according to the `scoring` metric and input in the ARFF file.
+
+        Parameters
+        ----------
+        arff_file_path: string
+            An ARFF file with which to calculate the score.
+
+        Returns
+        -------
+        float
+            The score obtained on the given test data according to the `scoring` metric.
+        """
         X, y = X_y_from_arff(arff_file_path)
         return self.score(X, y)
 
     def fit_arff(self, arff_file_path: str, *args, **kwargs):
         """ Find and fit a model to predict the target column (last) from other columns.
 
-        :param arff_file_path: string
+        Parameters
+        ----------
+        arff_file_path: string
             Path to an ARFF file containing the training data.
             The last column is always taken to be the target.
         """
@@ -218,13 +273,16 @@ class Gama(ABC):
         After the search termination condition is met, the best found pipeline
         configuration is then used to train a final model on all provided data.
 
-        :param x: pandas.DataFrame or numpy.ndarray, shape = [n_samples, n_features]
+        Parameters
+        ----------
+        x: pandas.DataFrame or numpy.ndarray, shape = [n_samples, n_features]
             Training data. All elements must be able to be converted to float.
-        :param y: pandas.DataFrame, pandas.Series or numpy.ndarray, shape = [n_samples,]
+        y: pandas.DataFrame, pandas.Series or numpy.ndarray, shape = [n_samples,]
             Target values. If a DataFrame is provided, it is assumed the first column contains target values.
-        :param warm_start: bool. Indicates the optimization should continue using the last individuals of the
+        warm_start: bool (default=False)
+            Indicates the optimization should continue using the last individuals of the
             previous `fit` call.
-        :param keep_cache: bool (default=False)
+        keep_cache: bool (default=False)
             If True, keep the cache directory and its content after fitting is complete. Otherwise delete it.
         """
 
@@ -315,9 +373,13 @@ class Gama(ABC):
         for callback in self._subscribers['evaluation_completed']:
             self._safe_outside_call(partial(callback, ind))
 
-    def evaluation_completed(self, fn):
+    def evaluation_completed(self, callback_function):
         """ Register a callback function that is called when new evaluation is completed.
 
-        :param fn: Function to call when a pipeline is evaluated. Expected signature is: ind -> None
+        Parameters
+        ----------
+        callback_function:
+            Function to call when a pipeline is evaluated, return values are ignored.
+            Expected signature is: Individual -> Any
         """
-        self._subscribers['evaluation_completed'].append(fn)
+        self._subscribers['evaluation_completed'].append(callback_function)
