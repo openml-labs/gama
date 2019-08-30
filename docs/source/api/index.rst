@@ -9,4 +9,6 @@ API
     I could not get Sphinx to display the base class docstrings correctly
     (see `issue #8 <https://github.com/PGijsbers/gama/issues/8>`_).
 
+.. include:: gama.inc
+
 .. include:: search_methods.inc

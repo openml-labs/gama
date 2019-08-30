@@ -13,7 +13,7 @@ from gama.utilities.metrics import scoring_to_metric
 
 
 class GamaClassifier(Gama):
-    """ GAMA for (multi-class) classification problems. """
+    """ Wrapper for the toolbox logic executing the AutoML pipeline for (multi-class) classification. """
     def __init__(self, config=None, scoring='neg_log_loss', *args, **kwargs):
         if not config:
             # Do this to avoid the whole dictionary being included in the documentation.

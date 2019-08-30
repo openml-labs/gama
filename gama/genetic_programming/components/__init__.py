@@ -13,3 +13,5 @@ from .terminal import Terminal, DATA_TERMINAL
 from .primitive_node import PrimitiveNode
 from .individual import Individual
 from .fitness import Fitness
+
+__all__ = ['Individual']

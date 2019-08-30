@@ -1,2 +1,6 @@
+GAMA
+----
 
-.. autoclass:: gama.gamaclassifier.GamaClassifier
+.. autoclass:: gama.GamaClassifier
+
+.. autoclass:: gama.GamaRegressor

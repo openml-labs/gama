@@ -5,7 +5,8 @@ from gama.configuration.regression import reg_config
 
 
 class GamaRegressor(Gama):
-    """ GAMA for regression problems. """
+    """ Wrapper for the toolbox logic executing the AutoML pipeline for regression. """
+
     def __init__(self, config=None, scoring='neg_mean_squared_error', *args, **kwargs):
         if not config:
             config = reg_config

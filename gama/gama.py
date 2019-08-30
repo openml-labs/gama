@@ -47,58 +47,7 @@ for module_to_ignore in ["sklearn", "numpy"]:
 
 
 class Gama(ABC):
-    """ Wrapper for the toolbox logic surrounding executing the AutoML pipeline.
-
-    Parameters
-    ----------
-    scoring: string, Metric or tuple.
-        Specifies the/all metric(s) to optimize towards. A string will be converted to Metric. A tuple must
-        specify each metric with the same type (i.e. all str or all Metric).
-
-        The valid metrics depend on the type of task. Many scikit-learn metrics are available.
-        For classification, the following metrics are available:
-        'accuracy', 'roc_auc', 'average_precision', 'log_loss', 'precision_macro', 'precision_micro',
-        'precision_weighted', 'precision_samples', 'recall_macro', 'recall_micro', 'recall_samples', 'recall_weighted',
-        'f1_macro', 'f1_micro', 'f1_samples', 'f1_weighted'.
-        For regression, the following metrics are available:
-        'explained_variance', 'r2', 'median_absolute_error', 'mean_squared_error',
-        'mean_squared_log_error', 'mean_absolute_error'.
-        Whether to minimize or maximize is determined automatically (though can be overwritten by `optimize_strategy`).
-        However, you can instead also specify 'neg_'+metric (e.g. 'neg_log_loss') as metric to make it explicit.
-
-    regularize_length: bool.
-        If True, add pipeline length as an optimization metric (preferring short over long).
-
-    config: a dictionary which specifies available components and their valid hyperparameter settings
-        For more information, see :ref:`search_space_configuration`.
-
-    random_state:  integer or None (default=None)
-        If an integer is passed, this will be the seed for the random number generators used in the process.
-        However, with `n_jobs > 1`, there will be randomization introduced by multi-processing.
-        For reproducible results, set this and use `n_jobs=1`.
-
-    max_total_time: positive integer (default=3600)
-        Time in seconds that can be used for the `fit` call.
-
-    max_eval_time: positive integer or None (default=300)
-        Time in seconds that can be used to evaluate any one single individual.
-
-    n_jobs: integer (default=-1)
-        The amount of parallel processes that may be created to speed up `fit`.
-        Accepted values are positive integers or -1.
-        If -1 is specified, multiprocessing.cpu_count() processes are created.
-
-    verbosity: integer (default=logging.WARNING)
-        Sets the level of log messages to be automatically output to terminal.
-
-    keep_analysis_log: str or None. (default='gama.log')
-        If non-empty str, specifies the path (and name) where the log should be stored, e.g. /output/gama.log.
-        If empty str or False, no log is stored.
-
-    cache_dir: string or None (default=None)
-        The directory in which to keep the cache during `fit`. In this directory,
-        models and their evaluation results will be stored. This facilitates a quick ensemble construction.
-    """
+    """ Wrapper for the toolbox logic surrounding executing the AutoML pipeline. """
 
     def __init__(self,
                  scoring: Union[str, Metric, Tuple[Union[str, Metric], ...]] = 'filled_in_by_child_class',
@@ -113,7 +62,58 @@ class Gama(ABC):
                  cache_dir: Optional[str] = None,
                  search_method: BaseSearch = AsyncEA(),
                  post_processing_method: BasePostProcessing = BestFitPostProcessing()):
+        """
 
+        Parameters
+        ----------
+        scoring: string, Metric or tuple.
+            Specifies the/all metric(s) to optimize towards. A string will be converted to Metric. A tuple must
+            specify each metric with the same type (i.e. all str or all Metric).
+
+            The valid metrics depend on the type of task. Many scikit-learn metrics are available.
+            For classification, the following metrics are available:
+            'accuracy', 'roc_auc', 'average_precision', 'log_loss', 'precision_macro', 'precision_micro',
+            'precision_weighted', 'precision_samples', 'recall_macro', 'recall_micro', 'recall_samples', 'recall_weighted',
+            'f1_macro', 'f1_micro', 'f1_samples', 'f1_weighted'.
+            For regression, the following metrics are available:
+            'explained_variance', 'r2', 'median_absolute_error', 'mean_squared_error',
+            'mean_squared_log_error', 'mean_absolute_error'.
+            Whether to minimize or maximize is determined automatically (though can be overwritten by `optimize_strategy`).
+            However, you can instead also specify 'neg_'+metric (e.g. 'neg_log_loss') as metric to make it explicit.
+
+        regularize_length: bool.
+            If True, add pipeline length as an optimization metric (preferring short over long).
+
+        config: a dictionary which specifies available components and their valid hyperparameter settings
+            For more information, see :ref:`search_space_configuration`.
+
+        random_state:  integer or None (default=None)
+            If an integer is passed, this will be the seed for the random number generators used in the process.
+            However, with `n_jobs > 1`, there will be randomization introduced by multi-processing.
+            For reproducible results, set this and use `n_jobs=1`.
+
+        max_total_time: positive integer (default=3600)
+            Time in seconds that can be used for the `fit` call.
+
+        max_eval_time: positive integer or None (default=300)
+            Time in seconds that can be used to evaluate any one single individual.
+
+        n_jobs: integer (default=-1)
+            The amount of parallel processes that may be created to speed up `fit`.
+            Accepted values are positive integers or -1.
+            If -1 is specified, multiprocessing.cpu_count() processes are created.
+
+        verbosity: integer (default=logging.WARNING)
+            Sets the level of log messages to be automatically output to terminal.
+
+        keep_analysis_log: str or None. (default='gama.log')
+            If non-empty str, specifies the path (and name) where the log should be stored, e.g. /output/gama.log.
+            If empty str or False, no log is stored.
+
+        cache_dir: string or None (default=None)
+            The directory in which to keep the cache during `fit`. In this directory,
+            models and their evaluation results will be stored. This facilitates a quick ensemble construction.
+        """
         register_stream_log(verbosity)
         if keep_analysis_log is not None:
             register_file_log(keep_analysis_log)
