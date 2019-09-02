@@ -12,7 +12,9 @@ class BasePostProcessing(ABC):
     def __init__(self, time_fraction: float):
         """
 
-        :param time_fraction: float
+        Parameters
+        ----------
+        time_fraction: float
             The fraction of total time that should be reserved for this post-processing step.
         """
         self.time_fraction: float = time_fraction
@@ -27,16 +29,20 @@ class BasePostProcessing(ABC):
             timeout: float,
             selection: List[Individual]) -> 'model':
         """
-
-        :param x: Union[pd.DataFrame]
+        Parameters
+        ----------
+        x: pd.DataFrame
             all training features
-        :param y: Union[pd.DataFrame, pd.Series]
+        y: Union[pd.DataFrame, pd.Series]
             all training labels
-        :param timeout: float
+        timeout: float
             allowed time in seconds for post-processing
-        :param selection: List[Individual]
+        selection: List[Individual]
             individuals selected by the search space, ordered best first
-        :return:
-            a model with `predict` and optionally `predict_proba`
+
+        Returns
+        -------
+        Any
+            A model with `predict` and optionally `predict_proba`.
         """
         raise NotImplementedError("Method must be implemented by child class.")

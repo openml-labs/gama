@@ -7,6 +7,7 @@ from gama.postprocessing.base_post_processing import BasePostProcessing
 
 
 class BestFitPostProcessing(BasePostProcessing):
+    """ Post processing technique which trains the best found single pipeline. """
 
     def __init__(self, time_fraction: float = 0.1):
         super().__init__(time_fraction)

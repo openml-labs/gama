@@ -14,6 +14,10 @@ API
 
 ----
 
+.. include:: post_processing.inc
+
+----
+
 .. include:: genetic_programming.inc
 
 ----

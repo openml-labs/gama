@@ -20,8 +20,15 @@ class GamaRegressor(Gama):
     def _predict(self, x: pd.DataFrame):
         """ Predict the target for input X.
 
-        :param x: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
-        :return: a numpy array with predictions. The array is of shape (N,) where N is the length of the
+        Parameters
+        ----------
+        x: pandas.DataFrame
+            A dataframe the same number of columns as that of X of `fit`.
+
+        Returns
+        -------
+        numpy.ndarray
+            A numpy array with predictions. The array is of shape (N,) where N is the length of the
             first dimension of X.
         """
         return self.model.predict(x)

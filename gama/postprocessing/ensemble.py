@@ -22,6 +22,17 @@ Model = namedtuple("Model", ['name', 'pipeline', 'predictions', 'validation_scor
 class EnsemblePostProcessing(BasePostProcessing):
 
     def __init__(self, time_fraction: float = 0.3, ensemble_size: int = 25):
+        """ Ensemble construction per Caruana et al.
+
+        Parameters
+        ----------
+        time_fraction: float (default=0.3)
+            Fraction of total time reserved for Ensemble building.
+        ensemble_size: int (default=25)
+            Total number of models in the ensemble.
+            When a single model is chosen more than once, it will increase its weight in the ensemble and
+            *does* count towards this maximum.
+        """
         super().__init__(time_fraction)
         self.ensemble_size = ensemble_size
         self.metric = None
@@ -44,13 +55,19 @@ class Ensemble(object):
         Either model_library or model_library_directory must be specified.
         If model_library is specified, model_library_directory is ignored.
 
-        :param metric: string or `gama.ea.metrics.Metric`. Metric to optimize the ensemble towards.
-        :param y: the true labels for the predictions made by the models in the library.
-        :param model_library: A list of models from which an ensemble can be built.
-        :param model_library_directory: a directory containing results of model evaluations.
-        :param shrink_on_pickle: if True, remove memory-intensive attributes that are required during fit,
-                                 but not predict, before pickling
-        :param label_encoder: a LabelEncoder which can decode the model predictions to desired labels.
+        Parameters
+        ----------
+        metric: string or Metric
+            Metric to optimize the ensemble towards.
+        y: pandas.DataFrame
+            True labels for the predictions made by the models in the library.
+        model_library:
+            A list of models from which an ensemble can be built.
+        model_library_directory: str
+            a directory containing results of model evaluations.
+        shrink_on_pickle: bool (default=True)
+            If True, remove memory-intensive attributes that are required before pickling.
+            When unpickled, the model can be used to create predictions, but the ensemble can't be changed.
         """
         if isinstance(metric, str):
             metric = Metric(metric)
@@ -101,11 +118,13 @@ class Ensemble(object):
         weighted_sum_predictions = sum([model.predictions * weight for (model, weight) in self._models.values()])
         return weighted_sum_predictions / self._total_model_weights()
 
-    def build_initial_ensemble(self, n):
+    def build_initial_ensemble(self, n: int):
         """ Builds an ensemble of n models, based solely on the performance of individual models, not their combined performance.
 
-        :param n: Number of models to include.
-        :return: self
+        Parameters
+        ----------
+        n: int
+            Number of models to include.
         """
         if not n > 0:
             raise ValueError("Ensemble must include at least one model.")
@@ -121,7 +140,6 @@ class Ensemble(object):
             self._add_model(model)
 
         log.debug("Initial ensemble created with score {}".format(self._ensemble_validation_score()))
-        return self
 
     def _add_model(self, model, add_weight=1):
         """ Adds a specific model to the ensemble or increases its weight if it already is contained. """
@@ -129,11 +147,13 @@ class Ensemble(object):
         self._models[model.pipeline] = (model, weight + add_weight)
         log.debug("Assigned a weight of {} to model {}".format(weight + add_weight, model.name))
 
-    def expand_ensemble(self, n):
+    def expand_ensemble(self, n: int):
         """ Adds new models to the ensemble based on earlier given data.
 
-        :param n: Number of models to add to current ensemble.
-        :return: self
+        Parameters
+        ----------
+        n: int
+            Number of models to add to current ensemble.
         """
         if not n > 0:
             raise ValueError("n must be greater than 0.")
@@ -154,17 +174,19 @@ class Ensemble(object):
             self._add_model(best_addition)
             log.debug('Ensemble size {} , best score: {}'.format(self._total_model_weights(), best_addition_score))
 
-        return self
-
     def fit(self, X, y, timeout=1e6):
         """ Constructs an Ensemble out of the library of models.
 
-        :param X: Data to fit the final selection of models on.
-        :param y: Targets corresponding to features X.
-        :param timeout: Maximum amount of time in seconds that is allowed in total for fitting pipelines.
-                        If this time is exceeded, only pipelines fit until that point are taken into account when making
-                        predictions. Starting the parallelization takes roughly 4 seconds by itself.
-        :return: self.
+        Parameters
+        ----------
+        X:
+            Data to fit the final selection of models on.
+        y:
+            Targets corresponding to features X.
+        timeout: int (default=1e6)
+            Maximum amount of time in seconds that is allowed in total for fitting pipelines.
+            If this time is exceeded, only pipelines fit until that point are taken into account when making
+            predictions. Starting the parallelization takes roughly 4 seconds by itself.
         """
         if not self._models:
             raise RuntimeError("You need to call `build` to select models for the ensemble, before fitting them.")
@@ -186,8 +208,6 @@ class Ensemble(object):
 
         if not c_mgr:
             log.info("Fitting of ensemble stopped early.")
-
-        return self
 
     def _get_weighted_mean_predictions(self, X, predict_method='predict'):
         weighted_predictions = []
@@ -241,9 +261,18 @@ def load_predictions(cache_dir, prediction_transformation=None):
 def fit_and_weight(args):
     """ Fit the pipeline given the data. Update weight to 0 if fitting fails.
 
-    :return:  pipeline, weight - The same pipeline that was provided as input.
-                                 Weight is either the input value of `weight`, if fitting succeeded, or 0 if *any*
-                                 exception occurred during fitting.
+    Parameters
+    ----------
+    args: Tuple
+        Expected Tuple of [Pipeline, X, y, weight].
+
+    Returns
+    -------
+    pipeline
+        The same pipeline that was provided as input.
+    weight
+        If fitting succeeded, return the input weight.
+        If *any* exception occurred during fitting, weight is 0.
     """
     pipeline, X, y, weight = args
     try:

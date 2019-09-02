@@ -27,7 +27,6 @@ class AsynchronousSuccessiveHalving(BaseSearch):
 
     Parameters
     ----------
-
     reduction_factor: int, optional (default=3)
         Reduction factor of candidates between each rung.
     minimum_resource: int, optional (default=100)
@@ -74,22 +73,27 @@ def asha(operations: OperatorSet,
          maximum_max_rung_evaluations: Optional[int] = None) -> List[Individual]:
     """ Asynchronous Halving Algorithm by Li et al. (paper: https://arxiv.org/abs/1810.05934)
 
-    :param operations: OperatorSet
+    Parameters
+    ----------
+    operations: OperatorSet
         An operator set with `evaluate` and `individual` functions.
-    :param start_candidates: List[Individual]
+    start_candidates: List[Individual]
         A list which contains the set of best found individuals during search.
-    :param reduction_factor: int (default=3)
+    reduction_factor: int (default=3)
         Reduction factor of candidates between each rung.
-    :param minimum_resource: int (default=100)
+    minimum_resource: int (default=100)
         Number of samples to use in the lowest rung.
-    :param maximum_resource: int (default=100_000)
+    maximum_resource: int (default=100_000)
         Number of samples to use in the top rung. This should not exceed the number of samples in the data.
-    :param minimum_early_stopping_rate: int (default=1)
+    minimum_early_stopping_rate: int (default=1)
         Number of lowest rungs to skip.
-    :param maximum_max_rung_evaluations: Optional[int] (default=None)
+    maximum_max_rung_evaluations: Optional[int] (default=None)
         Maximum number of individuals to evaluate on the max rung.
         If None, the algorithm will be run indefinitely.
-    :return: List[Individual]
+
+    Returns
+    -------
+    List[Individual]
         All individuals of the highest rung in which at least one individual has been evaluated.
     """
     evaluate = partial(evaluate_on_rung, evaluate_individual=operations.evaluate)

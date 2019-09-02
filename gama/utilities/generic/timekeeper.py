@@ -27,7 +27,15 @@ class Activity(NamedTuple):
 class TimeKeeper:
     """ Simple object that helps keep track of time over multiple activities. """
 
-    def __init__(self, total_time: int=0):
+    def __init__(self, total_time: Optional[int] = None):
+        """
+        Parameters
+        ----------
+        total_time: int, optional (default=None)
+            The total time available across activities.
+            If set to None, the `total_time_remaining` property will be unavailable.
+
+        """
         self.total_time = total_time
         self.current_activity = None
         self.activities = []
@@ -35,7 +43,7 @@ class TimeKeeper:
     @property
     def total_time_remaining(self) -> float:
         """ Return time remaining in seconds. """
-        if self.total_time > 0:
+        if self.total_time is not None:
             return self.total_time - sum(map(lambda a: a.stopwatch.elapsed_time, self.activities))
         raise RuntimeError("Time Remaining only available if `total_time` was set on init.")
 
@@ -55,14 +63,19 @@ class TimeKeeper:
         """ Mark the start of a new activity and automatically time its duration.
             TimeManager does not currently support nested activities.
 
-        :param activity: str
+        Parameters
+        ----------
+        activity: str
             Name of the activity for reference in current activity or later look-ups.
-        :param time_limit: int
+        time_limit: int, optional (default=None)
             Intended time limit of the activity in seconds. Used to calculate time remaining.
-        :param activity_meta: List[Any]
+        activity_meta: List[Any], optional (default=None)
             Any additional information about the activity to be logged.
-        :return:
-            A context manager, which when exited notes the end of the started activity.
+
+        Returns
+        -------
+        ContextManager
+            A context manager which when exited notes the end of the started activity.
         """
         if activity_meta is None:
             activity_meta = []

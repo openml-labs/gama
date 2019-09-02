@@ -56,25 +56,30 @@ def async_ea(
         operations: OperatorSet,
         output: List[Individual],
         start_candidates: List[Individual],
-        restart_callback: Optional[Callable] = None,
+        restart_callback: Optional[Callable[[], bool]] = None,
         max_n_evaluations: Optional[int] = None,
         population_size: int = 50) -> List[Individual]:
     """ Perform asynchronous evolutionary optimization given the evolutionary operators in `operations`.
-    
-    :param operations: OperatorSet
+
+    Parameters
+    ----------
+    operations: OperatorSet
         An operator set with `evaluate`, `create`, `individual` and `eliminate` functions.
-    :param output: List[Individual]
+    output: List[Individual]
         A list which contains the set of best found individuals during search.
-    :param start_candidates: List[Individual]
+    start_candidates: List[Individual]
         A list with candidate individuals which should be used to start search from.
-    :param restart_callback: Optional[Callable] (default=None)
+    restart_callback: Callable[[], bool], optional (default=None)
         A function with signature () -> bool which returns True if search should be restarted.
-    :param max_n_evaluations: Optional[int] (default=None)
+    max_n_evaluations: int, optional (default=None)
         If specified, only a maximum of `max_n_evaluations` individuals are evaluated.
         If None, the algorithm will be run indefinitely.
-    :param population_size: int (default=50)
+    population_size: int (default=50)
         Maximum number of individuals in the population at any time.
-    :return: List[Individual]
+
+    Returns
+    -------
+    List[Individual]
         The individuals currently in the population.
     """
     if max_n_evaluations is not None and max_n_evaluations <= 0:
