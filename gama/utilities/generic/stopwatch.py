@@ -2,7 +2,7 @@ import time
 
 
 class Stopwatch:
-    """ A context manager that keeps track of wall clock time spent."""
+    """ A context manager that keeps track of wall clock time spent. """
 
     def __init__(self, timing_function=time.time):
         self._is_running = False

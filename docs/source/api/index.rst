@@ -19,3 +19,7 @@ API
 ----
 
 .. include:: visualization.inc
+
+----
+
+.. include:: utilities.inc
