@@ -11,7 +11,7 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import cross_val_predict, ShuffleSplit
 from sklearn.pipeline import Pipeline
 
-from gama.genetic_programming.algorithms.metrics import Metric
+from gama.utilities.metrics import Metric
 from gama.genetic_programming.components import Individual, PrimitiveNode, Fitness
 from gama.logging.utility_functions import MultiprocessingLogger
 from gama.logging.machine_logging import TOKENS, log_event

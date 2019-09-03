@@ -8,7 +8,7 @@ Primitive = NamedTuple("Primitive",
 
 
 def primitive__str__(primitive) -> str:
-    """ e.g. "FastICA" """
+    """ str: e.g. "FastICA" """
     return primitive.identifier.__name__
 
 

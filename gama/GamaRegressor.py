@@ -5,7 +5,14 @@ from gama.configuration.regression import reg_config
 
 
 class GamaRegressor(Gama):
+    """ Wrapper for the toolbox logic executing the AutoML pipeline for regression.
+    Same parameters as GamaClassifier. """
+
     def __init__(self, config=None, scoring='neg_mean_squared_error', *args, **kwargs):
+        """ """
+        # Empty docstring overwrites base __init__ doc string.
+        # Prevents duplication of the __init__ doc string on the API page.
+
         if not config:
             config = reg_config
         super().__init__(*args, **kwargs, config=config, scoring=scoring)
@@ -13,8 +20,15 @@ class GamaRegressor(Gama):
     def _predict(self, x: pd.DataFrame):
         """ Predict the target for input X.
 
-        :param x: a 2d numpy array with the length of the second dimension is equal to that of X of `fit`.
-        :return: a numpy array with predictions. The array is of shape (N,) where N is the length of the
+        Parameters
+        ----------
+        x: pandas.DataFrame
+            A dataframe the same number of columns as that of X of `fit`.
+
+        Returns
+        -------
+        numpy.ndarray
+            A numpy array with predictions. The array is of shape (N,) where N is the length of the
             first dimension of X.
         """
         return self.model.predict(x)

@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from gama.genetic_programming.algorithms.metrics import Metric, all_metrics, scoring_to_metric
+from gama.utilities.metrics import Metric, all_metrics, scoring_to_metric
 
 
 def _test_metric(metric, y_true, y_pred, optimal_score, prediction_score):

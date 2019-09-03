@@ -8,6 +8,12 @@ from sklearn.datasets import load_wine, load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, log_loss
 
+from gama.postprocessing import EnsemblePostProcessing
+from gama.search_methods import asha, async_ea
+from gama.search_methods.asha import AsynchronousSuccessiveHalving
+from gama.search_methods.async_ea import AsyncEA
+from gama.search_methods.base_search import BaseSearch
+from gama.search_methods.random_search import RandomSearch
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama import GamaClassifier
 
@@ -65,7 +71,13 @@ diabetes_arff = dict(
 )
 
 
-def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.DataFrame):
+def _test_dataset_problem(
+        data,
+        metric: str,
+        arff: bool = False,
+        y_type: Type = pd.DataFrame,
+        search: BaseSearch = AsyncEA(),
+        missing_values: bool = False):
     """
 
     :param data:
@@ -74,7 +86,9 @@ def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.D
     :param y_type: pd.DataFrame, pd.Series, np.ndarray or str
     :return:
     """
-    gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric)
+    gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric, search_method=search, n_jobs=1,
+                          cache_dir=f"{data['name']}_arff_{arff}_m_{metric}_y_{y_type.__name__}_s_{search.__class__.__name__}",
+                          post_processing_method=EnsemblePostProcessing(ensemble_size=5))
     if arff:
         train_path = 'tests/data/{}_train.arff'.format(data['name'])
         test_path = 'tests/data/{}_test.arff'.format(data['name'])
@@ -84,7 +98,7 @@ def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.D
         y_test = [str(val) for val in y_test]
 
         with Stopwatch() as sw:
-            gama.fit_arff(train_path, auto_ensemble_n=5)
+            gama.fit_arff(train_path)
         class_predictions = gama.predict_arff(test_path)
         class_probabilities = gama.predict_proba_arff(test_path)
         gama_score = gama.score_arff(test_path)
@@ -97,9 +111,12 @@ def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.D
             y = y_type(y)
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
+        if missing_values:
+            X_train[1:300:2, 0] = X_train[2:300:5, 1] = float("NaN")
+            X_test[1:100:2, 0] = X_test[2:100:5, 1] = float("NaN")
 
         with Stopwatch() as sw:
-            gama.fit(X_train, y_train, auto_ensemble_n=5)
+            gama.fit(X_train, y_train)
         class_predictions = gama.predict(X_test)
         class_probabilities = gama.predict_proba(X_test)
         gama_score = gama.score(X_test, y_test)
@@ -125,11 +142,22 @@ def _test_dataset_problem(data, metric: str, arff: bool=False, y_type: Type=pd.D
 
     score_to_match = logloss if metric == 'log_loss' else accuracy
     assert score_to_match == pytest.approx(gama_score)
+    gama.delete_cache()
 
 
 def test_binary_classification_accuracy():
     """ GamaClassifier can do binary classification with predict metric from numpy data. """
     _test_dataset_problem(breast_cancer, 'accuracy')
+
+
+def test_binary_classification_accuracy_asha():
+    """ GamaClassifier can do binary classification with predict metric from numpy data using ASHA search. """
+    _test_dataset_problem(breast_cancer, 'accuracy', search=AsynchronousSuccessiveHalving())
+
+
+def test_binary_classification_accuracy_random_search():
+    """ GamaClassifier can do binary classification with predict metric from numpy data using ASHA search. """
+    _test_dataset_problem(breast_cancer, 'accuracy', search=RandomSearch())
 
 
 def test_binary_classification_logloss():
@@ -164,35 +192,4 @@ def test_missing_value_classification_arff():
 
 def test_missing_value_classification():
     """ GamaClassifier handles missing data from numpy data. """
-    data = breast_cancer
-    metric = 'log_loss'
-
-    X, y = data['load'](return_X_y=True)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
-    X_train[1:300:2, 0] = X_train[2:300:5, 1] = float("NaN")
-    X_test[1:100:2, 0] = X_test[2:100:5, 1] = float("NaN")
-
-    gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric)
-    with Stopwatch() as sw:
-        gama.fit(X_train, y_train, auto_ensemble_n=5)
-
-    assert 60 * FIT_TIME_MARGIN >= sw.elapsed_time, 'fit must stay within 110% of allotted time.'
-
-    class_predictions = gama.predict(X_test)
-    assert isinstance(class_predictions, np.ndarray), 'predictions should be numpy arrays.'
-    assert (data['test_size'],) == class_predictions.shape, 'predict should return (N,) shaped array.'
-
-    # Majority classifier on this split achieves 0.6293706293706294
-    accuracy = accuracy_score(y_test, class_predictions)
-    print(data['name'], metric, 'accuracy:', accuracy)
-    assert data['base_accuracy'] <= accuracy, 'predictions should be at least as good as majority class.'
-
-    class_probabilities = gama.predict_proba(X_test)
-    assert isinstance(class_probabilities, np.ndarray), 'probability predictions should be numpy arrays.'
-    assert (data['test_size'], data['n_classes']) == class_probabilities.shape, ('predict_proba should return'
-                                                                                 ' (N,K) shaped array.')
-
-    # Majority classifier on this split achieves 12.80138131184662
-    logloss = log_loss(y_test, class_probabilities)
-    print(data['name'], metric, 'log-loss:', logloss)
-    assert data['base_log_loss'] >= logloss, 'predictions should be at least as good as majority class.'
+    _test_dataset_problem(breast_cancer_missing, 'log_loss', missing_values=True)

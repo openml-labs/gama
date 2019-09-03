@@ -4,6 +4,8 @@ import multiprocessing as mp
 import queue
 import sys
 
+from gama.logging.MachineLogFileHandler import MachineLogFileHandler
+
 gama_log = logging.getLogger('gama')
 
 
@@ -21,15 +23,10 @@ def register_stream_log(verbosity):
 
 
 def register_file_log(filename):
-    if any([isinstance(handler, logging.FileHandler) and hasattr(handler, 'tag') for handler in gama_log.handlers]):
+    if any([isinstance(handler, MachineLogFileHandler) for handler in gama_log.handlers]):
         gama_log.debug("Removing FileHandlers registered by previous GAMA instance(s).")
-        gama_log.handlers = [handler for handler in gama_log.handlers
-                             if not (hasattr(handler, 'tag') and isinstance(handler, logging.FileHandler))]
-
-    file_handler = logging.FileHandler(filename)
-    file_handler.tag = 'machine_set'
-    file_handler.setLevel(5)
-    gama_log.addHandler(file_handler)
+        gama_log.handlers = [handler for handler in gama_log.handlers if not isinstance(handler, MachineLogFileHandler)]
+    gama_log.addHandler(MachineLogFileHandler(filename))
 
 
 class MultiprocessingLogger(object):

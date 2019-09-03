@@ -1,4 +1,5 @@
 import concurrent.futures
+import multiprocessing
 
 
 class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
@@ -10,12 +11,19 @@ class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
     pipeline search, where one can easily abort training a pipeline and only use results obtained so far.
 
     Additionally, even if not `wait=False` on the shutdown, it does still leave its subprocesses running.
-    This is problematic if those subprocesses may interfer with later logic. In particular, jobs which handle
+    This is problematic if those subprocesses may interfere with later logic. In particular, jobs which handle
     pipeline evaluations may still write to the cache directory while it is being removed from disk.
 
     As far as I know, there is no proper way to shutdown these child processes without accessing internal variables.
     """
+    # n_jobs overwritten by GAMA
+    n_jobs = multiprocessing.cpu_count()
+
     def __init__(self, *args, **kwargs):
+        # max_workers must be specified as keyword or first positional.
+        if 'max_workers' not in kwargs and len(args) == 0:
+            # if it is not, we use the class-default
+            kwargs['max_workers'] = AsyncExecutor.n_jobs
         super().__init__(*args, **kwargs)
         self._futures = []
 

@@ -19,9 +19,21 @@ test_requirements = [
     'pytest-cov'
 ]
 
+visualization_requirements = [
+    'dash==1.1.1',
+    'dash-daq==0.1.0'
+]
+
+documentation_requirements = [
+    'sphinx',
+    'sphinx_rtd_theme'
+] + visualization_requirements
+
+all_ = requirements + visualization_requirements + documentation_requirements
+
 setup(
     name='gama',
-    version='19.01.0',
+    version='19.08.0',
     description='A package for automated machine learning based on scikit-learn.',
     long_description='',
     long_description_content_type='text/markdown',
@@ -30,6 +42,11 @@ setup(
     url='https://github.com/PGijsbers/GAMA',
     packages=find_packages(exclude=['tests']),
     install_requires=requirements,
-    extras_require={'test': test_requirements},
+    extras_require={
+        'test': test_requirements,
+        'vis': visualization_requirements,
+        'doc': documentation_requirements,
+        'all': all_
+    },
     python_requires='>=3.6.0'
 )

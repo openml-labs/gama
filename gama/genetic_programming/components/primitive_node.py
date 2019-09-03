@@ -4,9 +4,19 @@ from .primitive import Primitive
 
 
 class PrimitiveNode:
-    """ An instantiation for a Primitive with specific Terminals. """
+    """ An instantiation for a Primitive with specific Terminals.
 
-    def __init__(self, primitive: Primitive, data_node, terminals: List[Terminal]):
+    Parameters
+    ----------
+    primitive: Primitive
+        The Primitive type of this PrimitiveNode.
+    data_node: PrimitiveNode
+        The PrimitiveNode that specifies all preprocessing before this PrimitiveNode.
+    terminals: List[Terminal]
+        A list of terminals matching the `primitive`.
+    """
+
+    def __init__(self, primitive: Primitive, data_node: 'PrimitiveNode', terminals: List[Terminal]):
         self._primitive = primitive
         self._data_node = data_node
         self._terminals = sorted(terminals, key=lambda t: str(t))
@@ -31,6 +41,20 @@ class PrimitiveNode:
 
     @classmethod
     def from_string(cls, string: str, primitive_set: dict):
+        """ Create a PrimitiveNode from string formatted like PrimitiveNode.__str__
+
+        Parameters
+        ----------
+        string: str
+            A string formatted similar to PrimitiveNode.__str__
+        primitive_set: dict
+            The dictionary defining all Terminals and Primitives.
+
+        Returns
+        -------
+        PrimitiveNode
+            The PrimitiveNode as defined the string.
+        """
         # General form is A(B(C(data[, C.param=value, ...])[, B.param=value, ...])[, A.param=value, ...])
         # below assumes that left parenthesis is never part of a parameter name or value.
         primitives = string.split('(')[:-1]
