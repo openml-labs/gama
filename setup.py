@@ -24,6 +24,13 @@ visualization_requirements = [
     'dash-daq==0.1.0'
 ]
 
+documentation_requirements = [
+    'sphinx',
+    'sphinx_rtd_theme'
+] + visualization_requirements
+
+all_ = requirements + visualization_requirements + documentation_requirements
+
 setup(
     name='gama',
     version='19.08.0',
@@ -37,7 +44,9 @@ setup(
     install_requires=requirements,
     extras_require={
         'test': test_requirements,
-        'vis': visualization_requirements
+        'vis': visualization_requirements,
+        'doc': documentation_requirements,
+        'all': all_
     },
     python_requires='>=3.6.0'
 )
