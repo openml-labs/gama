@@ -55,7 +55,7 @@ class GamaReport:
         for token, *event in ple_lines:
             events_by_type[token].append(event)
 
-        self.metrics = _find_metric_configuration(events_by_type[TOKENS.INIT])
+        self.metrics, self.search_method = _find_metric_configuration(events_by_type[TOKENS.INIT])
         self.phases: List[Tuple[str, str, datetime, float]] = _find_phase_information(events_by_type)
         self.evaluations: pd.DataFrame = _evaluations_to_dataframe(events_by_type[TOKENS.EVALUATION_RESULT],
                                                                    metric_names=self.metrics,
@@ -73,10 +73,6 @@ class GamaReport:
         )
         method_token = METHOD_TOKENS.get(self.search_method)
         self.method_data = parse_method_data[self.search_method](events_by_type[method_token], self.metrics)
-
-    @property
-    def search_method(self):
-        return self.phases[1][1]
 
 
 def _find_metric_configuration(init_lines: List[List[str]]) -> List[str]:

@@ -36,7 +36,7 @@ class AsyncEA(BaseSearch):
                  restart_callback: Optional[Callable] = None):
         super().__init__()
         # maps hyperparameter -> (set value, default)
-        self.hyperparameters: Dict[str, Tuple[Any, Any]] = dict(
+        self._hyperparameters: Dict[str, Tuple[Any, Any]] = dict(
             population_size=(population_size, 50),
             restart_callback=(restart_callback, None),
             max_n_evaluations=(max_n_evaluations, None)
@@ -47,9 +47,7 @@ class AsyncEA(BaseSearch):
         pass
 
     def search(self, operations: OperatorSet, start_candidates: List[Individual]):
-        hyperparameters = {parameter: set_value if set_value is not None else default
-                           for parameter, (set_value, default) in self.hyperparameters.items()}
-        self.output = async_ea(operations, self.output, start_candidates, **hyperparameters)
+        self.output = async_ea(operations, self.output, start_candidates, **self.hyperparameters)
 
 
 def async_ea(

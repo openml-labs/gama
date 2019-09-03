@@ -14,8 +14,29 @@ class BaseSearch(ABC):
 
     def __init__(self):
         # hyperparameters can be used to safe/process search hyperparameters
-        self.hyperparameters: Dict[str, Tuple[Any, Any]] = dict()
+        self._hyperparameters: Dict[str, Tuple[Any, Any]] = dict()
         self.output: List[Individual] = []
+
+    def __str__(self):
+        # Not sure if I should report actual used hyperparameters (i.e. include default), or only those set by user.
+        user_set_hps = {parameter: set_value
+                        for parameter, (set_value, default) in self._hyperparameters.items()
+                        if set_value is not None}
+        hp_configuration = ','.join([f"{name}={value}" for (name, value) in user_set_hps.items()])
+        return f"{self.__class__.__name__}({hp_configuration})"
+
+    @property
+    def hyperparameters(self) -> Dict[str, Any]:
+        """ Hyperparameter (name, value) pairs value determined by user > dynamic default > static default.
+
+         Dynamic default values only considered if `dynamic_defaults` has been called.
+         """
+        return {parameter: set_value if set_value is not None else default
+                for parameter, (set_value, default) in self._hyperparameters.items()}
+
+    def _overwrite_hyperparameter_default(self, hyperparameter: str, value: Any):
+        set_value, default_value = self._hyperparameters[hyperparameter]
+        self._hyperparameters[hyperparameter] = (set_value, value)
 
     def dynamic_defaults(
             self,
