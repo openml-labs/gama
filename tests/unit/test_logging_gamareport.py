@@ -9,7 +9,7 @@ def test_gamareport_from_log():
     # independence and backwards incompatability of changes to GamaReport are immediately caught if tested on the
     # old log first.
     # Perhaps we can/should link to the log file used in the documentation.
-    log_file = '../data/random_search.log'
+    log_file = 'tests/data/random_search.log'
     report = GamaReport(logfile=log_file, name=None)
     assert report.name == log_file
     assert 'RandomSearch' == report.search_method
@@ -23,7 +23,7 @@ def test_gamareport_from_log():
 
 def test_gamareport_asha_from_log():
     """ Test that a GamaReport can be constructed from a log and retrieve ASHA specific information. """
-    log_file = '../data/asha.log'
+    log_file = 'tests/data/asha.log'
     report = GamaReport(logfile=log_file, name=None)
     assert report.name == log_file
     assert 'AsynchronousSuccessiveHalving' == report.search_method
