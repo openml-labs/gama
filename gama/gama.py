@@ -1,14 +1,14 @@
 from abc import ABC
-import random
-import logging
-import os
 from collections import defaultdict
 import datetime
-import shutil
 from functools import partial
-import warnings
+import logging
+import os
+import random
+import shutil
 from typing import Union, Tuple, Optional, Dict
 import uuid
+import warnings
 
 import pandas as pd
 import numpy as np
@@ -32,7 +32,7 @@ from gama.genetic_programming.operations import create_random_expression
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
-from gama.postprocessing import BestFitPostProcessing, EnsemblePostProcessing, NoPostProcessing, BasePostProcessing
+from gama.postprocessing import BestFitPostProcessing, BasePostProcessing
 from gama.utilities.generic.async_executor import AsyncExecutor
 from gama.utilities.metrics import Metric
 
@@ -115,6 +115,9 @@ class Gama(ABC):
         register_stream_log(verbosity)
         if keep_analysis_log is not None:
             register_file_log(keep_analysis_log)
+
+        if keep_analysis_log is not None and not os.path.isabs(keep_analysis_log):
+            keep_analysis_log = os.path.abspath(keep_analysis_log)
 
         arguments = ','.join(['{}={}'.format(k, v) for (k, v) in locals().items()
                               if k not in ['self', 'config', 'gamalog', 'file_handler', 'stdout_streamhandler']])

@@ -41,24 +41,19 @@ class GamaReport:
             raise ValueError("Exactly one of 'logfile' and 'loglines' may be provided at once.")
 
         if logfile is not None:
-            with open(logfile, 'r') as fh:
-                log_lines = [line.rstrip() for line in fh.readlines()]
+            log_lines = _find_new_lines(logfile)
 
+        self._lines_read = len(log_lines)
         self._individuals = None
         self.name = name if name is not None else (logfile if logfile is not None else 'nameless')
 
-        # Find the Parseable Log Events and discard their start/end tokens.
-        ple_lines = [line.split(PLE_DELIM)[1:-1] for line in log_lines
-                     if line.startswith(PLE_START) and line.endswith(f'{PLE_END}')]
-
-        events_by_type = defaultdict(list)
-        for token, *event in ple_lines:
-            events_by_type[token].append(event)
+        events_by_type = _lines_to_dict(log_lines)
 
         if len(events_by_type[TOKENS.INIT]) == 0:
             raise ValueError("The log must contain at least contain an INIT string.")
 
-        self.metrics, self.search_method, self.postprocessing = _find_metric_configuration(events_by_type[TOKENS.INIT])
+        self.metrics, self.search_method, self.postprocessing, self._filename \
+            = _find_metric_configuration(events_by_type[TOKENS.INIT])
         self.phases: List[Tuple[str, str, datetime, float]] = _find_phase_information(events_by_type)
         search_start = self.phases[1][2] if len(self.phases) > 1 else None
         self.evaluations: pd.DataFrame = _evaluations_to_dataframe(events_by_type[TOKENS.EVALUATION_RESULT],
@@ -81,21 +76,60 @@ class GamaReport:
         self.method_data = parse_method_data[self.search_method](events_by_type[method_token], self.metrics)
 
         self.incomplete = (len(self.phases) < 3)
-        if self.incomplete:
-            # Set up tracking!
-            pass
+
+    def update(self) -> bool:
+        new_lines = _find_new_lines(self._filename, start_from=self._lines_read)
+        if len(new_lines) > 0:
+            self._lines_read += len(new_lines)
+            print(f'read {len(new_lines)} new lines')
+            events_by_type = _lines_to_dict(new_lines)
+            search_start = 0 if len(self.evaluations) == 0 else self.evaluations.start.min()
+            new_evaluations = _evaluations_to_dataframe(
+                events_by_type[TOKENS.EVALUATION_RESULT],
+                metric_names=self.metrics,
+                search_start=search_start,
+                start_n=self.evaluations.n.max() + 1
+            )
+            self.evaluations = pd.concat([self.evaluations, new_evaluations])
+            for metric in self.metrics:
+                self.evaluations[f'{metric}_cummax'] = self.evaluations[metric].cummax()
+            self.individuals.update({
+                id_: Individual.from_string(pipeline, pset)
+                for id_, pipeline in zip(new_evaluations.id, new_evaluations.pipeline)
+            })
+        return len(new_lines) > 0
 
 
-def _find_metric_configuration(init_lines: List[List[str]]) -> Tuple[List[str], str, str]:
-    scoring, regularize_length, *_, search, postprocessing = init_lines[0][0].split(',')
+def _lines_to_dict(log_lines: List[str]):
+    # Find the Parseable Log Events and discard their start/end tokens.
+    ple_lines = [line.split(PLE_DELIM)[1:-1] for line in log_lines
+                 if line.startswith(PLE_START) and line.endswith(f'{PLE_END}')]
+
+    events_by_type = defaultdict(list)
+    for token, *event in ple_lines:
+        events_by_type[token].append(event)
+
+    return events_by_type
+
+
+def _find_new_lines(logfile: str, start_from: int = 0):
+    with open(logfile, 'r') as fh:
+        log_lines = [line.rstrip() for line in fh.readlines()]
+    new_lines = log_lines[start_from:]
+    return new_lines
+
+
+def _find_metric_configuration(init_lines: List[List[str]]) -> Tuple[List[str], str, str, str]:
+    scoring, regularize_length, *_, filename, _, search, postprocessing = init_lines[0][0].split(',')
     _, metric = scoring.split('=')
     _, regularize = regularize_length.split('=')
     _, search = search.split('=', maxsplit=1)
+    _, filename = filename.split('=', maxsplit=1)
     _, postprocessing = postprocessing.split('=', maxsplit=1)
     if bool(regularize):
-        return [metric, 'length'], search, postprocessing
+        return [metric, 'length'], search, postprocessing, filename
     else:
-        return [metric], search, postprocessing
+        return [metric], search, postprocessing, filename
 
 
 def _find_phase_information(events_by_type: Dict[str, List[str]]) -> List[Tuple[str, str, datetime, float]]:
@@ -119,10 +153,11 @@ def _find_phase_information(events_by_type: Dict[str, List[str]]) -> List[Tuple[
 
 def _evaluations_to_dataframe(evaluation_lines: List[List[str]],
                               metric_names: Optional[List[str]] = None,
-                              search_start: datetime = None) -> pd.DataFrame:
+                              search_start: datetime = None,
+                              start_n: int = 0) -> pd.DataFrame:
     """ Create a dataframe with all pipeline evaluations as parsed from EVAL events in the log. """
     evaluations = []
-    for i, line in enumerate(evaluation_lines):
+    for i, line in enumerate(evaluation_lines, start=start_n):
         time, duration, process_duration, fitness, id_, pipeline_str, log_time = line
         # Fitness logged as '(metric1, metric2, ..., metriclast)'
         metrics_values = [float(value) for value in fitness[1:-1].split(',')]
