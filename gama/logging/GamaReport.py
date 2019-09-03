@@ -26,11 +26,13 @@ class GamaReport:
     ):
         """ Parses the logfile or log lines provided. Must provide exactly one of 'logfile' or 'loglines'.
 
-        :param logfile: Optional[str] (default=None)
+        Parameters
+        ----------
+        logfile: str, optional (default=None)
             Path to the log file. If not specified, loglines must be provided.
-        :param log_lines: Optional[List[str]] (default=None)
+        log_lines: List[str], optional (default=None)
             A list with each element one line from the log file. If not specified, logfile must be provided.
-        :param name: Optional[str] (default=None)
+        name: str, optional (default=None)
             Name of the report. If set to None, defaults to `logfile` if it is not None else 'nameless'.
         """
         if logfile is None and log_lines is None:
