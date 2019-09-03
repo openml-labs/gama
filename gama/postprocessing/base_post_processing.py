@@ -8,6 +8,9 @@ from gama.genetic_programming.components import Individual
 
 
 class BasePostProcessing(ABC):
+    """ All post-processing methods should be derived from this class.
+    This class should not be directly used to configure GAMA.
+    """
 
     def __init__(self, time_fraction: float):
         """

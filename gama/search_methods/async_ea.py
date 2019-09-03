@@ -43,7 +43,7 @@ class AsyncEA(BaseSearch):
         )
         self.output = []
 
-    def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time: int):
+    def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: int):
         pass
 
     def search(self, operations: OperatorSet, start_candidates: List[Individual]):

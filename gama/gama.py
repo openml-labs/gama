@@ -104,6 +104,13 @@ class Gama(ABC):
         cache_dir: str or None (default=None)
             The directory in which to keep the cache during `fit`. In this directory,
             models and their evaluation results will be stored. This facilitates a quick ensemble construction.
+
+        search_method: BaseSearch (default=AsyncEA())
+            Search method to use to find good pipelines. Should be instantiated.
+
+        post_processing_method: BasePostProcessing (default=BestFitPostProcessing())
+            Post-processing method to create a model after the search phase. Should be instantiated.
+
         """
         register_stream_log(verbosity)
         if keep_analysis_log is not None:
