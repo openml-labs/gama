@@ -120,7 +120,7 @@ class Gama(ABC):
                               if k not in ['self', 'config', 'gamalog', 'file_handler', 'stdout_streamhandler']])
         log.info('Using GAMA version {}.'.format(__version__))
         log.info('{}({})'.format(self.__class__.__name__, arguments))
-        log_event(log, TOKENS.INIT, [arguments])
+        log_event(log, TOKENS.INIT, arguments)
 
         if max_total_time is None or max_total_time <= 0:
             raise ValueError(f"max_total_time should be integer greater than zero but is {max_total_time}.")

@@ -55,11 +55,15 @@ class GamaReport:
         for token, *event in ple_lines:
             events_by_type[token].append(event)
 
-        self.metrics, self.search_method = _find_metric_configuration(events_by_type[TOKENS.INIT])
+        if len(events_by_type[TOKENS.INIT]) == 0:
+            raise ValueError("The log must contain at least contain an INIT string.")
+
+        self.metrics, self.search_method, self.postprocessing = _find_metric_configuration(events_by_type[TOKENS.INIT])
         self.phases: List[Tuple[str, str, datetime, float]] = _find_phase_information(events_by_type)
+        search_start = self.phases[1][2] if len(self.phases) > 1 else None
         self.evaluations: pd.DataFrame = _evaluations_to_dataframe(events_by_type[TOKENS.EVALUATION_RESULT],
                                                                    metric_names=self.metrics,
-                                                                   search_start=self.phases[1][2])
+                                                                   search_start=search_start)
 
         # This can take a while for long logs (e.g. ~1sec for 10k individuals)
         self.individuals: Dict[str, Individual] = {
@@ -71,18 +75,27 @@ class GamaReport:
             lambda: lambda *args: None,
             AsynchronousSuccessiveHalving=_ASHA_data_to_dataframe
         )
-        method_token = METHOD_TOKENS.get(self.search_method)
+        # search_method is formatted like NAME(kwargs) where kwargs could contain additional parentheses.
+        method_name, _ = self.search_method.split('(', maxsplit=1)
+        method_token = METHOD_TOKENS.get(method_name)
         self.method_data = parse_method_data[self.search_method](events_by_type[method_token], self.metrics)
 
+        self.incomplete = (len(self.phases) < 3)
+        if self.incomplete:
+            # Set up tracking!
+            pass
 
-def _find_metric_configuration(init_lines: List[List[str]]) -> List[str]:
-    scoring, regularize_length, *_ = init_lines[0][0].split(',')
+
+def _find_metric_configuration(init_lines: List[List[str]]) -> Tuple[List[str], str, str]:
+    scoring, regularize_length, *_, search, postprocessing = init_lines[0][0].split(',')
     _, metric = scoring.split('=')
     _, regularize = regularize_length.split('=')
+    _, search = search.split('=', maxsplit=1)
+    _, postprocessing = postprocessing.split('=', maxsplit=1)
     if bool(regularize):
-        return [metric, 'length']
+        return [metric, 'length'], search, postprocessing
     else:
-        return [metric]
+        return [metric], search, postprocessing
 
 
 def _find_phase_information(events_by_type: Dict[str, List[str]]) -> List[Tuple[str, str, datetime, float]]:
@@ -91,8 +104,12 @@ def _find_phase_information(events_by_type: Dict[str, List[str]]) -> List[Tuple[
     phase_info = []
     # Events as phase;algorithm;logtime
     for phase in phases:
-        start_phase = [event for event in events_by_type[TOKENS.PHASE_START] if phase in event][0]
-        end_phase = [event for event in events_by_type[TOKENS.PHASE_END] if phase in event][0]
+        start_phase_events = [event for event in events_by_type[TOKENS.PHASE_START] if phase in event]
+        end_phase_events = [event for event in events_by_type[TOKENS.PHASE_END] if phase in event]
+        if start_phase_events == [] or end_phase_events == []:
+            # the phase has either not yet started, or not yet completed. Then this is also true for later phases.
+            break
+        start_phase, end_phase = start_phase_events[0], end_phase_events[0]
         _, _, start_time = start_phase
         _, algorithm, end_time = end_phase
         duration = (datetime.strptime(end_time, TIME_FORMAT) - datetime.strptime(start_time, TIME_FORMAT))

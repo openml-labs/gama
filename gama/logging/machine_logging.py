@@ -41,6 +41,6 @@ def default_time_format(datetime_: datetime):
 def log_event(log_: object, token: object, *args: object) -> object:
     """ Writes the described event to the machine log level formatted for later parsing. """
     args = [default_time_format(arg) if isinstance(arg, datetime) else arg for arg in args]
-    attrs = f'{PLE_DELIM}'.join([str(arg) for arg in args])
+    attrs = f'{PLE_DELIM}'.join([str(arg) for arg in args]) if not isinstance(args, str) else args
     message = f'{PLE_DELIM}'.join([PLE_START, token, attrs, default_time_format(datetime.now()), PLE_END])
     log_.log(level=MACHINE_LOG_LEVEL, msg=message)
