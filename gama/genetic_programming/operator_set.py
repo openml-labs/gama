@@ -1,4 +1,4 @@
-from collections import Sequence
+from collections.abc import Sequence
 import logging
 from concurrent.futures.process import BrokenProcessPool
 
@@ -37,14 +37,15 @@ class OperatorSet:
 
     def wait_first_complete(self, *args, **kwargs):
         done, not_done = wait_first_complete(*args, **kwargs)
-        try:
-            results = [future.result() for future in done]
-        except BrokenProcessPool as e:
-            log.warning("Broken Process Pool while retrieving results.", exc_info=True)
-            raise stopit.TimeoutException
-
-        for result in results:
-            individual = result if not isinstance(result, Sequence) else result[0]
+        for result in [future.result() for future in done]:
+            if not isinstance(result, Sequence):
+                individual = result
+                log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
+                          individual.fitness.wallclock_time, individual.fitness.process_time,
+                          individual.fitness.values, individual._id, individual.pipeline_str())
+            else:
+                # For now, we leave logging for non-standard results to the caller (e.g. rungs in ASHA)
+                individual = result[0]
             if self._evaluate_callback is not None:
                 self._evaluate_callback(individual)
         return done, not_done

@@ -1,34 +1,37 @@
+from abc import ABC
 import random
 import logging
 import os
-from collections import defaultdict, Iterable
+from collections import defaultdict
 import datetime
-import multiprocessing
 import shutil
 from functools import partial
-import time
 import warnings
-from typing import Callable, Union, List
+from typing import Union, Tuple, Optional, Dict, Iterable
+import uuid
 
 import pandas as pd
 import numpy as np
 import stopit
 
 import gama.genetic_programming.compilers.scikitlearn
-from gama.genetic_programming.algorithms.metrics import Metric
+from gama.genetic_programming.components import Individual
+from gama.logging.machine_logging import log_event, TOKENS
+from gama.search_methods.base_search import BaseSearch
+from gama.utilities.metrics import scoring_to_metric
 from .utilities.observer import Observer
 
 from gama.data import X_y_from_arff
-from gama.genetic_programming.components import Individual
-from gama.genetic_programming.algorithms.async_ea import async_ea
-from gama.genetic_programming.algorithms.asha import asha, evaluate_on_rung
+from gama.search_methods.async_ea import AsyncEA
+
 from gama.utilities.generic.timekeeper import TimeKeeper
-from gama.utilities.plgen.manager import Manager
-from gama.utilities.plgen.library import GamaPsetLibrary
 from gama.logging.utility_functions import register_stream_log, register_file_log
+
 from gama.logging.machine_logging import TOKENS, log_event, MACHINE_LOG_LEVEL
 from gama.utilities.preprocessing import define_preprocessing_steps, format_x_y
-from gama.genetic_programming.mutation import random_valid_mutation_in_place, crossover
+from gama.genetic_programming.mutation import random_valid_mutation_in_place
+from gama.genetic_programming.mutation import random_valid_mutation_in_place
+from gama.genetic_programming.crossover import random_crossover
 from gama.genetic_programming.conformant_mutation import random_valid_mutation_in_place as conformant_mutation
 from gama.genetic_programming.conformant_mutation import crossover as conformant_crossover
 from gama.genetic_programming.selection import create_from_population, eliminate_from_pareto
@@ -36,11 +39,17 @@ from gama.genetic_programming.operations import create_random_expression, create
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
+
 from gama.d3m.metalearning import generate_warm_start_pop
 
 #  `gamalog` is for the entire gama module and submodules.
 gamalog = logging.getLogger('gama')
 gamalog.setLevel(MACHINE_LOG_LEVEL)
+
+from gama.postprocessing import BestFitPostProcessing, EnsemblePostProcessing, NoPostProcessing, BasePostProcessing
+from gama.utilities.generic.async_executor import AsyncExecutor
+from gama.utilities.metrics import Metric
+
 
 log = logging.getLogger(__name__)
 
@@ -52,144 +61,130 @@ __version__ = '19.01.0'
 for module_to_ignore in ["sklearn", "numpy"]:
     warnings.filterwarnings("ignore", module=module_to_ignore)
 
-
-class Gama(object):
-    """ Wrapper for the toolbox logic surrounding the GP process as well as ensemble construction.
-
-    :param scoring: string, Metric or tuple.
-        Specifies the/all metric(s) to optimize towards. A string will be converted to Metric. A tuple must
-        specify each metric with the same type (i.e. all str or all Metric).
-
-        The valid metrics depend on the type of task. Many scikit-learn metrics are available.
-        For classification, the following metrics are available:
-        'accuracy', 'roc_auc', 'average_precision', 'log_loss', 'precision_macro', 'precision_micro',
-        'precision_weighted', 'precision_samples', 'recall_macro', 'recall_micro', 'recall_samples', 'recall_weighted',
-        'f1_macro', 'f1_micro', 'f1_samples', 'f1_weighted'.
-        For regression, the following metrics are available:
-        'explained_variance', 'r2', 'median_absolute_error', 'mean_squared_error', 'mean_squared_log_error', 'mean_absolute_error'.
-        Whether to minimize or maximize is determined automatically (though can be overwritten by `optimize_strategy`.
-        However, you can instead also specify 'neg\_'+metric (e.g. 'neg_log_loss') as metric to make it explicit.
-
-    :param regularize_length: bool.
-        If True, add pipeline length as an optimization metric (preferring short over long).
-
-    :param config: a dictionary which specifies available components and their valid hyperparameter settings
-        For more information, see :ref:`search_space_configuration`.
-
-    :param random_state:  integer or None (default=None)
-        If an integer is passed, this will be the seed for the random number generators used in the process.
-        However, with `n_jobs > 1`, there will be randomization introduced by multi-processing.
-        For reproducible results, set this and use `n_jobs=1`.
-
-    :param population_size: positive integer (default=50)
-        Number of individuals to keep in the population at any one time.
-
-    :param max_total_time: positive integer (default=3600)
-        Time in seconds that can be used for the `fit` call.
-
-    :param max_eval_time: positive integer or None (default=300)
-        Time in seconds that can be used to evaluate any one single individual.
-
-    :param n_jobs: integer (default=1)
-        The amount of parallel processes that may be created to speed up `fit`. If this number
-        is zero or negative, it will be set to the amount of cores.
-
-    :param verbosity: integer (default=logging.WARNING)
-        Sets the level of log messages to be automatically output to terminal.
-
-    :param keep_analysis_log: str or False. (default='gama.log')
-        If non-empty str, specifies the path (and name) where the log should be stored, e.g. /output/gama.log.
-        If empty str or False, no log is stored.
-
-    :param keep_analysis_log: str or False. (default='gama.log')
-        If non-empty str, specifies the path (and name) where the log should be stored, e.g. /output/gama.log.
-        If empty str or False, no log is stored.
-
-    :param cache_dir: string or None (default=None)
-        The directory in which to keep the cache during `fit`. In this directory,
-        models and their evaluation results will be stored. This facilitates a quick ensemble construction.
-
-    :param grammar_file_name: string or None (default=None)
-        The name of a grammar file to use in generating and validating individuals.
-
-    :param rule_name: string or None (default=None)
-        The name of a grammar rule to use in generating and validating individuals.
-    """
+class Gama(ABC):
+    """ Wrapper for the toolbox logic surrounding executing the AutoML pipeline. """
 
     def __init__(self,
-                 scoring='filled_in_by_child_class',
-                 regularize_length=True,
-                 config=None,
-                 random_state=None,
-                 population_size=50,
-                 max_total_time=3600,
-                 max_eval_time=300,
-                 n_jobs=1,
-                 verbosity=logging.WARNING,
-                 keep_analysis_log='gama.log',
-                 cache_dir=None,
+                 scoring: Union[str, Metric, Tuple[Union[str, Metric], ...]] = 'filled_in_by_child_class',
+                 regularize_length: bool = True,
+                 config: Dict = None,
+                 random_state: int = None,
+                 max_total_time: Optional[int] = 3600,
+                 max_eval_time: Optional[int] = 300,
+                 n_jobs: int = 1,
+                 verbosity: int = logging.WARNING,
+                 keep_analysis_log: Optional[str] = 'gama.log',
+                 cache_dir: Optional[str] = None,
+                 search_method: BaseSearch = AsyncEA(),
+                 post_processing_method: BasePostProcessing = BestFitPostProcessing(),
                  grammar_file_name=None,
                  rule_name=None):
+        """
 
+        Parameters
+        ----------
+        scoring: str, Metric or Tuple
+            Specifies the/all metric(s) to optimize towards. A string will be converted to Metric. A tuple must
+            specify each metric with the same type (i.e. all str or all Metric). See :ref:`Metrics` for built-in
+            metrics.
+
+        regularize_length: bool
+            If True, add pipeline length as an optimization metric (preferring short over long).
+
+        config: a dictionary which specifies available components and their valid hyperparameter settings
+            For more information, see :ref:`search_space_configuration`.
+
+        random_state:  int or None (default=None)
+            If an integer is passed, this will be the seed for the random number generators used in the process.
+            However, with `n_jobs > 1`, there will be randomization introduced by multi-processing.
+            For reproducible results, set this and use `n_jobs=1`.
+
+        max_total_time: positive int (default=3600)
+            Time in seconds that can be used for the `fit` call.
+
+        max_eval_time: positive int, optional (default=300)
+            Time in seconds that can be used to evaluate any one single individual.
+
+        n_jobs: int (default=1)
+            The amount of parallel processes that may be created to speed up `fit`.
+            Accepted values are positive integers or -1.
+            If -1 is specified, multiprocessing.cpu_count() processes are created.
+
+        verbosity: int (default=logging.WARNING)
+            Sets the level of log messages to be automatically output to terminal.
+
+        keep_analysis_log: str, optional (default='gama.log')
+            If non-empty str, specifies the path (and name) where the log should be stored, e.g. /output/gama.log.
+            If `None`, no log is stored.
+
+        cache_dir: str or None (default=None)
+            The directory in which to keep the cache during `fit`. In this directory,
+            models and their evaluation results will be stored. This facilitates a quick ensemble construction.
+
+        search_method: BaseSearch (default=AsyncEA())
+            Search method to use to find good pipelines. Should be instantiated.
+
+        post_processing_method: BasePostProcessing (default=BestFitPostProcessing())
+            Post-processing method to create a model after the search phase. Should be instantiated.
+
+        grammar_file_name: string, optional (default=None)
+            The name of a grammar file to use in generating and validating individuals.
+
+        rule_name: string, optional (default=None)
+            The name of a grammar rule to use in generating and validating individuals.
+        """
         register_stream_log(verbosity)
-        if keep_analysis_log:
+        if keep_analysis_log is not None:
             register_file_log(keep_analysis_log)
 
+        arguments = ','.join(['{}={}'.format(k, v) for (k, v) in locals().items()
+                              if k not in ['self', 'config', 'gamalog', 'file_handler', 'stdout_streamhandler']])
         log.info('Using GAMA version {}.'.format(__version__))
-        log.info('{}({})'.format(
-            self.__class__.__name__,
-            ','.join(['{}={}'.format(k, v) for (k, v) in locals().items()
-                      if k not in ['self', 'config', 'gamalog', 'file_handler', 'stdout_streamhandler']])
-        ))
+        log.info('{}({})'.format(self.__class__.__name__, arguments))
+        log_event(log, TOKENS.INIT, [arguments])
 
         if max_total_time is None or max_total_time <= 0:
             raise ValueError(f"max_total_time should be integer greater than zero but is {max_total_time}.")
         if max_eval_time is None or max_eval_time <= 0:
             raise ValueError(f"max_eval_time should be integer greater than zero but is {max_eval_time}.")
-        if n_jobs < -1:
+        if n_jobs < -1 or n_jobs == 0:
             raise ValueError(f"n_jobs should be -1 or positive integer but is {n_jobs}.")
+        elif n_jobs != -1:
+            # AsyncExecutor defaults to using multiprocessing.cpu_count(), i.e. n_jobs=-1
+            AsyncExecutor.n_jobs = n_jobs
 
-        if n_jobs == -1:
-            n_jobs = multiprocessing.cpu_count()
-
-        self._fitted_pipelines = {}
         self._random_state = random_state
-        self._pop_size = population_size
         self._max_total_time = max_total_time
         self._max_eval_time = max_eval_time
-        self._n_jobs = n_jobs
-        self._regularize_length = regularize_length
         self._time_manager = TimeKeeper(max_total_time)
-        self._best_pipeline = None
-        self._observer = None
-        self.ensemble = None
-        self._ensemble_fit: bool = False
-        self._metrics = self._scoring_to_metric(scoring)
-        self._use_asha: bool = False
-        self._X: pd.DataFrame = None
-        self._y: pd.DataFrame = None
-        self._classes: List = []
+        self._metrics: Tuple[Metric] = scoring_to_metric(scoring)
+        self._regularize_length = regularize_length
+        self._post_processing = post_processing_method
 
-        default_cache_dir = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_GAMA"
+        default_cache_dir = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{str(uuid.uuid4())[:4]}_GAMA"
         self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
         if not os.path.isdir(self._cache_dir):
             os.mkdir(self._cache_dir)
 
-        self._imputer = None
-        self._evaluated_individuals = {}
-        self._final_pop = None
-        self._subscribers = defaultdict(list)
-
-        self._observer = Observer(self._cache_dir)
-        self.evaluation_completed(self._observer.update)
-        
         if self._random_state is not None:
             random.seed(self._random_state)
             np.random.seed(self._random_state)
 
+        self._X: Optional[pd.DataFrame] = None
+        self._y: Optional[pd.DataFrame] = None
+        self.model: object = None
+        self._search_method: BaseSearch = search_method
+        self._final_pop = None
+
+        self._subscribers = defaultdict(list)
+        self._observer = Observer(self._cache_dir)
+        self.evaluation_completed(self._observer.update)
+
         self._pset, parameter_checks = pset_from_config(config)
 
         if grammar_file_name is not None:
+            from gama.utilities.plgen.manager import Manager
+            from gama.utilities.plgen.library import GamaPsetLibrary
             library = GamaPsetLibrary(self._pset)
             self._grammar_manager = Manager(library=library)
             self._grammar_manager.parse_file(grammar_file_name)
@@ -197,18 +192,19 @@ class Gama(object):
             self._grammar_rule = self._grammar_manager.get_fa(rule_name)
             expression_creator = partial(create_expression_by_rule, primitive_set=self._pset, rule=self._grammar_rule)
             def individual_creator():
-                return Individual(expression_creator(),  )
+                return Individual(expression_creator(), )
             individual_creator = expression_creator
             # Turning off the grammar checking of individuals generated through reproduction
             # TODO: Debug grammar checking for reproduction
 #            mutate = partial(conformant_mutation, primitive_set=self._pset, rule=self._grammar_rule)
 #            mate = partial(conformant_crossover, rule=self._grammar_manager)
             mutate = partial(random_valid_mutation_in_place, primitive_set=self._pset)
-            mate = crossover
+            mate = random_crossover
         else:
             individual_creator = partial(create_random_expression, primitive_set=self._pset)
             mutate = partial(random_valid_mutation_in_place, primitive_set=self._pset)
-            mate = crossover
+            mate = random_crossover
+
         self._operator_set = OperatorSet(
             mutate=mutate,
             mate=mate,
@@ -222,49 +218,87 @@ class Gama(object):
     def clean_pipeline_string(self, p):
         return str(p)
 
-    def _scoring_to_metric(self, scoring):
-        if isinstance(scoring, str):
-            return tuple([Metric.from_string(scoring)])
-        elif isinstance(scoring, Metric):
-            return tuple([scoring])
-        elif isinstance(scoring, Iterable):
-            if all(isinstance(scorer, Metric) for scorer in scoring):
-                return scoring
-            elif all(isinstance(scorer, str) for scorer in scoring):
-                return tuple([Metric.from_string(scorer) for scorer in scoring])
-            else:
-                raise ValueError("Iterable of mixed types for `scoring` currently not supported.")
-        else:
-            raise ValueError("scoring must be a string, Metric or Iterable (of strings or Metrics).")
-
     def _predict(self, x: pd.DataFrame):
         raise NotImplemented('_predict is implemented by base classes.')
 
-    def predict(self, X: Union[pd.DataFrame, np.ndarray]):
-        if isinstance(X, np.ndarray):
-            X = pd.DataFrame(X)
+    def predict(self, x: Union[pd.DataFrame, np.ndarray]):
+        """ Predict the target for input X.
+
+        Parameters
+        ----------
+        x: pandas.DataFrame or numpy.ndarray
+            A dataframe or array with the same number of columns as the input to `fit`.
+
+        Returns
+        -------
+        numpy.ndarray
+            array with predictions of shape (N,) where N is the length of the first dimension of X.
+        """
+        if isinstance(x, np.ndarray):
+            x = pd.DataFrame(x)
             for col in self._X.columns:
-                X[col] = X[col].astype(self._X[col].dtype)
-        return self._predict(X)
+                x[col] = x[col].astype(self._X[col].dtype)
+        return self._predict(x)
 
     def predict_arff(self, arff_file_path: str):
+        """ Predict the target for input found in the ARFF file.
+
+        Parameters
+        ----------
+        arff_file_path: str
+            An ARFF file with the same columns as the one that used in fit.
+            The target column is ignored (but must be present).
+
+        Returns
+        -------
+        numpy.ndarray
+            array with predictions for each row in the ARFF file.
+        """
         if not isinstance(arff_file_path, str):
             raise TypeError(f"`arff_file_path` must be of type `str` but is of type {type(arff_file_path)}")
         X, _ = X_y_from_arff(arff_file_path)
         return self._predict(X)
 
-    def score(self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]):
+    def score(self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]) -> float:
+        """ Calculate the score of the model according to the `scoring` metric and input (x, y).
+
+        Parameters
+        ----------
+        x: pandas.DataFrame or numpy.ndarray
+            Data to predict target values for.
+        y: pandas.Series or numpy.ndarray
+            True values for the target.
+
+        Returns
+        -------
+        float
+            The score obtained on the given test data according to the `scoring` metric.
+        """
         predictions = self.predict_proba(x) if self._metrics[0].requires_probabilities else self.predict(x)
         return self._metrics[0].score(y, predictions)
 
-    def score_arff(self, arff_file_path: str):
+    def score_arff(self, arff_file_path: str) -> float:
+        """ Calculate the score of the model according to the `scoring` metric and input in the ARFF file.
+
+        Parameters
+        ----------
+        arff_file_path: string
+            An ARFF file with which to calculate the score.
+
+        Returns
+        -------
+        float
+            The score obtained on the given test data according to the `scoring` metric.
+        """
         X, y = X_y_from_arff(arff_file_path)
         return self.score(X, y)
 
     def fit_arff(self, arff_file_path: str, *args, **kwargs):
         """ Find and fit a model to predict the target column (last) from other columns.
 
-        :param arff_file_path: string
+        Parameters
+        ----------
+        arff_file_path: string
             Path to an ARFF file containing the training data.
             The last column is always taken to be the target.
         """
@@ -274,11 +308,9 @@ class Gama(object):
     def fit(self,
             x: Union[pd.DataFrame, np.ndarray],
             y: Union[pd.DataFrame, pd.Series, np.ndarray],
-            warm_start: bool=False,
-            auto_ensemble_n: int=25,
-            restart_: bool=False,
-            keep_cache: bool=False,
-            d3m_mode: bool=False):
+            warm_start: bool = False,
+            keep_cache: bool = False,
+            d3m_mode: bool = False):
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -288,31 +320,22 @@ class Gama(object):
         After the search termination condition is met, the best found pipeline
         configuration is then used to train a final model on all provided data.
 
-        :param x: pandas.DataFrame or numpy.ndarray, shape = [n_samples, n_features]
+        Parameters
+        ----------
+        x: pandas.DataFrame or numpy.ndarray, shape = [n_samples, n_features]
             Training data. All elements must be able to be converted to float.
-        :param y: pandas.DataFrame, pandas.Series or numpy.ndarray, shape = [n_samples,]
+        y: pandas.DataFrame, pandas.Series or numpy.ndarray, shape = [n_samples,]
             Target values. If a DataFrame is provided, it is assumed the first column contains target values.
-        :param warm_start: bool. Indicates the optimization should continue using the last individuals of the
+        warm_start: bool (default=False)
+            Indicates the optimization should continue using the last individuals of the
             previous `fit` call.
-        :param auto_ensemble_n: positive integer. The number of models to include in the ensemble which is built
-            after the optimizatio process.
-        :param restart_: bool (default=False)
-            Indicates whether or not the search should be restarted when a specific restart criteria is met.
-        :param keep_cache: bool (default=False)
+        keep_cache: bool (default=False)
             If True, keep the cache directory and its content after fitting is complete. Otherwise delete it.
-        :param d3m_mode: bool. Signals whether fit is being run in D3M context.  If so, we assume that various
+        d3m_mode: bool (default=False)
+            Signals whether fit is being run in D3M context.  If so, we assume that various
             kinds of preprocessing have already been performed and leave the inputs as D3M Dataframes.
         """
-        ensemble_ratio = 0.3  # fraction of time left after preprocessing that reserved for postprocessing
-
-        def restart_criteria():
-            restart = self._observer._individuals_since_last_pareto_update > 400
-            if restart and restart_:
-                log.info("Continuing search with new population.")
-                self._observer.reset_current_pareto_front()
-            return restart and restart_
-
-        with self._time_manager.start_activity('preprocessing') as preprocessing_sw:
+        with self._time_manager.start_activity('preprocessing', activity_meta=['default']):
             y_type = pd.DataFrame if d3m_mode else pd.Series
             self._X, self._y = format_x_y(x, y, y_type)
             self._classes = list(set(self._y))
@@ -320,100 +343,59 @@ class Gama(object):
                 steps = define_preprocessing_steps(self._X, max_extra_features_created=None, max_categories_for_one_hot=10)
                 self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
 
-        log_event(log, TOKENS.PREPROCESSING_END, preprocessing_sw.elapsed_time)
+        fit_time = int((1 - self._post_processing.time_fraction) * self._time_manager.total_time_remaining)
 
-        fit_time = int((1 - ensemble_ratio) * self._time_manager.total_time_remaining)
-
-        with self._time_manager.start_activity('search', time_limit=fit_time) as search_sw:
-            self._search_phase(warm_start, restart_criteria=restart_criteria, timeout=fit_time)
-        log_event(log, TOKENS.SEARCH_END, search_sw.elapsed_time)
+        with self._time_manager.start_activity('search', time_limit=fit_time,
+                                               activity_meta=[self._search_method.__class__.__name__]):
+            self._search_phase(warm_start, timeout=fit_time)
 
         with self._time_manager.start_activity('postprocess',
-                                               time_limit=int(self._time_manager.total_time_remaining)) as post_sw:
-            self._postprocess_phase(auto_ensemble_n, timeout=self._time_manager.total_time_remaining)
-        log_event(log, TOKENS.POSTPROCESSING_END, post_sw.elapsed_time)
-
+                                               time_limit=int(self._time_manager.total_time_remaining),
+                                               activity_meta=[self._post_processing.__class__.__name__]):
+            best_individuals = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values)))
+            self._post_processing.dynamic_defaults(self)
+            self.model = self._post_processing.post_process(
+                self._X, self._y, self._time_manager.total_time_remaining, best_individuals
+            )
         if not keep_cache:
             log.debug("Deleting cache.")
             self.delete_cache()
 
-    def _search_phase(self, warm_start: bool=False, restart_criteria: Callable=None, timeout: int=1e6):
+    def _search_phase(self, warm_start: bool = False, timeout: int = 1e6):
         """ Invoke the evolutionary algorithm, populate `final_pop` regardless of termination. """
         if warm_start and self._final_pop is not None:
             pop = self._final_pop
         else:
             if warm_start:
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
-            pop = [self._operator_set.individual() for _ in range(self._pop_size)]
-           # warm_start_pop = generate_warm_start_pop(X, y, self._pset)
-           # pop = warm_start_pop + pop[len(warm_start_pop):]
+            pop = [self._operator_set.individual() for _ in range(50)]
 
         evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self._X, y_train=self._y,
                              timeout=self._max_eval_time, metrics=self._metrics, cache_dir=self._cache_dir)
-        final_pop = []
+        self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
+                                              **evaluate_args)
 
         try:
             with stopit.ThreadingTimeout(timeout):
-                if not self._use_asha:
-                    self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
-                                                          **evaluate_args)
-                    final_pop = async_ea(self._operator_set, output=final_pop, start_population=pop,
-                                         restart_callback=restart_criteria,
-                                         max_time_seconds=timeout,
-                                         n_jobs=self._n_jobs)
-                else:
-                    self._operator_set.evaluate = partial(evaluate_on_rung, **evaluate_args)
-                    final_pop = asha(self._operator_set, output=final_pop,
-                                     start_candidates=pop, maximum_resource=len(self._X))
+                self._search_method.dynamic_defaults(self._X, self._y, timeout)
+                self._search_method.search(self._operator_set, start_candidates=pop)
         except KeyboardInterrupt:
             log.info('Search phase terminated because of Keyboard Interrupt.')
 
-        self._final_pop = final_pop
-        log.debug([str(i) for i in self._final_pop])
+        self._final_pop = self._search_method.output
+        log.debug([str(i) for i in self._final_pop[:100]])
         log.info(f'Search phase evaluated {len(self._observer._individuals)} individuals.')
-
-    def _postprocess_phase(self, n, timeout=1e6):
-        """ Perform any necessary post processing, such as ensemble building. """
-        self._best_individual = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values)))[0]
-        log.info("Best pipeline has fitness of {}".format(self._best_individual.fitness.values))
-        self._best_pipeline = self._best_individual.pipeline
-        log.info("Pipeline {}, steps: {}".format(self._best_pipeline, self._best_pipeline.steps))
-        self._best_pipeline.fit(self._X, self._y)
-        if n > 1:
-            self._build_fit_ensemble(n, timeout=timeout)
 
     def _initialize_ensemble(self):
         raise NotImplementedError('_initialize_ensemble should be implemented by a child class.')
 
-    def _build_fit_ensemble(self, ensemble_size, timeout):
-        start_build = time.time()
-        try:
-            log.debug('Building ensemble.')
-            self._initialize_ensemble()
-
-            # Starting with more models in the ensemble should help against overfitting, but depending on the total
-            # ensemble size, it might leave too little room to calibrate the weights or add new models. So we have
-            # some adaptive defaults (for now).
-            if ensemble_size <= 10:
-                self.ensemble.build_initial_ensemble(1)
-            else:
-                self.ensemble.build_initial_ensemble(10)
-
-            remainder = ensemble_size - self.ensemble._total_model_weights()
-            if remainder > 0:
-                self.ensemble.expand_ensemble(remainder)
-
-            build_time = time.time() - start_build
-            timeout = timeout - build_time
-            log.info('Building ensemble took {}s. Fitting ensemble with timeout {}s.'.format(build_time, timeout))
-
-            self.ensemble.fit(self._X, self._y, timeout=timeout)
-            self._ensemble_fit = True
-        except Exception as e:
-            log.warning("Error during auto ensemble: {}".format(e), exc_info=True)
-
     def delete_cache(self):
-        """ Removes the cache folder and all files associated to this instance. """
+        """ Removes the cache folder and all files associated to this instance.
+
+        Returns
+        -------
+        None
+        """
         while os.path.exists(self._cache_dir):
             try:
                 log.info("Attempting to delete {}".format(self._cache_dir))
@@ -443,9 +425,13 @@ class Gama(object):
         for callback in self._subscribers['evaluation_completed']:
             self._safe_outside_call(partial(callback, ind))
 
-    def evaluation_completed(self, fn):
+    def evaluation_completed(self, callback_function):
         """ Register a callback function that is called when new evaluation is completed.
 
-        :param fn: Function to call when a pipeline is evaluated. Expected signature is: ind -> None
+        Parameters
+        ----------
+        callback_function:
+            Function to call when a pipeline is evaluated, return values are ignored.
+            Expected signature is: Individual -> Any
         """
-        self._subscribers['evaluation_completed'].append(fn)
+        self._subscribers['evaluation_completed'].append(callback_function)

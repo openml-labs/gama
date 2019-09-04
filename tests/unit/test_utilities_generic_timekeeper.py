@@ -3,12 +3,12 @@ import pytest
 from gama.utilities.generic.timekeeper import TimeKeeper
 
 
-ROUND_ERROR = 0.01
+ROUND_ERROR = 0.02
 
 
 def test_timekeeper_total_time_remaning_error_if_total_time_zero():
     """ Ensure `total_time_remaining` is unavailable if `total_time` is not set. """
-    timekeeper = TimeKeeper(total_time=0)
+    timekeeper = TimeKeeper()
     with pytest.raises(RuntimeError):
         _ = timekeeper.total_time_remaining
 

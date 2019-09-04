@@ -2,6 +2,7 @@ import logging
 import os
 import pickle
 import time
+from typing import Iterable
 import uuid
 from datetime import datetime
 
@@ -11,7 +12,7 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import cross_val_predict, ShuffleSplit
 from sklearn.pipeline import Pipeline
 
-from gama.genetic_programming.algorithms.metrics import Metric
+from gama.utilities.metrics import Metric
 from gama.genetic_programming.components import Individual, PrimitiveNode, Fitness
 from gama.logging.utility_functions import MultiprocessingLogger
 from gama.logging.machine_logging import TOKENS, log_event
@@ -24,7 +25,7 @@ def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
     return primitive_node._primitive.identifier(**hyperparameters)
 
 
-def compile_individual(individual: Individual, parameter_checks=None, preprocessing_steps=None) -> Pipeline:
+def compile_individual(individual: Individual, parameter_checks=None, preprocessing_steps: Iterable[object]=None) -> Pipeline:
     steps = [(str(i), primitive_node_to_sklearn(primitive)) for i, primitive in enumerate(individual.primitives)]
     if preprocessing_steps:
         steps = steps + [(str(i), step) for (i, step) in enumerate(reversed(preprocessing_steps), start=len(steps))]

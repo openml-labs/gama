@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple, Union, Type
+from typing import Tuple, Union, Type, Optional
 import category_encoders as ce
 import numpy as np
 import pandas as pd
@@ -8,14 +8,27 @@ from sklearn.impute import SimpleImputer
 log = logging.getLogger(__name__)
 
 
-def define_preprocessing_steps(X_df, max_extra_features_created=None, max_categories_for_one_hot=10):
-    """ Constructs the preprocessing steps for the dataframe, taking into account data types.
+def define_preprocessing_steps(X_df: pd.DataFrame,
+                               max_extra_features_created: Optional[int] = None,
+                               max_categories_for_one_hot: int = 10):
+    """ Constructs imputation and categorical preprocessing steps for the dataframe, taking into account data types.
 
-    :param X_df: Features of the data (i.e. without target label).
-    :param max_extra_features_created: If set, dynamically decrease max_categories_for_one_hot as needed so as not to
+    Parameters
+    ----------
+    X_df: pandas.DataFrame
+        Features of the data (i.e. without target label).
+    max_extra_features_created: int, optional (default=None)
+        WARNING! Currently not supported, the only valid value is None.
+
+        If set, dynamically decrease max_categories_for_one_hot as needed so as not to
         create a greater amount of features than max_extra_features_created.
-    :param max_categories_for_one_hot: The maximum amount of unique category levels to be considered for one hot encoding.
-    :return: a list of preprocessing step objects.
+    max_categories_for_one_hot: int (default=10)
+        The maximum amount of unique category levels to be considered for one hot encoding.
+
+    Returns
+    -------
+    List
+        List of preprocessing step objects.
     """
     if max_extra_features_created:
         # Will determine max_categories_for_one_hot based on how many total new features would be created.
@@ -39,7 +52,7 @@ def define_preprocessing_steps(X_df, max_extra_features_created=None, max_catego
     return [one_hot_encoder, target_encoder, imputer]
 
 
-def heuristic_numpy_to_dataframe(X: np.ndarray, max_unique_values_cat: int=10) -> pd.DataFrame:
+def heuristic_numpy_to_dataframe(X: np.ndarray, max_unique_values_cat: int = 10) -> pd.DataFrame:
     """ Transform a numpy array to a typed pd.DataFrame. """
     X_df = pd.DataFrame(X)
     for column, n_unique in X_df.nunique(dropna=True).items():
@@ -53,12 +66,17 @@ def format_x_y(x: Union[pd.DataFrame, np.ndarray], y: Union[pd.DataFrame, pd.Ser
                ) -> Tuple[pd.DataFrame, Union[pd.DataFrame, pd.Series]]:
     """ Takes various types of (X,y) data and converts it into a (pd.DataFrame, pd.Series) tuple.
 
-    :param x: pd.DataFrame of np.ndarray
-    :param y: pd.DataFrame, pd.Series or np.ndarray
-    :param y_type: Type (default=pd.Series)
-    :param remove_unlabeled: bool (default=True)
+    Parameters
+    ----------
+    x: pandas.DataFrame or numpy.ndarray
+    y: pandas.DataFrame, pandas.Series or numpy.ndarray
+    y_type: Type (default=pandas.Series)
+    remove_unlabeled: bool (default=True)
         If true, remove all rows associated with unlabeled data (NaN in y).
-    :return:
+
+    Returns
+    -------
+    Tuple[pandas.DataFrame, pandas.DataFrame or pandas.Series]
         X and y, where X is formatted as pd.DataFrame and y is formatted as `y_type`.
     """
     if not isinstance(x, (np.ndarray, pd.DataFrame)):

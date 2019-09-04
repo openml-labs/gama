@@ -1,6 +1,6 @@
 from sklearn.svm import LinearSVC
 from sklearn.datasets import load_iris
-from gama.utilities.auto_ensemble import fit_and_weight
+from gama.postprocessing.ensemble import fit_and_weight
 
 
 def test_fit_and_weight():
