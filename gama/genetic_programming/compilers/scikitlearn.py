@@ -1,10 +1,10 @@
+from datetime import datetime
 import logging
 import os
 import pickle
 import time
 from typing import Iterable
 import uuid
-from datetime import datetime
 
 import stopit
 from sklearn.preprocessing import OneHotEncoder
@@ -79,7 +79,7 @@ def evaluate_individual(individual: Individual, evaluate_pipeline_length, *args,
     return individual
 
 
-def evaluate_pipeline(pl, X, y_train, timeout, metrics='accuracy', cv=5, cache_dir=None, logger=None, subsample=None):
+def evaluate_pipeline(pl, X, y_train, timeout, deadline, metrics='accuracy', cv=5, cache_dir=None, logger=None, subsample=None):
     """ Evaluates a pipeline used k-Fold CV. """
     if not logger:
         logger = log
@@ -91,6 +91,9 @@ def evaluate_pipeline(pl, X, y_train, timeout, metrics='accuracy', cv=5, cache_d
     scores = tuple([float('-inf')] * len(metrics))
     start_datetime = datetime.now()
     start = time.process_time()
+
+    time_to_deadline = deadline - time.time()
+    timeout = min(timeout, time_to_deadline)
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
             if draw_subsample:

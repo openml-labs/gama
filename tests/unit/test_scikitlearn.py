@@ -1,3 +1,5 @@
+import time
+
 import pytest
 import pandas as pd
 from sklearn.datasets import load_iris
@@ -63,6 +65,6 @@ def test_evaluate_pipeline(BernoulliNBStandardScaler):
     x, y = pd.DataFrame(x), pd.Series(y)
 
     scores, start, wallclock, process = evaluate_pipeline(
-        BernoulliNBStandardScaler.pipeline, x, y, timeout=60,
+        BernoulliNBStandardScaler.pipeline, x, y, timeout=60, deadline=time.time()+60,
         metrics=scoring_to_metric('accuracy'))
     assert 1 == len(scores)

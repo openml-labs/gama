@@ -28,13 +28,10 @@ class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
         self._futures = []
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        child_processes = list(self._processes.items())
-        self.shutdown(wait=False)
         for future in self._futures:
             if not future.done():
                 future.cancel()
-        for pid, process in child_processes:
-            process.terminate()
+        self.shutdown(wait=True)
         return False
 
     def submit(self, fn, *args, **kwargs):

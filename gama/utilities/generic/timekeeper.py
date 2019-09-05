@@ -55,6 +55,16 @@ class TimeKeeper:
         else:
             raise RuntimeError("No activity in progress.")
 
+    @property
+    def current_activity_time_left(self) -> float:
+        """ Return time left in seconds of current activity. Raise RuntimeError if no current activity. """
+        if self.current_activity is not None and self.current_activity.time_limit is not None:
+            return self.current_activity.time_limit - self.current_activity.stopwatch.elapsed_time
+        elif self.current_activity is None:
+            raise RuntimeError("No activity in progress.")
+        else:
+            raise RuntimeError("No time limit set for current activity.")
+
     @contextmanager
     def start_activity(self,
                        activity: str,
