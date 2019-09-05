@@ -1,14 +1,15 @@
 from abc import ABC
-import random
-import logging
-import os
 from collections import defaultdict
 import datetime
-import shutil
 from functools import partial
-import warnings
+import logging
+import os
+import random
+import shutil
+import time
 from typing import Union, Tuple, Optional, Dict
 import uuid
+import warnings
 
 import pandas as pd
 import numpy as np
@@ -125,8 +126,8 @@ class Gama(ABC):
 
         if max_total_time is None or max_total_time <= 0:
             raise ValueError(f"max_total_time should be integer greater than zero but is {max_total_time}.")
-        if max_eval_time <= 0:
-            raise ValueError(f"max_eval_time should be integer greater than zero but is {max_eval_time}.")
+        if max_eval_time is not None and max_eval_time <= 0:
+            raise ValueError(f"max_eval_time should be None or integer greater than zero but is {max_eval_time}.")
         if n_jobs < -1 or n_jobs == 0:
             raise ValueError(f"n_jobs should be -1 or positive integer but is {n_jobs}.")
         elif n_jobs != -1:
@@ -322,8 +323,10 @@ class Gama(ABC):
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = [self._operator_set.individual() for _ in range(50)]
 
+        deadline = time.time() + timeout
         evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self._X, y_train=self._y,
-                             metrics=self._metrics, cache_dir=self._cache_dir, timeout=self._max_eval_time)
+                             metrics=self._metrics, cache_dir=self._cache_dir, timeout=self._max_eval_time,
+                             deadline=deadline)
         self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
                                               **evaluate_args)
 
