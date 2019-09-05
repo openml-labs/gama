@@ -132,6 +132,11 @@ class Gama(ABC):
             # AsyncExecutor defaults to using multiprocessing.cpu_count(), i.e. n_jobs=-1
             AsyncExecutor.n_jobs = n_jobs
 
+        if max_eval_time > max_total_time:
+            log.warning(f"max_eval_time ({max_eval_time}) > max_total_time ({max_total_time}) is not allowed. "
+                        f"max_eval_time set to {max_total_time}.")
+            max_eval_time = max_total_time
+
         self._random_state = random_state
         self._max_total_time = max_total_time
         self._max_eval_time = max_eval_time
@@ -317,7 +322,7 @@ class Gama(ABC):
             pop = [self._operator_set.individual() for _ in range(50)]
 
         evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self._X, y_train=self._y,
-                             timeout=self._max_eval_time, metrics=self._metrics, cache_dir=self._cache_dir)
+                             metrics=self._metrics, cache_dir=self._cache_dir, timeout=self._max_eval_time)
         self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
                                               **evaluate_args)
 
