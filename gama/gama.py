@@ -6,6 +6,7 @@ import logging
 import os
 import random
 import shutil
+import time
 from typing import Union, Tuple, Optional, Dict
 import uuid
 import warnings
@@ -55,8 +56,8 @@ class Gama(ABC):
                  regularize_length: bool = True,
                  config: Dict = None,
                  random_state: int = None,
-                 max_total_time: Optional[int] = 3600,
-                 max_eval_time: Optional[int] = 300,
+                 max_total_time: int = 3600,
+                 max_eval_time: Optional[int] = None,
                  n_jobs: int = -1,
                  verbosity: int = logging.WARNING,
                  keep_analysis_log: Optional[str] = 'gama.log',
@@ -86,8 +87,9 @@ class Gama(ABC):
         max_total_time: positive int (default=3600)
             Time in seconds that can be used for the `fit` call.
 
-        max_eval_time: positive int, optional (default=300)
+        max_eval_time: positive int, optional (default=None)
             Time in seconds that can be used to evaluate any one single individual.
+            If None, set to 0.1 * max_total_time.
 
         n_jobs: int (default=-1)
             The amount of parallel processes that may be created to speed up `fit`.
@@ -127,20 +129,26 @@ class Gama(ABC):
 
         if max_total_time is None or max_total_time <= 0:
             raise ValueError(f"max_total_time should be integer greater than zero but is {max_total_time}.")
-        if max_eval_time is None or max_eval_time <= 0:
-            raise ValueError(f"max_eval_time should be integer greater than zero but is {max_eval_time}.")
+        if max_eval_time is not None and max_eval_time <= 0:
+            raise ValueError(f"max_eval_time should be None or integer greater than zero but is {max_eval_time}.")
         if n_jobs < -1 or n_jobs == 0:
             raise ValueError(f"n_jobs should be -1 or positive integer but is {n_jobs}.")
         elif n_jobs != -1:
             # AsyncExecutor defaults to using multiprocessing.cpu_count(), i.e. n_jobs=-1
             AsyncExecutor.n_jobs = n_jobs
 
-        self._random_state = random_state
-        self._max_total_time = max_total_time
+        if max_eval_time is None:
+            max_eval_time = 0.1 * max_total_time
+        if max_eval_time > max_total_time:
+            log.warning(f"max_eval_time ({max_eval_time}) > max_total_time ({max_total_time}) is not allowed. "
+                        f"max_eval_time set to {max_total_time}.")
+            max_eval_time = max_total_time
+
         self._max_eval_time = max_eval_time
         self._time_manager = TimeKeeper(max_total_time)
         self._metrics: Tuple[Metric] = scoring_to_metric(scoring)
         self._regularize_length = regularize_length
+        self._search_method: BaseSearch = search_method
         self._post_processing = post_processing_method
 
         default_cache_dir = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{str(uuid.uuid4())[:4]}_GAMA"
@@ -148,14 +156,13 @@ class Gama(ABC):
         if not os.path.isdir(self._cache_dir):
             os.mkdir(self._cache_dir)
 
-        if self._random_state is not None:
-            random.seed(self._random_state)
-            np.random.seed(self._random_state)
+        if random_state is not None:
+            random.seed(random_state)
+            np.random.seed(random_state)
 
         self._X: Optional[pd.DataFrame] = None
         self._y: Optional[pd.DataFrame] = None
         self.model: object = None
-        self._search_method: BaseSearch = search_method
         self._final_pop = None
 
         self._subscribers = defaultdict(list)
@@ -319,8 +326,10 @@ class Gama(ABC):
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = [self._operator_set.individual() for _ in range(50)]
 
+        deadline = time.time() + timeout
         evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self._X, y_train=self._y,
-                             timeout=self._max_eval_time, metrics=self._metrics, cache_dir=self._cache_dir)
+                             metrics=self._metrics, cache_dir=self._cache_dir, timeout=self._max_eval_time,
+                             deadline=deadline)
         self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
                                               **evaluate_args)
 

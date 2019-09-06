@@ -26,11 +26,7 @@ def test_gama_fail_on_invalid_hyperparameter_values():
 
     with pytest.raises(ValueError) as e:
         gama.GamaClassifier(max_eval_time=0).delete_cache()
-    assert "max_eval_time should be integer greater than zero" in str(e.value)
-
-    with pytest.raises(ValueError) as e:
-        gama.GamaClassifier(max_eval_time=None).delete_cache()
-    assert "max_eval_time should be integer greater than zero" in str(e.value)
+    assert "max_eval_time should be None or integer greater than zero" in str(e.value)
 
     with pytest.raises(ValueError) as e:
         gama.GamaClassifier(n_jobs=-2).delete_cache()

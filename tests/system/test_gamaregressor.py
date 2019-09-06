@@ -42,7 +42,7 @@ def _test_dataset_problem(data, metric):
     split_data = train_test_split(X, y, random_state=0)
 
     gama = GamaRegressor(random_state=0, max_total_time=TOTAL_TIME_S, scoring=metric, n_jobs=1, cache_dir=data['name'],
-                         post_processing_method=EnsemblePostProcessing(ensemble_size=5))
+                         max_eval_time=300, post_processing_method=EnsemblePostProcessing(ensemble_size=5))
     _test_gama_regressor(gama, *split_data, data, metric)
 
 

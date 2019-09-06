@@ -1,7 +1,7 @@
 from functools import partial
 import logging
 import math
-from typing import List, Optional, Dict, Tuple, Any
+from typing import List, Optional, Dict, Tuple, Any, Callable
 
 import pandas as pd
 import stopit
@@ -130,7 +130,7 @@ def asha(operations: OperatorSet,
                 time_penalty_for_rung = resource_for_rung[rung] / max(resource_for_rung.values())
                 futures.add(async_.submit(evaluate, individual, rung,
                                           subsample=resource_for_rung[rung],
-                                          timeout=min(10 + (time_penalty_for_rung * 600), 600)))
+                                          timeout=(10 + (time_penalty_for_rung * 600))))
 
             for _ in range(8):
                 start_new_job()
