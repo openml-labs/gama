@@ -17,6 +17,10 @@ def register_stream_log(verbosity):
     stdout_streamhandler = logging.StreamHandler(sys.stdout)
     stdout_streamhandler.tag = 'machine_set'
     stdout_streamhandler.setLevel(verbosity)
+
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    stdout_streamhandler.setFormatter(formatter)
+    
     gama_log.addHandler(stdout_streamhandler)
 
 
