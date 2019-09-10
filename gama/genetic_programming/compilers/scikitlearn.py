@@ -76,6 +76,7 @@ def object_is_valid_pipeline(o):
 
 
 def evaluate_individual(individual: Individual, evaluate_pipeline_length, *args, **kwargs):
+    log.info("EVALUATING: %s" % individual.pipeline_str())
     (scores, start_datetime, wallclock_time, process_time) = evaluate_pipeline(individual.pipeline, *args, **kwargs)
     if evaluate_pipeline_length:
         scores = (*scores, -len(individual.primitives))
@@ -109,9 +110,9 @@ def evaluate_pipeline(pl, X, y_train, timeout, metrics='accuracy', cv=5, cache_d
             raise
         except Exception as e:
             if isinstance(logger, MultiprocessingLogger):
-                logger.debug('{} encountered while evaluating pipeline.'.format(type(e)))
+                logger.info('{} encountered while evaluating pipeline.'.format(type(e)))
             else:
-                logger.debug('{} encountered while evaluating pipeline.'.format(type(e)), exc_info=True)
+                logger.info('{} encountered while evaluating pipeline.'.format(type(e)), exc_info=True)
 
             single_line_pipeline = str(pl).replace('\n', '')
             log_event(logger, TOKENS.EVALUATION_ERROR, start_datetime, single_line_pipeline, type(e), e)
