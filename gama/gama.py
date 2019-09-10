@@ -70,15 +70,9 @@ class Gama(ABC):
                  regularize_length: bool = True,
                  config: Dict = None,
                  random_state: int = None,
-<<<<<<< HEAD
-                 max_total_time: Optional[int] = 3600,
-                 max_eval_time: Optional[int] = 300,
-                 n_jobs: int = 1,
-=======
                  max_total_time: int = 3600,
                  max_eval_time: Optional[int] = None,
-                 n_jobs: int = -1,
->>>>>>> develop
+                 n_jobs: int = 1,
                  verbosity: int = logging.WARNING,
                  keep_analysis_log: Optional[str] = 'gama.log',
                  cache_dir: Optional[str] = None,
