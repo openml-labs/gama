@@ -9,6 +9,7 @@ from gama.genetic_programming.operator_set import OperatorSet
 from gama.logging.machine_logging import TOKENS, log_event
 from gama.logging.utility_functions import MultiprocessingLogger
 from gama.search_methods.base_search import BaseSearch
+from gama.utilities.generic.async_evaluation import AsyncEvaluator
 from gama.utilities.generic.async_executor import AsyncExecutor
 
 log = logging.getLogger(__name__)
@@ -94,7 +95,7 @@ def async_ea(
     current_population = output
     n_evaluated_individuals = 0
 
-    with AsyncExecutor() as async_:
+    with AsyncEvaluator() as async_:
         should_restart = True
         while should_restart:
             should_restart = False
@@ -104,22 +105,22 @@ def async_ea(
                 futures.add(async_.submit(evaluate_log, individual))
 
             while (max_n_evaluations is None) or (n_evaluated_individuals < max_n_evaluations):
-                done, futures = operations.wait_first_complete(futures)
-                logger.flush_to_log(log)
-                for future in done:
-                    individual = future.result()
-                    current_population.append(individual)
-                    if len(current_population) > max_population_size:
-                        to_remove = operations.eliminate(current_population, 1)
-                        log_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
-                        current_population.remove(to_remove[0])
+                done = operations.wait_next(async_)
+                #logger.flush_to_log(log)
+                #for future in done:
+                individual = done.result
+                current_population.append(individual)
+                if len(current_population) > max_population_size:
+                    to_remove = operations.eliminate(current_population, 1)
+                    log_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
+                    current_population.remove(to_remove[0])
 
-                    if len(current_population) > 1:
-                        new_individual = operations.create(current_population, 1)[0]
-                        futures.add(async_.submit(evaluate_log, new_individual))
+                if len(current_population) > 1:
+                    new_individual = operations.create(current_population, 1)[0]
+                    futures.add(async_.submit(evaluate_log, new_individual))
 
                 should_restart = (restart_callback is not None and restart_callback())
-                n_evaluated_individuals += len(done)
+                n_evaluated_individuals += 1
                 if should_restart:
                     log.info("Restart criterion met. Restarting with new random population.")
                     log_event(log, TOKENS.EA_RESTART, n_evaluated_individuals)

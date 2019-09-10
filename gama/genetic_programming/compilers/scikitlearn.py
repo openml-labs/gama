@@ -99,6 +99,8 @@ def evaluate_pipeline(pl, X, y_train, timeout, deadline, metrics='accuracy', cv=
 
     time_to_deadline = deadline - time.time()
     timeout = min(timeout, time_to_deadline)
+    with open('evals.txt', 'a') as fh:
+        fh.write(f'{timeout}->{str(pl)}\n')
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
             if draw_subsample:

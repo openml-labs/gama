@@ -19,6 +19,7 @@ import gama.genetic_programming.compilers.scikitlearn
 from gama.genetic_programming.components import Individual
 from gama.logging.machine_logging import log_event, TOKENS
 from gama.search_methods.base_search import BaseSearch
+from gama.utilities.generic.async_evaluation import AsyncEvaluator
 from gama.utilities.metrics import scoring_to_metric
 from .utilities.observer import Observer
 
@@ -154,6 +155,7 @@ class Gama(ABC):
         elif n_jobs != -1:
             # AsyncExecutor defaults to using multiprocessing.cpu_count(), i.e. n_jobs=-1
             AsyncExecutor.n_jobs = n_jobs
+            AsyncEvaluator.n_jobs = n_jobs
 
         if max_eval_time is None:
             max_eval_time = 0.1 * max_total_time

@@ -50,6 +50,21 @@ class OperatorSet:
                 self._evaluate_callback(individual)
         return done, not_done
 
+    def wait_next(self, async_eval):
+        done = async_eval.wait_next()
+        result = done.result
+        if not isinstance(result, Sequence):
+            individual = result
+            log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
+                      individual.fitness.wallclock_time, individual.fitness.process_time,
+                      individual.fitness.values, individual._id, individual.pipeline_str())
+        else:
+            # For now, we leave logging for non-standard results to the caller (e.g. rungs in ASHA)
+            individual = result[0]
+        if self._evaluate_callback is not None:
+            self._evaluate_callback(individual)
+        return done
+
     def try_until_new(self, operator, *args, **kwargs):
         for _ in range(self._max_retry):
             individual, log_args = operator(*args, **kwargs)

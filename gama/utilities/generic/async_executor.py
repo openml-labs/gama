@@ -1,5 +1,8 @@
 import concurrent.futures
+import logging
 import multiprocessing
+
+log = logging.getLogger(__name__)
 
 
 class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
@@ -28,10 +31,12 @@ class AsyncExecutor(concurrent.futures.ProcessPoolExecutor):
         self._futures = []
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        log.debug("Cancelling futures.")
         for future in self._futures:
             if not future.done():
                 future.cancel()
-        self.shutdown(wait=True)
+        log.debug("Shutting down subprocesses.")
+        self.shutdown(wait=False)
         return False
 
     def submit(self, fn, *args, **kwargs):
