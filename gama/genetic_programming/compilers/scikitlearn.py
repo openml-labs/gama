@@ -110,9 +110,9 @@ def evaluate_pipeline(pl, X, y_train, timeout, metrics='accuracy', cv=5, cache_d
             raise
         except Exception as e:
             if isinstance(logger, MultiprocessingLogger):
-                logger.info('{} encountered while evaluating pipeline.'.format(type(e)))
+                logger.debug('{} encountered while evaluating pipeline.'.format(type(e)))
             else:
-                logger.info('{} encountered while evaluating pipeline.'.format(type(e)), exc_info=True)
+                logger.debug('{} encountered while evaluating pipeline.'.format(type(e)), exc_info=True)
 
             single_line_pipeline = str(pl).replace('\n', '')
             log_event(logger, TOKENS.EVALUATION_ERROR, start_datetime, single_line_pipeline, type(e), e)
