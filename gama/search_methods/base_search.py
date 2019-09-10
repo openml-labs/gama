@@ -1,10 +1,11 @@
 from abc import ABC
-from typing import List, Dict, Tuple, Any, Union
+from typing import List, Dict, Tuple, Any, Union, Callable
 
 import pandas as pd
 
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.components import Individual
+from gama.utilities.generic.timekeeper import TimeKeeper
 
 
 class BaseSearch(ABC):
@@ -47,7 +48,7 @@ class BaseSearch(ABC):
         ----------
         operations: OperatorSet
             Has methods to create new individuals, evaluate individuals and more.
-        start_candidates
+        start_candidates: List[Individual]
             A list of individuals to be considered before all others.
         """
         raise NotImplementedError("Must be implemented by child class.")
