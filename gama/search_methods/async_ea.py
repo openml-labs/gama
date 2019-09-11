@@ -105,12 +105,13 @@ def async_ea(
             while (max_n_evaluations is None) or (n_evaluated_individuals < max_n_evaluations):
                 future = operations.wait_next(async_)
                 logger.flush_to_log(log)
-                individual = future.result
-                current_population.append(individual)
-                if len(current_population) > max_population_size:
-                    to_remove = operations.eliminate(current_population, 1)
-                    log_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
-                    current_population.remove(to_remove[0])
+                if future.exception is None:
+                    individual = future.result
+                    current_population.append(individual)
+                    if len(current_population) > max_population_size:
+                        to_remove = operations.eliminate(current_population, 1)
+                        log_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
+                        current_population.remove(to_remove[0])
 
                 if len(current_population) > 1:
                     new_individual = operations.create(current_population, 1)[0]
@@ -123,5 +124,6 @@ def async_ea(
                     log_event(log, TOKENS.EA_RESTART, n_evaluated_individuals)
                     start_candidates = [operations.individual() for _ in range(max_population_size)]
                     break
+
 
     return current_population

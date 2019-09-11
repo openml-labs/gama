@@ -140,16 +140,17 @@ def asha(operations: OperatorSet,
             while ((maximum_max_rung_evaluations is None)
                    or (len(individuals_by_rung[max_rung]) < maximum_max_rung_evaluations)):
                 future = operations.wait_next(async_)
-                individual, loss, rung = future.result
-                individuals_by_rung[rung].append((loss, individual))
-                # Due to `evaluate` returning additional information (like the rung),
-                # evaluations are not automatically logged, so we do it here.
-                log_event(log, ASHA_LOG_TOKEN, rung, individual.fitness.wallclock_time,
-                          individual.fitness.values, individual._id, individual.pipeline_str())
-                if rung == max(rungs):
-                    log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
-                              individual.fitness.wallclock_time, individual.fitness.process_time,
+                if future.result is not None:
+                    individual, loss, rung = future.result
+                    individuals_by_rung[rung].append((loss, individual))
+                    # Due to `evaluate` returning additional information (like the rung),
+                    # evaluations are not automatically logged, so we do it here.
+                    log_event(log, ASHA_LOG_TOKEN, rung, individual.fitness.wallclock_time,
                               individual.fitness.values, individual._id, individual.pipeline_str())
+                    if rung == max(rungs):
+                        log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
+                                  individual.fitness.wallclock_time, individual.fitness.process_time,
+                                  individual.fitness.values, individual._id, individual.pipeline_str())
 
                 start_new_job()
 

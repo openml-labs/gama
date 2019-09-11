@@ -35,17 +35,20 @@ class OperatorSet:
 
     def wait_next(self, async_evaluator):
         future = async_evaluator.wait_next()
-        result = future.result
-        if not isinstance(result, Sequence):
-            individual = result
-            log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
-                      individual.fitness.wallclock_time, individual.fitness.process_time,
-                      individual.fitness.values, individual._id, individual.pipeline_str())
-        else:
-            # For now, we leave logging for non-standard results to the caller (e.g. rungs in ASHA)
-            individual = result[0]
-        if self._evaluate_callback is not None:
-            self._evaluate_callback(individual)
+        if future.result is not None:
+            result = future.result
+            if not isinstance(result, Sequence):
+                individual = result
+                log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
+                          individual.fitness.wallclock_time, individual.fitness.process_time,
+                          individual.fitness.values, individual._id, individual.pipeline_str())
+            else:
+                # For now, we leave logging for non-standard results to the caller (e.g. rungs in ASHA)
+                individual = result[0]
+            if self._evaluate_callback is not None:
+                self._evaluate_callback(individual)
+        elif future.exception is not None:
+            log.warning(f'Encountered exception while evaluation individual: {str(future.exception)}.')
         return future
 
     def try_until_new(self, operator, *args, **kwargs):

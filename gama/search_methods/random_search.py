@@ -46,14 +46,14 @@ def random_search(
     """
     _check_base_search_hyperparameters(operations, output, start_candidates)
 
-    futures = set()
     with AsyncEvaluator() as async_:
         for individual in start_candidates:
-            futures.add(async_.submit(operations.evaluate, individual))
+            async_.submit(operations.evaluate, individual)
 
         while (max_evaluations is None) or (len(output) < max_evaluations):
             future = operations.wait_next(async_)
-            output.append(future.result)
-            futures.add(async_.submit(operations.evaluate, operations.individual()))
+            if future.result is not None:
+                output.append(future.result)
+            async_.submit(operations.evaluate, operations.individual())
 
     return output
