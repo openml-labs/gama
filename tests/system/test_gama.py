@@ -33,12 +33,12 @@ def _gama_on_digits(gama):
 
 
 def test_full_system_single_core(gamaclassifier):
-    from gama.utilities.generic.async_executor import AsyncExecutor
-    AsyncExecutor.n_jobs = 1
+    from gama.utilities.generic.async_evaluator import AsyncEvaluator
+    AsyncEvaluator.n_jobs = 1
     _gama_on_digits(gamaclassifier)
 
 
 def test_full_system_multi_core(gamaclassifier):
-    from gama.utilities.generic.async_executor import AsyncExecutor
-    AsyncExecutor.n_jobs = 2
+    from gama.utilities.generic.async_evaluator import AsyncEvaluator
+    AsyncEvaluator.n_jobs = 2
     _gama_on_digits(gamaclassifier)
