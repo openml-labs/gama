@@ -77,6 +77,7 @@ def object_is_valid_pipeline(o):
 
 
 def evaluate_individual(individual: Individual, evaluate_pipeline_length, *args, **kwargs):
+    log.info("EVALUATING: %s" % individual.pipeline_str())
     (scores, start_datetime, wallclock_time, process_time) = evaluate_pipeline(individual.pipeline, *args, **kwargs)
     if evaluate_pipeline_length:
         scores = (*scores, -len(individual.primitives))
