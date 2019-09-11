@@ -9,7 +9,7 @@ import stopit
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.search_methods.base_search import BaseSearch
 from gama.logging.machine_logging import TOKENS, log_event
-from gama.utilities.generic.async_executor import AsyncExecutor
+from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.genetic_programming.components.individual import Individual
 
 """
@@ -125,34 +125,33 @@ def asha(operations: OperatorSet,
         else:
             return operations.individual(), minimum_early_stopping_rate
 
-    futures = set()
     try:
-        with AsyncExecutor() as async_:
+        with AsyncEvaluator() as async_:
             def start_new_job():
                 individual, rung = get_job()
                 time_penalty_for_rung = resource_for_rung[rung] / max(resource_for_rung.values())
-                futures.add(async_.submit(evaluate, individual, rung,
-                                          subsample=resource_for_rung[rung],
-                                          timeout=(10 + (time_penalty_for_rung * 600))))
+                async_.submit(evaluate, individual, rung,
+                              subsample=resource_for_rung[rung],
+                              timeout=(10 + (time_penalty_for_rung * 600)))
 
             for _ in range(8):
                 start_new_job()
 
             while ((maximum_max_rung_evaluations is None)
                    or (len(individuals_by_rung[max_rung]) < maximum_max_rung_evaluations)):
-                done, futures = operations.wait_first_complete(futures)
-                for individual, loss, rung in [future.result() for future in done]:
-                    individuals_by_rung[rung].append((loss, individual))
-                    # Due to `evaluate` returning additional information (like the rung),
-                    # evaluations are not automatically logged, so we do it here.
-                    log_event(log, ASHA_LOG_TOKEN, rung, individual.fitness.wallclock_time,
+                future = operations.wait_next(async_)
+                individual, loss, rung = future.result
+                individuals_by_rung[rung].append((loss, individual))
+                # Due to `evaluate` returning additional information (like the rung),
+                # evaluations are not automatically logged, so we do it here.
+                log_event(log, ASHA_LOG_TOKEN, rung, individual.fitness.wallclock_time,
+                          individual.fitness.values, individual._id, individual.pipeline_str())
+                if rung == max(rungs):
+                    log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
+                              individual.fitness.wallclock_time, individual.fitness.process_time,
                               individual.fitness.values, individual._id, individual.pipeline_str())
-                    if rung == max(rungs):
-                        log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
-                                  individual.fitness.wallclock_time, individual.fitness.process_time,
-                                  individual.fitness.values, individual._id, individual.pipeline_str())
 
-                    start_new_job()
+                start_new_job()
 
             highest_rung_reached = max(rungs)
     except stopit.TimeoutException:
