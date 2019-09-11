@@ -49,7 +49,7 @@ gamalog = logging.getLogger('gama')
 gamalog.setLevel(MACHINE_LOG_LEVEL)
 
 from gama.postprocessing import BestFitPostProcessing, EnsemblePostProcessing, NoPostProcessing, BasePostProcessing
-from gama.utilities.generic.async_executor import AsyncExecutor
+from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.utilities.metrics import Metric
 
 
@@ -154,7 +154,6 @@ class Gama(ABC):
             raise ValueError(f"n_jobs should be -1 or positive integer but is {n_jobs}.")
         elif n_jobs != -1:
             # AsyncExecutor defaults to using multiprocessing.cpu_count(), i.e. n_jobs=-1
-            AsyncExecutor.n_jobs = n_jobs
             AsyncEvaluator.n_jobs = n_jobs
 
         if max_eval_time is None:
