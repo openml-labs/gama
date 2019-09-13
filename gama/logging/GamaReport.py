@@ -73,7 +73,7 @@ class GamaReport:
         # search_method is formatted like NAME(kwargs) where kwargs could contain additional parentheses.
         method_name, _ = self.search_method.split('(', maxsplit=1)
         method_token = METHOD_TOKENS.get(method_name)
-        self.method_data = parse_method_data[self.search_method](events_by_type[method_token], self.metrics)
+        self.method_data = parse_method_data[method_name](events_by_type[method_token], self.metrics)
 
         self.incomplete = (len(self.phases) < 3)
 

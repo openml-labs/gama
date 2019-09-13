@@ -12,7 +12,7 @@ def test_gamareport_from_log():
     log_file = 'tests/data/random_search.log'
     report = GamaReport(logfile=log_file, name=None)
     assert report.name == log_file
-    assert 'RandomSearch' == report.search_method
+    assert 'RandomSearch()' == report.search_method
     assert 3 == len(report.phases)
     assert (['preprocessing', 'search', 'postprocess']
             == list(map(lambda t: t[0], report.phases)))
@@ -26,7 +26,7 @@ def test_gamareport_asha_from_log():
     log_file = 'tests/data/asha.log'
     report = GamaReport(logfile=log_file, name=None)
     assert report.name == log_file
-    assert 'AsynchronousSuccessiveHalving' == report.search_method
+    assert 'AsynchronousSuccessiveHalving()' == report.search_method
     assert 3 == len(report.phases)
     assert (['preprocessing', 'search', 'postprocess']
             == list(map(lambda t: t[0], report.phases)))
