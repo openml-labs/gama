@@ -13,7 +13,7 @@ import stopit
 from gama.genetic_programming.components import Individual
 from gama.postprocessing.base_post_processing import BasePostProcessing
 from gama.utilities.metrics import Metric, MetricType
-from gama.utilities.generic.async_executor import AsyncExecutor, wait_first_complete
+from gama.utilities.generic.async_evaluator import AsyncEvaluator
 
 log = logging.getLogger(__name__)
 Model = namedtuple("Model", ['name', 'pipeline', 'predictions', 'validation_score'])
@@ -197,16 +197,15 @@ class Ensemble(object):
 
         self._fit_models = []
         futures = set()
-        with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncExecutor() as async_:
+        with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncEvaluator() as async_:
             for (model, weight) in self._models.values():
                 futures.add(async_.submit(fit_and_weight, (model.pipeline, X, y, weight)))
 
             for _ in self._models.values():
-                done, futures = wait_first_complete(futures)
-                for future in done:
-                    pipeline, weight = future.result()
-                    if weight > 0:
-                        self._fit_models.append((pipeline, weight))
+                future = async_.wait_next()
+                pipeline, weight = future.result
+                if weight > 0:
+                    self._fit_models.append((pipeline, weight))
 
         if not c_mgr:
             log.info("Fitting of ensemble stopped early.")

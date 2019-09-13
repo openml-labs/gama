@@ -6,7 +6,7 @@ import pandas as pd
 from gama.genetic_programming.components import Individual
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.search_methods.base_search import BaseSearch, _check_base_search_hyperparameters
-from gama.utilities.generic.async_executor import AsyncExecutor
+from gama.utilities.generic.async_evaluator import AsyncEvaluator
 
 log = logging.getLogger(__name__)
 
@@ -46,15 +46,14 @@ def random_search(
     """
     _check_base_search_hyperparameters(operations, output, start_candidates)
 
-    futures = set()
-    with AsyncExecutor() as async_:
+    with AsyncEvaluator() as async_:
         for individual in start_candidates:
-            futures.add(async_.submit(operations.evaluate, individual))
+            async_.submit(operations.evaluate, individual)
 
         while (max_evaluations is None) or (len(output) < max_evaluations):
-            done, futures = operations.wait_first_complete(futures)
-            for future in done:
-                output.append(future.result())
-                futures.add(async_.submit(operations.evaluate, operations.individual()))
+            future = operations.wait_next(async_)
+            if future.result is not None:
+                output.append(future.result)
+            async_.submit(operations.evaluate, operations.individual())
 
     return output
