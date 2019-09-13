@@ -45,7 +45,10 @@ class EnsemblePostProcessing(BasePostProcessing):
         self._overwrite_hyperparameter_default('cache', gama._cache_dir)
 
     def post_process(self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]) -> 'model':
-        return build_fit_ensemble(x, y, timeout, self.ensemble_size, self.metric, self.cache)
+        return build_fit_ensemble(x, y, timeout,
+                                  self.hyperparameters['ensemble_size'],
+                                  self.hyperparameters['metric'],
+                                  self.hyperparameters['cache'])
 
 
 class Ensemble(object):
