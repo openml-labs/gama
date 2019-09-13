@@ -164,6 +164,8 @@ def individual_plot(report: GamaReport, x_axis: str, y_axis: str, mode: str):
     :return:
         dash graph
     """
+    print(len(report.evaluations[x_axis]))
+    print(len(report.evaluations[y_axis]))
     return go.Scatter(
             name=f'{report.name}',
             x=report.evaluations[x_axis],

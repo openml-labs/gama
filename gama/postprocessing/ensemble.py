@@ -21,29 +21,34 @@ Model = namedtuple("Model", ['name', 'pipeline', 'predictions', 'validation_scor
 
 class EnsemblePostProcessing(BasePostProcessing):
 
-    def __init__(self, time_fraction: float = 0.3, ensemble_size: int = 25):
+    def __init__(self, time_fraction: float = 0.3, ensemble_size: Optional[int] = 25):
         """ Ensemble construction per Caruana et al.
 
         Parameters
         ----------
         time_fraction: float (default=0.3)
             Fraction of total time reserved for Ensemble building.
-        ensemble_size: int (default=25)
+        ensemble_size: int, optional (default=25)
             Total number of models in the ensemble.
             When a single model is chosen more than once, it will increase its weight in the ensemble and
             *does* count towards this maximum.
         """
         super().__init__(time_fraction)
-        self.ensemble_size = ensemble_size
-        self.metric = None
-        self.cache = None
+        self._hyperparameters = dict(
+            ensemble_size=(ensemble_size, 25),
+            metric=(None, None),
+            cache=(None, None)
+        )
 
     def dynamic_defaults(self, gama: 'Gama'):
-        self.metric = gama._metrics[0]
-        self.cache = gama._cache_dir
+        self._overwrite_hyperparameter_default('metric', gama._metrics[0])
+        self._overwrite_hyperparameter_default('cache', gama._cache_dir)
 
     def post_process(self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]) -> 'model':
-        return build_fit_ensemble(x, y, self.ensemble_size, timeout, self.metric, self.cache)
+        return build_fit_ensemble(x, y, timeout,
+                                  self.hyperparameters['ensemble_size'],
+                                  self.hyperparameters['metric'],
+                                  self.hyperparameters['cache'])
 
 
 class Ensemble(object):
@@ -344,7 +349,7 @@ class EnsembleRegressor(Ensemble):
         return self._get_weighted_mean_predictions(X)
 
 
-def build_fit_ensemble(x, y, ensemble_size: int, timeout: float,
+def build_fit_ensemble(x, y, timeout: float, ensemble_size: int,
                        metric: Metric, cache: str, encoder: Optional[object]=None) -> Ensemble:
     """ Construct an Ensemble of models from cache, optimizing for metric and fit to (x, y). """
     start_build = time.time()

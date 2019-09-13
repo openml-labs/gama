@@ -33,7 +33,7 @@ from gama.genetic_programming.operations import create_random_expression
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
-from gama.postprocessing import BestFitPostProcessing, EnsemblePostProcessing, NoPostProcessing, BasePostProcessing
+from gama.postprocessing import BestFitPostProcessing, BasePostProcessing
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.utilities.metrics import Metric
 
@@ -118,11 +118,14 @@ class Gama(ABC):
         if keep_analysis_log is not None:
             register_file_log(keep_analysis_log)
 
+        if keep_analysis_log is not None and not os.path.isabs(keep_analysis_log):
+            keep_analysis_log = os.path.abspath(keep_analysis_log)
+
         arguments = ','.join(['{}={}'.format(k, v) for (k, v) in locals().items()
                               if k not in ['self', 'config', 'gamalog', 'file_handler', 'stdout_streamhandler']])
         log.info('Using GAMA version {}.'.format(__version__))
         log.info('{}({})'.format(self.__class__.__name__, arguments))
-        log_event(log, TOKENS.INIT, [arguments])
+        log_event(log, TOKENS.INIT, arguments)
 
         if max_total_time is None or max_total_time <= 0:
             raise ValueError(f"max_total_time should be integer greater than zero but is {max_total_time}.")

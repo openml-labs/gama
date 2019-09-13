@@ -12,7 +12,7 @@ def test_gamareport_from_log():
     log_file = 'tests/data/random_search.log'
     report = GamaReport(logfile=log_file, name=None)
     assert report.name == log_file
-    assert 'RandomSearch' == report.search_method
+    assert 'RandomSearch()' == report.search_method
     assert 3 == len(report.phases)
     assert (['preprocessing', 'search', 'postprocess']
             == list(map(lambda t: t[0], report.phases)))
@@ -26,10 +26,24 @@ def test_gamareport_asha_from_log():
     log_file = 'tests/data/asha.log'
     report = GamaReport(logfile=log_file, name=None)
     assert report.name == log_file
-    assert 'AsynchronousSuccessiveHalving' == report.search_method
+    assert 'AsynchronousSuccessiveHalving()' == report.search_method
     assert 3 == len(report.phases)
     assert (['preprocessing', 'search', 'postprocess']
             == list(map(lambda t: t[0], report.phases)))
     assert (['default', 'AsynchronousSuccessiveHalving', 'NoPostProcessing']
             == list(map(lambda t: t[1], report.phases)))
     assert report.method_data is not None, "ASHA has method data associated."
+
+
+def test_gamareport_asyncEA_from_log():
+    """ Test that a GamaReport can be constructed from a log. """
+    log_file = 'tests/data/amazon_asyncEA.log'
+    report = GamaReport(logfile=log_file, name=None)
+    assert report.name == log_file
+    assert 'AsyncEA()' == report.search_method
+    assert 3 == len(report.phases)
+    assert (['preprocessing', 'search', 'postprocess']
+            == list(map(lambda t: t[0], report.phases)))
+    assert (['default', 'AsyncEA', 'NoPostProcessing']
+            == list(map(lambda t: t[1], report.phases)))
+    assert report.method_data is None, "AsyncEA has no method data associated."
