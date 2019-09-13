@@ -46,6 +46,8 @@ class AsyncEvaluator:
     """ ContextManager which manages subprocesses on which arbitrary* functions can be evaluated.
 
     * The function and all its arguments must be picklable.
+
+    You can not use the same AsyncEvaluator in two different contexts. Doing so raises a `RuntimeError`.
     """
     n_jobs: int = multiprocessing.cpu_count()
 
@@ -57,6 +59,7 @@ class AsyncEvaluator:
             Maximum number of subprocesses to run for parallel evaluations.
             If None, use `AsyncEvaluator.n_jobs` which defaults to multiprocessing.cpu_count().
         """
+        self._has_entered = False
         self.futures = {}
         self._processes = []
         self._n_jobs = n_workers if n_workers is not None else AsyncEvaluator.n_jobs
@@ -66,6 +69,13 @@ class AsyncEvaluator:
         self._output_queue = self._queue_manager.Queue()
 
     def __enter__(self):
+        if self._has_entered:
+            raise RuntimeError("You can not use the same AsyncEvaluator in two different contexts.")
+        self._has_entered = True
+
+        self._input_queue = self._queue_manager.Queue()
+        self._output_queue = self._queue_manager.Queue()
+
         log.debug(f"Starting {self._n_jobs} subprocesses.")
         for _ in range(self._n_jobs):
             subprocess = multiprocessing.Process(
@@ -75,6 +85,7 @@ class AsyncEvaluator:
             )
             self._processes.append(subprocess)
             subprocess.start()
+
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -83,13 +94,6 @@ class AsyncEvaluator:
         # https://docs.python.org/3/library/multiprocessing.html#all-start-methods
         for subprocess in self._processes:
             subprocess.terminate()
-
-        self._processes = []
-        self.futures = {}
-
-        # No direct `clear` method? AutoProxy[Queue] has `queue` attribute.
-        clear_queue(self._input_queue)
-        clear_queue(self._output_queue)
         return False
 
     def submit(self, fn: Callable, *args, **kwargs) -> AsyncFuture:
@@ -174,16 +178,3 @@ def evaluator_daemon(
         shutdown_message = 'Helper process stopping due to a broken pipe or EOF.'
     if print_exit_message:
         print(shutdown_message)
-
-
-def clear_queue(queue_: queue.Queue) -> int:
-    """ Dequeue items until the queue is empty. Returns number of items removed from the queue. """
-    for i in itertools.count():
-        try:
-            queue_.get(block=False)
-        except queue.Empty:
-            break
-        except EOFError:
-            log.warning('EOFError occurred while clearing queue.', exc_info=True)
-            break
-    return i
