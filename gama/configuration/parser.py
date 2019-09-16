@@ -1,4 +1,6 @@
 from collections import defaultdict
+from typing import Dict, Any
+
 import sklearn
 
 from gama.genetic_programming.components import Primitive, Terminal, DATA_TERMINAL
@@ -10,6 +12,7 @@ def pset_from_config(configuration):
     Given a configuration dictionary specifying operators (e.g. sklearn
     estimators), their hyperparameters and values for each hyperparameter,
     create a gp.PrimitiveSetTyped that contains:
+
         - For each operator a primitive
         - For each possible hyperparameter-value combination a unique terminal
 
@@ -70,3 +73,31 @@ def pset_from_config(configuration):
                             'Keys in the configuration should be str or class.')
 
     return pset, parameter_checks
+
+
+def merge_configurations(c1, c2):
+    """ Takes two configurations and merges them together. """
+    # Should refactor out 6 indentation levels
+    merged: Dict[Any, Any] = defaultdict(lambda: None, c1)
+    for algorithm, hyperparameters2 in c2.items():
+        if algorithm not in merged:
+            merged[algorithm] = hyperparameters2
+        else:
+            hyperparameters1 = merged[algorithm]
+            if isinstance(hyperparameters1, list) and isinstance(hyperparameters2, list):
+                #  they hyperparameters shared across algorithms
+                merged[algorithm] = list(set(hyperparameters1 + hyperparameters2))
+            else:
+                for hyperparameter, values in hyperparameters2.items():
+                    if hyperparameter not in hyperparameters1:
+                        hyperparameters1[hyperparameter] = values
+                    else:
+                        values1 = hyperparameters1[hyperparameter]
+                        if isinstance(values1, dict) and isinstance(values, dict):
+                            hyperparameters1[hyperparameter] = {**values1, **values}
+                        elif isinstance(values1, type(values)):
+                            hyperparameters1[hyperparameter] = list(set(list(values1) + list(values)))
+                        else:
+                            raise TypeError(f'Could not merge values of {algorithm}.{hyperparameter}:'
+                                            f'{hyperparameters1} vs. {hyperparameters2}')
+    return merged

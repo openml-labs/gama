@@ -2,7 +2,7 @@ import pytest
 from gama import GamaClassifier
 from gama.genetic_programming.components import Individual
 from gama.configuration.testconfiguration import clf_config
-
+from gama.genetic_programming.compilers.scikitlearn import compile_individual
 
 @pytest.fixture
 def pset():
@@ -13,17 +13,20 @@ def pset():
 
 @pytest.fixture
 def GaussianNB(pset):
-    return Individual.from_string("GaussianNB(data)", pset, None)
+    return Individual.from_string("GaussianNB(data)",
+                                  pset, compile_individual)
 
 
 @pytest.fixture
 def MultinomialNBRobustScaler(pset):
-    return Individual.from_string("MultinomialNB(RobustScaler(data), alpha=1.0, fit_prior=True)", pset, None)
+    return Individual.from_string("MultinomialNB(RobustScaler(data), alpha=1.0, fit_prior=True)",
+                                  pset, compile_individual)
 
 
 @pytest.fixture
 def BernoulliNBStandardScaler(pset):
-    return Individual.from_string("BernoulliNB(StandardScaler(data), alpha=0.1, fit_prior=True)", pset, None)
+    return Individual.from_string("BernoulliNB(StandardScaler(data), alpha=0.1, fit_prior=True)",
+                                  pset, compile_individual)
 
 
 @pytest.fixture

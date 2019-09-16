@@ -1,11 +1,19 @@
+from typing import Tuple, List, Optional, Callable, Any
+
+
 class ParetoFront(object):
     """  A Pareto front is a list of tuples in which no one tuple is dominated by another. """
 
-    def __init__(self, start_list=None, get_values_fn=None):
+    def __init__(self,
+                 start_list: Optional[List[Tuple[Any, ...]]] = None,
+                 get_values_fn: Optional[Callable[[Any], Tuple[Any, ...]]] = None):
         """
-        :param start_list: list or None (default: None). List of items of which to calculate the Pareto front.
-        :param get_values_fn: (default: None)
-            function that takes an item and returns a tuple of values such that each should be maximized.
+        Parameters
+        ----------
+        start_list: list, optional (default=None).
+            List of items of which to calculate the Pareto front.
+        get_values_fn: Callable, optional (default=None)
+            Function that takes an item and returns a tuple of values such that each should be maximized.
             If left None, it is assumed that items are already tuples of which each value should be maximized.
         """
         self._get_values_fn = get_values_fn
@@ -23,12 +31,20 @@ class ParetoFront(object):
         else:
             return item
 
-    def update(self, new_item):
+    def update(self, new_item: Any):
         """ Updates the Pareto front with new_item if it dominates any current item in the Pareto front.
 
-        :param new_item: Item to be evaluated for submission to the Pareto front. Arity must match that of items
-          already in the Pareto front.
-        :return: True if the Pareto front is updated, False otherwise.
+        Parameters
+        ----------
+        new_item: Any
+            Item to be evaluated for submission to the Pareto front.
+            Either a Tuple that matches the arity of items already in the Pareto front,
+            or an object from which such a Tuple can be extracted with the `get_values_fn` provided on `__init__`.
+
+        Returns
+        -------
+        bool
+            True if the Pareto front is updated, False otherwise.
         """
         if not self._front:
             self._front.append(new_item)
@@ -61,6 +77,7 @@ class ParetoFront(object):
         return True
 
     def clear(self):
+        """ Removes all items from the Pareto front."""
         self._front = []
 
     def __iter__(self):

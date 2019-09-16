@@ -1,7 +1,8 @@
 from contextlib import contextmanager
-from typing import Iterator, Optional, NamedTuple
+from typing import Iterator, Optional, NamedTuple, List, Any
 import logging
 
+from gama.logging.machine_logging import log_event, TOKENS
 from .stopwatch import Stopwatch
 
 log = logging.getLogger(__name__)
@@ -26,7 +27,15 @@ class Activity(NamedTuple):
 class TimeKeeper:
     """ Simple object that helps keep track of time over multiple activities. """
 
-    def __init__(self, total_time: int=0):
+    def __init__(self, total_time: Optional[int] = None):
+        """
+        Parameters
+        ----------
+        total_time: int, optional (default=None)
+            The total time available across activities.
+            If set to None, the `total_time_remaining` property will be unavailable.
+
+        """
         self.total_time = total_time
         self.current_activity = None
         self.activities = []
@@ -34,7 +43,7 @@ class TimeKeeper:
     @property
     def total_time_remaining(self) -> float:
         """ Return time remaining in seconds. """
-        if self.total_time > 0:
+        if self.total_time is not None:
             return self.total_time - sum(map(lambda a: a.stopwatch.elapsed_time, self.activities))
         raise RuntimeError("Time Remaining only available if `total_time` was set on init.")
 
@@ -46,13 +55,47 @@ class TimeKeeper:
         else:
             raise RuntimeError("No activity in progress.")
 
+    @property
+    def current_activity_time_left(self) -> float:
+        """ Return time left in seconds of current activity. Raise RuntimeError if no current activity. """
+        if self.current_activity is not None and self.current_activity.time_limit is not None:
+            return self.current_activity.time_limit - self.current_activity.stopwatch.elapsed_time
+        elif self.current_activity is None:
+            raise RuntimeError("No activity in progress.")
+        else:
+            raise RuntimeError("No time limit set for current activity.")
+
     @contextmanager
-    def start_activity(self, activity: str, time_limit: Optional[int] = None) -> Iterator[Stopwatch]:
+    def start_activity(self,
+                       activity: str,
+                       time_limit: Optional[int] = None,
+                       activity_meta: Optional[List[Any]] = None) -> Iterator[Stopwatch]:
         """ Mark the start of a new activity and automatically time its duration.
-            TimeManager does not currently support nested activities. """
+            TimeManager does not currently support nested activities.
+
+        Parameters
+        ----------
+        activity: str
+            Name of the activity for reference in current activity or later look-ups.
+        time_limit: int, optional (default=None)
+            Intended time limit of the activity in seconds. Used to calculate time remaining.
+        activity_meta: List[Any], optional (default=None)
+            Any additional information about the activity to be logged.
+
+        Returns
+        -------
+        ContextManager
+            A context manager which when exited notes the end of the started activity.
+        """
+        if activity_meta is None:
+            activity_meta = []
+        log_event(log, TOKENS.PHASE_START, activity, *activity_meta)
+
         with Stopwatch() as sw:
             self.current_activity = Activity(activity, sw, time_limit)
             self.activities.append(self.current_activity)
             yield sw
         self.current_activity = None
+
+        log_event(log, TOKENS.PHASE_END, activity, *activity_meta)
         log.info("{} took {:.4f}s.".format(activity, sw.elapsed_time))

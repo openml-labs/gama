@@ -1,18 +1,20 @@
+from datetime import datetime
 import logging
 import os
 import pickle
 import time
+from typing import Iterable
 import uuid
-from datetime import datetime
 
 import stopit
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import cross_val_predict, ShuffleSplit
 from sklearn.pipeline import Pipeline
 
-from gama.genetic_programming.algorithms.metrics import Metric
+from gama.utilities.metrics import Metric
 from gama.genetic_programming.components import Individual, PrimitiveNode, Fitness
-from gama.genetic_programming.operator_set import OperatorSet
-from gama.utilities.logging_utilities import MultiprocessingLogger, log_parseable_event, TOKENS
+from gama.logging.utility_functions import MultiprocessingLogger
+from gama.logging.machine_logging import TOKENS, log_event
 
 log = logging.getLogger(__name__)
 
@@ -22,25 +24,24 @@ def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
     return primitive_node._primitive.identifier(**hyperparameters)
 
 
-def compile_individual(individual: Individual, parameter_checks=None, preprocessing_steps=None) -> Pipeline:
+def compile_individual(individual: Individual, parameter_checks=None, preprocessing_steps: Iterable[object]=None) -> Pipeline:
     steps = [(str(i), primitive_node_to_sklearn(primitive)) for i, primitive in enumerate(individual.primitives)]
     if preprocessing_steps:
         steps = steps + [(str(i), step) for (i, step) in enumerate(reversed(preprocessing_steps), start=len(steps))]
     return Pipeline(list(reversed(steps)))
 
 
-def cross_val_predict_score(estimator, X, y_train, y_score, metrics=None, **kwargs):
+def cross_val_predict_score(estimator, X, y_train, metrics=None, **kwargs):
     """ Return both the predictions and score of the estimator trained on the data given the cv strategy.
 
     :param y_train: target in appropriate format for training (typically (N,))
-    :param y_score: target in appropriate format for scoring (typically (N,K) for metrics based on class probabilities,
-        (N,) otherwise).
     """
     if not all(isinstance(metric, Metric) for metric in metrics):
         raise ValueError('All `metrics` must be an instance of `metrics.Metric`, is {}.'
                          .format([type(metric) for metric in metrics]))
 
-    method = 'predict_proba' if any(metric.requires_probabilities for metric in metrics) else 'predict'
+    predictions_are_probabilities = any(metric.requires_probabilities for metric in metrics)
+    method = 'predict_proba' if predictions_are_probabilities else 'predict'
     predictions = cross_val_predict(estimator, X, y_train, method=method, **kwargs)
 
     if predictions.ndim == 2 and predictions.shape[1] == 1:
@@ -48,13 +49,16 @@ def cross_val_predict_score(estimator, X, y_train, y_score, metrics=None, **kwar
 
     scores = []
     for metric in metrics:
-        if metric.requires_probabilities or predictions.ndim == 1:
-            # either the metric requires probabilities, which means `predictions` is of shape (N,K), or no metric
-            # requires probabilities, which means that `predictions` is of shape (N,).
-            scores.append(metric.maximizable_score(y_score, predictions))
-        else:
-            # case of a class-label metric while `predictions` are class probabilities
+        if metric.requires_probabilities:
+            # `predictions` are of shape (N,K) and the ground truth should be formatted accordingly
+            y_ohe = OneHotEncoder().fit_transform(y_train.values.reshape(-1, 1)).toarray()
+            scores.append(metric.maximizable_score(y_ohe, predictions))
+        elif predictions_are_probabilities:
+            # Metric requires no probabilities, but probabilities were predicted.
             scores.append(metric.maximizable_score(y_train, predictions.argmax(axis=1)))
+        else:
+            # No metric requires probabilities, so `predictions` is an array of labels.
+            scores.append(metric.maximizable_score(y_train, predictions))
 
     return predictions, scores
 
@@ -75,7 +79,7 @@ def evaluate_individual(individual: Individual, evaluate_pipeline_length, *args,
     return individual
 
 
-def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5, cache_dir=None, logger=None, subsample=None):
+def evaluate_pipeline(pl, X, y_train, timeout, deadline, metrics='accuracy', cv=5, cache_dir=None, logger=None, subsample=None):
     """ Evaluates a pipeline used k-Fold CV. """
     if not logger:
         logger = log
@@ -87,13 +91,16 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5
     scores = tuple([float('-inf')] * len(metrics))
     start_datetime = datetime.now()
     start = time.process_time()
+
+    time_to_deadline = deadline - time.time()
+    timeout = min(timeout, time_to_deadline)
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
             if draw_subsample:
                 idx, _ = next(ShuffleSplit(n_splits=1, train_size=subsample, random_state=0).split(X))
-                X, y_train, y_score = X.iloc[idx, :], y_train[idx], y_score[idx]
+                X, y_train = X.iloc[idx, :], y_train[idx]
 
-            prediction, scores = cross_val_predict_score(pl, X, y_train, y_score, cv=cv, metrics=metrics)
+            prediction, scores = cross_val_predict_score(pl, X, y_train, cv=cv, metrics=metrics)
         except stopit.TimeoutException:
             # score not actually unused, because exception gets caught by the context manager.
             raise
@@ -106,7 +113,7 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5
                 logger.debug('{} encountered while evaluating pipeline.'.format(type(e)), exc_info=True)
 
             single_line_pipeline = str(pl).replace('\n', '')
-            log_parseable_event(logger, TOKENS.EVALUATION_ERROR, start_datetime, single_line_pipeline, type(e), e)
+            log_event(logger, TOKENS.EVALUATION_ERROR, start_datetime, single_line_pipeline, type(e), e)
 
     if cache_dir and -float("inf") not in scores and not draw_subsample:
         pl_filename = str(uuid.uuid4())
@@ -130,7 +137,7 @@ def evaluate_pipeline(pl, X, y_train, y_score, timeout, metrics='accuracy', cv=5
         # For now we treat an eval timeout the same way as e.g. NaN exceptions and use the default score.
         logger.info('Timeout encountered while evaluating pipeline.')
         single_line_pipeline = ''.join(str(pl).split('\n'))
-        log_parseable_event(logger, TOKENS.EVALUATION_TIMEOUT, start_datetime, single_line_pipeline)
+        log_event(logger, TOKENS.EVALUATION_TIMEOUT, start_datetime, single_line_pipeline)
         logger.debug("Timeout after {}s: {}".format(timeout, pl))
 
     fitness_values = (scores, start_datetime, wallclock_time, process_time)
