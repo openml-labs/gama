@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Related Packages &mdash; gama 0.1 documentation</title>
+  <title>Related Packages &mdash; gama 2019.08.0 documentation</title>
   
 
   
@@ -17,32 +17,34 @@
   
 
   
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -56,7 +58,7 @@
             
             
               <div class="version">
-                0.1
+                2019.08.0
               </div>
             
           
@@ -82,9 +84,10 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical_guide/index.html">Technical Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
 </ul>
 
@@ -152,67 +155,36 @@
             
   <div class="section" id="related-packages">
 <h1>Related Packages<a class="headerlink" href="#related-packages" title="Permalink to this headline">¶</a></h1>
+<p>There are many different AutoML packages in Python and other languages.
+<a class="reference external" href="https://openml.github.io/automlbenchmark/automl_overview.html">This page</a> of the AutoML Benchmark project has an overview of commonly used open source AutoML frameworks.
+Another nice overview of papers and projects is gathered at <a class="reference external" href="https://github.com/hibayesian/awesome-automl-papers#projects">this Github repo</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Any comparisons in this section are intended to highlight the main differences, but are by no means exhaustive.
+If anything is missing that is important to add, please open an issue.</p>
+</div>
 <div class="section" id="tpot">
 <h2>TPOT<a class="headerlink" href="#tpot" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://epistasislab.github.io/tpot/">TPOT</a> is the package most closely related to GAMA.
 Like GAMA, it is an AutoML package that is based on genetic programming in Python.
 Below you will find a list of differences and similarities of the packages.</p>
-<p><em>Disclaimer: the list is intended to give the main differences, but is by no means exhaustive. If anything is missing that
-is important to add, please open an issue.</em></p>
-<div class="section" id="in-gama-but-not-in-tpot">
-<h3>In GAMA but not in TPOT:<a class="headerlink" href="#in-gama-but-not-in-tpot" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt>Asynchronous evolution</dt>
-<dd>In theory, asynchronous evolution should be able to utilize the computing resources better.
+<p>The evolution algorithm differs.
+TPOT uses a synchronous form of evolution, whereas GAMA uses asynchronous evolution (by default).
+The advantage of asynchronous evolution is that in theory it is able to utilize computing resources better.
 This is due to generation-based evolution waiting for the last individual in the population to be evaluated in each generation,
-whereas asynchronous evolution does not have any point where all evaluations need to be finished at the same time.
-More on the differences in the user guide.</dd>
-<dt>ARFF support</dt>
-<dd>The Attribute-Relation File Format (<a class="reference external" href="https://www.cs.waikato.ac.nz/ml/weka/arff.html">ARFF</a>)
-is used to store and describe data. It can be used, for instance, to make sure certain data preprocessing steps,
-such as category encoding, are applied only on the columns it was intended for instead of using heuristics.</dd>
-<dt>Automatic Ensembling</dt>
-<dd>During the optimization process, many pipelines get evaluated. Instead of using only
-the single best in the final model to make predictions, GAMA can create an ensemble out of a subset of them.
-This can lead to better generalization performance.</dd>
-</dl>
-</div>
-<div class="section" id="in-tpot-but-not-in-gama">
-<h3>In TPOT but not in GAMA:<a class="headerlink" href="#in-tpot-but-not-in-gama" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt>Code export</dt>
-<dd>TPOT is able to export Python code to recreate the best found pipeline. The Python code can be used
-without any further dependency on TPOT.</dd>
-<dt>Command Line Interface</dt>
-<dd>TPOT can be used directly from the command line (in addition to the Python API).</dd>
-<dt>DASK integration</dt>
-<dd>When DASK is installed, TPOT’s pipelines can be evaluated on any DASK cluster. Moreover, it can
-use other optimizations such as caching and computing graphs to avoid (some of the) double work.</dd>
-</dl>
-<p>An empirical study of performance will follow.</p>
-</div>
+whereas asynchronous evolution does not have any point where all evaluations need to be finished at the same time.</p>
+<p>TPOT sports some great user-friendly features such as a command-line interface (in addition to its Python API),
+code export (creates a file constructing the machine learning pipeline without a TPOT dependency)
+and <a class="reference external" href="https://dask.org/">DASK</a> integration (which allows the use of a Dask cluster for pipeline evaluations and further optimizations).</p>
+<p>GAMA focuses more on extensibility and research friendliness,
+with the ability to configure your AutoML pipeline (for instance using a different search strategy),
+an ensembling post-processing step, visualization of the optimization process and support for <a class="reference external" href="https://www.cs.waikato.ac.nz/ml/weka/arff.html">ARFF</a> files.</p>
 </div>
 <div class="section" id="auto-sklearn">
 <h2>auto-sklearn<a class="headerlink" href="#auto-sklearn" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://automl.github.io/auto-sklearn/stable/">auto-sklearn</a> is another AutoML package in Python.
 It uses Bayesian optimization to search for good machine learning pipelines and also features automatic ensemble construction.
 Auto-sklearn won ChaLearn AutoML challenge 1 and 2.</p>
-</div>
-<div class="section" id="other-packages">
-<h2>Other packages<a class="headerlink" href="#other-packages" title="Permalink to this headline">¶</a></h2>
-<p>There a lot of other hyperparameter optimization and AutoML frameworks out there.
-A nice overview of papers and projects is gathered at <a class="reference external" href="https://github.com/hibayesian/awesome-automl-papers#projects">this Github repo</a>.</p>
-<p>The back-end of GAMA features a genetic programming module.
-More familiar developers might see that it very closely follows the design of <a class="reference external" href="https://github.com/DEAP/deap">DEAP</a>, a package that is also used by TPOT.
-This is not by coincidence, but because up until recently GAMA used DEAP instead.
-There two main reasons for reimplementation were:</p>
-<blockquote>
-<div><ul class="simple">
-<li>Legibility. It was sometimes hard to tell exactly what was going on with mutation operators. This stems from the fact that DEAP expects many primitives with different return types. This makes terminals easily replacable by new trees. For GAMA, all of the hyperparameters were defined by their own types which can not be defined by subtrees.</li>
-<li>Serializability of individuals. DEAP generates classes to define the terminals, and uses Python class inheritance to determine suitability of input/output types. Serializing of generated classes can become an issue with multi-processing (e.g. having to first compile them to scikit-learn pipelines before sending them to a different process).</li>
-</ul>
-</div></blockquote>
-<p>In the future, the genetic programming module of GAMA might (and probably will) deviate more from DEAP’s architecture as new insights are gained.</p>
 </div>
 </div>
 
@@ -227,7 +199,7 @@ There two main reasons for reimplementation were:</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Pieter Gijsbers.
+        &copy; Copyright 2018-2019, Pieter Gijsbers
 
     </p>
   </div>
@@ -244,32 +216,16 @@ There two main reasons for reimplementation were:</p>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.1',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-
-  
-
-  <script type="text/javascript" src="../_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

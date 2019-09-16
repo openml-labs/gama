@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>GAMA Search Space Configuration &mdash; gama 0.1 documentation</title>
+  <title>GAMA Search Space Configuration &mdash; gama 2019.08.0 documentation</title>
   
 
   
@@ -17,32 +17,34 @@
   
 
   
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -56,7 +58,7 @@
             
             
               <div class="version">
-                0.1
+                2019.08.0
               </div>
             
           
@@ -84,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="index.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
 </ul>
 
@@ -159,22 +161,21 @@ The defaults are found in
 <a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/configuration/classification.py">classification.py</a> and
 <a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/configuration/regression.py">regression.py</a>
 for the GamaClassifier and GamaRegressor, respectively.</p>
-<dl class="docutils">
-<dt>A sample of algorithms that GAMA uses by default:</dt>
-<dd><ul class="first last simple">
-<li><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html">logistic regression</a></li>
-<li><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html">random forest classifier</a></li>
-<li><a class="reference external" href="https://scikit-learn.org/stable/modules/naive_bayes.html">naive bayes</a></li>
-<li><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC">support vector machines</a></li>
-<li><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html">PCA</a></li>
-<li><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.Normalizer.html">normalization</a></li>
-<li><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html">ICA</a></li>
+<dl class="simple">
+<dt>A sample of algorithms that GAMA uses by default:</dt><dd><ul class="simple">
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html">logistic regression</a></p></li>
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html">random forest classifier</a></p></li>
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/naive_bayes.html">naive bayes</a></p></li>
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC">support vector machines</a></p></li>
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html">PCA</a></p></li>
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.Normalizer.html">normalization</a></p></li>
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html">ICA</a></p></li>
 </ul>
 </dd>
 </dl>
 <p>The search space configuration is a python dictionary.
 For reference, a minimal example search space configuration can look like this:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.naive_bayes</span> <span class="k">import</span> <span class="n">BernoulliNB</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.naive_bayes</span> <span class="k">import</span> <span class="n">BernoulliNB</span>
 <span class="n">search_space</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">,</span> <span class="mf">1e-1</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">],</span>
     <span class="n">BernoulliNB</span><span class="p">:</span> <span class="p">{</span>
@@ -186,23 +187,25 @@ For reference, a minimal example search space configuration can look like this:<
 </div>
 <p>At the top level, allowed key types are:</p>
 <ul class="simple">
-<li><cite>string</cite>, with a list as value. It specifies the name of a hyperparameter with its possible values.</li>
+<li><p><cite>string</cite>, with a list as value. It specifies the name of a hyperparameter with its possible values.</p></li>
 </ul>
 <blockquote>
-<div>By defining a hyperparameter at the top level, you can reference it as hyperparameter for any specific algorithm.
+<div><p>By defining a hyperparameter at the top level, you can reference it as hyperparameter for any specific algorithm.
 To do so, identify it with the same name and set its possible values to an empty list (see <cite>alpha</cite> in the example).
 The benefit of doing is that multiple algorithms can share a hyperparameter space that is defined only once.
 Additionally, in evolution this makes it possible to know which hyperparameter values can be crossed over between
-different algorithms.</div></blockquote>
+different algorithms.</p>
+</div></blockquote>
 <ul class="simple">
-<li><cite>class</cite>, with a dictionary as value. The key specifies the algorithm, calling it should instantiate the algorithm.</li>
+<li><p><cite>class</cite>, with a dictionary as value. The key specifies the algorithm, calling it should instantiate the algorithm.</p></li>
 </ul>
 <blockquote>
-<div>The dictionary specifies the hyperparameters by name and their possible values as list.
+<div><p>The dictionary specifies the hyperparameters by name and their possible values as list.
 All hyperparameters specified should be taken as arguments for the algorithm’s initialization.
 A hyperparameter specified at the top level of the dictionary can share a name with a hyperparameter of the algorithm.
 To use the values provided by the shared hyperparameter, set the possible values to an empty list.
-If a list of values is provided instead, it will not use the shared hyperparameter values.</div></blockquote>
+If a list of values is provided instead, it will not use the shared hyperparameter values.</p>
+</div></blockquote>
 </div>
 
 
@@ -216,7 +219,7 @@ If a list of values is provided instead, it will not use the shared hyperparamet
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Pieter Gijsbers.
+        &copy; Copyright 2018-2019, Pieter Gijsbers
 
     </p>
   </div>
@@ -233,32 +236,16 @@ If a list of values is provided instead, it will not use the shared hyperparamet
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.1',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-
-  
-
-  <script type="text/javascript" src="../_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

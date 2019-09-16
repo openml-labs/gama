@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>gama.utilities package &mdash; gama 0.1 documentation</title>
+  <title>gama.utilities package &mdash; gama 2019.08.0 documentation</title>
   
 
   
@@ -17,32 +17,34 @@
   
 
   
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -56,7 +58,7 @@
             
             
               <div class="version">
-                0.1
+                2019.08.0
               </div>
             
           
@@ -84,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
 </ul>
 
@@ -158,7 +160,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="gama.utilities.generic.html">gama.utilities.generic package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="gama.utilities.generic.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gama.utilities.generic.html#module-gama.utilities.generic.function_dispatcher">gama.utilities.generic.function_dispatcher module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gama.utilities.generic.html#gama-utilities-generic-function-dispatcher-module">gama.utilities.generic.function_dispatcher module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gama.utilities.generic.html#module-gama.utilities.generic.paretofront">gama.utilities.generic.paretofront module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gama.utilities.generic.html#module-gama.utilities.generic.stopwatch">gama.utilities.generic.stopwatch module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gama.utilities.generic.html#module-gama.utilities.generic">Module contents</a></li>
@@ -170,153 +172,8 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-gama.utilities.auto_ensemble">
-<span id="gama-utilities-auto-ensemble-module"></span><h2>gama.utilities.auto_ensemble module<a class="headerlink" href="#module-gama.utilities.auto_ensemble" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="gama.utilities.auto_ensemble.Ensemble">
-<em class="property">class </em><code class="descclassname">gama.utilities.auto_ensemble.</code><code class="descname">Ensemble</code><span class="sig-paren">(</span><em>metric</em>, <em>y_true</em>, <em>model_library=None</em>, <em>model_library_directory=None</em>, <em>shrink_on_pickle=True</em>, <em>n_jobs=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/auto_ensemble.html#Ensemble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.auto_ensemble.Ensemble" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
-<dl class="method">
-<dt id="gama.utilities.auto_ensemble.Ensemble.build_initial_ensemble">
-<code class="descname">build_initial_ensemble</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/auto_ensemble.html#Ensemble.build_initial_ensemble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.auto_ensemble.Ensemble.build_initial_ensemble" title="Permalink to this definition">¶</a></dt>
-<dd><p>Builds an ensemble of n models, based solely on the performance of individual models, not their combined performance.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> – Number of models to include.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="gama.utilities.auto_ensemble.Ensemble.expand_ensemble">
-<code class="descname">expand_ensemble</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/auto_ensemble.html#Ensemble.expand_ensemble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.auto_ensemble.Ensemble.expand_ensemble" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds new models to the ensemble based on earlier given data.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> – Number of models to add to current ensemble.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="gama.utilities.auto_ensemble.Ensemble.fit">
-<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>timeout=1000000.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/auto_ensemble.html#Ensemble.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.auto_ensemble.Ensemble.fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructs an Ensemble out of the library of models.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>X</strong> – Data to fit the final selection of models on.</li>
-<li><strong>y</strong> – Targets corresponding to features X.</li>
-<li><strong>timeout</strong> – Maximum amount of time in seconds that is allowed in total for fitting pipelines.
-If this time is exceeded, only pipelines fit until that point are taken into account when making
-predictions. Starting the parallelization takes roughly 4 seconds by itself.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">self.</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="gama.utilities.auto_ensemble.Ensemble.model_library">
-<code class="descname">model_library</code><a class="headerlink" href="#gama.utilities.auto_ensemble.Ensemble.model_library" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="gama.utilities.auto_ensemble.EnsembleClassifier">
-<em class="property">class </em><code class="descclassname">gama.utilities.auto_ensemble.</code><code class="descname">EnsembleClassifier</code><span class="sig-paren">(</span><em>metric</em>, <em>y_true</em>, <em>label_encoder=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/auto_ensemble.html#EnsembleClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.auto_ensemble.EnsembleClassifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#gama.utilities.auto_ensemble.Ensemble" title="gama.utilities.auto_ensemble.Ensemble"><code class="xref py py-class docutils literal"><span class="pre">gama.utilities.auto_ensemble.Ensemble</span></code></a></p>
-<dl class="method">
-<dt id="gama.utilities.auto_ensemble.EnsembleClassifier.predict">
-<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/auto_ensemble.html#EnsembleClassifier.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.auto_ensemble.EnsembleClassifier.predict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="gama.utilities.auto_ensemble.EnsembleClassifier.predict_proba">
-<code class="descname">predict_proba</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/auto_ensemble.html#EnsembleClassifier.predict_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.auto_ensemble.EnsembleClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="gama.utilities.auto_ensemble.EnsembleRegressor">
-<em class="property">class </em><code class="descclassname">gama.utilities.auto_ensemble.</code><code class="descname">EnsembleRegressor</code><span class="sig-paren">(</span><em>metric</em>, <em>y_true</em>, <em>model_library=None</em>, <em>model_library_directory=None</em>, <em>shrink_on_pickle=True</em>, <em>n_jobs=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/auto_ensemble.html#EnsembleRegressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.auto_ensemble.EnsembleRegressor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#gama.utilities.auto_ensemble.Ensemble" title="gama.utilities.auto_ensemble.Ensemble"><code class="xref py py-class docutils literal"><span class="pre">gama.utilities.auto_ensemble.Ensemble</span></code></a></p>
-<dl class="method">
-<dt id="gama.utilities.auto_ensemble.EnsembleRegressor.predict">
-<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/auto_ensemble.html#EnsembleRegressor.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.auto_ensemble.EnsembleRegressor.predict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="gama.utilities.auto_ensemble.Model">
-<em class="property">class </em><code class="descclassname">gama.utilities.auto_ensemble.</code><code class="descname">Model</code><span class="sig-paren">(</span><em>name</em>, <em>pipeline</em>, <em>predictions</em>, <em>validation_score</em><span class="sig-paren">)</span><a class="headerlink" href="#gama.utilities.auto_ensemble.Model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></a></p>
-<dl class="attribute">
-<dt id="gama.utilities.auto_ensemble.Model.name">
-<code class="descname">name</code><a class="headerlink" href="#gama.utilities.auto_ensemble.Model.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 0</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="gama.utilities.auto_ensemble.Model.pipeline">
-<code class="descname">pipeline</code><a class="headerlink" href="#gama.utilities.auto_ensemble.Model.pipeline" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 1</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="gama.utilities.auto_ensemble.Model.predictions">
-<code class="descname">predictions</code><a class="headerlink" href="#gama.utilities.auto_ensemble.Model.predictions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 2</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="gama.utilities.auto_ensemble.Model.validation_score">
-<code class="descname">validation_score</code><a class="headerlink" href="#gama.utilities.auto_ensemble.Model.validation_score" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 3</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="gama.utilities.auto_ensemble.fit_and_weight">
-<code class="descclassname">gama.utilities.auto_ensemble.</code><code class="descname">fit_and_weight</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/auto_ensemble.html#fit_and_weight"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.auto_ensemble.fit_and_weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fit the pipeline given the data. Update weight to 0 if fitting fails.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">pipeline, weight - The same pipeline that was provided as input.
-Weight is either the input value of <cite>weight</cite>, if fitting succeeded, or 0 if <em>any</em>
-exception occurred during fitting.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="gama.utilities.auto_ensemble.load_predictions">
-<code class="descclassname">gama.utilities.auto_ensemble.</code><code class="descname">load_predictions</code><span class="sig-paren">(</span><em>cache_dir</em>, <em>prediction_transformation=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/auto_ensemble.html#load_predictions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.auto_ensemble.load_predictions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<div class="section" id="gama-utilities-auto-ensemble-module">
+<h2>gama.utilities.auto_ensemble module<a class="headerlink" href="#gama-utilities-auto-ensemble-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="gama-utilities-mp-logger-module">
 <h2>gama.utilities.mp_logger module<a class="headerlink" href="#gama-utilities-mp-logger-module" title="Permalink to this headline">¶</a></h2>
@@ -325,68 +182,59 @@ exception occurred during fitting.</td>
 <span id="gama-utilities-observer-module"></span><h2>gama.utilities.observer module<a class="headerlink" href="#module-gama.utilities.observer" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="gama.utilities.observer.Observer">
-<em class="property">class </em><code class="descclassname">gama.utilities.observer.</code><code class="descname">Observer</code><span class="sig-paren">(</span><em>id_</em>, <em>with_log=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/observer.html#Observer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.observer.Observer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.observer.</code><code class="sig-name descname">Observer</code><span class="sig-paren">(</span><em class="sig-param">id_</em>, <em class="sig-param">with_log=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/observer.html#Observer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.observer.Observer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="method">
 <dt id="gama.utilities.observer.Observer.best_n">
-<code class="descname">best_n</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/observer.html#Observer.best_n"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.observer.Observer.best_n" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">best_n</code><span class="sig-paren">(</span><em class="sig-param">n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/observer.html#Observer.best_n"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.observer.Observer.best_n" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the best n individuals observed based on the first optimization criterion.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> – the number of individuals to return</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of up to n individuals for which the score on the first criterion is the best.
-returns less than n individuals if less than n have been evaluated.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> – the number of individuals to return</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a list of up to n individuals for which the score on the first criterion is the best.
+returns less than n individuals if less than n have been evaluated.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="gama.utilities.observer.Observer.callback_on_improvement">
-<code class="descname">callback_on_improvement</code><span class="sig-paren">(</span><em>fn</em>, <em>criterion=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/observer.html#Observer.callback_on_improvement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.observer.Observer.callback_on_improvement" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">callback_on_improvement</code><span class="sig-paren">(</span><em class="sig-param">fn</em>, <em class="sig-param">criterion=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/observer.html#Observer.callback_on_improvement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.observer.Observer.callback_on_improvement" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a callback function for when a certain criterion is improved upon in the pareto front.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>fn</strong> – </li>
-<li><strong>criterion</strong> – </li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fn</strong> – </p></li>
+<li><p><strong>criterion</strong> – </p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="gama.utilities.observer.Observer.on_pareto_updated">
-<code class="descname">on_pareto_updated</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/observer.html#Observer.on_pareto_updated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.observer.Observer.on_pareto_updated" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_pareto_updated</code><span class="sig-paren">(</span><em class="sig-param">fn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/observer.html#Observer.on_pareto_updated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.observer.Observer.on_pareto_updated" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a callback function that is called when the Pareto-front is updated.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fn</strong> – Function to call when the pareto front is updated. Expected signature is: ind -&gt; None</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fn</strong> – Function to call when the pareto front is updated. Expected signature is: ind -&gt; None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="gama.utilities.observer.Observer.reset_current_pareto_front">
-<code class="descname">reset_current_pareto_front</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/observer.html#Observer.reset_current_pareto_front"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.observer.Observer.reset_current_pareto_front" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">reset_current_pareto_front</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/observer.html#Observer.reset_current_pareto_front"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.observer.Observer.reset_current_pareto_front" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="gama.utilities.observer.Observer.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>ind</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/observer.html#Observer.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.observer.Observer.update" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param">ind</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/observer.html#Observer.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.observer.Observer.update" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -411,7 +259,7 @@ returns less than n individuals if less than n have been evaluated.</td>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Pieter Gijsbers.
+        &copy; Copyright 2018-2019, Pieter Gijsbers
 
     </p>
   </div>
@@ -428,32 +276,16 @@ returns less than n individuals if less than n have been evaluated.</td>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.1',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-
-  
-
-  <script type="text/javascript" src="../_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
