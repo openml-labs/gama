@@ -1,0 +1,365 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gama.search_methods.asha &mdash; gama 2019.08.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2019.08.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../technical_guide/index.html">Technical Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>gama.search_methods.asha</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gama.search_methods.asha</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">stopit</span>
+
+<span class="kn">from</span> <span class="nn">gama.genetic_programming.operator_set</span> <span class="k">import</span> <span class="n">OperatorSet</span>
+<span class="kn">from</span> <span class="nn">gama.search_methods.base_search</span> <span class="k">import</span> <span class="n">BaseSearch</span>
+<span class="kn">from</span> <span class="nn">gama.logging.machine_logging</span> <span class="k">import</span> <span class="n">TOKENS</span><span class="p">,</span> <span class="n">log_event</span>
+<span class="kn">from</span> <span class="nn">gama.utilities.generic.async_evaluator</span> <span class="k">import</span> <span class="n">AsyncEvaluator</span>
+<span class="kn">from</span> <span class="nn">gama.genetic_programming.components.individual</span> <span class="k">import</span> <span class="n">Individual</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">TODO:</span>
+<span class="sd"> - instead of list, use a min-heap by rung.</span>
+<span class="sd"> - promoted pipelines as set and set-intersection to determine promotability?</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">ASHA_LOG_TOKEN</span> <span class="o">=</span> <span class="s1">&#39;ASHA&#39;</span>
+
+
+<div class="viewcode-block" id="AsynchronousSuccessiveHalving"><a class="viewcode-back" href="../../../api/index.html#gama.search_methods.AsynchronousSuccessiveHalving">[docs]</a><span class="k">class</span> <span class="nc">AsynchronousSuccessiveHalving</span><span class="p">(</span><span class="n">BaseSearch</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Asynchronous Halving Algorithm by Li et al. (paper: https://arxiv.org/abs/1810.05934)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    reduction_factor: int, optional (default=3)</span>
+<span class="sd">        Reduction factor of candidates between each rung.</span>
+<span class="sd">    minimum_resource: int, optional (default=100)</span>
+<span class="sd">        Number of samples to use in the lowest rung.</span>
+<span class="sd">    maximum_resource: int, optional (default=number of samples in the dataset)</span>
+<span class="sd">        Number of samples to use in the top rung. This should not exceed the number of samples in the data.</span>
+<span class="sd">    minimum_early_stopping_rate: int (default=1)</span>
+<span class="sd">        Number of lowest rungs to skip.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">reduction_factor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">minimum_resource</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">maximum_resource</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">minimum_early_stopping_rate</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="c1"># maps hyperparameter -&gt; (set value, default)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hyperparameters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">reduction_factor</span><span class="o">=</span><span class="p">(</span><span class="n">reduction_factor</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+            <span class="n">minimum_resource</span><span class="o">=</span><span class="p">(</span><span class="n">minimum_resource</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+            <span class="n">maximum_resource</span><span class="o">=</span><span class="p">(</span><span class="n">maximum_resource</span><span class="p">,</span> <span class="mi">100_000</span><span class="p">),</span>
+            <span class="n">minimum_early_stopping_rate</span><span class="o">=</span><span class="p">(</span><span class="n">minimum_early_stopping_rate</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">dynamic_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">time_limit</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="c1"># `maximum_resource` is the number of samples used in the highest rung.</span>
+        <span class="c1"># this typically should be the number of samples in the (training) dataset.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_overwrite_hyperparameter_default</span><span class="p">(</span><span class="s1">&#39;maximum_resource&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operations</span><span class="p">:</span> <span class="n">OperatorSet</span><span class="p">,</span> <span class="n">start_candidates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Individual</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">asha</span><span class="p">(</span><span class="n">operations</span><span class="p">,</span> <span class="n">start_candidates</span><span class="o">=</span><span class="n">start_candidates</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">asha</span><span class="p">(</span><span class="n">operations</span><span class="p">:</span> <span class="n">OperatorSet</span><span class="p">,</span>
+         <span class="n">start_candidates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Individual</span><span class="p">],</span>
+         <span class="n">reduction_factor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+         <span class="n">minimum_resource</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+         <span class="n">maximum_resource</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100_000</span><span class="p">,</span>
+         <span class="n">minimum_early_stopping_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+         <span class="n">maximum_max_rung_evaluations</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Individual</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot; Asynchronous Halving Algorithm by Li et al. (paper: https://arxiv.org/abs/1810.05934)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    operations: OperatorSet</span>
+<span class="sd">        An operator set with `evaluate` and `individual` functions.</span>
+<span class="sd">    start_candidates: List[Individual]</span>
+<span class="sd">        A list which contains the set of best found individuals during search.</span>
+<span class="sd">    reduction_factor: int (default=3)</span>
+<span class="sd">        Reduction factor of candidates between each rung.</span>
+<span class="sd">    minimum_resource: int (default=100)</span>
+<span class="sd">        Number of samples to use in the lowest rung.</span>
+<span class="sd">    maximum_resource: int (default=100_000)</span>
+<span class="sd">        Number of samples to use in the top rung. This should not exceed the number of samples in the data.</span>
+<span class="sd">    minimum_early_stopping_rate: int (default=1)</span>
+<span class="sd">        Number of lowest rungs to skip.</span>
+<span class="sd">    maximum_max_rung_evaluations: Optional[int] (default=None)</span>
+<span class="sd">        Maximum number of individuals to evaluate on the max rung.</span>
+<span class="sd">        If None, the algorithm will be run indefinitely.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    List[Individual]</span>
+<span class="sd">        All individuals of the highest rung in which at least one individual has been evaluated.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">evaluate</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">evaluate_on_rung</span><span class="p">,</span> <span class="n">evaluate_individual</span><span class="o">=</span><span class="n">operations</span><span class="o">.</span><span class="n">evaluate</span><span class="p">)</span>
+
+    <span class="c1"># Note that here we index the rungs by all possible rungs (0..ceil(log_eta(R/r))), and ignore the first</span>
+    <span class="c1"># minimum_early_stopping_rate rungs. This contrasts the paper where rung 0 refers to the first used one.</span>
+    <span class="n">max_rung</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">maximum_resource</span><span class="o">/</span><span class="n">minimum_resource</span><span class="p">,</span> <span class="n">reduction_factor</span><span class="p">))</span>
+    <span class="n">rungs</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">minimum_early_stopping_rate</span><span class="p">,</span> <span class="n">max_rung</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">resource_for_rung</span> <span class="o">=</span> <span class="p">{</span><span class="n">rung</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">minimum_resource</span> <span class="o">*</span> <span class="p">(</span><span class="n">reduction_factor</span> <span class="o">**</span> <span class="n">rung</span><span class="p">),</span> <span class="n">maximum_resource</span><span class="p">)</span> <span class="k">for</span> <span class="n">rung</span> <span class="ow">in</span> <span class="n">rungs</span><span class="p">}</span>
+
+    <span class="c1"># Should we just use lists of lists/heaps instead?</span>
+    <span class="n">individuals_by_rung</span> <span class="o">=</span> <span class="p">{</span><span class="n">rung</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">rung</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">rungs</span><span class="p">)}</span>  <span class="c1"># Highest rungs first is how we typically iterate them</span>
+    <span class="n">promoted_individuals</span> <span class="o">=</span> <span class="p">{</span><span class="n">rung</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">rung</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">rungs</span><span class="p">)}</span>
+
+    <span class="k">def</span> <span class="nf">get_job</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">rung</span><span class="p">,</span> <span class="n">individuals</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">individuals_by_rung</span><span class="o">.</span><span class="n">items</span><span class="p">())[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="c1"># This is not in the paper code but is derived from fig 2b</span>
+            <span class="n">n_to_promote</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">individuals</span><span class="p">)</span> <span class="o">/</span> <span class="n">reduction_factor</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">n_to_promote</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">promoted_individuals</span><span class="p">[</span><span class="n">rung</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Problem: equal loss falls back on comparison of individual</span>
+                <span class="n">candidates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">individuals</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">))[:</span><span class="n">n_to_promote</span><span class="p">]</span>
+                <span class="n">promotable</span> <span class="o">=</span> <span class="p">[</span><span class="n">candidate</span> <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">candidates</span> <span class="k">if</span> <span class="n">candidate</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">promoted_individuals</span><span class="p">[</span><span class="n">rung</span><span class="p">]]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">promotable</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">promoted_individuals</span><span class="p">[</span><span class="n">rung</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">promotable</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">return</span> <span class="n">promotable</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">rung</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">start_candidates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">start_candidates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">start_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">(),</span> <span class="n">minimum_early_stopping_rate</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">operations</span><span class="o">.</span><span class="n">individual</span><span class="p">(),</span> <span class="n">minimum_early_stopping_rate</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">AsyncEvaluator</span><span class="p">()</span> <span class="k">as</span> <span class="n">async_</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">start_new_job</span><span class="p">():</span>
+                <span class="n">individual</span><span class="p">,</span> <span class="n">rung</span> <span class="o">=</span> <span class="n">get_job</span><span class="p">()</span>
+                <span class="n">time_penalty_for_rung</span> <span class="o">=</span> <span class="n">resource_for_rung</span><span class="p">[</span><span class="n">rung</span><span class="p">]</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">resource_for_rung</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+                <span class="n">async_</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">evaluate</span><span class="p">,</span> <span class="n">individual</span><span class="p">,</span> <span class="n">rung</span><span class="p">,</span>
+                              <span class="n">subsample</span><span class="o">=</span><span class="n">resource_for_rung</span><span class="p">[</span><span class="n">rung</span><span class="p">],</span>
+                              <span class="n">timeout</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span> <span class="o">+</span> <span class="p">(</span><span class="n">time_penalty_for_rung</span> <span class="o">*</span> <span class="mi">600</span><span class="p">)))</span>
+
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+                <span class="n">start_new_job</span><span class="p">()</span>
+
+            <span class="k">while</span> <span class="p">((</span><span class="n">maximum_max_rung_evaluations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+                   <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">individuals_by_rung</span><span class="p">[</span><span class="n">max_rung</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">maximum_max_rung_evaluations</span><span class="p">)):</span>
+                <span class="n">future</span> <span class="o">=</span> <span class="n">operations</span><span class="o">.</span><span class="n">wait_next</span><span class="p">(</span><span class="n">async_</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">individual</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">rung</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span>
+                    <span class="n">individuals_by_rung</span><span class="p">[</span><span class="n">rung</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">loss</span><span class="p">,</span> <span class="n">individual</span><span class="p">))</span>
+                    <span class="c1"># Due to `evaluate` returning additional information (like the rung),</span>
+                    <span class="c1"># evaluations are not automatically logged, so we do it here.</span>
+                    <span class="n">log_event</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">ASHA_LOG_TOKEN</span><span class="p">,</span> <span class="n">rung</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">wallclock_time</span><span class="p">,</span>
+                              <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">pipeline_str</span><span class="p">())</span>
+                    <span class="k">if</span> <span class="n">rung</span> <span class="o">==</span> <span class="nb">max</span><span class="p">(</span><span class="n">rungs</span><span class="p">):</span>
+                        <span class="n">log_event</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">TOKENS</span><span class="o">.</span><span class="n">EVALUATION_RESULT</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">start_time</span><span class="p">,</span>
+                                  <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">wallclock_time</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">process_time</span><span class="p">,</span>
+                                  <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">pipeline_str</span><span class="p">())</span>
+
+                <span class="n">start_new_job</span><span class="p">()</span>
+
+            <span class="n">highest_rung_reached</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">rungs</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">stopit</span><span class="o">.</span><span class="n">TimeoutException</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ASHA ended due to timeout.&#39;</span><span class="p">)</span>
+        <span class="n">highest_rung_reached</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">rung</span> <span class="k">for</span> <span class="n">rung</span><span class="p">,</span> <span class="n">individuals</span> <span class="ow">in</span> <span class="n">individuals_by_rung</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">individuals</span> <span class="o">!=</span> <span class="p">[])</span>
+        <span class="k">if</span> <span class="n">highest_rung_reached</span> <span class="o">!=</span> <span class="nb">max</span><span class="p">(</span><span class="n">rungs</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeWarning</span><span class="p">(</span><span class="s2">&quot;Highest rung not reached.&quot;</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">rung</span><span class="p">,</span> <span class="n">individuals</span> <span class="ow">in</span> <span class="n">individuals_by_rung</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">] </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rung</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">individuals</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">individuals_by_rung</span><span class="p">[</span><span class="n">highest_rung_reached</span><span class="p">]))</span>
+
+
+<span class="k">def</span> <span class="nf">evaluate_on_rung</span><span class="p">(</span><span class="n">individual</span><span class="p">,</span> <span class="n">rung</span><span class="p">,</span> <span class="n">evaluate_individual</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">individual</span> <span class="o">=</span> <span class="n">evaluate_individual</span><span class="p">(</span><span class="n">individual</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">individual</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rung</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2019, Pieter Gijsbers
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

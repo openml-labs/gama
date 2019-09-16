@@ -1,0 +1,477 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Technical Guide &mdash; gama 2019.08.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API" href="../api/index.html" />
+    <link rel="prev" title="User Guide" href="../user_guide/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2019.08.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Technical Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#automl-pipeline">AutoML Pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#search-algorithms">Search Algorithms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#post-processing">Post-processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuring-the-automl-pipeline">Configuring the AutoML pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#logging">Logging</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#generated-files">Generated Files</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#visualization">Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gama-search-space-configuration">GAMA Search Space Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#events">Events</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Technical Guide</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/technical_guide/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="technical-guide">
+<span id="technical-guide-index"></span><h1>Technical Guide<a class="headerlink" href="#technical-guide" title="Permalink to this headline">¶</a></h1>
+<p>For a basic introduction to GAMA, read the <a class="reference internal" href="../user_guide/index.html#user-guide-index"><span class="std std-ref">User Guide</span></a> first.
+This section will cover more advanced usage of GAMA, in particular it covers:</p>
+<ul class="simple">
+<li><p>A description of non-default AutoML steps and how to configure them.</p></li>
+<li><p>An introduction to optimization traces and visualizing them.</p></li>
+<li><p>Configuring the search space.</p></li>
+<li><p>GAMA’s Events.</p></li>
+</ul>
+<hr class="docutils" />
+<div class="section" id="automl-pipeline">
+<h2>AutoML Pipeline<a class="headerlink" href="#automl-pipeline" title="Permalink to this headline">¶</a></h2>
+<p>An AutoML system performs several operations in its search for a model, and each of them may have several options and hyperparameters.
+An important decision is picking the search algorithm, which performs search over machine learning pipelines for your data.
+Another choice would be how to construct a model after search, e.g. by training the best pipeline or constructing an ensemble.
+Much like data processing algorithms can form a <em>machine learning pipeline</em>,
+we will refer to a configuration of these AutoML components as an <em>AutoML Pipeline</em>.
+In GAMA we currently support flexibility in the AutoML pipeline in two stages: search and post-processing.</p>
+<div class="section" id="search-algorithms">
+<h3>Search Algorithms<a class="headerlink" href="#search-algorithms" title="Permalink to this headline">¶</a></h3>
+<p>The following search algorithms are available in GAMA:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Random</span> <span class="pre">Search</span></code>: Randomly pick machine learning pipelines from the search space and evaluate them.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Asynchronous</span> <span class="pre">Evolutionary</span> <span class="pre">Algorithm</span></code>: Evolve a population of machine learning pipelines, drawing new machine learning pipelines from the best of the population.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Asynchronous</span> <span class="pre">Successive</span> <span class="pre">Halving</span> <span class="pre">Algorithm</span></code>: A bandit-based approach where many machine learning pipelines iteratively get evaluated and eliminated on bigger fractions of the data.</p></li>
+</ul>
+</div>
+<div class="section" id="post-processing">
+<h3>Post-processing<a class="headerlink" href="#post-processing" title="Permalink to this headline">¶</a></h3>
+<p>The following post-processing steps are available:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: no post-processing will be done. This means no final pipeline will be trained and <cite>predict</cite> and <cite>predict_proba</cite> will be unavailable. This can be interesting if you are only interested in the search procedure.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FitBest</span></code>: fit the single best machine learning pipeline found during search.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ensemble</span></code>: create an ensemble out of evaluated machine learning pipelines. This requires more time but can lead to better results.</p></li>
+</ul>
+</div>
+<div class="section" id="configuring-the-automl-pipeline">
+<h3>Configuring the AutoML pipeline<a class="headerlink" href="#configuring-the-automl-pipeline" title="Permalink to this headline">¶</a></h3>
+<p>By default ‘prepend pipeline’, ‘Asynchronous EA’ and ‘FitBest’ are chosen for pre-processing, search and post-processing, respectively.
+However, it is easy to change this, or to change the hyperparameters with which each component is used.
+For example, searching with ‘Asynchronous Successive Halving’ and creating an ensemble during post-processing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
+<span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="k">import</span> <span class="n">ASHA</span>  <span class="c1">#Asynchronous Successive Halving Algorithm</span>
+<span class="kn">from</span> <span class="nn">gama.postprocessing</span> <span class="k">import</span> <span class="n">Ensemble</span>
+
+<span class="n">custom_pipeline_gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="n">ASHA</span><span class="p">(),</span> <span class="n">post_processing</span><span class="o">=</span><span class="n">EnsemblePostProcessing</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>or using ‘Asynchronous EA’ but with custom hyperparameters:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
+<span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="k">import</span> <span class="n">AsyncEA</span>
+
+<span class="n">custom_pipeline_gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="n">AsyncEA</span><span class="p">(</span><span class="n">population_size</span><span class="o">=</span><span class="mi">30</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="logging">
+<h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
+<p>GAMA makes use of the default Python <a class="reference external" href="https://docs.python.org/3.5/library/logging.html">logging</a> module.
+This means logs can be captured at different levels, and handled by one of several StreamHandlers.
+In addition to the Python built-in log levels GAMA introduces one level below <code class="code docutils literal notranslate"><span class="pre">logging.DEBUG</span></code>, explicitly for log
+messages that are meant to be parsed by a program later.</p>
+<p>The most common logging use cases are to write a comprehensive log to file, as well as print important messages to <code class="code docutils literal notranslate"><span class="pre">stdout</span></code>.
+Writing log messages to <code class="code docutils literal notranslate"><span class="pre">stdout</span></code> is directly supported by GAMA through the <code class="code docutils literal notranslate"><span class="pre">verbosity</span></code> hyperparameter
+(which defaults to <code class="code docutils literal notranslate"><span class="pre">logging.WARNING</span></code>).</p>
+<p>Logging all log messages to file is not entirely supported directly.
+Instead, GAMA provides a <code class="code docutils literal notranslate"><span class="pre">keep_analysis_log</span></code> hyperparameter.
+When set (by providing the name of the file to write to), it will only write <em>most</em> information to file.
+In particular it will write any log messages at <code class="code docutils literal notranslate"><span class="pre">logging.WARNING</span></code>, <code class="code docutils literal notranslate"><span class="pre">logging.CRITICAL</span></code> and <code class="code docutils literal notranslate"><span class="pre">logging.ERROR</span></code>, as
+well as all messages at the <code class="code docutils literal notranslate"><span class="pre">MACHINE_LOG_LEVEL</span></code> - the log level introduced by GAMA.
+The <code class="code docutils literal notranslate"><span class="pre">MACHINE_LOG_LEVEL</span></code> write messages in a structured way, so that they may easily be parsed by a program later.
+By default GAMA writes to ‘gama.log’.</p>
+<p>If you want other behavior, the logging module offers you great flexibility on making your own variations.
+The following script writes any log messages of <code class="code docutils literal notranslate"><span class="pre">logging.DEBUG</span></code> or up to both file and console:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
+
+<span class="n">gama_log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;gama&#39;</span><span class="p">)</span>
+<span class="n">gama_log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+<span class="n">fh_log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="s1">&#39;logfile.txt&#39;</span><span class="p">)</span>
+<span class="n">fh_log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+<span class="n">gama_log</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">fh_log</span><span class="p">)</span>
+
+<span class="c1"># The verbosity hyperparameter sets up an StreamHandler to `stdout`.</span>
+<span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="n">keep_analysis_log</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Running the above script will create the ‘logfile.txt’ file with all log messages that could also be seen in the console.
+An overview the log levels:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">MACHINE_LOG_LEVEL</span> <span class="pre">(5)</span></code>: Messages mostly meant to be parsed by a program.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">DEBUG</span></code>: Messages for developers.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">INFO</span></code>: General information about the optimization process.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">WARNING</span></code>: Serious errors that do not prohibit GAMA from running to completion (but results could be suboptimal).</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">ERROR</span></code>: Errors which prevent GAMA from running to completion.</p></li>
+</ul>
+</div></blockquote>
+<div class="section" id="generated-files">
+<h3>Generated Files<a class="headerlink" href="#generated-files" title="Permalink to this headline">¶</a></h3>
+<p>GAMA can create some files during the optimization process. Here is an overview of produced files:</p>
+<p><strong>Folder `’{DATE}_{STARTTIME}_XXXX_GAMA’`</strong>: (XXXX are random alphanumeric characters)
+This folder is used to save results from evaluations during the optimization process.
+The files in this folders are needed to create an ensemble of pipelines in the post-processing phase of GAMA.
+You can specify the name of this folder with the <code class="code docutils literal notranslate"><span class="pre">cache_dir</span></code> hyperparameter when initializing a GAMA object.
+By default, this folders gets deleted after the <code class="code docutils literal notranslate"><span class="pre">fit</span></code> call is done.
+In order to preserve this folder (e.g. to later construct different ensembles or later analysis), specify <code class="code docutils literal notranslate"><span class="pre">keep_cache=True</span></code> when calling <code class="code docutils literal notranslate"><span class="pre">fit</span></code>.</p>
+<p><strong>File: gama.log</strong>: This file contains all information about the optimization process, and by default is not removed.
+As described in <a class="reference internal" href="visualization.html#visualization"><span class="std std-ref">Visualization</span></a> this file can be used to generate visualizations about the optimization process.
+You can use the <code class="code docutils literal notranslate"><span class="pre">keep_analysis_log</span></code> hyperparameter to specify the desired location and name of the log,
+or set it to <code class="code docutils literal notranslate"><span class="pre">None</span></code> to prevent it being produced in the first place.</p>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="visualization">
+<h2>Visualization<a class="headerlink" href="#visualization" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The visualization of optimization traces is in an early stages of development (even moreso than the rest of GAMA).
+To be frank, it leaves a lot to be desired.
+That said, it can be very useful to see variance over different GAMA runs, compare optimization methods,
+or see how solution quality improves over time.</p>
+</div>
+<img alt="../_images/viz.gif" src="../_images/viz.gif" />
+<p>If you have installed GAMA with the optional visualization dependencies (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.[vis]</span></code>),
+you can start the dashboard like so:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama.visualization</span> <span class="k">import</span> <span class="n">dash_app</span>
+<span class="n">dash_app</span><span class="o">.</span><span class="n">run_server</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>A message will be printed on console indicating how to reach the server, e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Running</span> <span class="n">on</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">8050</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>Visiting this address in your webbrowser will show the screen below.</p>
+<img alt="../_images/viz_home_screen.png" src="../_images/viz_home_screen.png" />
+<p>Clicking ‘Select or drop log(s)’ in the top-right corner opens a file explorer which lets you select file(s) to load.
+Select a log file generated by a GAMA run, here we use the example log found <a class="reference external" href="https://github.com/PGijsbers/gama/blob/master/tests/data/amazon_asyncEA.log">here</a>.
+After loading the file, you can toggle its visualization by clicking the checkbox that appears next to the file name.
+The first visualization you will see is the best obtained score as a function of the number of evaluated pipelines:</p>
+<img alt="../_images/viz_loaded_example.png" src="../_images/viz_loaded_example.png" />
+<p>In the top bar you will find a dropdown ‘Visualization Presets’ which allow you to see other visualizations.
+Additionally you can also select whether or not to aggregate statistics across multiple logs.
+This is useful when comparing two optimization methods with each other.
+Below you will find a description of each preset.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Aggregating logs will group all logs with the same search method together, even if those logs are executed on
+different datasets or with different hyperparameter configurations.
+Be careful in your selection of visualized logs (use the checklist on the right).
+It is currently not possible to manually define groups, or define how aggregates are computed.</p>
+</div>
+<p>Visualization presets include:</p>
+<ul class="simple">
+<li><p><strong>#Pipeline by learner</strong> A bar chart of the number of times each estimator is used as the final step in a machine learning pipeline.</p></li>
+<li><p><strong>#Pipeline by size</strong> A bar chart of the distribution of the number of components per evaluated pipeline.</p></li>
+<li><p><strong>Best score over time</strong> The best score obtained by any individual pipeline at a given point in time.</p></li>
+<li><p><strong>Best score over iterations</strong> The best score obtained by any individual pipeline at a given iteration.</p></li>
+<li><p><strong>Size vs Metric</strong> A scatter plot where each pipeline is represented by a marker, gives an impression of the distribution of scores for evaluated pipelines of different lengths.</p></li>
+<li><p><strong>Evaluation Times</strong> A bar chart plotting the distribution of time required to evaluate pipelines during optimization.</p></li>
+<li><p><strong>Evaluations by Rung</strong> (ASHA only) A bar chart plotting the number of evaluations at each ASHA rung.</p></li>
+<li><p><strong>Time by Rung</strong> (ASHA only) A bar chart plotting the combined time used of all evaluations for each ASHA rung.</p></li>
+</ul>
+<p>Finally there is the <strong>custom</strong> option, which lets you define what to put on the axes.
+There is no support for aggregating logs in this mode.</p>
+<hr class="docutils" />
+</div>
+<div class="section" id="gama-search-space-configuration">
+<span id="search-space-configuration"></span><h2>GAMA Search Space Configuration<a class="headerlink" href="#gama-search-space-configuration" title="Permalink to this headline">¶</a></h2>
+<p>By default GAMA will build pipelines out of scikit-learn algorithms, both for preprocessing and learning models.
+It is possible to modify this search space, changing the algorithms or hyperparameter ranges to consider.</p>
+<p>The search space is determined by the <code class="code docutils literal notranslate"><span class="pre">search_space</span></code> dictionary passed upon initialization.
+The defaults are found in
+<a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/configuration/classification.py">classification.py</a> and
+<a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/configuration/regression.py">regression.py</a>
+for the GamaClassifier and GamaRegressor, respectively.</p>
+<p>A sample of algorithms that GAMA uses by default:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html">logistic regression</a></p></li>
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html">random forest classifier</a></p></li>
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/naive_bayes.html">naive bayes</a></p></li>
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC">support vector machines</a></p></li>
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html">PCA</a></p></li>
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.Normalizer.html">normalization</a></p></li>
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html">ICA</a></p></li>
+</ul>
+</div></blockquote>
+<p>The search space configuration is defined in a python dictionary.
+For reference, a minimal example search space configuration can look like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.naive_bayes</span> <span class="k">import</span> <span class="n">BernoulliNB</span>
+<span class="n">search_space</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">,</span> <span class="mf">1e-1</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">],</span>
+    <span class="n">BernoulliNB</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;fit_prior&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>At the top level, allowed key types are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">string</span></code>, with a list as value.</p></li>
+</ul>
+<blockquote>
+<div><p>It specifies the name of a hyperparameter with its possible values.
+By defining a hyperparameter at the top level, you can reference it as hyperparameter for any specific algorithm.
+To do so, identify it with the same name and set its possible values to an empty list (see <code class="code docutils literal notranslate"><span class="pre">alpha</span></code> in the example).
+The benefit of doing is that multiple algorithms can share a hyperparameter space that is defined only once.
+Additionally, in evolution this makes it possible to know which hyperparameter values can be crossed over between
+different algorithms.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">class</span></code>, with a dictionary as value.</p></li>
+</ul>
+<blockquote>
+<div><p>The key specifies the algorithm, calling it should instantiate the algorithm.
+The dictionary specifies the hyperparameters by name and their possible values as list.
+All hyperparameters specified should be taken as arguments for the algorithm’s initialization.
+A hyperparameter specified at the top level of the dictionary can share a name with a hyperparameter of the algorithm.
+To use the values provided by the shared hyperparameter, set the possible values to an empty list.
+If a list of values is provided instead, it will not use the shared hyperparameter values.</p>
+</div></blockquote>
+</div>
+<hr class="docutils" />
+<div class="section" id="events">
+<h2>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h2>
+<p>It is also possible to programmatically receive updates of the optimization process through the events:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
+
+<span class="k">def</span> <span class="nf">process_individual</span><span class="p">(</span><span class="n">individual</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> was evaluated. Fitness is </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">individual</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+
+<span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">()</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">evaluation_completed</span><span class="p">(</span><span class="n">process_individual</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The function passed to <code class="docutils literal notranslate"><span class="pre">evaluation_completed</span></code> should take a <code class="docutils literal notranslate"><span class="pre">gama.genetic_programming.components.individual.Individual</span></code>
+as single argument.
+Any exceptions raised but not handled in the callback will be ignored but logged at <code class="docutils literal notranslate"><span class="pre">logging.WARNING</span></code> level.
+During the callback a <code class="docutils literal notranslate"><span class="pre">stopit.utils.TimeoutException</span></code> may be raised.
+This signal normally indicates to GAMA to move on to the next step in the AutoML pipeline.
+If caught by the callback, GAMA may exceed its allotted time.
+For this reason, it is advised to keep callbacks short after catching a <code class="docutils literal notranslate"><span class="pre">stopit.utils.TimeoutException</span></code>.
+If the <code class="docutils literal notranslate"><span class="pre">stopit.utils.TimeoutException</span></code> is not caught, GAMA will correctly terminate its step in the AutoML pipeline
+and continue as normal.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../api/index.html" class="btn btn-neutral float-right" title="API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../user_guide/index.html" class="btn btn-neutral float-left" title="User Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2019, Pieter Gijsbers
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

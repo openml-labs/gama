@@ -1,0 +1,241 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Important Hyperparameters &mdash; gama 2019.08.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2019.08.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical_guide/index.html">Technical Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Important Hyperparameters</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/user_guide/hyperparameters.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="important-hyperparameters">
+<h1>Important Hyperparameters<a class="headerlink" href="#important-hyperparameters" title="Permalink to this headline">¶</a></h1>
+<p>There are a lot of hyperparameters exposed in GAMA.
+In this section, you will find some hyperparameters you might want to set even if you otherwise use defaults.
+For more complete documentation on all hyperparameters, see <a class="reference external" href="https://pgijsbers.github.io/gama/api/index.html#api">API documentation</a>.</p>
+<div class="section" id="optimization">
+<h2>Optimization<a class="headerlink" href="#optimization" title="Permalink to this headline">¶</a></h2>
+<p>Perhaps the most important hyperparameters are the ones that specify what to optimize for, these are:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">scoring</span></code>: <code class="docutils literal notranslate"><span class="pre">string</span></code> (default=’log_loss’ for classification and ‘mean_squared_error’ for regression)</dt><dd><p>Sets the metric to optimize for. Make sure to optimize towards the metric that reflects well what is important to you.
+Valid options include <cite>roc_auc</cite>, <cite>accuracy</cite> and <cite>log_loss</cite> for classification, and <cite>mean_squared_error</cite> and <cite>r2</cite> for regression.
+For more options see <a class="reference external" href="https://pgijsbers.github.io/gama/api/index.html#api">API documentation</a>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">regularize_length</span></code>: <code class="docutils literal notranslate"><span class="pre">bool</span></code> (default=True)</dt><dd><p>If True, in addition to optimizing towards the metric set in <code class="docutils literal notranslate"><span class="pre">scoring</span></code>, also guide the search towards shorter pipelines.
+This setting currently has no effect for non-default search methods.</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GamaClassifier</span><span class="p">(</span><span class="n">scoring</span><span class="o">=</span><span class="s1">&#39;roc_auc&#39;</span><span class="p">,</span> <span class="n">regularize_length</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="resources">
+<h2>Resources<a class="headerlink" href="#resources" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">n_jobs</span></code>: <code class="docutils literal notranslate"><span class="pre">int</span></code> (default=-1)</dt><dd><p>Determines how many processes can be run in parallel during <cite>fit</cite>.
+This has the most influence over how many machine learning pipelines can be evaluated.
+If it is set to -1, which is the default, all cores are used.
+Changing it to use a set amount of (fewer) cores will decrease the amount of pipelines evaluated,
+but is needed if you do not want GAMA to use all resources.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">max_total_time</span></code>: <code class="docutils literal notranslate"><span class="pre">int</span></code> (default=3600)</dt><dd><p>The maximum time in seconds that GAMA should aim to use to construct a model from the data.
+By default GAMA uses one hour. For large datasets, more time may be needed to get useful results.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">max_eval_time</span></code>: <code class="docutils literal notranslate"><span class="pre">int</span></code> (default=300)</dt><dd><p>The maximum time in seconds that GAMA is allowed to use to evaluate a single machine learning pipeline.
+The default is set to five minutes. For large datasets, more time may be needed to get useful results.</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GamaClassifier</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_total_time</span><span class="o">=</span><span class="mi">7200</span><span class="p">,</span> <span class="n">max_eval_time</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2019, Pieter Gijsbers
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
