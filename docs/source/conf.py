@@ -19,7 +19,8 @@
 # -- Adding the module to document ----------------------------------------
 import os
 import sys
-sys.path.append(os.path.abspath('../gama'))
+
+sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Copying Example files over -------------------------------------------
 import shutil

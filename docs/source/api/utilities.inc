@@ -21,11 +21,12 @@ Timekeeper
 
 .. autoclass:: gama.utilities.generic.timekeeper.TimeKeeper
 
-AsyncExecutor
-~~~~~~~~~~~~~
+AsyncEvaluator
+~~~~~~~~~~~~~~
 
 .. warning::
-    This component in particular has its own issues and will be replaced.
-    But I have yet to find a satisfying alternative to 'hacking' the built-in ProcessPoolExecutor.
+    I'm sure there are better tools out there, but I have yet to find a minimal easy multi-processing tool.
+    I tried using the built-in ProcessPoolExecutor, but it had short comings such as not being able to cancel
+    jobs while they were running.
 
-.. autoclass:: gama.utilities.generic.async_executor.AsyncExecutor
+.. autoclass:: gama.utilities.generic.async_evaluator.AsyncEvaluator
