@@ -130,7 +130,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#pareto-front">Pareto Front</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#stopwatch">Stopwatch</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#timekeeper">Timekeeper</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#asyncexecutor">AsyncExecutor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#asyncevaluator">AsyncEvaluator</a></li>
 </ul>
 </li>
 </ul>
@@ -794,13 +794,30 @@ If set to None, the <code class="code docutils literal notranslate"><span class=
 </dd></dl>
 
 </div>
-<div class="section" id="asyncexecutor">
-<h4>AsyncExecutor<a class="headerlink" href="#asyncexecutor" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="asyncevaluator">
+<h4>AsyncEvaluator<a class="headerlink" href="#asyncevaluator" title="Permalink to this headline">¶</a></h4>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>This component in particular has its own issues and will be replaced.
-But I have yet to find a satisfying alternative to ‘hacking’ the built-in ProcessPoolExecutor.</p>
+<p>I’m sure there are better tools out there, but I have yet to find a minimal easy multi-processing tool.
+I tried using the built-in ProcessPoolExecutor, but it had short comings such as not being able to cancel
+jobs while they were running.</p>
 </div>
+<dl class="class">
+<dt id="gama.utilities.generic.async_evaluator.AsyncEvaluator">
+<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.async_evaluator.</code><code class="sig-name descname">AsyncEvaluator</code><span class="sig-paren">(</span><em class="sig-param">n_workers: Optional[int] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/async_evaluator.html#AsyncEvaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.async_evaluator.AsyncEvaluator" title="Permalink to this definition">¶</a></dt>
+<dd><p>ContextManager which manages subprocesses on which arbitrary* functions can be evaluated.</p>
+<ul class="simple">
+<li><p>The function and all its arguments must be picklable.</p></li>
+</ul>
+<p>You can not use the same AsyncEvaluator in two different contexts. Doing so raises a <code class="code docutils literal notranslate"><span class="pre">RuntimeError</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n_workers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Maximum number of subprocesses to run for parallel evaluations.
+If None, use <code class="code docutils literal notranslate"><span class="pre">AsyncEvaluator.n_jobs</span></code> which defaults to multiprocessing.cpu_count().</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 </div>
 </div>

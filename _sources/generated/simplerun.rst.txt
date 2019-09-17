@@ -1,7 +1,0 @@
-simplerun module
-================
-
-.. automodule:: simplerun
-    :members:
-    :undoc-members:
-    :show-inheritance:
