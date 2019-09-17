@@ -37,7 +37,7 @@ with open(os.path.join("README.md")) as fid:
 
 setup(
     name='gama',
-    version='19.08.2',
+    version='19.08.0',
     description='A package for automated machine learning based on scikit-learn.',
     long_description=README,
     long_description_content_type='text/markdown',

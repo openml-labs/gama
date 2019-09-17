@@ -21,17 +21,13 @@ In addition to its general use AutoML functionality, GAMA aims to serve AutoML r
 During the optimization process, GAMA keeps an extensive log of progress made.
 Using this log, insight can be obtained on the behaviour of the search procedure.
 For example, it can produce a graph that shows pipeline fitness over time:
-![graph of fitness over time](https://raw.githubusercontent.com/PGijsbers/gama/modularize/docs/source/technical_guide/images/viz.gif)
+![graph of fitness over time](https://github.com/PGijsbers/gama/blob/master/docs/source/technical_guide/images/viz.gif)
 
 For more examples and information on the visualization, see [the technical guide](https://pgijsbers.github.io/gama/technical_guide/index.html#visualization).
 
 ## Installing GAMA
 
-You can install GAMA with pip:
-
-`pip install gama`
-
-All done!
+You can install GAMA with pip: `pip install gama`
 
 ## Minimal Example
 The following example uses AutoML to find a machine learning pipeline that classifies breast cancer as malign or benign.
