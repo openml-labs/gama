@@ -90,6 +90,7 @@ class Ensemble(object):
         self._y = y
         self._prediction_transformation = None
 
+        self._internal_score = None
         self._fit_models = None
         self._maximize = True
         self._child_ensembles = []
@@ -172,6 +173,7 @@ class Ensemble(object):
                     best_addition, best_addition_score = model, candidate_ensemble_score
 
             self._add_model(best_addition)
+            self._internal_score = best_addition_score
             log.info('Ensemble size {} , best score: {}'.format(self._total_model_weights(), best_addition_score))
 
     def fit(self, X, y, timeout=1e6):
