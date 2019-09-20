@@ -1,5 +1,5 @@
 import math
-from typing import Union, Generator
+from typing import Union, Generator, List
 
 import pandas as pd
 
@@ -74,16 +74,23 @@ def prequential_sample(
         batch_start_index = initial_batch_size + i * batch_size
         batch_indices.append((batch_start_index, batch_start_index + batch_size))
 
-    for (train_start, train_end, test_start, test_end) in zip(batch_indices, batch_indices[1:]):
+    for ((train_start, train_end), (test_start, test_end)) in zip(batch_indices, batch_indices[1:]):
         if train_include_all:
             train_start = 0
         yield ((x.iloc[train_start:train_end], y.iloc[train_start:train_end]),
                (x.iloc[test_start:test_end], y.iloc[test_start:test_end]))
 
 
-def prequential_score_predict(pipeline, x, y, metric: Metric):
-    for ((x_train, y_train), (x_test, y_test)) in prequential_sample(x, y, train_include_all=True):
-        pipeline.fit(x_train, y_train)
-        y_pred = pipeline.predict(x_test)
-        score = metric.maximizable_score(y_test, y_pred)
-    pass
+def prequential_score_predict(pipeline, x, y, metrics: List[Metric], with_partial_fit: bool = False):
+    y_pred_concat = pd.Series()
+    y_test_concat = pd.Series()
+    for ((x_train, y_train), (x_test, y_test)) in prequential_sample(x, y, train_include_all=(not with_partial_fit)):
+        if with_partial_fit:
+            pipeline.partial_fit(x_train, y_train)
+        else:
+            pipeline.fit(x_train, y_train)
+        y_pred = pd.Series(pipeline.predict(x_test))
+        y_test_concat = pd.concat([y_test_concat, y_test])
+        y_pred_concat = pd.concat([y_pred_concat, y_pred])
+    scores = [metric.maximizable_score(y_test_concat, y_pred_concat) for metric in metrics]
+    return y_pred_concat, scores
