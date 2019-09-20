@@ -79,7 +79,7 @@ def evaluate_individual(individual: Individual, evaluate_pipeline_length, *args,
     return individual
 
 
-def evaluate_pipeline(pl, X, y_train, timeout, deadline, metrics='accuracy', cv=5, cache_dir=None, logger=None, subsample=None):
+def evaluate_pipeline(pl, X, y_train, timeout, deadline, metrics='accuracy', cv=5, cache_dir=None, logger=None, subsample=None, evaluation_function=None):
     """ Evaluates a pipeline used k-Fold CV. """
     if not logger:
         logger = log
@@ -100,7 +100,10 @@ def evaluate_pipeline(pl, X, y_train, timeout, deadline, metrics='accuracy', cv=
                 idx, _ = next(ShuffleSplit(n_splits=1, train_size=subsample, random_state=0).split(X))
                 X, y_train = X.iloc[idx, :], y_train[idx]
 
-            prediction, scores = cross_val_predict_score(pl, X, y_train, cv=cv, metrics=metrics)
+            if evaluation_function is None:
+                prediction, scores = cross_val_predict_score(pl, X, y_train, cv=cv, metrics=metrics)
+            else:
+                prediction, scores = evaluation_function(pl, X, y_train, metrics)
         except stopit.TimeoutException:
             # score not actually unused, because exception gets caught by the context manager.
             raise

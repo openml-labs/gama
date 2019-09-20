@@ -2,6 +2,7 @@ import math
 from typing import Union, Generator, List
 
 import pandas as pd
+from category_encoders import OneHotEncoder
 
 from gama.utilities.metrics import Metric
 
@@ -82,15 +83,27 @@ def prequential_sample(
 
 
 def prequential_score_predict(pipeline, x, y, metrics: List[Metric], with_partial_fit: bool = False):
-    y_pred_concat = pd.Series()
+    y_pred_concat = pd.DataFrame()
     y_test_concat = pd.Series()
     for ((x_train, y_train), (x_test, y_test)) in prequential_sample(x, y, train_include_all=(not with_partial_fit)):
         if with_partial_fit:
             pipeline.partial_fit(x_train, y_train)
         else:
             pipeline.fit(x_train, y_train)
-        y_pred = pd.Series(pipeline.predict(x_test))
+        y_pred = pd.DataFrame(pipeline.predict_proba(x_test))
         y_test_concat = pd.concat([y_test_concat, y_test])
         y_pred_concat = pd.concat([y_pred_concat, y_pred])
-    scores = [metric.maximizable_score(y_test_concat, y_pred_concat) for metric in metrics]
+
+    scores = []
+    for metric in metrics:
+        if metric.requires_probabilities:
+            # `predictions` are of shape (N,K) and the ground truth should be formatted accordingly
+            y_ohe = OneHotEncoder().fit_transform(y_test_concat.values.reshape(-1, 1))
+            scores.append(metric.maximizable_score(y_ohe, y_pred_concat))
+        elif True:
+            # Metric requires no probabilities, but probabilities were predicted.
+            scores.append(metric.maximizable_score(y_test_concat, y_pred_concat.values.argmax(axis=1)))
+        else:
+            # No metric requires probabilities, so `predictions` is an array of labels.
+            scores.append(metric.maximizable_score(y_train, predictions))
     return y_pred_concat, scores

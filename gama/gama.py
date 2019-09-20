@@ -16,6 +16,7 @@ import numpy as np
 import stopit
 
 import gama.genetic_programming.compilers.scikitlearn
+from gama.evaluation.prequential_evaluation import prequential_score_predict
 from gama.logging.machine_logging import log_event, TOKENS
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.metrics import scoring_to_metric
@@ -271,7 +272,8 @@ class Gama(ABC):
             x: Union[pd.DataFrame, np.ndarray],
             y: Union[pd.DataFrame, pd.Series, np.ndarray],
             warm_start: bool = False,
-            keep_cache: bool = False):
+            keep_cache: bool = False,
+            is_ordered_time_series: bool = False):
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -292,6 +294,8 @@ class Gama(ABC):
             previous `fit` call.
         keep_cache: bool (default=False)
             If True, keep the cache directory and its content after fitting is complete. Otherwise delete it.
+        is_ordered_time_series: bool (default=False)
+            Treat data as an ordered times-series, using a (naive) sequential split instead of k-fold cv.
         """
 
         with self._time_manager.start_activity('preprocessing', activity_meta=['default']):
@@ -303,12 +307,13 @@ class Gama(ABC):
 
         with self._time_manager.start_activity('search', time_limit=fit_time,
                                                activity_meta=[self._search_method.__class__.__name__]):
-            self._search_phase(warm_start, timeout=fit_time)
+            self._search_phase(warm_start, is_ordered_time_series, timeout=fit_time)
 
         with self._time_manager.start_activity('postprocess',
                                                time_limit=int(self._time_manager.total_time_remaining),
                                                activity_meta=[self._post_processing.__class__.__name__]):
             best_individuals = list(reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values)))
+            print([ind.fitness.values for ind in best_individuals[:3]])
             self._post_processing.dynamic_defaults(self)
             self.model = self._post_processing.post_process(
                 self._X, self._y, self._time_manager.total_time_remaining, best_individuals
@@ -317,7 +322,7 @@ class Gama(ABC):
             log.debug("Deleting cache.")
             self.delete_cache()
 
-    def _search_phase(self, warm_start: bool = False, timeout: int = 1e6):
+    def _search_phase(self, warm_start: bool = False, is_ordered_time_series: bool = False, timeout: int = 1e6):
         """ Invoke the evolutionary algorithm, populate `final_pop` regardless of termination. """
         if warm_start and self._final_pop is not None:
             pop = self._final_pop
@@ -330,6 +335,9 @@ class Gama(ABC):
         evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self._X, y_train=self._y,
                              metrics=self._metrics, cache_dir=self._cache_dir, timeout=self._max_eval_time,
                              deadline=deadline)
+        if is_ordered_time_series:
+           evaluate_args['evaluation_function'] = prequential_score_predict
+
         self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
                                               **evaluate_args)
 
