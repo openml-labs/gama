@@ -116,7 +116,7 @@ def evaluate_pipeline(pl, X, y_train, timeout, deadline, metrics='accuracy', cv=
             raise
         except Exception as e:
             if isinstance(logger, MultiprocessingLogger):
-                logger.debug('{} encountered while evaluating pipeline.'.format(type(e)))
+                logger.debug('{} encountered while evaluating pipeline: {}'.format(type(e), str(e)))
             else:
                 logger.debug('{} encountered while evaluating pipeline.'.format(type(e)), exc_info=True)
 
