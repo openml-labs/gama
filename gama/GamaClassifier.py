@@ -105,9 +105,9 @@ class GamaClassifier(Gama):
         """ Should use base class documentation. """
         y_ = y.squeeze() if isinstance(y, pd.DataFrame) else y
         self._label_encoder = LabelEncoder().fit(y_)
-        #if any([isinstance(yi, str) for yi in y_]):
+        if any([isinstance(yi, str) for yi in y_]):
             # If target values are `str` we encode them or scikit-learn will complain.
-        y = self._label_encoder.transform(y_)
+            y = self._label_encoder.transform(y_)
         super().fit(x, y, *args, **kwargs)
 
     def _encode_labels(self, y):
