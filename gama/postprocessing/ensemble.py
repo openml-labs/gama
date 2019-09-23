@@ -7,7 +7,7 @@ from typing import Optional, List
 
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 import stopit
 
 from gama.genetic_programming.components import Individual
@@ -311,7 +311,7 @@ class EnsembleClassifier(Ensemble):
             return self._metric.maximizable_score(self._y, prediction_to_validate)
         else:
             # argmax returns (N, 1) matrix, need to squeeze it to (N,) for scoring.
-            class_predictions = np.argmax(prediction_to_validate.toarray(), axis=1)
+            class_predictions = self._one_hot_encoder.inverse_transform(prediction_to_validate.toarray())
             return self._metric.maximizable_score(self._y, class_predictions)
 
     def predict(self, X):
@@ -322,7 +322,7 @@ class EnsembleClassifier(Ensemble):
         else:
             class_probabilities = self._get_weighted_mean_predictions(X, 'predict').toarray()
 
-        class_predictions = np.argmax(class_probabilities, axis=1)
+        class_predictions = self._one_hot_encoder.inverse_transform(class_probabilities)
         if self._label_encoder:
             class_predictions = self._label_encoder.inverse_transform(class_predictions)
         return class_predictions
