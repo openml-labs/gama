@@ -162,7 +162,6 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">OneHotEncoder</span>
 <span class="kn">import</span> <span class="nn">stopit</span>
 
@@ -201,8 +200,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_overwrite_hyperparameter_default</span><span class="p">(</span><span class="s1">&#39;cache&#39;</span><span class="p">,</span> <span class="n">gama</span><span class="o">.</span><span class="n">_cache_dir</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">selection</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Individual</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s1">&#39;model&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">build_fit_ensemble</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span>
+        <span class="k">return</span> <span class="n">build_fit_ensemble</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
                                   <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;ensemble_size&#39;</span><span class="p">],</span>
+                                  <span class="n">timeout</span><span class="p">,</span>
                                   <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">],</span>
                                   <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s1">&#39;cache&#39;</span><span class="p">])</span></div>
 
@@ -251,6 +251,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="n">y</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_transformation</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_internal_score</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fit_models</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_maximize</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_child_ensembles</span> <span class="o">=</span> <span class="p">[]</span>
@@ -333,7 +334,8 @@
                     <span class="n">best_addition</span><span class="p">,</span> <span class="n">best_addition_score</span> <span class="o">=</span> <span class="n">model</span><span class="p">,</span> <span class="n">candidate_ensemble_score</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_add_model</span><span class="p">(</span><span class="n">best_addition</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Ensemble size </span><span class="si">{}</span><span class="s1"> , best score: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_total_model_weights</span><span class="p">(),</span> <span class="n">best_addition_score</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal_score</span> <span class="o">=</span> <span class="n">best_addition_score</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Ensemble size </span><span class="si">{}</span><span class="s1"> , best score: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_total_model_weights</span><span class="p">(),</span> <span class="n">best_addition_score</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">1e6</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Constructs an Ensemble out of the library of models.</span>
@@ -470,7 +472,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">maximizable_score</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">,</span> <span class="n">prediction_to_validate</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># argmax returns (N, 1) matrix, need to squeeze it to (N,) for scoring.</span>
-            <span class="n">class_predictions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">prediction_to_validate</span><span class="o">.</span><span class="n">toarray</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">class_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_one_hot_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">prediction_to_validate</span><span class="o">.</span><span class="n">toarray</span><span class="p">())</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">maximizable_score</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">,</span> <span class="n">class_predictions</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
@@ -481,10 +483,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">class_probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_weighted_mean_predictions</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;predict&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
 
-        <span class="n">class_predictions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">class_probabilities</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">class_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_one_hot_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">class_probabilities</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span><span class="p">:</span>
             <span class="n">class_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">class_predictions</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">class_predictions</span>
+
+        <span class="k">return</span> <span class="n">class_predictions</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">requires_probabilities</span><span class="p">:</span>
@@ -505,7 +508,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_weighted_mean_predictions</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">build_fit_ensemble</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">build_fit_ensemble</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
                        <span class="n">metric</span><span class="p">:</span> <span class="n">Metric</span><span class="p">,</span> <span class="n">cache</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">encoder</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ensemble</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Construct an Ensemble of models from cache, optimizing for metric and fit to (x, y). &quot;&quot;&quot;</span>
     <span class="n">start_build</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
