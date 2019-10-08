@@ -3,24 +3,28 @@
 Installation
 ------------
 
-GAMA makes use of optional dependencies for its test environment (``test``) and its dash app (``vis``).
-To install GAMA first clone the repository::
+For regular usage, you can install GAMA with pip::
+
+    pip install gama
+
+GAMA features optional dependencies for visualization and development.
+You can install them with::
+
+    pip install gama[OPTIONAL]
+
+where `OPTIONAL` is one of:
+
+ - `vis`: allows you to use the prototype dash app to visualize optimization traces.
+ - `test`: to run GAMA's unit tests locally.
+ - `doc`: to build docs locally.
+ - `all`: all of the above.
+
+To see exactly what dependencies will be installed, see `setup.py <https://github.com/PGijsbers/gama/blob/master/setup.py>`_.
+If you plan on developing GAMA, cloning the repository and installing locally is advised::
 
     git clone https://github.com/PGijsbers/gama.git
     cd gama
+    pip install -e .[all]
 
-Then install GAMA with optional dependencies as desired.
-Installing only the required dependencies allows you to use all of GAMA's AutoML functionality::
-
-    pip install -e .
-
-Installing the visualization dependencies additionally allows you to use the prototype dash app to visualize optimization traces::
-
-    pip install -e .[vis]
-
-If you plan on developing GAMA, install the test environment::
-
-    pip install -e .[test]
-
-To see what dependencies will be installed, see `setup.py <https://github.com/PGijsbers/gama/blob/master/setup.py>`_.
-
+This installation will refer to your local GAMA files.
+Changes to the code directly affect the installed GAMA package without reinstalling requiring a reinstall.
