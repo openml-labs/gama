@@ -23,6 +23,8 @@ def build_app():
     from gama.dashboard.pages import pages
     base = create_generic_layout()
     base['tabs'].children = create_tabs(pages)
+    for page in pages:
+        page.register_callbacks(dashboard)
     return base
 
 
@@ -63,8 +65,7 @@ def create_tab(name: str):
         'border-top-left-radius': '3px',  # round tab corners
         'border-top-right-radius': '3px',
         'border-bottom': '0px',  # bottom box-shadow still present
-        'padding': '6px',
-        'align': 'right'
+        'padding': '6px'
     }
     selected_tab_style = {
         ** tab_style,
@@ -89,7 +90,7 @@ def create_tab(name: str):
 def display_page_content(page_name):
     from gama.dashboard.pages import pages
     page = [page for page in pages if page.name == page_name][0]
-    return [page.build_page()]
+    return [page.content]
 
 
 if __name__ == '__main__':

@@ -19,7 +19,18 @@ class BasePage(abc.ABC):
         """
         self.name = name
         self.alignment = alignment
+        self._content = None
+
+    @property
+    def content(self):
+        if self._content is None:
+            self._content = self.build_page()
+        return self._content
 
     @abc.abstractmethod
     def build_page(self):
         raise NotImplementedError
+
+    def register_callbacks(self, app):
+        # a page is not required to have callbacks
+        pass
