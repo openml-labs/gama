@@ -28,10 +28,17 @@ def build_app():
 
 def create_generic_layout():
     """ Creates the generic layout of tabs and their content pages. """
+    tab_banner_style = {
+        'border-top-left-radius': '3px',
+        'background-color': '#f9f9f9',
+        'padding': '0px 24px',
+        'border-bottom': '1px solid #d6d6d6'
+    }
+
     return html.Div(
         id="page",
         children=[
-            html.Div(id="tabs"),
+            html.Div(id="tabs", style=tab_banner_style),
             html.Div(id="content")
         ]
     )
@@ -40,6 +47,7 @@ def create_generic_layout():
 def create_tabs(pages: List[BasePage]):
     if pages == []:
         raise ValueError("Must have at least one tab.")
+
     # Sort pages by alignment
     sorted_pages = sorted(pages, key=lambda p: p.alignment)
     grouped_pages = ([page for page in sorted_pages if page.alignment >= 0] +
@@ -49,11 +57,26 @@ def create_tabs(pages: List[BasePage]):
 
 
 def create_tab(name: str):
+    tab_style = {
+        'color': 'black',
+        'width': '10%',
+        'border-top-left-radius': '3px',  # round tab corners
+        'border-top-right-radius': '3px',
+        'border-bottom': '0px',  # bottom box-shadow still present
+        'padding': '6px',
+        'align': 'right'
+    }
+    selected_tab_style = {
+        ** tab_style,
+        'border-top': '3px solid #c81818',  # Highlight color (TU/e colored)
+        'box-shadow': '1px 1px 0px white'  # removes bottom edge
+    }
     return dcc.Tab(
         id=f"{name}-tab",
         label=name,
         value=name,
-        style={'width': '10%'}
+        style=tab_style,
+        selected_style=selected_tab_style
     )
 
 
