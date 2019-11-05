@@ -1,3 +1,6 @@
+import multiprocessing
+from typing import Optional
+
 import dash_html_components as html
 import dash_daq as daq
 from dash.dependencies import Input, Output, State
@@ -6,6 +9,7 @@ from gama.dashboard.pages.base_page import BasePage
 
 
 class HomePage(BasePage):
+    callbacks = []
 
     def __init__(self):
         super().__init__(name='Home', alignment=0)
@@ -27,18 +31,23 @@ class HomePage(BasePage):
 
     def register_callbacks(self, app):
         app.callback(
-            Output("n_jobs", "marks"),
-            [Input("n_jobs", "value")],
-            [State("n_jobs", "min"), State("n_jobs", "max")]
         )(update_marks)
 
 
-def create_slider_input(label: str, min_: int, max_: int):
-    return daq.Slider(id=label, min=min_, max=max_, updatemode='drag')
+def create_slider_input(id_: str, min_: int, max_: int, label: Optional[str]):
+    HomePage.callbacks.append(((
+            Output("n_jobs", "marks"),
+            [Input("n_jobs", "value")],
+            [State("n_jobs", "min"), State("n_jobs", "max")]),
+            update_marks
+    ))
+    return daq.Slider(id=id_, min=min_, max=max_, updatemode='drag',
+                      value=min_, marks={min_: min_, max_: max_})
 
 
 def build_configuration_menu() -> html.Div:
-    cpu_slider = create_slider_input('n_jobs', 1, 16)
+    n_cpus = multiprocessing.cpu_count()
+    cpu_slider = create_slider_input('n_jobs', 1, n_cpus)
     return html.Div(
         children=[html.P("Configuration Menu"), cpu_slider],
         style={'box-shadow': '1px 1px 1px black'}
