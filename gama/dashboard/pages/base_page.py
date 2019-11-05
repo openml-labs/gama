@@ -1,4 +1,5 @@
 import abc
+from typing import Optional
 
 
 class BasePage(abc.ABC):
@@ -28,9 +29,6 @@ class BasePage(abc.ABC):
         return self._content
 
     @abc.abstractmethod
-    def build_page(self):
+    def build_page(self, app: Optional = None):
+        """ Populate the `content` field with html, register any callbacks. """
         raise NotImplementedError
-
-    def register_callbacks(self, app):
-        # a page is not required to have callbacks
-        pass

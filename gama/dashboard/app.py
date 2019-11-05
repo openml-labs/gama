@@ -24,7 +24,7 @@ def build_app():
     base = create_generic_layout()
     base['tabs'].children = create_tabs(pages)
     for page in pages:
-        page.register_callbacks(dashboard)
+        page.build_page(dashboard)
     return base
 
 
