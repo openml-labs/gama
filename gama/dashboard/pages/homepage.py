@@ -42,6 +42,10 @@ class HomePage(BasePage):
         HomePage.callbacks = []
 
 
+# === Configuration Menu ===
+parameter_input_row = {'margin': '4%', 'line-height': 2}
+
+
 def create_slider_input(id_: str, min_: int, max_: int, label: Optional[str] = None):
     HomePage.callbacks.append(((
             Output(id_, "marks"),
@@ -51,17 +55,31 @@ def create_slider_input(id_: str, min_: int, max_: int, label: Optional[str] = N
     ))
     slider = daq.Slider(id=id_, min=min_, max=max_, updatemode='drag',
                         value=min_, marks={min_: min_, max_: max_})
-    slider_div = html.Div(id=f"{id}-slider-div", children=[slider], style={'width': '46%', 'float': 'left'})
+    slider_div = html.Div(id=f"{id_}-slider-div", children=[slider])
     label_text = label if label is not None else id_
-    label_div = html.Div(id=f"{id}-label-div", children=label_text, style={'width': '46%', 'float': 'left'})
-    return html.Div(id=f"{id_}-row", children=[label_div, slider_div], style={'margin': '4%'})
+    label_div = html.Div(id=f"{id_}-label-div", children=label_text, style={'width': '46%', 'float': 'left'})
+    return html.Div(id=f"{id_}-row", children=[label_div, slider_div], className="control-element")
 
 
 def build_configuration_menu() -> html.Div:
     n_cpus = multiprocessing.cpu_count()
     cpu_slider = create_slider_input('n_jobs', 1, n_cpus, label='N Jobs')
+
+    nud_width = 60
+    max_time_label = html.Div(id='max_time_label', children='Max Runtime', style={'width': '46%', 'float': 'left', 'text-align': 'middle'})
+    max_hours_input = daq.NumericInput(id='max_hours_input', max=99, size=nud_width)
+    hours_input_div = html.Div(id='hours_input_div', children=[max_hours_input], style={'float': 'right', 'width': f'{nud_width}px'})
+    hours_label = html.Label(id='hours_label', children='h', style={'float': 'right', 'width': '2%', 'vertical-align': 'center'})
+    max_minutes_input = daq.NumericInput(id='max_minutes_input', max=59, size=nud_width)
+    minutes_input_div = html.Div(id='minutes_input_div', children=[max_minutes_input], style={'float': 'right', 'width': f'{nud_width}px'})
+    minutes_label = html.Label(id='minutes_label', children='m', style={'float': 'right', 'width': '5%', 'vertical-align': 'center'})
+
+    time_row = html.Div(id='time_row',
+                        children=[max_time_label, html.Div(), hours_input_div, hours_label, minutes_input_div, minutes_label],
+                        className="control-element")
+
     return html.Div(
-        children=[html.P("Configuration Menu"), cpu_slider],
+        children=[html.P("Configuration Menu"), cpu_slider, time_row],
         style={'box-shadow': '1px 1px 1px black'}
     )
 
