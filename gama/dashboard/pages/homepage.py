@@ -1,6 +1,7 @@
 import multiprocessing
 from typing import Optional
 
+import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
 import dash_daq as daq
@@ -44,58 +45,85 @@ class HomePage(BasePage):
 
 
 # === Configuration Menu ===
-parameter_input_row = {'margin': '4%', 'line-height': 2}
 
-
-def create_slider_input(id_: str, min_: int, max_: int, label: Optional[str] = None):
+def cpu_slider():
+    n_cpus = multiprocessing.cpu_count()
+    id_ = 'cpu_slider'
+    cpu_input = dbc.FormGroup(
+        [
+            dbc.Label("N Jobs", html_for=id_, width=5),
+            dbc.Col(
+                dcc.Slider(id=id_, min=1, max=n_cpus, updatemode='drag',
+                           value=1, marks={1: '1', n_cpus: str(n_cpus)})
+            )
+        ],
+        row=True
+    )
     HomePage.callbacks.append(((
-            Output(id_, "marks"),
-            [Input(id_, "value")],
-            [State(id_, "min"), State(id_, "max")]),
-            update_marks
+        Output(id_, "marks"),
+        [Input(id_, "value")],
+        [State(id_, "min"), State(id_, "max")]),
+        update_marks
     ))
-    slider = daq.Slider(id=id_, min=min_, max=max_, updatemode='drag',
-                        value=min_, marks={min_: min_, max_: max_})
-    slider_div = html.Div(id=f"{id_}-slider-div", children=[slider])
-    label_text = label if label is not None else id_
-    label_div = html.Div(id=f"{id_}-label-div", children=label_text, style={'width': '46%', 'float': 'left'})
-    return html.Div(id=f"{id_}-row", children=[label_div, slider_div], className="control-element")
+    return cpu_input
+
+
+def time_nud(label_text: str, hour_id: str, hour_default: int, minute_id: str, minute_default: int):
+    time_input = dbc.FormGroup(
+        [
+            dbc.Label(label_text, html_for=hour_id, width=6),
+            dbc.Col(
+                dbc.InputGroup(
+                    [
+                        dbc.Input(id=hour_id, type='number', min=0, max=99, step=1, value=hour_default),
+                        dbc.InputGroupAddon("H", addon_type="append"),
+                    ]
+                )
+            ),
+            dbc.Col(
+                dbc.InputGroup(
+                    [
+                        dbc.Input(id=minute_id, type='number', min=0, max=59, step=1, value=minute_default),
+                        dbc.InputGroupAddon("M", addon_type="append"),
+                    ]
+                )
+            )
+        ],
+        row=True
+    )
+    return time_input
+
+
+def markdown_header(text: str, level: int = 4, with_horizontal_rule: bool = True):
+    hr = '\n---'
+    markdown = f"{'#' * level} {text}{hr if with_horizontal_rule else ''}"
+    return dcc.Markdown(markdown)
 
 
 def build_configuration_menu() -> html.Div:
-    n_cpus = multiprocessing.cpu_count()
-    cpu_slider = create_slider_input('n_jobs', 1, n_cpus, label='N Jobs')
-
-    def aligned_P(text: str) -> html.P:
-        return html.P(text, style={'position': 'relative', 'bottom': '12%'})
-
-    nud_width = 60
-    max_time_label = html.Div(id='max_time_label',
-                              children=[aligned_P('Max Runtime')],
-                              style={'width': '46%', 'float': 'left'})
-    max_hours_input = daq.NumericInput(id='max_hours_input', max=99, size=nud_width)
-    hours_input_div = html.Div(id='hours_input_div', children=[max_hours_input], style={'float': 'right', 'width': f'{nud_width}px'})
-    hours_label = html.Label(id='hours_label',
-                             children=[aligned_P('h')],
-                             style={'float': 'right', 'width': '2%', 'vertical-align': 'center'})
-    max_minutes_input = daq.NumericInput(id='max_minutes_input', max=59, size=nud_width)
-    minutes_input_div = html.Div(id='minutes_input_div', children=[max_minutes_input], style={'float': 'right', 'width': f'{nud_width}px'})
-    minutes_label = html.Label(id='minutes_label',
-                               children=[aligned_P('m')],
-                               style={'float': 'right', 'width': '5%', 'vertical-align': 'center'})
-
-    time_row = html.Div(id='time_row',
-                        children=[max_time_label, html.Div(), hours_input_div, hours_label, minutes_input_div, minutes_label],
-                        className="control-element")
-
+    cpu_input = cpu_slider()
+    max_total_time_input = time_nud('Max Runtime',
+                                    hour_id='max_total_h',
+                                    hour_default=1,
+                                    minute_id='max_total_m',
+                                    minute_default=0)
+    max_eval_time_input = time_nud('Max time per pipeline',
+                                   hour_id='max_eval_h',
+                                   hour_default=0,
+                                   minute_id='max_eval_m',
+                                   minute_default=5)
     return html.Div(
-        children=[html.P("Configuration Menu"), cpu_slider, time_row],
-        style={'box-shadow': '1px 1px 1px black'}
+        children=[markdown_header('Configure GAMA', level=2),
+                  markdown_header('Resources'),
+                  dbc.Form([cpu_input, max_total_time_input, max_eval_time_input]),
+                  markdown_header('Resources 2'),
+                  dbc.Form([cpu_input, max_total_time_input, max_eval_time_input])],
+        style={'box-shadow': '1px 1px 1px black', 'padding': '2%'}
     )
 
 
 def update_marks(selected_value, min_, max_):
-    return {min_: min_, selected_value: selected_value, max_: max_}
+    return {min_: str(min_), selected_value: str(selected_value), max_: str(max_)}
 
 
 def build_data_navigator() -> html.Div:

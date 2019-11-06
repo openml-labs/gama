@@ -3,6 +3,7 @@ from typing import List
 
 import dash
 import dash_core_components as dcc
+import dash_bootstrap_components as dbc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import dash_table
@@ -13,7 +14,7 @@ import pandas as pd
 
 from gama.dashboard.pages.base_page import BasePage
 
-dashboard = dash.Dash('GamaDashboard')
+dashboard = dash.Dash('GamaDashboard', external_stylesheets=[dbc.themes.BOOTSTRAP])
 dashboard.config.suppress_callback_exceptions = True
 
 
