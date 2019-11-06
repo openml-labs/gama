@@ -42,7 +42,8 @@ def create_generic_layout():
         children=[
             html.Div(id="tabs", style=tab_banner_style),
             html.Div(id="content")
-        ]
+        ],
+        style={'font-family': "'Open Sans Semi Bold', sans-serif"}
     )
 
 

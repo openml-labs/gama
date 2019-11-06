@@ -1,6 +1,7 @@
 import multiprocessing
 from typing import Optional
 
+import dash_bootstrap_components as dbc
 import dash_html_components as html
 import dash_daq as daq
 from dash.dependencies import Input, Output, State
@@ -65,14 +66,23 @@ def build_configuration_menu() -> html.Div:
     n_cpus = multiprocessing.cpu_count()
     cpu_slider = create_slider_input('n_jobs', 1, n_cpus, label='N Jobs')
 
+    def aligned_P(text: str) -> html.P:
+        return html.P(text, style={'position': 'relative', 'bottom': '12%'})
+
     nud_width = 60
-    max_time_label = html.Div(id='max_time_label', children='Max Runtime', style={'width': '46%', 'float': 'left', 'text-align': 'middle'})
+    max_time_label = html.Div(id='max_time_label',
+                              children=[aligned_P('Max Runtime')],
+                              style={'width': '46%', 'float': 'left'})
     max_hours_input = daq.NumericInput(id='max_hours_input', max=99, size=nud_width)
     hours_input_div = html.Div(id='hours_input_div', children=[max_hours_input], style={'float': 'right', 'width': f'{nud_width}px'})
-    hours_label = html.Label(id='hours_label', children='h', style={'float': 'right', 'width': '2%', 'vertical-align': 'center'})
+    hours_label = html.Label(id='hours_label',
+                             children=[aligned_P('h')],
+                             style={'float': 'right', 'width': '2%', 'vertical-align': 'center'})
     max_minutes_input = daq.NumericInput(id='max_minutes_input', max=59, size=nud_width)
     minutes_input_div = html.Div(id='minutes_input_div', children=[max_minutes_input], style={'float': 'right', 'width': f'{nud_width}px'})
-    minutes_label = html.Label(id='minutes_label', children='m', style={'float': 'right', 'width': '5%', 'vertical-align': 'center'})
+    minutes_label = html.Label(id='minutes_label',
+                               children=[aligned_P('m')],
+                               style={'float': 'right', 'width': '5%', 'vertical-align': 'center'})
 
     time_row = html.Div(id='time_row',
                         children=[max_time_label, html.Div(), hours_input_div, hours_label, minutes_input_div, minutes_label],
