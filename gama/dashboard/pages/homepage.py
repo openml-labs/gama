@@ -1,5 +1,5 @@
 import multiprocessing
-from typing import Optional
+from typing import Optional, List, Dict, Tuple
 
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
@@ -51,7 +51,7 @@ def cpu_slider():
     id_ = 'cpu_slider'
     cpu_input = dbc.FormGroup(
         [
-            dbc.Label("N Jobs", html_for=id_, width=5),
+            dbc.Label("N Jobs", html_for=id_, width=6),
             dbc.Col(
                 dcc.Slider(id=id_, min=1, max=n_cpus, updatemode='drag',
                            value=1, marks={1: '1', n_cpus: str(n_cpus)})
@@ -69,7 +69,7 @@ def cpu_slider():
 
 
 def time_nud(label_text: str, hour_id: str, hour_default: int, minute_id: str, minute_default: int):
-    time_input = dbc.FormGroup(
+    return dbc.FormGroup(
         [
             dbc.Label(label_text, html_for=hour_id, width=6),
             dbc.Col(
@@ -91,16 +91,95 @@ def time_nud(label_text: str, hour_id: str, hour_default: int, minute_id: str, m
         ],
         row=True
     )
-    return time_input
+
+
+def toggle_button(label_text: str, id_: str):
+    return dbc.FormGroup(
+        [
+            dbc.Label(label_text, html_for=id_, width=6),
+            dbc.Col(dbc.Checklist(id=id_, options=[{'label': '', 'value': 'regularize'}], switch=True)),
+        ],
+        row=True
+    )
+
+
+def dropdown(label_text: str, id_: str, options: Dict[str, str]):
+    """ options formatted as {LABEL_KEY: LABEL_TEXT, ...} """
+    return dbc.FormGroup(
+        [
+            dbc.Label(label_text, html_for=id_, width=6),
+            dbc.Col(
+                dcc.Dropdown(
+                    id=id_,
+                    options=[
+                        {'label': text, 'value': key}
+                        for key, text in options.items()
+                    ],
+                    clearable=False
+                ),
+            ),
+        ],
+        row=True
+    )
+
+
+def button_header(text: str, id_: str, level: int = 4):
+    header = f"{'#' * level} {text}"
+    return dbc.FormGroup([dbc.Button([dcc.Markdown(header)], id=id_, block=True, color='primary')])
 
 
 def markdown_header(text: str, level: int = 4, with_horizontal_rule: bool = True):
-    hr = '\n---'
-    markdown = f"{'#' * level} {text}{hr if with_horizontal_rule else ''}"
-    return dcc.Markdown(markdown)
+    header = f"{'#' * level} {text}"
+    hr = f"\n{'-'*(level + 1 + len(text))}"  # matching length '-' not required but nicer.
+    return dcc.Markdown(f"{header}{hr if with_horizontal_rule else ''}")
+
+
+def toggle_collapse(click, is_open: bool):
+    if click:
+        return not is_open
+    return is_open
+
+
+def collapsable_section(header: str, controls: List[dbc.FormGroup], start_open: bool = True):
+    header_id = f"{header}-header"
+    form_id = f"{header}-form"
+
+    form_header = button_header(header, id_=header_id),
+    collapsable_form = dbc.Collapse(
+        id=form_id,
+        children=[dbc.Form(controls)],
+        is_open=start_open
+    )
+
+    HomePage.callbacks.append(((
+        Output(form_id, "is_open"),
+        [Input(header_id, "n_clicks")],
+        [State(form_id, "is_open")]),
+        toggle_collapse
+    ))
+    return form_header, collapsable_form
 
 
 def build_configuration_menu() -> html.Div:
+    # Optimization
+    from gama.utilities.metrics import all_metrics
+    metrics = {m: m.replace('_', ' ') for m in all_metrics}
+    scoring_input = dropdown('Metric', 'metric_dropdown', options=metrics)
+    regularize_input = toggle_button('Prefer short pipelines', 'regularize_length_switch')
+    opt_form = dbc.Collapse(
+        id='opt_form',
+        children=[dbc.Form([scoring_input, regularize_input])],
+        is_open=True
+    )
+    HomePage.callbacks.append(((
+        Output("opt_form", "is_open"),
+        [Input("opt_header", "n_clicks")],
+        [State("opt_form", "is_open")]),
+        toggle_collapse
+    ))
+    header, content = collapsable_section("opt", [scoring_input, regularize_input])
+
+    # Resources
     cpu_input = cpu_slider()
     max_total_time_input = time_nud('Max Runtime',
                                     hour_id='max_total_h',
@@ -114,9 +193,11 @@ def build_configuration_menu() -> html.Div:
                                    minute_default=5)
     return html.Div(
         children=[markdown_header('Configure GAMA', level=2),
-                  markdown_header('Resources'),
-                  dbc.Form([cpu_input, max_total_time_input, max_eval_time_input]),
-                  markdown_header('Resources 2'),
+                  #header,
+                  #content,
+                  button_header('Optimization', id_='opt_header'),
+                  opt_form,
+                  button_header('Resources', id_='resource_header'),
                   dbc.Form([cpu_input, max_total_time_input, max_eval_time_input])],
         style={'box-shadow': '1px 1px 1px black', 'padding': '2%'}
     )
