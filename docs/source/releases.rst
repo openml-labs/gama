@@ -10,6 +10,7 @@ Features:
 
 Bugfixes:
  - fit(x, y) may now be called with y as (N,1) array.
+ - ensemble post-processing is now compatible with non-zero indexed class labels
 
 Maintenance:
  - `__version__.py` is now the only place with hard-coded version.
