@@ -3,6 +3,9 @@ import os
 
 from setuptools import setup, find_packages
 
+with open("gama/__version__.py", 'r') as fh:
+    version = fh.readlines()[-1].split()[-1].strip("\"'")
+
 requirements = [
     'numpy>=1.14.0',
     'scipy>=1.0.0',
@@ -37,7 +40,7 @@ with open(os.path.join("README.md")) as fid:
 
 setup(
     name='gama',
-    version='19.08.0',
+    version=version,
     description='A package for automated machine learning based on scikit-learn.',
     long_description=README,
     long_description_content_type='text/markdown',

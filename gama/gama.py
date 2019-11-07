@@ -21,6 +21,7 @@ from gama.search_methods.base_search import BaseSearch
 from gama.utilities.metrics import scoring_to_metric
 from .utilities.observer import Observer
 
+from gama.__version__ import __version__
 from gama.data import X_y_from_arff
 from gama.search_methods.async_ea import AsyncEA
 from gama.utilities.generic.timekeeper import TimeKeeper
@@ -42,7 +43,6 @@ log = logging.getLogger(__name__)
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
                           did not terminate successfully."""
-__version__ = '19.01.0'
 
 for module_to_ignore in ["sklearn", "numpy"]:
     warnings.filterwarnings("ignore", module=module_to_ignore)
@@ -202,23 +202,24 @@ class Gama(ABC):
                 x[col] = x[col].astype(self._X[col].dtype)
         return self._predict(x)
 
-    def predict_arff(self, arff_file_path: str):
+    def predict_arff(self, arff_file_path: str, target_column: Optional[str] = None) -> np.ndarray:
         """ Predict the target for input found in the ARFF file.
 
         Parameters
         ----------
         arff_file_path: str
             An ARFF file with the same columns as the one that used in fit.
-            The target column is ignored (but must be present).
+            Target column must be present in file, but its values are ignored (can be '?').
+        target_column: str, optional (default=None)
+            Specifies which column the model should predict.
+            If left None, the last column is taken to be the target.
 
         Returns
         -------
         numpy.ndarray
             array with predictions for each row in the ARFF file.
         """
-        if not isinstance(arff_file_path, str):
-            raise TypeError(f"`arff_file_path` must be of type `str` but is of type {type(arff_file_path)}")
-        X, _ = X_y_from_arff(arff_file_path)
+        X, _ = X_y_from_arff(arff_file_path, split_column=target_column)
         return self._predict(X)
 
     def score(self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]) -> float:
@@ -239,32 +240,38 @@ class Gama(ABC):
         predictions = self.predict_proba(x) if self._metrics[0].requires_probabilities else self.predict(x)
         return self._metrics[0].score(y, predictions)
 
-    def score_arff(self, arff_file_path: str) -> float:
+    def score_arff(self, arff_file_path: str, target_column: Optional[str] = None) -> float:
         """ Calculate the score of the model according to the `scoring` metric and input in the ARFF file.
 
         Parameters
         ----------
-        arff_file_path: string
+        arff_file_path: str
             An ARFF file with which to calculate the score.
+        target_column: str, optional (default=None)
+            Specifies which column the model should predict.
+            If left None, the last column is taken to be the target.
 
         Returns
         -------
         float
             The score obtained on the given test data according to the `scoring` metric.
         """
-        X, y = X_y_from_arff(arff_file_path)
+        X, y = X_y_from_arff(arff_file_path, split_column=target_column)
         return self.score(X, y)
 
-    def fit_arff(self, arff_file_path: str, *args, **kwargs):
+    def fit_arff(self, arff_file_path: str, target_column: Optional[str] = None, *args, **kwargs):
         """ Find and fit a model to predict the target column (last) from other columns.
 
         Parameters
         ----------
-        arff_file_path: string
+        arff_file_path: str
             Path to an ARFF file containing the training data.
-            The last column is always taken to be the target.
+        target_column: str, optional (default=None)
+            Specifies which column the model should predict.
+            If left None, the last column is taken to be the target.
+
         """
-        X, y = X_y_from_arff(arff_file_path)
+        X, y = X_y_from_arff(arff_file_path, split_column=target_column)
         self.fit(X, y, *args, **kwargs)
 
     def fit(self,
