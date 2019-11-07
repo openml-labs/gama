@@ -166,17 +166,6 @@ def build_configuration_menu() -> html.Div:
     metrics = {m: m.replace('_', ' ') for m in all_metrics}
     scoring_input = dropdown('Metric', 'metric_dropdown', options=metrics)
     regularize_input = toggle_button('Prefer short pipelines', 'regularize_length_switch')
-    opt_form = dbc.Collapse(
-        id='opt_form',
-        children=[dbc.Form([scoring_input, regularize_input])],
-        is_open=True
-    )
-    HomePage.callbacks.append(((
-        Output("opt_form", "is_open"),
-        [Input("opt_header", "n_clicks")],
-        [State("opt_form", "is_open")]),
-        toggle_collapse
-    ))
     optimization = collapsable_section("Optimization", [scoring_input, regularize_input])
 
     # Resources
@@ -192,10 +181,15 @@ def build_configuration_menu() -> html.Div:
                                    minute_id='max_eval_m',
                                    minute_default=5)
     resources = collapsable_section("Resources", [cpu_input, max_total_time_input, max_eval_time_input])
+
+    # Advanced
+    advanced = collapsable_section("Advanced", [], start_open=False)
+
     return html.Div(
         children=[markdown_header('Configure GAMA', level=2),
                   *optimization,
-                  *resources],
+                  *resources,
+                  *advanced],
         style={'box-shadow': '1px 1px 1px black', 'padding': '2%'}
     )
 
