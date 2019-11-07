@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 19.11.0
+Version 19.11.1
 ---------------
 Features:
  - `gama.__version__` can now be used to retrieve gama's version.
@@ -14,6 +14,10 @@ Bugfixes:
 
 Maintenance:
  - `__version__.py` is now the only place with hard-coded version.
+
+Version 19.11.0
+---------------
+Accidentally released without updates.
 
 
 Version 19.08.0
