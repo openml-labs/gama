@@ -6,7 +6,6 @@ import time
 from typing import Optional, List
 
 import pandas as pd
-import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 import stopit
 
@@ -45,8 +44,9 @@ class EnsemblePostProcessing(BasePostProcessing):
         self._overwrite_hyperparameter_default('cache', gama._cache_dir)
 
     def post_process(self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]) -> 'model':
-        return build_fit_ensemble(x, y, timeout,
+        return build_fit_ensemble(x, y,
                                   self.hyperparameters['ensemble_size'],
+                                  timeout,
                                   self.hyperparameters['metric'],
                                   self.hyperparameters['cache'])
 
@@ -95,6 +95,7 @@ class Ensemble(object):
         self._y = y
         self._prediction_transformation = None
 
+        self._internal_score = None
         self._fit_models = None
         self._maximize = True
         self._child_ensembles = []
@@ -177,7 +178,8 @@ class Ensemble(object):
                     best_addition, best_addition_score = model, candidate_ensemble_score
 
             self._add_model(best_addition)
-            log.debug('Ensemble size {} , best score: {}'.format(self._total_model_weights(), best_addition_score))
+            self._internal_score = best_addition_score
+            log.info('Ensemble size {} , best score: {}'.format(self._total_model_weights(), best_addition_score))
 
     def fit(self, X, y, timeout=1e6):
         """ Constructs an Ensemble out of the library of models.
@@ -314,7 +316,7 @@ class EnsembleClassifier(Ensemble):
             return self._metric.maximizable_score(self._y, prediction_to_validate)
         else:
             # argmax returns (N, 1) matrix, need to squeeze it to (N,) for scoring.
-            class_predictions = np.argmax(prediction_to_validate.toarray(), axis=1)
+            class_predictions = self._one_hot_encoder.inverse_transform(prediction_to_validate.toarray())
             return self._metric.maximizable_score(self._y, class_predictions)
 
     def predict(self, X):
@@ -325,10 +327,11 @@ class EnsembleClassifier(Ensemble):
         else:
             class_probabilities = self._get_weighted_mean_predictions(X, 'predict').toarray()
 
-        class_predictions = np.argmax(class_probabilities, axis=1)
+        class_predictions = self._one_hot_encoder.inverse_transform(class_probabilities)
         if self._label_encoder:
             class_predictions = self._label_encoder.inverse_transform(class_predictions)
-        return class_predictions
+
+        return class_predictions.ravel()
 
     def predict_proba(self, X):
         if self._metric.requires_probabilities:
@@ -349,7 +352,7 @@ class EnsembleRegressor(Ensemble):
         return self._get_weighted_mean_predictions(X)
 
 
-def build_fit_ensemble(x, y, timeout: float, ensemble_size: int,
+def build_fit_ensemble(x, y, ensemble_size: int, timeout: float,
                        metric: Metric, cache: str, encoder: Optional[object]=None) -> Ensemble:
     """ Construct an Ensemble of models from cache, optimizing for metric and fit to (x, y). """
     start_build = time.time()
