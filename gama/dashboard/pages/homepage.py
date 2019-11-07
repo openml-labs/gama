@@ -144,7 +144,7 @@ def collapsable_section(header: str, controls: List[dbc.FormGroup], start_open: 
     header_id = f"{header}-header"
     form_id = f"{header}-form"
 
-    form_header = button_header(header, id_=header_id),
+    form_header = button_header(header, id_=header_id)
     collapsable_form = dbc.Collapse(
         id=form_id,
         children=[dbc.Form(controls)],
@@ -177,7 +177,7 @@ def build_configuration_menu() -> html.Div:
         [State("opt_form", "is_open")]),
         toggle_collapse
     ))
-    header, content = collapsable_section("opt", [scoring_input, regularize_input])
+    optimization = collapsable_section("Optimization", [scoring_input, regularize_input])
 
     # Resources
     cpu_input = cpu_slider()
@@ -191,14 +191,11 @@ def build_configuration_menu() -> html.Div:
                                    hour_default=0,
                                    minute_id='max_eval_m',
                                    minute_default=5)
+    resources = collapsable_section("Resources", [cpu_input, max_total_time_input, max_eval_time_input])
     return html.Div(
         children=[markdown_header('Configure GAMA', level=2),
-                  #header,
-                  #content,
-                  button_header('Optimization', id_='opt_header'),
-                  opt_form,
-                  button_header('Resources', id_='resource_header'),
-                  dbc.Form([cpu_input, max_total_time_input, max_eval_time_input])],
+                  *optimization,
+                  *resources],
         style={'box-shadow': '1px 1px 1px black', 'padding': '2%'}
     )
 
