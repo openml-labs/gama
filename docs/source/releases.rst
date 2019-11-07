@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 19.11.2
+---------------
+Bugfixes:
+ - `predict_proba_arff` now also accepts a `target_column` as expected from the previous update.
+
 Version 19.11.1
 ---------------
 Features:
