@@ -21,6 +21,7 @@ from gama.search_methods.base_search import BaseSearch
 from gama.utilities.metrics import scoring_to_metric
 from .utilities.observer import Observer
 
+from gama.__version__ import __version__
 from gama.data import X_y_from_arff
 from gama.search_methods.async_ea import AsyncEA
 from gama.utilities.generic.timekeeper import TimeKeeper
@@ -42,7 +43,6 @@ log = logging.getLogger(__name__)
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
                           did not terminate successfully."""
-__version__ = '19.01.0'
 
 for module_to_ignore in ["sklearn", "numpy"]:
     warnings.filterwarnings("ignore", module=module_to_ignore)
