@@ -35,6 +35,7 @@ breast_cancer = dict(
 breast_cancer_missing = dict(
     name='breast_cancer_missing',
     load=load_breast_cancer,
+    target='status',
     test_size=143,
     n_classes=2,
     base_accuracy=0.62937,
@@ -98,9 +99,9 @@ def _test_dataset_problem(
         y_test = [str(val) for val in y_test]
 
         with Stopwatch() as sw:
-            gama.fit_arff(train_path)
-        class_predictions = gama.predict_arff(test_path)
-        class_probabilities = gama.predict_proba_arff(test_path)
+            gama.fit_arff(train_path, target_column=data['target'])
+        class_predictions = gama.predict_arff(test_path, target_column=data['target'])
+        class_probabilities = gama.predict_proba_arff(test_path, target_column=data['target'])
         gama_score = gama.score_arff(test_path)
     else:
         X, y = data['load'](return_X_y=True)
