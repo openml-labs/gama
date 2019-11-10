@@ -1,5 +1,6 @@
 import argparse
 import logging
+import pickle
 import pandas as pd
 
 from gama import GamaClassifier, GamaRegressor
@@ -146,6 +147,8 @@ def main():
 
     # == Model Export ===
     print('CLI: Exporting models.')
+    with open(args.output_file, 'wb') as fh:
+        pickle.dump(automl.model, fh)
     print('done!')
 
 
