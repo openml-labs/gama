@@ -106,8 +106,9 @@ def format_x_y(x: Union[pd.DataFrame, np.ndarray], y: Union[pd.DataFrame, pd.Ser
 
     if remove_unlabeled:
         unlabeled = y[y.columns[0]].isnull() if isinstance(y, pd.DataFrame) else y.isnull()
-        if unlabeled.isnull().any():
-            log.info("Target vector has been found to contain NaN-labels, these rows will be ignored.")
-            x, y = x.loc[~y.isnull(), :], y[~y.isnull(), :]
+        if unlabeled.any():
+            log.info(f"Target vector has been found to contain {sum(unlabeled)} NaN-labels, "
+                     f"these rows will be ignored.")
+            x, y = x.loc[~unlabeled], y.loc[~unlabeled]
 
     return x, y

@@ -1,2 +1,3 @@
 ignore:
   - "gama/visualization/.*"
+  - "gama/utilities/cli.py"
