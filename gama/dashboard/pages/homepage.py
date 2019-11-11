@@ -1,5 +1,6 @@
 import multiprocessing
-from typing import Optional, List, Dict, Tuple
+import os
+from typing import Optional, List, Dict
 
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
@@ -93,17 +94,18 @@ def time_nud(label_text: str, hour_id: str, hour_default: int, minute_id: str, m
     )
 
 
-def toggle_button(label_text: str, id_: str):
+def toggle_button(label_text: str, id_: str, start_on: bool = True):
     return dbc.FormGroup(
         [
             dbc.Label(label_text, html_for=id_, width=6),
-            dbc.Col(dbc.Checklist(id=id_, options=[{'label': '', 'value': 'regularize'}], switch=True)),
+            dbc.Col(dbc.Checklist(id=id_, options=[{'label': '', 'value': 'on'}], switch=True,
+                                  value='on' if start_on else 'off')),
         ],
         row=True
     )
 
 
-def dropdown(label_text: str, id_: str, options: Dict[str, str]):
+def dropdown(label_text: str, id_: str, options: Dict[str, str], value: Optional[str] = None):
     """ options formatted as {LABEL_KEY: LABEL_TEXT, ...} """
     return dbc.FormGroup(
         [
@@ -115,7 +117,8 @@ def dropdown(label_text: str, id_: str, options: Dict[str, str]):
                         {'label': text, 'value': key}
                         for key, text in options.items()
                     ],
-                    clearable=False
+                    clearable=False,
+                    value=value
                 ),
             ),
         ],
@@ -164,7 +167,8 @@ def build_configuration_menu() -> html.Div:
     # Optimization
     from gama.utilities.metrics import all_metrics
     metrics = {m: m.replace('_', ' ') for m in all_metrics}
-    scoring_input = dropdown('Metric', 'metric_dropdown', options=metrics)
+    metrics.update({'default': 'default'})
+    scoring_input = dropdown('Metric', 'metric_dropdown', options=metrics, value='default')
     regularize_input = toggle_button('Prefer short pipelines', 'regularize_length_switch')
     optimization = collapsable_section("Optimization", [scoring_input, regularize_input])
 
@@ -185,11 +189,15 @@ def build_configuration_menu() -> html.Div:
     # Advanced
     advanced = collapsable_section("Advanced", [], start_open=False)
 
+    # Go!
+    go_button = dbc.Button([dcc.Markdown("#### Go!")], id='go-button', block=True, color='success', disabled=True)
+
     return html.Div(
         children=[markdown_header('Configure GAMA', level=2),
                   *optimization,
                   *resources,
-                  *advanced],
+                  *advanced,
+                  go_button],
         style={'box-shadow': '1px 1px 1px black', 'padding': '2%'}
     )
 
@@ -199,4 +207,52 @@ def update_marks(selected_value, min_, max_):
 
 
 def build_data_navigator() -> html.Div:
-    return html.Div([html.P("Data Navigator")], style={'box-shadow': '1px 1px 1px black'})
+    # Unfortunately, at this time we need a full path, which is not available with dcc.Upload
+    #
+    # default_message = ['Drag and Drop or ', html.A('Select Files')]
+    # upload_file = dcc.Upload(
+    #     id='upload-data',
+    #     children=html.Div(
+    #         id='upload-data-text',
+    #         children=default_message
+    #     ),
+    #     style={'borderWidth': '1px', 'borderRadius': '5px', 'borderStyle': 'dashed', 'textAlign': 'center'}
+    # )
+
+    # def update_output(list_of_contents, filename, list_of_dates):
+    #     if list_of_contents is not None:
+    #         children = html.Div([f"Showing '{filename}'", html.A(' (Click to change)')])
+    #         return children, filename
+    #     return default_message, filename
+    #
+    # ---------------------------------------------
+
+    upload_file = dbc.Input(
+        id='file-path-input',
+        placeholder='Path to data file, e.g. ~/data/mydata.arff',
+        type='text'
+    )
+
+    table_container = html.Div(
+        id='table-container',
+        children=['This is where I would put my table. IF I HAD ONE.']
+    )
+
+    def update_data_table(filename):
+        if filename is not None and os.path.isfile(filename):
+            return 'found a file!', False
+        return filename, True
+
+    HomePage.callbacks.append(((
+        [Output('table-container', 'children'),
+         Output('go-button', 'disabled')],
+        [Input('file-path-input', 'value')]),
+        update_data_table
+    ))
+
+    return html.Div(
+        children=[markdown_header("Data Navigator", level=2),
+                  upload_file,
+                  table_container],
+        style={'box-shadow': '1px 1px 1px black', 'padding': '2%'}
+    )
