@@ -23,6 +23,9 @@ It describes visualization of optimization logs, changing the AutoML pipeline, a
 If there are any questions you have that are not answered by the documentation, check the `issue page <https://github.com/PGijsbers/GAMA/issues>`_.
 If your question has not been answered there either, please open a new issue and label with the question label.
 
+.. note::
+
+
 .. toctree::
    :includehidden:
 

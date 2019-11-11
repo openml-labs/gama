@@ -60,5 +60,6 @@ setup(
         'doc': documentation_requirements,
         'all': all_
     },
-    python_requires='>=3.6.0'
+    python_requires='>=3.6.0',
+    entry_points={'console_scripts': ['gama=gama.utilities.cli:main']}
 )
