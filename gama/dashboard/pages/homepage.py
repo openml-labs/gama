@@ -275,7 +275,7 @@ def build_data_navigator() -> html.Div:
 
     table_container = html.Div(
         id='table-container',
-        children=['This is where I would put my table. IF I HAD ONE.']
+        children=['No data loaded.']
     )
 
     def update_data_table(filename):
