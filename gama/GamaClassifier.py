@@ -1,5 +1,5 @@
 import inspect
-from typing import Union
+from typing import Union, Optional
 
 import numpy as np
 import pandas as pd
@@ -88,17 +88,25 @@ class GamaClassifier(Gama):
                 x[col] = x[col].astype(self._X[col].dtype)
         return self._predict_proba(x)
 
-    def predict_proba_arff(self, arff_file_path: str):
+    def predict_proba_arff(self, arff_file_path: str, target_column: Optional[str] = None):
         """ Predict the class probabilities for input in the arff_file, must have empty target column.
 
-        Predict target for X, using the best found pipeline(s) during the `fit` call.
+        Parameters
+        ----------
+        arff_file_path: str
+            An ARFF file with the same columns as the one that used in fit.
+            Target column must be present in file, but its values are ignored (can be '?').
+        target_column: str, optional (default=None)
+            Specifies which column the model should predict.
+            If left None, the last column is taken to be the target.
 
-        :param arff_file_path: str
-
-        :return: a numpy array with class probabilities. The array is of shape (N, K) where N is the length of the
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array with class probabilities. The array is of shape (N, K) where N is the length of the
             first dimension of X, and K is the number of class labels found in `y` of `fit`.
         """
-        X, _ = X_y_from_arff(arff_file_path)
+        X, _ = X_y_from_arff(arff_file_path, target_column)
         return self._predict_proba(X)
 
     def fit(self, x, y, *args, **kwargs):
