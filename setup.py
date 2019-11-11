@@ -25,7 +25,8 @@ test_requirements = [
 
 visualization_requirements = [
     'dash==1.1.1',
-    'dash-daq==0.1.0'
+    'dash-daq==0.1.0',
+    'dash-bootstrap-components'
 ]
 
 documentation_requirements = [

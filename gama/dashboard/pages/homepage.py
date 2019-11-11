@@ -1,5 +1,7 @@
 import multiprocessing
 import os
+import shlex
+import subprocess
 from typing import Optional, List, Dict
 
 import dash_core_components as dcc
@@ -163,6 +165,28 @@ def collapsable_section(header: str, controls: List[dbc.FormGroup], start_open: 
     return form_header, collapsable_form
 
 
+def start_gama(
+        n_clicks, metric, regularize, n_jobs,
+        max_total_time_h, max_total_time_m, max_eval_time_h, max_eval_time_m,
+        input_file):
+    # For some reason, 0 input registers as None.
+    max_total_time_h = 0 if max_total_time_h is None else max_total_time_h
+    max_total_time_m = 0 if max_total_time_m is None else max_total_time_m
+    max_eval_time_h = 0 if max_eval_time_h is None else max_eval_time_h
+    max_eval_time_m = 0 if max_eval_time_m is None else max_eval_time_m
+    max_total_time = (max_total_time_h * 60 + max_total_time_m)
+    max_eval_time = (max_eval_time_h * 60 + max_eval_time_m)
+    command = f'gama "{input_file}" -n {n_jobs} -t {max_total_time} --time_pipeline {max_eval_time}'
+    if regularize != 'on':
+        command += ' --long'
+    if metric != 'default':
+        command += f' -m {metric}'
+    print('calling ', command)
+    command = shlex.split(command)
+    process = subprocess.Popen(command, shell=True)
+    return 'danger', dcc.Markdown("#### Stop!")
+
+
 def build_configuration_menu() -> html.Div:
     # Optimization
     from gama.utilities.metrics import all_metrics
@@ -191,6 +215,22 @@ def build_configuration_menu() -> html.Div:
 
     # Go!
     go_button = dbc.Button([dcc.Markdown("#### Go!")], id='go-button', block=True, color='success', disabled=True)
+
+    HomePage.callbacks.append(((
+        [Output('go-button', "color"),
+         Output('go-button', "children")],
+        [Input('go-button', "n_clicks")],
+        [State('metric_dropdown', "value"),
+         State('regularize_length_switch', "value"),
+         State('cpu_slider', "value"),
+         State('max_total_h', "value"),
+         State('max_total_m', "value"),
+         State('max_eval_h', "value"),
+         State('max_eval_m', "value"),
+         State('file-path-input', 'value')]),
+        start_gama
+    ))
+    #def start_gama(metric, regularize, n_jobs, max_total_time, max_eval_time, input_file):
 
     return html.Div(
         children=[markdown_header('Configure GAMA', level=2),
