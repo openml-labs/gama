@@ -5,8 +5,10 @@ A fast and elitist multiobjective genetic algorithm: NSGA-II.
 IEEE transactions on evolutionary computation, 6(2), 182-197.
 """
 import itertools
+import random
 from functools import cmp_to_key
 from typing import List, Any, Callable
+import numpy as np
 
 
 class NSGAMeta:
@@ -32,7 +34,22 @@ class NSGAMeta:
         return -1 if self_better else 1
 
 
-def NSGA2(population: List[Any], n: int, metrics: List[Callable[[Any], float]]) -> List[Any]:
+def nsga2_select(population: List[Any], n: int, metrics: List[Callable[[Any], float]]) -> List[Any]:
+    """ Select n pairs from the population through binary tournament selection based on crowding distance. """
+    # Entire population is returned, but with rank and distance information.
+    candidates = nsga2(population, n=len(population), metrics=metrics, return_meta=True)
+
+    def select_one():
+        ind1, ind2 = random.sample(candidates, k=2)
+        return ind1 if ind1.crowd_compare(ind2) < 0 else ind2
+
+    selected = []
+    for _ in range(n):
+        selected.append((select_one().obj, select_one().obj))
+    return selected
+
+
+def nsga2(population: List[Any], n: int, metrics: List[Callable[[Any], float]], return_meta: bool=False) -> List[Any]:
     """ Selects n individuals from the population to create offspring with according to NSGA-II.
 
     Parameters
@@ -43,6 +60,9 @@ def NSGA2(population: List[Any], n: int, metrics: List[Callable[[Any], float]]) 
         Number of objects to pick out of population. Must be greater than 0 and smaller than len(population).
     metrics: List[Callable[[T], float]]
         List of functions which obtain the values for each dimension on which to compare elements of population.
+    return_meta: bool (default=False)
+        If True, return the selected individuals wrapped in a NSGAMeta class with information such as rank and distance.
+        If False, return the selected individuals as they were passed to this function.
 
     Returns
     -------
@@ -67,7 +87,7 @@ def NSGA2(population: List[Any], n: int, metrics: List[Callable[[Any], float]]) 
             selection += s[: (n - len(selection))]  # Fill up to n
         i += 1
 
-    return [s.obj for s in selection]
+    return selection if return_meta else [s.obj for s in selection]
 
 
 def fast_non_dominated_sort(P):
@@ -103,32 +123,11 @@ def crowding_distance_assignment(I):
     for m in range(len(I[0].values)):
         I = sorted(I, key=lambda x: x.values[m])
         I[0].distance = I[-1].distance = float('inf')
+        if I[-1].values[m] == I[0].values[m] or np.isinf(I[0].values[m]) or np.isinf(I[-1].values[m]):
+            # Would raise divisionbyzero later, or give other numerical warnings.
+            # This typically happens only for the worst pareto front(s), so the inaccuracy in crowding distance for
+            # the remainder is not really a concern. Might consider immediately removing failing individuals.
+            continue
+
         for i_prev, i, i_next in zip(I, I[1:], I[2:]):
             i.distance += (i_next.values[m] - i_prev.values[m]) / (I[-1].values[m] - I[0].values[m])
-
-
-# def correctness():
-#     P = [(5, 6), (6, 5), (3, 5), (4, 4), (5, 3), (2, 3), (3, 2), (2.5, 2.5), (2.49, 2.51)]
-#     metrics = [lambda x:x[0], lambda x:x[1]]
-#     for i in range(1,10):
-#         print(NSGA2(P, i, metrics))
-#
-#
-# def performance():
-#     import time
-#     import numpy as np
-#     start = time.time()
-#
-#     for i in range(10):
-#         loop_time = time.time()
-#         P = [p for p in np.random.random((100, 3))]
-#         metrics = [lambda x: x[0], lambda x: x[1], lambda x: x[2]]
-#         for N in [5, 10, 25, 100]:
-#             print(f'starting i={i}, n={N}')
-#             selected = NSGA2(P, n=N, metrics=metrics)
-#         print(f'Four selects took {time.time() - loop_time}')
-#     print(f'total time: {time.time() - start}')
-#
-#
-# if __name__ == '__main__':
-#     performance()
