@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+
+Version 19.11.3
+---------------
+Maintenance:
+ - Selection now takes crowding distance into account (again).
+
+
 Version 19.11.2
 ---------------
 Bugfixes:
