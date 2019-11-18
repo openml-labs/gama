@@ -5,7 +5,9 @@ Release Notes
 Version 19.11.3
 ---------------
 Maintenance:
- - Selection now takes crowding distance into account (again).
+ #67: Selection now takes crowding distance into account (again).
+ #68: `n_jobs` will now default to use half of available cores.
+ #68: Updates given about the Pareto front now include the pipeline structure.
 
 
 Version 19.11.2
