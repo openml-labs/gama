@@ -45,11 +45,15 @@ def define_preprocessing_steps(X_df: pd.DataFrame,
             else:
                 pass  # Binary category or constant feature.
 
-    one_hot_encoder = ce.OneHotEncoder(cols=one_hot_columns, handle_unknown='ignore')
-    target_encoder = ce.TargetEncoder(cols=target_encoding_columns, handle_unknown='ignore')
-    imputer = SimpleImputer(strategy='median')
-
-    return [one_hot_encoder, target_encoder, imputer]
+    steps = []
+    if one_hot_columns != []:
+        steps.append(ce.OneHotEncoder(cols=one_hot_columns, handle_unknown='ignore'))
+    if target_encoding_columns != []:
+        steps.append(ce.TargetEncoder(cols=target_encoding_columns, handle_unknown='ignore'))
+    # We always train an Imputer so we can impute missing data in the test set even if training data
+    # has no missing values. It would be better to only do this for the final pipeline.
+    steps.append(SimpleImputer(strategy='median'))
+    return steps
 
 
 def heuristic_numpy_to_dataframe(X: np.ndarray, max_unique_values_cat: int = 10) -> pd.DataFrame:

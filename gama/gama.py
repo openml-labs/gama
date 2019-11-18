@@ -3,6 +3,7 @@ from collections import defaultdict
 import datetime
 from functools import partial
 import logging
+import multiprocessing
 import os
 import random
 import shutil
@@ -55,10 +56,10 @@ class Gama(ABC):
                  scoring: Union[str, Metric, Tuple[Union[str, Metric], ...]] = 'filled_in_by_child_class',
                  regularize_length: bool = True,
                  config: Dict = None,
-                 random_state: int = None,
+                 random_state: Optional[int] = None,
                  max_total_time: int = 3600,
                  max_eval_time: Optional[int] = None,
-                 n_jobs: int = -1,
+                 n_jobs: Optional[int] = None,
                  verbosity: int = logging.WARNING,
                  keep_analysis_log: Optional[str] = 'gama.log',
                  cache_dir: Optional[str] = None,
@@ -79,7 +80,7 @@ class Gama(ABC):
         config: a dictionary which specifies available components and their valid hyperparameter settings
             For more information, see :ref:`search_space_configuration`.
 
-        random_state:  int or None (default=None)
+        random_state:  int, optional (default=None)
             If an integer is passed, this will be the seed for the random number generators used in the process.
             However, with `n_jobs > 1`, there will be randomization introduced by multi-processing.
             For reproducible results, set this and use `n_jobs=1`.
@@ -91,10 +92,11 @@ class Gama(ABC):
             Time in seconds that can be used to evaluate any one single individual.
             If None, set to 0.1 * max_total_time.
 
-        n_jobs: int (default=-1)
+        n_jobs: int, optional (default=None)
             The amount of parallel processes that may be created to speed up `fit`.
-            Accepted values are positive integers or -1.
+            Accepted values are positive integers, -1 or None.
             If -1 is specified, multiprocessing.cpu_count() processes are created.
+            If None is specified, multiprocessing.cpu_count() / 2 processes are created.
 
         verbosity: int (default=logging.WARNING)
             Sets the level of log messages to be automatically output to terminal.
@@ -126,6 +128,10 @@ class Gama(ABC):
         log.info('Using GAMA version {}.'.format(__version__))
         log.info('{}({})'.format(self.__class__.__name__, arguments))
         log_event(log, TOKENS.INIT, arguments)
+
+        if n_jobs is None:
+            n_jobs = multiprocessing.cpu_count() // 2
+            log.debug('n_jobs defaulted to %d', n_jobs)
 
         if max_total_time is None or max_total_time <= 0:
             raise ValueError(f"max_total_time should be integer greater than zero but is {max_total_time}.")
