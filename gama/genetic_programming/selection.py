@@ -2,6 +2,7 @@
 import random
 import numpy
 
+from gama.genetic_programming.nsga2 import nsga2_select
 from gama.utilities.generic.paretofront import ParetoFront
 from gama.genetic_programming.crossover import _valid_crossover_functions
 
@@ -9,8 +10,9 @@ from gama.genetic_programming.crossover import _valid_crossover_functions
 def create_from_population(operator_shell, pop, n, cxpb, mutpb):
     """ Creates n new individuals based on the population. Can apply both crossover and mutation. """
     offspring = []
-    for _ in range(n):
-        ind1, ind2 = random.sample(pop, k=2)
+    metrics = [lambda ind: ind.fitness.values[0], lambda ind: ind.fitness.values[1]]
+    parent_pairs = nsga2_select(pop, n, metrics)
+    for (ind1, ind2) in parent_pairs:
         if random.random() < cxpb and len(_valid_crossover_functions(ind1, ind2)) > 0:
             ind1 = operator_shell.mate(ind1, ind2)
         else:
