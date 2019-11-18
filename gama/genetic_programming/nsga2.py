@@ -21,13 +21,13 @@ class NSGAMeta:
         self.dominating = []
         self.domination_counter = 0
 
-    def dominates(self, other):
+    def dominates(self, other: 'NSGAMeta'):
         for self_val, other_val in zip(self.values, other.values):
             if self_val <= other_val:  # or maybe <?
                 return False
         return True
 
-    def crowd_compare(self, other):
+    def crowd_compare(self, other: 'NSGAMeta'):
         """ Favor higher rank, if equal, favor less crowded. """
         self_better = (self.rank < other.rank or
                        (self.rank == other.rank and self.distance > other.distance))
@@ -90,7 +90,7 @@ def nsga2(population: List[Any], n: int, metrics: List[Callable[[Any], float]], 
     return selection if return_meta else [s.obj for s in selection]
 
 
-def fast_non_dominated_sort(P):
+def fast_non_dominated_sort(P: List[NSGAMeta]) -> List[List[NSGAMeta]]:
     """ Sorts P into Pareto fronts. """
     fronts = [[]]
     for p, q in itertools.combinations(P, 2):
@@ -119,7 +119,7 @@ def fast_non_dominated_sort(P):
     return fronts
 
 
-def crowding_distance_assignment(I):
+def crowding_distance_assignment(I: List[NSGAMeta]) -> None:
     for m in range(len(I[0].values)):
         I = sorted(I, key=lambda x: x.values[m])
         I[0].distance = I[-1].distance = float('inf')
