@@ -135,7 +135,6 @@ def evaluate_pipeline(pl, X, y_train, timeout, deadline, metrics='accuracy', cv=
 
     if not c_mgr:
         # For now we treat an eval timeout the same way as e.g. NaN exceptions and use the default score.
-        logger.info('Timeout encountered while evaluating pipeline.')
         single_line_pipeline = ''.join(str(pl).split('\n'))
         log_event(logger, TOKENS.EVALUATION_TIMEOUT, start_datetime, single_line_pipeline)
         logger.debug("Timeout after {}s: {}".format(timeout, pl))
