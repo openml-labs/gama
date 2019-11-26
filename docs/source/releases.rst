@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+
+Version 19.11.3
+---------------
+Bugfixes:
+ #68: Only add categorical encoding steps if (non-binary) categorical data is present.
+
+Maintenance:
+ #67: Selection now takes crowding distance into account (again).
+ #68: `n_jobs` will now default to use half of available cores.
+ #68: Updates given about the Pareto front now include the pipeline structure.
+
+
 Version 19.11.2
 ---------------
 Bugfixes:
