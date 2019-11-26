@@ -14,7 +14,10 @@ import pandas as pd
 
 from gama.dashboard.pages.base_page import BasePage
 
-dashboard = dash.Dash('GamaDashboard', external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+external_scripts = ['https://code.jquery.com/jquery-3.3.1.min.js',
+                    'https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js']
+dashboard = dash.Dash('GamaDashboard', external_stylesheets=[dbc.themes.BOOTSTRAP], external_scripts=external_scripts)
 dashboard.config.suppress_callback_exceptions = True
 
 

@@ -9,6 +9,7 @@ from typing import Optional, List, Dict
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
+import visdcc
 import dash_daq as daq
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
@@ -27,9 +28,11 @@ class CLIWindow:
         self._update_interval_s = update_interval_s
         self.console_id = f'{id_}-text'
         self.timer_id = f'{id_}-interval'
+        self.js_id = f'{id_}-js'
         self.id_ = id_
         self.html = self._build_component()
 
+        self.autoscroll_script = f"document.getElementById('{self.console_id}').scrollTop = document.getElementById('{self.console_id}').scrollHeight"
         self.process = None
         self._thread = None
         self._queue = None
@@ -42,6 +45,7 @@ class CLIWindow:
             interval=self._update_interval_s * 1000,
             n_intervals=0
         )
+        scroller = visdcc.Run_js(id=self.js_id, run='')
         console = dcc.Textarea(
             id=self.console_id,
             contentEditable='false',
@@ -49,12 +53,14 @@ class CLIWindow:
         )
         return html.Div(
             id=self.id_,
-            children=[timer, console]
+            children=[timer, console, scroller]
         )
 
     def register_callback(self, app):
         app.callback(
-            Output(self.console_id, 'value'),
+            [Output(self.console_id, 'value'),
+             Output(self.console_id, 'disabled'),
+             Output(self.js_id, 'run')],
             [Input(self.timer_id, 'n_intervals')]
         )(self.update_console)
 
@@ -70,14 +76,14 @@ class CLIWindow:
 
     def update_console(self, _ignore):
         if self.process is None:
-            return None
+            return [None, True, None]
         try:
             line = self._queue.get_nowait()
             self._lines.append(line.decode('utf-8'))
         except queue.Empty:
             # No new message, no update required.
             raise PreventUpdate
-        return ''.join(self._lines[-8:])
+        return [''.join(self._lines), True, self.autoscroll_script]
 
 
 cli = CLIWindow(id_='cli')
@@ -233,6 +239,7 @@ def collapsable_section(header: str, controls: List[dbc.FormGroup], start_open: 
         toggle_collapse
     ))
     return form_header, collapsable_form
+
 
 def start_gama(
         n_clicks, metric, regularize, n_jobs,
