@@ -13,79 +13,8 @@ import visdcc
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
+from gama.dashboard.components.cli_window import CLIWindow
 from gama.dashboard.pages.base_page import BasePage
-
-
-def enqueue_output(out, queue_: queue.Queue):
-    for line in iter(out.readline, b''):
-        queue_.put(line)
-    out.close()
-
-
-class CLIWindow:
-    def __init__(self, id_: str = None, update_interval_s: float = 1.0):
-        self._update_interval_s = update_interval_s
-        self.console_id = f'{id_}-text'
-        self.timer_id = f'{id_}-interval'
-        self.js_id = f'{id_}-js'
-        self.id_ = id_
-        self.html = self._build_component()
-
-        self.autoscroll_script = f"document.getElementById('{self.console_id}').scrollTop = document.getElementById('{self.console_id}').scrollHeight"
-        self.process = None
-        self._thread = None
-        self._queue = None
-
-        self._lines = []
-
-    def _build_component(self) -> html.Div:
-        timer = dcc.Interval(
-            id=self.timer_id,
-            interval=self._update_interval_s * 1000,
-            n_intervals=0
-        )
-        scroller = visdcc.Run_js(id=self.js_id, run='')
-        console = dcc.Textarea(
-            id=self.console_id,
-            contentEditable='false',
-            style={'height': '200px', 'width': '100%', 'borderWidth': '1px', 'borderRadius': '5px', 'borderStyle': 'dashed'}
-        )
-        return html.Div(
-            id=self.id_,
-            children=[timer, console, scroller]
-        )
-
-    def register_callback(self, app):
-        app.callback(
-            [Output(self.console_id, 'value'),
-             Output(self.console_id, 'disabled'),
-             Output(self.js_id, 'run')],
-            [Input(self.timer_id, 'n_intervals')]
-        )(self.update_console)
-
-    def call(self, command: str):
-        command = shlex.split(command)
-        self.process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-
-        # Because there are only blocking reads to the pipe,
-        # we need to read them on a separate thread.
-        self._queue = queue.Queue()
-        self._thread = threading.Thread(target=enqueue_output, args=(self.process.stdout, self._queue), daemon=True)
-        self._thread.start()
-
-    def update_console(self, _ignore):
-        if self.process is None:
-            return [None, True, None]
-        try:
-            line = self._queue.get_nowait()
-            self._lines.append(line.decode('utf-8'))
-        except queue.Empty:
-            # No new message, no update required.
-            raise PreventUpdate
-        return [''.join(self._lines), True, self.autoscroll_script]
-
-
-cli = CLIWindow(id_='cli')
 
 
 class HomePage(BasePage):
@@ -98,7 +27,6 @@ class HomePage(BasePage):
         self._build_content()
         if app is not None:
             self._register_callbacks(app)
-            cli.register_callback(app)
 
     def _build_content(self) -> html.Div:
         """ Build all the components of the page. """
@@ -240,26 +168,25 @@ def collapsable_section(header: str, controls: List[dbc.FormGroup], start_open: 
     return form_header, collapsable_form
 
 
-def start_gama(
-        n_clicks, metric, regularize, n_jobs,
-        max_total_time_h, max_total_time_m, max_eval_time_h, max_eval_time_m,
-        input_file):
-    # For some reason, 0 input registers as None.
-    max_total_time_h = 0 if max_total_time_h is None else max_total_time_h
-    max_total_time_m = 0 if max_total_time_m is None else max_total_time_m
-    max_eval_time_h = 0 if max_eval_time_h is None else max_eval_time_h
-    max_eval_time_m = 0 if max_eval_time_m is None else max_eval_time_m
-    max_total_time = (max_total_time_h * 60 + max_total_time_m)
-    max_eval_time = (max_eval_time_h * 60 + max_eval_time_m)
-    command = f'gama "{input_file}" -v -n {n_jobs} -t {max_total_time} --time_pipeline {max_eval_time}'
-    if regularize != 'on':
-        command += ' --long'
-    if metric != 'default':
-        command += f' -m {metric}'
-    # import time
-    # time.sleep(1)
-    cli.call(command)
-    return 'danger', dcc.Markdown("#### Stop!")
+# def start_gama(
+#         n_clicks, metric, regularize, n_jobs,
+#         max_total_time_h, max_total_time_m, max_eval_time_h, max_eval_time_m,
+#         input_file):
+#     # For some reason, 0 input registers as None.
+#     max_total_time_h = 0 if max_total_time_h is None else max_total_time_h
+#     max_total_time_m = 0 if max_total_time_m is None else max_total_time_m
+#     max_eval_time_h = 0 if max_eval_time_h is None else max_eval_time_h
+#     max_eval_time_m = 0 if max_eval_time_m is None else max_eval_time_m
+#     max_total_time = (max_total_time_h * 60 + max_total_time_m)
+#     max_eval_time = (max_eval_time_h * 60 + max_eval_time_m)
+#     command = f'gama "{input_file}" -v -n {n_jobs} -t {max_total_time} --time_pipeline {max_eval_time}'
+#     if regularize != 'on':
+#         command += ' --long'
+#     if metric != 'default':
+#         command += f' -m {metric}'
+#
+#     cli.call(command)
+#     return 'danger', dcc.Markdown("#### Stop!")
 
 
 def build_configuration_menu() -> html.Div:
@@ -291,20 +218,20 @@ def build_configuration_menu() -> html.Div:
     # Go!
     go_button = dbc.Button([dcc.Markdown("#### Go!")], id='go-button', block=True, color='success', disabled=True)
 
-    HomePage.callbacks.append(((
-        [Output('go-button', "color"),
-         Output('go-button', "children")],
-        [Input('go-button', "n_clicks")],
-        [State('metric_dropdown', "value"),
-         State('regularize_length_switch', "value"),
-         State('cpu_slider', "value"),
-         State('max_total_h', "value"),
-         State('max_total_m', "value"),
-         State('max_eval_h', "value"),
-         State('max_eval_m', "value"),
-         State('file-path-input', 'value')]),
-        start_gama
-    ))
+    # HomePage.callbacks.append(((
+    #     [Output('go-button', "color"),
+    #      Output('go-button', "children")],
+    #     [Input('go-button', "n_clicks")],
+    #     [State('metric_dropdown', "value"),
+    #      State('regularize_length_switch', "value"),
+    #      State('cpu_slider', "value"),
+    #      State('max_total_h', "value"),
+    #      State('max_total_m', "value"),
+    #      State('max_eval_h', "value"),
+    #      State('max_eval_m', "value"),
+    #      State('file-path-input', 'value')]),
+    #     start_gama
+    # ))
     #def start_gama(metric, regularize, n_jobs, max_total_time, max_eval_time, input_file):
 
     return html.Div(
@@ -368,7 +295,7 @@ def build_data_navigator() -> html.Div:
     return html.Div(
         children=[markdown_header("Data Navigator", level=2),
                   upload_file,
-                  table_container,
-                  cli.html],
+                  table_container
+                  ],
         style={'box-shadow': '1px 1px 1px black', 'padding': '2%'}
     )
