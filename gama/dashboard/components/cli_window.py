@@ -46,41 +46,44 @@ class CLIWindow:
             n_intervals=0
         )
         scroller = visdcc.Run_js(id=self.js_id, run='')
-        console = dcc.Textarea(
+        self.console = dcc.Textarea(
             id=self.console_id,
             contentEditable='false',
-            style={'height': '200px', 'width': '100%', 'borderWidth': '1px', 'borderRadius': '5px', 'borderStyle': 'dashed'}
+            style={'height': '200px', 'width': '100%', 'borderWidth': '1px', 'borderRadius': '5px', 'borderStyle': 'dashed'},
         )
         return html.Div(
             id=self.id_,
-            children=[timer, console, scroller]
+            children=[timer, self.console, scroller]
         )
 
     def _register_callbacks(self, app):
         app.callback(
             [Output(self.console_id, 'value'),
-             Output(self.console_id, 'disabled'),
              Output(self.js_id, 'run')],
             [Input(self.timer_id, 'n_intervals')]
         )(self.update_console)
 
-    def call(self, command: str):
-        command = shlex.split(command)
-        self.process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-
+    def monitor(self, process):
+        self.process = process
         # Because there are only blocking reads to the pipe,
         # we need to read them on a separate thread.
         self._queue = queue.Queue()
         self._thread = threading.Thread(target=enqueue_output, args=(self.process.stdout, self._queue), daemon=True)
         self._thread.start()
 
+    def call(self, command: str):
+        command = shlex.split(command)
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+        self.monitor(process)
+
     def update_console(self, _):
         if self.process is None:
-            return [None, True, None]
+            return [None, None]
         try:
             line = self._queue.get_nowait()
             self._lines.append(line.decode('utf-8'))
         except queue.Empty:
             # No new message, no update required.
             raise PreventUpdate
-        return [''.join(self._lines), True, self.autoscroll_script if self.auto_scroll else '']
+        self.console.value = ''.join(self._lines)
+        return [''.join(self._lines), self.autoscroll_script if self.auto_scroll else '']

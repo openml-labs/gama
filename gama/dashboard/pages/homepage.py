@@ -1,19 +1,11 @@
 import multiprocessing
 import os
-import shlex
-import subprocess
-import threading
-import queue
 from typing import Optional, List, Dict
 
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
-import visdcc
 from dash.dependencies import Input, Output, State
-from dash.exceptions import PreventUpdate
-
-from gama.dashboard.components.cli_window import CLIWindow
 from gama.dashboard.pages.base_page import BasePage
 
 
@@ -22,22 +14,23 @@ class HomePage(BasePage):
 
     def __init__(self):
         super().__init__(name='Home', alignment=0)
+        self.id = "home-page"
 
-    def build_page(self, app: Optional = None):
-        self._build_content()
+    def build_page(self, app, controller):
+        self._build_content(app, controller)
         if app is not None:
             self._register_callbacks(app)
 
-    def _build_content(self) -> html.Div:
+    def _build_content(self, app, controller) -> html.Div:
         """ Build all the components of the page. """
-        configuration = build_configuration_menu()
+        configuration = build_configuration_menu(app, controller)
         configuration.style['width'] = '35%'
         configuration.style['float'] = 'left'
         data_navigator = build_data_navigator()
         data_navigator.style['width'] = '65%'
         data_navigator.style['float'] = 'right'
         self._content = html.Div(
-            id="home-content",
+            id=self.id,
             children=[
                 configuration,
                 data_navigator
@@ -168,28 +161,7 @@ def collapsable_section(header: str, controls: List[dbc.FormGroup], start_open: 
     return form_header, collapsable_form
 
 
-# def start_gama(
-#         n_clicks, metric, regularize, n_jobs,
-#         max_total_time_h, max_total_time_m, max_eval_time_h, max_eval_time_m,
-#         input_file):
-#     # For some reason, 0 input registers as None.
-#     max_total_time_h = 0 if max_total_time_h is None else max_total_time_h
-#     max_total_time_m = 0 if max_total_time_m is None else max_total_time_m
-#     max_eval_time_h = 0 if max_eval_time_h is None else max_eval_time_h
-#     max_eval_time_m = 0 if max_eval_time_m is None else max_eval_time_m
-#     max_total_time = (max_total_time_h * 60 + max_total_time_m)
-#     max_eval_time = (max_eval_time_h * 60 + max_eval_time_m)
-#     command = f'gama "{input_file}" -v -n {n_jobs} -t {max_total_time} --time_pipeline {max_eval_time}'
-#     if regularize != 'on':
-#         command += ' --long'
-#     if metric != 'default':
-#         command += f' -m {metric}'
-#
-#     cli.call(command)
-#     return 'danger', dcc.Markdown("#### Stop!")
-
-
-def build_configuration_menu() -> html.Div:
+def build_configuration_menu(app, controller) -> html.Div:
     # Optimization
     from gama.utilities.metrics import all_metrics
     metrics = {m: m.replace('_', ' ') for m in all_metrics}
@@ -218,21 +190,19 @@ def build_configuration_menu() -> html.Div:
     # Go!
     go_button = dbc.Button([dcc.Markdown("#### Go!")], id='go-button', block=True, color='success', disabled=True)
 
-    # HomePage.callbacks.append(((
-    #     [Output('go-button', "color"),
-    #      Output('go-button', "children")],
-    #     [Input('go-button', "n_clicks")],
-    #     [State('metric_dropdown', "value"),
-    #      State('regularize_length_switch', "value"),
-    #      State('cpu_slider', "value"),
-    #      State('max_total_h', "value"),
-    #      State('max_total_m', "value"),
-    #      State('max_eval_h', "value"),
-    #      State('max_eval_m', "value"),
-    #      State('file-path-input', 'value')]),
-    #     start_gama
-    # ))
-    #def start_gama(metric, regularize, n_jobs, max_total_time, max_eval_time, input_file):
+    app.callback(
+        [Output('go-button', "color"),
+         Output('go-button', "children")],
+        [Input('go-button', "n_clicks")],
+        [State('metric_dropdown', "value"),
+         State('regularize_length_switch', "value"),
+         State('cpu_slider', "value"),
+         State('max_total_h', "value"),
+         State('max_total_m', "value"),
+         State('max_eval_h', "value"),
+         State('max_eval_m', "value"),
+         State('file-path-input', 'value')]
+    )(controller.start_gama)
 
     return html.Div(
         children=[markdown_header('Configure GAMA', level=2),

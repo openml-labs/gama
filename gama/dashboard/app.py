@@ -12,6 +12,7 @@ import dash_daq as daq
 
 import pandas as pd
 
+from gama.dashboard.controller import Controller
 from gama.dashboard.pages.base_page import BasePage
 
 
@@ -19,6 +20,8 @@ external_scripts = ['https://code.jquery.com/jquery-3.3.1.min.js',
                     'https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js']
 dashboard = dash.Dash('GamaDashboard', external_stylesheets=[dbc.themes.BOOTSTRAP], external_scripts=external_scripts)
 dashboard.config.suppress_callback_exceptions = True
+
+controller = Controller()
 
 
 # === Construct UI elements ===
@@ -28,7 +31,9 @@ def build_app():
     base = create_generic_layout()
     base['tabs'].children = create_tabs(pages)
     for page in pages:
-        page.build_page(dashboard)
+        page.build_page(dashboard, controller)
+        if hasattr(page, 'gama_started'):
+            controller.gama_started(page.gama_started)
     return base
 
 

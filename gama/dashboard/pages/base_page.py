@@ -1,5 +1,4 @@
 import abc
-from typing import Optional
 
 
 class BasePage(abc.ABC):
@@ -24,11 +23,9 @@ class BasePage(abc.ABC):
 
     @property
     def content(self):
-        if self._content is None:
-            self._content = self.build_page()
         return self._content
 
     @abc.abstractmethod
-    def build_page(self, app: Optional = None):
+    def build_page(self, app, controller):
         """ Populate the `content` field with html, register any callbacks. """
         raise NotImplementedError
