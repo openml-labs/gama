@@ -24,7 +24,7 @@ test_requirements = [
 ]
 
 visualization_requirements = [
-    'dash==1.1.1',
+    'dash==1.3',
     'dash-daq==0.1.0',
     'dash-bootstrap-components',
     'visdcc'

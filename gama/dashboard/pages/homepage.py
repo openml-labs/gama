@@ -6,6 +6,8 @@ import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+from dash.exceptions import PreventUpdate
+
 from gama.dashboard.pages.base_page import BasePage
 
 
@@ -43,6 +45,12 @@ class HomePage(BasePage):
             app.callback(*io)(fn)
         HomePage.callbacks = []
 
+    def load(self):
+        pass
+
+    def unload(self):
+        pass
+
 # === Configuration Menu ===
 
 def cpu_slider():
@@ -53,7 +61,8 @@ def cpu_slider():
             dbc.Label("N Jobs", html_for=id_, width=6),
             dbc.Col(
                 dcc.Slider(id=id_, min=1, max=n_cpus, updatemode='drag',
-                           value=1, marks={1: '1', n_cpus: str(n_cpus)})
+                           value=1, marks={1: '1', n_cpus: str(n_cpus)},
+                           persistence_type='session', persistence=True)
             )
         ],
         row=True
@@ -103,6 +112,16 @@ def toggle_button(label_text: str, id_: str, start_on: bool = True):
     )
 
 
+def text_input(label_text: str, default_text: str, id_: str):
+    return dbc.FormGroup(
+        [
+            dbc.Label(label_text, html_for=id_, width=6),
+            dbc.Col(dbc.Input(id=id_, type='text', placeholder=default_text)),
+        ],
+        row=True
+    )
+
+
 def dropdown(label_text: str, id_: str, options: Dict[str, str], value: Optional[str] = None):
     """ options formatted as {LABEL_KEY: LABEL_TEXT, ...} """
     return dbc.FormGroup(
@@ -116,7 +135,9 @@ def dropdown(label_text: str, id_: str, options: Dict[str, str], value: Optional
                         for key, text in options.items()
                     ],
                     clearable=False,
-                    value=value
+                    value=value,
+                    persistence_type='session',
+                    persistence=True
                 ),
             ),
         ],
@@ -185,10 +206,15 @@ def build_configuration_menu(app, controller) -> html.Div:
     resources = collapsable_section("Resources", [cpu_input, max_total_time_input, max_eval_time_input])
 
     # Advanced
-    advanced = collapsable_section("Advanced", [], start_open=False)
+    log_path = text_input("Logfile Path", 'gama.log', 'logpath')
+    advanced = collapsable_section("Advanced", [log_path], start_open=False)
 
     # Go!
     go_button = dbc.Button([dcc.Markdown("#### Go!")], id='go-button', block=True, color='success', disabled=True)
+
+    def start_gama(*args, **kwargs):
+        controller.start_gama(*args, **kwargs)
+        return 'danger', dcc.Markdown("#### Stop!")
 
     app.callback(
         [Output('go-button', "color"),
@@ -201,8 +227,9 @@ def build_configuration_menu(app, controller) -> html.Div:
          State('max_total_m', "value"),
          State('max_eval_h', "value"),
          State('max_eval_m', "value"),
-         State('file-path-input', 'value')]
-    )(controller.start_gama)
+         State('file-path-input', 'value'),
+         State('logpath', 'value')]
+    )(start_gama)
 
     return html.Div(
         children=[markdown_header('Configure GAMA', level=2),

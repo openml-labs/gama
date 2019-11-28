@@ -1,16 +1,10 @@
-from bisect import bisect
 from typing import List
 
 import dash
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
-from dash.dependencies import Input, Output, State
-import dash_table
-import plotly.graph_objs as go
-import dash_daq as daq
-
-import pandas as pd
+from dash.dependencies import Input, Output
 
 from gama.dashboard.controller import Controller
 from gama.dashboard.pages.base_page import BasePage

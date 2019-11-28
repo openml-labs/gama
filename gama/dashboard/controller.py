@@ -2,8 +2,6 @@ import shlex
 import subprocess
 from collections import defaultdict
 
-from dash.exceptions import PreventUpdate
-
 
 class Controller:
 
@@ -13,7 +11,7 @@ class Controller:
     def start_gama(
             self, n_clicks, metric, regularize, n_jobs,
             max_total_time_h, max_total_time_m, max_eval_time_h, max_eval_time_m,
-            input_file):
+            input_file, log_file):
         # For some reason, 0 input registers as None.
         max_total_time_h = 0 if max_total_time_h is None else max_total_time_h
         max_total_time_m = 0 if max_total_time_m is None else max_total_time_m
@@ -21,7 +19,7 @@ class Controller:
         max_eval_time_m = 0 if max_eval_time_m is None else max_eval_time_m
         max_total_time = (max_total_time_h * 60 + max_total_time_m)
         max_eval_time = (max_eval_time_h * 60 + max_eval_time_m)
-        command = f'gama "{input_file}" -v -n {n_jobs} -t {max_total_time} --time_pipeline {max_eval_time}'
+        command = f'gama "{input_file}" -v -n {n_jobs} -t {max_total_time} --time_pipeline {max_eval_time} -log {log_file}'
         if regularize != 'on':
             command += ' --long'
         if metric != 'default':
@@ -29,13 +27,11 @@ class Controller:
 
         command = shlex.split(command)
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-        self._on_gama_started(process)
-        raise PreventUpdate
-        #return 'danger', dcc.Markdown("#### Stop!")
+        self._on_gama_started(process, log_file)
 
-    def _on_gama_started(self, process):
+    def _on_gama_started(self, process, log_file):
         for subscriber in self._subscribers['gama_started']:
-            subscriber(process, None)
+            subscriber(process, log_file)
 
     def gama_started(self, callback_function):
         self._subscribers['gama_started'].append(callback_function)

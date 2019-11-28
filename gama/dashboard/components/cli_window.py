@@ -50,10 +50,12 @@ class CLIWindow:
             id=self.console_id,
             contentEditable='false',
             style={'height': '200px', 'width': '100%', 'borderWidth': '1px', 'borderRadius': '5px', 'borderStyle': 'dashed'},
+            persistence_type='session', persistence=True
         )
         return html.Div(
             id=self.id_,
-            children=[timer, self.console, scroller]
+            children=[timer, self.console, scroller],
+            style={}
         )
 
     def _register_callbacks(self, app):
@@ -85,5 +87,5 @@ class CLIWindow:
         except queue.Empty:
             # No new message, no update required.
             raise PreventUpdate
-        self.console.value = ''.join(self._lines)
+        #self.console.value = ''.join(self._lines)
         return [''.join(self._lines), self.autoscroll_script if self.auto_scroll else '']

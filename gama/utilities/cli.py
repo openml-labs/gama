@@ -92,6 +92,13 @@ def parse_args():
 
     # Extra
     parser.add_argument(
+        '-log',
+        dest='logpath',
+        default=None,
+        type=str,
+        help="File to store GAMA's log."
+    )
+    parser.add_argument(
         '-v',
         dest='verbose',
         action='store_true',
@@ -127,7 +134,8 @@ def main():
         max_total_time=args.time_limit_m * 60,
         max_eval_time=args.max_eval_time_m * 60,
         n_jobs=args.n_jobs,
-        verbosity=log_level
+        verbosity=log_level,
+        keep_analysis_log=args.logpath
     )
     if args.metric:
         configuration['scoring'] = args.metric
