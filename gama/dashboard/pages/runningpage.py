@@ -95,17 +95,15 @@ class RunningPage(BasePage):
             persistence_type='session', persistence=True
         )
 
+        def process_selection(active_cell):
+            # https://community.plot.ly/t/datatable-accessing-value-of-active-cell/20378
+            print(active_cell)
+            return [str(active_cell)]
         app.callback(
-            Output('pl-viz', 'value'),
+            [Output('pl-viz', 'children')],
             [Input('pipeline-table', 'active_cell')]
         )(process_selection)
         return html.Div(ta, style={'height': '100%', 'box-shadow': '1px 1px 1px black', 'padding': '2%'})
 
     def pipeline_viz(self):
-        return html.Div('pl-viz', style={'height': '100%', 'box-shadow': '1px 1px 1px black', 'padding': '2%'})
-
-
-def process_selection(active_cell):
-    # https://community.plot.ly/t/datatable-accessing-value-of-active-cell/20378
-    print(active_cell)
-    return [str(active_cell)]
+        return html.Div(id='pl-viz', style={'height': '100%', 'box-shadow': '1px 1px 1px black', 'padding': '2%'})
