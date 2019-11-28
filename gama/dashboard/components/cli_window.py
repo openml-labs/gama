@@ -49,13 +49,13 @@ class CLIWindow:
         self.console = dcc.Textarea(
             id=self.console_id,
             contentEditable='false',
-            style={'height': '200px', 'width': '100%', 'borderWidth': '1px', 'borderRadius': '5px', 'borderStyle': 'dashed'},
+            style={'height': '100%','width': '100%', 'borderWidth': '1px', 'borderRadius': '5px', 'borderStyle': 'dashed'},
             persistence_type='session', persistence=True
         )
         return html.Div(
             id=self.id_,
             children=[timer, self.console, scroller],
-            style={}
+            style={'height': '100%'}
         )
 
     def _register_callbacks(self, app):
