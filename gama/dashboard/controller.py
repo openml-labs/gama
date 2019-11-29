@@ -1,3 +1,5 @@
+""" Provides updates on GAMA's search. Next step is to call GAMA directly, but the `fit` call has to be made async. """
+
 import shlex
 import subprocess
 from collections import defaultdict

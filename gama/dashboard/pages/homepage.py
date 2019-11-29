@@ -2,6 +2,7 @@ import multiprocessing
 import os
 from typing import Optional, List, Dict
 
+import dash_table
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
@@ -116,7 +117,7 @@ def text_input(label_text: str, default_text: str, id_: str):
     return dbc.FormGroup(
         [
             dbc.Label(label_text, html_for=id_, width=6),
-            dbc.Col(dbc.Input(id=id_, type='text', placeholder=default_text)),
+            dbc.Col(dbc.Input(id=id_, type='text', placeholder=default_text, value=default_text)),
         ],
         row=True
     )
@@ -270,6 +271,10 @@ def build_data_navigator() -> html.Div:
         id='file-path-input',
         placeholder='Path to data file, e.g. ~/data/mydata.arff',
         type='text'
+    )
+
+    table = dash_table.DataTable(
+        id='data-table'
     )
 
     table_container = html.Div(

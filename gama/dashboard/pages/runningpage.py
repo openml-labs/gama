@@ -1,12 +1,16 @@
+import os
+
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
+from dash.exceptions import PreventUpdate
 from plotly import graph_objects as go
 from dash.dependencies import Input, Output, State
 
 from gama.dashboard.components.cli_window import CLIWindow
 from gama.dashboard.pages.base_page import BasePage
+from gama.logging.GamaReport import GamaReport
 
 
 class RunningPage(BasePage):
@@ -15,12 +19,15 @@ class RunningPage(BasePage):
         super().__init__(name='Running', alignment=-1)
         self.cli = None
         self.id = 'running-page'
+        self.report = None
+        self.log_file = None
 
     def build_page(self, app, controller):
         self.cli = CLIWindow('cli', app)
         plot_area = self.plot_area()
         pl_viz = self.pipeline_viz()
         pl_list = self.pipeline_list(app)
+        ticker = dcc.Interval(id='ticker', interval=1000)
         self._content = html.Div(
             id=self.id,
             children=[
@@ -31,15 +38,39 @@ class RunningPage(BasePage):
                 dbc.Row([
                     dbc.Col(pl_viz, width=8),
                     dbc.Col(pl_list)
-                ])
+                ]),
+                ticker
             ]
         )
+
+        def update(_):
+            if ((self.report is None and (self.log_file is None or not os.path.exists(self.log_file)))
+                    or self.report is not None and not self.report.update()):
+                # The report does not exist, or exists but nothing is updated.
+                raise PreventUpdate
+            elif self.report is None:
+                self.report = GamaReport(self.log_file)
+
+            scatters = self.create_scatter_plots(self.report)
+            datas = self.fill_pipeline_table(self.report)
+            return {'data': scatters}, datas
+
+        app.callback(
+            [Output('evaluation-graph', 'figure'),
+             Output('pipeline-table', 'data')],
+            [Input('ticker', 'n_intervals')]
+        )(update)
+
         return self._content
 
     def gama_started(self, process, log_file):
         self.cli.monitor(process)
+        self.log_file = log_file
 
-    def plot_area(self):
+    def fill_pipeline_table(self, report):
+        return [{'pl': report.individuals[id_].short_name, 'id': id_} for id_ in report.evaluations.id]
+
+    def create_scatter_plots(self, report):
         import numpy as np
         evals = 2*np.random.random((50, 2))
         evaluations = evals
@@ -63,8 +94,12 @@ class RunningPage(BasePage):
             name='pareto front'
         )
 
+        return [all_scatter, pareto_scatter]
+
+    def plot_area(self):
         scatter = dcc.Graph(
-            figure={'data': [all_scatter, pareto_scatter]}
+            id='evaluation-graph',
+            figure={'data': []}
         )
 
         return html.Div(scatter, style={'height': '100%', 'box-shadow': '1px 1px 1px black', 'padding': '2%'})
@@ -97,6 +132,8 @@ class RunningPage(BasePage):
 
         def process_selection(active_cell):
             # https://community.plot.ly/t/datatable-accessing-value-of-active-cell/20378
+            # Want to refer to the individual's ID, look up the individual and display the
+            # full hyperparameter configuration of the individual.
             print(active_cell)
             return [str(active_cell)]
         app.callback(

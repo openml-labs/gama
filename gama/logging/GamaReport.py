@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
+import math
 from typing import List, Optional, Tuple, Dict, Callable
 
 import pandas as pd
@@ -84,11 +85,15 @@ class GamaReport:
             print(f'read {len(new_lines)} new lines')
             events_by_type = _lines_to_dict(new_lines)
             search_start = 0 if len(self.evaluations) == 0 else self.evaluations.start.min()
+            start_n = self.evaluations.n.max()
+            if math.isnan(start_n):
+                start_n = -1
+
             new_evaluations = _evaluations_to_dataframe(
                 events_by_type[TOKENS.EVALUATION_RESULT],
                 metric_names=self.metrics,
                 search_start=search_start,
-                start_n=self.evaluations.n.max() + 1
+                start_n=start_n + 1
             )
             self.evaluations = pd.concat([self.evaluations, new_evaluations])
             for metric in self.metrics:
@@ -173,7 +178,12 @@ def _evaluations_to_dataframe(evaluation_lines: List[List[str]],
     df.start = pd.to_datetime(df.start)
     df.duration = pd.to_timedelta(df.duration, unit='s')
     search_start = search_start if search_start is not None else df.start.min()
-    df['relative_end'] = ((df.start + df.duration) - search_start).dt.total_seconds()
+    print(len(evaluations))
+    print(search_start)
+    if len(df.start) > 0:
+        df['relative_end'] = ((df.start + df.duration) - search_start).dt.total_seconds()
+    else:
+        df['relative_end'] = pd.Series()
     return df
 
 
