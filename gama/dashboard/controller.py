@@ -28,6 +28,7 @@ class Controller:
             command += f' -m {metric}'
 
         command = shlex.split(command)
+        fake_command = ['python', '-h']
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         self._on_gama_started(process, log_file)
 

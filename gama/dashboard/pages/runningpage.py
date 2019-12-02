@@ -7,6 +7,7 @@ import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 from plotly import graph_objects as go
 from dash.dependencies import Input, Output, State
+import pandas as pd
 
 from gama.dashboard.components.cli_window import CLIWindow
 from gama.dashboard.pages.base_page import BasePage
@@ -24,7 +25,7 @@ class RunningPage(BasePage):
 
     def build_page(self, app, controller):
         self.cli = CLIWindow('cli', app)
-        plot_area = self.plot_area()
+        plot_area = self.plot_area(app)
         pl_viz = self.pipeline_viz()
         pl_list = self.pipeline_list(app)
         ticker = dcc.Interval(id='ticker', interval=1000)
@@ -36,7 +37,7 @@ class RunningPage(BasePage):
                     dbc.Col(self.cli.html),
                 ]),
                 dbc.Row([
-                    dbc.Col(pl_viz, width=8),
+                    dbc.Col(pl_viz, width=4),
                     dbc.Col(pl_list)
                 ]),
                 ticker
@@ -53,7 +54,15 @@ class RunningPage(BasePage):
 
             scatters = self.create_scatter_plots(self.report)
             datas = self.fill_pipeline_table(self.report)
-            return {'data': scatters}, datas
+            figure = {
+                'data': scatters,
+                'layout': dict(
+                    hovermode='closest',
+                    clickmode='event+select'
+                )
+            }
+
+            return figure, datas
 
         app.callback(
             [Output('evaluation-graph', 'figure'),
@@ -71,21 +80,27 @@ class RunningPage(BasePage):
         return [{'pl': report.individuals[id_].short_name, 'id': id_} for id_ in report.evaluations.id]
 
     def create_scatter_plots(self, report):
-        import numpy as np
-        evals = 2*np.random.random((50, 2))
-        evaluations = evals
-        sizes = list(range(20, 1, -1))[:len(evaluations)] + [10] * max(len(evaluations) - 20, 0)
+        if len(report.evaluations) == 0:
+            raise PreventUpdate
+
+        with pd.option_context('mode.use_inf_as_na', True):
+            evaluations = report.evaluations.dropna()
+        scores = evaluations.loc[:, report.metrics].values
+        sizes = [6] * max(len(scores) - 20, 0) + list(range(6, 26))[:len(scores)]
         evaluation_color = '#301cc9'  # (247°, 86%, 79%)
         pareto = [(2.1, 2.1), (2.05, 2.2), (2.2, 2.05)]
         pareto_color = '#c81818'
 
         all_scatter = go.Scatter(
-            x=[f[0] for f in evaluations],
-            y=[f[1] for f in evaluations],
+            x=[-f[0] for f in scores],
+            y=[-f[1] for f in scores],
             mode='markers',
             marker={'color': evaluation_color, 'size': sizes},
-            name='all evaluations'
+            name='all evaluations',
+            text=[self.report.individuals[row.id].short_name for i, row in evaluations.iterrows()],
+            customdata=[row.id for i, row in evaluations.iterrows()],
         )
+
         pareto_scatter = go.Scatter(
             x=[f[0] for f in pareto],
             y=[f[1] for f in pareto],
@@ -93,36 +108,37 @@ class RunningPage(BasePage):
             marker={'color': pareto_color, 'size': 30},
             name='pareto front'
         )
+        return [all_scatter] #, pareto_scatter]
 
-        return [all_scatter, pareto_scatter]
-
-    def plot_area(self):
+    def plot_area(self, app):
         scatter = dcc.Graph(
             id='evaluation-graph',
-            figure={'data': []}
+            figure={
+                'data': [],
+                'layout': dict(
+                    hovermode='closest',
+                    transition={'duration': 500},
+                )
+            }
         )
+
+        def display_click_data(clickData):
+            return {'row': 2, 'column': 0, 'column_id': 'pl', 'row_id': 'fc678cef-defa-455e-bbb5-961ae436ea5c'}
+            #return clickData["points"][0]['customdata']
+
+        app.callback(
+            Output('pipeline-table', 'active_cell'),
+            [Input('evaluation-graph', 'clickData')]
+        )(display_click_data)
+
 
         return html.Div(scatter, style={'height': '100%', 'box-shadow': '1px 1px 1px black', 'padding': '2%'})
 
     def pipeline_list(self, app):
-        pipelines = [
-            'GaussianNB',
-            'SelectFWE>RandomForestClassifier',
-            'MinMaxScaler>DecisionTree',
-            'GaussianNB',
-            'SelectFWE>RandomForestClassifier',
-            'MinMaxScaler>DecisionTree',
-            'GaussianNB',
-            'SelectFWE>RandomForestClassifier',
-            'MinMaxScaler>DecisionTree',
-            'GaussianNB',
-            'SelectFWE>RandomForestClassifier',
-            'MinMaxScaler>DecisionTree'
-        ]
         ta = dash_table.DataTable(
             id='pipeline-table',
             columns=[{'name': 'Pipeline', 'id': 'pl'}],
-            data=[{'pl': pl} for pl in pipelines],
+            data=[],
             style_table={
                 'maxHeight': '300px',
                 'overflowY': 'scroll'
@@ -134,8 +150,7 @@ class RunningPage(BasePage):
             # https://community.plot.ly/t/datatable-accessing-value-of-active-cell/20378
             # Want to refer to the individual's ID, look up the individual and display the
             # full hyperparameter configuration of the individual.
-            print(active_cell)
-            return [str(active_cell)]
+            return [self.report.individuals[active_cell['row_id']].pipeline_str()]
         app.callback(
             [Output('pl-viz', 'children')],
             [Input('pipeline-table', 'active_cell')]
