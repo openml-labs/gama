@@ -22,13 +22,13 @@ class RunningPage(BasePage):
         self.id = 'running-page'
         self.report = None
         self.log_file = None
-        self.selected_pipeline = None
+        self.selected_pipeline_changed = False
 
     def build_page(self, app, controller):
         self.cli = CLIWindow('cli', app)
         plot_area = self.plot_area(app)
         pl_viz = self.pipeline_viz()
-        pl_list = self.pipeline_list(app)
+        pl_list = self.pipeline_list()
         ticker = dcc.Interval(id='ticker', interval=1000)
         self._content = html.Div(
             id=self.id,
@@ -41,83 +41,96 @@ class RunningPage(BasePage):
                     dbc.Col(pl_viz, width=4),
                     dbc.Col(pl_list)
                 ]),
-                ticker
+                ticker,
+                # A div as sink for Output
+                html.Div(
+                    id='selected-pipeline',
+                    style=dict(display='none')
+                )
             ]
         )
 
-        def update(_, active_cell):
-            selected_pipeline = None if active_cell is None else active_cell['row_id']
-            new_pipeline_selected = self.selected_pipeline != selected_pipeline
-            self.selected_pipeline = selected_pipeline
-            if ((self.report is None and (self.log_file is None or not os.path.exists(self.log_file)))
-                    or (self.report is not None and not self.report.update() and not new_pipeline_selected)):
-                # The report does not exist, or exists but nothing is updated.
-                raise PreventUpdate
-            elif self.report is None:
-                self.report = GamaReport(self.log_file)
-
-            scatters = self.create_scatter_plots(self.report, selected_pipeline)
-            datas = self.fill_pipeline_table(self.report)
-            figure = {
-                'data': scatters,
-                'layout': dict(
-                    hovermode='closest',
-                    clickmode='event+select'
-                )
-            }
-
-            return figure, datas
         app.callback(
             [Output('evaluation-graph', 'figure'),
-             Output('pipeline-table', 'data')],
+             Output('pipeline-table', 'data'),
+             Output('pl-viz', 'children')],
             [Input('ticker', 'n_intervals'),
-             Input('pipeline-table', 'active_cell')]
-        )(update)
+             Input('selected-pipeline', 'children')]
+        )(self.update_page)
+
+        app.callback(
+            [Output('selected-pipeline', 'children')],
+            [Input('evaluation-graph', 'clickData'),
+             Input('pipeline-table', 'active_cell')],
+            [State('selected-pipeline', 'children')]
+        )(self.update_selection)
 
         return self._content
+
+    def update_page(self, _, selected_pipeline):
+        if ((self.report is None and (self.log_file is None or not os.path.exists(self.log_file)))
+                or (self.report is not None and not self.report.update() and not self.selected_pipeline_changed)):
+            # The report does not exist, or exists but nothing is updated.
+            raise PreventUpdate
+        elif self.report is None:
+            self.report = GamaReport(self.log_file)
+
+        self.selected_pipeline_changed = False
+        scatters = self.scatter_plot(self.report, selected_pipeline)
+        figure = {
+            'data': scatters,
+            'layout': dict(
+                hovermode='closest',
+                clickmode='event+select'
+            )
+        }
+
+        pl_table_data = [{'pl': self.report.individuals[id_].short_name(' > '), 'id': id_}
+                         for id_ in self.report.evaluations.id]
+
+        pl_viz_data = None if selected_pipeline is None else self.report.individuals[selected_pipeline].pipeline_str()
+
+        return figure, pl_table_data, pl_viz_data
+
+    def scatter_plot(self, report, selected_pipeline: str = None):
+        with pd.option_context('mode.use_inf_as_na', True):
+            evaluations = report.evaluations.dropna()
+
+        metric_one, metric_two = report.metrics[:2]
+
+        # Marker size indicates recency of the evaluations, recent evaluations are bigger.
+        biggest_size = 25
+        smallest_size = 5
+        selected_size = 30
+        d_size_min_max = biggest_size - smallest_size
+
+        sizes = list(range(smallest_size, biggest_size))[-len(evaluations):]
+        if len(evaluations) > d_size_min_max:
+            sizes = [smallest_size] * (len(evaluations) - d_size_min_max) + sizes
+        if selected_pipeline is not None:
+            sizes = [size if id_ != selected_pipeline else selected_size
+                     for size, id_ in zip(sizes, evaluations.id)]
+
+        default_color = '#301cc9'
+        selected_color = '#c81818'
+
+        colors = [default_color if id_ != selected_pipeline else selected_color
+                  for id_ in evaluations.id]
+
+        all_scatter = go.Scatter(
+            x=-evaluations[metric_one],
+            y=-evaluations[metric_two],
+            mode='markers',
+            marker={'color': colors, 'size': sizes},
+            name='all evaluations',
+            text=[self.report.individuals[id_].short_name() for id_ in evaluations.id],
+            customdata=evaluations.id,
+        )
+        return [all_scatter]
 
     def gama_started(self, process, log_file):
         self.cli.monitor(process)
         self.log_file = log_file
-
-    def fill_pipeline_table(self, report):
-        return [{'pl': report.individuals[id_].short_name(' > '), 'id': id_} for id_ in report.evaluations.id]
-
-    def create_scatter_plots(self, report, selected_pipeline=None):
-        if len(report.evaluations) == 0:
-            raise PreventUpdate
-
-        with pd.option_context('mode.use_inf_as_na', True):
-            evaluations = report.evaluations.dropna()
-        scores = evaluations.loc[:, report.metrics].values
-        ids = [row.id for i, row in evaluations.iterrows()]
-        sizes = [6] * max(len(scores) - 20, 0) + list(range(6, 26))[:len(scores)]
-        evaluation_color = '#301cc9'  # (247°, 86%, 79%)
-        pareto_color = '#c81818'
-        colors = [pareto_color if id_ == selected_pipeline else evaluation_color
-                  for id_ in ids]
-        sizes = [30 if id_ == selected_pipeline else size for id_, size in zip(ids, sizes)]
-
-        pareto = [(2.1, 2.1), (2.05, 2.2), (2.2, 2.05)]
-
-        all_scatter = go.Scatter(
-            x=[-f[0] for f in scores],
-            y=[-f[1] for f in scores],
-            mode='markers',
-            marker={'color': colors, 'size': sizes},
-            name='all evaluations',
-            text=[self.report.individuals[row.id].short_name() for i, row in evaluations.iterrows()],
-            customdata=ids,
-        )
-
-        pareto_scatter = go.Scatter(
-            x=[f[0] for f in pareto],
-            y=[f[1] for f in pareto],
-            mode='markers',
-            marker={'color': pareto_color, 'size': 30},
-            name='pareto front'
-        )
-        return [all_scatter] #, pareto_scatter]
 
     def plot_area(self, app):
         scatter = dcc.Graph(
@@ -130,20 +143,21 @@ class RunningPage(BasePage):
                 )
             }
         )
-
-        def display_click_data(clickData):
-            return ['7f1bb0ed-b80c-4d78-a23a-0c456721fa3f']
-            #return clickData["points"][0]['customdata']
-
-        app.callback(
-            Output('pipeline-table', 'selected_row_ids'),
-            [Input('evaluation-graph', 'clickData')]
-        )(display_click_data)
-
-
         return html.Div(scatter, style={'height': '100%', 'box-shadow': '1px 1px 1px black', 'padding': '2%'})
 
-    def pipeline_list(self, app):
+    def update_selection(self, click_data, active_cell, previous_selected):
+        click_selected = None if click_data is None else click_data["points"][0]['customdata']
+        cell_selected = None if active_cell is None else active_cell['row_id']
+        if click_selected == cell_selected == previous_selected:
+            raise PreventUpdate
+
+        self.selected_pipeline_changed = True
+        if click_selected is not None and previous_selected != click_selected:
+            return [click_selected]
+        elif cell_selected is not None and previous_selected != cell_selected:
+            return [cell_selected]
+
+    def pipeline_list(self):
         ta = dash_table.DataTable(
             id='pipeline-table',
             columns=[{'name': 'Pipeline', 'id': 'pl'}],
@@ -155,15 +169,6 @@ class RunningPage(BasePage):
             persistence_type='session', persistence=True
         )
 
-        def process_selection(active_cell):
-            # https://community.plot.ly/t/datatable-accessing-value-of-active-cell/20378
-            # Want to refer to the individual's ID, look up the individual and display the
-            # full hyperparameter configuration of the individual.
-            return [self.report.individuals[active_cell['row_id']].pipeline_str()]
-        app.callback(
-            [Output('pl-viz', 'children')],
-            [Input('pipeline-table', 'active_cell')]
-        )(process_selection)
         return html.Div(ta, style={'height': '100%', 'box-shadow': '1px 1px 1px black', 'padding': '2%'})
 
     def pipeline_viz(self):
