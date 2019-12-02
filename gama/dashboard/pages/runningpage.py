@@ -22,6 +22,7 @@ class RunningPage(BasePage):
         self.id = 'running-page'
         self.report = None
         self.log_file = None
+        self.selected_pipeline = None
 
     def build_page(self, app, controller):
         self.cli = CLIWindow('cli', app)
@@ -44,15 +45,18 @@ class RunningPage(BasePage):
             ]
         )
 
-        def update(_):
+        def update(_, active_cell):
+            selected_pipeline = None if active_cell is None else active_cell['row_id']
+            new_pipeline_selected = self.selected_pipeline != selected_pipeline
+            self.selected_pipeline = selected_pipeline
             if ((self.report is None and (self.log_file is None or not os.path.exists(self.log_file)))
-                    or self.report is not None and not self.report.update()):
+                    or (self.report is not None and not self.report.update() and not new_pipeline_selected)):
                 # The report does not exist, or exists but nothing is updated.
                 raise PreventUpdate
             elif self.report is None:
                 self.report = GamaReport(self.log_file)
 
-            scatters = self.create_scatter_plots(self.report)
+            scatters = self.create_scatter_plots(self.report, selected_pipeline)
             datas = self.fill_pipeline_table(self.report)
             figure = {
                 'data': scatters,
@@ -63,11 +67,11 @@ class RunningPage(BasePage):
             }
 
             return figure, datas
-
         app.callback(
             [Output('evaluation-graph', 'figure'),
              Output('pipeline-table', 'data')],
-            [Input('ticker', 'n_intervals')]
+            [Input('ticker', 'n_intervals'),
+             Input('pipeline-table', 'active_cell')]
         )(update)
 
         return self._content
@@ -77,28 +81,33 @@ class RunningPage(BasePage):
         self.log_file = log_file
 
     def fill_pipeline_table(self, report):
-        return [{'pl': report.individuals[id_].short_name, 'id': id_} for id_ in report.evaluations.id]
+        return [{'pl': report.individuals[id_].short_name(' > '), 'id': id_} for id_ in report.evaluations.id]
 
-    def create_scatter_plots(self, report):
+    def create_scatter_plots(self, report, selected_pipeline=None):
         if len(report.evaluations) == 0:
             raise PreventUpdate
 
         with pd.option_context('mode.use_inf_as_na', True):
             evaluations = report.evaluations.dropna()
         scores = evaluations.loc[:, report.metrics].values
+        ids = [row.id for i, row in evaluations.iterrows()]
         sizes = [6] * max(len(scores) - 20, 0) + list(range(6, 26))[:len(scores)]
         evaluation_color = '#301cc9'  # (247°, 86%, 79%)
-        pareto = [(2.1, 2.1), (2.05, 2.2), (2.2, 2.05)]
         pareto_color = '#c81818'
+        colors = [pareto_color if id_ == selected_pipeline else evaluation_color
+                  for id_ in ids]
+        sizes = [30 if id_ == selected_pipeline else size for id_, size in zip(ids, sizes)]
+
+        pareto = [(2.1, 2.1), (2.05, 2.2), (2.2, 2.05)]
 
         all_scatter = go.Scatter(
             x=[-f[0] for f in scores],
             y=[-f[1] for f in scores],
             mode='markers',
-            marker={'color': evaluation_color, 'size': sizes},
+            marker={'color': colors, 'size': sizes},
             name='all evaluations',
-            text=[self.report.individuals[row.id].short_name for i, row in evaluations.iterrows()],
-            customdata=[row.id for i, row in evaluations.iterrows()],
+            text=[self.report.individuals[row.id].short_name() for i, row in evaluations.iterrows()],
+            customdata=ids,
         )
 
         pareto_scatter = go.Scatter(
@@ -123,11 +132,11 @@ class RunningPage(BasePage):
         )
 
         def display_click_data(clickData):
-            return {'row': 2, 'column': 0, 'column_id': 'pl', 'row_id': 'fc678cef-defa-455e-bbb5-961ae436ea5c'}
+            return ['7f1bb0ed-b80c-4d78-a23a-0c456721fa3f']
             #return clickData["points"][0]['customdata']
 
         app.callback(
-            Output('pipeline-table', 'active_cell'),
+            Output('pipeline-table', 'selected_row_ids'),
             [Input('evaluation-graph', 'clickData')]
         )(display_click_data)
 
