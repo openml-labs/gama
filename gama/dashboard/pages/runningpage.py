@@ -109,9 +109,17 @@ class RunningPage(BasePage):
         pl_table_data = [{'pl': self.report.individuals[id_].short_name(' > '), 'id': id_}
                          for id_ in evaluations.id]
         row_id = [i for i, id_ in enumerate(evaluations.id) if id_ == selected_pipeline]
-        pl_viz_data = None if selected_pipeline is None else self.report.individuals[selected_pipeline].pipeline_str()
-        def format_pipeline(ind):
 
+        def format_pipeline(ind):
+            pipeline_elements = []
+            for primitive_node in reversed(ind.primitives):
+                pipeline_elements.append(html.B(str(primitive_node._primitive)))
+                pipeline_elements.append(html.Br())
+                for terminal in primitive_node._terminals:
+                    pipeline_elements.append(f'    {terminal}')
+                    pipeline_elements.append(html.Br())
+            return pipeline_elements
+        pl_viz_data = None if selected_pipeline is None else format_pipeline(self.report.individuals[selected_pipeline])
 
         print('Update complete.', row_id)
         return figure, pl_table_data, pl_viz_data, row_id, None, None
@@ -183,4 +191,4 @@ class RunningPage(BasePage):
         return html.Div(ta, style={'height': '100%', 'box-shadow': '1px 1px 1px black', 'padding': '2%'})
 
     def pipeline_viz(self):
-        return html.Div(id='pl-viz', style={'height': '100%', 'box-shadow': '1px 1px 1px black', 'padding': '2%'})
+        return html.Div(id='pl-viz', style={'height': '100%', 'box-shadow': '1px 1px 1px black', 'padding': '2%', 'whiteSpace': 'pre-wrap'})
