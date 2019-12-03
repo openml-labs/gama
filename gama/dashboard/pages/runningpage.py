@@ -26,10 +26,10 @@ class RunningPage(BasePage):
 
     def build_page(self, app, controller):
         self.cli = CLIWindow('cli', app)
-        plot_area = self.plot_area(app)
+        plot_area = self.plot_area()
         pl_viz = self.pipeline_viz()
         pl_list = self.pipeline_list()
-        ticker = dcc.Interval(id='ticker', interval=1000)
+        ticker = dcc.Interval(id='ticker', interval=5000)
         self._content = html.Div(
             id=self.id,
             children=[
@@ -42,7 +42,7 @@ class RunningPage(BasePage):
                     dbc.Col(pl_list)
                 ]),
                 ticker,
-                # A div as sink for Output
+                # A div to store the pipeline selected through the table or graph
                 html.Div(
                     id='selected-pipeline',
                     style=dict(display='none')
@@ -53,7 +53,10 @@ class RunningPage(BasePage):
         app.callback(
             [Output('evaluation-graph', 'figure'),
              Output('pipeline-table', 'data'),
-             Output('pl-viz', 'children')],
+             Output('pl-viz', 'children'),
+             Output('pipeline-table', 'selected_rows'),
+             Output('pipeline-table', 'selected_row_ids'),
+             Output('evaluation-graph', 'clickData')],
             [Input('ticker', 'n_intervals'),
              Input('selected-pipeline', 'children')]
         )(self.update_page)
@@ -61,22 +64,40 @@ class RunningPage(BasePage):
         app.callback(
             [Output('selected-pipeline', 'children')],
             [Input('evaluation-graph', 'clickData'),
-             Input('pipeline-table', 'active_cell')],
+             Input('pipeline-table', 'selected_row_ids')],
             [State('selected-pipeline', 'children')]
         )(self.update_selection)
 
         return self._content
 
+    def update_selection(self, click_data, selected_row_ids, previous_selected):
+        cell_selected = None if selected_row_ids is None else selected_row_ids[0]
+        click_selected = None if click_data is None else click_data["points"][0]['customdata']
+        # Selected row ids and click data are always set back to None. The value that is not None is the new value.
+        if click_data is not None:
+            self.selected_pipeline_changed = True
+            return [click_data["points"][0]['customdata']]
+        elif cell_selected is not None:
+            self.selected_pipeline_changed = True
+            return [cell_selected]
+        # First call or sync call.
+        raise PreventUpdate
+
     def update_page(self, _, selected_pipeline):
         if ((self.report is None and (self.log_file is None or not os.path.exists(self.log_file)))
                 or (self.report is not None and not self.report.update() and not self.selected_pipeline_changed)):
             # The report does not exist, or exists but nothing is updated.
+            print('no update needed')
             raise PreventUpdate
         elif self.report is None:
             self.report = GamaReport(self.log_file)
+        print('Updating with selected', selected_pipeline)
+
+        with pd.option_context('mode.use_inf_as_na', True):
+            evaluations = self.report.evaluations.dropna()
 
         self.selected_pipeline_changed = False
-        scatters = self.scatter_plot(self.report, selected_pipeline)
+        scatters = self.scatter_plot(evaluations, self.report.metrics, selected_pipeline)
         figure = {
             'data': scatters,
             'layout': dict(
@@ -86,17 +107,17 @@ class RunningPage(BasePage):
         }
 
         pl_table_data = [{'pl': self.report.individuals[id_].short_name(' > '), 'id': id_}
-                         for id_ in self.report.evaluations.id]
-
+                         for id_ in evaluations.id]
+        row_id = [i for i, id_ in enumerate(evaluations.id) if id_ == selected_pipeline]
         pl_viz_data = None if selected_pipeline is None else self.report.individuals[selected_pipeline].pipeline_str()
+        def format_pipeline(ind):
 
-        return figure, pl_table_data, pl_viz_data
 
-    def scatter_plot(self, report, selected_pipeline: str = None):
-        with pd.option_context('mode.use_inf_as_na', True):
-            evaluations = report.evaluations.dropna()
+        print('Update complete.', row_id)
+        return figure, pl_table_data, pl_viz_data, row_id, None, None
 
-        metric_one, metric_two = report.metrics[:2]
+    def scatter_plot(self, evaluations, metrics, selected_pipeline: str = None):
+        metric_one, metric_two = metrics
 
         # Marker size indicates recency of the evaluations, recent evaluations are bigger.
         biggest_size = 25
@@ -132,7 +153,7 @@ class RunningPage(BasePage):
         self.cli.monitor(process)
         self.log_file = log_file
 
-    def plot_area(self, app):
+    def plot_area(self):
         scatter = dcc.Graph(
             id='evaluation-graph',
             figure={
@@ -145,18 +166,6 @@ class RunningPage(BasePage):
         )
         return html.Div(scatter, style={'height': '100%', 'box-shadow': '1px 1px 1px black', 'padding': '2%'})
 
-    def update_selection(self, click_data, active_cell, previous_selected):
-        click_selected = None if click_data is None else click_data["points"][0]['customdata']
-        cell_selected = None if active_cell is None else active_cell['row_id']
-        if click_selected == cell_selected == previous_selected:
-            raise PreventUpdate
-
-        self.selected_pipeline_changed = True
-        if click_selected is not None and previous_selected != click_selected:
-            return [click_selected]
-        elif cell_selected is not None and previous_selected != cell_selected:
-            return [cell_selected]
-
     def pipeline_list(self):
         ta = dash_table.DataTable(
             id='pipeline-table',
@@ -166,7 +175,9 @@ class RunningPage(BasePage):
                 'maxHeight': '300px',
                 'overflowY': 'scroll'
             },
-            persistence_type='session', persistence=True
+            row_selectable='single',
+            persistence_type='session',
+            persistence=True
         )
 
         return html.Div(ta, style={'height': '100%', 'box-shadow': '1px 1px 1px black', 'padding': '2%'})
