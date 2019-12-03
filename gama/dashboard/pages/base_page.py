@@ -19,6 +19,7 @@ class BasePage(abc.ABC):
         """
         self.name = name
         self.alignment = alignment
+        self.need_update = False
         self._content = None
 
     @property

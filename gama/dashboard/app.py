@@ -24,10 +24,13 @@ def build_app():
     from gama.dashboard.pages import pages
     base = create_generic_layout()
     base['tabs'].children = create_tabs(pages)
+    page_stores = []
     for page in pages:
         page.build_page(dashboard, controller)
         if hasattr(page, 'gama_started'):
             controller.gama_started(page.gama_started)
+        page_stores.append(dcc.Store(id=f'{page.id}-store', storage_type='session', data={}))
+    base['page-stores'].children = page_stores
     return base
 
 
@@ -44,7 +47,8 @@ def create_generic_layout():
         id="page",
         children=[
             html.Div(id="tabs", style=tab_banner_style),
-            html.Div(id="content")
+            html.Div(id="content"),
+            html.Div(id="page-stores")
         ],
         style={'font-family': "'Open Sans Semi Bold', sans-serif"}
     )
@@ -94,6 +98,7 @@ def create_tab(name: str):
 def display_page_content(page_name):
     from gama.dashboard.pages import pages
     page = [page for page in pages if page.name == page_name][0]
+    page.need_update = True
     return [page.content]
 
 

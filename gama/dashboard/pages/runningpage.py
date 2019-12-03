@@ -1,4 +1,5 @@
 import os
+import time
 
 import dash_table
 import dash_core_components as dcc
@@ -22,7 +23,6 @@ class RunningPage(BasePage):
         self.id = 'running-page'
         self.report = None
         self.log_file = None
-        self.selected_pipeline_changed = False
 
     def build_page(self, app, controller):
         self.cli = CLIWindow('cli', app)
@@ -41,12 +41,7 @@ class RunningPage(BasePage):
                     dbc.Col(pl_viz, width=4),
                     dbc.Col(pl_list)
                 ]),
-                ticker,
-                # A div to store the pipeline selected through the table or graph
-                html.Div(
-                    id='selected-pipeline',
-                    style=dict(display='none')
-                )
+                ticker
             ]
         )
 
@@ -58,45 +53,43 @@ class RunningPage(BasePage):
              Output('pipeline-table', 'selected_row_ids'),
              Output('evaluation-graph', 'clickData')],
             [Input('ticker', 'n_intervals'),
-             Input('selected-pipeline', 'children')]
+             Input('running-page-store', 'data')]
         )(self.update_page)
 
         app.callback(
-            [Output('selected-pipeline', 'children')],
+            [Output('running-page-store', 'data')],
             [Input('evaluation-graph', 'clickData'),
              Input('pipeline-table', 'selected_row_ids')],
-            [State('selected-pipeline', 'children')]
+            [State('running-page-store', 'data')]
         )(self.update_selection)
 
         return self._content
 
-    def update_selection(self, click_data, selected_row_ids, previous_selected):
+    def update_selection(self, click_data, selected_row_ids, page_store):
         cell_selected = None if selected_row_ids is None else selected_row_ids[0]
         click_selected = None if click_data is None else click_data["points"][0]['customdata']
         # Selected row ids and click data are always set back to None. The value that is not None is the new value.
-        if click_data is not None:
-            self.selected_pipeline_changed = True
-            return [click_data["points"][0]['customdata']]
-        elif cell_selected is not None:
-            self.selected_pipeline_changed = True
-            return [cell_selected]
+        if click_data is not None or cell_selected is not None:
+            self.need_update = True
+            page_store['selected_pipeline'] = click_selected if click_selected is not None else cell_selected
+            return [page_store]
         # First call or sync call.
         raise PreventUpdate
 
-    def update_page(self, _, selected_pipeline):
+    def update_page(self, _, page_store):
+        start_update = time.time()
+        selected_pipeline = page_store.get('selected_pipeline', None)
         if ((self.report is None and (self.log_file is None or not os.path.exists(self.log_file)))
-                or (self.report is not None and not self.report.update() and not self.selected_pipeline_changed)):
+                or (self.report is not None and not self.report.update() and not self.need_update)):
             # The report does not exist, or exists but nothing is updated.
-            print('no update needed')
             raise PreventUpdate
         elif self.report is None:
             self.report = GamaReport(self.log_file)
-        print('Updating with selected', selected_pipeline)
 
         with pd.option_context('mode.use_inf_as_na', True):
             evaluations = self.report.evaluations.dropna()
 
-        self.selected_pipeline_changed = False
+        self.need_update = False
         scatters = self.scatter_plot(evaluations, self.report.metrics, selected_pipeline)
         figure = {
             'data': scatters,
@@ -121,7 +114,7 @@ class RunningPage(BasePage):
             return pipeline_elements
         pl_viz_data = None if selected_pipeline is None else format_pipeline(self.report.individuals[selected_pipeline])
 
-        print('Update complete.', row_id)
+        print('Update complete in ', time.time() - start_update)
         return figure, pl_table_data, pl_viz_data, row_id, None, None
 
     def scatter_plot(self, evaluations, metrics, selected_pipeline: str = None):
