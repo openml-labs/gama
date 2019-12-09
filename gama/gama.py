@@ -376,6 +376,26 @@ class Gama(ABC):
                     log.warning("Did not delete due to:", exc_info=True)
                 # else ignore silently. This can occur if an evaluation process writes to cache.
 
+    def export_script(self, file: str = 'gama_pipeline.py', raise_if_exists: bool = False):
+        """ Exports a Python script which sets up the best found pipeline.
+
+        Parameters
+        ----------
+        file: str (default='gama_pipeline.py')
+            Desired filename of the exported Python script.
+        raise_if_exists: bool (default=False)
+            If True, raise an error if the file already exists.
+            If False, overwrite `file` if it already exists.
+        """
+        if self.model is None:
+            raise RuntimeError(STR_NO_OPTIMAL_PIPELINE)
+        if raise_if_exists and os.path.isfile(file):
+            raise FileExistsError(f"File {file} already exists.")
+
+        script_text = self._post_processing.to_code()
+        with open(file, 'w') as fh:
+            fh.write(script_text)
+
     def _safe_outside_call(self, fn):
         """ Calls fn and log any exception it raises without reraising, except for TimeoutException. """
         try:
