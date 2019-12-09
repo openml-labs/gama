@@ -48,7 +48,7 @@ class OperatorSet:
             if self._evaluate_callback is not None:
                 self._evaluate_callback(individual)
         elif future.exception is not None:
-            log.warning(f'Encountered exception while evaluation individual: {str(future.exception)}.')
+            log.warning(f'Encountered exception while evaluating individual: {str(future.exception)}.')
         return future
 
     def try_until_new(self, operator, *args, **kwargs):
