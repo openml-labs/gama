@@ -72,15 +72,16 @@ def object_is_valid_pipeline(o):
 
 
 def evaluate_individual(individual: Individual, evaluate_pipeline_length, *args, **kwargs):
-    (scores, start_datetime, wallclock_time, process_time) = evaluate_pipeline(individual.pipeline, *args, **kwargs)
+    (scores, start_datetime, wallclock_time, process_time) = evaluate_pipeline(individual, *args, **kwargs)
     if evaluate_pipeline_length:
         scores = (*scores, -len(individual.primitives))
     individual.fitness = Fitness(scores, start_datetime, wallclock_time, process_time)
     return individual
 
 
-def evaluate_pipeline(pl, X, y_train, timeout, deadline, metrics='accuracy', cv=5, cache_dir=None, logger=None, subsample=None):
+def evaluate_pipeline(individual, X, y_train, timeout, deadline, metrics='accuracy', cv=5, cache_dir=None, logger=None, subsample=None):
     """ Evaluates a pipeline used k-Fold CV. """
+    pl = individual.pipeline
     if not logger:
         logger = log
 
@@ -119,7 +120,7 @@ def evaluate_pipeline(pl, X, y_train, timeout, deadline, metrics='accuracy', cv=
         pl_filename = str(uuid.uuid4())
         try:
             with open(os.path.join(cache_dir, pl_filename + '.pkl'), 'wb') as fh:
-                pickle.dump((pl, prediction, scores), fh)
+                pickle.dump((individual, prediction, scores), fh)
         except FileNotFoundError:
             log.debug("File not found while saving predictions. This can happen in the multi-process case if the "
                       "cache gets deleted within `max_eval_time` of the end of the search process.", exc_info=True)
