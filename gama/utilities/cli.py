@@ -42,6 +42,14 @@ def parse_args():
         help="Path to store the final model in. (default=gama_model.pkl)"
     )
 
+    io_group.add_argument(
+        '-py',
+        dest='export_python',
+        type=str,
+        default=None,
+        help="If set, will export a Python file to this destination which sets up the final model."
+    )
+
     optimization = parser.add_argument_group("Optimization")
     optimization.add_argument(
         '--mode',
@@ -149,6 +157,9 @@ def main():
     print('CLI: Exporting models.')
     with open(args.output_file, 'wb') as fh:
         pickle.dump(automl.model, fh)
+
+    if args.export_python is not None:
+        automl.export_script(args.export_python, raise_if_exists=False)
     print('done!')
 
 
