@@ -25,15 +25,10 @@ For ease of use, GAMA provides a `fit`, `predict` and `predict_proba` function a
 .. include:: examples.rst
     :start-line: 1
 
-It is possible to have GAMA export the final model definition as a Python file, see :meth:`gama.Gama.export_script`.
-
 -----
 
-.. include:: cli.rst
+.. include:: simple_features.rst
     :start-line: 1
-
------
-
 
 -----
 
