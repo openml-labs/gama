@@ -377,7 +377,22 @@ class Gama(ABC):
                 # else ignore silently. This can occur if an evaluation process writes to cache.
 
     def export_script(self, file: str = 'gama_pipeline.py', raise_if_exists: bool = False):
-        """ Exports a Python script which sets up the best found pipeline.
+        """ Exports a Python script which sets up the best found pipeline. Can only be called after `fit`.
+
+        Example
+        -------
+        After the AutoML search process has completed (i.e. `fit` has been called), the model which
+        has been found by GAMA may be exported to a Python file. The Python file will define the found
+        pipeline or ensemble.
+
+        .. code-block:: python
+
+            automl = GamaClassifier()
+            automl.fit(X, y)
+            automl.export_script('my_pipeline_script.py')
+
+        The resulting script will define a variable `pipeline` or `ensemble`, depending on the post-processing
+        method that was used after search.
 
         Parameters
         ----------
