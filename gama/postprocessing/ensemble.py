@@ -11,11 +11,12 @@ import stopit
 
 from gama.genetic_programming.components import Individual
 from gama.postprocessing.base_post_processing import BasePostProcessing
+from gama.utilities.export import imports_and_steps_for_individual
 from gama.utilities.metrics import Metric, MetricType
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 
 log = logging.getLogger(__name__)
-Model = namedtuple("Model", ['name', 'pipeline', 'predictions', 'validation_score'])
+Model = namedtuple("Model", ['name', 'individual', 'pipeline', 'predictions', 'validation_score'])
 
 
 class EnsemblePostProcessing(BasePostProcessing):
@@ -38,17 +39,47 @@ class EnsemblePostProcessing(BasePostProcessing):
             metric=(None, None),
             cache=(None, None)
         )
+        self._ensemble = None
 
     def dynamic_defaults(self, gama: 'Gama'):
         self._overwrite_hyperparameter_default('metric', gama._metrics[0])
         self._overwrite_hyperparameter_default('cache', gama._cache_dir)
 
     def post_process(self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]) -> 'model':
-        return build_fit_ensemble(x, y,
-                                  self.hyperparameters['ensemble_size'],
-                                  timeout,
-                                  self.hyperparameters['metric'],
-                                  self.hyperparameters['cache'])
+        self._ensemble = build_fit_ensemble(
+            x, y,
+            self.hyperparameters['ensemble_size'],
+            timeout,
+            self.hyperparameters['metric'],
+            self.hyperparameters['cache']
+        )
+        return self._ensemble
+
+    def to_code(self) -> str:
+        voter = 'VotingClassifier' if isinstance(self._ensemble, EnsembleClassifier) else 'VotingRegressor'
+        all_imports = {f"from sklearn.ensemble import {voter}", "from sklearn.pipeline import Pipeline"}
+
+        pipeline_names = []
+        pipeline_declarations = []
+        pipeline_weights = []
+        for i, (model, weight) in enumerate(self._ensemble._models.values()):
+            imports, steps = imports_and_steps_for_individual(model.individual)
+            all_imports = all_imports.union(set(imports))
+            steps_str = ',\n'.join([f"('{name}', {step})" for name, step in steps])
+            pipeline_name = f"pipeline_{i}"
+            pipeline_names.append(pipeline_name)
+            pipeline_declarations.append(f"{pipeline_name} = Pipeline([{steps_str}])")
+            pipeline_weights.append(weight)
+
+        estimators = ','.join([f"('{i}', {name})" for i, name in enumerate(pipeline_names)])
+        if isinstance(self._ensemble, EnsembleClassifier):
+            voting = ",'soft'" if self._ensemble._metric.requires_probabilities else 'hard'
+        else:
+            voting = ''  # This parameter does not exist for VotingRegressor
+        script = ('\n'.join(all_imports) + '\n\n' +
+                  '\n\n'.join(pipeline_declarations) + '\n' +
+                  f"ensemble = {voter}([{estimators}]{voting},{pipeline_weights})\n")
+        return script
 
 
 class Ensemble(object):
@@ -257,10 +288,10 @@ def load_predictions(cache_dir, prediction_transformation=None):
                 # to a restart/timeout. I can not find specifications saying that any interrupt of pickle.dump leads
                 # to 0-sized files, but in practice this seems to case so far.
                 with open(os.path.join(cache_dir, file), 'rb') as fh:
-                    pl, predictions, scores = pickle.load(fh)
+                    individual, predictions, scores = pickle.load(fh)
                 if prediction_transformation:
                     predictions = prediction_transformation(predictions)
-                models.append(Model(str(pl), pl, predictions, scores))
+                models.append(Model(individual.pipeline_str(), individual, individual.pipeline, predictions, scores))
     return models
 
 

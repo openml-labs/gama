@@ -34,6 +34,16 @@ class PrimitiveNode:
         else:
             return "{}({})".format(self._primitive, str(self._data_node))
 
+    @property
+    def str_nonrecursive(self) -> str:
+        """ Stringify all primitive node without data node (primitive and hyperparameters).
+
+        Examples: - "GaussianNB()"
+                  - "BernoulliNB(alpha=1.0)"
+        """
+        terminal_str = ", ".join([str(terminal) for terminal in self._terminals])
+        return "{}({})".format(self._primitive, terminal_str)
+
     def copy(self):
         """ Make a shallow copy w.r.t. Primitive/Terminal (they are immutable), but deep w.r.t. PrimitiveNodes. """
         data_node_copy = self._data_node if self._data_node == DATA_TERMINAL else self._data_node.copy()

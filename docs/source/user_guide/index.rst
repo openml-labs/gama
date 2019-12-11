@@ -27,7 +27,7 @@ For ease of use, GAMA provides a `fit`, `predict` and `predict_proba` function a
 
 -----
 
-.. include:: cli.rst
+.. include:: simple_features.rst
     :start-line: 1
 
 -----
