@@ -445,3 +445,12 @@ class Gama(ABC):
             Expected signature is: Individual -> Any
         """
         self._subscribers['evaluation_completed'].append(callback_function)
+
+    def morris_sensitivity_chart(self, filename: str):
+        """ Save a chart of Morris Sensitivity by feature as html file to `filename`. """
+        from interpret import preserve
+        from interpret.perf import ROC
+
+        predict = self.model.predict_proba if hasattr(self.model, 'predict_proba') else self.model.predict
+        blackbox_perf = ROC(predict).explain_perf(self._X, self._y, name='Blackbox')
+        preserve(blackbox_perf, file_name=filename)
