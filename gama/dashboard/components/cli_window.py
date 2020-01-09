@@ -3,7 +3,7 @@ import subprocess
 import threading
 import queue
 
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 import dash_core_components as dcc
 import dash_html_components as html
@@ -62,7 +62,8 @@ class CLIWindow:
         app.callback(
             [Output(self.console_id, 'value'),
              Output(self.js_id, 'run')],
-            [Input(self.timer_id, 'n_intervals')]
+            [Input(self.timer_id, 'n_intervals')],
+            [State(self.console_id, 'value')]
         )(self.update_console)
 
     def monitor(self, process):
@@ -78,14 +79,18 @@ class CLIWindow:
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         self.monitor(process)
 
-    def update_console(self, _):
+    def update_console(self, _, current_text):
         if self.process is None:
             return [None, None]
+
+        # We want to update the text field if there is new output from the process,
+        # or if we detect the text value has been reset (due to e.g. switching tabs).
         try:
             line = self._queue.get_nowait()
             self._lines.append(line.decode('utf-8'))
         except queue.Empty:
-            # No new message, no update required.
-            raise PreventUpdate
-        #self.console.value = ''.join(self._lines)
+            # No new message, update only required if value field had been reset.
+            if current_text is not None:
+                raise PreventUpdate
+
         return [''.join(self._lines), self.autoscroll_script if self.auto_scroll else '']

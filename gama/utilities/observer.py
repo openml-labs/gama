@@ -40,7 +40,7 @@ class Observer(object):
         updated = self._current_pareto_front.update(ind)
         if updated:
             self._individuals_since_last_pareto_update = 0
-            log.info("Current Pareto front updated: {} scores {}".format(ind.short_name, ind.fitness.values))
+            log.info("Current Pareto front updated: {} scores {}".format(ind.short_name(), ind.fitness.values))
         else:
             self._individuals_since_last_pareto_update += 1
 

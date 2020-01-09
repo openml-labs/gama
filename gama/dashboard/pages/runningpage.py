@@ -91,16 +91,25 @@ class RunningPage(BasePage):
 
         self.need_update = False
         scatters = self.scatter_plot(evaluations, self.report.metrics, selected_pipeline)
+        metric_one, metric_two = self.report.metrics
+        metric_one_text = metric_one.replace('_', ' ')
+
         figure = {
             'data': scatters,
             'layout': dict(
                 hovermode='closest',
-                clickmode='event+select'
+                clickmode='event+select',
+                title=f'{metric_one_text} vs {metric_two}',
+                xaxis=dict(title=metric_one_text),
+                yaxis=dict(title=metric_two, tickformat=',d'),  # tickformat forces integer ticks for length,
+                uirevision='never_reset_zoom'
             )
         }
 
-        pl_table_data = [{'pl': self.report.individuals[id_].short_name(' > '), 'id': id_}
-                         for id_ in evaluations.id]
+        pl_table_data = [{'pl': self.report.individuals[id_].short_name(' > '),
+                          'id': id_,
+                          'score': score}
+                         for id_, score in zip(evaluations.id, evaluations[metric_one])]
         row_id = [i for i, id_ in enumerate(evaluations.id) if id_ == selected_pipeline]
 
         def format_pipeline(ind):
@@ -140,7 +149,7 @@ class RunningPage(BasePage):
                   for id_ in evaluations.id]
 
         all_scatter = go.Scatter(
-            x=-evaluations[metric_one],
+            x=evaluations[metric_one],
             y=-evaluations[metric_two],
             mode='markers',
             marker={'color': colors, 'size': sizes},
@@ -170,12 +179,14 @@ class RunningPage(BasePage):
     def pipeline_list(self):
         ta = dash_table.DataTable(
             id='pipeline-table',
-            columns=[{'name': 'Pipeline', 'id': 'pl'}],
+            columns=[{'name': 'Pipeline', 'id': 'pl'}, {'name': 'Score', 'id': 'score'}],
             data=[],
             style_table={
                 'maxHeight': '300px',
                 'overflowY': 'scroll'
             },
+            filter_action="native",
+            sort_action="native",
             row_selectable='single',
             persistence_type='session',
             persistence=True

@@ -29,7 +29,7 @@ class Controller:
 
         command = shlex.split(command)
         fake_command = ['python', '-h']
-        process = subprocess.Popen(fake_command, shell=True, stdout=subprocess.PIPE)
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         self._on_gama_started(process, log_file)
 
     def _on_gama_started(self, process, log_file):
