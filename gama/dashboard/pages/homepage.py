@@ -215,11 +215,12 @@ def build_configuration_menu(app, controller) -> html.Div:
 
     def start_gama(*args, **kwargs):
         controller.start_gama(*args, **kwargs)
-        return 'danger', dcc.Markdown("#### Stop!")
+        return 'danger', dcc.Markdown("#### Stop!"), "Running"
 
     app.callback(
         [Output('go-button', "color"),
-         Output('go-button', "children")],
+         Output('go-button', "children"),
+         Output("page-tabs", "value")],
         [Input('go-button', "n_clicks")],
         [State('metric_dropdown', "value"),
          State('regularize_length_switch', "value"),
