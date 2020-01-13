@@ -1,6 +1,10 @@
 Release Notes
 =============
 
+Version 19.12
+-------------
+Features:
+ - Code export! Export Python code that sets up the machine learning pipeline found with AutoML.
 
 Version 20.0.0
 --------------
