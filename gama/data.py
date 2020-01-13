@@ -63,13 +63,13 @@ def X_y_from_arff(file_path: str, split_column: Optional[str] = None) -> Tuple[p
 
 def load_feature_metadata_from_arff(file_path: str) -> Dict[str, str]:
     """ Load the header of the ARFF file and return the type of each attribute. """
-    data_header = '@DATA'
-    attribute_indicator = '@ATTRIBUTE'
+    data_header = '@data'
+    attribute_indicator = '@attribute'
     attributes = {}
     with open(file_path, 'r') as fh:
         line = fh.readline()
-        while not line.startswith(data_header):
-            if line.startswith(attribute_indicator):
+        while not line.lower().startswith(data_header):
+            if line.lower().startswith(attribute_indicator):
                 # arff uses a space separator, but allows spaces in
                 # feature name (name must be quoted) and feature type (if nominal).
                 indicator, name_and_type = line.split(' ', 1)
