@@ -35,10 +35,9 @@ class Individual:
             raise AttributeError("`pipeline` not available because `to_pipeline` was not set on __init__.")
         return self._to_pipeline(self)
 
-    @property
-    def short_name(self):
+    def short_name(self, step_separator: str = '>'):
         """ str: e.g. "Binarizer>BernoulliNB" """
-        return '>'.join([str(primitive._primitive) for primitive in reversed(self.primitives)])
+        return step_separator.join([str(primitive._primitive) for primitive in reversed(self.primitives)])
 
     def pipeline_str(self):
         """ str: e.g. "BernoulliNB(Binarizer(data, Binarizer.threshold=0.6), BernoulliNB.alpha=1.0)" """
