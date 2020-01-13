@@ -1,11 +1,6 @@
 Release Notes
 =============
 
-Version 19.12
--------------
-Features:
- - Code export! Export Python code that sets up the machine learning pipeline found with AutoML.
-
 Version 20.0.0
 --------------
 Features:
@@ -16,7 +11,7 @@ Features:
     First steps to providing a user interface for GAMA.
     It allows users to start GAMA AutoML through a webapp built with Dash,
     and monitor the performance of the search as it is executed.
- - Code Export. The best found model pipeline can now be exported as Python code.
+ - Code export: export Python code that sets up the machine learning pipeline found with AutoML.
 
 Bugfixes:
  #68: Only add categorical encoding steps if (non-binary) categorical data is present.
