@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 20.0.1
+--------------
+Bugfixes:
+ - Reading ARFF markers (such as @data and @attribute) is now correctly case insensitive.
+
 Version 20.0.0
 --------------
 Features:
