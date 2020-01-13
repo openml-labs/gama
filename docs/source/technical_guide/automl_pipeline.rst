@@ -36,10 +36,10 @@ However, it is easy to change this, or to change the hyperparameters with which 
 For example, searching with 'Asynchronous Successive Halving' and creating an ensemble during post-processing::
 
     from gama import GamaClassifier
-    from gama.search_methods import ASHA  #Asynchronous Successive Halving Algorithm
-    from gama.postprocessing import Ensemble
+    from gama.search_methods import AsynchronousSuccessiveHalving
+    from gama.postprocessing import EnsemblePostProcessing
 
-    custom_pipeline_gama = GamaClassifier(search=ASHA(), post_processing=EnsemblePostProcessing())
+    custom_pipeline_gama = GamaClassifier(search=AsynchronousSuccessiveHalving(), post_processing=EnsemblePostProcessing())
 
 or using 'Asynchronous EA' but with custom hyperparameters::
 

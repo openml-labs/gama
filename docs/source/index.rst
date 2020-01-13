@@ -17,6 +17,10 @@ You can install GAMA from PyPI with pip::
 
     pip install gama
 
+Or if you would like to include the graphical frontend::
+
+    pip install gama[vis]
+
 To get more basic information on GAMA and its AutoML functionality, read more in the :ref:`user_guide_index`.
 If you want find out everything there is to know about GAMA, also visit the :ref:`technical_guide_index`.
 It describes visualization of optimization logs, changing the AutoML pipeline, and more.

@@ -107,8 +107,13 @@ def display_page_content(page_name):
     return [page.content]
 
 
-def main(**server_kwargs):
+def main(open_window: bool = True, **server_kwargs):
     dashboard.layout = build_app()
+    if open_window:
+        import webbrowser
+        from threading import Timer
+        port = server_kwargs.get('port', 8050)
+        Timer(1, webbrowser.open_new, kwargs=dict(url=f"http://127.0.0.1:{port}")).start()
     dashboard.run_server(**server_kwargs)
 
 
