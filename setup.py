@@ -63,5 +63,5 @@ setup(
         'all': all_
     },
     python_requires='>=3.6.0',
-    entry_points={'console_scripts': ['gama=gama.utilities.cli:main']}
+    entry_points={'console_scripts': ['gama=gama.utilities.cli:main', 'gamadash=gama.dashboard.app:main']}
 )

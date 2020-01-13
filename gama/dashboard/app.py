@@ -1,10 +1,15 @@
 from typing import List
 
-import dash
-import dash_core_components as dcc
-import dash_bootstrap_components as dbc
-import dash_html_components as html
-from dash.dependencies import Input, Output
+try:
+    import dash
+    import dash_core_components as dcc
+    import dash_bootstrap_components as dbc
+    import dash_html_components as html
+    from dash.dependencies import Input, Output
+except ImportError:
+    print("Unable to import Dash modules. Make sure GAMA is installed with the optional visualization dependencies."
+          "E.g.: pip install gama[vis]")
+    raise
 
 from gama.dashboard.controller import Controller
 from gama.dashboard.pages.base_page import BasePage
@@ -102,6 +107,10 @@ def display_page_content(page_name):
     return [page.content]
 
 
-if __name__ == '__main__':
+def main(**server_kwargs):
     dashboard.layout = build_app()
-    dashboard.run_server(debug=True)
+    dashboard.run_server(**server_kwargs)
+
+
+if __name__ == '__main__':
+    main(debug=True)
