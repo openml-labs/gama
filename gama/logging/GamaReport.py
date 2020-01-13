@@ -125,12 +125,16 @@ def _find_new_lines(logfile: str, start_from: int = 0):
 
 
 def _find_metric_configuration(init_lines: List[List[str]]) -> Tuple[List[str], str, str, str]:
-    scoring, regularize_length, *_, filename, _, search, postprocessing = init_lines[0][0].split(',')
-    _, metric = scoring.split('=')
-    _, regularize = regularize_length.split('=')
-    _, search = search.split('=', maxsplit=1)
-    _, filename = filename.split('=', maxsplit=1)
-    _, postprocessing = postprocessing.split('=', maxsplit=1)
+    hps = init_lines[0][0].split(',')
+
+    def hyperparameter_value_of(hyperparameter_name: str) -> str:
+        return [hp.split('=', maxsplit=1)[-1] for hp in hps if hyperparameter_name in hp][0]
+
+    metric = hyperparameter_value_of('scoring')
+    regularize = hyperparameter_value_of('regularize_length')
+    search = hyperparameter_value_of('search_method')
+    filename = hyperparameter_value_of('keep_analysis_log')
+    postprocessing = hyperparameter_value_of('post_processing_method')
     if bool(regularize):
         return [metric, 'length'], search, postprocessing, filename
     else:
