@@ -4,14 +4,15 @@ Release Notes
 Version 20.0.0
 --------------
 Features:
- - GAMA Command Line Interface:
+ #65 GAMA Command Line Interface:
     Allows users to start GAMA from the command line.
     Requires data to be formatted in ARFF.
- - GAMA Dashboard:
+ #69 Code export:
+    Export Python code that sets up the machine learning pipeline found with AutoML.
+ #71 GAMA Dashboard:
     First steps to providing a user interface for GAMA.
     It allows users to start GAMA AutoML through a webapp built with Dash,
     and monitor the performance of the search as it is executed.
- - Code export: export Python code that sets up the machine learning pipeline found with AutoML.
 
 Bugfixes:
  #68: Only add categorical encoding steps if (non-binary) categorical data is present.
@@ -20,7 +21,7 @@ Maintenance:
  #67: Selection now takes crowding distance into account (again).
  #68: `n_jobs` will now default to use half of available cores.
  #68: Updates given about the Pareto front now include the pipeline structure.
- - Versioning now YY.Minor.Micro
+ #70: Versioning now YY.Minor.Micro
 
 
 Version 19.11.2
