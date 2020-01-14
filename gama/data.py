@@ -5,13 +5,15 @@ import arff
 import pandas as pd
 
 
-def arff_to_pandas(file_path: str) -> pd.DataFrame:
+def arff_to_pandas(file_path: str, encoding: Optional[str] = None) -> pd.DataFrame:
     """ Load data from the ARFF file into a pd.DataFrame.
 
     Parameters
     ----------
     file_path: str
         Path of the ARFF file
+    encoding: str, optional
+        Encoding of the ARFF file.
 
     Returns
     -------
@@ -22,7 +24,7 @@ def arff_to_pandas(file_path: str) -> pd.DataFrame:
     if not isinstance(file_path, str):
         raise TypeError(f"`file_path` must be of type `str` but is of type {type(file_path)}")
 
-    with open(file_path, 'r') as arff_file:
+    with open(file_path, 'r', encoding=encoding) as arff_file:
         arff_dict = arff.load(arff_file)
 
     attribute_names, data_types = zip(*arff_dict['attributes'])
@@ -34,7 +36,7 @@ def arff_to_pandas(file_path: str) -> pd.DataFrame:
     return data
 
 
-def X_y_from_arff(file_path: str, split_column: Optional[str] = None) -> Tuple[pd.DataFrame, pd.Series]:
+def X_y_from_arff(file_path: str, split_column: Optional[str] = None, encoding: Optional[str] = None) -> Tuple[pd.DataFrame, pd.Series]:
     """ Load data from the ARFF file into pandas DataFrame and specified column to pd.Series. "
 
     Parameters
@@ -45,13 +47,15 @@ def X_y_from_arff(file_path: str, split_column: Optional[str] = None) -> Tuple[p
         Column to split and return separately (e.g. target column).
         Value should either match a column name or None.
         If None is specified, the last column is returned separately.
+    encoding: str, optional
+        Encoding of the ARFF file.
 
     Returns
     -------
     Tuple[pd.DataFrame, pd.Series]
         Features (everything except split_column) and targets (split_column).
     """
-    data = arff_to_pandas(file_path)
+    data = arff_to_pandas(file_path, encoding)
 
     if split_column is None:
         return data.iloc[:, :-1], data.iloc[:, -1]

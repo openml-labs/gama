@@ -208,7 +208,10 @@ class Gama(ABC):
                 x[col] = x[col].astype(self._X[col].dtype)
         return self._predict(x)
 
-    def predict_arff(self, arff_file_path: str, target_column: Optional[str] = None) -> np.ndarray:
+    def predict_arff(self,
+                     arff_file_path: str,
+                     target_column: Optional[str] = None,
+                     encoding: Optional[str] = None) -> np.ndarray:
         """ Predict the target for input found in the ARFF file.
 
         Parameters
@@ -219,13 +222,15 @@ class Gama(ABC):
         target_column: str, optional (default=None)
             Specifies which column the model should predict.
             If left None, the last column is taken to be the target.
+        encoding: str, optional
+            Encoding of the ARFF file.
 
         Returns
         -------
         numpy.ndarray
             array with predictions for each row in the ARFF file.
         """
-        X, _ = X_y_from_arff(arff_file_path, split_column=target_column)
+        X, _ = X_y_from_arff(arff_file_path, split_column=target_column, encoding=encoding)
         return self._predict(X)
 
     def score(self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]) -> float:
@@ -246,7 +251,11 @@ class Gama(ABC):
         predictions = self.predict_proba(x) if self._metrics[0].requires_probabilities else self.predict(x)
         return self._metrics[0].score(y, predictions)
 
-    def score_arff(self, arff_file_path: str, target_column: Optional[str] = None) -> float:
+    def score_arff(self,
+                   arff_file_path: str,
+                   target_column: Optional[str] = None,
+                   encoding: Optional[str] = None
+                   ) -> float:
         """ Calculate the score of the model according to the `scoring` metric and input in the ARFF file.
 
         Parameters
@@ -256,16 +265,23 @@ class Gama(ABC):
         target_column: str, optional (default=None)
             Specifies which column the model should predict.
             If left None, the last column is taken to be the target.
+        encoding: str, optional
+            Encoding of the ARFF file.
 
         Returns
         -------
         float
             The score obtained on the given test data according to the `scoring` metric.
         """
-        X, y = X_y_from_arff(arff_file_path, split_column=target_column)
+        X, y = X_y_from_arff(arff_file_path, split_column=target_column, encoding=encoding)
         return self.score(X, y)
 
-    def fit_arff(self, arff_file_path: str, target_column: Optional[str] = None, *args, **kwargs):
+    def fit_arff(self,
+                 arff_file_path: str,
+                 target_column: Optional[str] = None,
+                 encoding: Optional[str] = None,
+                 *args, **kwargs
+                 ) -> None:
         """ Find and fit a model to predict the target column (last) from other columns.
 
         Parameters
@@ -275,16 +291,18 @@ class Gama(ABC):
         target_column: str, optional (default=None)
             Specifies which column the model should predict.
             If left None, the last column is taken to be the target.
+        encoding: str, optional
+            Encoding of the ARFF file.
 
         """
-        X, y = X_y_from_arff(arff_file_path, split_column=target_column)
+        X, y = X_y_from_arff(arff_file_path, split_column=target_column, encoding=encoding)
         self.fit(X, y, *args, **kwargs)
 
     def fit(self,
             x: Union[pd.DataFrame, np.ndarray],
             y: Union[pd.DataFrame, pd.Series, np.ndarray],
             warm_start: bool = False,
-            keep_cache: bool = False):
+            keep_cache: bool = False) -> None:
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
