@@ -2,8 +2,9 @@ from collections import namedtuple
 import os
 import pickle
 import logging
+import random
 import time
-from typing import Optional, List
+from typing import Optional, List, Callable
 
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
@@ -86,7 +87,9 @@ class Ensemble(object):
 
     def __init__(self, metric, y: pd.DataFrame,
                  model_library=None, model_library_directory=None,
-                 shrink_on_pickle=True):
+                 shrink_on_pickle=True,
+                 downsample_to: Optional[int] = 10_000,
+                 use_top_n_only: Optional[int] = 200):
         """
         Either model_library or model_library_directory must be specified.
         If model_library is specified, model_library_directory is ignored.
@@ -123,8 +126,18 @@ class Ensemble(object):
         self._model_library_directory = model_library_directory
         self._model_library = model_library if model_library is not None else []
         self._shrink_on_pickle = shrink_on_pickle
-        self._y = y
         self._prediction_transformation = None
+        self._use_top_n_only = use_top_n_only
+
+        if downsample_to is None or downsample_to >= len(y):
+            if downsample_to is not None:
+                log.info(f"Not downsampling because training data only had {len(y)} samples.")
+            self._y = y
+            self._prediction_sample = None
+        else:
+            log.info(f"Downsampling because training data exceeds {downsample_to} samples.")
+            self._prediction_sample = random.sample(range(len(y)), downsample_to)
+            self._y = y[self._prediction_sample]
 
         self._internal_score = None
         self._fit_models = None
@@ -136,8 +149,15 @@ class Ensemble(object):
     def model_library(self):
         if not self._model_library:
             log.debug("Loading model library from disk.")
-            self._model_library = load_predictions(self._model_library_directory, self._prediction_transformation)
+            self._model_library = load_predictions(self._model_library_directory, self._prediction_transformation, self._prediction_sample)
             log.info("Loaded model library of size {} from disk.".format(len(self._model_library)))
+            self._model_library = list(reversed(sorted(self._model_library, key=lambda m: m.validation_score)))
+            if self._use_top_n_only is not None and self._use_top_n_only < len(self._model_library):
+                log.info("Discarding {} models, keeping the {} best ones."
+                         .format(len(self._model_library) - self._use_top_n_only, self._use_top_n_only))
+                self._model_library = self._model_library[:self._use_top_n_only]
+            elif self._use_top_n_only is not None and self._use_top_n_only > len(self._model_library):
+                log.info(f"Keeping all models since only {len(self._model_library)} models were evaluated.")
 
         return self._model_library
 
@@ -169,11 +189,8 @@ class Ensemble(object):
             log.warning("The ensemble already contained models. Overwriting the ensemble.")
             self._models = {}
 
-        sorted_ensembles = reversed(sorted(self.model_library, key=lambda m: m.validation_score))
-
         # Since the model library only features unique models, we do not need to check for duplicates here.
-        selected_models = list(sorted_ensembles)[:n]
-        for model in selected_models:
+        for model in self.model_library[:n]:
             self._add_model(model)
 
         log.debug("Initial ensemble created with score {}".format(self._ensemble_validation_score()))
@@ -278,7 +295,26 @@ class Ensemble(object):
         return self.__dict__.copy()
 
 
-def load_predictions(cache_dir, prediction_transformation=None):
+def load_predictions(
+        cache_dir: str,
+        prediction_transformation: Optional[Callable] = None,
+        sample: Optional[List[int]] = None) -> List[Model]:
+    """
+
+    Parameters
+    ----------
+    cache_dir: str
+        Directory with stored models.
+    prediction_transformation: callable, optional
+        Function which transforms the predictions (for multi-class classification)
+    sample: List[int], optional
+        If specified only keep these samples of the predictions in each Model, discard the remainder.
+
+    Returns
+    -------
+    A list of Models.
+
+    """
     models = []
     for file in os.listdir(cache_dir):
         if file.endswith('.pkl'):
@@ -291,6 +327,8 @@ def load_predictions(cache_dir, prediction_transformation=None):
                     individual, predictions, scores = pickle.load(fh)
                 if prediction_transformation:
                     predictions = prediction_transformation(predictions)
+                if sample:
+                    predictions = predictions[sample]
                 models.append(Model(individual.pipeline_str(), individual, individual.pipeline, predictions, scores))
     return models
 
@@ -333,6 +371,8 @@ class EnsembleClassifier(Ensemble):
 
         if self._metric.requires_probabilities:
             self._y = self._one_hot_encoder.transform(y_as_squeezed_array).toarray()
+            if self._prediction_sample is not None:
+                self._y = self._y[self._prediction_sample]
         else:
             def one_hot_encode_predictions(predictions):
                 return self._one_hot_encoder.transform(predictions.reshape(-1, 1))
