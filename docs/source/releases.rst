@@ -3,6 +3,9 @@ Release Notes
 
 Version 20.0.1
 --------------
+Features:
+ - Encoding of ARFF files may now be specified with the `encoding` parameter in {fit/predict/score}_arff calls.
+
 Bugfixes:
  - Reading ARFF markers (such as @data and @attribute) is now correctly case insensitive.
 
