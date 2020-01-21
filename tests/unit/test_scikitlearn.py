@@ -20,11 +20,12 @@ def test_cross_val_predict_score():
     x, y = pd.DataFrame(x), pd.Series(y)
 
     metrics = scoring_to_metric(['accuracy', 'log_loss'])
-    predictions, scores = cross_val_predict_score(estimator, x, y, metrics=metrics)
+    predictions, scores, estimators = cross_val_predict_score(estimator, x, y, metrics=metrics)
     accuracy, logloss = scores
 
     assert accuracy_score(y_ohe, predictions) == pytest.approx(accuracy)
     assert -1 * log_loss(y_ohe, predictions) == pytest.approx(logloss)
+    assert len(set(estimators)) == len(estimators)
 
 
 def test_evaluate_individual(BernoulliNBStandardScaler, mocker):

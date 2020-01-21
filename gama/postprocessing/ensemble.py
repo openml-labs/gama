@@ -17,7 +17,7 @@ from gama.utilities.metrics import Metric, MetricType
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 
 log = logging.getLogger(__name__)
-Model = namedtuple("Model", ['name', 'individual', 'pipeline', 'predictions', 'validation_score'])
+Model = namedtuple("Model", ['name', 'individual', 'pipelines', 'predictions', 'validation_score'])
 
 
 class EnsemblePostProcessing(BasePostProcessing):
@@ -197,8 +197,8 @@ class Ensemble(object):
 
     def _add_model(self, model, add_weight=1):
         """ Adds a specific model to the ensemble or increases its weight if it already is contained. """
-        model, weight = self._models.pop(model.pipeline, (model, 0))
-        self._models[model.pipeline] = (model, weight + add_weight)
+        model, weight = self._models.pop(model.individual._id, (model, 0))
+        self._models[model.individual._id] = (model, weight + add_weight)
         log.debug("Assigned a weight of {} to model {}".format(weight + add_weight, model.name))
 
     def expand_ensemble(self, n: int):
@@ -248,20 +248,25 @@ class Ensemble(object):
         if timeout <= 0:
             raise ValueError("timeout must be greater than 0.")
 
-        self._fit_models = []
-        futures = set()
-        with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncEvaluator() as async_:
-            for (model, weight) in self._models.values():
-                futures.add(async_.submit(fit_and_weight, (model.pipeline, X, y, weight)))
+        self._fit_models = [(estimator, weight)
+                            for (model, weight) in self._models.values()
+                            for estimator in model.pipelines]
+        # for (model, weight) in self._models.values():
 
-            for _ in self._models.values():
-                future = async_.wait_next()
-                pipeline, weight = future.result
-                if weight > 0:
-                    self._fit_models.append((pipeline, weight))
-
-        if not c_mgr:
-            log.info("Fitting of ensemble stopped early.")
+        # self._fit_models = []
+        # futures = set()
+        # with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncEvaluator() as async_:
+        #     for (model, weight) in self._models.values():
+        #         futures.add(async_.submit(fit_and_weight, (model.pipeline, X, y, weight)))
+        #
+        #     for _ in self._models.values():
+        #         future = async_.wait_next()
+        #         pipeline, weight = future.result
+        #         if weight > 0:
+        #             self._fit_models.append((pipeline, weight))
+        #
+        # if not c_mgr:
+        #     log.info("Fitting of ensemble stopped early.")
 
     def _get_weighted_mean_predictions(self, X, predict_method='predict'):
         weighted_predictions = []
@@ -324,12 +329,12 @@ def load_predictions(
                 # to a restart/timeout. I can not find specifications saying that any interrupt of pickle.dump leads
                 # to 0-sized files, but in practice this seems to case so far.
                 with open(os.path.join(cache_dir, file), 'rb') as fh:
-                    individual, predictions, scores = pickle.load(fh)
+                    individual, estimators, predictions, scores = pickle.load(fh)
                 if prediction_transformation:
                     predictions = prediction_transformation(predictions)
                 if sample:
                     predictions = predictions[sample]
-                models.append(Model(individual.pipeline_str(), individual, individual.pipeline, predictions, scores))
+                models.append(Model(individual.pipeline_str(), individual, estimators, predictions, scores))
     return models
 
 
