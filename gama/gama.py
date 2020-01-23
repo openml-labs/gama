@@ -15,6 +15,7 @@ import warnings
 import pandas as pd
 import numpy as np
 import stopit
+from sklearn.pipeline import Pipeline
 
 import gama.genetic_programming.compilers.scikitlearn
 from gama.logging.machine_logging import log_event, TOKENS
@@ -23,11 +24,11 @@ from gama.utilities.metrics import scoring_to_metric
 from .utilities.observer import Observer
 
 from gama.__version__ import __version__
-from gama.data import X_y_from_arff
+from gama.data import X_y_from_arff, format_x_y
 from gama.search_methods.async_ea import AsyncEA
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.logging.utility_functions import register_stream_log, register_file_log
-from gama.utilities.preprocessing import define_preprocessing_steps, format_x_y
+from gama.utilities.preprocessing import define_preprocessing_steps, basic_encoding, basic_pipeline_extension
 from gama.genetic_programming.mutation import random_valid_mutation_in_place
 from gama.genetic_programming.crossover import random_crossover
 from gama.genetic_programming.selection import create_from_population, eliminate_from_pareto
@@ -168,6 +169,7 @@ class Gama(ABC):
 
         self._X: Optional[pd.DataFrame] = None
         self._y: Optional[pd.DataFrame] = None
+        self._basic_encoding_pipeline: Optional[Pipeline] = None
         self.model: object = None
         self._final_pop = None
 
@@ -186,6 +188,16 @@ class Gama(ABC):
             evaluate_callback=self._on_evaluation_completed
         )
 
+    def _np_to_matching_dataframe(self, x: np.ndarray) -> pd.DataFrame:
+        """ Format the numpy array to a dataframe whose column types match the training data. """
+        if not isinstance(x, np.ndarray):
+            raise TypeError(f"Expected x to be of type 'numpy.ndarray' not {type(x)}.")
+
+        x = pd.DataFrame(x)
+        for col in self._X.columns:
+            x[col] = x[col].astype(self._X[col].dtype)
+        return x
+
     def _predict(self, x: pd.DataFrame):
         raise NotImplemented('_predict is implemented by base classes.')
 
@@ -203,9 +215,7 @@ class Gama(ABC):
             array with predictions of shape (N,) where N is the length of the first dimension of X.
         """
         if isinstance(x, np.ndarray):
-            x = pd.DataFrame(x)
-            for col in self._X.columns:
-                x[col] = x[col].astype(self._X[col].dtype)
+            x = self._np_to_matching_dataframe(x)
         return self._predict(x)
 
     def predict_arff(self,
@@ -326,7 +336,9 @@ class Gama(ABC):
         """
 
         with self._time_manager.start_activity('preprocessing', activity_meta=['default']):
-            self._X, self._y = format_x_y(x, y)
+            x, y = format_x_y(x, y)
+            # self._X, self._basic_encoding_pipeline = basic_encoding(x)
+            # steps = basic_pipeline_extension(self._X)
             steps = define_preprocessing_steps(self._X, max_extra_features_created=None, max_categories_for_one_hot=10)
             self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
 
