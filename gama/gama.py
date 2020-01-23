@@ -8,7 +8,7 @@ import os
 import random
 import shutil
 import time
-from typing import Union, Tuple, Optional, Dict
+from typing import Union, Tuple, Optional, Dict, Type, List
 import uuid
 import warnings
 
@@ -170,6 +170,7 @@ class Gama(ABC):
         self._X: Optional[pd.DataFrame] = None
         self._y: Optional[pd.DataFrame] = None
         self._basic_encoding_pipeline: Optional[Pipeline] = None
+        self._inferred_dtypes: List[Type] = []
         self.model: object = None
         self._final_pop = None
 
@@ -194,8 +195,14 @@ class Gama(ABC):
             raise TypeError(f"Expected x to be of type 'numpy.ndarray' not {type(x)}.")
 
         x = pd.DataFrame(x)
-        for col in self._X.columns:
-            x[col] = x[col].astype(self._X[col].dtype)
+        for i, dtype in enumerate(self._inferred_dtypes):
+            x[i] = x[i].astype(dtype)
+        return x
+
+    def _prepare_for_prediction(self, x):
+        if isinstance(x, np.ndarray):
+            x = self._np_to_matching_dataframe(x)
+        x = self._basic_encoding_pipeline.transform(x)
         return x
 
     def _predict(self, x: pd.DataFrame):
@@ -214,8 +221,7 @@ class Gama(ABC):
         numpy.ndarray
             array with predictions of shape (N,) where N is the length of the first dimension of X.
         """
-        if isinstance(x, np.ndarray):
-            x = self._np_to_matching_dataframe(x)
+        x = self._prepare_for_prediction(x)
         return self._predict(x)
 
     def predict_arff(self,
@@ -240,8 +246,9 @@ class Gama(ABC):
         numpy.ndarray
             array with predictions for each row in the ARFF file.
         """
-        X, _ = X_y_from_arff(arff_file_path, split_column=target_column, encoding=encoding)
-        return self._predict(X)
+        x, _ = X_y_from_arff(arff_file_path, split_column=target_column, encoding=encoding)
+        x = self._prepare_for_prediction(x)
+        return self._predict(x)
 
     def score(self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]) -> float:
         """ Calculate the score of the model according to the `scoring` metric and input (x, y).
@@ -336,10 +343,11 @@ class Gama(ABC):
         """
 
         with self._time_manager.start_activity('preprocessing', activity_meta=['default']):
-            x, y = format_x_y(x, y)
-            # self._X, self._basic_encoding_pipeline = basic_encoding(x)
-            # steps = basic_pipeline_extension(self._X)
-            steps = define_preprocessing_steps(self._X, max_extra_features_created=None, max_categories_for_one_hot=10)
+            x, self._y = format_x_y(x, y)
+            self._inferred_dtypes = x.dtypes
+            self._X, self._basic_encoding_pipeline = basic_encoding(x)
+            steps = basic_pipeline_extension(self._X)
+            #  steps = define_preprocessing_steps(self._X, max_extra_features_created=None, max_categories_for_one_hot=10)
             self._operator_set._safe_compile = partial(compile_individual, preprocessing_steps=steps)
 
         fit_time = int((1 - self._post_processing.time_fraction) * self._time_manager.total_time_remaining)

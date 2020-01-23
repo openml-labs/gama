@@ -82,10 +82,7 @@ class GamaClassifier(Gama):
             Array of shape (N, K) with class probabilities where N is the length of the
             first dimension of x, and K is the number of class labels found in `y` of `fit`.
         """
-        if isinstance(x, np.ndarray):
-            x = pd.DataFrame(x)
-            for col in self._X.columns:
-                x[col] = x[col].astype(self._X[col].dtype)
+        x = self._prepare_for_prediction(x)
         return self._predict_proba(x)
 
     def predict_proba_arff(self,
@@ -111,8 +108,9 @@ class GamaClassifier(Gama):
             Numpy array with class probabilities. The array is of shape (N, K) where N is the length of the
             first dimension of X, and K is the number of class labels found in `y` of `fit`.
         """
-        X, _ = X_y_from_arff(arff_file_path, target_column, encoding)
-        return self._predict_proba(X)
+        x, _ = X_y_from_arff(arff_file_path, target_column, encoding)
+        x = self._prepare_for_prediction(x)
+        return self._predict_proba(x)
 
     def fit(self, x, y, *args, **kwargs):
         """ Should use base class documentation. """
