@@ -4,10 +4,12 @@ Each mutation function takes an individual and modifies it in-place.
 """
 import random
 from typing import Callable
+import logging
 
 from .components import Individual, DATA_TERMINAL
 from .operations import random_primitive_node
 
+log = logging.getLogger(__name__)
 
 def mut_replace_terminal(individual: Individual, primitive_set: dict) -> None:
     """ Mutates an Individual in-place by replacing one of its Terminals.
@@ -24,6 +26,9 @@ def mut_replace_terminal(individual: Individual, primitive_set: dict) -> None:
 
     terminal_index, old_terminal = random.choice(terminals)
     acceptable_new_terminals = [t for t in primitive_set[old_terminal.identifier] if t.value != old_terminal.value]
+    if len(acceptable_new_terminals) == 0:
+        log.info("No terminals available for replacement")
+        return
     new_terminal = random.choice(acceptable_new_terminals)
     individual.replace_terminal(terminal_index, new_terminal)
 
@@ -39,7 +44,7 @@ def mut_replace_primitive(individual: Individual, primitive_set: dict) -> None:
     """
     replaceable_primitives = [(i, p) for i, p in enumerate(individual.primitives)
                               if len(primitive_set[p._primitive.output]) > 1]
-    if replaceable_primitives == 0:
+    if len(replaceable_primitives) == 0:
         raise ValueError("Individual has no primitives which can be replaced with a different primitive.")
 
     primitive_index, old_primitive_node = random.choice(replaceable_primitives)
@@ -112,7 +117,11 @@ def random_valid_mutation_in_place(individual: Individual, primitive_set: dict) 
     Callable
         The mutation function used.
     """
-    available_mutations = [mut_replace_primitive, mut_insert]
+    available_mutations = [mut_insert]
+
+    if len([(i, p) for i, p in enumerate(individual.primitives)
+            if len(primitive_set[p._primitive.output]) > 1]) > 0:
+        available_mutations.append(mut_replace_primitive)
     if len(list(individual.primitives)) > 1:
         available_mutations.append(mut_shrink)
     if len([t for t in individual.terminals if len(primitive_set[t.identifier]) > 1]):
