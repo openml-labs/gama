@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 requirements = [
-    'numpy==1.15.4',
+    'numpy==1.17.3',
     'scipy>=1.0.0',
     'scikit-learn==0.20.2',
     'stopit>=1.1.1',
