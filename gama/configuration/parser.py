@@ -57,10 +57,11 @@ def pset_from_config(configuration):
             # After registering the hyperparameter types, we can register the operator itself.
             if hasattr(key, 'pclass'):
                 transformer_tags = ["DATA_PREPROCESSING", "FEATURE_SELECTION", "DATA_TRANSFORMATION", "FEATURE_EXTRACTION"]
+                predictor_tags = ["CLASSIFICATION", "REGRESSION", "TIME_SERIES_FORECASTING"]
                 family = key.pclass.metadata.query()['primitive_family']
                 if family in transformer_tags:
                     pset[DATA_TERMINAL].append(Primitive(input=hyperparameter_types, output=DATA_TERMINAL, identifier=key))
-                elif family == 'CLASSIFICATION' or family == 'REGRESSION':
+                elif family in predictor_tags:
                     pset["prediction"].append(Primitive(input=hyperparameter_types, output="prediction", identifier=key))
                 else:
                     raise TypeError("{} has unknown family '{}'".format(key, family))

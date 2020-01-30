@@ -369,6 +369,14 @@ class Gama(ABC):
             log.debug("Deleting cache.")
             self.delete_cache()
 
+    def _set_evaluator(self, timeout: int = 1e6):
+        deadline = time.time() + timeout
+        evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self._X, y_train=self._y,
+                             metrics=self._metrics, cache_dir=self._cache_dir, timeout=self._max_eval_time,
+                             deadline=deadline)
+        self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
+                                              **evaluate_args)
+
     def _search_phase(self, warm_start: bool = False, timeout: int = 1e6):
         """ Invoke the evolutionary algorithm, populate `final_pop` regardless of termination. """
         if warm_start and self._final_pop is not None:
@@ -378,12 +386,7 @@ class Gama(ABC):
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
             pop = [self._operator_set.individual() for _ in range(50)]
 
-        deadline = time.time() + timeout
-        evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self._X, y_train=self._y,
-                             metrics=self._metrics, cache_dir=self._cache_dir, timeout=self._max_eval_time,
-                             deadline=deadline)
-        self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
-                                              **evaluate_args)
+        self._set_evaluator(timeout)
 
         try:
             with stopit.ThreadingTimeout(timeout):
