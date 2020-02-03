@@ -1,5 +1,7 @@
 import logging
+from typing import List, Callable
 
+from gama.genetic_programming.components import Individual
 from gama.utilities.generic.paretofront import ParetoFront
 
 log = logging.getLogger(__name__)
@@ -52,12 +54,19 @@ class Observer(object):
         self._individuals_since_last_pareto_update = 0
         self._multiple_pareto_fronts = True
 
-    def best_n(self, n):
+    def best_n(self, n: int) -> List[Individual]:
         """ Return the best n individuals observed based on the first optimization criterion.
 
-        :param n: the number of individuals to return
-        :return: a list of up to n individuals for which the score on the first criterion is the best.
-                returns less than n individuals if less than n have been evaluated.
+        Parameters
+        ----------
+        n: int
+            the number of individuals to return
+
+        Returns
+        -------
+        List[Individual]
+            A list of up to n individuals for which the score on the first criterion is the best.
+            Returns less than n individuals if less than n have been evaluated.
         """
         best_pipelines = sorted(self._individuals, key=lambda x: (-x.fitness.values[0], str(x)))
         return best_pipelines[:n]
@@ -66,18 +75,12 @@ class Observer(object):
         for callback in self._pareto_callbacks:
             callback(ind)
 
-    def on_pareto_updated(self, fn):
+    def on_pareto_updated(self, fn: Callable[[Individual], None]):
         """ Register a callback function that is called when the Pareto-front is updated.
 
-        :param fn: Function to call when the pareto front is updated. Expected signature is: ind -> None
+        Parameters
+        ----------
+        fn: Callable[[Individual], None]
+            Function to call when the pareto front is updated. Expected signature is: ind -> None
         """
         self._pareto_callbacks.append(fn)
-
-    def callback_on_improvement(self, fn, criterion=None):
-        """ Register a callback function for when a certain criterion is improved upon in the pareto front.
-
-        :param fn:
-        :param criterion:
-        :return:
-        """
-        raise NotImplemented()

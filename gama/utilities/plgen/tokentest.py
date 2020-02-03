@@ -50,7 +50,7 @@ class SpecTokenTest(TokenTest):
         params = None
         if hasattr(self, 'parameters'):
             params = self.parameters
-        return set(Emission(primitive=p, parameters=params) for p in prims)
+        return set([Emission(primitive=p, parameters=params) for p in prims])
 
     def matches(self, primitive):
         if not self.parent.library.primitive_has_type(primitive, self.name, self.items):

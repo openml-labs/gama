@@ -1,11 +1,3 @@
-.. gama documentation master file, created by
-   sphinx-quickstart on Sun Aug 19 19:44:17 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-.. automodule::
-   :members:
-   
 GAMA - Genetic Automated Machine learning Assistant
 ===================================================
 
@@ -27,18 +19,18 @@ You can install GAMA (and its dependencies) by cloning the repository and callin
     cd gama
     python setup.py install
 
+To get more basic information on GAMA and its AutoML functionality, read more in the :ref:`user_guide_index`.
+If you want find out everything there is to know about GAMA, also visit the :ref:`technical_guide_index`.
+It describes visualization of optimization logs, changing the AutoML pipeline, and more.
+If there are any questions you have that are not answered by the documentation, check the `issue page <https://github.com/PGijsbers/GAMA/issues>`_.
+If your question has not been answered there either, please open a new issue and label with the question label.
+
 .. toctree::
-   :maxdepth: 2
-   :hidden:
+   :includehidden:
 
    user_guide/index
+   technical_guide/index
    api/index
    releases
-   contributing
+   contributing/index
    citing
-
-   :caption: Contents:
-
-
-To get a general understanding on how to work with GAMA, read the :ref:`user_guide_index`.
-It gives background information, examples and other pointers.

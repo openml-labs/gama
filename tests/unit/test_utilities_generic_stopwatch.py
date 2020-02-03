@@ -3,7 +3,7 @@ import pytest
 from gama.utilities.generic.stopwatch import Stopwatch
 
 
-ROUND_ERROR = 0.01
+ROUND_ERROR = 0.02
 
 
 def test_stopwatch_initialization_zero():

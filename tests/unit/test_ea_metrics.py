@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from gama.genetic_programming.algorithms.metrics import Metric, all_metrics
+from gama.utilities.metrics import Metric, all_metrics, scoring_to_metric
 
 
 def _test_metric(metric, y_true, y_pred, optimal_score, prediction_score):
@@ -53,3 +53,9 @@ def test_logloss_numeric():
 def test_all_metrics_instantiate():
     for metric in all_metrics:
         Metric.from_string(metric)
+
+
+def test_scoring_to_metric_mixed():
+    metrics = list(all_metrics)
+    mixed_metrics = [Metric.from_string(metric) for metric in metrics[:2]] + metrics[2:]
+    scoring_to_metric(mixed_metrics)

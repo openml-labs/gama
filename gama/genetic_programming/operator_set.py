@@ -1,8 +1,10 @@
-from collections import Sequence
+from collections.abc import Sequence
 import logging
+from concurrent.futures.process import BrokenProcessPool
 
+import stopit
 from gama.logging.machine_logging import TOKENS, log_event
-from gama.utilities.generic.async_executor import wait_first_complete
+from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from .components import Individual
 
 log = logging.getLogger(__name__)
@@ -33,13 +35,38 @@ class OperatorSet:
 
         self._seen_individuals = {}
 
-    def wait_first_complete(self, *args, **kwargs):
-        done, not_done = wait_first_complete(*args, **kwargs)
-        for result in [future.result() for future in done]:
-            individual = result if not isinstance(result, Sequence) else result[0]
+    def wait_next(self, async_evaluator):
+        future = async_evaluator.wait_next()
+        if future.result is not None:
+            result = future.result
+            if not isinstance(result, Sequence):
+                individual = result
+                log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
+                          individual.fitness.wallclock_time, individual.fitness.process_time,
+                          individual.fitness.values, individual._id, individual.pipeline_str())
+            else:
+                # For now, we leave logging for non-standard results to the caller (e.g. rungs in ASHA)
+                individual = result[0]
             if self._evaluate_callback is not None:
                 self._evaluate_callback(individual)
-        return done, not_done
+        elif future.exception is not None:
+            log.warning(f'Encountered exception while evaluation individual: {str(future.exception)}.')
+        return future
+
+    def wait_next(self, async_eval):
+        done = async_eval.wait_next()
+        result = done.result
+        if not isinstance(result, Sequence):
+            individual = result
+            log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
+                      individual.fitness.wallclock_time, individual.fitness.process_time,
+                      individual.fitness.values, individual._id, individual.pipeline_str())
+        else:
+            # For now, we leave logging for non-standard results to the caller (e.g. rungs in ASHA)
+            individual = result[0]
+        if self._evaluate_callback is not None:
+            self._evaluate_callback(individual)
+        return done
 
     def try_until_new(self, operator, *args, **kwargs):
         for _ in range(self._max_retry):
