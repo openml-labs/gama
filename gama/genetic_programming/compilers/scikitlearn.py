@@ -31,6 +31,39 @@ def compile_individual(individual: Individual, parameter_checks=None, preprocess
     return Pipeline(list(reversed(steps)))
 
 
+def cross_val_train_predict(estimator, x, y, predict_method: str = 'predict', cv: int = 5):
+    """ Perform (Stratified)KFold returning the trained estimators and predictions of each fold. """
+    from sklearn.base import clone, is_classifier
+    from sklearn.model_selection._split import check_cv
+    from sklearn.utils.metaestimators import _safe_split
+    import numpy as np
+
+    cv = check_cv(cv, y, classifier=is_classifier(estimator))
+
+    estimators = []
+    predictions = None
+    for train, test in cv.split(x, y):
+        x_train, y_train = _safe_split(estimator, x, y, train)
+        x_test, _ = _safe_split(estimator, x, y, test, train)
+
+        fold_estimator = clone(estimator)
+        fold_predict = getattr(fold_estimator, predict_method)
+
+        fold_estimator.fit(x_train, y_train)
+        estimators.append(fold_estimator)
+        fold_prediction = fold_predict(x_test)
+
+        if predictions is None:
+            if fold_prediction.ndim == 2:
+                predictions = np.empty(shape=(len(y), fold_prediction.shape[1]))
+            else:
+                predictions = np.empty(shape=(len(y),))
+
+        predictions[test] = fold_prediction
+
+    return predictions, estimators
+
+
 def cross_val_predict_score(estimator, X, y_train, metrics=None, **kwargs):
     """ Return both the predictions and score of the estimator trained on the data given the cv strategy.
 
@@ -42,7 +75,8 @@ def cross_val_predict_score(estimator, X, y_train, metrics=None, **kwargs):
 
     predictions_are_probabilities = any(metric.requires_probabilities for metric in metrics)
     method = 'predict_proba' if predictions_are_probabilities else 'predict'
-    predictions = cross_val_predict(estimator, X, y_train, method=method, **kwargs)
+    # predictions = cross_val_predict(estimator, X, y_train, method=method, **kwargs)
+    predictions, estimators = cross_val_train_predict(estimator, X, y_train, predict_method=method)
 
     if predictions.ndim == 2 and predictions.shape[1] == 1:
         predictions = predictions.squeeze()
@@ -60,7 +94,7 @@ def cross_val_predict_score(estimator, X, y_train, metrics=None, **kwargs):
             # No metric requires probabilities, so `predictions` is an array of labels.
             scores.append(metric.maximizable_score(y_train, predictions))
 
-    return predictions, scores
+    return predictions, scores, estimators
 
 
 def object_is_valid_pipeline(o):
@@ -101,7 +135,7 @@ def evaluate_pipeline(individual, X, y_train, timeout, deadline, metrics='accura
                 idx, _ = next(ShuffleSplit(n_splits=1, train_size=subsample, random_state=0).split(X))
                 X, y_train = X.iloc[idx, :], y_train[idx]
 
-            prediction, scores = cross_val_predict_score(pl, X, y_train, cv=cv, metrics=metrics)
+            prediction, scores, estimators = cross_val_predict_score(pl, X, y_train, cv=cv, metrics=metrics)
         except stopit.TimeoutException:
             # score not actually unused, because exception gets caught by the context manager.
             raise
@@ -120,7 +154,7 @@ def evaluate_pipeline(individual, X, y_train, timeout, deadline, metrics='accura
         pl_filename = str(uuid.uuid4())
         try:
             with open(os.path.join(cache_dir, pl_filename + '.pkl'), 'wb') as fh:
-                pickle.dump((individual, prediction, scores), fh)
+                pickle.dump((individual, estimators, prediction, scores), fh)
         except FileNotFoundError:
             log.debug("File not found while saving predictions. This can happen in the multi-process case if the "
                       "cache gets deleted within `max_eval_time` of the end of the search process.", exc_info=True)

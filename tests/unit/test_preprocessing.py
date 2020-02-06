@@ -1,6 +1,6 @@
 import itertools
 import pandas as pd
-from gama.utilities.preprocessing import format_x_y
+from gama.data import format_x_y
 
 
 def test_format_x_y():
