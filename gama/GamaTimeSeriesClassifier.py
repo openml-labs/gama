@@ -1,12 +1,12 @@
 
 import time
 from functools import partial
-from .GamaRegressor import GamaRegressor
+from .GamaClassifier import GamaClassifier
 from .genetic_programming.compilers.scikitlearn import evaluate_individual, cross_val_predict_timeseries
 from .utilities.timeseries import timeseries_cv_grouped
 
 
-class GamaTimeSeriesForecaster(GamaRegressor):
+class GamaTimeSeriesClassifier(GamaClassifier):
     """ Wrapper for the toolbox logic executing the AutoML pipeline for time
     series forecasting. """
 
