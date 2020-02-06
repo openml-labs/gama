@@ -86,9 +86,11 @@ def cross_val_predict_score(estimator, X, y_train, metrics=None, cvpredict=cross
     predictions_are_probabilities = any(metric.requires_probabilities for metric in metrics)
     method = 'predict_proba' if predictions_are_probabilities else 'predict'
     result = cvpredict(estimator, X, y_train, method=method, **kwargs)
+
     predictions = result['predictions']
     y_train = result.get('y_train', y_train)
     estimators = result.get('estimators', None)
+
     # time series = predictions, y_train
     # other  = predictions, estimators
 
@@ -280,7 +282,7 @@ def evaluate_individual(individual: Individual, evaluate_pipeline_length, *args,
 
 
 def evaluate_pipeline(individual, X, y_train, timeout, deadline, metrics='accuracy', cv=5, cache_dir=None, logger=None,
-                      subsample=None, cvpredict=cross_val_predict):
+                      subsample=None, cvpredict=cross_val_train_predict):
     """ Evaluates a pipeline used k-Fold CV. """
     pl = individual.pipeline
     if not logger:
@@ -298,11 +300,13 @@ def evaluate_pipeline(individual, X, y_train, timeout, deadline, metrics='accura
     timeout = min(timeout, time_to_deadline)
     with open('evals.txt', 'a') as fh:
         fh.write(f'{timeout}->{str(pl)}\n')
+
+    if draw_subsample:
+        idx, _ = next(ShuffleSplit(n_splits=1, train_size=subsample, random_state=0).split(X))
+        X, y_train = X.iloc[idx, :], y_train[idx]
+
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
-            if draw_subsample:
-                idx, _ = next(ShuffleSplit(n_splits=1, train_size=subsample, random_state=0).split(X))
-                X, y_train = X.iloc[idx, :], y_train[idx]
             prediction, scores, estimators = cross_val_predict_score(pl, X, y_train, cv=cv, metrics=metrics, cvpredict=cvpredict)
             print(scores)
         except stopit.TimeoutException:
