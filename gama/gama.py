@@ -3,6 +3,7 @@ from collections import defaultdict
 import datetime
 from functools import partial
 import logging
+import multiprocessing
 import os
 import random
 import shutil
@@ -55,10 +56,10 @@ class Gama(ABC):
                  scoring: Union[str, Metric, Tuple[Union[str, Metric], ...]] = 'filled_in_by_child_class',
                  regularize_length: bool = True,
                  config: Dict = None,
-                 random_state: int = None,
+                 random_state: Optional[int] = None,
                  max_total_time: int = 3600,
                  max_eval_time: Optional[int] = None,
-                 n_jobs: int = -1,
+                 n_jobs: Optional[int] = None,
                  verbosity: int = logging.WARNING,
                  keep_analysis_log: Optional[str] = 'gama.log',
                  cache_dir: Optional[str] = None,
@@ -79,7 +80,7 @@ class Gama(ABC):
         config: a dictionary which specifies available components and their valid hyperparameter settings
             For more information, see :ref:`search_space_configuration`.
 
-        random_state:  int or None (default=None)
+        random_state:  int, optional (default=None)
             If an integer is passed, this will be the seed for the random number generators used in the process.
             However, with `n_jobs > 1`, there will be randomization introduced by multi-processing.
             For reproducible results, set this and use `n_jobs=1`.
@@ -91,10 +92,11 @@ class Gama(ABC):
             Time in seconds that can be used to evaluate any one single individual.
             If None, set to 0.1 * max_total_time.
 
-        n_jobs: int (default=-1)
+        n_jobs: int, optional (default=None)
             The amount of parallel processes that may be created to speed up `fit`.
-            Accepted values are positive integers or -1.
+            Accepted values are positive integers, -1 or None.
             If -1 is specified, multiprocessing.cpu_count() processes are created.
+            If None is specified, multiprocessing.cpu_count() / 2 processes are created.
 
         verbosity: int (default=logging.WARNING)
             Sets the level of log messages to be automatically output to terminal.
@@ -126,6 +128,10 @@ class Gama(ABC):
         log.info('Using GAMA version {}.'.format(__version__))
         log.info('{}({})'.format(self.__class__.__name__, arguments))
         log_event(log, TOKENS.INIT, arguments)
+
+        if n_jobs is None:
+            n_jobs = multiprocessing.cpu_count() // 2
+            log.debug('n_jobs defaulted to %d', n_jobs)
 
         if max_total_time is None or max_total_time <= 0:
             raise ValueError(f"max_total_time should be integer greater than zero but is {max_total_time}.")
@@ -369,6 +375,41 @@ class Gama(ABC):
                 if "The directory is not empty" not in str(e):
                     log.warning("Did not delete due to:", exc_info=True)
                 # else ignore silently. This can occur if an evaluation process writes to cache.
+
+    def export_script(self, file: str = 'gama_pipeline.py', raise_if_exists: bool = False):
+        """ Exports a Python script which sets up the best found pipeline. Can only be called after `fit`.
+
+        Example
+        -------
+        After the AutoML search process has completed (i.e. `fit` has been called), the model which
+        has been found by GAMA may be exported to a Python file. The Python file will define the found
+        pipeline or ensemble.
+
+        .. code-block:: python
+
+            automl = GamaClassifier()
+            automl.fit(X, y)
+            automl.export_script('my_pipeline_script.py')
+
+        The resulting script will define a variable `pipeline` or `ensemble`, depending on the post-processing
+        method that was used after search.
+
+        Parameters
+        ----------
+        file: str (default='gama_pipeline.py')
+            Desired filename of the exported Python script.
+        raise_if_exists: bool (default=False)
+            If True, raise an error if the file already exists.
+            If False, overwrite `file` if it already exists.
+        """
+        if self.model is None:
+            raise RuntimeError(STR_NO_OPTIMAL_PIPELINE)
+        if raise_if_exists and os.path.isfile(file):
+            raise FileExistsError(f"File {file} already exists.")
+
+        script_text = self._post_processing.to_code()
+        with open(file, 'w') as fh:
+            fh.write(script_text)
 
     def _safe_outside_call(self, fn):
         """ Calls fn and log any exception it raises without reraising, except for TimeoutException. """

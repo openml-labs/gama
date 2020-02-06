@@ -48,4 +48,4 @@ dash_app.layout['header-box'].children = dashboard_header
 
 
 if __name__ == '__main__':
-    dash_app.run_server(debug=True)
+    dash_app.run_server(debug=True, port=5001)

@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
+import math
 from typing import List, Optional, Tuple, Dict, Callable
 
 import pandas as pd
@@ -83,12 +84,16 @@ class GamaReport:
             self._lines_read += len(new_lines)
             print(f'read {len(new_lines)} new lines')
             events_by_type = _lines_to_dict(new_lines)
-            search_start = 0 if len(self.evaluations) == 0 else self.evaluations.start.min()
+            search_start = None if len(self.evaluations) == 0 else self.evaluations.start.min()
+            start_n = self.evaluations.n.max()
+            if math.isnan(start_n):
+                start_n = -1
+
             new_evaluations = _evaluations_to_dataframe(
                 events_by_type[TOKENS.EVALUATION_RESULT],
                 metric_names=self.metrics,
                 search_start=search_start,
-                start_n=self.evaluations.n.max() + 1
+                start_n=start_n + 1
             )
             self.evaluations = pd.concat([self.evaluations, new_evaluations])
             for metric in self.metrics:
@@ -120,12 +125,16 @@ def _find_new_lines(logfile: str, start_from: int = 0):
 
 
 def _find_metric_configuration(init_lines: List[List[str]]) -> Tuple[List[str], str, str, str]:
-    scoring, regularize_length, *_, filename, _, search, postprocessing = init_lines[0][0].split(',')
-    _, metric = scoring.split('=')
-    _, regularize = regularize_length.split('=')
-    _, search = search.split('=', maxsplit=1)
-    _, filename = filename.split('=', maxsplit=1)
-    _, postprocessing = postprocessing.split('=', maxsplit=1)
+    hps = init_lines[0][0].split(',')
+
+    def hyperparameter_value_of(hyperparameter_name: str) -> str:
+        return [hp.split('=', maxsplit=1)[-1] for hp in hps if hyperparameter_name in hp][0]
+
+    metric = hyperparameter_value_of('scoring')
+    regularize = hyperparameter_value_of('regularize_length')
+    search = hyperparameter_value_of('search_method')
+    filename = hyperparameter_value_of('keep_analysis_log')
+    postprocessing = hyperparameter_value_of('post_processing_method')
     if bool(regularize):
         return [metric, 'length'], search, postprocessing, filename
     else:
@@ -173,7 +182,10 @@ def _evaluations_to_dataframe(evaluation_lines: List[List[str]],
     df.start = pd.to_datetime(df.start)
     df.duration = pd.to_timedelta(df.duration, unit='s')
     search_start = search_start if search_start is not None else df.start.min()
-    df['relative_end'] = ((df.start + df.duration) - search_start).dt.total_seconds()
+    if len(df.start) > 0:
+        df['relative_end'] = ((df.start + df.duration) - search_start).dt.total_seconds()
+    else:
+        df['relative_end'] = pd.Series()
     return df
 
 

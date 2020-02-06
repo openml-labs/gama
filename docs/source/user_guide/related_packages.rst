@@ -23,7 +23,7 @@ The advantage of asynchronous evolution is that in theory it is able to utilize 
 This is due to generation-based evolution waiting for the last individual in the population to be evaluated in each generation,
 whereas asynchronous evolution does not have any point where all evaluations need to be finished at the same time.
 
-TPOT sports some great user-friendly features such as a command-line interface (in addition to its Python API),
+TPOT sports some great user-friendly features such as a less limited command-line interface,
 code export (creates a file constructing the machine learning pipeline without a TPOT dependency)
 and `DASK <https://dask.org/>`_ integration (which allows the use of a Dask cluster for pipeline evaluations and further optimizations).
 

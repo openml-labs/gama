@@ -24,8 +24,10 @@ test_requirements = [
 ]
 
 visualization_requirements = [
-    'dash==1.1.1',
-    'dash-daq==0.1.0'
+    'dash==1.3',
+    'dash-daq==0.1.0',
+    'dash-bootstrap-components',
+    'visdcc'
 ]
 
 documentation_requirements = [
@@ -60,5 +62,6 @@ setup(
         'doc': documentation_requirements,
         'all': all_
     },
-    python_requires='>=3.6.0'
+    python_requires='>=3.6.0',
+    entry_points={'console_scripts': ['gama=gama.utilities.cli:main', 'gamadash=gama.dashboard.app:main']}
 )
