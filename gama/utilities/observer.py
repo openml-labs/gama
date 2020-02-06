@@ -31,7 +31,7 @@ class Observer(object):
                          str(ind)]
             fh.write(';'.join(to_record) + '\n')
 
-    def update(self, ind):
+    def update(self, ind: Individual):
         log.debug("Evaluation;{:.4f};{};{}".format(ind.fitness.wallclock_time, ind.fitness.values, ind))
         self._individuals.append(ind)
         if self._with_log:
@@ -40,7 +40,7 @@ class Observer(object):
         updated = self._current_pareto_front.update(ind)
         if updated:
             self._individuals_since_last_pareto_update = 0
-            log.info("Current pareto-front updated with individual with wvalues {}.".format(ind.fitness.values))
+            log.info("Current Pareto front updated: {} scores {}".format(ind.short_name(), ind.fitness.values))
         else:
             self._individuals_since_last_pareto_update += 1
 

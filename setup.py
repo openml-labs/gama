@@ -1,6 +1,10 @@
 #!/usr/bin/env python
+import os
 
 from setuptools import setup, find_packages
+
+with open("gama/__version__.py", 'r') as fh:
+    version = fh.readlines()[-1].split()[-1].strip("\"'")
 
 requirements = [
     'numpy==1.17.3',
@@ -21,8 +25,10 @@ test_requirements = [
 ]
 
 visualization_requirements = [
-    'dash==1.1.1',
-    'dash-daq==0.1.0'
+    'dash==1.3',
+    'dash-daq==0.1.0',
+    'dash-bootstrap-components',
+    'visdcc'
 ]
 
 documentation_requirements = [
@@ -32,16 +38,24 @@ documentation_requirements = [
 
 all_ = requirements + visualization_requirements + documentation_requirements
 
+with open(os.path.join("README.md")) as fid:
+    README = fid.read()
+
 setup(
     name='gama',
-    version='19.08.0',
-    description='A package for automated machine learning based on scikit-learn. d3m-version',
-    long_description='',
+    version=version,
+    description='A package for automated machine learning based on scikit-learn.  d3m-version',
+    long_description=README,
     long_description_content_type='text/markdown',
     author='Pieter Gijsbers',
     author_email='p.gijsbers@tue.nl',
     url='https://github.com/PGijsbers/GAMA',
-    packages=find_packages(exclude=['tests']),
+    project_urls={
+        "Bug Tracker": "https://github.com/PGijsbers/gama/issues",
+        "Documentation": "https://pgijsbers.github.io/gama/",
+        "Source Code": "https://github.com/PGijsbers/gama",
+    },
+    packages=find_packages(exclude=['tests', "tests.*"]),
     install_requires=requirements,
     extras_require={
         'test': test_requirements,
@@ -49,5 +63,6 @@ setup(
         'doc': documentation_requirements,
         'all': all_
     },
-    python_requires='>=3.6.0'
+    python_requires='>=3.6.0',
+    entry_points={'console_scripts': ['gama=gama.utilities.cli:main', 'gamadash=gama.dashboard.app:main']}
 )

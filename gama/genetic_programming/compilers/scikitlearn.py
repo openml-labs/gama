@@ -41,7 +41,40 @@ def compile_individual(individual: Individual, parameter_checks=None, preprocess
     return Pipeline(list(reversed(steps)))
 
 
-def cross_val_predict_score(estimator, X, y_train, metrics=None, cvpredict=cross_val_predict, **kwargs):
+def cross_val_train_predict(estimator, x, y, method: str = 'predict', cv: int = 5):
+    """ Perform (Stratified)KFold returning the trained estimators and predictions of each fold. """
+    from sklearn.base import clone, is_classifier
+    from sklearn.model_selection._split import check_cv
+    from sklearn.utils.metaestimators import _safe_split
+    import numpy as np
+
+    cv = check_cv(cv, y, classifier=is_classifier(estimator))
+
+    estimators = []
+    predictions = None
+    for train, test in cv.split(x, y):
+        x_train, y_train = _safe_split(estimator, x, y, train)
+        x_test, _ = _safe_split(estimator, x, y, test, train)
+
+        fold_estimator = clone(estimator)
+        fold_predict = getattr(fold_estimator, method)
+
+        fold_estimator.fit(x_train, y_train)
+        estimators.append(fold_estimator)
+        fold_prediction = fold_predict(x_test)
+
+        if predictions is None:
+            if fold_prediction.ndim == 2:
+                predictions = np.empty(shape=(len(y), fold_prediction.shape[1]))
+            else:
+                predictions = np.empty(shape=(len(y),))
+
+        predictions[test] = fold_prediction
+
+    return {'predictions': predictions, 'estimators': estimators}
+
+
+def cross_val_predict_score(estimator, X, y_train, metrics=None, cvpredict=cross_val_train_predict, **kwargs):
     """ Return both the predictions and score of the estimator trained on the data given the cv strategy.
 
     :param y_train: target in appropriate format for training (typically (N,))
@@ -53,12 +86,18 @@ def cross_val_predict_score(estimator, X, y_train, metrics=None, cvpredict=cross
     predictions_are_probabilities = any(metric.requires_probabilities for metric in metrics)
     method = 'predict_proba' if predictions_are_probabilities else 'predict'
     result = cvpredict(estimator, X, y_train, method=method, **kwargs)
+    predictions = result['predictions']
+    y_train = result.get('y_train', y_train)
+    estimators = result.get('estimators', None)
+    # time series = predictions, y_train
+    # other  = predictions, estimators
 
     # Ugly hack to support evaluation for time
-    if isinstance(result, tuple):
-        predictions, y_train = result
-    else:
-        predictions = result
+    # if isinstance(result, tuple):
+    #     predictions, y_train = result
+    # else:
+    #     predictions = result
+    # predictions = cross_val_predict(estimator, X, y_train, method=method, **kwargs)
 
     if predictions.ndim == 2 and predictions.shape[1] == 1:
         predictions = predictions.squeeze()
@@ -80,7 +119,7 @@ def cross_val_predict_score(estimator, X, y_train, metrics=None, cvpredict=cross
             # No metric requires probabilities, so `predictions` is an array of labels.
             scores.append(metric.maximizable_score(y_train, predictions))
 
-    return predictions, scores
+    return predictions, scores, estimators
 
 
 def cross_val_predict_timeseries(estimator, X, y=None, groups=None, cv='warn',
@@ -221,7 +260,7 @@ def cross_val_predict_timeseries(estimator, X, y=None, groups=None, cv='warn',
     else:
         predictions = np.concatenate(predictions)
     y_train = np.concatenate(y_part)
-    return predictions, y.iloc[y_train,:]
+    return {'predictions': predictions, 'y_train': y.iloc[y_train, :]}
 
 
 def object_is_valid_pipeline(o):
@@ -233,17 +272,17 @@ def object_is_valid_pipeline(o):
 
 
 def evaluate_individual(individual: Individual, evaluate_pipeline_length, *args, **kwargs):
-    log.info("Evaluating individual: %s" % individual)
-    (scores, start_datetime, wallclock_time, process_time) = evaluate_pipeline(individual.pipeline, *args, **kwargs)
+    (scores, start_datetime, wallclock_time, process_time) = evaluate_pipeline(individual, *args, **kwargs)
     if evaluate_pipeline_length:
         scores = (*scores, -len(individual.primitives))
     individual.fitness = Fitness(scores, start_datetime, wallclock_time, process_time)
     return individual
 
 
-def evaluate_pipeline(pl, X, y_train, timeout, deadline, metrics='accuracy', cv=5, cache_dir=None, logger=None,
+def evaluate_pipeline(individual, X, y_train, timeout, deadline, metrics='accuracy', cv=5, cache_dir=None, logger=None,
                       subsample=None, cvpredict=cross_val_predict):
     """ Evaluates a pipeline used k-Fold CV. """
+    pl = individual.pipeline
     if not logger:
         logger = log
 
@@ -264,8 +303,7 @@ def evaluate_pipeline(pl, X, y_train, timeout, deadline, metrics='accuracy', cv=
             if draw_subsample:
                 idx, _ = next(ShuffleSplit(n_splits=1, train_size=subsample, random_state=0).split(X))
                 X, y_train = X.iloc[idx, :], y_train[idx]
-
-            prediction, scores = cross_val_predict_score(pl, X, y_train, cv=cv, metrics=metrics, cvpredict=cvpredict)
+            prediction, scores, estimators = cross_val_predict_score(pl, X, y_train, cv=cv, metrics=metrics, cvpredict=cvpredict)
             print(scores)
         except stopit.TimeoutException:
             # score not actually unused, because exception gets caught by the context manager.
@@ -289,7 +327,7 @@ def evaluate_pipeline(pl, X, y_train, timeout, deadline, metrics='accuracy', cv=
         pl_filename = str(uuid.uuid4())
         try:
             with open(os.path.join(cache_dir, pl_filename + '.pkl'), 'wb') as fh:
-                pickle.dump((pl, prediction, scores), fh)
+                pickle.dump((individual, estimators, prediction, scores), fh)
         except FileNotFoundError:
             log.debug("File not found while saving predictions. This can happen in the multi-process case if the "
                       "cache gets deleted within `max_eval_time` of the end of the search process.", exc_info=True)
@@ -305,7 +343,6 @@ def evaluate_pipeline(pl, X, y_train, timeout, deadline, metrics='accuracy', cv=
 
     if not c_mgr:
         # For now we treat an eval timeout the same way as e.g. NaN exceptions and use the default score.
-        logger.info('Timeout encountered while evaluating pipeline.')
         single_line_pipeline = ''.join(str(pl).split('\n'))
         log_event(logger, TOKENS.EVALUATION_TIMEOUT, start_datetime, single_line_pipeline)
         logger.debug("Timeout after {}s: {}".format(timeout, pl))

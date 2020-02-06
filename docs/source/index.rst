@@ -13,17 +13,22 @@ Using GAMA is as simple as using::
 	automl.predict(X_test)
 	automl.predict_proba(X_test)
 
-You can install GAMA (and its dependencies) by cloning the repository and calling the setup script::
+You can install GAMA from PyPI with pip::
 
-    git clone https://github.com/PGijsbers/gama.git
-    cd gama
-    python setup.py install
+    pip install gama
+
+Or if you would like to include the graphical frontend::
+
+    pip install gama[vis]
 
 To get more basic information on GAMA and its AutoML functionality, read more in the :ref:`user_guide_index`.
 If you want find out everything there is to know about GAMA, also visit the :ref:`technical_guide_index`.
 It describes visualization of optimization logs, changing the AutoML pipeline, and more.
 If there are any questions you have that are not answered by the documentation, check the `issue page <https://github.com/PGijsbers/GAMA/issues>`_.
 If your question has not been answered there either, please open a new issue and label with the question label.
+
+.. note::
+
 
 .. toctree::
    :includehidden:

@@ -2,55 +2,94 @@ from collections import namedtuple
 import os
 import pickle
 import logging
+import random
 import time
-from typing import Optional, List
+from typing import Optional, List, Callable
 
 import pandas as pd
-import numpy as np
-from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 import stopit
+from sklearn.preprocessing import OneHotEncoder
 
 from gama.genetic_programming.components import Individual
 from gama.postprocessing.base_post_processing import BasePostProcessing
-from gama.utilities.metrics import Metric, MetricType
+from gama.utilities.export import imports_and_steps_for_individual
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
+from gama.utilities.metrics import Metric, MetricType
 
 log = logging.getLogger(__name__)
-Model = namedtuple("Model", ['name', 'pipeline', 'predictions', 'validation_score'])
+Model = namedtuple("Model", ['name', 'individual', 'pipelines', 'predictions', 'validation_score'])
 
 
 class EnsemblePostProcessing(BasePostProcessing):
 
-    def __init__(self, time_fraction: float = 0.3, ensemble_size: int = 25):
+    def __init__(self, time_fraction: float = 0.3, ensemble_size: Optional[int] = 25):
         """ Ensemble construction per Caruana et al.
 
         Parameters
         ----------
         time_fraction: float (default=0.3)
             Fraction of total time reserved for Ensemble building.
-        ensemble_size: int (default=25)
+        ensemble_size: int, optional (default=25)
             Total number of models in the ensemble.
             When a single model is chosen more than once, it will increase its weight in the ensemble and
             *does* count towards this maximum.
         """
         super().__init__(time_fraction)
-        self.ensemble_size = ensemble_size
-        self.metric = None
-        self.cache = None
+        self._hyperparameters = dict(
+            ensemble_size=(ensemble_size, 25),
+            metric=(None, None),
+            cache=(None, None)
+        )
+        self._ensemble = None
 
     def dynamic_defaults(self, gama: 'Gama'):
-        self.metric = gama._metrics[0]
-        self.cache = gama._cache_dir
+        self._overwrite_hyperparameter_default('metric', gama._metrics[0])
+        self._overwrite_hyperparameter_default('cache', gama._cache_dir)
 
     def post_process(self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]) -> 'model':
-        return build_fit_ensemble(x, y, self.ensemble_size, timeout, self.metric, self.cache)
+        self._ensemble = build_fit_ensemble(
+            x, y,
+            self.hyperparameters['ensemble_size'],
+            timeout,
+            self.hyperparameters['metric'],
+            self.hyperparameters['cache']
+        )
+        return self._ensemble
+
+    def to_code(self) -> str:
+        voter = 'VotingClassifier' if isinstance(self._ensemble, EnsembleClassifier) else 'VotingRegressor'
+        all_imports = {f"from sklearn.ensemble import {voter}", "from sklearn.pipeline import Pipeline"}
+
+        pipeline_names = []
+        pipeline_declarations = []
+        pipeline_weights = []
+        for i, (model, weight) in enumerate(self._ensemble._models.values()):
+            imports, steps = imports_and_steps_for_individual(model.individual)
+            all_imports = all_imports.union(set(imports))
+            steps_str = ',\n'.join([f"('{name}', {step})" for name, step in steps])
+            pipeline_name = f"pipeline_{i}"
+            pipeline_names.append(pipeline_name)
+            pipeline_declarations.append(f"{pipeline_name} = Pipeline([{steps_str}])")
+            pipeline_weights.append(weight)
+
+        estimators = ','.join([f"('{i}', {name})" for i, name in enumerate(pipeline_names)])
+        if isinstance(self._ensemble, EnsembleClassifier):
+            voting = ",'soft'" if self._ensemble._metric.requires_probabilities else 'hard'
+        else:
+            voting = ''  # This parameter does not exist for VotingRegressor
+        script = ('\n'.join(all_imports) + '\n\n' +
+                  '\n\n'.join(pipeline_declarations) + '\n' +
+                  f"ensemble = {voter}([{estimators}]{voting},{pipeline_weights})\n")
+        return script
 
 
 class Ensemble(object):
 
     def __init__(self, metric, y: pd.DataFrame,
                  model_library=None, model_library_directory=None,
-                 shrink_on_pickle=True):
+                 shrink_on_pickle=True,
+                 downsample_to: Optional[int] = 10_000,
+                 use_top_n_only: Optional[int] = 200):
         """
         Either model_library or model_library_directory must be specified.
         If model_library is specified, model_library_directory is ignored.
@@ -87,8 +126,18 @@ class Ensemble(object):
         self._model_library_directory = model_library_directory
         self._model_library = model_library if model_library is not None else []
         self._shrink_on_pickle = shrink_on_pickle
-        self._y = y
         self._prediction_transformation = None
+        self._use_top_n_only = use_top_n_only
+
+        if downsample_to is None or downsample_to >= len(y):
+            if downsample_to is not None:
+                log.info(f"Not downsampling because training data only had {len(y)} samples.")
+            self._y = y
+            self._prediction_sample = None
+        else:
+            log.info(f"Downsampling because training data exceeds {downsample_to} samples.")
+            self._prediction_sample = random.sample(range(len(y)), downsample_to)
+            self._y = y[self._prediction_sample]
 
         self._internal_score = None
         self._fit_models = None
@@ -100,8 +149,15 @@ class Ensemble(object):
     def model_library(self):
         if not self._model_library:
             log.debug("Loading model library from disk.")
-            self._model_library = load_predictions(self._model_library_directory, self._prediction_transformation)
+            self._model_library = load_predictions(self._model_library_directory, self._prediction_transformation, self._prediction_sample)
             log.info("Loaded model library of size {} from disk.".format(len(self._model_library)))
+            self._model_library = list(reversed(sorted(self._model_library, key=lambda m: m.validation_score)))
+            if self._use_top_n_only is not None and self._use_top_n_only < len(self._model_library):
+                log.info("Discarding {} models, keeping the {} best ones."
+                         .format(len(self._model_library) - self._use_top_n_only, self._use_top_n_only))
+                self._model_library = self._model_library[:self._use_top_n_only]
+            elif self._use_top_n_only is not None and self._use_top_n_only > len(self._model_library):
+                log.info(f"Keeping all models since only {len(self._model_library)} models were evaluated.")
 
         return self._model_library
 
@@ -133,19 +189,16 @@ class Ensemble(object):
             log.warning("The ensemble already contained models. Overwriting the ensemble.")
             self._models = {}
 
-        sorted_ensembles = reversed(sorted(self.model_library, key=lambda m: m.validation_score))
-
         # Since the model library only features unique models, we do not need to check for duplicates here.
-        selected_models = list(sorted_ensembles)[:n]
-        for model in selected_models:
+        for model in self.model_library[:n]:
             self._add_model(model)
 
         log.debug("Initial ensemble created with score {}".format(self._ensemble_validation_score()))
 
     def _add_model(self, model, add_weight=1):
         """ Adds a specific model to the ensemble or increases its weight if it already is contained. """
-        model, weight = self._models.pop(model.pipeline, (model, 0))
-        self._models[model.pipeline] = (model, weight + add_weight)
+        model, weight = self._models.pop(model.individual._id, (model, 0))
+        self._models[model.individual._id] = (model, weight + add_weight)
         log.debug("Assigned a weight of {} to model {}".format(weight + add_weight, model.name))
 
     def expand_ensemble(self, n: int):
@@ -195,20 +248,26 @@ class Ensemble(object):
         if timeout <= 0:
             raise ValueError("timeout must be greater than 0.")
 
-        self._fit_models = []
-        futures = set()
-        with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncEvaluator() as async_:
-            for (model, weight) in self._models.values():
-                futures.add(async_.submit(fit_and_weight, (model.pipeline, X, y, weight)))
+        # Check if pipelines from cross-validation were stored (not the case for time series):
+        if all([model.pipelines for model, _ in self._models.values()]):
+            self._fit_models = [(estimator, weight)
+                                for (model, weight) in self._models.values()
+                                for estimator in model.pipelines]
+        else:
+            self._fit_models = []
+            futures = set()
+            with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncEvaluator() as async_:
+                for (model, weight) in self._models.values():
+                    futures.add(async_.submit(fit_and_weight, (model.pipeline, X, y, weight)))
 
-            for _ in self._models.values():
-                future = async_.wait_next()
-                pipeline, weight = future.result
-                if weight > 0:
-                    self._fit_models.append((pipeline, weight))
+                for _ in self._models.values():
+                    future = async_.wait_next()
+                    pipeline, weight = future.result
+                    if weight > 0:
+                        self._fit_models.append((pipeline, weight))
 
-        if not c_mgr:
-            log.info("Fitting of ensemble stopped early.")
+            if not c_mgr:
+                log.info("Fitting of ensemble stopped early.")
 
     def _get_weighted_mean_predictions(self, X, predict_method='predict'):
         weighted_predictions = []
@@ -242,7 +301,26 @@ class Ensemble(object):
         return self.__dict__.copy()
 
 
-def load_predictions(cache_dir, prediction_transformation=None):
+def load_predictions(
+        cache_dir: str,
+        prediction_transformation: Optional[Callable] = None,
+        sample: Optional[List[int]] = None) -> List[Model]:
+    """
+
+    Parameters
+    ----------
+    cache_dir: str
+        Directory with stored models.
+    prediction_transformation: callable, optional
+        Function which transforms the predictions (for multi-class classification)
+    sample: List[int], optional
+        If specified only keep these samples of the predictions in each Model, discard the remainder.
+
+    Returns
+    -------
+    A list of Models.
+
+    """
     models = []
     for file in os.listdir(cache_dir):
         if file.endswith('.pkl'):
@@ -252,10 +330,12 @@ def load_predictions(cache_dir, prediction_transformation=None):
                 # to a restart/timeout. I can not find specifications saying that any interrupt of pickle.dump leads
                 # to 0-sized files, but in practice this seems to case so far.
                 with open(os.path.join(cache_dir, file), 'rb') as fh:
-                    pl, predictions, scores = pickle.load(fh)
+                    individual, estimators, predictions, scores = pickle.load(fh)
                 if prediction_transformation:
                     predictions = prediction_transformation(predictions)
-                models.append(Model(str(pl), pl, predictions, scores))
+                if sample:
+                    predictions = predictions[sample]
+                models.append(Model(individual.pipeline_str(), individual, estimators, predictions, scores))
     return models
 
 
@@ -297,6 +377,8 @@ class EnsembleClassifier(Ensemble):
 
         if self._metric.requires_probabilities:
             self._y = self._one_hot_encoder.transform(y_as_squeezed_array).toarray()
+            if self._prediction_sample is not None:
+                self._y = self._y[self._prediction_sample]
         else:
             def one_hot_encode_predictions(predictions):
                 return self._one_hot_encoder.transform(predictions.reshape(-1, 1))
@@ -325,7 +407,8 @@ class EnsembleClassifier(Ensemble):
         class_predictions = self._one_hot_encoder.inverse_transform(class_probabilities)
         if self._label_encoder:
             class_predictions = self._label_encoder.inverse_transform(class_predictions)
-        return class_predictions
+
+        return class_predictions.ravel()
 
     def predict_proba(self, X):
         if self._metric.requires_probabilities:

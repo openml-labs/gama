@@ -1,10 +1,11 @@
 import base64
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 
 import pandas as pd
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+from dash.exceptions import PreventUpdate
 
 from gama.visualization.app import dash_app
 from gama.logging.GamaReport import GamaReport
@@ -106,10 +107,21 @@ graph_settings_container = html.Div(
     children=[plot_control_container]
 )
 
+graph_update_timer = dcc.Interval(
+    id='update-timer',
+    interval=2*1000  #ms
+)
+
+graph_update_trigger = dcc.Store(
+    id='update-trigger'
+)
+
 visualization_container = html.Div(
     id='visualization-container',
     children=[dashboard_graph,
-              graph_settings_container],
+              graph_settings_container,
+              graph_update_timer,
+              graph_update_trigger],
     style={'float': 'left', 'width': '85%'}
 )
 
@@ -139,6 +151,21 @@ dashboard_page = html.Div(
 ###########################################################
 #                      Callbacks                          #
 ###########################################################
+
+@dash_app.callback(Output('update-trigger', 'data'),
+                   [Input('update-timer', 'n_intervals')])
+def update_reports(n_intervals: int):
+    print('timer', n_intervals)
+    updates = []
+    for report in reports.values():
+        if report.incomplete:
+            updates.append(report.update())
+    if any(updates):
+        return None
+    else:
+        raise PreventUpdate
+
+
 @dash_app.callback([Output('x-axis-metric', 'options'),
                     Output('y-axis-metric', 'options')],
                    [Input('select-log-checklist', 'value')])
@@ -159,8 +186,9 @@ def update_valid_axis_options(logs: List[str]):
                Input('x-axis-metric', 'value'),
                Input('y-axis-metric', 'value'),
                Input('plot-type', 'value'),
-               Input('preset-dropdown', 'value')])
-def update_graph(logs: List[str], aggregate: str = 'separate-line', xaxis: str = None, yaxis: str = None, mode: str = None, preset_value: str = None):
+               Input('preset-dropdown', 'value'),
+               Input('update-trigger', 'data')])
+def update_graph(logs: List[str], aggregate: str = 'separate-line', xaxis: str = None, yaxis: str = None, mode: str = None, preset_value: str = None, trigger: Any = None):
     print(logs, aggregate, xaxis, yaxis, mode, preset_value)
     if preset_value == 'custom':
         if logs is None or logs == [] or xaxis is None or yaxis is None:

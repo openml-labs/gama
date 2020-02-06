@@ -12,12 +12,6 @@ from gama.logging.machine_logging import TOKENS, log_event
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.genetic_programming.components.individual import Individual
 
-"""
-TODO:
- - instead of list, use a min-heap by rung.
- - promoted pipelines as set and set-intersection to determine promotability?
-"""
-
 log = logging.getLogger(__name__)
 ASHA_LOG_TOKEN = 'ASHA'
 
@@ -44,7 +38,7 @@ class AsynchronousSuccessiveHalving(BaseSearch):
                  minimum_early_stopping_rate: Optional[int] = None):
         super().__init__()
         # maps hyperparameter -> (set value, default)
-        self.hyperparameters: Dict[str, Tuple[Any, Any]] = dict(
+        self._hyperparameters: Dict[str, Tuple[Any, Any]] = dict(
             reduction_factor=(reduction_factor, 3),
             minimum_resource=(minimum_resource, 100),
             maximum_resource=(maximum_resource, 100_000),
@@ -55,13 +49,10 @@ class AsynchronousSuccessiveHalving(BaseSearch):
     def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: int):
         # `maximum_resource` is the number of samples used in the highest rung.
         # this typically should be the number of samples in the (training) dataset.
-        set_value, default_value = self.hyperparameters['maximum_resource']
-        self.hyperparameters['maximum_resource'] = (set_value, len(y))
+        self._overwrite_hyperparameter_default('maximum_resource', len(y))
 
     def search(self, operations: OperatorSet, start_candidates: List[Individual]):
-        hyperparameters = {parameter: set_value if set_value is not None else default
-                           for parameter, (set_value, default) in self.hyperparameters.items()}
-        self.output = asha(operations, start_candidates, **hyperparameters)
+        self.output = asha(operations, start_candidates=start_candidates, **self.hyperparameters)
 
 
 def asha(operations: OperatorSet,
