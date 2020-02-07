@@ -378,11 +378,13 @@ class Gama(ABC):
             pop = [self._operator_set.individual() for _ in range(50)]
 
         deadline = time.time() + timeout
-        evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self._X, y_train=self._y,
-                             metrics=self._metrics, cache_dir=self._cache_dir, timeout=self._max_eval_time,
-                             deadline=deadline)
+
+        evaluate_pipeline = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_pipeline,
+                                    X=self._X, y_train=self._y, metrics=self._metrics)
         self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
-                                              **evaluate_args)
+                                              evaluate_pipeline=evaluate_pipeline,
+                                              timeout=self._max_eval_time, deadline=deadline,
+                                              add_length_to_score=self._regularize_length)
 
         try:
             with stopit.ThreadingTimeout(timeout):

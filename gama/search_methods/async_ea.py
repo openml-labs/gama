@@ -104,7 +104,7 @@ def async_ea(
                 future = operations.wait_next(async_)
                 logger.flush_to_log(log)
                 if future.exception is None:
-                    individual = future.result
+                    individual = future.result.individual
                     current_population.append(individual)
                     if len(current_population) > max_population_size:
                         to_remove = operations.eliminate(current_population, 1)
@@ -122,6 +122,5 @@ def async_ea(
                     log_event(log, TOKENS.EA_RESTART, n_evaluated_individuals)
                     start_candidates = [operations.individual() for _ in range(max_population_size)]
                     break
-
 
     return current_population

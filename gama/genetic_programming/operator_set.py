@@ -2,6 +2,7 @@ from collections.abc import Sequence
 import logging
 
 from gama.logging.machine_logging import TOKENS, log_event
+from gama.utilities.evaluation_library import Evaluation
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from .components import Individual
 
@@ -37,8 +38,8 @@ class OperatorSet:
         future = async_evaluator.wait_next()
         if future.result is not None:
             result = future.result
-            if not isinstance(result, Sequence):
-                individual = result
+            if isinstance(result, Evaluation):
+                individual = result.individual
                 log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
                           individual.fitness.wallclock_time, individual.fitness.process_time,
                           individual.fitness.values, individual._id, individual.pipeline_str())

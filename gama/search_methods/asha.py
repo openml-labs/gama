@@ -159,5 +159,5 @@ def asha(operations: OperatorSet,
 
 
 def evaluate_on_rung(individual, rung, evaluate_individual, *args, **kwargs):
-    individual = evaluate_individual(individual, *args, **kwargs)
-    return individual, individual.fitness.values[0], rung
+    evaluation = evaluate_individual(individual, *args, **kwargs)
+    return evaluation.individual, evaluation.score[0], rung
