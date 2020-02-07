@@ -7,7 +7,6 @@ from gama.genetic_programming.compilers.scikitlearn import compile_individual
 @pytest.fixture
 def pset():
     gc = GamaClassifier(config=clf_config, scoring='accuracy')
-    gc.delete_cache()
     return gc._pset
 
 

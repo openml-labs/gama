@@ -20,12 +20,12 @@ class Evaluation:
         self.error = None
 
     # Is there a better way to do this? Assignment in __init__ is not preferred even if it saves lines.
-    def __lt__(self, other): return self.score.__lt__(other)
-    def __le__(self, other): return self.score.__le__(other)
-    def __eq__(self, other): return self.score.__eq__(other)
-    def __ne__(self, other): return self.score.__ne__(other)
-    def __gt__(self, other): return self.score.__gt__(other)
-    def __ge__(self, other): return self.score.__ge__(other)
+    def __lt__(self, other): return self.score.__lt__(other.score)
+    def __le__(self, other): return self.score.__le__(other.score)
+    def __eq__(self, other): return self.score.__eq__(other.score)
+    def __ne__(self, other): return self.score.__ne__(other.score)
+    def __gt__(self, other): return self.score.__gt__(other.score)
+    def __ge__(self, other): return self.score.__ge__(other.score)
 
 
 class EvaluationLibrary:
@@ -48,4 +48,4 @@ class EvaluationLibrary:
             heapq.heappushpop(self.best_pipelines, evaluation)
 
     def n_best(self, n: int = 5) -> Iterable[Evaluation]:
-        return heapq.nlargest(n, self.best_pipelines)
+        return [e for e in heapq.nlargest(n, self.best_pipelines) if e.predictions is not None]

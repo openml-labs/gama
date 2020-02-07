@@ -34,14 +34,13 @@ def _test_gama_regressor(gama, X_train, X_test, y_train, y_test, data, metric):
     mse = mean_squared_error(y_test, predictions)
     print(data['name'], metric, 'mse:', mse)
     assert data['base_mse'] >= mse, 'predictions should be at least as good as predicting mean.'
-    gama.delete_cache()
 
 
 def _test_dataset_problem(data, metric):
     X, y = data['load'](return_X_y=True)
     split_data = train_test_split(X, y, random_state=0)
 
-    gama = GamaRegressor(random_state=0, max_total_time=TOTAL_TIME_S, scoring=metric, n_jobs=1, cache_dir=data['name'],
+    gama = GamaRegressor(random_state=0, max_total_time=TOTAL_TIME_S, scoring=metric, n_jobs=1,
                          max_eval_time=300, post_processing_method=EnsemblePostProcessing(ensemble_size=5))
     _test_gama_regressor(gama, *split_data, data, metric)
 
@@ -60,5 +59,5 @@ def test_missing_value_regression():
     X_train[1:300:2, 0] = X_train[2:300:5, 1] = float("NaN")
     X_test[1:100:2, 0] = X_test[2:100:5, 1] = float("NaN")
 
-    gama = GamaRegressor(random_state=0, max_total_time=TOTAL_TIME_S, scoring=metric, cache_dir=data['name']+'_missing')
+    gama = GamaRegressor(random_state=0, max_total_time=TOTAL_TIME_S, scoring=metric)
     _test_gama_regressor(gama, X_train, X_test, y_train, y_test, data, metric)

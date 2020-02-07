@@ -20,6 +20,7 @@ from sklearn.pipeline import Pipeline
 import gama.genetic_programming.compilers.scikitlearn
 from gama.logging.machine_logging import log_event, TOKENS
 from gama.search_methods.base_search import BaseSearch
+from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
 from gama.utilities.metrics import scoring_to_metric
 from .utilities.observer import Observer
 
@@ -63,7 +64,6 @@ class Gama(ABC):
                  n_jobs: Optional[int] = None,
                  verbosity: int = logging.WARNING,
                  keep_analysis_log: Optional[str] = 'gama.log',
-                 cache_dir: Optional[str] = None,
                  search_method: BaseSearch = AsyncEA(),
                  post_processing_method: BasePostProcessing = BestFitPostProcessing()):
         """
@@ -105,10 +105,6 @@ class Gama(ABC):
         keep_analysis_log: str, optional (default='gama.log')
             If non-empty str, specifies the path (and name) where the log should be stored, e.g. /output/gama.log.
             If `None`, no log is stored.
-
-        cache_dir: str or None (default=None)
-            The directory in which to keep the cache during `fit`. In this directory,
-            models and their evaluation results will be stored. This facilitates a quick ensemble construction.
 
         search_method: BaseSearch (default=AsyncEA())
             Search method to use to find good pipelines. Should be instantiated.
@@ -158,11 +154,6 @@ class Gama(ABC):
         self._search_method: BaseSearch = search_method
         self._post_processing = post_processing_method
 
-        default_cache_dir = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{str(uuid.uuid4())[:4]}_GAMA"
-        self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
-        if not os.path.isdir(self._cache_dir):
-            os.mkdir(self._cache_dir)
-
         if random_state is not None:
             random.seed(random_state)
             np.random.seed(random_state)
@@ -175,8 +166,10 @@ class Gama(ABC):
         self._final_pop = None
 
         self._subscribers = defaultdict(list)
-        self._observer = Observer(self._cache_dir)
+        self._observer = Observer('observer-id')
         self.evaluation_completed(self._observer.update)
+        self._evaluation_library = EvaluationLibrary()
+        self.evaluation_completed(self._evaluation_library.save_evaluation)
 
         self._pset, parameter_checks = pset_from_config(config)
         self._operator_set = OperatorSet(
@@ -318,8 +311,7 @@ class Gama(ABC):
     def fit(self,
             x: Union[pd.DataFrame, np.ndarray],
             y: Union[pd.DataFrame, pd.Series, np.ndarray],
-            warm_start: bool = False,
-            keep_cache: bool = False) -> None:
+            warm_start: bool = False) -> None:
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -338,8 +330,6 @@ class Gama(ABC):
         warm_start: bool (default=False)
             Indicates the optimization should continue using the last individuals of the
             previous `fit` call.
-        keep_cache: bool (default=False)
-            If True, keep the cache directory and its content after fitting is complete. Otherwise delete it.
         """
 
         with self._time_manager.start_activity('preprocessing', activity_meta=['default']):
@@ -364,9 +354,6 @@ class Gama(ABC):
             self.model = self._post_processing.post_process(
                 self._X, self._y, self._time_manager.total_time_remaining, best_individuals
             )
-        if not keep_cache:
-            log.debug("Deleting cache.")
-            self.delete_cache()
 
     def _search_phase(self, warm_start: bool = False, timeout: int = 1e6):
         """ Invoke the evolutionary algorithm, populate `final_pop` regardless of termination. """
@@ -396,25 +383,6 @@ class Gama(ABC):
         self._final_pop = self._search_method.output
         log.debug([str(i) for i in self._final_pop[:100]])
         log.info(f'Search phase evaluated {len(self._observer._individuals)} individuals.')
-
-    def _initialize_ensemble(self):
-        raise NotImplementedError('_initialize_ensemble should be implemented by a child class.')
-
-    def delete_cache(self):
-        """ Removes the cache folder and all files associated to this instance.
-
-        Returns
-        -------
-        None
-        """
-        while os.path.exists(self._cache_dir):
-            try:
-                log.info("Attempting to delete {}".format(self._cache_dir))
-                shutil.rmtree(self._cache_dir)
-            except OSError as e:
-                if "The directory is not empty" not in str(e):
-                    log.warning("Did not delete due to:", exc_info=True)
-                # else ignore silently. This can occur if an evaluation process writes to cache.
 
     def export_script(self, file: str = 'gama_pipeline.py', raise_if_exists: bool = False):
         """ Exports a Python script which sets up the best found pipeline. Can only be called after `fit`.
@@ -467,9 +435,9 @@ class Gama(ABC):
             log.info("Time exceeded during callback, but exception was swallowed.")
             raise stopit.utils.TimeoutException
 
-    def _on_evaluation_completed(self, ind):
+    def _on_evaluation_completed(self, evaluation: Evaluation):
         for callback in self._subscribers['evaluation_completed']:
-            self._safe_outside_call(partial(callback, ind))
+            self._safe_outside_call(partial(callback, evaluation))
 
     def evaluation_completed(self, callback_function):
         """ Register a callback function that is called when new evaluation is completed.
@@ -478,6 +446,6 @@ class Gama(ABC):
         ----------
         callback_function:
             Function to call when a pipeline is evaluated, return values are ignored.
-            Expected signature is: Individual -> Any
+            Expected signature is: Evaluation -> Any
         """
         self._subscribers['evaluation_completed'].append(callback_function)

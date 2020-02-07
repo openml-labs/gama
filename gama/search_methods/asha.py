@@ -121,7 +121,7 @@ def asha(operations: OperatorSet,
             def start_new_job():
                 individual, rung = get_job()
                 time_penalty_for_rung = resource_for_rung[rung] / max(resource_for_rung.values())
-                async_.submit(evaluate, individual, rung,
+                async_.submit(evaluate, individual, rung, rung == max(rungs),
                               subsample=resource_for_rung[rung],
                               timeout=(10 + (time_penalty_for_rung * 600)))
 
@@ -132,16 +132,13 @@ def asha(operations: OperatorSet,
                    or (len(individuals_by_rung[max_rung]) < maximum_max_rung_evaluations)):
                 future = operations.wait_next(async_)
                 if future.result is not None:
-                    individual, loss, rung = future.result
+                    evaluation, loss, rung, _ = future.result
+                    individual = evaluation.individual
                     individuals_by_rung[rung].append((loss, individual))
                     # Due to `evaluate` returning additional information (like the rung),
                     # evaluations are not automatically logged, so we do it here.
                     log_event(log, ASHA_LOG_TOKEN, rung, individual.fitness.wallclock_time,
                               individual.fitness.values, individual._id, individual.pipeline_str())
-                    if rung == max(rungs):
-                        log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
-                                  individual.fitness.wallclock_time, individual.fitness.process_time,
-                                  individual.fitness.values, individual._id, individual.pipeline_str())
 
                 start_new_job()
 
@@ -158,6 +155,6 @@ def asha(operations: OperatorSet,
         return list(map(lambda p: p[1], individuals_by_rung[highest_rung_reached]))
 
 
-def evaluate_on_rung(individual, rung, evaluate_individual, *args, **kwargs):
+def evaluate_on_rung(individual, rung, report, evaluate_individual, *args, **kwargs):
     evaluation = evaluate_individual(individual, *args, **kwargs)
-    return evaluation.individual, evaluation.score[0], rung
+    return evaluation, evaluation.score[0], rung, report

@@ -2,6 +2,7 @@ import logging
 from typing import List, Callable
 
 from gama.genetic_programming.components import Individual
+from gama.utilities.evaluation_library import Evaluation
 from gama.utilities.generic.paretofront import ParetoFront
 
 log = logging.getLogger(__name__)
@@ -31,7 +32,8 @@ class Observer(object):
                          str(ind)]
             fh.write(';'.join(to_record) + '\n')
 
-    def update(self, ind: Individual):
+    def update(self, evaluation: Evaluation):
+        ind = evaluation.individual
         log.debug("Evaluation;{:.4f};{};{}".format(ind.fitness.wallclock_time, ind.fitness.values, ind))
         self._individuals.append(ind)
         if self._with_log:

@@ -11,9 +11,7 @@ from gama import GamaClassifier
 
 @pytest.fixture
 def gamaclassifier():
-    gc = GamaClassifier(random_state=0, max_total_time=60)
-    yield gc
-    gc.delete_cache()
+    return GamaClassifier(random_state=0, max_total_time=60)
 
 
 def _gama_on_digits(gama):

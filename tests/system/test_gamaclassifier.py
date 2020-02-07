@@ -78,7 +78,8 @@ def _test_dataset_problem(
         arff: bool = False,
         y_type: Type = pd.DataFrame,
         search: BaseSearch = AsyncEA(),
-        missing_values: bool = False):
+        missing_values: bool = False,
+        max_time: int = 60):
     """
 
     :param data:
@@ -87,8 +88,7 @@ def _test_dataset_problem(
     :param y_type: pd.DataFrame, pd.Series, np.ndarray or str
     :return:
     """
-    gama = GamaClassifier(random_state=0, max_total_time=60, scoring=metric, search_method=search, n_jobs=1,
-                          cache_dir=f"{data['name']}_arff_{arff}_m_{metric}_y_{y_type.__name__}_s_{search.__class__.__name__}",
+    gama = GamaClassifier(random_state=0, max_total_time=max_time, scoring=metric, search_method=search, n_jobs=1,
                           post_processing_method=EnsemblePostProcessing(ensemble_size=5))
     if arff:
         train_path = 'tests/data/{}_train.arff'.format(data['name'])
@@ -143,7 +143,6 @@ def _test_dataset_problem(
 
     score_to_match = logloss if metric == 'log_loss' else accuracy
     assert score_to_match == pytest.approx(gama_score)
-    gama.delete_cache()
 
 
 def test_binary_classification_accuracy():
@@ -153,7 +152,7 @@ def test_binary_classification_accuracy():
 
 def test_binary_classification_accuracy_asha():
     """ GamaClassifier can do binary classification with predict metric from numpy data using ASHA search. """
-    _test_dataset_problem(breast_cancer, 'accuracy', search=AsynchronousSuccessiveHalving())
+    _test_dataset_problem(breast_cancer, 'accuracy', search=AsynchronousSuccessiveHalving(), max_time=60)
 
 
 def test_binary_classification_accuracy_random_search():
