@@ -57,6 +57,7 @@ class Gama(ABC):
     def __init__(self,
                  scoring: Union[str, Metric, Tuple[Union[str, Metric], ...]] = 'filled_in_by_child_class',
                  regularize_length: bool = True,
+                 max_pipeline_length: Optional[int] = None,
                  config: Dict = None,
                  random_state: Optional[int] = None,
                  max_total_time: int = 3600,
@@ -77,6 +78,9 @@ class Gama(ABC):
 
         regularize_length: bool
             If True, add pipeline length as an optimization metric (preferring short over long).
+
+        max_pipeline_length: int, optional (default=None)
+            If set, limit the maximum number of steps in any evaluated pipeline. Encoding and imputation are excluded.
 
         config: a dictionary which specifies available components and their valid hyperparameter settings
             For more information, see :ref:`search_space_configuration`.
@@ -172,11 +176,13 @@ class Gama(ABC):
         self.evaluation_completed(self._evaluation_library.save_evaluation)
 
         self._pset, parameter_checks = pset_from_config(config)
+
+        max_start_length = 3 if max_pipeline_length is None else max_pipeline_length
         self._operator_set = OperatorSet(
-            mutate=partial(random_valid_mutation_in_place, primitive_set=self._pset),
-            mate=random_crossover,
+            mutate=partial(random_valid_mutation_in_place, primitive_set=self._pset, max_length=max_pipeline_length),
+            mate=partial(random_crossover, max_length=max_pipeline_length),
             create_from_population=partial(create_from_population, cxpb=0.2, mutpb=0.8),
-            create_new=partial(create_random_expression, primitive_set=self._pset),
+            create_new=partial(create_random_expression, primitive_set=self._pset, max_length=max_start_length),
             compile_=compile_individual,
             eliminate=eliminate_from_pareto,
             evaluate_callback=self._on_evaluation_completed

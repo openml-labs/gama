@@ -95,7 +95,7 @@ def mut_insert(individual: Individual, primitive_set: dict) -> None:
 def random_valid_mutation_in_place(
         individual: Individual,
         primitive_set: dict,
-        new_max_length: Optional[int] = None
+        max_length: Optional[int] = None
 ) -> Callable:
     """ Apply a random valid mutation in place.
 
@@ -112,7 +112,7 @@ def random_valid_mutation_in_place(
       An individual to be mutated *in-place*.
     primitive_set: dict
       A dictionary defining the set of primitives and terminals.
-    new_max_length: int, optional (default=None)
+    max_length: int, optional (default=None)
      If specified, impose a maximum length on the new individual.
 
 
@@ -122,11 +122,11 @@ def random_valid_mutation_in_place(
         The mutation function used.
     """
     n_primitives = len(list(individual.primitives))
-    if new_max_length is not None and n_primitives > new_max_length:
-        available_mutations = [partial(mut_shrink, shrink_by=n_primitives - new_max_length)]
+    if max_length is not None and n_primitives > max_length:
+        available_mutations = [partial(mut_shrink, shrink_by=n_primitives - max_length)]
     else:
         available_mutations = [mut_replace_primitive]
-        if new_max_length is None or n_primitives < new_max_length:
+        if max_length is None or n_primitives < max_length:
             available_mutations.append(mut_insert)
         if n_primitives > 1:
             available_mutations.append(mut_shrink)

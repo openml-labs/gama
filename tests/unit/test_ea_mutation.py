@@ -8,6 +8,7 @@ from gama.genetic_programming.mutation import mut_replace_terminal, mut_replace_
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
 from .unit_fixtures import pset, GaussianNB, RandomForestPipeline, LinearSVC
 
+
 def test_mut_replace_terminal(RandomForestPipeline, pset):
     """ Tests if mut_replace_terminal replaces exactly one terminal. """
     _test_mutation(RandomForestPipeline, mut_replace_terminal, _mut_replace_terminal_is_applied, pset)
