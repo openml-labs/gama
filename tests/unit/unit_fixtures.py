@@ -27,6 +27,11 @@ def BernoulliNBStandardScaler(pset):
     return Individual.from_string("BernoulliNB(StandardScaler(data), alpha=0.1, fit_prior=True)",
                                   pset, compile_individual)
 
+@pytest.fixture
+def BernoulliNBThreeScalers(pset):
+    return Individual.from_string(
+        "BernoulliNB(StandardScaler(RobustScaler(StandardScaler(data))), alpha=0.1, fit_prior=True)",
+        pset, compile_individual)
 
 @pytest.fixture
 def LinearSVC(pset):
