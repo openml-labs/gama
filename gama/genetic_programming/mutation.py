@@ -81,10 +81,7 @@ def mut_insert(individual: Individual, primitive_set: dict) -> None:
         Individual to mutate in-place.
     primitive_set: dict
     """
-    if len(list(individual.primitives)) == 1:
-        parent_node = individual.main_node
-    else:
-        parent_node = random.choice(list(individual.primitives)[:-1])
+    parent_node = random.choice(list(individual.primitives))
     new_primitive_node = random_primitive_node(output_type=DATA_TERMINAL, primitive_set=primitive_set)
     new_primitive_node._data_node = parent_node._data_node
     parent_node._data_node = new_primitive_node
