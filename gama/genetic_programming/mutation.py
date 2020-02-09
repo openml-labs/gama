@@ -3,7 +3,8 @@ Contains mutation functions for genetic programming.
 Each mutation function takes an individual and modifies it in-place.
 """
 import random
-from typing import Callable
+from functools import partial
+from typing import Callable, Optional
 
 from .components import Individual, DATA_TERMINAL
 from .operations import random_primitive_node
@@ -49,7 +50,7 @@ def mut_replace_primitive(individual: Individual, primitive_set: dict) -> None:
     individual.replace_primitive(primitive_index, primitive_node)
 
 
-def mut_shrink(individual: Individual, primitive_set: dict = None) -> None:
+def mut_shrink(individual: Individual, primitive_set: dict = None, shrink_by: Optional[int] = None) -> None:
     """ Mutates an Individual in-place by removing any number of primitive nodes, starting with the last.
 
     Parameters
@@ -58,15 +59,19 @@ def mut_shrink(individual: Individual, primitive_set: dict = None) -> None:
         Individual to mutate in-place.
     primitive_set: dict, optional
         Not used. Present to create a matching function signature with other mutations.
+    shrink_by: int, optional (default=None)
+        Number of primitives to remove. Must be at least one greater than the number of primitives in `individual`.
+        If None, a random number of primitives is removed.
     """
     n_primitives = len(list(individual.primitives))
-    if n_primitives == 1:
-        raise ValueError("Can not shrink an individual with only one primitive.")
+    if shrink_by is not None and n_primitives <= shrink_by:
+        raise ValueError(f"Can not shrink an individual with only {n_primitives} primitive by {shrink_by}.")
+    if shrink_by is None:
+        shrink_by = random.randint(1, n_primitives - 1)
 
-    n_primitives_to_cut = random.randint(1, n_primitives-1)
     current_primitive_node = individual.main_node
     primitives_left = n_primitives - 1
-    while primitives_left > n_primitives_to_cut:
+    while primitives_left > shrink_by:
         current_primitive_node = current_primitive_node._data_node
         primitives_left -= 1
     current_primitive_node._data_node = DATA_TERMINAL
@@ -87,7 +92,11 @@ def mut_insert(individual: Individual, primitive_set: dict) -> None:
     parent_node._data_node = new_primitive_node
 
 
-def random_valid_mutation_in_place(individual: Individual, primitive_set: dict) -> Callable:
+def random_valid_mutation_in_place(
+        individual: Individual,
+        primitive_set: dict,
+        new_max_length: Optional[int] = None
+) -> Callable:
     """ Apply a random valid mutation in place.
 
     The random mutation can be one of:
@@ -95,7 +104,7 @@ def random_valid_mutation_in_place(individual: Individual, primitive_set: dict) 
      - mut_random_primitive
      - mut_random_terminal, if the individual has at least one
      - mutShrink, if individual has at least two primitives
-     - mutInsert
+     - mutInsert, if it would not exceed `new_max_length` when specified.
 
     Parameters
     ----------
@@ -103,17 +112,26 @@ def random_valid_mutation_in_place(individual: Individual, primitive_set: dict) 
       An individual to be mutated *in-place*.
     primitive_set: dict
       A dictionary defining the set of primitives and terminals.
+    new_max_length: int, optional (default=None)
+     If specified, impose a maximum length on the new individual.
+
 
     Returns
     -------
     Callable
         The mutation function used.
     """
-    available_mutations = [mut_replace_primitive, mut_insert]
-    if len(list(individual.primitives)) > 1:
-        available_mutations.append(mut_shrink)
-    if len([t for t in individual.terminals if len(primitive_set[t.identifier]) > 1]):
-        available_mutations.append(mut_replace_terminal)
+    n_primitives = len(list(individual.primitives))
+    if new_max_length is not None and n_primitives > new_max_length:
+        available_mutations = [partial(mut_shrink, shrink_by=n_primitives - new_max_length)]
+    else:
+        available_mutations = [mut_replace_primitive]
+        if new_max_length is None or n_primitives < new_max_length:
+            available_mutations.append(mut_insert)
+        if n_primitives > 1:
+            available_mutations.append(mut_shrink)
+        if len([t for t in individual.terminals if len(primitive_set[t.identifier]) > 1]):
+            available_mutations.append(mut_replace_terminal)
 
     mut_fn = random.choice(available_mutations)
     mut_fn(individual, primitive_set)
