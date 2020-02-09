@@ -1,5 +1,5 @@
 import heapq
-from typing import Tuple, List, Optional, Iterable
+from typing import Tuple, List, Optional, Iterable, Union
 
 import numpy as np
 
@@ -31,21 +31,55 @@ class Evaluation:
 class EvaluationLibrary:
     """ Maintains an in-memory record of the top n evaluations. """
 
-    def __init__(self, max_number_of_models: Optional[int] = 200, prediction_sample=None):
-        # some mask to index the predictions
-        # standardize mask available for dataframe, predictions and np.ndarray??
-        self.best_pipelines = []
-        self._max_n_models = max_number_of_models
+    def __init__(
+            self,
+            max_number_of_evaluations: Optional[int] = 200,
+            prediction_sample: Optional[Union[int, object]] = None
+    ):
+        """
+        
+        Parameters
+        ----------
+        max_number_of_evaluations: int, optional (default=200)
+            Maximum number of evaluations to keep in memory with predictions and fitted pipelines.
+        prediction_sample: int, array-like, optional (default=None)
+            Allows downsampling of predictions to a select number before storing the evaluation.
+            This is useful if you don't plan on using all predictions anyway, as it lowers memory usage.
+            If it is set with an int, `prediction_sample` is the number of predictions to keep of each evaluation.
+            If it is set with an an array-like, it specifies the indices of the predictions to keep.
+            Set with an array-like if it matters which predictions to keep (e.g. class stratified samples).
+        """
+        self.top_evaluations = []
+        self._max_n_evaluations = max_number_of_evaluations
         self._sample = prediction_sample
 
     def save_evaluation(self, evaluation: Evaluation) -> None:
-        if self._sample is not None:
-            evaluation.predictions = evaluation.predictions[self._sample]
+        self._downsample_predictions(evaluation)
 
-        if self._max_n_models is None or self._max_n_models > len(self.best_pipelines):
-            heapq.heappush(self.best_pipelines, evaluation)
+        if self._max_n_evaluations is None or self._max_n_evaluations > len(self.top_evaluations):
+            heapq.heappush(self.top_evaluations, evaluation)
         else:
-            heapq.heappushpop(self.best_pipelines, evaluation)
+            heapq.heappushpop(self.top_evaluations, evaluation)
 
-    def n_best(self, n: int = 5) -> Iterable[Evaluation]:
-        return [e for e in heapq.nlargest(n, self.best_pipelines) if e.predictions is not None]
+    def _downsample_predictions(self, evaluation: Evaluation):
+        """ Downsample predictions if possible and specified through `self._sample`. """
+        if evaluation.predictions is None or self._sample is None:
+            return
+
+        # On initialization, `self._sample` may be set as int, if so, select indices for all future downsampling.
+        if isinstance(self._sample, int):
+            if self._sample >= len(evaluation.predictions):
+                self._sample = None  # Sample size exceeds number of predictions, store all predictions, don't sample.
+                return
+            self._sample = np.random.choice(range(len(evaluation.predictions)), size=self._sample, replace=False)
+
+        evaluation.predictions = evaluation.predictions[self._sample]
+
+    def n_best(self, n: int = 5) -> List[Evaluation]:
+        return [e for e in heapq.nlargest(n, self.top_evaluations) if e.predictions is not None]
+
+
+def _determine_sample(self, sample_size: int, evaluation: Evaluation) -> Optional[np.ndarray]:
+    """ Determine a set of random samples, if any, based on desired sample size and number of predictions. """
+    if sample_size >= len(evaluation.predictions):
+        return None  # Suggested sample size exceeds number of predictions, so act as if sample not specified.
