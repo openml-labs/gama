@@ -34,7 +34,7 @@ class EvaluationLibrary:
     def __init__(
             self,
             max_number_of_evaluations: Optional[int] = 200,
-            prediction_sample: Optional[Union[int, object]] = None
+            prediction_sample: Optional[Union[int, np.ndarray]] = None
     ):
         """
         
@@ -42,12 +42,12 @@ class EvaluationLibrary:
         ----------
         max_number_of_evaluations: int, optional (default=200)
             Maximum number of evaluations to keep in memory with predictions and fitted pipelines.
-        prediction_sample: int, array-like, optional (default=None)
+        prediction_sample: int or np.ndarray, optional (default=None)
             Allows downsampling of predictions to a select number before storing the evaluation.
             This is useful if you don't plan on using all predictions anyway, as it lowers memory usage.
             If it is set with an int, `prediction_sample` is the number of predictions to keep of each evaluation.
-            If it is set with an an array-like, it specifies the indices of the predictions to keep.
-            Set with an array-like if it matters which predictions to keep (e.g. class stratified samples).
+            If it is set with a numpy array, it specifies the indices of the predictions to keep.
+            Set with an array if it matters which predictions to keep (e.g. class stratified samples).
         """
         self.top_evaluations = []
         self._max_n_evaluations = max_number_of_evaluations
@@ -77,9 +77,3 @@ class EvaluationLibrary:
 
     def n_best(self, n: int = 5) -> List[Evaluation]:
         return [e for e in heapq.nlargest(n, self.top_evaluations) if e.predictions is not None]
-
-
-def _determine_sample(self, sample_size: int, evaluation: Evaluation) -> Optional[np.ndarray]:
-    """ Determine a set of random samples, if any, based on desired sample size and number of predictions. """
-    if sample_size >= len(evaluation.predictions):
-        return None  # Suggested sample size exceeds number of predictions, so act as if sample not specified.
