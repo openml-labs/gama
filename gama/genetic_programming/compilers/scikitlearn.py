@@ -116,7 +116,16 @@ def evaluate_pipeline(
         logger=None,
         subsample=None
 ) -> Tuple:
-    """ Evaluate `pipeline` using k-Fold CV. """
+    """ Score `pipeline` with k-fold CV according to `metrics` on (a subsample of) X, y
+
+    Returns
+    -------
+    Tuple:
+        prediction: np.ndarray if successful, None if not
+        scores: tuple with one float per metric, each value is -inf on fail.
+        estimators: list of fitted pipelines if successful, None if not
+        error: None if successful, otherwise an Exception
+    """
     if not logger:
         logger = log
     if not object_is_valid_pipeline(pipeline):

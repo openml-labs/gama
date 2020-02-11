@@ -62,3 +62,15 @@ def RandomForestPipeline(pset):
     individual_str = ''.join(individual_str.split()).replace(',', ', ')
 
     return Individual.from_string(individual_str, pset, None)
+
+
+@pytest.fixture
+def InvalidLinearSVC(pset):
+    individual_str = """LinearSVC(data,
+            LinearSVC.C=0.001,
+            LinearSVC.dual=True,
+            LinearSVC.loss='squared_hinge',
+            LinearSVC.penalty='l1',
+            LinearSVC.tol=1e-05)"""
+    individual_str = ''.join(individual_str.split()).replace(',', ', ')
+    return Individual.from_string(individual_str, pset, compile_individual)

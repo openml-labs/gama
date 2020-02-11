@@ -9,7 +9,7 @@ from gama.utilities.evaluation_library import Evaluation
 from gama.utilities.metrics import scoring_to_metric
 from gama.genetic_programming.compilers.scikitlearn import \
     cross_val_predict_score, evaluate_individual, compile_individual, evaluate_pipeline
-from tests.unit.unit_fixtures import BernoulliNBStandardScaler, pset
+from tests.unit.unit_fixtures import BernoulliNBStandardScaler, InvalidLinearSVC, pset
 
 
 def test_cross_val_predict_score():
@@ -72,3 +72,17 @@ def test_evaluate_pipeline(BernoulliNBStandardScaler):
     assert errors is None
     assert 5 == len(estimators)
     assert prediction.shape == (150,)
+
+
+def test_evaluate_invalid_pipeline(InvalidLinearSVC):
+    x, y = load_iris(return_X_y=True)
+    x, y = pd.DataFrame(x), pd.Series(y)
+
+    prediction, scores, estimators, error = evaluate_pipeline(
+        InvalidLinearSVC.pipeline, x, y, timeout=60, metrics=scoring_to_metric('accuracy')
+    )
+    assert (float('-inf'),) == scores
+    assert str(error).startswith("Unsupported set of arguments:")
+    assert str(error).endswith("penalty='l1', loss='squared_hinge', dual=True")
+    assert estimators is None
+    assert prediction is None
