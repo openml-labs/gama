@@ -99,7 +99,7 @@ class EvaluationLibrary:
 
     def n_best(self, n: int = 5) -> List[Evaluation]:
         """ Return the best `n` pipelines. Slower if `n` exceeds `m` given on initialization. """
-        if n <= self._m:
+        if self._m is None or n <= self._m:
             return [e for e in heapq.nlargest(n, self.top_evaluations) if e.predictions is not None]
         else:
             return list(reversed(sorted(self.evaluations)))[:n]
