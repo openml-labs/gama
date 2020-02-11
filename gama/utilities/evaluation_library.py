@@ -164,7 +164,9 @@ class EvaluationLibrary:
     def save_evaluation(self, evaluation: Evaluation) -> None:
         self._process_predictions(evaluation)
 
-        if self._m is None or self._m > len(self.top_evaluations):
+        if evaluation.error is not None:
+            self.other_evaluations.append(evaluation)
+        elif self._m is None or self._m > len(self.top_evaluations):
             heapq.heappush(self.top_evaluations, evaluation)
         else:
             removed = heapq.heappushpop(self.top_evaluations, evaluation)
