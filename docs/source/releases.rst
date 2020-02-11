@@ -10,6 +10,10 @@ Features:
 Bugfixes:
  - Reading ARFF markers (such as @data and @attribute) is now correctly case insensitive.
 
+Maintenance:
+ - Evaluation results are no longer saved to disk but kept in memory only.
+   Consequently the `cache_dir` hyperparameter has been removed.
+
 Changes:
  - Pipelines fitted during search are now used in the ensemble, instead of retraining the pipeline.
  - Ordinal Encoding and One Hot Encoding are now applied outside of 5-fold CV.
