@@ -1,15 +1,12 @@
 from abc import ABC
 from collections import defaultdict
-import datetime
 from functools import partial
 import logging
 import multiprocessing
 import os
 import random
-import shutil
 import time
 from typing import Union, Tuple, Optional, Dict, Type, List
-import uuid
 import warnings
 
 import pandas as pd
@@ -22,7 +19,6 @@ from gama.logging.machine_logging import log_event, TOKENS
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
 from gama.utilities.metrics import scoring_to_metric
-from .utilities.observer import Observer
 
 from gama.__version__ import __version__
 from gama.data import X_y_from_arff, format_x_y
@@ -170,8 +166,6 @@ class Gama(ABC):
         self._final_pop = None
 
         self._subscribers = defaultdict(list)
-        self._observer = Observer('observer-id')
-        self.evaluation_completed(self._observer.update)
         self._evaluation_library = EvaluationLibrary()
         self.evaluation_completed(self._evaluation_library.save_evaluation)
 
@@ -388,7 +382,7 @@ class Gama(ABC):
 
         self._final_pop = self._search_method.output
         log.debug([str(i) for i in self._final_pop[:100]])
-        log.info(f'Search phase evaluated {len(self._observer._individuals)} individuals.')
+        log.info(f'Search phase evaluated {len(self._evaluation_library.evaluations)} individuals.')
 
     def export_script(self, file: str = 'gama_pipeline.py', raise_if_exists: bool = False):
         """ Exports a Python script which sets up the best found pipeline. Can only be called after `fit`.
