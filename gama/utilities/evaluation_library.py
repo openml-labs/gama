@@ -147,13 +147,22 @@ class EvaluationLibrary:
             # No n was provided here nor set on initialization
             self._sample = None
 
+    def _process_predictions(self, evaluation: Evaluation):
+        """ Downsample evaluation predictions if required. """
+        if self._sample_n == 0:
+            evaluation.predictions = None
+        if evaluation.predictions is None:
+            return  # Predictions either not provided or removed because sample_n is 0.
+
+        if isinstance(self._sample, str) and self._sample == "not set":
+            # Happens only for the first evaluation with predictions.
+            self.determine_sample_indices(self._sample_n, len(evaluation.predictions))
+
+        if self._sample is not None:
+            evaluation.predictions = evaluation.predictions[self._sample]
+
     def save_evaluation(self, evaluation: Evaluation) -> None:
-        if evaluation.predictions is not None:
-            if isinstance(self._sample, str) and self._sample == "not set":
-                # Happens only for the first evaluation with predictions.
-                self.determine_sample_indices(self._sample_n, len(evaluation.predictions))
-            if self._sample is not None:
-                evaluation.predictions = evaluation.predictions[self._sample]
+        self._process_predictions(evaluation)
 
         if self._m is None or self._m > len(self.top_evaluations):
             heapq.heappush(self.top_evaluations, evaluation)
