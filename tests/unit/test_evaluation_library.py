@@ -9,7 +9,7 @@ from .unit_fixtures import pset, GaussianNB, RandomForestPipeline, LinearSVC
 
 def _mock_evaluation(
         individual: Individual,
-        predictions: Optional[Union[np.ndarray, pd.DataFrame, pd.Series]] = object(),
+        predictions: Optional[Union[np.ndarray, pd.DataFrame, pd.Series]] = np.zeros(30,),
         score: Optional[Tuple[float, ...]] = None,
         estimators: List[object] = None,
         start_time: int = 0,
@@ -25,15 +25,6 @@ def _mock_evaluation(
         duration,
         error
     )
-
-
-def _test_subsample(sample, predictions, subsample):
-    """ Test the `predictions` correctly get sampled to `subsample`. """
-    lib = EvaluationLibrary(prediction_sample=sample)
-    best_evaluation = _mock_evaluation(GaussianNB, predictions=predictions)
-    lib.save_evaluation(best_evaluation)
-    assert best_evaluation.predictions.shape == subsample.shape, "Subsample does not have expected shape."
-    assert np.array_equal(best_evaluation.predictions, subsample), "Content of subsample differs from expected."
 
 
 def test_evaluation_convert_predictions_from_1darray_to_nparray(GaussianNB):
@@ -62,8 +53,8 @@ def test_evaluation_convert_predictions_from_dataframe_to_nparray(GaussianNB):
 
 def test_evaluation_library_max_number_evaluations(GaussianNB):
     """ Test `max_number_of_evaluations` correctly restricts the number of evaluations in `top_evaluations`. """
-    lib200 = EvaluationLibrary(m=200, prediction_sample=None)
-    lib_unlimited = EvaluationLibrary(m=None, prediction_sample=None)
+    lib200 = EvaluationLibrary(m=200, sample=None)
+    lib_unlimited = EvaluationLibrary(m=None, sample=None)
 
     worst_evaluation = _mock_evaluation(GaussianNB, score=(0., 0., 0.))
     lib200.save_evaluation(worst_evaluation)
@@ -81,7 +72,7 @@ def test_evaluation_library_max_number_evaluations(GaussianNB):
 
 def test_evaluation_library_n_best(GaussianNB):
     """ Test `max_number_of_evaluations` correctly restricts the number of evaluations in `top_evaluations`. """
-    lib = EvaluationLibrary(m=None, prediction_sample=None)
+    lib = EvaluationLibrary(m=None, sample=None)
 
     best_evaluation = _mock_evaluation(GaussianNB, score=(1., 1., 1.))
     worst_evaluation = _mock_evaluation(GaussianNB, score=(0., 0., 0.))
@@ -95,6 +86,15 @@ def test_evaluation_library_n_best(GaussianNB):
     assert best_evaluation is lib.n_best(10)[0], "`best_evaluation` should be number one in `n_best`"
     assert worst_evaluation not in lib.n_best(10), "`worst_evaluation` should not be in the top 10 of 12 evaluations."
     assert len(lib.n_best(100)) == 12, "`n > len(lib.top_evaluations)` should return all evaluations."
+
+
+def _test_subsample(sample, predictions, subsample):
+    """ Test the `predictions` correctly get sampled to `subsample`. """
+    lib = EvaluationLibrary(sample=sample)
+    best_evaluation = _mock_evaluation(GaussianNB, predictions=predictions)
+    lib.save_evaluation(best_evaluation)
+    assert best_evaluation.predictions.shape == subsample.shape, "Subsample does not have expected shape."
+    assert np.array_equal(best_evaluation.predictions, subsample), "Content of subsample differs from expected."
 
 
 def test_evaluation_library_sample_np2d_prediction(GaussianNB):

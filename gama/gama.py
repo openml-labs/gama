@@ -166,7 +166,7 @@ class Gama(ABC):
         self._final_pop = None
 
         self._subscribers = defaultdict(list)
-        self._evaluation_library = EvaluationLibrary(prediction_sample=10_000)
+        self._evaluation_library = EvaluationLibrary()
         self.evaluation_completed(self._evaluation_library.save_evaluation)
 
         self._pset, parameter_checks = pset_from_config(config)

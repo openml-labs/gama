@@ -1,4 +1,5 @@
 import heapq
+import logging
 from typing import Tuple, List, Optional, Iterable, Union
 
 import numpy as np
@@ -6,6 +7,8 @@ import pandas as pd
 from sklearn.model_selection import StratifiedShuffleSplit
 
 from gama.genetic_programming.components import Individual
+
+log = logging.getLogger(__name__)
 
 
 class Evaluation:
@@ -43,52 +46,114 @@ class Evaluation:
 
 
 class EvaluationLibrary:
-    """ Maintains an in-memory record of evaluations. """
+    """ Maintains an in-memory record of evaluations.
+
+    The main function of the EvaluationLibrary is to maintain a fast lookup for
+    the best evaluations, and to discard meta-data of Evaluations which are not
+    good enough.
+
+    Specifically for the top `m` evaluations the estimators and predictions are kept.
+    All but `n` predictions of each evaluation are discarded.
+    As soon as an evaluation is no longer in the top `m`,
+    its estimators and the sampled predictions are also discarded.
+    Other evaluation meta-data (e.g. scores, evaluation time, errors) is not discarded.
+
+    This discarding is useful to reduce memory usage when you know which meta-data
+    is used later. E.g.:
+    Ensembling selects from the best `m` models and uses `n` points for hill-climbing,
+    but general score information is relevant for all evaluated models.
+    """
 
     def __init__(
             self,
             m: Optional[int] = 200,
-            prediction_sample: Optional[Union[int, np.ndarray]] = None
+            n: Optional[int] = 10_000,
+            sample: Optional[np.ndarray] = None
     ):
-        """
-        
+        """ Create an EvaluationLibrary for in-memory record of evaluations.
+
         Parameters
         ----------
         m: int, optional (default=200)
             Evaluations outside of the top `m` have their predictions and estimators discarded to reduce memory usage.
             The best `m` evaluations can be queried quickly through `n_best(int)`.
             If set to `None` all evaluations remain sorted and with predictions and fit pipelines.
-        prediction_sample: int or np.ndarray, optional (default=None)
-            Allows downsampling of predictions to a select number before storing the evaluation.
-            This is useful if you don't plan on using all predictions anyway, as it lowers memory usage.
-
-            If it is set with a numpy array, it specifies the indices of the predictions to keep.
-            If it is set with an int, `prediction_sample` is the number of predictions to keep of each evaluation.
-            Preferably used combined with `create_stratified_sample` for classification evaluations.
-            Set with an array or combined with `create_stratified_sample` if it matters which predictions to keep.
+        n: int, optional (default=10_000)
+            Instead of storing all predictions of the 'top m' evaluations,
+            store only 'n' predictions. If left `None` all predictions will be kept.
+            This parameter is ignored when 'sample' is also provided.
+            Call `determine_sample_indices` before saving the first evaluation,
+            if you want to ensure a class stratified sample.
+        sample: np.ndarray, optional (default=None)
+            Instead of storing all predictions of the 'top m' evaluations,
+            store only those with indices specified in this array.
         """
         self.top_evaluations = []
         self.other_evaluations = []
         self._m = m
-        self._sample = prediction_sample
+        self._sample_n = n
+
+        if sample is not None:
+            self._sample = sample
+        elif n is None:
+            self._sample = None
+        else:
+            self._sample = "not set"
 
     @property
     def evaluations(self):
         return self.top_evaluations + self.other_evaluations
 
-    def create_stratified_sample(self, y: Union[np.ndarray, pd.Series, pd.DataFrame]):
-        """ Create class stratified sample indices for sampling predictions. """
-        if not isinstance(self._sample, int):
-            raise AttributeError("prediction_sample should be initialized as `int`,"
-                                 f"but is {type(self._sample)}.")
-        if self._sample >= len(y):
-            self._sample = None  # dataset smaller than preferred sample size
+    def determine_sample_indices(
+            self,
+            n: Optional[int] = None,
+            prediction_size: Optional[int] = None,
+            stratify: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]] = None
+    ) -> None:
+        """ Set `self._sample` to an array for sampling predictions or `None`.
+
+        The sample indices can be class stratified if `stratify` is set.
+        If `prediction_size` or `len(stratify)` is smaller than `n`,
+        predictions will not be sampled and all predictions are saved.
+
+        Parameters
+        ----------
+        n: int, optional (default=None)
+            Number of predictions to keep for each evaluation.
+            If `None`, use `n` set at the library's initialisation.
+        prediction_size: int, optional (default=None)
+            Number of predictions one can sample from.
+        stratify: np.ndarray, pd.Series or pd.DataFrame, optional (default=None)
+            The target variable of a supervised classification problem.
+            The sample will be class stratified according to this variable.
+        """
+        if not ((prediction_size is None) ^ (stratify is None)):
+            raise ValueError("Exactly one of `prediction_size` and `stratify` must be set.")
+        if len(self.evaluations) > 0:
+            log.warning("New subsample not used for already stored evaluations.")
+        n = self._sample_n if n is None else n
+
+        if n is not None:
+            if prediction_size is not None and n < prediction_size:
+                # Subsample is to be chosen uniformly random.
+                self._sample = np.random.choice(range(prediction_size), size=n, replace=False)
+            elif stratify is not None and n < len(stratify):
+                splitter = StratifiedShuffleSplit(n_splits=1, train_size=n)
+                self._sample, _ = next(splitter.split(np.zeros(len(stratify)), stratify))
+            else:
+                # Specified sample size exceeds size of predictions
+                self._sample = None
         else:
-            splitter = StratifiedShuffleSplit(n_splits=1, train_size=self._sample)
-            self._sample, _ = next(splitter.split(np.zeros(len(y)), y))
+            # No n was provided here nor set on initialization
+            self._sample = None
 
     def save_evaluation(self, evaluation: Evaluation) -> None:
-        self._downsample_predictions(evaluation)
+        if evaluation.predictions is not None:
+            if isinstance(self._sample, str) and self._sample == "not set":
+                # Happens only for the first evaluation with predictions.
+                self.determine_sample_indices(self._sample_n, len(evaluation.predictions))
+            if self._sample is not None:
+                evaluation.predictions = evaluation.predictions[self._sample]
 
         if self._m is None or self._m > len(self.top_evaluations):
             heapq.heappush(self.top_evaluations, evaluation)
@@ -96,20 +161,6 @@ class EvaluationLibrary:
             removed = heapq.heappushpop(self.top_evaluations, evaluation)
             removed.predictions, removed.estimators = None, None
             self.other_evaluations.append(removed)
-
-    def _downsample_predictions(self, evaluation: Evaluation):
-        """ Downsample predictions if possible and specified through `self._sample`. """
-        if evaluation.predictions is None or self._sample is None:
-            return
-
-        # On initialization, `self._sample` may be set as int, if so, select indices for all future downsampling.
-        if isinstance(self._sample, int):
-            if self._sample >= len(evaluation.predictions):
-                self._sample = None  # Sample size exceeds number of predictions, store all predictions, don't sample.
-                return
-            self._sample = np.random.choice(range(len(evaluation.predictions)), size=self._sample, replace=False)
-
-        evaluation.predictions = evaluation.predictions[self._sample]
 
     def n_best(self, n: int = 5) -> List[Evaluation]:
         """ Return the best `n` pipelines. Slower if `n` exceeds `m` given on initialization. """
