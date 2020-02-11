@@ -42,7 +42,7 @@ def test_evaluate_individual(BernoulliNBStandardScaler):
     assert individual == BernoulliNBStandardScaler
     assert hasattr(individual, 'fitness')
     assert individual.fitness.values == (1., -2)
-    assert individual.fitness.start_time == reported_start_time
+    assert (individual.fitness.start_time - reported_start_time).total_seconds() < 1.0
 
 
 def test_compile_individual(BernoulliNBStandardScaler):
