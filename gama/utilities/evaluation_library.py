@@ -3,6 +3,7 @@ from typing import Tuple, List, Optional, Iterable, Union
 
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import StratifiedShuffleSplit
 
 from gama.genetic_programming.components import Individual
 
@@ -60,9 +61,11 @@ class EvaluationLibrary:
         prediction_sample: int or np.ndarray, optional (default=None)
             Allows downsampling of predictions to a select number before storing the evaluation.
             This is useful if you don't plan on using all predictions anyway, as it lowers memory usage.
-            If it is set with an int, `prediction_sample` is the number of predictions to keep of each evaluation.
+
             If it is set with a numpy array, it specifies the indices of the predictions to keep.
-            Set with an array if it matters which predictions to keep (e.g. class stratified samples).
+            If it is set with an int, `prediction_sample` is the number of predictions to keep of each evaluation.
+            Preferably used combined with `create_stratified_sample` for classification evaluations.
+            Set with an array or combined with `create_stratified_sample` if it matters which predictions to keep.
         """
         self.top_evaluations = []
         self.other_evaluations = []
@@ -72,6 +75,17 @@ class EvaluationLibrary:
     @property
     def evaluations(self):
         return self.top_evaluations + self.other_evaluations
+
+    def create_stratified_sample(self, y: Union[np.ndarray, pd.Series, pd.DataFrame]):
+        """ Create class stratified sample indices for sampling predictions. """
+        if not isinstance(self._sample, int):
+            raise AttributeError("prediction_sample should be initialized as `int`,"
+                                 f"but is {type(self._sample)}.")
+        if self._sample >= len(y):
+            self._sample = None  # dataset smaller than preferred sample size
+        else:
+            splitter = StratifiedShuffleSplit(n_splits=1, train_size=self._sample)
+            self._sample, _ = next(splitter.split(np.zeros(len(y)), y))
 
     def save_evaluation(self, evaluation: Evaluation) -> None:
         self._downsample_predictions(evaluation)

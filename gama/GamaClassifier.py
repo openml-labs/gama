@@ -119,6 +119,7 @@ class GamaClassifier(Gama):
         if any([isinstance(yi, str) for yi in y_]):
             # If target values are `str` we encode them or scikit-learn will complain.
             y = self._label_encoder.transform(y_)
+        self._evaluation_library.create_stratified_sample(y)
         super().fit(x, y, *args, **kwargs)
 
     def _encode_labels(self, y):

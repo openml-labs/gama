@@ -125,6 +125,11 @@ class Ensemble(object):
         self._shrink_on_pickle = shrink_on_pickle
         self._prediction_transformation = None
 
+        if self.evaluation_library._sample is not None:
+            # If the library stores sampled predictions, we match that first.
+            y = y.iloc[self.evaluation_library._sample]
+
+        # Then apply even more sampling if requested.
         if downsample_to is None or downsample_to >= len(y):
             if downsample_to is not None:
                 log.info(f"Not downsampling because training data only had {len(y)} samples.")
@@ -133,7 +138,7 @@ class Ensemble(object):
         else:
             log.info(f"Downsampling because training data exceeds {downsample_to} samples.")
             self._prediction_sample = random.sample(range(len(y)), downsample_to)
-            self._y = y[self._prediction_sample]
+            self._y = y.iloc[self._prediction_sample]
 
         self._internal_score = None
         self._fit_models = None
@@ -333,7 +338,7 @@ class EnsembleClassifier(Ensemble):
         self._one_hot_encoder = OneHotEncoder(categories='auto').fit(y_as_squeezed_array)
 
         if self._metric.requires_probabilities:
-            self._y = self._one_hot_encoder.transform(y_as_squeezed_array).toarray()
+            self._y = self._one_hot_encoder.transform(self._y.values.reshape(-1, 1)).toarray()
             if self._prediction_sample is not None:
                 self._y = self._y[self._prediction_sample]
         else:
