@@ -33,7 +33,7 @@ from gama.genetic_programming.operations import create_random_expression
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
-from gama.postprocessing import BestFitPostProcessing, BasePostProcessing
+from gama.postprocessing import BestFitPostProcessing, BasePostProcessing, EnsemblePostProcessing
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.utilities.metrics import Metric
 
@@ -166,7 +166,14 @@ class Gama(ABC):
         self._final_pop = None
 
         self._subscribers = defaultdict(list)
-        self._evaluation_library = EvaluationLibrary()
+        if isinstance(post_processing_method, EnsemblePostProcessing):
+            self._evaluation_library = EvaluationLibrary(
+                m=post_processing_method.hyperparameters['max_models'],
+                n=post_processing_method.hyperparameters['hillclimb_size'],
+            )
+        else:
+            # Don't keep memory-heavy evaluation meta-data (predictions, estimators)
+            self._evaluation_library = EvaluationLibrary(m=0)
         self.evaluation_completed(self._evaluation_library.save_evaluation)
 
         self._pset, parameter_checks = pset_from_config(config)

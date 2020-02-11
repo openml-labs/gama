@@ -1,10 +1,8 @@
-import os
-import pickle
 import logging
 import random
 import time
 from collections import namedtuple
-from typing import Optional, List, Callable
+from typing import Optional, List
 
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
@@ -21,7 +19,13 @@ Model = namedtuple("Model", ['name', 'individual', 'pipelines', 'predictions', '
 
 class EnsemblePostProcessing(BasePostProcessing):
 
-    def __init__(self, time_fraction: float = 0.3, ensemble_size: Optional[int] = 25):
+    def __init__(
+            self,
+            time_fraction: float = 0.3,
+            ensemble_size: Optional[int] = 25,
+            hillclimb_size: Optional[int] = 10_000,
+            max_models: Optional[int] = 200
+    ):
         """ Ensemble construction per Caruana et al.
 
         Parameters
@@ -32,12 +36,20 @@ class EnsemblePostProcessing(BasePostProcessing):
             Total number of models in the ensemble.
             When a single model is chosen more than once, it will increase its weight in the ensemble and
             *does* count towards this maximum.
+        hillclimb_size: int, optional (default=10_000)
+            Number of predictions that are used to determine the ensemble score
+            during hillclimbing. If `None`, use all.
+        max_models: int, optional (default=200)
+            Only consider the best `max_models` number of models. If `None`, use all.
+            Consequently also sets the max number of unique models in the ensemble.
         """
         super().__init__(time_fraction)
         self._hyperparameters = dict(
             ensemble_size=(ensemble_size, 25),
             metric=(None, None),
-            evaluation_library=(None, None)
+            evaluation_library=(None, None),
+            hillclimb_size=(hillclimb_size, 10_000),
+            max_models=(max_models, 200)
         )
         self._ensemble = None
 
