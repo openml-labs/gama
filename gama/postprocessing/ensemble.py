@@ -1,20 +1,17 @@
-from collections import namedtuple
-import os
-import pickle
 import logging
 import random
 import time
-from typing import Optional, List, Callable
+from collections import namedtuple
+from typing import Optional, List
 
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
-import stopit
 
 from gama.genetic_programming.components import Individual
 from gama.postprocessing.base_post_processing import BasePostProcessing
+from gama.utilities.evaluation_library import EvaluationLibrary
 from gama.utilities.export import imports_and_steps_for_individual
 from gama.utilities.metrics import Metric, MetricType
-from gama.utilities.generic.async_evaluator import AsyncEvaluator
 
 log = logging.getLogger(__name__)
 Model = namedtuple("Model", ['name', 'individual', 'pipelines', 'predictions', 'validation_score'])
@@ -22,7 +19,13 @@ Model = namedtuple("Model", ['name', 'individual', 'pipelines', 'predictions', '
 
 class EnsemblePostProcessing(BasePostProcessing):
 
-    def __init__(self, time_fraction: float = 0.3, ensemble_size: Optional[int] = 25):
+    def __init__(
+            self,
+            time_fraction: float = 0.3,
+            ensemble_size: Optional[int] = 25,
+            hillclimb_size: Optional[int] = 10_000,
+            max_models: Optional[int] = 200
+    ):
         """ Ensemble construction per Caruana et al.
 
         Parameters
@@ -33,18 +36,26 @@ class EnsemblePostProcessing(BasePostProcessing):
             Total number of models in the ensemble.
             When a single model is chosen more than once, it will increase its weight in the ensemble and
             *does* count towards this maximum.
+        hillclimb_size: int, optional (default=10_000)
+            Number of predictions that are used to determine the ensemble score
+            during hillclimbing. If `None`, use all.
+        max_models: int, optional (default=200)
+            Only consider the best `max_models` number of models. If `None`, use all.
+            Consequently also sets the max number of unique models in the ensemble.
         """
         super().__init__(time_fraction)
         self._hyperparameters = dict(
             ensemble_size=(ensemble_size, 25),
             metric=(None, None),
-            cache=(None, None)
+            evaluation_library=(None, None),
+            hillclimb_size=(hillclimb_size, 10_000),
+            max_models=(max_models, 200)
         )
         self._ensemble = None
 
     def dynamic_defaults(self, gama: 'Gama'):
         self._overwrite_hyperparameter_default('metric', gama._metrics[0])
-        self._overwrite_hyperparameter_default('cache', gama._cache_dir)
+        self._overwrite_hyperparameter_default('evaluation_library', gama._evaluation_library)
 
     def post_process(self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]) -> 'model':
         self._ensemble = build_fit_ensemble(
@@ -52,7 +63,7 @@ class EnsemblePostProcessing(BasePostProcessing):
             self.hyperparameters['ensemble_size'],
             timeout,
             self.hyperparameters['metric'],
-            self.hyperparameters['cache']
+            self.hyperparameters['evaluation_library']
         )
         return self._ensemble
 
@@ -86,7 +97,7 @@ class EnsemblePostProcessing(BasePostProcessing):
 class Ensemble(object):
 
     def __init__(self, metric, y: pd.DataFrame,
-                 model_library=None, model_library_directory=None,
+                 evaluation_library: EvaluationLibrary = None,
                  shrink_on_pickle=True,
                  downsample_to: Optional[int] = 10_000,
                  use_top_n_only: Optional[int] = 200):
@@ -100,10 +111,8 @@ class Ensemble(object):
             Metric to optimize the ensemble towards.
         y: pandas.DataFrame
             True labels for the predictions made by the models in the library.
-        model_library:
+        evaluation_library: `gama.utilities.evaluation_library.EvaluationLibrary`
             A list of models from which an ensemble can be built.
-        model_library_directory: str
-            a directory containing results of model evaluations.
         shrink_on_pickle: bool (default=True)
             If True, remove memory-intensive attributes that are required before pickling.
             When unpickled, the model can be used to create predictions, but the ensemble can't be changed.
@@ -113,22 +122,26 @@ class Ensemble(object):
         elif not isinstance(metric, Metric):
             raise ValueError("metric must be specified as string or `gama.ea.metrics.Metric`.")
 
-        if model_library is None and model_library_directory is None:
-            raise ValueError("At least one of model_library or model_library_directory must be specified.")
-
-        if model_library is not None and model_library_directory is not None:
-            log.warning("model_library_directory will be ignored because model_library is also specified.")
+        if evaluation_library is None:
+            raise ValueError("`evaluation_library` is None but must be EvaluationLibrary.")
+        elif not isinstance(evaluation_library, EvaluationLibrary):
+            raise TypeError("`evaluation_library` must be of type gama.utilities.evaluation_library.EvaluationLibrary.")
 
         if not isinstance(y, (pd.Series, pd.DataFrame)):
             raise TypeError(f"`y_true` must be of type pandas.DataFrame or pandas.Series but is {type(y)}.")
 
         self._metric = metric
-        self._model_library_directory = model_library_directory
-        self._model_library = model_library if model_library is not None else []
+        self.evaluation_library = evaluation_library
+        self._model_library = []
+        self._use_top_n_only = use_top_n_only
         self._shrink_on_pickle = shrink_on_pickle
         self._prediction_transformation = None
-        self._use_top_n_only = use_top_n_only
 
+        if self.evaluation_library._sample is not None:
+            # If the library stores sampled predictions, we match that first.
+            y = y.iloc[self.evaluation_library._sample]
+
+        # Then apply even more sampling if requested.
         if downsample_to is None or downsample_to >= len(y):
             if downsample_to is not None:
                 log.info(f"Not downsampling because training data only had {len(y)} samples.")
@@ -137,7 +150,7 @@ class Ensemble(object):
         else:
             log.info(f"Downsampling because training data exceeds {downsample_to} samples.")
             self._prediction_sample = random.sample(range(len(y)), downsample_to)
-            self._y = y[self._prediction_sample]
+            self._y = y.iloc[self._prediction_sample]
 
         self._internal_score = None
         self._fit_models = None
@@ -148,16 +161,16 @@ class Ensemble(object):
     @property
     def model_library(self):
         if not self._model_library:
-            log.debug("Loading model library from disk.")
-            self._model_library = load_predictions(self._model_library_directory, self._prediction_transformation, self._prediction_sample)
-            log.info("Loaded model library of size {} from disk.".format(len(self._model_library)))
-            self._model_library = list(reversed(sorted(self._model_library, key=lambda m: m.validation_score)))
-            if self._use_top_n_only is not None and self._use_top_n_only < len(self._model_library):
-                log.info("Discarding {} models, keeping the {} best ones."
-                         .format(len(self._model_library) - self._use_top_n_only, self._use_top_n_only))
-                self._model_library = self._model_library[:self._use_top_n_only]
-            elif self._use_top_n_only is not None and self._use_top_n_only > len(self._model_library):
-                log.info(f"Keeping all models since only {len(self._model_library)} models were evaluated.")
+            self._model_library = []
+            for evaluation in self.evaluation_library.n_best(self._use_top_n_only):
+                if self._prediction_transformation:
+                    evaluation.predictions = self._prediction_transformation(evaluation.predictions)
+                if self._prediction_sample:
+                    evaluation.predictions = evaluation.predictions[self._prediction_sample]
+                self._model_library.append(
+                    Model(evaluation.individual.pipeline_str(), evaluation.individual, evaluation.estimators,
+                          evaluation.predictions, evaluation.score)
+                )
 
         return self._model_library
 
@@ -300,44 +313,6 @@ class Ensemble(object):
         return self.__dict__.copy()
 
 
-def load_predictions(
-        cache_dir: str,
-        prediction_transformation: Optional[Callable] = None,
-        sample: Optional[List[int]] = None) -> List[Model]:
-    """
-
-    Parameters
-    ----------
-    cache_dir: str
-        Directory with stored models.
-    prediction_transformation: callable, optional
-        Function which transforms the predictions (for multi-class classification)
-    sample: List[int], optional
-        If specified only keep these samples of the predictions in each Model, discard the remainder.
-
-    Returns
-    -------
-    A list of Models.
-
-    """
-    models = []
-    for file in os.listdir(cache_dir):
-        if file.endswith('.pkl'):
-            file_name = os.path.join(cache_dir, file)
-            if os.stat(file_name).st_size > 0:
-                # We check file size, because writing to disk may be interrupted if the process was terminated due
-                # to a restart/timeout. I can not find specifications saying that any interrupt of pickle.dump leads
-                # to 0-sized files, but in practice this seems to case so far.
-                with open(os.path.join(cache_dir, file), 'rb') as fh:
-                    individual, estimators, predictions, scores = pickle.load(fh)
-                if prediction_transformation:
-                    predictions = prediction_transformation(predictions)
-                if sample:
-                    predictions = predictions[sample]
-                models.append(Model(individual.pipeline_str(), individual, estimators, predictions, scores))
-    return models
-
-
 def fit_and_weight(args):
     """ Fit the pipeline given the data. Update weight to 0 if fitting fails.
 
@@ -375,7 +350,7 @@ class EnsembleClassifier(Ensemble):
         self._one_hot_encoder = OneHotEncoder(categories='auto').fit(y_as_squeezed_array)
 
         if self._metric.requires_probabilities:
-            self._y = self._one_hot_encoder.transform(y_as_squeezed_array).toarray()
+            self._y = self._one_hot_encoder.transform(self._y.values.reshape(-1, 1)).toarray()
             if self._prediction_sample is not None:
                 self._y = self._y[self._prediction_sample]
         else:
@@ -428,17 +403,17 @@ class EnsembleRegressor(Ensemble):
         return self._get_weighted_mean_predictions(X)
 
 
-def build_fit_ensemble(x, y, ensemble_size: int, timeout: float,
-                       metric: Metric, cache: str, encoder: Optional[object]=None) -> Ensemble:
+def build_fit_ensemble(x, y, ensemble_size: int, timeout: float, metric: Metric,
+                       evaluation_library: EvaluationLibrary, encoder: Optional[object] = None) -> Ensemble:
     """ Construct an Ensemble of models from cache, optimizing for metric and fit to (x, y). """
     start_build = time.time()
 
     log.debug('Building ensemble.')
     if metric.task_type == MetricType.CLASSIFICATION:
-        ensemble = EnsembleClassifier(metric, y, model_library_directory=cache)
+        ensemble = EnsembleClassifier(metric, y, evaluation_library=evaluation_library)
         ensemble._label_encoder = encoder
     elif metric.task_type == MetricType.REGRESSION:
-        ensemble = EnsembleRegressor(metric, y, model_library_directory=cache)
+        ensemble = EnsembleRegressor(metric, y, evaluation_library=evaluation_library)
     else:
         raise ValueError(f"Unknown metric task type {metric.task_type}")
 

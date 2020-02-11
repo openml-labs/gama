@@ -2,6 +2,7 @@ from collections.abc import Sequence
 import logging
 
 from gama.logging.machine_logging import TOKENS, log_event
+from gama.utilities.evaluation_library import Evaluation
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from .components import Individual
 
@@ -36,17 +37,21 @@ class OperatorSet:
     def wait_next(self, async_evaluator):
         future = async_evaluator.wait_next()
         if future.result is not None:
-            result = future.result
-            if not isinstance(result, Sequence):
-                individual = result
-                log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
-                          individual.fitness.wallclock_time, individual.fitness.process_time,
-                          individual.fitness.values, individual._id, individual.pipeline_str())
-            else:
-                # For now, we leave logging for non-standard results to the caller (e.g. rungs in ASHA)
-                individual = result[0]
+            evaluation = future.result
+            if isinstance(evaluation, Sequence):
+                # Only evaluation with this signature is currently an ASHA evaluation result
+                evaluation, loss, rung, full_evaluation = evaluation  # not re-assignment of evaluation
+                if not full_evaluation:
+                    # We don't process low-fidelity evaluations here (for now?).
+                    return future
+
+            individual = evaluation.individual
+            log_event(log, TOKENS.EVALUATION_RESULT, individual.fitness.start_time,
+                      individual.fitness.wallclock_time, individual.fitness.process_time,
+                      individual.fitness.values, individual._id, individual.pipeline_str())
             if self._evaluate_callback is not None:
-                self._evaluate_callback(individual)
+                self._evaluate_callback(evaluation)
+
         elif future.exception is not None:
             log.warning(f'Encountered exception while evaluating individual: {str(future.exception)}.')
         return future

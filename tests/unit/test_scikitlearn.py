@@ -1,5 +1,3 @@
-import time
-
 import pytest
 import pandas as pd
 from sklearn.datasets import load_iris
@@ -7,10 +5,11 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, log_loss
 from sklearn.preprocessing import OneHotEncoder
 
+from gama.utilities.evaluation_library import Evaluation
 from gama.utilities.metrics import scoring_to_metric
 from gama.genetic_programming.compilers.scikitlearn import \
     cross_val_predict_score, evaluate_individual, compile_individual, evaluate_pipeline
-from tests.unit.unit_fixtures import BernoulliNBStandardScaler, pset
+from tests.unit.unit_fixtures import BernoulliNBStandardScaler, InvalidLinearSVC, pset
 
 
 def test_cross_val_predict_score():
@@ -28,21 +27,22 @@ def test_cross_val_predict_score():
     assert len(set(estimators)) == len(estimators)
 
 
-def test_evaluate_individual(BernoulliNBStandardScaler, mocker):
+def test_evaluate_individual(BernoulliNBStandardScaler):
     import datetime
     reported_start_time = datetime.datetime.now()
-    def fake_evaluate(*args, **kwargs):
-        # (scores), start, walltime, processtime
-        return (1.0, -0.5), reported_start_time, 0.5, 0.7
 
-    mocker.patch('gama.genetic_programming.compilers.scikitlearn.evaluate_pipeline', new=fake_evaluate)
-    individual = evaluate_individual(BernoulliNBStandardScaler, evaluate_pipeline_length=True)
+    def fake_evaluate_pipeline(pipeline, *args, **kwargs):
+        # predictions, scores, estimators, errors
+        return None, (1., ), [], None
+
+    evaluation = evaluate_individual(
+        BernoulliNBStandardScaler, evaluate_pipeline=fake_evaluate_pipeline, add_length_to_score=True
+    )
+    individual = evaluation.individual
     assert individual == BernoulliNBStandardScaler
     assert hasattr(individual, 'fitness')
-    assert individual.fitness.values == (1.0, -0.5, -2)
-    assert individual.fitness.start_time == reported_start_time
-    assert individual.fitness.wallclock_time == 0.5
-    assert individual.fitness.process_time == 0.7
+    assert individual.fitness.values == (1., -2)
+    assert (individual.fitness.start_time - reported_start_time).total_seconds() < 1.0
 
 
 def test_compile_individual(BernoulliNBStandardScaler):
@@ -65,7 +65,24 @@ def test_evaluate_pipeline(BernoulliNBStandardScaler):
     x, y = load_iris(return_X_y=True)
     x, y = pd.DataFrame(x), pd.Series(y)
 
-    scores, start, wallclock, process = evaluate_pipeline(
-        BernoulliNBStandardScaler, x, y, timeout=60, deadline=time.time()+60,
-        metrics=scoring_to_metric('accuracy'))
+    prediction, scores, estimators, errors = evaluate_pipeline(
+        BernoulliNBStandardScaler.pipeline, x, y, timeout=60, metrics=scoring_to_metric('accuracy')
+    )
     assert 1 == len(scores)
+    assert errors is None
+    assert 5 == len(estimators)
+    assert prediction.shape == (150,)
+
+
+def test_evaluate_invalid_pipeline(InvalidLinearSVC):
+    x, y = load_iris(return_X_y=True)
+    x, y = pd.DataFrame(x), pd.Series(y)
+
+    prediction, scores, estimators, error = evaluate_pipeline(
+        InvalidLinearSVC.pipeline, x, y, timeout=60, metrics=scoring_to_metric('accuracy')
+    )
+    assert (float('-inf'),) == scores
+    assert str(error).startswith("Unsupported set of arguments:")
+    assert str(error).endswith("penalty='l1', loss='squared_hinge', dual=True")
+    assert estimators is None
+    assert prediction is None

@@ -1,15 +1,12 @@
 from abc import ABC
 from collections import defaultdict
-import datetime
 from functools import partial
 import logging
 import multiprocessing
 import os
 import random
-import shutil
 import time
 from typing import Union, Tuple, Optional, Dict, Type, List
-import uuid
 import warnings
 
 import pandas as pd
@@ -20,8 +17,8 @@ from sklearn.pipeline import Pipeline
 import gama.genetic_programming.compilers.scikitlearn
 from gama.logging.machine_logging import log_event, TOKENS
 from gama.search_methods.base_search import BaseSearch
+from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
 from gama.utilities.metrics import scoring_to_metric
-from .utilities.observer import Observer
 
 from gama.__version__ import __version__
 from gama.data import X_y_from_arff, format_x_y
@@ -36,7 +33,7 @@ from gama.genetic_programming.operations import create_random_expression
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
-from gama.postprocessing import BestFitPostProcessing, BasePostProcessing
+from gama.postprocessing import BestFitPostProcessing, BasePostProcessing, EnsemblePostProcessing
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.utilities.metrics import Metric
 
@@ -56,6 +53,7 @@ class Gama(ABC):
     def __init__(self,
                  scoring: Union[str, Metric, Tuple[Union[str, Metric], ...]] = 'filled_in_by_child_class',
                  regularize_length: bool = True,
+                 max_pipeline_length: Optional[int] = None,
                  config: Dict = None,
                  random_state: Optional[int] = None,
                  max_total_time: int = 3600,
@@ -63,7 +61,6 @@ class Gama(ABC):
                  n_jobs: Optional[int] = None,
                  verbosity: int = logging.WARNING,
                  keep_analysis_log: Optional[str] = 'gama.log',
-                 cache_dir: Optional[str] = None,
                  search_method: BaseSearch = AsyncEA(),
                  post_processing_method: BasePostProcessing = BestFitPostProcessing()):
         """
@@ -77,6 +74,9 @@ class Gama(ABC):
 
         regularize_length: bool
             If True, add pipeline length as an optimization metric (preferring short over long).
+
+        max_pipeline_length: int, optional (default=None)
+            If set, limit the maximum number of steps in any evaluated pipeline. Encoding and imputation are excluded.
 
         config: a dictionary which specifies available components and their valid hyperparameter settings
             For more information, see :ref:`search_space_configuration`.
@@ -105,10 +105,6 @@ class Gama(ABC):
         keep_analysis_log: str, optional (default='gama.log')
             If non-empty str, specifies the path (and name) where the log should be stored, e.g. /output/gama.log.
             If `None`, no log is stored.
-
-        cache_dir: str or None (default=None)
-            The directory in which to keep the cache during `fit`. In this directory,
-            models and their evaluation results will be stored. This facilitates a quick ensemble construction.
 
         search_method: BaseSearch (default=AsyncEA())
             Search method to use to find good pipelines. Should be instantiated.
@@ -158,11 +154,6 @@ class Gama(ABC):
         self._search_method: BaseSearch = search_method
         self._post_processing = post_processing_method
 
-        default_cache_dir = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{str(uuid.uuid4())[:4]}_GAMA"
-        self._cache_dir = cache_dir if cache_dir is not None else default_cache_dir
-        if not os.path.isdir(self._cache_dir):
-            os.mkdir(self._cache_dir)
-
         if random_state is not None:
             random.seed(random_state)
             np.random.seed(random_state)
@@ -175,15 +166,24 @@ class Gama(ABC):
         self._final_pop = None
 
         self._subscribers = defaultdict(list)
-        self._observer = Observer(self._cache_dir)
-        self.evaluation_completed(self._observer.update)
+        if isinstance(post_processing_method, EnsemblePostProcessing):
+            self._evaluation_library = EvaluationLibrary(
+                m=post_processing_method.hyperparameters['max_models'],
+                n=post_processing_method.hyperparameters['hillclimb_size'],
+            )
+        else:
+            # Don't keep memory-heavy evaluation meta-data (predictions, estimators)
+            self._evaluation_library = EvaluationLibrary(m=0)
+        self.evaluation_completed(self._evaluation_library.save_evaluation)
 
         self._pset, parameter_checks = pset_from_config(config)
+
+        max_start_length = 3 if max_pipeline_length is None else max_pipeline_length
         self._operator_set = OperatorSet(
-            mutate=partial(random_valid_mutation_in_place, primitive_set=self._pset),
-            mate=random_crossover,
+            mutate=partial(random_valid_mutation_in_place, primitive_set=self._pset, max_length=max_pipeline_length),
+            mate=partial(random_crossover, max_length=max_pipeline_length),
             create_from_population=partial(create_from_population, cxpb=0.2, mutpb=0.8),
-            create_new=partial(create_random_expression, primitive_set=self._pset),
+            create_new=partial(create_random_expression, primitive_set=self._pset, max_length=max_start_length),
             compile_=compile_individual,
             eliminate=eliminate_from_pareto,
             evaluate_callback=self._on_evaluation_completed
@@ -318,8 +318,7 @@ class Gama(ABC):
     def fit(self,
             x: Union[pd.DataFrame, np.ndarray],
             y: Union[pd.DataFrame, pd.Series, np.ndarray],
-            warm_start: bool = False,
-            keep_cache: bool = False) -> None:
+            warm_start: bool = False) -> None:
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -338,8 +337,6 @@ class Gama(ABC):
         warm_start: bool (default=False)
             Indicates the optimization should continue using the last individuals of the
             previous `fit` call.
-        keep_cache: bool (default=False)
-            If True, keep the cache directory and its content after fitting is complete. Otherwise delete it.
         """
 
         with self._time_manager.start_activity('preprocessing', activity_meta=['default']):
@@ -364,9 +361,6 @@ class Gama(ABC):
             self.model = self._post_processing.post_process(
                 self._X, self._y, self._time_manager.total_time_remaining, best_individuals
             )
-        if not keep_cache:
-            log.debug("Deleting cache.")
-            self.delete_cache()
 
     def _search_phase(self, warm_start: bool = False, timeout: int = 1e6):
         """ Invoke the evolutionary algorithm, populate `final_pop` regardless of termination. """
@@ -378,11 +372,13 @@ class Gama(ABC):
             pop = [self._operator_set.individual() for _ in range(50)]
 
         deadline = time.time() + timeout
-        evaluate_args = dict(evaluate_pipeline_length=self._regularize_length, X=self._X, y_train=self._y,
-                             metrics=self._metrics, cache_dir=self._cache_dir, timeout=self._max_eval_time,
-                             deadline=deadline)
+
+        evaluate_pipeline = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_pipeline,
+                                    X=self._X, y_train=self._y, metrics=self._metrics)
         self._operator_set.evaluate = partial(gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
-                                              **evaluate_args)
+                                              evaluate_pipeline=evaluate_pipeline,
+                                              timeout=self._max_eval_time, deadline=deadline,
+                                              add_length_to_score=self._regularize_length)
 
         try:
             with stopit.ThreadingTimeout(timeout):
@@ -393,26 +389,7 @@ class Gama(ABC):
 
         self._final_pop = self._search_method.output
         log.debug([str(i) for i in self._final_pop[:100]])
-        log.info(f'Search phase evaluated {len(self._observer._individuals)} individuals.')
-
-    def _initialize_ensemble(self):
-        raise NotImplementedError('_initialize_ensemble should be implemented by a child class.')
-
-    def delete_cache(self):
-        """ Removes the cache folder and all files associated to this instance.
-
-        Returns
-        -------
-        None
-        """
-        while os.path.exists(self._cache_dir):
-            try:
-                log.info("Attempting to delete {}".format(self._cache_dir))
-                shutil.rmtree(self._cache_dir)
-            except OSError as e:
-                if "The directory is not empty" not in str(e):
-                    log.warning("Did not delete due to:", exc_info=True)
-                # else ignore silently. This can occur if an evaluation process writes to cache.
+        log.info(f'Search phase evaluated {len(self._evaluation_library.evaluations)} individuals.')
 
     def export_script(self, file: str = 'gama_pipeline.py', raise_if_exists: bool = False):
         """ Exports a Python script which sets up the best found pipeline. Can only be called after `fit`.
@@ -465,9 +442,9 @@ class Gama(ABC):
             log.info("Time exceeded during callback, but exception was swallowed.")
             raise stopit.utils.TimeoutException
 
-    def _on_evaluation_completed(self, ind):
+    def _on_evaluation_completed(self, evaluation: Evaluation):
         for callback in self._subscribers['evaluation_completed']:
-            self._safe_outside_call(partial(callback, ind))
+            self._safe_outside_call(partial(callback, evaluation))
 
     def evaluation_completed(self, callback_function):
         """ Register a callback function that is called when new evaluation is completed.
@@ -476,6 +453,6 @@ class Gama(ABC):
         ----------
         callback_function:
             Function to call when a pipeline is evaluated, return values are ignored.
-            Expected signature is: Individual -> Any
+            Expected signature is: Evaluation -> Any
         """
         self._subscribers['evaluation_completed'].append(callback_function)
