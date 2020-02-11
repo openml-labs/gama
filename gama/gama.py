@@ -365,7 +365,7 @@ class Gama(ABC):
     def _search_phase(self, warm_start: bool = False, timeout: int = 1e6):
         """ Invoke the evolutionary algorithm, populate `final_pop` regardless of termination. """
         if warm_start and self._final_pop is not None:
-            pop = self._final_pop
+            pop = [ind for ind in self._final_pop]
         else:
             if warm_start:
                 log.warning('Warm-start enabled but no earlier fit. Using new generated population instead.')
