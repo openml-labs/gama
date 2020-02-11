@@ -5,6 +5,7 @@ Version 20.1.0
 --------------
 Features:
  - Encoding of ARFF files may now be specified with the `encoding` parameter in {fit/predict/score}_arff calls.
+ - Set `max_pipeline_length` on initialization to impose a maximum number of steps in your pipelines.
 
 Bugfixes:
  - Reading ARFF markers (such as @data and @attribute) is now correctly case insensitive.
