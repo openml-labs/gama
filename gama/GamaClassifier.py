@@ -3,6 +3,8 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
+from d3m.container import DataFrame as D3MDataFrame
+from d3m.metadata import base as mdbase
 from sklearn.base import ClassifierMixin
 from sklearn.preprocessing import LabelEncoder
 
@@ -103,11 +105,25 @@ class GamaClassifier(Gama):
 
     def fit(self, x, y, *args, **kwargs):
         """ Should use base class documentation. """
-        y_ = y.squeeze() if isinstance(y, pd.DataFrame) else y
+        # If a D3M data frame, not the semantic types, so we can restore them below
+        if isinstance(y, D3MDataFrame):
+            y_ = y.squeeze()
+            col_semantic_types = y.metadata.query_column(0)['semantic_types']
+        elif isinstance(y, pd.DataFrame):
+            y_ = y.squeeze()
+            col_semantic_types = None
+        else:
+            y_ = y
+            col_semantic_types = None
         self._label_encoder = LabelEncoder().fit(y_)
         if any([isinstance(yi, str) for yi in y_]):
             # If target values are `str` we encode them or scikit-learn will complain.
             y = self._label_encoder.transform(y_)
+            # D3M categorical predictors barf if metadata is absent
+            y = D3MDataFrame(y, generate_metadata=True)
+            if col_semantic_types is not None:
+                for stype in col_semantic_types:
+                    y.metadata = y.metadata.add_semantic_type((mdbase.ALL_ELEMENTS, 0), stype)
         super().fit(x, y, *args, **kwargs)
 
     def _encode_labels(self, y):
