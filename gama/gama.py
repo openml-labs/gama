@@ -422,7 +422,7 @@ class Gama(ABC):
         if raise_if_exists and os.path.isfile(file):
             raise FileExistsError(f"File {file} already exists.")
 
-        script_text = self._post_processing.to_code()
+        script_text = self._post_processing.to_code(self._basic_encoding_pipeline)
         with open(file, 'w') as fh:
             fh.write(script_text)
 
