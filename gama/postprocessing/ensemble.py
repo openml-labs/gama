@@ -106,7 +106,7 @@ class EnsemblePostProcessing(BasePostProcessing):
                   f"ensemble = {voter}([{estimators}]{voting},{pipeline_weights})\n")
         if preprocessing is not None:
             steps = '\n,'.join([f"('{name}', {step})" for name, step in prepend])
-            script += f"model = Pipeline([{steps},\n ('ensemble', ensemble)])\n"
+            script += f"pipeline = Pipeline([{steps},\n ('ensemble', ensemble)])\n"
         return script
 
 
