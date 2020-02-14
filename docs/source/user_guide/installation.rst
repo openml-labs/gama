@@ -27,4 +27,4 @@ If you plan on developing GAMA, cloning the repository and installing locally is
     pip install -e .[all]
 
 This installation will refer to your local GAMA files.
-Changes to the code directly affect the installed GAMA package without reinstalling requiring a reinstall.
+Changes to the code directly affect the installed GAMA package without requiring a reinstall.
