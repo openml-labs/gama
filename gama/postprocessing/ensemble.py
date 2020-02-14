@@ -87,7 +87,7 @@ class EnsemblePostProcessing(BasePostProcessing):
 
         estimators = ','.join([f"('{i}', {name})" for i, name in enumerate(pipeline_names)])
         if isinstance(self._ensemble, EnsembleClassifier):
-            voting = ",'soft'" if self._ensemble._metric.requires_probabilities else 'hard'
+            voting = ",'soft'" if self._ensemble._metric.requires_probabilities else ", 'hard'"
         else:
             voting = ''  # This parameter does not exist for VotingRegressor
 
