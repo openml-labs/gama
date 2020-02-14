@@ -50,19 +50,7 @@ An overview the log levels:
  - `ERROR`: Errors which prevent GAMA from running to completion.
 
 
-Generated Files
-***************
-
-GAMA can create some files during the optimization process. Here is an overview of produced files:
-
-**Folder `'{DATE}_{STARTTIME}_XXXX_GAMA'`**: (XXXX are random alphanumeric characters)
-This folder is used to save results from evaluations during the optimization process.
-The files in this folders are needed to create an ensemble of pipelines in the post-processing phase of GAMA.
-You can specify the name of this folder with the `cache_dir` hyperparameter when initializing a GAMA object.
-By default, this folders gets deleted after the `fit` call is done.
-In order to preserve this folder (e.g. to later construct different ensembles or later analysis), specify `keep_cache=True` when calling `fit`.
-
-**File: gama.log**: This file contains all information about the optimization process, and by default is not removed.
-As described in :ref:`visualization` this file can be used to generate visualizations about the optimization process.
+By default GAMA will also capture log output to a file named 'gama.log'.
 You can use the `keep_analysis_log` hyperparameter to specify the desired location and name of the log,
 or set it to `None` to prevent it being produced in the first place.
+As described in :ref:`visualization` this file can be used to generate visualizations about the optimization process.

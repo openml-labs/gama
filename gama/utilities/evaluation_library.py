@@ -129,7 +129,7 @@ class EvaluationLibrary:
         """
         if not ((prediction_size is None) ^ (stratify is None)):
             raise ValueError("Exactly one of `prediction_size` and `stratify` must be set.")
-        if len(self.evaluations) > 0:
+        if len(self.top_evaluations) > 0:
             log.warning("New subsample not used for already stored evaluations.")
         n = self._sample_n if n is None else n
 

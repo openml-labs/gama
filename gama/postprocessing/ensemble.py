@@ -1,10 +1,12 @@
+import copy
+from collections import namedtuple
 import logging
 import random
 import time
-from collections import namedtuple
 from typing import Optional, List
 
 import pandas as pd
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 
 from gama.genetic_programming.components import Individual
@@ -67,7 +69,7 @@ class EnsemblePostProcessing(BasePostProcessing):
         )
         return self._ensemble
 
-    def to_code(self) -> str:
+    def to_code(self, preprocessing: Optional[Pipeline] = None) -> str:
         voter = 'VotingClassifier' if isinstance(self._ensemble, EnsembleClassifier) else 'VotingRegressor'
         all_imports = {f"from sklearn.ensemble import {voter}", "from sklearn.pipeline import Pipeline"}
 
@@ -85,12 +87,26 @@ class EnsemblePostProcessing(BasePostProcessing):
 
         estimators = ','.join([f"('{i}', {name})" for i, name in enumerate(pipeline_names)])
         if isinstance(self._ensemble, EnsembleClassifier):
-            voting = ",'soft'" if self._ensemble._metric.requires_probabilities else 'hard'
+            voting = ",'soft'" if self._ensemble._metric.requires_probabilities else ", 'hard'"
         else:
             voting = ''  # This parameter does not exist for VotingRegressor
+
+        if preprocessing is not None:
+            # We don't want to export the mapping of categorical encoders
+            prepend = [(name, copy.copy(transformer))
+                       for name, transformer in preprocessing.steps]
+            for name, transformer in prepend:
+                transformer.mapping = None
+                all_imports = all_imports.union(
+                    {f"from {transformer.__module__} import {transformer.__class__.__name__}"}
+                )
+
         script = ('\n'.join(all_imports) + '\n\n' +
                   '\n\n'.join(pipeline_declarations) + '\n' +
                   f"ensemble = {voter}([{estimators}]{voting},{pipeline_weights})\n")
+        if preprocessing is not None:
+            steps = '\n,'.join([f"('{name}', {step})" for name, step in prepend])
+            script += f"pipeline = Pipeline([{steps},\n ('ensemble', ensemble)])\n"
         return script
 
 

@@ -1,5 +1,6 @@
 from typing import Tuple, List
 
+from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
 
 from gama.genetic_programming.components import Individual
@@ -46,9 +47,14 @@ def imports_and_steps_for_individual(individual: Individual) -> Tuple[List[str],
     return imports, steps
 
 
-def individual_to_python(individual: Individual) -> str:
+def individual_to_python(individual: Individual, prepend_steps: List[Tuple[str, TransformerMixin]] = None) -> str:
     """ Generates Python code which sets up the machine learning pipeline represented by `individual`. """
     imports, steps = imports_and_steps_for_individual(individual)
+    if prepend_steps is not None:
+        steps = prepend_steps + steps
+        imports = ([f"from {step.__module__} import {step.__class__.__name__}"
+                    for name, step in prepend_steps] + imports)
+
     steps_str = ',\n'.join([f"('{name}', {step})" for name, step in steps])
     pipeline = f"Pipeline([{steps_str}])"
     script = ("from sklearn.pipeline import Pipeline\n" +
