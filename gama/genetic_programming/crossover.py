@@ -1,11 +1,12 @@
 """ Functions which take two Individuals, and produce at least one new Individual from them. """
 import random
-from typing import List, Callable, Iterable
+from typing import List, Callable, Iterable, Optional, Tuple
 
 from gama.genetic_programming.components import Individual
 
 
-def random_crossover(individual1: Individual, individual2: Individual) -> None:
+def random_crossover(individual1: Individual, individual2: Individual, max_length: Optional[int] = None
+                     ) -> Tuple[Individual, Individual]:
     """ Perform a random valid crossover between two individuals in-place, if there is one.
 
     Parameters
@@ -14,19 +15,32 @@ def random_crossover(individual1: Individual, individual2: Individual) -> None:
         The individual to crossover with individual2.
     individual2: Individual
         The individual to crossover with individual1.
+    max_length: int, optional(default=None)
+        If set, the first individual in the returned tuple will have at most `max_length` primitives.
+        Requires both provided individuals to contain at most `max_length` primitives.
 
     Raises
     ------
     ValueError
-        If there is no valid crossover function for the two individuals.
+        - If there is no valid crossover function for the two individuals.
+        - If `max_length` is set and either `individual1` or `individual2` contain more primitives than `max_length`.
     """
+    if max_length is not None and len(individual1.primitives) > max_length:
+        raise ValueError(f"`individual1` ({individual1}) exceeds `max_length` ({max_length}).")
+    if max_length is not None and len(individual2.primitives) > max_length:
+        raise ValueError(f"`individual2` ({individual1}) exceeds `max_length` ({max_length}).")
+
     crossover_choices = _valid_crossover_functions(individual1, individual2)
     if len(crossover_choices) == 0:
         raise ValueError(f"{individual1.pipeline_str()} and {individual2.pipeline_str()} can't mate.")
-    random.choice(crossover_choices)(individual1, individual2)
+    ind1, ind2 = random.choice(crossover_choices)(individual1, individual2)
+
+    if max_length is not None and len(ind1.primitives) > max_length:
+        return ind2, ind1
+    return ind1, ind2
 
 
-def crossover_primitives(individual1: Individual, individual2: Individual) -> None:
+def crossover_primitives(individual1: Individual, individual2: Individual) -> Tuple[Individual, Individual]:
     """ Crossover two individuals by splitting both at a random PrimitiveNode and switching one part out.
 
     Parameters
@@ -39,9 +53,10 @@ def crossover_primitives(individual1: Individual, individual2: Individual) -> No
     parent_node_1 = random.choice(list(individual1.primitives)[:-1])
     parent_node_2 = random.choice(list(individual2.primitives)[:-1])
     parent_node_1._data_node, parent_node_2._data_node = parent_node_2._data_node, parent_node_1._data_node
+    return individual1, individual2
 
 
-def crossover_terminals(individual1: Individual, individual2: Individual) -> None:
+def crossover_terminals(individual1: Individual, individual2: Individual) -> Tuple[Individual, Individual]:
     """ Crossover two individuals in-place by exchanging two Terminals with shared output type but different values.
 
     Parameters
@@ -55,6 +70,7 @@ def crossover_terminals(individual1: Individual, individual2: Individual) -> Non
     i, ind1_term, j, ind2_term = random.choice(candidates)
     individual1.replace_terminal(i, ind2_term)
     individual2.replace_terminal(j, ind1_term)
+    return individual1, individual2
 
 
 def _shared_terminals(individual1: Individual, individual2: Individual,

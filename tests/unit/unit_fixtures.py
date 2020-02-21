@@ -7,7 +7,6 @@ from gama.genetic_programming.compilers.scikitlearn import compile_individual
 @pytest.fixture
 def pset():
     gc = GamaClassifier(config=clf_config, scoring='accuracy')
-    gc.delete_cache()
     return gc._pset
 
 
@@ -28,6 +27,11 @@ def BernoulliNBStandardScaler(pset):
     return Individual.from_string("BernoulliNB(StandardScaler(data), alpha=0.1, fit_prior=True)",
                                   pset, compile_individual)
 
+@pytest.fixture
+def BernoulliNBThreeScalers(pset):
+    return Individual.from_string(
+        "BernoulliNB(StandardScaler(RobustScaler(StandardScaler(data))), alpha=0.1, fit_prior=True)",
+        pset, compile_individual)
 
 @pytest.fixture
 def LinearSVC(pset):
@@ -58,3 +62,15 @@ def RandomForestPipeline(pset):
     individual_str = ''.join(individual_str.split()).replace(',', ', ')
 
     return Individual.from_string(individual_str, pset, None)
+
+
+@pytest.fixture
+def InvalidLinearSVC(pset):
+    individual_str = """LinearSVC(data,
+            LinearSVC.C=0.001,
+            LinearSVC.dual=True,
+            LinearSVC.loss='squared_hinge',
+            LinearSVC.penalty='l1',
+            LinearSVC.tol=1e-05)"""
+    individual_str = ''.join(individual_str.split()).replace(',', ', ')
+    return Individual.from_string(individual_str, pset, compile_individual)

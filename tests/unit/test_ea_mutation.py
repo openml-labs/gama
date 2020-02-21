@@ -4,9 +4,11 @@ import pytest
 import numpy as np
 
 from gama.genetic_programming.components import Individual
-from gama.genetic_programming.mutation import mut_replace_terminal, mut_replace_primitive, random_valid_mutation_in_place
+from gama.genetic_programming.mutation import mut_replace_terminal, mut_replace_primitive, \
+    random_valid_mutation_in_place, mut_insert
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
 from .unit_fixtures import pset, GaussianNB, RandomForestPipeline, LinearSVC
+
 
 def test_mut_replace_terminal(RandomForestPipeline, pset):
     """ Tests if mut_replace_terminal replaces exactly one terminal. """
@@ -45,9 +47,9 @@ def test_random_valid_mutation_with_all(RandomForestPipeline, pset):
     for i in range(N):
         ind_clone = RandomForestPipeline.copy_as_new()
         random_valid_mutation_in_place(ind_clone, pset)
-        if _mutShrink_is_applied(RandomForestPipeline, ind_clone)[0]:
+        if _mut_shrink_is_applied(RandomForestPipeline, ind_clone)[0]:
             applied_mutation['shrink'] += 1
-        elif _mutInsert_is_applied(RandomForestPipeline, ind_clone)[0]:
+        elif _mut_insert_is_applied(RandomForestPipeline, ind_clone)[0]:
             applied_mutation['insert'] += 1
         elif _mut_replace_terminal_is_applied(RandomForestPipeline, ind_clone)[0]:
             applied_mutation['terminal'] += 1
@@ -68,12 +70,11 @@ def test_random_valid_mutation_without_shrink(LinearSVC, pset):
     """
 
     applied_mutation = defaultdict(int)
-    N = _min_trials(n_mutations=3)
 
-    for i in range(N):
+    for i in range(_min_trials(n_mutations=3)):
         ind_clone = LinearSVC.copy_as_new()
         random_valid_mutation_in_place(ind_clone, pset)
-        if _mutInsert_is_applied(LinearSVC, ind_clone)[0]:
+        if _mut_insert_is_applied(LinearSVC, ind_clone)[0]:
             applied_mutation['insert'] += 1
         elif _mut_replace_terminal_is_applied(LinearSVC, ind_clone)[0]:
             applied_mutation['terminal'] += 1
@@ -95,12 +96,11 @@ def test_random_valid_mutation_without_terminal(GaussianNB, pset):
     # The tested individual contains no terminals and one primitive,
     # and thus is not eligible for replace_terminal and mutShrink.
     applied_mutation = defaultdict(int)
-    N = _min_trials(n_mutations=2)
 
-    for i in range(N):
+    for i in range(_min_trials(n_mutations=2)):
         ind_clone = GaussianNB.copy_as_new()
         random_valid_mutation_in_place(ind_clone, pset)
-        if _mutInsert_is_applied(GaussianNB, ind_clone)[0]:
+        if _mut_insert_is_applied(GaussianNB, ind_clone)[0]:
             applied_mutation['insert'] += 1
         elif _mut_replace_primitive_is_applied(GaussianNB, ind_clone)[0]:
             applied_mutation['primitive'] += 1
@@ -110,11 +110,40 @@ def test_random_valid_mutation_without_terminal(GaussianNB, pset):
     assert all([n > 0 for (mut, n) in applied_mutation.items()])
 
 
-def _min_trials(n_mutations, max_error_rate=0.0001):
+def test_random_valid_mutation_without_insert(RandomForestPipeline, pset):
+    """ Test if a valid mutation is applied at random.
+
+    I am honestly not sure of the best way to test this.
+    Because of the random nature, we repeat this enough times to ensure each mutation is tried with
+    probability >0.99999.
+    """
+    # The tested individual contains no terminals and one primitive,
+    # and thus is not eligible for replace_terminal and mutShrink.
+    # When specifying max_length=1 it is also not eligible for mut_insert
+    applied_mutation = defaultdict(int)
+
+    for i in range(_min_trials(n_mutations=3)):
+        ind_clone = RandomForestPipeline.copy_as_new()
+        random_valid_mutation_in_place(ind_clone, pset, max_length=2)
+        if _mut_shrink_is_applied(RandomForestPipeline, ind_clone)[0]:
+            applied_mutation['shrink'] += 1
+        elif _mut_replace_terminal_is_applied(RandomForestPipeline, ind_clone)[0]:
+            applied_mutation['terminal'] += 1
+        elif _mut_replace_primitive_is_applied(RandomForestPipeline, ind_clone)[0]:
+            applied_mutation['primitive'] += 1
+        else:
+            assert False, "No mutation (or one that is unaccounted for) is applied."
+
+    assert all([n > 0 for (mut, n) in applied_mutation.items()])
+
+
+def _min_trials(n_mutations: int, max_error_rate: float = 0.0001):
+    if n_mutations == 1:
+        return 1
     return int(np.ceil(np.log(max_error_rate) / np.log((n_mutations - 1) / n_mutations)))
 
 
-def _mutShrink_is_applied(original, mutated):
+def _mut_shrink_is_applied(original, mutated):
     """ Checks if mutation was caused by `mut_shrink`.
 
     :param original: the pre-mutation individual
@@ -125,10 +154,10 @@ def _mutShrink_is_applied(original, mutated):
     if len(list(original.primitives)) <= len(list(mutated.primitives)):
         return (False, "Number of primitives should be strictly less, was {} is {}."
                 .format(len(list(original.primitives)), len(list(mutated.primitives))))
-    return (True, None)
+    return True, None
 
 
-def _mutInsert_is_applied(original, mutated):
+def _mut_insert_is_applied(original, mutated):
     """ Checks if mutation was caused by `mut_insert`.
 
     :param original: the pre-mutation individual
@@ -139,7 +168,7 @@ def _mutInsert_is_applied(original, mutated):
     if len(list(original.primitives)) >= len(list(mutated.primitives)):
         return (False, "Number of primitives should be strictly greater, was {} is {}."
                 .format(len(list(original.primitives)), len(list(mutated.primitives))))
-    return (True, None)
+    return True, None
 
 
 def _mut_replace_terminal_is_applied(original, mutated):
@@ -156,8 +185,8 @@ def _mut_replace_terminal_is_applied(original, mutated):
 
     replaced_terminals = [t1 for t1, t2 in zip(original.terminals, mutated.terminals) if str(t1) != str(t2)]
     if len(replaced_terminals) != 1:
-        return (False, "Expected 1 replaced Terminal, found {}.".format(len(replaced_terminals)))
-    return (True, None)
+        return False, "Expected 1 replaced Terminal, found {}.".format(len(replaced_terminals))
+    return True, None
 
 
 def _mut_replace_primitive_is_applied(original, mutated):
@@ -175,8 +204,8 @@ def _mut_replace_primitive_is_applied(original, mutated):
     replaced_primitives = [p1 for p1, p2 in zip(original.primitives, mutated.primitives)
                            if str(p1._primitive) != str(p2._primitive)]
     if len(replaced_primitives) != 1:
-        return (False, "Expected 1 replaced Primitive, found {}.".format(len(replaced_primitives)))
-    return (True, None)
+        return False, "Expected 1 replaced Primitive, found {}.".format(len(replaced_primitives))
+    return True, None
 
 
 def _test_mutation(individual: Individual, mutation, mutation_check, pset):
@@ -195,4 +224,3 @@ def _test_mutation(individual: Individual, mutation, mutation_check, pset):
 
     # Should be able to compile the individual, will raise an Exception if not.
     compile_individual(ind_clone, pset)
-

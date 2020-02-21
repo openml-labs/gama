@@ -1,8 +1,8 @@
 from abc import ABC
-from typing import List, Union, Dict, Any
+from typing import List, Union, Dict, Any, Optional
 
 import pandas as pd
-
+from sklearn.pipeline import Pipeline
 
 from gama.genetic_programming.components import Individual
 
@@ -72,8 +72,13 @@ class BasePostProcessing(ABC):
         """
         raise NotImplementedError("Method must be implemented by child class.")
 
-    def to_code(self) -> str:
+    def to_code(self, preprocessing: Optional[Pipeline] = None) -> str:
         """ Generate Python code to reconstruct a pipeline that constructs the model.
+
+        Parameters
+        ----------
+        preprocessing: sklearn.pipeline.Pipeline, optional (default=None)
+            Preprocessing steps that need be executed before the model.
 
         Returns
         -------
