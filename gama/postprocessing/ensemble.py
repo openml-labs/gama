@@ -160,7 +160,7 @@ class Ensemble(object):
         # Then apply even more sampling if requested.
         if downsample_to is None or downsample_to >= len(y):
             if downsample_to is not None:
-                log.info(f"Not downsampling because training data only had {len(y)} samples.")
+                log.info(f"Not downsampling because only {len(y)} samples were stored.")
             self._y = y
             self._prediction_sample = None
         else:
