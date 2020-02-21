@@ -54,7 +54,6 @@ def individual_to_python(individual: Individual, prepend_steps: List[Tuple[str, 
         steps = prepend_steps + steps
         imports = ([f"from {step.__module__} import {step.__class__.__name__}"
                     for name, step in prepend_steps] + imports)
-
     steps_str = ',\n'.join([f"('{name}', {step})" for name, step in steps])
     pipeline = f"Pipeline([{steps_str}])"
     script = ("from sklearn.pipeline import Pipeline\n" +

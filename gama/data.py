@@ -1,5 +1,9 @@
 """ This module contains functions for loading data. """
+<<<<<<< HEAD
 from typing import Tuple, Optional, Dict, Union, Type
+=======
+from typing import Tuple, Optional, Dict
+>>>>>>> master
 
 import arff
 import numpy as np
@@ -65,11 +69,16 @@ def X_y_from_arff(file_path: str, split_column: Optional[str] = None, encoding: 
     elif split_column in data.columns:
         return data.loc[:, data.columns != split_column], data.loc[:, split_column]
     else:
+<<<<<<< HEAD
         raise ValueError(f"No column with name {split_column} found in ARFF file {file_path}")
+=======
+        raise ValueError("No column with name {} found in ARFF file {}".format(split_column, file_path))
+>>>>>>> master
 
 
 def load_feature_metadata_from_arff(file_path: str) -> Dict[str, str]:
     """ Load the header of the ARFF file and return the type of each attribute. """
+<<<<<<< HEAD
     data_header = '@data'
     attribute_indicator = '@attribute'
     attributes = {}
@@ -77,6 +86,15 @@ def load_feature_metadata_from_arff(file_path: str) -> Dict[str, str]:
         line = fh.readline()
         while not line.lower().startswith(data_header):
             if line.lower().startswith(attribute_indicator):
+=======
+    data_header = '@DATA'
+    attribute_indicator = '@ATTRIBUTE'
+    attributes = {}
+    with open(file_path, 'r') as fh:
+        line = fh.readline()
+        while not line.startswith(data_header):
+            if line.startswith(attribute_indicator):
+>>>>>>> master
                 # arff uses a space separator, but allows spaces in
                 # feature name (name must be quoted) and feature type (if nominal).
                 indicator, name_and_type = line.split(' ', 1)
@@ -88,6 +106,7 @@ def load_feature_metadata_from_arff(file_path: str) -> Dict[str, str]:
                 attributes[name] = data_type
             line = fh.readline()[:-1]  # remove newline character
     return attributes
+<<<<<<< HEAD
 
 
 def heuristic_numpy_to_dataframe(X: np.ndarray, max_unique_values_cat: int = 10) -> pd.DataFrame:
@@ -150,3 +169,5 @@ def format_x_y(x: Union[pd.DataFrame, np.ndarray], y: Union[pd.DataFrame, pd.Ser
             x, y = x.loc[~unlabeled], y.loc[~unlabeled]
 
     return x, y
+=======
+>>>>>>> master
