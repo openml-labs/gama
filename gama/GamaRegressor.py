@@ -5,10 +5,9 @@ from gama.configuration.regression import reg_config
 
 
 class GamaRegressor(Gama):
-    """ Wrapper for the toolbox logic executing the AutoML pipeline for regression.
-    Same parameters as GamaClassifier. """
+    """ Gama with adaptations for regression. """
 
-    def __init__(self, config=None, scoring='neg_mean_squared_error', *args, **kwargs):
+    def __init__(self, config=None, scoring="neg_mean_squared_error", *args, **kwargs):
         """ """
         # Empty docstring overwrites base __init__ doc string.
         # Prevents duplication of the __init__ doc string on the API page.
@@ -28,7 +27,6 @@ class GamaRegressor(Gama):
         Returns
         -------
         numpy.ndarray
-            A numpy array with predictions. The array is of shape (N,) where N is the length of the
-            first dimension of X.
+            Array with predictions of shape (N,) where N is len(X).
         """
         return self.model.predict(x)

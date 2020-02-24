@@ -25,8 +25,8 @@ def pset_from_config(configuration):
     parameter_checks = {}
 
     shared_hyperparameter_types = {}
-    # We have to make sure the str-keys are evaluated first: they describe shared hyperparameters
-    # We can not rely on order-preserving dictionaries as this is not in the Python 3.5 specification.
+    # Make sure the str-keys are evaluated first, they describe shared hyperparameters.
+    # Order-preserving dictionaries are not in the Python 3.6 specification.
     sorted_keys = reversed(sorted(configuration.keys(), key=lambda x: str(type(x))))
     for key in sorted_keys:
         values = configuration[key]
@@ -46,31 +46,61 @@ def pset_from_config(configuration):
                     # An empty list indicates a shared hyperparameter
                     hyperparameter_types.append(name)
                 elif name == "param_check":
-                    # This allows users to define illegal hyperparameter combinations, but is not a terminal.
+                    # This allows users to define illegal hyperparameter combinations,
+                    # but is not a terminal.
                     parameter_checks[key.__name__] = param_values[0]
                 else:
-                    hyperparameter_types.append(key.__name__ + '.' + name)
+                    hp_name = f"{key.__name__}.{name}"
+                    hyperparameter_types.append(hp_name)
                     for value in param_values:
-                        pset[key.__name__ + '.' + name].append(
-                            Terminal(value=value, output=name, identifier=key.__name__ + '.' + name))
+                        pset[hp_name].append(
+                            Terminal(value=value, output=name, identifier=hp_name,)
+                        )
 
-            # After registering the hyperparameter types, we can register the operator itself.
-            transformer_tags = ["DATA_PREPROCESSING", "FEATURE_SELECTION", "DATA_TRANSFORMATION"]
-            if (issubclass(key, sklearn.base.TransformerMixin) or
-                    (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] in transformer_tags)):
-                pset[DATA_TERMINAL].append(Primitive(input=hyperparameter_types, output=DATA_TERMINAL, identifier=key))
-            elif (issubclass(key, sklearn.base.ClassifierMixin) or
-                  (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] == "CLASSIFICATION")):
-                pset["prediction"].append(Primitive(input=hyperparameter_types, output="prediction", identifier=key))
-            elif (issubclass(key, sklearn.base.RegressorMixin) or
-                  (hasattr(key, 'metadata') and key.metadata.query()["primitive_family"] == "REGRESSION")):
-                pset["prediction"].append(Primitive(input=hyperparameter_types, output="prediction", identifier=key))
+            # After registering the hyperparameter types,
+            # we can register the operator itself.
+            transformer_tags = [
+                "DATA_PREPROCESSING",
+                "FEATURE_SELECTION",
+                "DATA_TRANSFORMATION",
+            ]
+            if issubclass(key, sklearn.base.TransformerMixin) or (
+                hasattr(key, "metadata")
+                and key.metadata.query()["primitive_family"] in transformer_tags
+            ):
+                pset[DATA_TERMINAL].append(
+                    Primitive(
+                        input=hyperparameter_types, output=DATA_TERMINAL, identifier=key
+                    )
+                )
+            elif issubclass(key, sklearn.base.ClassifierMixin) or (
+                hasattr(key, "metadata")
+                and key.metadata.query()["primitive_family"] == "CLASSIFICATION"
+            ):
+                pset["prediction"].append(
+                    Primitive(
+                        input=hyperparameter_types, output="prediction", identifier=key
+                    )
+                )
+            elif issubclass(key, sklearn.base.RegressorMixin) or (
+                hasattr(key, "metadata")
+                and key.metadata.query()["primitive_family"] == "REGRESSION"
+            ):
+                pset["prediction"].append(
+                    Primitive(
+                        input=hyperparameter_types, output="prediction", identifier=key
+                    )
+                )
             else:
-                raise TypeError("Expected {} to be either subclass of "
-                                "TransformerMixin, RegressorMixin or ClassifierMixin.".format(key))
+                raise TypeError(
+                    f"Expected {key} to be either subclass of "
+                    "TransformerMixin, RegressorMixin or ClassifierMixin."
+                )
         else:
-            raise TypeError('Encountered unknown type as key in dictionary.'
-                            'Keys in the configuration should be str or class.')
+            raise TypeError(
+                "Encountered unknown type as key in dictionary."
+                "Keys in the configuration should be str or class."
+            )
 
     return pset, parameter_checks
 
@@ -79,25 +109,30 @@ def merge_configurations(c1, c2):
     """ Takes two configurations and merges them together. """
     # Should refactor out 6 indentation levels
     merged: Dict[Any, Any] = defaultdict(lambda: None, c1)
-    for algorithm, hyperparameters2 in c2.items():
+    for algorithm, hparams2 in c2.items():
         if algorithm not in merged:
-            merged[algorithm] = hyperparameters2
-        else:
-            hyperparameters1 = merged[algorithm]
-            if isinstance(hyperparameters1, list) and isinstance(hyperparameters2, list):
-                #  they hyperparameters shared across algorithms
-                merged[algorithm] = list(set(hyperparameters1 + hyperparameters2))
+            merged[algorithm] = hparams2
+            continue
+
+        hparams = merged[algorithm]
+        if isinstance(hparams, list) and isinstance(hparams2, list):
+            merged[algorithm] = list(set(hparams + hparams2))
+            continue  # Here the algorithm is actually a shared hyperparameter.
+
+        for hyperparameter, values in hparams2.items():
+            if hyperparameter not in hparams:
+                hparams[hyperparameter] = values
+                continue  # Hyperparameter only specified in one configuration.
+
+            values1 = hparams[hyperparameter]
+            if isinstance(values1, dict) and isinstance(values, dict):
+                hparams[hyperparameter] = {**values1, **values}
+            elif isinstance(values1, type(values)):
+                # Both are ranges, arrays or lists.
+                hparams[hyperparameter] = list(set(list(values1) + list(values)))
             else:
-                for hyperparameter, values in hyperparameters2.items():
-                    if hyperparameter not in hyperparameters1:
-                        hyperparameters1[hyperparameter] = values
-                    else:
-                        values1 = hyperparameters1[hyperparameter]
-                        if isinstance(values1, dict) and isinstance(values, dict):
-                            hyperparameters1[hyperparameter] = {**values1, **values}
-                        elif isinstance(values1, type(values)):
-                            hyperparameters1[hyperparameter] = list(set(list(values1) + list(values)))
-                        else:
-                            raise TypeError(f'Could not merge values of {algorithm}.{hyperparameter}:'
-                                            f'{hyperparameters1} vs. {hyperparameters2}')
+                raise TypeError(
+                    f"Could not merge values of {algorithm}.{hyperparameter}:"
+                    f"{hparams} vs. {hparams2}"
+                )
     return merged

@@ -1,12 +1,9 @@
-import itertools
 from typing import List, Tuple
-
-import pytest
-import numpy as np
-import pandas as pd
-
-from gama.genetic_programming.nsga2 import \
-    NSGAMeta, nsga2_select, nsga2, fast_non_dominated_sort, crowding_distance_assignment
+from gama.genetic_programming.nsga2 import (
+    NSGAMeta,
+    fast_non_dominated_sort,
+    crowding_distance_assignment,
+)
 
 
 def _tuples_to_NSGAMeta(tuples: List[Tuple]) -> List[NSGAMeta]:
@@ -14,6 +11,7 @@ def _tuples_to_NSGAMeta(tuples: List[Tuple]) -> List[NSGAMeta]:
     # Can't declare it directly in a loop as it does not create a new scope.
     def fetch_value(i):
         return lambda x: x[i]
+
     metrics = [fetch_value(i) for i in range(len(tuples[0]))]
     return [NSGAMeta(t, metrics) for t in tuples]
 
@@ -40,23 +38,24 @@ def test_dominates():
     assert not five_three.dominates(two_four)
     assert not two_four.dominates(five_three)
 
+
 def test_crowding_distance_assignment():
     pareto = _tuples_to_NSGAMeta([(3, 5), (5, 3), (4, 4)])
     three_five, five_three, four_four = pareto
     crowding_distance_assignment(pareto)
 
-    assert three_five.distance == float('inf')
-    assert five_three.distance == float('inf')
+    assert three_five.distance == float("inf")
+    assert five_three.distance == float("inf")
     assert four_four.distance == 2
 
 
 def test_crowding_distance_assignment_inf():
-    pareto = _tuples_to_NSGAMeta([(3, float('inf')), (5, 3), (4, 4)])
+    pareto = _tuples_to_NSGAMeta([(3, float("inf")), (5, 3), (4, 4)])
     three_inf, five_three, four_four = pareto
     crowding_distance_assignment(pareto)
 
-    assert three_inf.distance == float('inf')
-    assert five_three.distance == float('inf')
+    assert three_inf.distance == float("inf")
+    assert five_three.distance == float("inf")
     #  In our implementation, we ignore 'axis' that contain inf values.
     assert four_four.distance == 1
 

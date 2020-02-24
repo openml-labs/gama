@@ -13,8 +13,9 @@ from gama.utilities.metrics import scoring_to_metric
 
 
 class GamaClassifier(Gama):
-    """ Wrapper for the toolbox logic executing the AutoML pipeline for (multi-class) classification. """
-    def __init__(self, config=None, scoring='neg_log_loss', *args, **kwargs):
+    """ Gama with adaptations for (multi-class) classification. """
+
+    def __init__(self, config=None, scoring="neg_log_loss", *args, **kwargs):
         if not config:
             # Do this to avoid the whole dictionary being included in the documentation.
             config = clf_config
@@ -23,8 +24,15 @@ class GamaClassifier(Gama):
         if any(metric.requires_probabilities for metric in self._metrics):
             # we don't want classifiers that do not have `predict_proba`, because then we have to
             # start doing one hot encodings of predictions etc.
-            config = {alg: hp for (alg, hp) in config.items()
-                      if not (inspect.isclass(alg) and issubclass(alg, ClassifierMixin)and not hasattr(alg(), 'predict_proba'))}
+            config = {
+                alg: hp
+                for (alg, hp) in config.items()
+                if not (
+                    inspect.isclass(alg)
+                    and issubclass(alg, ClassifierMixin)
+                    and not hasattr(alg(), "predict_proba")
+                )
+            }
 
         self._label_encoder = None
         super().__init__(*args, **kwargs, config=config, scoring=scoring)
@@ -40,7 +48,7 @@ class GamaClassifier(Gama):
         Returns
         -------
         numpy.ndarray
-            array with predictions of shape (N,) where N is the length of the first dimension of X.
+            Array with predictions of shape (N,) where N is len(X).
         """
         y = self.model.predict(x)
         # Decode the predicted labels - necessary only if ensemble is not used.
@@ -61,8 +69,8 @@ class GamaClassifier(Gama):
         Returns
         -------
         numpy.ndarray
-            Array of shape (N, K) with class probabilities where N is the length of the
-            first dimension of x, and K is the number of class labels found in `y` of `fit`.
+            Array of shape (N, K) with class probabilities where N is len(x),
+             and K is the number of class labels found in `y` of `fit`.
         """
         return self.model.predict_proba(x)
 
@@ -74,28 +82,30 @@ class GamaClassifier(Gama):
         Parameters
         ----------
         x: pandas.DataFrame or numpy.ndarray
-            A dataframe or numpy array with the same number of columns as the input to `fit`.
+            Data with the same number of columns as the input to `fit`.
 
         Returns
         -------
         numpy.ndarray
-            Array of shape (N, K) with class probabilities where N is the length of the
-            first dimension of x, and K is the number of class labels found in `y` of `fit`.
+            Array of shape (N, K) with class probabilities where N is len(x),
+             and K is the number of class labels found in `y` of `fit`.
         """
         x = self._prepare_for_prediction(x)
         return self._predict_proba(x)
 
-    def predict_proba_arff(self,
-                           arff_file_path: str,
-                           target_column: Optional[str] = None,
-                           encoding: Optional[str] = None):
-        """ Predict the class probabilities for input in the arff_file, must have empty target column.
+    def predict_proba_arff(
+        self,
+        arff_file_path: str,
+        target_column: Optional[str] = None,
+        encoding: Optional[str] = None,
+    ):
+        """ Predict the class probabilities for input in the arff_file.
 
         Parameters
         ----------
         arff_file_path: str
             An ARFF file with the same columns as the one that used in fit.
-            Target column must be present in file, but its values are ignored (can be '?').
+            Target column must be present in file, but its values are ignored.
         target_column: str, optional (default=None)
             Specifies which column the model should predict.
             If left None, the last column is taken to be the target.
@@ -105,8 +115,9 @@ class GamaClassifier(Gama):
         Returns
         -------
         numpy.ndarray
-            Numpy array with class probabilities. The array is of shape (N, K) where N is the length of the
-            first dimension of X, and K is the number of class labels found in `y` of `fit`.
+            Numpy array with class probabilities.
+            The array is of shape (N, K) where N is len(X),
+            and K is the number of class labels found in `y` of `fit`.
         """
         x, _ = X_y_from_arff(arff_file_path, target_column, encoding)
         x = self._prepare_for_prediction(x)

@@ -16,15 +16,19 @@ class BestFitPostProcessing(BasePostProcessing):
         super().__init__(time_fraction)
         self._selected_individual = None
 
-    def post_process(self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]) -> 'model':
+    def post_process(
+        self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]
+    ) -> "model":
         self._selected_individual = selection[0]
         return self._selected_individual.pipeline.fit(x, y)
 
     def to_code(self, preprocessing: Optional[Pipeline] = None) -> str:
         if preprocessing is not None:
             # We don't want to export the mapping of categorical encoders
-            prepend = [(name, copy.copy(transformer))
-                       for name, transformer in preprocessing.steps]
+            prepend = [
+                (name, copy.copy(transformer))
+                for name, transformer in preprocessing.steps
+            ]
             for _, transformer in prepend:
                 transformer.mapping = None
             return individual_to_python(self._selected_individual, prepend)
