@@ -1,4 +1,4 @@
-""" Functions which take two Individuals, and produce at least one new Individual from them. """
+""" Functions which take two Individuals and produce at least one new Individual. """
 import random
 from typing import List, Callable, Iterable, Optional, Tuple
 

@@ -20,7 +20,8 @@ def mut_replace_terminal(individual: Individual, primitive_set: dict) -> None:
     primitive_set: dict
     """
 
-    def terminal_replaceable(_, terminal):
+    def terminal_replaceable(index_terminal):
+        _, terminal = index_terminal
         return len(primitive_set[terminal.identifier]) > 1
 
     terminals = list(filter(terminal_replaceable, enumerate(individual.terminals)))
@@ -44,7 +45,8 @@ def mut_replace_primitive(individual: Individual, primitive_set: dict) -> None:
     primitive_set: dict
     """
 
-    def primitive_replaceable(_, primitive):
+    def primitive_replaceable(index_primitive):
+        _, primitive = index_primitive
         return len(primitive_set[primitive._primitive.output]) > 1
 
     primitives = list(filter(primitive_replaceable, enumerate(individual.primitives)))
