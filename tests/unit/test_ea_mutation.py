@@ -12,7 +12,6 @@ from gama.genetic_programming.mutation import (
     mut_insert,
 )
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
-from .unit_fixtures import pset, GNB, ForestPipeline, LinearSVC
 
 
 def test_mut_replace_terminal(ForestPipeline, pset):
@@ -27,7 +26,7 @@ def test_mut_replace_terminal_none_available(GNB, pset):
     with pytest.raises(ValueError) as error:
         mut_replace_terminal(GNB, pset)
 
-    assert "no terminals or no terminals suitable for mutation." in str(error.value)
+    assert "Individual has no terminals suitable for mutation." in str(error.value)
 
 
 def test_mut_replace_primitive_len_1(LinearSVC, pset):

@@ -12,7 +12,6 @@ from gama.genetic_programming.compilers.scikitlearn import (
     compile_individual,
     evaluate_pipeline,
 )
-from tests.unit.unit_fixtures import SS_BNB, InvalidLinearSVC, pset
 
 
 def test_cross_val_predict_score():

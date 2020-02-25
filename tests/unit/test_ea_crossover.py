@@ -6,7 +6,6 @@ from gama.genetic_programming.crossover import (
     _shared_terminals,
     crossover_terminals,
 )
-from .unit_fixtures import pset, SS_BNB, RS_MNB, GNB, SS_RBS_SS_BNB
 
 
 def test_shared_terminals(SS_BNB, RS_MNB, GNB):

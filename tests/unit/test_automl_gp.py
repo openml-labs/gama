@@ -1,6 +1,5 @@
 from gama.genetic_programming.components import Fitness
 from gama.genetic_programming.selection import eliminate_from_pareto
-from .unit_fixtures import pset, GNB, ForestPipeline, LinearSVC
 
 
 def test_individual_length(GNB, ForestPipeline, LinearSVC):

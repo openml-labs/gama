@@ -4,7 +4,6 @@ import pandas as pd
 
 from gama.genetic_programming.components import Individual
 from gama.utilities.evaluation_library import Evaluation, EvaluationLibrary
-from .unit_fixtures import pset, GNB, ForestPipeline, LinearSVC
 
 
 def _mock_evaluation(
@@ -110,6 +109,7 @@ def test_evaluation_library_n_best(GNB):
 
 def _test_subsample(sample, predictions, subsample):
     """ Test the `predictions` correctly get sampled to `subsample`. """
+    from ..conftest import GNB
     lib = EvaluationLibrary(sample=sample)
     best_evaluation = _mock_evaluation(GNB, predictions=predictions)
     lib.save_evaluation(best_evaluation)
