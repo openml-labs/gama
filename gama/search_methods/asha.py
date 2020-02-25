@@ -125,12 +125,11 @@ def asha(
             n_to_promote = math.floor(len(individuals) / reduction_factor)
             if n_to_promote - len(promoted_individuals[rung]) > 0:
                 # Problem: equal loss falls back on comparison of individual
-                best_inds = list(sorted(individuals, key=lambda t: t[0], reverse=True))
-                candidates = best_inds[:n_to_promote]
-                promotable = set(candidates) - set(promoted_individuals[rung])
-                if len(promotable) > 0:
-                    promoted_individuals[rung].append(promotable[0])
-                    return promotable[0][1], rung + 1
+                not_promoted = set(individuals) - set(promoted_individuals[rung])
+                if len(not_promoted) > 0:
+                    to_promote = max(not_promoted, key=lambda i: i[0])
+                    promoted_individuals[rung].append(to_promote)
+                    return to_promote[1], rung + 1
 
         if start_candidates is not None and len(start_candidates) > 0:
             return start_candidates.pop(), minimum_early_stopping_rate
@@ -139,6 +138,7 @@ def asha(
 
     try:
         with AsyncEvaluator() as async_:
+            log.info("ASHA start")
 
             def start_new_job():
                 individual, rung = get_job()

@@ -27,6 +27,9 @@ class Individual:
     def __eq__(self, other):
         return isinstance(other, Individual) and other._id == self._id
 
+    def __hash__(self):
+        return hash(self._id)
+
     def __str__(self):
         return (
             f"Individual {self._id}\n"

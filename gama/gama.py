@@ -447,7 +447,7 @@ class Gama(ABC):
 
         evaluate_pipeline = partial(
             gama.genetic_programming.compilers.scikitlearn.evaluate_pipeline,
-            X=self._X,
+            x=self._X,
             y_train=self._y,
             metrics=self._metrics,
         )
