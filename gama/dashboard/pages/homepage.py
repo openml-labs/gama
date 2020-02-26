@@ -2,12 +2,10 @@ import multiprocessing
 import os
 from typing import Optional, List, Dict
 
-import dash_table
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-from dash.exceptions import PreventUpdate
 
 from gama.dashboard.pages.base_page import BasePage
 
@@ -193,7 +191,7 @@ def button_header(text: str, id_: str, level: int = 4):
 
 def markdown_header(text: str, level: int = 4, with_horizontal_rule: bool = True):
     header = f"{'#' * level} {text}"
-    hr = f"\n{'-'*(level + 1 + len(text))}"  # matching length '-' not required but nicer.
+    hr = f"\n{'-'*(level + 1 + len(text))}"  # matching length '-' not required but nice
     return dcc.Markdown(f"{header}{hr if with_horizontal_rule else ''}")
 
 
@@ -317,33 +315,11 @@ def update_marks(selected_value, min_, max_):
 
 
 def build_data_navigator() -> html.Div:
-    # Unfortunately, at this time we need a full path, which is not available with dcc.Upload
-    #
-    # default_message = ['Drag and Drop or ', html.A('Select Files')]
-    # upload_file = dcc.Upload(
-    #     id='upload-data',
-    #     children=html.Div(
-    #         id='upload-data-text',
-    #         children=default_message
-    #     ),
-    #     style={'borderWidth': '1px', 'borderRadius': '5px', 'borderStyle': 'dashed', 'textAlign': 'center'}
-    # )
-
-    # def update_output(list_of_contents, filename, list_of_dates):
-    #     if list_of_contents is not None:
-    #         children = html.Div([f"Showing '{filename}'", html.A(' (Click to change)')])
-    #         return children, filename
-    #     return default_message, filename
-    #
-    # ---------------------------------------------
-
     upload_file = dbc.Input(
         id="file-path-input",
         placeholder="Path to data file, e.g. ~/data/mydata.arff",
         type="text",
     )
-
-    table = dash_table.DataTable(id="data-table")
 
     table_container = html.Div(id="table-container", children=["No data loaded."])
 

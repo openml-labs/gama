@@ -1,6 +1,6 @@
 import heapq
 import logging
-from typing import Tuple, List, Optional, Iterable, Union
+from typing import Tuple, List, Optional, Union
 
 import numpy as np
 import pandas as pd

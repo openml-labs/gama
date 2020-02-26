@@ -1,7 +1,7 @@
 from functools import partial
 import logging
 import math
-from typing import List, Optional, Dict, Tuple, Any, Callable
+from typing import List, Optional, Dict, Tuple, Any
 
 import pandas as pd
 import stopit

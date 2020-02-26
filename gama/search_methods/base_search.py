@@ -32,8 +32,12 @@ class BaseSearch(ABC):
 
     @property
     def hyperparameters(self) -> Dict[str, Any]:
-        """ Hyperparameter (name, value) pairs value determined by user > dynamic default > static default.
+        """ Hyperparameter (name, value) pairs as set/determined dynamically/default.
 
+         Values may have been set directly, through dynamic defaults or static defaults.
+         This is also the order in which the value of a hyperparameter is checked,
+         i.e. a user set value wil overwrite any other value, and a dynamic default
+         will overwrite a static one.
          Dynamic default values only considered if `dynamic_defaults` has been called.
          """
         return {

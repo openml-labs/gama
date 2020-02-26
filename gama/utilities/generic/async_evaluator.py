@@ -14,7 +14,6 @@ but it has issues:
       Though that does not hinder the execution of the program,
       I don't want errors for expected behavior.
 """
-import itertools
 import logging
 import multiprocessing
 import queue

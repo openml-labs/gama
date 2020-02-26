@@ -64,7 +64,7 @@ class EnsemblePostProcessing(BasePostProcessing):
 
     def post_process(
         self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]
-    ) -> "model":
+    ) -> object:
         self._ensemble = build_fit_ensemble(
             x,
             y,

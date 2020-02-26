@@ -54,7 +54,7 @@ def select_from_pareto(population, select_n, pareto_fronts_n):
 def eliminate_from_pareto(pop, n):
     # For now we only eliminate one at a time so this will do.
     if n != 1:
-        raise NotImplemented("Currently only n=1 is supported.")
+        raise NotImplementedError("Currently only n=1 is supported.")
 
     def inverse_fitness(ind):
         return [-value for value in ind.fitness.values]

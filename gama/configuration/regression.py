@@ -20,7 +20,7 @@ from sklearn.feature_selection import (
 )
 
 
-from sklearn.linear_model import ElasticNetCV, LassoLarsCV, RidgeCV
+from sklearn.linear_model import ElasticNetCV, LassoLarsCV
 from sklearn.ensemble import (
     ExtraTreesRegressor,
     GradientBoostingRegressor,
@@ -31,7 +31,8 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import LinearSVR
 
-# This selection of operators and hyperparameters is currently most of what TPOT supports, for comparison.
+# For comparison, this selection of operators and hyperparameters is
+# currently most of what TPOT supports.
 
 reg_config = {
     ElasticNetCV: {

@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.datasets import load_digits
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, log_loss
+from sklearn.metrics import log_loss
 
 from gama import GamaClassifier
 

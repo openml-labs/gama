@@ -26,7 +26,6 @@ from gama.search_methods.async_ea import AsyncEA
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.logging.utility_functions import register_stream_log, register_file_log
 from gama.utilities.preprocessing import (
-    define_preprocessing_steps,
     basic_encoding,
     basic_pipeline_extension,
 )
@@ -239,7 +238,7 @@ class Gama(ABC):
         return x
 
     def _predict(self, x: pd.DataFrame):
-        raise NotImplemented("_predict is implemented by base classes.")
+        raise NotImplementedError("_predict is implemented by base classes.")
 
     def predict(self, x: Union[pd.DataFrame, np.ndarray]):
         """ Predict the target for input X.

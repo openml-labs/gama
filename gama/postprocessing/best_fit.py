@@ -18,7 +18,7 @@ class BestFitPostProcessing(BasePostProcessing):
 
     def post_process(
         self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]
-    ) -> "model":
+    ) -> object:
         self._selected_individual = selection[0]
         return self._selected_individual.pipeline.fit(x, y)
 

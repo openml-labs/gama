@@ -52,7 +52,7 @@ class Individual:
         )
 
     def pipeline_str(self):
-        """ str: e.g. "BernoulliNB(Binarizer(data, Binarizer.threshold=0.6), BernoulliNB.alpha=1.0)" """  # ignore line length
+        """ str: e.g. "BernoulliNB(Binarizer(data, Binarizer.threshold=0.6), BernoulliNB.alpha=1.0)" """  # noqa: E501
         return str(self.main_node)
 
     @property

@@ -22,8 +22,8 @@ class GamaClassifier(Gama):
 
         self._metrics = scoring_to_metric(scoring)
         if any(metric.requires_probabilities for metric in self._metrics):
-            # we don't want classifiers that do not have `predict_proba`, because then we have to
-            # start doing one hot encodings of predictions etc.
+            # we don't want classifiers that do not have `predict_proba`,
+            # because then we have to start doing one hot encodings of predictions etc.
             config = {
                 alg: hp
                 for (alg, hp) in config.items()

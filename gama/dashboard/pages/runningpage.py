@@ -32,7 +32,7 @@ class RunningPage(BasePage):
         self._content = html.Div(
             id=self.id,
             children=[
-                dbc.Row([dbc.Col(plot_area, width=8), dbc.Col(self.cli.html),]),
+                dbc.Row([dbc.Col(plot_area, width=8), dbc.Col(self.cli.html)]),
                 dbc.Row([dbc.Col(pl_viz, width=4), dbc.Col(pl_list)]),
                 ticker,
             ],

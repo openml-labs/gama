@@ -9,11 +9,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, log_loss
 
 from gama.postprocessing import EnsemblePostProcessing
-from gama.search_methods import asha, async_ea
-from gama.search_methods.asha import AsynchronousSuccessiveHalving
-from gama.search_methods.async_ea import AsyncEA
+from gama.search_methods import AsynchronousSuccessiveHalving, AsyncEA, RandomSearch
 from gama.search_methods.base_search import BaseSearch
-from gama.search_methods.random_search import RandomSearch
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama import GamaClassifier
 
@@ -145,8 +142,8 @@ def _test_dataset_problem(
         class_predictions, np.ndarray
     ), "predictions should be numpy arrays."
     assert (
-        (data["test_size"],) == class_predictions.shape
-    ), "predict should return (N,) shaped array."
+        data["test_size"],
+    ) == class_predictions.shape, "predict should return (N,) shaped array."
 
     accuracy = accuracy_score(y_test, class_predictions)
     # Majority classifier on this split achieves 0.6293706293706294

@@ -37,7 +37,7 @@ def SS_BNB(pset):
 @pytest.fixture
 def SS_RBS_SS_BNB(pset):
     return Individual.from_string(
-        "BernoulliNB(StandardScaler(RobustScaler(StandardScaler(data))), alpha=0.1, fit_prior=True)",
+        "BernoulliNB(StandardScaler(RobustScaler(StandardScaler(data))), alpha=0.1, fit_prior=True)",  # noqa: E501
         pset,
         compile_individual,
     )
@@ -62,12 +62,12 @@ def ForestPipeline(pset):
                     data,
                     FeatureAgglomeration.affinity='l2',
                     FeatureAgglomeration.linkage='complete'
-                    ),   
+                    ),
             RandomForestClassifier.bootstrap=True,
             RandomForestClassifier.criterion='gini',
             RandomForestClassifier.max_features=0.6,
-            RandomForestClassifier.min_samples_leaf=7,  
-            RandomForestClassifier.min_samples_split=6, 
+            RandomForestClassifier.min_samples_leaf=7,
+            RandomForestClassifier.min_samples_split=6,
             RandomForestClassifier.n_estimators=100)"""
     individual_str = "".join(individual_str.split()).replace(",", ", ")
 

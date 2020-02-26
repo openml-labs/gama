@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List
 
 import pandas as pd
 from plotly import graph_objects as go
@@ -251,13 +251,16 @@ def aggregate_best_over_time(aggregate: pd.DataFrame, y_axis: str):
 
 
 def aggregate_plot(aggregate: pd.DataFrame, x_axis: str, y_axis: str):
-    """ Creates an aggregate plot over multiple reports by calculating the mean and std of `y_axis` by `x_axis`.
+    """ Create an aggregate plot over multiple reports.
+
+     Aggregates the mean and std of `y_axis` by `x_axis`.
 
     :param aggregate: dataframe with all evaluations
     :param x_axis: column which is grouped by before aggregating `y_axis`
     :param y_axis: column over which to calculate the mean/std.
     :return:
-        Three dash Scatter objects which respectively draw the lower bound, mean and upper bound.
+        Three dash Scatter objects which respectively draw  the lower bound, mean and
+        upper bound.
     """
     colors = {
         0: "rgba(255, 0, 0, {a})",

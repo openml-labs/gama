@@ -5,7 +5,7 @@ from typing import Iterable, Callable, Tuple, Optional
 
 import stopit
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.model_selection import cross_val_predict, ShuffleSplit
+from sklearn.model_selection import ShuffleSplit
 from sklearn.pipeline import Pipeline
 
 from gama.utilities.evaluation_library import Evaluation

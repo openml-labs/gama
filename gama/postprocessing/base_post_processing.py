@@ -61,7 +61,7 @@ class BasePostProcessing(ABC):
         y: Union[pd.DataFrame, pd.Series],
         timeout: float,
         selection: List[Individual],
-    ) -> "model":
+    ) -> object:
         """
         Parameters
         ----------

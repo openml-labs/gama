@@ -24,7 +24,6 @@ def pset_from_config(configuration):
     pset = defaultdict(list)
     parameter_checks = {}
 
-    shared_hyperparameter_types = {}
     # Make sure the str-keys are evaluated first, they describe shared hyperparameters.
     # Order-preserving dictionaries are not in the Python 3.6 specification.
     sorted_keys = reversed(sorted(configuration.keys(), key=lambda x: str(type(x))))

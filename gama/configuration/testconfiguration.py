@@ -29,7 +29,7 @@ from sklearn.feature_selection import (
     VarianceThreshold,
 )
 
-# This selection of operators and hyperparameters is currently most of what TPOT supports, for comparison.
+# A configuration with limited operators for unit tests.
 
 clf_config = {
     "alpha": [1e-3, 1e-2, 1e-1, 1.0, 10.0, 100.0],

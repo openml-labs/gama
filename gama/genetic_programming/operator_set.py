@@ -2,8 +2,6 @@ from collections.abc import Sequence
 import logging
 
 from gama.logging.machine_logging import TOKENS, log_event
-from gama.utilities.evaluation_library import Evaluation
-from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from .components import Individual
 
 log = logging.getLogger(__name__)

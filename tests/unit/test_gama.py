@@ -21,7 +21,7 @@ def test_gama_fail_on_invalid_hyperparameter_values():
 
     with pytest.raises(ValueError) as e:
         gama.GamaClassifier(max_total_time=None)
-    assert  "Expect positive int for max_total_time" in str(e.value)
+    assert "Expect positive int for max_total_time" in str(e.value)
 
     with pytest.raises(ValueError) as e:
         gama.GamaClassifier(max_eval_time=0)

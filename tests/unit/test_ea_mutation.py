@@ -9,7 +9,6 @@ from gama.genetic_programming.mutation import (
     mut_replace_terminal,
     mut_replace_primitive,
     random_valid_mutation_in_place,
-    mut_insert,
 )
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
 

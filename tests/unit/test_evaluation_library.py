@@ -110,6 +110,7 @@ def test_evaluation_library_n_best(GNB):
 def _test_subsample(sample, predictions, subsample):
     """ Test the `predictions` correctly get sampled to `subsample`. """
     from ..conftest import GNB
+
     lib = EvaluationLibrary(sample=sample)
     best_evaluation = _mock_evaluation(GNB, predictions=predictions)
     lib.save_evaluation(best_evaluation)
