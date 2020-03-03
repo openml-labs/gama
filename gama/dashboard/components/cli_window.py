@@ -2,7 +2,9 @@ import shlex
 import subprocess
 import threading
 import queue
+from typing import List
 
+from dash import Dash
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 import dash_core_components as dcc
@@ -22,7 +24,7 @@ class CLIWindow:
     def __init__(
         self,
         id_: str,
-        app: "Dash",
+        app: Dash,
         update_interval_s: float = 1.0,
         auto_scroll: bool = True,
     ):
@@ -41,7 +43,7 @@ class CLIWindow:
         self.process = None
         self._thread = None
         self._queue = None
-        self._lines = []
+        self._lines: List[str] = []
 
         self.html = self._build_component()
         self._register_callbacks(app)
@@ -88,8 +90,8 @@ class CLIWindow:
         self._thread.start()
 
     def call(self, command: str):
-        command = shlex.split(command)
-        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+        cmd = shlex.split(command)
+        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         self.monitor(process)
 
     def update_console(self, _, current_text):

@@ -50,7 +50,7 @@ class GamaClassifier(Gama):
         numpy.ndarray
             Array with predictions of shape (N,) where N is len(X).
         """
-        y = self.model.predict(x)
+        y = self.model.predict(x)  # type: ignore
         # Decode the predicted labels - necessary only if ensemble is not used.
         if y[0] not in self._label_encoder.classes_:
             y = self._label_encoder.inverse_transform(y)
@@ -72,7 +72,7 @@ class GamaClassifier(Gama):
             Array of shape (N, K) with class probabilities where N is len(x),
              and K is the number of class labels found in `y` of `fit`.
         """
-        return self.model.predict_proba(x)
+        return self.model.predict_proba(x)  # type: ignore
 
     def predict_proba(self, x: Union[pd.DataFrame, np.ndarray]):
         """ Predict the class probabilities for input x.

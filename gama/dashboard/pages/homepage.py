@@ -1,6 +1,6 @@
 import multiprocessing
 import os
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Tuple, Callable
 
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
@@ -11,7 +11,7 @@ from gama.dashboard.pages.base_page import BasePage
 
 
 class HomePage(BasePage):
-    callbacks = []
+    callbacks: List[Tuple[Tuple, Callable]] = []
 
     def __init__(self):
         super().__init__(name="Home", alignment=0)

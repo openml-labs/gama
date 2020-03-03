@@ -155,7 +155,7 @@ class Metric:
 
 def scoring_to_metric(
     scoring: Union[str, Metric, Iterable[str], Iterable[Metric]]
-) -> Tuple[Metric]:
+) -> Tuple[Metric, ...]:
     if isinstance(scoring, str):
         return tuple([Metric.from_string(scoring)])
     if isinstance(scoring, Metric):

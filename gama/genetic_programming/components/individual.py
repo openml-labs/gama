@@ -1,7 +1,9 @@
 import uuid
 from typing import List, Callable, Optional
+
+from .fitness import Fitness
 from .primitive_node import PrimitiveNode
-from .terminal import DATA_TERMINAL, Terminal
+from .terminal import Terminal
 
 
 class Individual:
@@ -19,7 +21,7 @@ class Individual:
     def __init__(
         self, main_node: PrimitiveNode, to_pipeline: Optional[Callable] = None
     ):
-        self.fitness = None
+        self.fitness: Optional[Fitness] = None
         self.main_node = main_node
         self._id = uuid.uuid4()
         self._to_pipeline = to_pipeline
@@ -60,7 +62,7 @@ class Individual:
         """ Lists all primitive nodes, starting with the Individual's main node. """
         primitives = [self.main_node]
         current_node = self.main_node._data_node
-        while current_node != DATA_TERMINAL:
+        while isinstance(current_node, PrimitiveNode):  # i.e. not DATA_TERMINAL
             primitives.append(current_node)
             current_node = current_node._data_node
         return primitives
@@ -123,7 +125,7 @@ class Individual:
             else:
                 last_primitive = primitive_node
 
-        if position == 0:
+        if last_primitive is None:
             self.main_node = new_primitive
         else:
             last_primitive._data_node = new_primitive

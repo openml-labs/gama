@@ -51,7 +51,7 @@ class AsynchronousSuccessiveHalving(BaseSearch):
         )
         self.output = []
 
-    def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: int):
+    def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float):
         # `maximum_resource` is the number of samples used in the highest rung.
         # this typically should be the number of samples in the (training) dataset.
         self._overwrite_hyperparameter_default("maximum_resource", len(y))
@@ -116,8 +116,12 @@ def asha(
 
     # Highest rungs first is how we typically iterate them
     # Should we just use lists of lists/heaps instead?
-    rung_individuals = {rung: [] for rung in reversed(rungs)}
-    promoted_individuals = {rung: [] for rung in reversed(rungs)}
+    rung_individuals: Dict[int, List[Tuple[float, Individual]]] = {
+        rung: [] for rung in reversed(rungs)
+    }
+    promoted_individuals: Dict[int, List[Individual]] = {
+        rung: [] for rung in reversed(rungs)
+    }
 
     def get_job():
         for rung, individuals in list(rung_individuals.items())[1:]:

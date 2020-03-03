@@ -1,7 +1,7 @@
 """ Module to facility logging in machine parsable format. """
 from datetime import datetime
 from typing import List
-
+import logging
 from gama.logging import TIME_FORMAT, MACHINE_LOG_LEVEL
 
 PLE_START = "PLE"
@@ -35,21 +35,17 @@ class TOKENS:
 METHOD_TOKENS = dict(AsynchronousSuccessiveHalving="ASHA")
 
 
-def default_time_format(datetime_: datetime):
+def datetime_to_str(datetime_: datetime):
     return datetime_.strftime(TIME_FORMAT)  # [:-3]
 
 
-def log_event(log_: object, token: object, *args: object) -> object:
+def log_event(log_: logging.Logger, token: str, *args: object):
     """ Write an event to the machine log level formatted for later parsing. """
-    args = [
-        default_time_format(arg) if isinstance(arg, datetime) else arg for arg in args
+    formatted_args = [
+        datetime_to_str(arg) if isinstance(arg, datetime) else str(arg) for arg in args
     ]
-    attrs = (
-        f"{PLE_DELIM}".join([str(arg) for arg in args])
-        if not isinstance(args, str)
-        else args
-    )
+    attrs = f"{PLE_DELIM}".join(formatted_args)
     message = f"{PLE_DELIM}".join(
-        [PLE_START, token, attrs, default_time_format(datetime.now()), PLE_END]
+        [PLE_START, token, attrs, datetime_to_str(datetime.now()), PLE_END]
     )
     log_.log(level=MACHINE_LOG_LEVEL, msg=message)

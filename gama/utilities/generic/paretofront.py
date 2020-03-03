@@ -6,7 +6,7 @@ class ParetoFront(object):
 
     def __init__(
         self,
-        start_list: Optional[List[Tuple[Any, ...]]] = None,
+        start_list: Optional[List[Any]] = None,
         get_values_fn: Optional[Callable[[Any], Tuple[Any, ...]]] = None,
     ):
         """
@@ -21,7 +21,7 @@ class ParetoFront(object):
         """
         self._get_values_fn = get_values_fn
 
-        self._front = []
+        self._front: List[Any] = []
         if start_list:
             for item in start_list:
                 self.update(item)

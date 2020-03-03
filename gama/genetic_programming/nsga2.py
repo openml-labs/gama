@@ -85,7 +85,7 @@ def nsga2(
     if n == 0 or n > len(population):
         raise ValueError(f"n is {n} must be 0 < n < len(population)={len(population)}")
     population = [NSGAMeta(p, metrics) for p in population]
-    selection = []
+    selection: List[NSGAMeta] = []
     fronts = fast_non_dominated_sort(population)
     i = 0
 
@@ -105,7 +105,7 @@ def nsga2(
 
 def fast_non_dominated_sort(P: List[NSGAMeta]) -> List[List[NSGAMeta]]:
     """ Sorts P into Pareto fronts. """
-    fronts = [[]]
+    fronts: List[List[NSGAMeta]] = [[]]
     for p, q in itertools.combinations(P, 2):
         if p.dominates(q):
             p.dominating.append(q)

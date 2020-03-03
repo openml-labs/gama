@@ -19,7 +19,7 @@ import multiprocessing
 import queue
 import time
 import uuid
-from typing import Optional, Callable
+from typing import Optional, Callable, Dict, List
 
 log = logging.getLogger(__name__)
 
@@ -61,8 +61,8 @@ class AsyncEvaluator:
             Defaults to `AsyncEvaluator.n_jobs`, using all cores unless overwritten.
         """
         self._has_entered = False
-        self.futures = {}
-        self._processes = []
+        self.futures: Dict[uuid.UUID, AsyncFuture] = {}
+        self._processes: List[multiprocessing.Process] = []
         self._n_jobs = n_workers if n_workers is not None else AsyncEvaluator.n_jobs
 
         self._queue_manager = multiprocessing.Manager()

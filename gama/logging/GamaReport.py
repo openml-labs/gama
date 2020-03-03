@@ -1,7 +1,7 @@
 from collections import defaultdict
 from datetime import datetime
 import math
-from typing import List, Optional, Tuple, Dict, Callable
+from typing import List, Optional, Tuple, Dict, Callable, cast
 
 import pandas as pd
 
@@ -44,17 +44,11 @@ class GamaReport:
             Name of the report.
             If set to None, defaults to `logfile` if it is not None else 'nameless'.
         """
-        if logfile is None and log_lines is None:
-            raise ValueError(
-                "Either 'logfile' or 'loglines' must be provided. Both are None."
-            )
-        if logfile is not None and log_lines is not None:
-            raise ValueError(
-                "Exactly one of 'logfile' and 'loglines' may be provided at once."
-            )
+        if not ((logfile is None) ^ (log_lines is None)):
+            raise ValueError("Must provide exactly one of 'logfile' or 'loglines'.")
 
-        if logfile is not None:
-            log_lines = _find_new_lines(logfile)
+        if log_lines is None:
+            log_lines = _find_new_lines(cast(str, logfile))
 
         self._lines_read = len(log_lines)
         self._individuals = None
@@ -141,14 +135,14 @@ def _lines_to_dict(log_lines: List[str]):
         if line.startswith(PLE_START) and line.endswith(f"{PLE_END}")
     ]
 
-    events_by_type = defaultdict(list)
+    events_by_type: Dict[str, List[List[str]]] = defaultdict(list)
     for token, *event in ple_lines:
         events_by_type[token].append(event)
 
     return events_by_type
 
 
-def _find_new_lines(logfile: str, start_from: int = 0):
+def _find_new_lines(logfile: str, start_from: int = 0) -> List[str]:
     with open(logfile, "r") as fh:
         log_lines = [line.rstrip() for line in fh.readlines()]
     new_lines = log_lines[start_from:]
@@ -193,7 +187,7 @@ def _find_phase_information(
         start_time_dt = datetime.strptime(start_time, TIME_FORMAT)
         _, algorithm, end_time = end_phase
         duration = datetime.strptime(end_time, TIME_FORMAT) - start_time_dt
-        phase_info.append([phase, algorithm, start_time_dt, duration.total_seconds()])
+        phase_info.append((phase, algorithm, start_time_dt, duration.total_seconds()))
     return phase_info
 
 

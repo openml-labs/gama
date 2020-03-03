@@ -4,8 +4,9 @@ Each mutation function takes an individual and modifies it in-place.
 """
 import random
 from functools import partial
-from typing import Callable, Optional
+from typing import Callable, Optional, cast, List, Dict
 
+from gama.genetic_programming.components import PrimitiveNode
 from .components import Individual, DATA_TERMINAL
 from .operations import random_primitive_node
 
@@ -89,7 +90,7 @@ def mut_shrink(
     current_primitive_node = individual.main_node
     primitives_left = n_primitives - 1
     while primitives_left > shrink_by:
-        current_primitive_node = current_primitive_node._data_node
+        current_primitive_node = cast(PrimitiveNode, current_primitive_node._data_node)
         primitives_left -= 1
     current_primitive_node._data_node = DATA_TERMINAL
 
@@ -141,10 +142,13 @@ def random_valid_mutation_in_place(
         The mutation function used.
     """
     n_primitives = len(list(individual.primitives))
+    available_mutations: List[Callable[[Individual, Dict], None]] = []
     if max_length is not None and n_primitives > max_length:
-        available_mutations = [partial(mut_shrink, shrink_by=n_primitives - max_length)]
+        available_mutations.append(
+            partial(mut_shrink, shrink_by=n_primitives - max_length)
+        )
     else:
-        available_mutations = [mut_replace_primitive]
+        available_mutations.append(mut_replace_primitive)
         if max_length is None or n_primitives < max_length:
             available_mutations.append(mut_insert)
         if n_primitives > 1:

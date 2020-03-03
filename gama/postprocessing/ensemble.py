@@ -1,9 +1,10 @@
 import copy
+import uuid
 from collections import namedtuple
 import logging
 import random
 import time
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING, Dict, Tuple
 
 import pandas as pd
 from sklearn.pipeline import Pipeline
@@ -14,6 +15,10 @@ from gama.postprocessing.base_post_processing import BasePostProcessing
 from gama.utilities.evaluation_library import EvaluationLibrary
 from gama.utilities.export import imports_and_steps_for_individual
 from gama.utilities.metrics import Metric, MetricType
+
+
+if TYPE_CHECKING:
+    from gama.gama import Gama
 
 log = logging.getLogger(__name__)
 Model = namedtuple(
@@ -54,7 +59,7 @@ class EnsemblePostProcessing(BasePostProcessing):
             hillclimb_size=(hillclimb_size, 10_000),
             max_models=(max_models, 200),
         )
-        self._ensemble = None
+        self._ensemble: Optional[Ensemble] = None
 
     def dynamic_defaults(self, gama: "Gama"):
         self._overwrite_hyperparameter_default("metric", gama._metrics[0])
@@ -78,8 +83,10 @@ class EnsemblePostProcessing(BasePostProcessing):
     def to_code(self, preprocessing: Optional[Pipeline] = None) -> str:
         if isinstance(self._ensemble, EnsembleClassifier):
             voter = "VotingClassifier"
-        else:
+        elif isinstance(self._ensemble, EnsembleRegressor):
             voter = "VotingRegressor"
+        else:
+            raise RuntimeError(f"Can't export ensemble of type {type(self._ensemble)}.")
 
         all_imports = {
             f"from sklearn.ensemble import {voter}",
@@ -131,8 +138,8 @@ class EnsemblePostProcessing(BasePostProcessing):
             + f"ensemble = {voter}([{estimators}]{voting},{pipeline_weights})\n"
         )
         if preprocessing is not None:
-            steps = "\n,".join([f"('{name}', {step})" for name, step in prepend])
-            script += f"pipeline = Pipeline([{steps},\n ('ensemble', ensemble)])\n"
+            pp_steps = "\n,".join([f"('{name}', {step})" for name, step in prepend])
+            script += f"pipeline = Pipeline([{pp_steps},\n ('ensemble', ensemble)])\n"
         return script
 
 
@@ -164,7 +171,7 @@ class Ensemble(object):
             but the ensemble can't be changed.
         """
         if isinstance(metric, str):
-            metric = Metric(metric)
+            metric = Metric.from_string(metric)
         elif not isinstance(metric, Metric):
             raise ValueError(
                 "metric must be specified as string or `gama.ea.metrics.Metric`."
@@ -185,7 +192,7 @@ class Ensemble(object):
 
         self._metric = metric
         self.evaluation_library = evaluation_library
-        self._model_library = []
+        self._model_library: List[Model] = []
         self._use_top_n_only = use_top_n_only
         self._shrink_on_pickle = shrink_on_pickle
         self._prediction_transformation = None
@@ -205,11 +212,10 @@ class Ensemble(object):
             self._prediction_sample = random.sample(range(len(y)), downsample_to)
             self._y = y.iloc[self._prediction_sample]
 
-        self._internal_score = None
+        self._internal_score = -float("inf")
         self._fit_models = None
         self._maximize = True
-        self._child_ensembles = []
-        self._models = {}
+        self._models: Dict[uuid.UUID, Tuple[Model, int]] = {}
 
     @property
     def model_library(self):
@@ -395,7 +401,6 @@ class Ensemble(object):
             )
             self._models = None
             self._model_library = None
-            self._child_ensembles = None
             # self._y_true can not be removed as it is needed to ensure proper
             # dimensionality of predictions.
             # Alternatively, one could just save the number of classes instead.
@@ -520,11 +525,11 @@ def build_fit_ensemble(
     start_build = time.time()
 
     log.debug("Building ensemble.")
-    if metric.task_type == MetricType.CLASSIFICATION:
-        ensemble = EnsembleClassifier(metric, y, evaluation_library=evaluation_library)
+    if metric.task_type == MetricType.REGRESSION:
+        ensemble = EnsembleRegressor(metric, y, evaluation_library)  # type: Ensemble
+    elif metric.task_type == MetricType.CLASSIFICATION:
+        ensemble = EnsembleClassifier(metric, y, evaluation_library)
         ensemble._label_encoder = encoder
-    elif metric.task_type == MetricType.REGRESSION:
-        ensemble = EnsembleRegressor(metric, y, evaluation_library=evaluation_library)
     else:
         raise ValueError(f"Unknown metric task type {metric.task_type}")
 

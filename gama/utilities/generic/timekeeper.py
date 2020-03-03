@@ -42,8 +42,8 @@ class TimeKeeper:
 
         """
         self.total_time = total_time
-        self.current_activity = None
-        self.activities = []
+        self.current_activity: Optional[Activity] = None
+        self.activities: List[Activity] = []
 
     @property
     def total_time_remaining(self) -> float:

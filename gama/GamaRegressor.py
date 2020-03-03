@@ -29,4 +29,4 @@ class GamaRegressor(Gama):
         numpy.ndarray
             Array with predictions of shape (N,) where N is len(X).
         """
-        return self.model.predict(x)
+        return self.model.predict(x)  # type: ignore

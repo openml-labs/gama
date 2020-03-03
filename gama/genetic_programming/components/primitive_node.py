@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from .terminal import DATA_TERMINAL, Terminal
 from .primitive import Primitive
 
@@ -19,7 +19,7 @@ class PrimitiveNode:
     def __init__(
         self,
         primitive: Primitive,
-        data_node: "PrimitiveNode",
+        data_node: Union["PrimitiveNode", str],
         terminals: List[Terminal],
     ):
         self._primitive = primitive
@@ -85,7 +85,7 @@ class PrimitiveNode:
         terminals_string = string[terminal_start_index + len(DATA_TERMINAL) :]
         terminal_sets = terminals_string.split(")")[:-1]
 
-        last_node = DATA_TERMINAL
+        last_node: Union[PrimitiveNode, str] = DATA_TERMINAL
         for primitive_string, terminal_set in zip(reversed(primitives), terminal_sets):
             primitive = find_primitive(primitive_set, primitive_string)
             if terminal_set == "":

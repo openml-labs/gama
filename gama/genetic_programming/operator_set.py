@@ -39,6 +39,7 @@ class OperatorSet:
         self._max_retry = max_retry
         self._evaluate = None
         self._evaluate_callback = evaluate_callback
+        self.evaluate = None
 
         self._seen_individuals = {}
 

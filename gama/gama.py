@@ -6,7 +6,7 @@ import multiprocessing
 import os
 import random
 import time
-from typing import Union, Tuple, Optional, Dict, Type, List
+from typing import Union, Tuple, Optional, Dict, Type, List, Callable, Any, Iterable
 import warnings
 
 import pandas as pd
@@ -15,6 +15,7 @@ import stopit
 from sklearn.pipeline import Pipeline
 
 import gama.genetic_programming.compilers.scikitlearn
+from gama.genetic_programming.components import Individual
 from gama.logging.machine_logging import log_event, TOKENS
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
@@ -63,7 +64,7 @@ class Gama(ABC):
     def __init__(
         self,
         scoring: Union[
-            str, Metric, Tuple[Union[str, Metric], ...]
+            str, Metric, Iterable[str], Iterable[Metric]
         ] = "filled_in_by_child_class",
         regularize_length: bool = True,
         max_pipeline_length: Optional[int] = None,
@@ -163,7 +164,7 @@ class Gama(ABC):
         AsyncEvaluator.n_jobs = n_jobs
 
         if max_eval_time is None:
-            max_eval_time = 0.1 * max_total_time
+            max_eval_time = round(0.1 * max_total_time)
         if max_eval_time > max_total_time:
             log.warning(
                 f"max_eval_time ({max_eval_time}) > max_total_time ({max_total_time}) "
@@ -173,7 +174,7 @@ class Gama(ABC):
 
         self._max_eval_time = max_eval_time
         self._time_manager = TimeKeeper(max_total_time)
-        self._metrics: Tuple[Metric] = scoring_to_metric(scoring)
+        self._metrics: Tuple[Metric, ...] = scoring_to_metric(scoring)
         self._regularize_length = regularize_length
         self._search_method: BaseSearch = search_method
         self._post_processing = post_processing_method
@@ -187,9 +188,9 @@ class Gama(ABC):
         self._basic_encoding_pipeline: Optional[Pipeline] = None
         self._inferred_dtypes: List[Type] = []
         self.model: object = None
-        self._final_pop = None
+        self._final_pop: List[Individual] = []
 
-        self._subscribers = defaultdict(list)
+        self._subscribers: Dict[str, List[Callable]] = defaultdict(list)
         if isinstance(post_processing_method, EnsemblePostProcessing):
             self._evaluation_library = EvaluationLibrary(
                 m=post_processing_method.hyperparameters["max_models"],
@@ -304,7 +305,7 @@ class Gama(ABC):
             The score obtained on the given test data according to the `scoring` metric.
         """
         predictions = (
-            self.predict_proba(x)
+            self.predict_proba(x)  # type: ignore
             if self._metrics[0].requires_probabilities
             else self.predict(x)
         )
@@ -423,7 +424,7 @@ class Gama(ABC):
             activity_meta=[self._post_processing.__class__.__name__],
         ):
             best_individuals = list(
-                reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values))
+                reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values))  # type: ignore # noqa: E501
             )
             self._post_processing.dynamic_defaults(self)
             self.model = self._post_processing.post_process(
@@ -433,9 +434,9 @@ class Gama(ABC):
                 best_individuals,
             )
 
-    def _search_phase(self, warm_start: bool = False, timeout: int = 1e6):
+    def _search_phase(self, warm_start: bool = False, timeout: float = 1e6):
         """ Invoke the search algorithm, populate `final_pop`. """
-        if warm_start and self._final_pop is not None:
+        if warm_start and not self._final_pop:
             pop = [ind for ind in self._final_pop]
         else:
             if warm_start:
@@ -530,13 +531,12 @@ class Gama(ABC):
         for callback in self._subscribers["evaluation_completed"]:
             self._safe_outside_call(partial(callback, evaluation))
 
-    def evaluation_completed(self, callback_function):
+    def evaluation_completed(self, callback: Callable[[Evaluation], Any]) -> None:
         """ Register a callback function that is called when an evaluation is completed.
 
         Parameters
         ----------
-        callback_function:
+        callback: Callable[[Evaluation], Any]
             Function to call when a pipeline is evaluated, return values are ignored.
-            Expected signature is: Evaluation -> Any
         """
-        self._subscribers["evaluation_completed"].append(callback_function)
+        self._subscribers["evaluation_completed"].append(callback)

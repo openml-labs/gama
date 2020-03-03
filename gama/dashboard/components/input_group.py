@@ -1,11 +1,12 @@
 from typing import Dict
 
+from dash import Dash
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 
 
-def automark_slider(app: "Dash", id_: str, label: str, slider_kwargs: Dict):
+def automark_slider(app: Dash, id_: str, label: str, slider_kwargs: Dict):
     defaults = dict(min=1, max=10, value=1, updatemode="drag")
     defaults.update(slider_kwargs)
     marks = {defaults["min"]: defaults["min"], defaults["max"]: defaults["max"]}
@@ -30,7 +31,7 @@ def _update_marks(selected_value, min_, max_):
 
 
 class ToggleButton:
-    def __init__(self, button_id: str, app: "Dash", label: str, start_on: bool = True):
+    def __init__(self, button_id: str, app: Dash, label: str, start_on: bool = True):
         self._button_id = button_id
         self.html = self._build_content(label, start_on)
 

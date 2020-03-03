@@ -1,10 +1,14 @@
 from abc import ABC
-from typing import List, Union, Dict, Any, Optional
+from typing import List, Union, Dict, Any, Optional, Tuple, TYPE_CHECKING
 
 import pandas as pd
 from sklearn.pipeline import Pipeline
 
 from gama.genetic_programming.components import Individual
+
+
+if TYPE_CHECKING:
+    from gama.gama import Gama
 
 
 class BasePostProcessing(ABC):
@@ -21,7 +25,7 @@ class BasePostProcessing(ABC):
             Fraction of total time that to be reserved for this post-processing step.
         """
         self.time_fraction: float = time_fraction
-        self._hyperparameters = {}
+        self._hyperparameters: Dict[str, Tuple[Any, Any]] = {}
 
     def __str__(self):
         # Not sure if I should report actual used hyperparameters

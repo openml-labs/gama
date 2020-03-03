@@ -1,3 +1,4 @@
+import datetime
 import heapq
 import logging
 from typing import Tuple, List, Optional, Union
@@ -28,15 +29,15 @@ class Evaluation:
         self,
         individual: Individual,
         predictions: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]] = None,
-        score: Tuple[float, ...] = None,
+        score: Tuple[float, ...] = (),
         estimators: Optional[List] = None,
-        start_time: float = -1,
+        start_time: Optional[datetime.datetime] = None,
         duration: float = -1,
         error: str = None,
     ):
         self.individual: Individual = individual
-        self.score = () if score is None else score
-        self.estimators = [] if estimators is None else estimators
+        self.score = score
+        self.estimators: Optional[List] = [] if estimators is None else estimators
         self.start_time = start_time
         self.duration = duration
         self.error = error
@@ -110,8 +111,8 @@ class EvaluationLibrary:
             Instead of storing all predictions of the 'top m' evaluations,
             store only those with indices specified in this array.
         """
-        self.top_evaluations = []
-        self.other_evaluations = []
+        self.top_evaluations: List[Evaluation] = []
+        self.other_evaluations: List[Evaluation] = []
         self._m = m
         self._sample_n = n
 

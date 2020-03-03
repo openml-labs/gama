@@ -1,7 +1,7 @@
 from datetime import datetime
 import logging
 import time
-from typing import Iterable, Callable, Tuple, Optional
+from typing import Callable, Tuple, Optional, Sequence
 
 import stopit
 from sklearn.preprocessing import OneHotEncoder
@@ -28,7 +28,7 @@ def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
 def compile_individual(
     individual: Individual,
     parameter_checks=None,
-    preprocessing_steps: Iterable[object] = None,
+    preprocessing_steps: Sequence[object] = None,
 ) -> Pipeline:
     steps = [
         (str(i), primitive_node_to_sklearn(primitive))
@@ -51,11 +51,11 @@ def cross_val_train_predict(
     from sklearn.utils.metaestimators import _safe_split
     import numpy as np
 
-    cv = check_cv(cv, y, classifier=is_classifier(estimator))
+    splitter = check_cv(cv, y, classifier=is_classifier(estimator))
 
     estimators = []
     predictions = None
-    for train, test in cv.split(x, y):
+    for train, test in splitter.split(x, y):
         x_train, y_train = _safe_split(estimator, x, y, train)
         x_test, _ = _safe_split(estimator, x, y, test, train)
 
@@ -253,7 +253,7 @@ def evaluate_individual(
     result.duration = wall_time.elapsed_time
 
     if add_length_to_score:
-        result.score = (*result.score, -len(individual.primitives))
+        result.score = result.score + (-len(individual.primitives),)
     individual.fitness = Fitness(
         result.score,
         result.start_time,

@@ -50,7 +50,7 @@ class BaseSearch(ABC):
         self._hyperparameters[hyperparameter] = (set_value, value)
 
     def dynamic_defaults(
-        self, x: pd.DataFrame, y: Union[pd.DataFrame, pd.Series], time_limit: int
+        self, x: pd.DataFrame, y: Union[pd.DataFrame, pd.Series], time_limit: float
     ) -> None:
         """ Set hyperparameter defaults based on the dataset and time-constraints.
 
@@ -62,7 +62,7 @@ class BaseSearch(ABC):
             Features of the data.
         y: pandas.DataFrame or pandas.Series
             Labels of the data.
-        time_limit: int
+        time_limit: float
             Time in seconds available for search and selecting dynamic defaults.
             There is no need to adhere to this explicitly,
             a `stopit.utils.TimeoutException` will be raised.
