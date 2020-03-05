@@ -424,7 +424,7 @@ class Gama(ABC):
             activity_meta=[self._post_processing.__class__.__name__],
         ):
             best_individuals = list(
-                reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values))  # type: ignore # noqa: E501
+                reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values))  # type: ignore
             )
             self._post_processing.dynamic_defaults(self)
             self.model = self._post_processing.post_process(
