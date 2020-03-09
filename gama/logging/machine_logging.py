@@ -42,7 +42,7 @@ def datetime_to_str(datetime_: datetime):
 def log_event(log_: logging.Logger, token: str, *args: object):
     """ Write an event to the machine log level formatted for later parsing. """
     formatted_args = [
-        datetime_to_str(arg) if isinstance(arg, datetime) else str(arg) for arg in args
+        datetime_to_str(arg) if isinstance(arg, datetime) else str(arg) for arg in args  # type: ignore
     ]
     attrs = f"{PLE_DELIM}".join(formatted_args)
     message = f"{PLE_DELIM}".join(
