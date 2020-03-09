@@ -8,7 +8,9 @@ repos:
     rev: v0.761
     hooks:
       - id: mypy
+        files: gama/*
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.7.9
     hooks:
       - id: flake8
+        files: gama/*
