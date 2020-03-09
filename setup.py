@@ -15,14 +15,6 @@ requirements = [
     "category-encoders>=1.2.8",
 ]
 
-test_requirements = [
-    "pytest>=4.4.0",
-    "pytest-mock",
-    "pytest-xdist",
-    "codecov",
-    "pytest-cov",
-]
-
 visualization_requirements = [
     "dash==1.3",
     "dash-daq==0.1.0",
@@ -31,6 +23,16 @@ visualization_requirements = [
 ]
 
 documentation_requirements = ["sphinx", "sphinx_rtd_theme"] + visualization_requirements
+
+# Black, Flake8 and Mypy will be installed through calling pre-commit install
+dev = [
+    "pre-commit==2.1.1",
+    "pytest>=4.4.0",
+    "pytest-mock",
+    "pytest-xdist",
+    "codecov",
+    "pytest-cov",
+]
 
 all_ = requirements + visualization_requirements + documentation_requirements
 
@@ -54,7 +56,7 @@ setup(
     packages=find_packages(exclude=["tests", "tests.*"]),
     install_requires=requirements,
     extras_require={
-        "test": test_requirements,
+        "dev": dev,
         "vis": visualization_requirements,
         "doc": documentation_requirements,
         "all": all_,
