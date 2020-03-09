@@ -2,15 +2,18 @@ language: python
 python:
   - "3.6"
   - "3.7"
-
 env:
-  - TEST_SUITE=unit
-  - TEST_SUITE=system
+  - JOB=TEST SUITE=unit
+  - JOB=TEST SUITE=system
+
+# Perform pre-commit checks only once:
+jobs:
+  include:
+  - env: JOB=CHECK
 
 install:
-  - pip install -e .[test]
+  - ./ci_scripts/install.sh
 script:
-  - pip list
-  - pytest --cov=gama -sv -n 4 tests/$TEST_SUITE/
+  - ./ci_scripts/script.sh
 after_success:
- - bash <(curl -s https://codecov.io/bash)
+ - ./ci_scripts/after_success.sh
