@@ -203,7 +203,7 @@ def evaluate_pipeline(
         )
         logger.debug(f"Timeout after {timeout}s: {pipeline}")
 
-    return prediction, scores, estimators, None
+    return prediction, tuple(scores), estimators, None
 
 
 def evaluate_individual(
