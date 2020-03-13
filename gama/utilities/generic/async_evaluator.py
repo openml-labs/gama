@@ -18,6 +18,7 @@ import logging
 import multiprocessing
 import queue
 import time
+import traceback
 import uuid
 from typing import Optional, Callable, Dict, List
 
@@ -34,6 +35,7 @@ class AsyncFuture:
         self.kwargs = kwargs
         self.result = None
         self.exception = None
+        self.traceback = None
 
     def execute(self):
         """ Execute the function call `fn(*args, **kwargs)` and record results. """
@@ -41,6 +43,7 @@ class AsyncFuture:
             self.result = self.fn(*self.args, **self.kwargs)
         except Exception as e:
             self.exception = e
+            self.traceback = traceback.format_exc()
 
 
 class AsyncEvaluator:
@@ -148,12 +151,13 @@ class AsyncEvaluator:
         while True:
             try:
                 completed_future = self._output_queue.get(block=False)
-                matching_future = self.futures.pop(completed_future.id)
-                matching_future.result, matching_future.exception = (
+                match = self.futures.pop(completed_future.id)
+                match.result, match.exception, match.traceback = (
                     completed_future.result,
                     completed_future.exception,
+                    completed_future.traceback,
                 )
-                return matching_future
+                return match
             except queue.Empty:
                 time.sleep(poll_time)
                 continue
