@@ -5,6 +5,7 @@ import logging
 import multiprocessing
 import os
 import random
+import subprocess
 import time
 from typing import Union, Tuple, Optional, Dict, Type, List, Callable, Any, Iterable
 import warnings
@@ -424,7 +425,7 @@ class Gama(ABC):
             activity_meta=[self._post_processing.__class__.__name__],
         ):
             best_individuals = list(
-                reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values))  # type: ignore # noqa: E501
+                reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values))
             )
             self._post_processing.dynamic_defaults(self)
             self.model = self._post_processing.post_process(
@@ -509,6 +510,7 @@ class Gama(ABC):
         script_text = self._post_processing.to_code(self._basic_encoding_pipeline)
         with open(file, "w") as fh:
             fh.write(script_text)
+        subprocess.call(["black", file])
 
     def _safe_outside_call(self, fn):
         """ Calls fn logging and ignoring all exceptions except TimeoutException. """

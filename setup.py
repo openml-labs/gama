@@ -13,6 +13,7 @@ requirements = [
     "stopit>=1.1.1",
     "liac-arff>=2.2.2",
     "category-encoders>=1.2.8",
+    "black==19.10b0",
 ]
 
 visualization_requirements = [
