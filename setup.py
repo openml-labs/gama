@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 with open("gama/__version__.py", "r") as fh:
     version = fh.readlines()[-1].split()[-1].strip("\"'")
 
-requirements = [
+base = [
     "numpy>=1.14.0",
     "scipy>=1.0.0",
     "scikit-learn>=0.20.0",
@@ -16,17 +16,16 @@ requirements = [
     "black==19.10b0",
 ]
 
-visualization_requirements = [
+vis = [
     "dash==1.3",
     "dash-daq==0.1.0",
     "dash-bootstrap-components",
     "visdcc",
 ]
 
-documentation_requirements = ["sphinx", "sphinx_rtd_theme"] + visualization_requirements
+doc = ["sphinx", "sphinx_rtd_theme"]
 
-# Black, Flake8 and Mypy will be installed through calling pre-commit install
-dev = [
+test = [
     "pre-commit==2.1.1",
     "pytest>=4.4.0",
     "pytest-mock",
@@ -35,7 +34,9 @@ dev = [
     "pytest-cov",
 ]
 
-all_ = requirements + visualization_requirements + documentation_requirements
+# Black, Flake8 and Mypy will be installed through calling pre-commit install
+dev = test + doc
+all_ = test + doc + vis
 
 with open(os.path.join("README.md")) as fid:
     README = fid.read()
@@ -55,13 +56,8 @@ setup(
         "Source Code": "https://github.com/PGijsbers/gama",
     },
     packages=find_packages(exclude=["tests", "tests.*"]),
-    install_requires=requirements,
-    extras_require={
-        "dev": dev,
-        "vis": visualization_requirements,
-        "doc": documentation_requirements,
-        "all": all_,
-    },
+    install_requires=base,
+    extras_require={"vis": vis, "dev": dev, "all": all_,},
     python_requires=">=3.6.0",
     entry_points={
         "console_scripts": [
