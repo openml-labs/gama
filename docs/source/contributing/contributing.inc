@@ -68,6 +68,7 @@ Run ``pre-commit run --all-files`` to see the pre-commit in action, it should ou
 You should now be set up for development!
 Pre-commit will run these tests whenever you attempt to make a commit.
 If any of the checks fail, the commit will be aborted and you will be able to make the required changes before attempting to commit again.
+Remember to add the updated file to your commit!
 We use pre-commit to ensure a consistent code style and make PR reviews easier.
 Note that pre-commit does not run any code tests.
 
@@ -85,7 +86,7 @@ It also functions as a sanity check that the system as a whole produces reasonab
 While complete state coverage of the code will always be impossible for this type of system,
 the system tests aim to cover as much as possible within a small time frame.
 
-To run a tests run::
+To run a test group run::
 
     pytest -sv -n 4 tests/SUITE
 
@@ -97,8 +98,10 @@ For more information, run ``pytest -h``.
 Generating Documentation
 ************************
 The documentation is generated with `Sphinx <https://www.sphinx-doc.org/en/master/>`_.
-Run::
+After updating the documentation, please build the new docs to verify everything works and looks as intended::
 
     sphinx-build -b html docs\source docs\build
 
 The html pages are now in the ``gama\docs\build`` directory.
+There is no need to upload the generated documentation.
+When a release happens, the commit to master will trigger the build and upload of the latest documentation.
