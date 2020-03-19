@@ -1,6 +1,9 @@
 #!/bin/bash
 
-if [ "$JOB" = "TEST" ]; then
-  # This should be the last test to complete.
+if [ "$JOB" = "test" ]; then
+  # codecov will merge reports automatically
   bash <(curl -s https://codecov.io/bash)
+fi
+if [ "$JOB" = "deploy" ]; then
+  sphinx-build -b html docs/source docs/build
 fi

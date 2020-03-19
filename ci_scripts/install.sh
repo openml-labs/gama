@@ -6,3 +6,6 @@ fi
 if [ "$JOB" = "check" ]; then
   pip install pre-commit
 fi
+if [ "$JOB" = "deploy" ]; then
+  pip install -e .[all]
+fi

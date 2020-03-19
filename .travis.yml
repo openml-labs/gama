@@ -20,9 +20,6 @@ script:
 after_success:
  - ./ci_scripts/after_success.sh
 
-before_deploy:
-  - "pip install -e .[all]"
-  - "sphinx-build -b html docs/source docs/build"
 deploy:
   provider: pages
   local_dir: docs/build
