@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ "$JOB" = "TEST" ]; then
+if [ "$JOB" = "test" ]; then
   pip install -e .[dev]
 fi
-if [ "$JOB" = "CHECK" ]; then
+if [ "$JOB" = "check" ]; then
   pip install pre-commit
 fi

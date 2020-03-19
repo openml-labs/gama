@@ -3,13 +3,13 @@ python:
   - "3.6"
   - "3.7"
 env:
-  - JOB=TEST SUITE=unit
-  - JOB=TEST SUITE=system
+  - JOB=test SUITE=unit
+  - JOB=test SUITE=system
 
 # Perform pre-commit checks only once:
 jobs:
   include:
-  - env: JOB=CHECK
+  - env: JOB=check
   - env: JOB=deploy
     if: branch = master
 
