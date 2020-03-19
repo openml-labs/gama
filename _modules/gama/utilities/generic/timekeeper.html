@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
 
@@ -152,12 +152,12 @@
            <div itemprop="articleBody">
             
   <h1>Source code for gama.utilities.generic.timekeeper</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">contextlib</span> <span class="k">import</span> <span class="n">contextmanager</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">NamedTuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span>
+<span></span><span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">NamedTuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
-<span class="kn">from</span> <span class="nn">gama.logging.machine_logging</span> <span class="k">import</span> <span class="n">log_event</span><span class="p">,</span> <span class="n">TOKENS</span>
-<span class="kn">from</span> <span class="nn">.stopwatch</span> <span class="k">import</span> <span class="n">Stopwatch</span>
+<span class="kn">from</span> <span class="nn">gama.logging.machine_logging</span> <span class="kn">import</span> <span class="n">log_event</span><span class="p">,</span> <span class="n">TOKENS</span>
+<span class="kn">from</span> <span class="nn">.stopwatch</span> <span class="kn">import</span> <span class="n">Stopwatch</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -166,22 +166,27 @@
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">stopwatch</span><span class="p">:</span> <span class="n">Stopwatch</span>
     <span class="n">time_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">time_left</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Time left in seconds. Raises a TypeError if `time_limit` was not specified. &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Time left in seconds.</span>
+
+<span class="sd">        Raises a TypeError if `time_limit` was not specified.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopwatch</span><span class="o">.</span><span class="n">elapsed_time</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">exceeded_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; True iff a limit was specified and its exceeded. False iff there is time left or no limit was specified. &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopwatch</span><span class="o">.</span><span class="n">elapsed_time</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot; True iff a limit was specified and it is exceeded. &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopwatch</span><span class="o">.</span><span class="n">elapsed_time</span> <span class="o">&lt;</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
 
 <div class="viewcode-block" id="TimeKeeper"><a class="viewcode-back" href="../../../../api/index.html#gama.utilities.generic.timekeeper.TimeKeeper">[docs]</a><span class="k">class</span> <span class="nc">TimeKeeper</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Simple object that helps keep track of time over multiple activities. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -191,19 +196,26 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_time</span> <span class="o">=</span> <span class="n">total_time</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">current_activity</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">activities</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_activity</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Activity</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activities</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Activity</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">total_time_remaining</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Return time remaining in seconds. &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_time</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">stopwatch</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">activities</span><span class="p">))</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Time Remaining only available if `total_time` was set on init.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_time</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span>
+                <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">stopwatch</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">activities</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s2">&quot;Time Remaining only available if `total_time` was set on init.&quot;</span>
+        <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">current_activity_time_elapsed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Return elapsed time in seconds of current activity. Raise RuntimeError if no current activity. &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Return elapsed time in seconds of current activity.</span>
+
+<span class="sd">        Raise RuntimeError if no current activity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_activity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_activity</span><span class="o">.</span><span class="n">stopwatch</span><span class="o">.</span><span class="n">elapsed_time</span>
         <span class="k">else</span><span class="p">:</span>
@@ -211,19 +223,30 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">current_activity_time_left</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Return time left in seconds of current activity. Raise RuntimeError if no current activity. &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_activity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_activity</span><span class="o">.</span><span class="n">time_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_activity</span><span class="o">.</span><span class="n">time_limit</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_activity</span><span class="o">.</span><span class="n">stopwatch</span><span class="o">.</span><span class="n">elapsed_time</span>
+        <span class="sd">&quot;&quot;&quot; Return time left in seconds of current activity.</span>
+
+<span class="sd">        Raise RuntimeError if no current activity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_activity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_activity</span><span class="o">.</span><span class="n">time_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_activity</span><span class="o">.</span><span class="n">time_limit</span>
+                <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_activity</span><span class="o">.</span><span class="n">stopwatch</span><span class="o">.</span><span class="n">elapsed_time</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_activity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No activity in progress.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No time limit set for current activity.&quot;</span><span class="p">)</span>
 
     <span class="nd">@contextmanager</span>
-    <span class="k">def</span> <span class="nf">start_activity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                       <span class="n">activity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                       <span class="n">time_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                       <span class="n">activity_meta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Stopwatch</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">start_activity</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">activity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">time_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">activity_meta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Stopwatch</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot; Mark the start of a new activity and automatically time its duration.</span>
 <span class="sd">            TimeManager does not currently support nested activities.</span>
 
@@ -232,7 +255,8 @@
 <span class="sd">        activity: str</span>
 <span class="sd">            Name of the activity for reference in current activity or later look-ups.</span>
 <span class="sd">        time_limit: int, optional (default=None)</span>
-<span class="sd">            Intended time limit of the activity in seconds. Used to calculate time remaining.</span>
+<span class="sd">            Intended time limit of the activity in seconds.</span>
+<span class="sd">            Used to calculate time remaining.</span>
 <span class="sd">        activity_meta: List[Any], optional (default=None)</span>
 <span class="sd">            Any additional information about the activity to be logged.</span>
 

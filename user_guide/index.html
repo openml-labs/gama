@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -93,6 +93,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#using-arff-files">Using ARFF files</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#simple-features">Simple Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#command-line-interface">Command Line Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-export">Code Export</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#dashboard">Dashboard</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#important-hyperparameters">Important Hyperparameters</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#optimization">Optimization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#resources">Resources</a></li>
@@ -216,21 +222,23 @@ If you plan on developing GAMA, cloning the repository and installing locally is
 </pre></div>
 </div>
 <p>This installation will refer to your local GAMA files.
-Changes to the code directly affect the installed GAMA package without reinstalling requiring a reinstall.</p>
+Changes to the code directly affect the installed GAMA package without requiring a reinstall.</p>
 </div>
 <hr class="docutils" />
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="classification">
 <h3>Classification<a class="headerlink" href="#classification" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="k">import</span> <span class="n">load_breast_cancer</span>
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">train_test_split</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">log_loss</span><span class="p">,</span> <span class="n">accuracy_score</span>
-<span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_breast_cancer</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">log_loss</span><span class="p">,</span> <span class="n">accuracy_score</span>
+<span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">)</span>
 
     <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">keep_analysis_log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting `fit` which will take roughly 3 minutes.&quot;</span><span class="p">)</span>
@@ -239,8 +247,8 @@ Changes to the code directly affect the installed GAMA package without reinstall
     <span class="n">label_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
     <span class="n">probability_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;accuracy:&#39;</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">label_predictions</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;log loss:&#39;</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">probability_predictions</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;accuracy:&quot;</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">label_predictions</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;log loss:&quot;</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">probability_predictions</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Should take 3 minutes to run and give the output below (exact performance might differ):</p>
@@ -252,12 +260,12 @@ Changes to the code directly affect the installed GAMA package without reinstall
 </div>
 <div class="section" id="regression">
 <h3>Regression<a class="headerlink" href="#regression" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="k">import</span> <span class="n">load_boston</span>
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">train_test_split</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">mean_squared_error</span>
-<span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaRegressor</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_boston</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
+<span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaRegressor</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_boston</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
@@ -267,7 +275,7 @@ Changes to the code directly affect the installed GAMA package without reinstall
 
     <span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MSE:&#39;</span><span class="p">,</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MSE:&quot;</span><span class="p">,</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Should take 3 minutes to run and give the output below (exact performance might differ):</p>
@@ -283,19 +291,19 @@ In the example below, make sure to replace the file paths to the ARFF files to b
 The example script can be run by using e.g.
 <a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_train.arff">breast_cancer_train.arff</a> and
 <a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_test.arff">breast_cancer_test.arff</a>.
-The target should always be specified as the last column.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
+The target should always be specified as the last column.
+Make sure you adjust the file path if not executed from the examples directory.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Make sure you adjust the file path if not executed from the examples directory.&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">file_path</span> <span class="o">=</span> <span class="s2">&quot;../tests/data/breast_cancer_</span><span class="si">{}</span><span class="s2">.arff&quot;</span>
 
     <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">keep_analysis_log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting `fit` which will take roughly 3 minutes.&quot;</span><span class="p">)</span>
-    <span class="n">automl</span><span class="o">.</span><span class="n">fit_arff</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;train&#39;</span><span class="p">))</span>
+    <span class="n">automl</span><span class="o">.</span><span class="n">fit_arff</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">))</span>
 
-    <span class="n">label_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_arff</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">))</span>
-    <span class="n">probability_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_proba_arff</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">))</span>
+    <span class="n">label_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_arff</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
+    <span class="n">probability_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_proba_arff</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>The GamaRegressor also has ARFF support.</p>
@@ -306,6 +314,60 @@ Note that this is not unique to GAMA, but any framework which accepts numeric in
 <p>Unfortunately the <code class="docutils literal notranslate"><span class="pre">date</span></code> and <code class="docutils literal notranslate"><span class="pre">string</span></code> formats the ARFF file allows is not (fully) supported in GAMA yet,
 for the latest news, see <a class="reference external" href="https://github.com/PGijsbers/gama/issues/2">issue#2</a>.</p>
 </div>
+</div>
+<hr class="docutils" />
+<div class="section" id="simple-features">
+<h2>Simple Features<a class="headerlink" href="#simple-features" title="Permalink to this headline">¶</a></h2>
+<p>This section features a couple of simple to use features that might be interesting for a wide audience.
+For more advanced features, see the <cite>Technical Guide</cite>.</p>
+<div class="section" id="command-line-interface">
+<h3>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h3>
+<p>GAMA may also be called from a terminal, but the tool currently supports only part of all Python functionality.
+In particular it can only load data from <cite>.arff</cite> files and AutoML pipeline configuration is not available.
+The tool will produce a single pickled scikit-learn model (by default named ‘gama_model.pkl’),
+code export is also available.
+Please see <cite>gama -h</cite> for all options.</p>
+</div>
+<div class="section" id="code-export">
+<h3>Code Export<a class="headerlink" href="#code-export" title="Permalink to this headline">¶</a></h3>
+<p>It is possible to have GAMA export the final model definition as a Python file, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">gama.Gama.export_script()</span></code>.</p>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="dashboard">
+<h2>Dashboard<a class="headerlink" href="#dashboard" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The GAMA Dashboard is not done.
+However, it is functional and released to get some early feedback.</p>
+</div>
+<p>GAMA Dashboard is a graphical user interface to start and monitor the AutoML search.
+It is available when GAMA has been installed with its visualization optional dependencies (<cite>pip install gama[vis]</cite>).
+To start GAMA Dashboard call <cite>gamadash</cite> from the command line.</p>
+<p>Starting GAMA Dashboard will open a new tab in your webbrowser which will show the GAMA Dashboard Home page:</p>
+<img alt="../_images/DashboardHome.png" src="../_images/DashboardHome.png" />
+<p>On the left you can configure GAMA, on the right you can select the dataset you want to perform AutoML on.
+To provide a dataset, specify the path to the ARFF-file which contains your data.
+Once the dataset has been set, the <cite>Go!</cite>-button on the bottom left will be enabled.
+When you are satisfied with your chosen configuration, press the <cite>Go!</cite>-button to start GAMA.
+This will take you to the ‘Running’ tab.</p>
+<p>The running tab will look similar to this:</p>
+<img alt="../_images/DashboardRunning.png" src="../_images/DashboardRunning.png" />
+<p>You see four main components on this page:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>A visualization of search results. In this scatter plot, each scored pipeline is represented by a marker.
+The larger markers represent the most recent evaluations. Their location is determined by the pipeline’s
+length (on the y-axis) and score (on the x-axis). You can hover over the markers to get precise scores,
+and click on the pipeline to select it. A selected pipeline is represented with a large red marker.</p></li>
+<li><p>Output of the search command. This field provides a textual progress report on GAMA’s AutoML process.</p></li>
+<li><p>Full specification of the selected pipeline. This view of the selected pipeline specifies hyperparametersettings
+for each step in the pipeline.</p></li>
+<li><p>A table of each evaluated pipeline. Similar to the plot (1), here you find all pipelines evaluated during search.
+It is possible to sort and filter based on performance.</p></li>
+</ol>
+</div></blockquote>
+<p>Selecting a pipeline in the table or through the plot will update the other components.</p>
 </div>
 <hr class="docutils" />
 <div class="section" id="important-hyperparameters">
@@ -373,7 +435,7 @@ TPOT uses a synchronous form of evolution, whereas GAMA uses asynchronous evolut
 The advantage of asynchronous evolution is that in theory it is able to utilize computing resources better.
 This is due to generation-based evolution waiting for the last individual in the population to be evaluated in each generation,
 whereas asynchronous evolution does not have any point where all evaluations need to be finished at the same time.</p>
-<p>TPOT sports some great user-friendly features such as a command-line interface (in addition to its Python API),
+<p>TPOT sports some great user-friendly features such as a less limited command-line interface,
 code export (creates a file constructing the machine learning pipeline without a TPOT dependency)
 and <a class="reference external" href="https://dask.org/">DASK</a> integration (which allows the use of a Dask cluster for pipeline evaluations and further optimizations).</p>
 <p>GAMA focuses more on extensibility and research friendliness,

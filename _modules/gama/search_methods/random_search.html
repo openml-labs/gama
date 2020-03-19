@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -153,21 +153,25 @@
             
   <h1>Source code for gama.search_methods.random_search</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">gama.genetic_programming.components</span> <span class="k">import</span> <span class="n">Individual</span>
-<span class="kn">from</span> <span class="nn">gama.genetic_programming.operator_set</span> <span class="k">import</span> <span class="n">OperatorSet</span>
-<span class="kn">from</span> <span class="nn">gama.search_methods.base_search</span> <span class="k">import</span> <span class="n">BaseSearch</span><span class="p">,</span> <span class="n">_check_base_search_hyperparameters</span>
-<span class="kn">from</span> <span class="nn">gama.utilities.generic.async_evaluator</span> <span class="k">import</span> <span class="n">AsyncEvaluator</span>
+<span class="kn">from</span> <span class="nn">gama.genetic_programming.components</span> <span class="kn">import</span> <span class="n">Individual</span>
+<span class="kn">from</span> <span class="nn">gama.genetic_programming.operator_set</span> <span class="kn">import</span> <span class="n">OperatorSet</span>
+<span class="kn">from</span> <span class="nn">gama.search_methods.base_search</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BaseSearch</span><span class="p">,</span>
+    <span class="n">_check_base_search_hyperparameters</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">gama.utilities.generic.async_evaluator</span> <span class="kn">import</span> <span class="n">AsyncEvaluator</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="RandomSearch"><a class="viewcode-back" href="../../../api/index.html#gama.search_methods.RandomSearch">[docs]</a><span class="k">class</span> <span class="nc">RandomSearch</span><span class="p">(</span><span class="n">BaseSearch</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Perform random search over all possible pipelines. &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">dynamic_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">time_limit</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">dynamic_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">time_limit</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operations</span><span class="p">:</span> <span class="n">OperatorSet</span><span class="p">,</span> <span class="n">start_candidates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Individual</span><span class="p">]):</span>
@@ -175,10 +179,11 @@
 
 
 <span class="k">def</span> <span class="nf">random_search</span><span class="p">(</span>
-        <span class="n">operations</span><span class="p">:</span> <span class="n">OperatorSet</span><span class="p">,</span>
-        <span class="n">output</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Individual</span><span class="p">],</span>
-        <span class="n">start_candidates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Individual</span><span class="p">],</span>
-        <span class="n">max_evaluations</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Individual</span><span class="p">]:</span>
+    <span class="n">operations</span><span class="p">:</span> <span class="n">OperatorSet</span><span class="p">,</span>
+    <span class="n">output</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Individual</span><span class="p">],</span>
+    <span class="n">start_candidates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Individual</span><span class="p">],</span>
+    <span class="n">max_evaluations</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Individual</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot; Perform random search over all possible pipelines.</span>
 
 <span class="sd">    Parameters</span>
@@ -207,7 +212,7 @@
         <span class="k">while</span> <span class="p">(</span><span class="n">max_evaluations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">max_evaluations</span><span class="p">):</span>
             <span class="n">future</span> <span class="o">=</span> <span class="n">operations</span><span class="o">.</span><span class="n">wait_next</span><span class="p">(</span><span class="n">async_</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+                <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">individual</span><span class="p">)</span>
             <span class="n">async_</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">operations</span><span class="o">.</span><span class="n">evaluate</span><span class="p">,</span> <span class="n">operations</span><span class="o">.</span><span class="n">individual</span><span class="p">())</span>
 
     <span class="k">return</span> <span class="n">output</span>

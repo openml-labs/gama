@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -93,10 +93,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#configuring-the-automl-pipeline">Configuring the AutoML pipeline</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#logging">Logging</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#generated-files">Generated Files</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#logging">Logging</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#visualization">Visualization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#gama-search-space-configuration">GAMA Search Space Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#events">Events</a></li>
@@ -212,16 +209,16 @@ In GAMA we currently support flexibility in the AutoML pipeline in two stages: s
 <p>By default ‘prepend pipeline’, ‘Asynchronous EA’ and ‘FitBest’ are chosen for pre-processing, search and post-processing, respectively.
 However, it is easy to change this, or to change the hyperparameters with which each component is used.
 For example, searching with ‘Asynchronous Successive Halving’ and creating an ensemble during post-processing:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
-<span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="k">import</span> <span class="n">ASHA</span>  <span class="c1">#Asynchronous Successive Halving Algorithm</span>
-<span class="kn">from</span> <span class="nn">gama.postprocessing</span> <span class="k">import</span> <span class="n">Ensemble</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
+<span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="kn">import</span> <span class="n">AsynchronousSuccessiveHalving</span>
+<span class="kn">from</span> <span class="nn">gama.postprocessing</span> <span class="kn">import</span> <span class="n">EnsemblePostProcessing</span>
 
-<span class="n">custom_pipeline_gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="n">ASHA</span><span class="p">(),</span> <span class="n">post_processing</span><span class="o">=</span><span class="n">EnsemblePostProcessing</span><span class="p">())</span>
+<span class="n">custom_pipeline_gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="n">AsynchronousSuccessiveHalving</span><span class="p">(),</span> <span class="n">post_processing</span><span class="o">=</span><span class="n">EnsemblePostProcessing</span><span class="p">())</span>
 </pre></div>
 </div>
 <p>or using ‘Asynchronous EA’ but with custom hyperparameters:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
-<span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="k">import</span> <span class="n">AsyncEA</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
+<span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="kn">import</span> <span class="n">AsyncEA</span>
 
 <span class="n">custom_pipeline_gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="n">AsyncEA</span><span class="p">(</span><span class="n">population_size</span><span class="o">=</span><span class="mi">30</span><span class="p">))</span>
 </pre></div>
@@ -249,7 +246,7 @@ By default GAMA writes to ‘gama.log’.</p>
 The following script writes any log messages of <code class="code docutils literal notranslate"><span class="pre">logging.DEBUG</span></code> or up to both file and console:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
+<span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
 
 <span class="n">gama_log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;gama&#39;</span><span class="p">)</span>
 <span class="n">gama_log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
@@ -273,20 +270,10 @@ An overview the log levels:</p>
 <li><p><code class="code docutils literal notranslate"><span class="pre">ERROR</span></code>: Errors which prevent GAMA from running to completion.</p></li>
 </ul>
 </div></blockquote>
-<div class="section" id="generated-files">
-<h3>Generated Files<a class="headerlink" href="#generated-files" title="Permalink to this headline">¶</a></h3>
-<p>GAMA can create some files during the optimization process. Here is an overview of produced files:</p>
-<p><strong>Folder `’{DATE}_{STARTTIME}_XXXX_GAMA’`</strong>: (XXXX are random alphanumeric characters)
-This folder is used to save results from evaluations during the optimization process.
-The files in this folders are needed to create an ensemble of pipelines in the post-processing phase of GAMA.
-You can specify the name of this folder with the <code class="code docutils literal notranslate"><span class="pre">cache_dir</span></code> hyperparameter when initializing a GAMA object.
-By default, this folders gets deleted after the <code class="code docutils literal notranslate"><span class="pre">fit</span></code> call is done.
-In order to preserve this folder (e.g. to later construct different ensembles or later analysis), specify <code class="code docutils literal notranslate"><span class="pre">keep_cache=True</span></code> when calling <code class="code docutils literal notranslate"><span class="pre">fit</span></code>.</p>
-<p><strong>File: gama.log</strong>: This file contains all information about the optimization process, and by default is not removed.
-As described in <a class="reference internal" href="visualization.html#visualization"><span class="std std-ref">Visualization</span></a> this file can be used to generate visualizations about the optimization process.
+<p>By default GAMA will also capture log output to a file named ‘gama.log’.
 You can use the <code class="code docutils literal notranslate"><span class="pre">keep_analysis_log</span></code> hyperparameter to specify the desired location and name of the log,
-or set it to <code class="code docutils literal notranslate"><span class="pre">None</span></code> to prevent it being produced in the first place.</p>
-</div>
+or set it to <code class="code docutils literal notranslate"><span class="pre">None</span></code> to prevent it being produced in the first place.
+As described in <a class="reference internal" href="visualization.html#visualization"><span class="std std-ref">Visualization</span></a> this file can be used to generate visualizations about the optimization process.</p>
 </div>
 <hr class="docutils" />
 <div class="section" id="visualization">
@@ -301,7 +288,7 @@ or see how solution quality improves over time.</p>
 <img alt="../_images/viz.gif" src="../_images/viz.gif" />
 <p>If you have installed GAMA with the optional visualization dependencies (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.[vis]</span></code>),
 you can start the dashboard like so:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama.visualization</span> <span class="k">import</span> <span class="n">dash_app</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama.visualization</span> <span class="kn">import</span> <span class="n">dash_app</span>
 <span class="n">dash_app</span><span class="o">.</span><span class="n">run_server</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -365,7 +352,7 @@ for the GamaClassifier and GamaRegressor, respectively.</p>
 </div></blockquote>
 <p>The search space configuration is defined in a python dictionary.
 For reference, a minimal example search space configuration can look like this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.naive_bayes</span> <span class="k">import</span> <span class="n">BernoulliNB</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.naive_bayes</span> <span class="kn">import</span> <span class="n">BernoulliNB</span>
 <span class="n">search_space</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">,</span> <span class="mf">1e-1</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">],</span>
     <span class="n">BernoulliNB</span><span class="p">:</span> <span class="p">{</span>
@@ -403,7 +390,7 @@ If a list of values is provided instead, it will not use the shared hyperparamet
 <div class="section" id="events">
 <h2>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h2>
 <p>It is also possible to programmatically receive updates of the optimization process through the events:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
 
 <span class="k">def</span> <span class="nf">process_individual</span><span class="p">(</span><span class="n">individual</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> was evaluated. Fitness is </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">individual</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>

@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -213,31 +213,37 @@
 <dl class="class">
 <dt id="gama.GamaClassifier">
 <em class="property">class </em><code class="sig-prename descclassname">gama.</code><code class="sig-name descname">GamaClassifier</code><span class="sig-paren">(</span><em class="sig-param">config=None</em>, <em class="sig-param">scoring='neg_log_loss'</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaClassifier.html#GamaClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.GamaClassifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapper for the toolbox logic executing the AutoML pipeline for (multi-class) classification.</p>
+<dd><p>Gama with adaptations for (multi-class) classification.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>scoring</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>, </em><a class="reference internal" href="#gama.utilities.metrics.Metric" title="gama.utilities.metrics.Metric"><em>Metric</em></a><em> or </em><em>Tuple</em>) – Specifies the/all metric(s) to optimize towards. A string will be converted to Metric. A tuple must
-specify each metric with the same type (i.e. all str or all Metric). See <a class="reference internal" href="#metrics"><span class="std std-ref">Metrics</span></a> for built-in
-metrics.</p></li>
-<li><p><strong>regularize_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – If True, add pipeline length as an optimization metric (preferring short over long).</p></li>
-<li><p><strong>config</strong> (<em>a dictionary which specifies available components and their valid hyperparameter settings</em>) – For more information, see <a class="reference internal" href="../technical_guide/index.html#search-space-configuration"><span class="std std-ref">GAMA Search Space Configuration</span></a>.</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a><em> (</em><em>default=None</em><em>)</em>) – If an integer is passed, this will be the seed for the random number generators used in the process.
-However, with <code class="code docutils literal notranslate"><span class="pre">n_jobs</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>, there will be randomization introduced by multi-processing.
+<li><p><strong>scoring</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference internal" href="#gama.utilities.metrics.Metric" title="gama.utilities.metrics.Metric"><em>Metric</em></a><em> or </em><em>Tuple</em>) – Specifies the/all metric(s) to optimize towards.
+A string will be converted to Metric.
+A tuple must specify each metric with the same type (e.g. all str).
+See <a class="reference internal" href="#metrics"><span class="std std-ref">Metrics</span></a> for built-in metrics.</p></li>
+<li><p><strong>regularize_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em> (</em><em>default=True</em><em>)</em>) – If True, add pipeline length as an optimization metric.
+Short pipelines should then be preferred over long ones.</p></li>
+<li><p><strong>max_pipeline_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – If set, limit the maximum number of steps in any evaluated pipeline.
+Encoding and imputation are excluded.</p></li>
+<li><p><strong>config</strong> (<em>Dict</em>) – Specifies available components and their valid hyperparameter settings.
+For more information, see <a class="reference internal" href="../technical_guide/index.html#search-space-configuration"><span class="std std-ref">GAMA Search Space Configuration</span></a>.</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Seed for the random number generators used in the process.
+However, with <code class="code docutils literal notranslate"><span class="pre">n_jobs</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>,
+there will be randomization introduced by multi-processing.
 For reproducible results, set this and use <code class="code docutils literal notranslate"><span class="pre">n_jobs=1</span></code>.</p></li>
 <li><p><strong>max_total_time</strong> (<em>positive int</em><em> (</em><em>default=3600</em><em>)</em>) – Time in seconds that can be used for the <code class="code docutils literal notranslate"><span class="pre">fit</span></code> call.</p></li>
 <li><p><strong>max_eval_time</strong> (<em>positive int</em><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Time in seconds that can be used to evaluate any one single individual.
 If None, set to 0.1 * max_total_time.</p></li>
-<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default=-1</em><em>)</em>) – The amount of parallel processes that may be created to speed up <code class="code docutils literal notranslate"><span class="pre">fit</span></code>.
-Accepted values are positive integers or -1.
-If -1 is specified, multiprocessing.cpu_count() processes are created.</p></li>
-<li><p><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default=logging.WARNING</em><em>)</em>) – Sets the level of log messages to be automatically output to terminal.</p></li>
-<li><p><strong>keep_analysis_log</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>, </em><em>optional</em><em> (</em><em>default='gama.log'</em><em>)</em>) – If non-empty str, specifies the path (and name) where the log should be stored, e.g. /output/gama.log.
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – The amount of parallel processes that may be created to speed up <code class="code docutils literal notranslate"><span class="pre">fit</span></code>.
+Accepted values are positive integers, -1 or None.
+If -1 is specified, multiprocessing.cpu_count() processes are created.
+If None is specified, multiprocessing.cpu_count() / 2 processes are created.</p></li>
+<li><p><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> (</em><em>default=logging.WARNING</em><em>)</em>) – Sets the level of log messages to be automatically output to terminal.</p></li>
+<li><p><strong>keep_analysis_log</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em><em> (</em><em>default='gama.log'</em><em>)</em>) – If non-empty str, specify filepath where the log should be stored.
 If <code class="code docutils literal notranslate"><span class="pre">None</span></code>, no log is stored.</p></li>
-<li><p><strong>cache_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a><em> (</em><em>default=None</em><em>)</em>) – The directory in which to keep the cache during <code class="code docutils literal notranslate"><span class="pre">fit</span></code>. In this directory,
-models and their evaluation results will be stored. This facilitates a quick ensemble construction.</p></li>
 <li><p><strong>search_method</strong> (<a class="reference internal" href="#gama.search_methods.base_search.BaseSearch" title="gama.search_methods.base_search.BaseSearch"><em>BaseSearch</em></a><em> (</em><em>default=AsyncEA</em><em>(</em><em>)</em><em>)</em>) – Search method to use to find good pipelines. Should be instantiated.</p></li>
-<li><p><strong>post_processing_method</strong> (<a class="reference internal" href="#gama.postprocessing.BasePostProcessing" title="gama.postprocessing.BasePostProcessing"><em>BasePostProcessing</em></a><em> (</em><em>default=BestFitPostProcessing</em><em>(</em><em>)</em><em>)</em>) – Post-processing method to create a model after the search phase. Should be instantiated.</p></li>
+<li><p><strong>post_processing_method</strong> (<a class="reference internal" href="#gama.postprocessing.BasePostProcessing" title="gama.postprocessing.BasePostProcessing"><em>BasePostProcessing</em></a><em> (</em><em>default=BestFitPostProcessing</em><em>(</em><em>)</em><em>)</em>) – Post-processing method to create a model after the search phase.
+Should be an instantiated subclass of BasePostProcessing.</p></li>
 </ul>
 </dd>
 </dl>
@@ -249,8 +255,7 @@ models and their evaluation results will be stored. This facilitates a quick ens
 <dl class="class">
 <dt id="gama.GamaRegressor">
 <em class="property">class </em><code class="sig-prename descclassname">gama.</code><code class="sig-name descname">GamaRegressor</code><span class="sig-paren">(</span><em class="sig-param">config=None</em>, <em class="sig-param">scoring='neg_mean_squared_error'</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaRegressor.html#GamaRegressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.GamaRegressor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapper for the toolbox logic executing the AutoML pipeline for regression.
-Same parameters as GamaClassifier.</p>
+<dd><p>Gama with adaptations for regression.</p>
 </dd></dl>
 
 </div>
@@ -263,12 +268,13 @@ For classification, the following metrics are available:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>accuracy, roc_auc, average_precision, log_loss</p></li>
-<li><p>micro, macro, weighted and sample averages for precision, recall and f1 (e.g. f1_macro, precision_micro)</p></li>
+<li><p>micro, macro, weighted and sample averages for precision, recall and f1</p></li>
 </ul>
 </div></blockquote>
 <p>For regression, the following metrics are available:</p>
 <blockquote>
-<div><p>explained_variance, r2, median_absolute_error, mean_squared_error, mean_squared_log_error, mean_absolute_error</p>
+<div><p>explained_variance, r2, median_absolute_error, mean_squared_error,
+mean_squared_log_error, mean_absolute_error</p>
 </div></blockquote>
 <p>Whether to minimize or maximize is determined automatically.</p>
 <p>If you have a custom scoring function, you can define your own <code class="code docutils literal notranslate"><span class="pre">Metric</span></code>.</p>
@@ -281,10 +287,12 @@ For classification, the following metrics are available:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>metric_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the metric.</p></li>
-<li><p><strong>score_function</strong> (<em>Callable</em>) – Takes either predicted targets or predicted probabilities and the true target values to calculate a score.</p></li>
-<li><p><strong>requires_probabilities</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – For classification metrics only, describes if the metric should be computed with predicted probabilities.</p></li>
-<li><p><strong>maximize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – If True, indicates that maximizing the score corresponds to better models.</p></li>
+<li><p><strong>metric_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Name of the metric.</p></li>
+<li><p><strong>score_function</strong> (<em>Callable</em>) – Takes either predicted targets or predicted probabilities and
+the true target values to calculate a score.</p></li>
+<li><p><strong>requires_probabilities</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – For classification metrics only,
+describes if the metric should be computed with predicted probabilities.</p></li>
+<li><p><strong>maximize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If True, indicates that maximizing the score corresponds to better models.</p></li>
 <li><p><strong>task_type</strong> (<a class="reference internal" href="#gama.utilities.metrics.MetricType" title="gama.utilities.metrics.MetricType"><em>MetricType</em></a>) – Type of the machine learning task.</p></li>
 </ul>
 </dd>
@@ -300,13 +308,13 @@ For classification, the following metrics are available:</p>
 <dd><p>Metric types supported by GAMA.</p>
 <dl class="attribute">
 <dt id="gama.utilities.metrics.MetricType.CLASSIFICATION">
-<code class="sig-name descname">CLASSIFICATION</code><em class="property"> = 1</em><a class="headerlink" href="#gama.utilities.metrics.MetricType.CLASSIFICATION" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">CLASSIFICATION</code><em class="property">: int</em><em class="property"> = 1</em><a class="headerlink" href="#gama.utilities.metrics.MetricType.CLASSIFICATION" title="Permalink to this definition">¶</a></dt>
 <dd><p>discrete target</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="gama.utilities.metrics.MetricType.REGRESSION">
-<code class="sig-name descname">REGRESSION</code><em class="property"> = 2</em><a class="headerlink" href="#gama.utilities.metrics.MetricType.REGRESSION" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">REGRESSION</code><em class="property">: int</em><em class="property"> = 2</em><a class="headerlink" href="#gama.utilities.metrics.MetricType.REGRESSION" title="Permalink to this definition">¶</a></dt>
 <dd><p>continuous target</p>
 </dd></dl>
 
@@ -322,14 +330,16 @@ For classification, the following metrics are available:</p>
 <dl class="class">
 <dt id="gama.search_methods.AsynchronousSuccessiveHalving">
 <em class="property">class </em><code class="sig-prename descclassname">gama.search_methods.</code><code class="sig-name descname">AsynchronousSuccessiveHalving</code><span class="sig-paren">(</span><em class="sig-param">reduction_factor: Optional[int] = None</em>, <em class="sig-param">minimum_resource: Optional[int] = None</em>, <em class="sig-param">maximum_resource: Optional[int] = None</em>, <em class="sig-param">minimum_early_stopping_rate: Optional[int] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/asha.html#AsynchronousSuccessiveHalving"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.AsynchronousSuccessiveHalving" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asynchronous Halving Algorithm by Li et al. (paper: <a class="reference external" href="https://arxiv.org/abs/1810.05934">https://arxiv.org/abs/1810.05934</a>)</p>
+<dd><p>Asynchronous Halving Algorithm by Li et al.</p>
+<p>paper: <a class="reference external" href="https://arxiv.org/abs/1810.05934">https://arxiv.org/abs/1810.05934</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>reduction_factor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=3</em><em>)</em>) – Reduction factor of candidates between each rung.</p></li>
-<li><p><strong>minimum_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=100</em><em>)</em>) – Number of samples to use in the lowest rung.</p></li>
-<li><p><strong>maximum_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=number of samples in the dataset</em><em>)</em>) – Number of samples to use in the top rung. This should not exceed the number of samples in the data.</p></li>
-<li><p><strong>minimum_early_stopping_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default=1</em><em>)</em>) – Number of lowest rungs to skip.</p></li>
+<li><p><strong>reduction_factor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=3</em><em>)</em>) – Reduction factor of candidates between each rung.</p></li>
+<li><p><strong>minimum_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=100</em><em>)</em>) – Number of samples to use in the lowest rung.</p></li>
+<li><p><strong>maximum_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=number of samples in the dataset</em><em>)</em>) – Number of samples to use in the top rung.
+This should not exceed the number of samples in the data.</p></li>
+<li><p><strong>minimum_early_stopping_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> (</em><em>default=1</em><em>)</em>) – Number of lowest rungs to skip.</p></li>
 </ul>
 </dd>
 </dl>
@@ -340,15 +350,15 @@ For classification, the following metrics are available:</p>
 <h3>AsyncEA<a class="headerlink" href="#asyncea" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="gama.search_methods.AsyncEA">
-<em class="property">class </em><code class="sig-prename descclassname">gama.search_methods.</code><code class="sig-name descname">AsyncEA</code><span class="sig-paren">(</span><em class="sig-param">population_size: Optional[int] = None</em>, <em class="sig-param">max_n_evaluations: Optional[int] = None</em>, <em class="sig-param">restart_callback: Optional[Callable] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/async_ea.html#AsyncEA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.AsyncEA" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.search_methods.</code><code class="sig-name descname">AsyncEA</code><span class="sig-paren">(</span><em class="sig-param">population_size: Optional[int] = None</em>, <em class="sig-param">max_n_evaluations: Optional[int] = None</em>, <em class="sig-param">restart_callback: Optional[Callable[bool]] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/async_ea.html#AsyncEA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.AsyncEA" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform asynchronous evolutionary optimization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>population_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=50</em><em>)</em>) – Maximum number of individuals in the population at any time.</p></li>
-<li><p><strong>max_n_evaluations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – If specified, only a maximum of <code class="code docutils literal notranslate"><span class="pre">max_n_evaluations</span></code> individuals are evaluated.
+<li><p><strong>population_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=50</em><em>)</em>) – Maximum number of individuals in the population at any time.</p></li>
+<li><p><strong>max_n_evaluations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – If specified, only a maximum of <code class="code docutils literal notranslate"><span class="pre">max_n_evaluations</span></code> individuals are evaluated.
 If None, the algorithm will be run until interrupted by the user or a timeout.</p></li>
-<li><p><strong>restart_callback</strong> (<em>Callable</em><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – A function with signature () -&gt; <code class="code docutils literal notranslate"><span class="pre">bool</span></code> which returns <code class="code docutils literal notranslate"><span class="pre">True</span></code> if search should be restarted.</p></li>
+<li><p><strong>restart_callback</strong> (<em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>]</em><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Function which takes no arguments and returns True if search restart.</p></li>
 </ul>
 </dd>
 </dl>
@@ -386,17 +396,18 @@ we bundle them in a class derived from <code class="code docutils literal notran
 This class should not be directly used to configure GAMA.</p>
 <dl class="method">
 <dt id="gama.search_methods.base_search.BaseSearch.dynamic_defaults">
-<code class="sig-name descname">dynamic_defaults</code><span class="sig-paren">(</span><em class="sig-param">x: pandas.core.frame.DataFrame, y: Union[pandas.core.frame.DataFrame, pandas.core.series.Series], time_limit: int</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.dynamic_defaults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.base_search.BaseSearch.dynamic_defaults" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set hyperparameter defaults taking into account dataset characteristics and time-constraints.</p>
-<p>Called before <code class="code docutils literal notranslate"><span class="pre">search</span></code>.</p>
+<code class="sig-name descname">dynamic_defaults</code><span class="sig-paren">(</span><em class="sig-param">x: pandas.core.frame.DataFrame, y: Union[pandas.core.frame.DataFrame, pandas.core.series.Series], time_limit: float</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.dynamic_defaults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.base_search.BaseSearch.dynamic_defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set hyperparameter defaults based on the dataset and time-constraints.</p>
+<p>Should be called before <code class="code docutils literal notranslate"><span class="pre">search</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>pandas.DataFrame</em>) – Features of the data.</p></li>
 <li><p><strong>y</strong> (<em>pandas.DataFrame</em><em> or </em><em>pandas.Series</em>) – Labels of the data.</p></li>
-<li><p><strong>time_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Time in seconds available for search and selecting dynamic defaults.
-There is no need to adhere to this explicitly, a <code class="code docutils literal notranslate"><span class="pre">stopit.utils.TimeoutException</span></code> will be raised.
-However, the time-limit might be an important factor in setting hyperparameter values.</p></li>
+<li><p><strong>time_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Time in seconds available for search and selecting dynamic defaults.
+There is no need to adhere to this explicitly,
+a <code class="code docutils literal notranslate"><span class="pre">stopit.utils.TimeoutException</span></code> will be raised.
+The time-limit might be an important factor in setting hyperparameter values</p></li>
 </ul>
 </dd>
 </dl>
@@ -405,14 +416,19 @@ However, the time-limit might be an important factor in setting hyperparameter v
 <dl class="method">
 <dt id="gama.search_methods.base_search.BaseSearch.hyperparameters">
 <em class="property">property </em><code class="sig-name descname">hyperparameters</code><a class="headerlink" href="#gama.search_methods.base_search.BaseSearch.hyperparameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Hyperparameter (name, value) pairs value determined by user &gt; dynamic default &gt; static default.</p>
-<p>Dynamic default values only considered if <code class="code docutils literal notranslate"><span class="pre">dynamic_defaults</span></code> has been called.</p>
+<dd><p>Hyperparameter (name, value) pairs as set/determined dynamically/default.</p>
+<p>Values may have been set directly, through dynamic defaults or static defaults.
+This is also the order in which the value of a hyperparameter is checked,
+i.e. a user set value wil overwrite any other value, and a dynamic default
+will overwrite a static one.
+Dynamic default values only considered if <code class="code docutils literal notranslate"><span class="pre">dynamic_defaults</span></code> has been called.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="gama.search_methods.base_search.BaseSearch.search">
 <code class="sig-name descname">search</code><span class="sig-paren">(</span><em class="sig-param">operations: gama.genetic_programming.operator_set.OperatorSet, start_candidates: List[gama.genetic_programming.components.individual.Individual]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.base_search.BaseSearch.search" title="Permalink to this definition">¶</a></dt>
-<dd><p>Execute search as configured. Set <code class="code docutils literal notranslate"><span class="pre">output</span></code> field of this class to the best Individuals.</p>
+<dd><p>Execute search as configured.</p>
+<p>Sets <code class="code docutils literal notranslate"><span class="pre">output</span></code> field of this class to the best Individuals.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -441,7 +457,7 @@ Refer to implemented search techniques for examples.</p>
 <dd><p>Does nothing, no time will be reserved for post-processing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The fraction of total time that should be reserved for this post-processing step.</p>
+<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Fraction of total time that to be reserved for this post-processing step.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -455,7 +471,7 @@ Refer to implemented search techniques for examples.</p>
 <dd><p>Post processing technique which trains the best found single pipeline.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The fraction of total time that should be reserved for this post-processing step.</p>
+<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Fraction of total time that to be reserved for this post-processing step.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -465,15 +481,19 @@ Refer to implemented search techniques for examples.</p>
 <h3>EnsemblePostProcessing<a class="headerlink" href="#ensemblepostprocessing" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="gama.postprocessing.EnsemblePostProcessing">
-<em class="property">class </em><code class="sig-prename descclassname">gama.postprocessing.</code><code class="sig-name descname">EnsemblePostProcessing</code><span class="sig-paren">(</span><em class="sig-param">time_fraction: float = 0.3</em>, <em class="sig-param">ensemble_size: Optional[int] = 25</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/ensemble.html#EnsemblePostProcessing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.postprocessing.EnsemblePostProcessing" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.postprocessing.</code><code class="sig-name descname">EnsemblePostProcessing</code><span class="sig-paren">(</span><em class="sig-param">time_fraction: float = 0.3</em>, <em class="sig-param">ensemble_size: Optional[int] = 25</em>, <em class="sig-param">hillclimb_size: Optional[int] = 10000</em>, <em class="sig-param">max_models: Optional[int] = 200</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/ensemble.html#EnsemblePostProcessing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.postprocessing.EnsemblePostProcessing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Ensemble construction per Caruana et al.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a><em> (</em><em>default=0.3</em><em>)</em>) – Fraction of total time reserved for Ensemble building.</p></li>
-<li><p><strong>ensemble_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=25</em><em>)</em>) – Total number of models in the ensemble.
-When a single model is chosen more than once, it will increase its weight in the ensemble and
-<em>does</em> count towards this maximum.</p></li>
+<li><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em> (</em><em>default=0.3</em><em>)</em>) – Fraction of total time reserved for Ensemble building.</p></li>
+<li><p><strong>ensemble_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=25</em><em>)</em>) – Total number of models in the ensemble.
+When a single model is chosen more than once, it will increase its weight
+in the ensemble and <em>does</em> count towards this maximum.</p></li>
+<li><p><strong>hillclimb_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=10_000</em><em>)</em>) – Number of predictions that are used to determine the ensemble score
+during hillclimbing. If <code class="code docutils literal notranslate"><span class="pre">None</span></code>, use all.</p></li>
+<li><p><strong>max_models</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=200</em><em>)</em>) – Only consider the best <code class="code docutils literal notranslate"><span class="pre">max_models</span></code> number of models. If <code class="code docutils literal notranslate"><span class="pre">None</span></code>, use all.
+Consequently also sets the max number of unique models in the ensemble.</p></li>
 </ul>
 </dd>
 </dl>
@@ -500,7 +520,7 @@ we bundle them in a class derived from <code class="code docutils literal notran
 This class should not be directly used to configure GAMA.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The fraction of total time that should be reserved for this post-processing step.</p>
+<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Fraction of total time that to be reserved for this post-processing step.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -530,14 +550,23 @@ post-processing phases.</p>
 <span id="components"></span><h3>Components<a class="headerlink" href="#module-gama.genetic_programming.components" title="Permalink to this headline">¶</a></h3>
 <p>Defines the building blocks for Individuals.
 Individuals represent machine learning pipelines in a back-end agnostic way.
-An Individual can be converted to its back-end specific representation (e.g. a scikit-learn Pipeline
-by calling its <code class="code docutils literal notranslate"><span class="pre">pipeline</span></code> property as long as a function has been provided to convert the individual to it).</p>
+An Individual can be converted to its back-end specific representation
+(e.g. a scikit-learn Pipeline) by calling its <code class="code docutils literal notranslate"><span class="pre">pipeline</span></code> property
+as long as a function has been provided to convert the individual to it.</p>
 <p>Individuals are built with:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>Terminals. Definition of a specific value for a specific hyperparameter. Immutable.</p></li>
-<li><p>Primitives. Definition of a specific algorithm; defined by Terminal input, output type and operation. Immutable.</p></li>
-<li><p>PrimitiveNodes. An instanciated Primitive with specific Terminals. Mutable for easy operations (e.g. mutation).</p></li>
+<li><dl class="simple">
+<dt>Primitives. Definition of a specific algorithm. Immutable.</dt><dd><p>Defined by Terminal input, output type and operation.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>PrimitiveNodes. Mutable for easy operations (e.g. mutation).</dt><dd><p>An instantiated Primitive with specific Terminals.</p>
+</dd>
+</dl>
+</li>
 <li><p>Fitness. Stores information about the evaluation of the individual.</p></li>
 </ul>
 </div></blockquote>
@@ -546,7 +575,7 @@ by calling its <code class="code docutils literal notranslate"><span class="pre"
 <dl class="class">
 <dt id="gama.genetic_programming.components.Individual">
 <em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Individual</code><span class="sig-paren">(</span><em class="sig-param">main_node: gama.genetic_programming.components.primitive_node.PrimitiveNode</em>, <em class="sig-param">to_pipeline: Optional[Callable] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/individual.html#Individual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.Individual" title="Permalink to this definition">¶</a></dt>
-<dd><p>A collection of PrimitiveNodes which together specify a machine learning pipeline.</p>
+<dd><p>Collection of PrimitiveNodes which together specify a machine learning pipeline.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -563,8 +592,10 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 <h4>Primitive<a class="headerlink" href="#primitive" title="Permalink to this headline">¶</a></h4>
 <dl class="class">
 <dt id="gama.genetic_programming.components.Primitive">
-<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Primitive</code><span class="sig-paren">(</span><em class="sig-param">input</em>, <em class="sig-param">output</em>, <em class="sig-param">identifier</em><span class="sig-paren">)</span><a class="headerlink" href="#gama.genetic_programming.components.Primitive" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new instance of Primitive(input, output, identifier)</p>
+<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Primitive</code><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive.html#Primitive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.Primitive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines an operator which takes input and produces output.</p>
+<p>E.g. a preprocessing or classification algorithm.</p>
+<p>Create new instance of Primitive(input, output, identifier)</p>
 </dd></dl>
 
 </div>
@@ -572,7 +603,7 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 <h4>PrimitiveNode<a class="headerlink" href="#primitivenode" title="Permalink to this headline">¶</a></h4>
 <dl class="class">
 <dt id="gama.genetic_programming.components.PrimitiveNode">
-<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">PrimitiveNode</code><span class="sig-paren">(</span><em class="sig-param">primitive: gama.genetic_programming.components.primitive.Primitive, data_node: gama.genetic_programming.components.primitive_node.PrimitiveNode, terminals: List[gama.genetic_programming.components.terminal.Terminal]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive_node.html#PrimitiveNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.PrimitiveNode" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">PrimitiveNode</code><span class="sig-paren">(</span><em class="sig-param">primitive: gama.genetic_programming.components.primitive.Primitive, data_node: Union[PrimitiveNode, str], terminals: List[gama.genetic_programming.components.terminal.Terminal]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive_node.html#PrimitiveNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.PrimitiveNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>An instantiation for a Primitive with specific Terminals.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -590,8 +621,10 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 <h4>Terminal<a class="headerlink" href="#terminal" title="Permalink to this headline">¶</a></h4>
 <dl class="class">
 <dt id="gama.genetic_programming.components.Terminal">
-<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Terminal</code><span class="sig-paren">(</span><em class="sig-param">value</em>, <em class="sig-param">output</em>, <em class="sig-param">identifier</em><span class="sig-paren">)</span><a class="headerlink" href="#gama.genetic_programming.components.Terminal" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new instance of Terminal(value, output, identifier)</p>
+<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Terminal</code><a class="reference internal" href="../_modules/gama/genetic_programming/components/terminal.html#Terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.Terminal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies a specific value for a specific type or input.</p>
+<p>E.g. a value for a hyperparameter for an algorithm.</p>
+<p>Create new instance of Terminal(value, output, identifier)</p>
 </dd></dl>
 
 </div>
@@ -603,12 +636,13 @@ Each mutation function takes an individual and modifies it in-place.</p>
 <dl class="function">
 <dt id="gama.genetic_programming.mutation.mut_insert">
 <code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">mut_insert</code><span class="sig-paren">(</span><em class="sig-param">individual: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">primitive_set: dict</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_insert" title="Permalink to this definition">¶</a></dt>
-<dd><p>Mutate an Individual in-place by inserting a PrimitiveNode at a random location, except as root node.</p>
+<dd><p>Mutate an Individual in-place by inserting a PrimitiveNode at a random location.</p>
+<p>The new PrimitiveNode will not be inserted as root node.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>individual</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – Individual to mutate in-place.</p></li>
-<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – </p></li>
+<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -622,7 +656,7 @@ Each mutation function takes an individual and modifies it in-place.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>individual</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – Individual to mutate in-place.</p></li>
-<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – </p></li>
+<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -636,7 +670,7 @@ Each mutation function takes an individual and modifies it in-place.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>individual</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – Individual to mutate in-place.</p></li>
-<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – </p></li>
+<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -644,13 +678,17 @@ Each mutation function takes an individual and modifies it in-place.</p>
 
 <dl class="function">
 <dt id="gama.genetic_programming.mutation.mut_shrink">
-<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">mut_shrink</code><span class="sig-paren">(</span><em class="sig-param">individual: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">primitive_set: dict = None</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_shrink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_shrink" title="Permalink to this definition">¶</a></dt>
-<dd><p>Mutates an Individual in-place by removing any number of primitive nodes, starting with the last.</p>
+<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">mut_shrink</code><span class="sig-paren">(</span><em class="sig-param">individual: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">primitive_set: dict = None</em>, <em class="sig-param">shrink_by: Optional[int] = None</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_shrink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_shrink" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mutates an Individual in-place by removing any number of primitive nodes.</p>
+<p>Primitive nodes are removed from the preprocessing end.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>individual</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – Individual to mutate in-place.</p></li>
-<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a><em>, </em><em>optional</em>) – Not used. Present to create a matching function signature with other mutations.</p></li>
+<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><em>optional</em>) – Not used. Present to create a matching function signature with other mutations.</p></li>
+<li><p><strong>shrink_by</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Number of primitives to remove.
+Must be at least one greater than the number of primitives in <code class="code docutils literal notranslate"><span class="pre">individual</span></code>.
+If None, a random number of primitives is removed.</p></li>
 </ul>
 </dd>
 </dl>
@@ -658,7 +696,7 @@ Each mutation function takes an individual and modifies it in-place.</p>
 
 <dl class="function">
 <dt id="gama.genetic_programming.mutation.random_valid_mutation_in_place">
-<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">random_valid_mutation_in_place</code><span class="sig-paren">(</span><em class="sig-param">individual: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">primitive_set: dict</em><span class="sig-paren">)</span> &#x2192; Callable<a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#random_valid_mutation_in_place"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.random_valid_mutation_in_place" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">random_valid_mutation_in_place</code><span class="sig-paren">(</span><em class="sig-param">individual: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">primitive_set: dict</em>, <em class="sig-param">max_length: Optional[int] = None</em><span class="sig-paren">)</span> &#x2192; Callable<a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#random_valid_mutation_in_place"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.random_valid_mutation_in_place" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply a random valid mutation in place.</p>
 <p>The random mutation can be one of:</p>
 <blockquote>
@@ -666,14 +704,15 @@ Each mutation function takes an individual and modifies it in-place.</p>
 <li><p>mut_random_primitive</p></li>
 <li><p>mut_random_terminal, if the individual has at least one</p></li>
 <li><p>mutShrink, if individual has at least two primitives</p></li>
-<li><p>mutInsert</p></li>
+<li><p>mutInsert, if it would not exceed <code class="code docutils literal notranslate"><span class="pre">new_max_length</span></code> when specified.</p></li>
 </ul>
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>individual</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – An individual to be mutated <em>in-place</em>.</p></li>
-<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – A dictionary defining the set of primitives and terminals.</p></li>
+<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – A dictionary defining the set of primitives and terminals.</p></li>
+<li><p><strong>max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – If specified, impose a maximum length on the new individual.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -688,16 +727,16 @@ Each mutation function takes an individual and modifies it in-place.</p>
 </div>
 <div class="section" id="module-gama.genetic_programming.crossover">
 <span id="crossover"></span><h3>Crossover<a class="headerlink" href="#module-gama.genetic_programming.crossover" title="Permalink to this headline">¶</a></h3>
-<p>Functions which take two Individuals, and produce at least one new Individual from them.</p>
+<p>Functions which take two Individuals and produce at least one new Individual.</p>
 <dl class="function">
 <dt id="gama.genetic_programming.crossover.crossover_primitives">
-<code class="sig-prename descclassname">gama.genetic_programming.crossover.</code><code class="sig-name descname">crossover_primitives</code><span class="sig-paren">(</span><em class="sig-param">individual1: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">individual2: gama.genetic_programming.components.individual.Individual</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#crossover_primitives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.crossover.crossover_primitives" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crossover two individuals by splitting both at a random PrimitiveNode and switching one part out.</p>
+<code class="sig-prename descclassname">gama.genetic_programming.crossover.</code><code class="sig-name descname">crossover_primitives</code><span class="sig-paren">(</span><em class="sig-param">ind1: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">ind2: gama.genetic_programming.components.individual.Individual</em><span class="sig-paren">)</span> &#x2192; Tuple[gama.genetic_programming.components.individual.Individual, gama.genetic_programming.components.individual.Individual]<a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#crossover_primitives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.crossover.crossover_primitives" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crossover two individuals by exchanging any number of preprocessing steps.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>individual1</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with individual2.</p></li>
-<li><p><strong>individual2</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with individual1.</p></li>
+<li><p><strong>ind1</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with individual2.</p></li>
+<li><p><strong>ind2</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with individual1.</p></li>
 </ul>
 </dd>
 </dl>
@@ -705,13 +744,14 @@ Each mutation function takes an individual and modifies it in-place.</p>
 
 <dl class="function">
 <dt id="gama.genetic_programming.crossover.crossover_terminals">
-<code class="sig-prename descclassname">gama.genetic_programming.crossover.</code><code class="sig-name descname">crossover_terminals</code><span class="sig-paren">(</span><em class="sig-param">individual1: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">individual2: gama.genetic_programming.components.individual.Individual</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#crossover_terminals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.crossover.crossover_terminals" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crossover two individuals in-place by exchanging two Terminals with shared output type but different values.</p>
+<code class="sig-prename descclassname">gama.genetic_programming.crossover.</code><code class="sig-name descname">crossover_terminals</code><span class="sig-paren">(</span><em class="sig-param">ind1: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">ind2: gama.genetic_programming.components.individual.Individual</em><span class="sig-paren">)</span> &#x2192; Tuple[gama.genetic_programming.components.individual.Individual, gama.genetic_programming.components.individual.Individual]<a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#crossover_terminals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.crossover.crossover_terminals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crossover two individuals in-place by exchanging two Terminals.</p>
+<p>Terminals must share output type but have different values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>individual1</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with individual2.</p></li>
-<li><p><strong>individual2</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with individual1.</p></li>
+<li><p><strong>ind1</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with individual2.</p></li>
+<li><p><strong>ind2</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with individual1.</p></li>
 </ul>
 </dd>
 </dl>
@@ -719,17 +759,24 @@ Each mutation function takes an individual and modifies it in-place.</p>
 
 <dl class="function">
 <dt id="gama.genetic_programming.crossover.random_crossover">
-<code class="sig-prename descclassname">gama.genetic_programming.crossover.</code><code class="sig-name descname">random_crossover</code><span class="sig-paren">(</span><em class="sig-param">individual1: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">individual2: gama.genetic_programming.components.individual.Individual</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#random_crossover"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.crossover.random_crossover" title="Permalink to this definition">¶</a></dt>
-<dd><p>Perform a random valid crossover between two individuals in-place, if there is one.</p>
+<code class="sig-prename descclassname">gama.genetic_programming.crossover.</code><code class="sig-name descname">random_crossover</code><span class="sig-paren">(</span><em class="sig-param">ind1: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">ind2: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">max_length: Optional[int] = None</em><span class="sig-paren">)</span> &#x2192; Tuple[gama.genetic_programming.components.individual.Individual, gama.genetic_programming.components.individual.Individual]<a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#random_crossover"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.crossover.random_crossover" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random valid crossover between two individuals in-place, if it can be done.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>individual1</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with individual2.</p></li>
-<li><p><strong>individual2</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with individual1.</p></li>
+<li><p><strong>ind1</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with ind2.</p></li>
+<li><p><strong>ind2</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with ind1.</p></li>
+<li><p><strong>max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em>(</em><em>default=None</em><em>)</em>) – The first individual in the returned tuple has at most <code class="code docutils literal notranslate"><span class="pre">max_length</span></code> primitives.
+Requires both provided individuals to contain at most <code class="code docutils literal notranslate"><span class="pre">max_length</span></code> primitives.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.7)"><strong>ValueError</strong></a> – If there is no valid crossover function for the two individuals.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><strong>ValueError</strong></a> – <ul class="simple">
+<li><p>If there is no valid crossover function for the two individuals.
+    - If <code class="code docutils literal notranslate"><span class="pre">max_length</span></code> is set and either <code class="code docutils literal notranslate"><span class="pre">ind1</span></code> or <code class="code docutils literal notranslate"><span class="pre">ind2</span></code> contain
+      more primitives than <code class="code docutils literal notranslate"><span class="pre">max_length</span></code>.</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -739,7 +786,8 @@ Each mutation function takes an individual and modifies it in-place.</p>
 <hr class="docutils" />
 <div class="section" id="module-gama.visualization">
 <span id="visualization"></span><h2>Visualization<a class="headerlink" href="#module-gama.visualization" title="Permalink to this headline">¶</a></h2>
-<p>Contains the dash app to visualize log results. See <a class="reference internal" href="../technical_guide/visualization.html#visualization"><span class="std std-ref">Visualization</span></a> in the Technical Guide.</p>
+<p>Contains the dash app to visualize log results.
+See <a class="reference internal" href="../technical_guide/visualization.html#visualization"><span class="std std-ref">Visualization</span></a> in the Technical Guide.</p>
 </div>
 <hr class="docutils" />
 <div class="section" id="utilities">
@@ -751,14 +799,15 @@ Each mutation function takes an individual and modifies it in-place.</p>
 <h4>Pareto Front<a class="headerlink" href="#pareto-front" title="Permalink to this headline">¶</a></h4>
 <dl class="class">
 <dt id="gama.utilities.generic.paretofront.ParetoFront">
-<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.paretofront.</code><code class="sig-name descname">ParetoFront</code><span class="sig-paren">(</span><em class="sig-param">start_list: Optional[List[Tuple[Any, ...]]] = None, get_values_fn: Optional[Callable[[Any], Tuple[Any, ...]]] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/paretofront.html#ParetoFront"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.paretofront.ParetoFront" title="Permalink to this definition">¶</a></dt>
-<dd><p>A Pareto front is a list of tuples in which no one tuple is dominated by another.</p>
+<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.paretofront.</code><code class="sig-name descname">ParetoFront</code><span class="sig-paren">(</span><em class="sig-param">start_list: Optional[List[Any]] = None</em>, <em class="sig-param">get_values_fn: Optional[Callable[Any</em>, <em class="sig-param">Tuple[Any</em>, <em class="sig-param">...]]] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/paretofront.html#ParetoFront"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.paretofront.ParetoFront" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of tuples in which no one tuple is dominated by another.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>start_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em><em></em>) – List of items of which to calculate the Pareto front.</p></li>
-<li><p><strong>get_values_fn</strong> (<em>Callable</em><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Function that takes an item and returns a tuple of values such that each should be maximized.
-If left None, it is assumed that items are already tuples of which each value should be maximized.</p></li>
+<li><p><strong>start_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em><em></em>) – List of items of which to calculate the Pareto front.</p></li>
+<li><p><strong>get_values_fn</strong> (<em>Callable</em><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Function that takes an item and returns a tuple of values,
+such that each should be maximized.
+If left None, it is assumed that items are already such tuples.</p></li>
 </ul>
 </dd>
 </dl>
@@ -787,7 +836,7 @@ If left None, it is assumed that items are already tuples of which each value sh
 <dd><p>Simple object that helps keep track of time over multiple activities.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>total_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – The total time available across activities.
+<dd class="field-odd"><p><strong>total_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – The total time available across activities.
 If set to None, the <code class="code docutils literal notranslate"><span class="pre">total_time_remaining</span></code> property will be unavailable.</p>
 </dd>
 </dl>
@@ -805,15 +854,13 @@ jobs while they were running.</p>
 <dl class="class">
 <dt id="gama.utilities.generic.async_evaluator.AsyncEvaluator">
 <em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.async_evaluator.</code><code class="sig-name descname">AsyncEvaluator</code><span class="sig-paren">(</span><em class="sig-param">n_workers: Optional[int] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/async_evaluator.html#AsyncEvaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.async_evaluator.AsyncEvaluator" title="Permalink to this definition">¶</a></dt>
-<dd><p>ContextManager which manages subprocesses on which arbitrary* functions can be evaluated.</p>
-<ul class="simple">
-<li><p>The function and all its arguments must be picklable.</p></li>
-</ul>
-<p>You can not use the same AsyncEvaluator in two different contexts. Doing so raises a <code class="code docutils literal notranslate"><span class="pre">RuntimeError</span></code>.</p>
+<dd><p>Manages subprocesses on which arbitrary functions can be evaluated.</p>
+<p>The function and all its arguments must be picklable.
+Using the same AsyncEvaluator in two different contexts raises a <code class="code docutils literal notranslate"><span class="pre">RuntimeError</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>n_workers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Maximum number of subprocesses to run for parallel evaluations.
-If None, use <code class="code docutils literal notranslate"><span class="pre">AsyncEvaluator.n_jobs</span></code> which defaults to multiprocessing.cpu_count().</p>
+<dd class="field-odd"><p><strong>n_workers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Maximum number of subprocesses to run for parallel evaluations.
+Defaults to <code class="code docutils literal notranslate"><span class="pre">AsyncEvaluator.n_jobs</span></code>, using all cores unless overwritten.</p>
 </dd>
 </dl>
 </dd></dl>

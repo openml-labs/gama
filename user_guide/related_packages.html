@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -173,7 +173,7 @@ TPOT uses a synchronous form of evolution, whereas GAMA uses asynchronous evolut
 The advantage of asynchronous evolution is that in theory it is able to utilize computing resources better.
 This is due to generation-based evolution waiting for the last individual in the population to be evaluated in each generation,
 whereas asynchronous evolution does not have any point where all evaluations need to be finished at the same time.</p>
-<p>TPOT sports some great user-friendly features such as a command-line interface (in addition to its Python API),
+<p>TPOT sports some great user-friendly features such as a less limited command-line interface,
 code export (creates a file constructing the machine learning pipeline without a TPOT dependency)
 and <a class="reference external" href="https://dask.org/">DASK</a> integration (which allows the use of a Dask cluster for pipeline evaluations and further optimizations).</p>
 <p>GAMA focuses more on extensibility and research friendliness,

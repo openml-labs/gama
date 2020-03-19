@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
 
@@ -152,38 +152,40 @@
            <div itemprop="articleBody">
             
   <h1>Source code for gama.genetic_programming.components.terminal</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">NamedTuple</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">NamedTuple</span>
 
-<span class="n">DATA_TERMINAL</span> <span class="o">=</span> <span class="s1">&#39;data&#39;</span>
-
-<span class="c1"># Specifies a specific value for a specific type or input, e.g. a value for a hyperparameter for an algorithm.</span>
-<span class="n">Terminal</span> <span class="o">=</span> <span class="n">NamedTuple</span><span class="p">(</span><span class="s2">&quot;Terminal&quot;</span><span class="p">,</span>
-                      <span class="p">[(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
-                       <span class="p">(</span><span class="s2">&quot;output&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
-                       <span class="p">(</span><span class="s2">&quot;identifier&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)])</span>
+<span class="n">DATA_TERMINAL</span> <span class="o">=</span> <span class="s2">&quot;data&quot;</span>
 
 
-<span class="k">def</span> <span class="nf">str_format_terminal_value</span><span class="p">(</span><span class="n">terminal</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">terminal</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">terminal</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="n">terminal</span><span class="o">.</span><span class="n">value</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">terminal</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+<div class="viewcode-block" id="Terminal"><a class="viewcode-back" href="../../../../api/index.html#gama.genetic_programming.components.Terminal">[docs]</a><span class="k">class</span> <span class="nc">Terminal</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Specifies a specific value for a specific type or input.</span>
+
+<span class="sd">    E.g. a value for a hyperparameter for an algorithm.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">value</span><span class="p">:</span> <span class="nb">object</span>
+    <span class="n">output</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">identifier</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; str: e.g. &quot;tol=0.5&quot; &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">format_hyperparameter_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; str: e.g. &quot;FastICA.tol=0.5&quot;.</span>
+
+<span class="sd">        If the hyperparameter is shared across primitives, there is no prefix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">format_hyperparameter_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+<span class="k">def</span> <span class="nf">format_hyperparameter_value</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39;&quot;</span>  <span class="c1"># Quoted</span>
+    <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>  <span class="c1"># type: ignore</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">terminal</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">terminal__str__</span><span class="p">(</span><span class="n">terminal</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; str: e.g. &quot;tol=0.5&quot; &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">terminal</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="n">str_format_terminal_value</span><span class="p">(</span><span class="n">terminal</span><span class="p">))</span>
-
-
-<span class="k">def</span> <span class="nf">terminal__repr__</span><span class="p">(</span><span class="n">terminal</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; str: e.g. &quot;FastICA.tol=0.5&quot;. If the hyperparameter is shared across primitives, there is no prefix. &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">terminal</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="n">str_format_terminal_value</span><span class="p">(</span><span class="n">terminal</span><span class="p">))</span>
-
-
-<span class="n">Terminal</span><span class="o">.</span><span class="fm">__str__</span> <span class="o">=</span> <span class="n">terminal__str__</span>
-<span class="n">Terminal</span><span class="o">.</span><span class="fm">__repr__</span> <span class="o">=</span> <span class="n">terminal__repr__</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 </pre></div>
 
            </div>

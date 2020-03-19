@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -161,7 +161,7 @@ All you need to do is supply the data, and GAMA will automatically try to find a
 For the <em>machine learning pipeline</em> GAMA considers data preprocessing steps, various machine learning algorithms, and their possible hyperparameters configurations.
 This takes away the knowledge and labour intensive work of selecting the right algorithms and tuning their hyperparameters yourself.
 Using GAMA is as simple as using:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
 <span class="n">automl</span> <span class="o">=</span>  <span class="n">GamaClassifier</span><span class="p">()</span>
 <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
@@ -170,6 +170,10 @@ Using GAMA is as simple as using:</p>
 </div>
 <p>You can install GAMA from PyPI with pip:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">gama</span>
+</pre></div>
+</div>
+<p>Or if you would like to include the graphical frontend:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">gama</span><span class="p">[</span><span class="n">vis</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>To get more basic information on GAMA and its AutoML functionality, read more in the <a class="reference internal" href="user_guide/index.html#user-guide-index"><span class="std std-ref">User Guide</span></a>.
@@ -187,6 +191,12 @@ If your question has not been answered there either, please open a new issue and
 <li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#using-arff-files">Using ARFF files</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#simple-features">Simple Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#command-line-interface">Command Line Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#code-export">Code Export</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#dashboard">Dashboard</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#important-hyperparameters">Important Hyperparameters</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#optimization">Optimization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#resources">Resources</a></li>
@@ -206,10 +216,7 @@ If your question has not been answered there either, please open a new issue and
 <li class="toctree-l3"><a class="reference internal" href="technical_guide/index.html#configuring-the-automl-pipeline">Configuring the AutoML pipeline</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="technical_guide/index.html#logging">Logging</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="technical_guide/index.html#generated-files">Generated Files</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="technical_guide/index.html#logging">Logging</a></li>
 <li class="toctree-l2"><a class="reference internal" href="technical_guide/index.html#visualization">Visualization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="technical_guide/index.html#gama-search-space-configuration">GAMA Search Space Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="technical_guide/index.html#events">Events</a></li>
@@ -266,13 +273,19 @@ If your question has not been answered there either, please open a new issue and
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#version-20-1-0">Version 20.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#version-20-0-0">Version 20.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#version-19-11-2">Version 19.11.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#version-19-11-1">Version 19.11.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#version-19-11-0">Version 19.11.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="releases.html#version-19-08-0">Version 19.08.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="releases.html#version-0-1-0">Version 0.1.0</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="contributing/index.html">Contributing</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="contributing/index.html#github-workflow-for-your-contribution">Github workflow for your contribution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing/index.html#running-unit-tests">Running unit tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/index.html#setting-up-the-development-dependencies">Setting up the development dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/index.html#running-code-tests">Running code tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contributing/index.html#generating-documentation">Generating Documentation</a></li>
 </ul>
 </li>

@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
 
@@ -153,13 +153,15 @@
             
   <h1>Source code for gama.genetic_programming.components.individual</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">uuid</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
-<span class="kn">from</span> <span class="nn">.primitive_node</span> <span class="k">import</span> <span class="n">PrimitiveNode</span>
-<span class="kn">from</span> <span class="nn">.terminal</span> <span class="k">import</span> <span class="n">DATA_TERMINAL</span><span class="p">,</span> <span class="n">Terminal</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">.fitness</span> <span class="kn">import</span> <span class="n">Fitness</span>
+<span class="kn">from</span> <span class="nn">.primitive_node</span> <span class="kn">import</span> <span class="n">PrimitiveNode</span>
+<span class="kn">from</span> <span class="nn">.terminal</span> <span class="kn">import</span> <span class="n">Terminal</span>
 
 
 <div class="viewcode-block" id="Individual"><a class="viewcode-back" href="../../../../api/index.html#gama.genetic_programming.components.Individual">[docs]</a><span class="k">class</span> <span class="nc">Individual</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; A collection of PrimitiveNodes which together specify a machine learning pipeline.</span>
+    <span class="sd">&quot;&quot;&quot; Collection of PrimitiveNodes which together specify a machine learning pipeline.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -170,48 +172,59 @@
 <span class="sd">         If not provided, the `pipeline` property will be unavailable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main_node</span><span class="p">:</span> <span class="n">PrimitiveNode</span><span class="p">,</span> <span class="n">to_pipeline</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">main_node</span><span class="p">:</span> <span class="n">PrimitiveNode</span><span class="p">,</span> <span class="n">to_pipeline</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Fitness</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">main_node</span> <span class="o">=</span> <span class="n">main_node</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_to_pipeline</span> <span class="o">=</span> <span class="n">to_pipeline</span>
 
-    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Individual</span><span class="p">)</span> <span class="ow">and</span> <span class="n">other</span><span class="o">.</span><span class="n">_id</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;Individual </span><span class="si">{}</span><span class="se">\n</span><span class="s2">Pipeline: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">Fitness: </span><span class="si">{}</span><span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline_str</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Individual </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Pipeline: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline_str</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">Fitness: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Calls the `to_pipeline` method on itself. Typically a scikit-learn Pipeline. &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Calls the `to_pipeline` method on itself.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_pipeline</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;`pipeline` not available because `to_pipeline` was not set on __init__.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                <span class="s2">&quot;pipeline not available because `to_pipeline` was not set on __init__.&quot;</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">short_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">short_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; str: e.g. &quot;Binarizer&gt;BernoulliNB&quot; &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;&gt;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">primitive</span><span class="o">.</span><span class="n">_primitive</span><span class="p">)</span> <span class="k">for</span> <span class="n">primitive</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">primitives</span><span class="p">)])</span>
+        <span class="k">return</span> <span class="n">step_separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">primitive</span><span class="o">.</span><span class="n">_primitive</span><span class="p">)</span> <span class="k">for</span> <span class="n">primitive</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">primitives</span><span class="p">)]</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">pipeline_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; str: e.g. &quot;BernoulliNB(Binarizer(data, Binarizer.threshold=0.6), BernoulliNB.alpha=1.0)&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; str: e.g. &quot;BernoulliNB(Binarizer(data, Binarizer.threshold=0.6), BernoulliNB.alpha=1.0)&quot; &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_node</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">primitives</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">PrimitiveNode</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; List[PrimitiveNode]: lists all primitive nodes, starting with the Individual&#39;s main node. &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Lists all primitive nodes, starting with the Individual&#39;s main node. &quot;&quot;&quot;</span>
         <span class="n">primitives</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">main_node</span><span class="p">]</span>
         <span class="n">current_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_node</span><span class="o">.</span><span class="n">_data_node</span>
-        <span class="k">while</span> <span class="n">current_node</span> <span class="o">!=</span> <span class="n">DATA_TERMINAL</span><span class="p">:</span>
+        <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current_node</span><span class="p">,</span> <span class="n">PrimitiveNode</span><span class="p">):</span>  <span class="c1"># i.e. not DATA_TERMINAL</span>
             <span class="n">primitives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_node</span><span class="p">)</span>
             <span class="n">current_node</span> <span class="o">=</span> <span class="n">current_node</span><span class="o">.</span><span class="n">_data_node</span>
         <span class="k">return</span> <span class="n">primitives</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">terminals</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Terminal</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; List[Terminal]: lists all terminals connected to the Individual&#39;s primitive nodes. &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">terminal</span> <span class="k">for</span> <span class="n">primitive</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">primitives</span> <span class="k">for</span> <span class="n">terminal</span> <span class="ow">in</span> <span class="n">primitive</span><span class="o">.</span><span class="n">_terminals</span><span class="p">]</span>
+        <span class="sd">&quot;&quot;&quot; Lists all terminals connected to the Individual&#39;s primitive nodes. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">terminal</span> <span class="k">for</span> <span class="n">prim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">primitives</span> <span class="k">for</span> <span class="n">terminal</span> <span class="ow">in</span> <span class="n">prim</span><span class="o">.</span><span class="n">_terminals</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">replace_terminal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">new_terminal</span><span class="p">:</span> <span class="n">Terminal</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Replace the terminal at `position` by `new_terminal` in-place.</span>
@@ -231,14 +244,17 @@
                     <span class="n">primitive</span><span class="o">.</span><span class="n">_terminals</span><span class="p">[</span><span class="n">position</span> <span class="o">-</span> <span class="n">scan_position</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_terminal</span>
                     <span class="k">return</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;New terminal does not share output type with the one at position </span><span class="si">{}</span><span class="s2">.&quot;</span>
-                                     <span class="s2">&quot;Old: </span><span class="si">{}</span><span class="s2">. New: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">position</span><span class="p">,</span>
-                                                                <span class="n">terminal_to_be_replaced</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
-                                                                <span class="n">new_terminal</span><span class="o">.</span><span class="n">identifier</span><span class="p">))</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;New terminal does not share output type with the old.&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;Old: </span><span class="si">{</span><span class="n">terminal_to_be_replaced</span><span class="o">.</span><span class="n">identifier</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;New: </span><span class="si">{</span><span class="n">new_terminal</span><span class="o">.</span><span class="n">identifier</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">scan_position</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">primitive</span><span class="o">.</span><span class="n">_terminals</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">scan_position</span> <span class="o">&lt;</span> <span class="n">position</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Position </span><span class="si">{}</span><span class="s2"> is out of range with </span><span class="si">{}</span><span class="s2"> terminals.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">scan_position</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Position </span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2"> is out of range with </span><span class="si">{</span><span class="n">scan_position</span><span class="si">}</span><span class="s2"> terminals.&quot;</span>
+            <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">replace_primitive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">new_primitive</span><span class="p">:</span> <span class="n">PrimitiveNode</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Replace the PrimitiveNode at `position` by `new_primitive`.</span>
@@ -254,7 +270,7 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">primitive_node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">primitives</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">position</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">primitive_node</span><span class="o">.</span><span class="n">_primitive</span><span class="o">.</span><span class="n">output</span> <span class="o">!=</span> <span class="n">new_primitive</span><span class="o">.</span><span class="n">_primitive</span><span class="o">.</span><span class="n">output</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;New primitive does not produce same output as the primitive to be replaced.&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;New primitive output type differs from old.&quot;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">primitive_node</span><span class="o">.</span><span class="n">_data_node</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                     <span class="n">new_primitive</span><span class="o">.</span><span class="n">_data_node</span> <span class="o">=</span> <span class="n">primitive_node</span><span class="o">.</span><span class="n">_data_node</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -263,17 +279,19 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">last_primitive</span> <span class="o">=</span> <span class="n">primitive_node</span>
 
-        <span class="k">if</span> <span class="n">position</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">last_primitive</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">main_node</span> <span class="o">=</span> <span class="n">new_primitive</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">last_primitive</span><span class="o">.</span><span class="n">_data_node</span> <span class="o">=</span> <span class="n">new_primitive</span>
 
     <span class="k">def</span> <span class="nf">copy_as_new</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Make a deep copy of the individual, but with fitness set to None and assigned a new id. &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">Individual</span><span class="p">(</span><span class="n">main_node</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">main_node</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">to_pipeline</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_pipeline</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot; Make deep copy of self, but with fitness None and assigned a new id. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Individual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_node</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">to_pipeline</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_pipeline</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">string</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">primitive_set</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">to_pipeline</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">string</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">primitive_set</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">to_pipeline</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Construct an Individual from its `pipeline_str` representation.</span>
 
 <span class="sd">        Parameters</span>

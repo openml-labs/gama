@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -91,7 +91,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#github-workflow-for-your-contribution">Github workflow for your contribution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#running-unit-tests">Running unit tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-the-development-dependencies">Setting up the development dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-code-tests">Running code tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generating-documentation">Generating Documentation</a></li>
 </ul>
 </li>
@@ -176,6 +177,12 @@ and for discussion on its implementation.</p>
 When you are finished, make sure all the unit tests work and the documentation is updated before submitting a pull request.
 In the pull request, mention the issue that discusses the contribution and please mention any additional information
 that might be useful for reviewing the changes.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We recently <a class="reference external" href="https://black.readthedocs.io/en/stable/">blackened</a> our code.
+Before that we maintained a 120 character line limit, which far exceeds the limit
+of 88 by black. Refactoring the code to read well at 88 characters is an ongoing process.</p>
+</div>
 <div class="section" id="github-workflow-for-your-contribution">
 <span id="contributing-howto"></span><h2>Github workflow for your contribution<a class="headerlink" href="#github-workflow-for-your-contribution" title="Permalink to this headline">¶</a></h2>
 <p>The workflow GAMA maintains is described in more detail in this
@@ -218,25 +225,54 @@ This can be done using the Github website, where a button should pop up on your 
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="running-unit-tests">
-<h2>Running unit tests<a class="headerlink" href="#running-unit-tests" title="Permalink to this headline">¶</a></h2>
-<p>To run the unit tests, make sure optional dependencies for developers are installed.
-From GAMA directory run:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span><span class="p">[</span><span class="n">test</span><span class="p">]</span>
+<div class="section" id="setting-up-the-development-dependencies">
+<h2>Setting up the development dependencies<a class="headerlink" href="#setting-up-the-development-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>For development, you will need some additional packages for code style checks and running tests.
+Navigate to your GAMA directory and run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span><span class="p">[</span><span class="n">dev</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>This installs test dependencies such as <code class="docutils literal notranslate"><span class="pre">pytest</span></code> and plugins.</p>
-<p>The unit tests are separated into two suites: unit and system tests.
-Unit tests are designed to test isolated functions quickly.
-Due to the big configuration space and random nature of search,
-it is impossible to test all scenarios thoroughly in unit tests.
-System tests perform full AutoML runs (on tiny datasets) and are meant to pick up on things missed by unit tests.
-To run a test suite run:</p>
+<p>This installs test dependencies such as <code class="docutils literal notranslate"><span class="pre">pytest</span></code> and plugins.
+It also installs <a class="reference external" href="https://pre-commit.com/">pre-commit</a>,
+a tool for automatically running several style checks before any commit.
+Pre-commit will run <a class="reference external" href="https://black.readthedocs.io/en/stable/">black</a> code formatter,
+<a class="reference external" href="https://flake8.pycqa.org/en/latest/">flake8</a> style checker and
+<a class="reference external" href="https://mypy.readthedocs.io/en/stable/">mypy</a> type checker before any commit.
+While pre-commit is installed through the above command,
+it itself needs to install the dependencies specified for our pre-commit workflow:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pre</span><span class="o">-</span><span class="n">commit</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>Run <code class="docutils literal notranslate"><span class="pre">pre-commit</span> <span class="pre">run</span> <span class="pre">--all-files</span></code> to see the pre-commit in action, it should output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">black</span><span class="o">....................................................................</span><span class="n">Passed</span>
+<span class="n">mypy</span><span class="o">.....................................................................</span><span class="n">Passed</span>
+<span class="n">flake8</span><span class="o">...................................................................</span><span class="n">Passed</span>
+</pre></div>
+</div>
+<p>You should now be set up for development!
+Pre-commit will run these tests whenever you attempt to make a commit.
+If any of the checks fail, the commit will be aborted and you will be able to make the required changes before attempting to commit again.
+We use pre-commit to ensure a consistent code style and make PR reviews easier.
+Note that pre-commit does not run any code tests.</p>
+</div>
+<div class="section" id="running-code-tests">
+<h2>Running code tests<a class="headerlink" href="#running-code-tests" title="Permalink to this headline">¶</a></h2>
+<p>If you followed the instructions above, the required test dependencies should be installed on your system.
+The tests are separated into unit and system tests, based on scope.</p>
+<p>Unit tests are for quickly testable isolated functions.
+Examples include creation of machine learning pipelines, selection procedures or data formatting.</p>
+<p>System tests perform full AutoML runs on tiny datasets with limited resources.
+They are meant to ensure that the individual snippets tested in unit tests are integrated well together.
+It also functions as a sanity check that the system as a whole produces reasonable results.
+While complete state coverage of the code will always be impossible for this type of system,
+the system tests aim to cover as much as possible within a small time frame.</p>
+<p>To run a tests run:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pytest</span> <span class="o">-</span><span class="n">sv</span> <span class="o">-</span><span class="n">n</span> <span class="mi">4</span> <span class="n">tests</span><span class="o">/</span><span class="n">SUITE</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">SUITE</span></code> is either <code class="docutils literal notranslate"><span class="pre">unit</span></code> or <code class="docutils literal notranslate"><span class="pre">system</span></code>.
-The <code class="docutils literal notranslate"><span class="pre">-sv</span> <span class="pre">-n</span> <span class="pre">4</span></code> flags are optional, but give succinct feedback on what is being run (<code class="docutils literal notranslate"><span class="pre">-sv</span></code>) and run tests in parallel (<code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">4</span></code>).
+The <code class="docutils literal notranslate"><span class="pre">-sv</span> <span class="pre">-n</span> <span class="pre">4</span></code> flags are optional,
+but give succinct feedback on what is being run (<code class="docutils literal notranslate"><span class="pre">-sv</span></code>) and run tests in parallel (<code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">4</span></code>).
 For more information, run <code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">-h</span></code>.</p>
 </div>
 <div class="section" id="generating-documentation">

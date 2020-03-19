@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -184,16 +184,16 @@ In GAMA we currently support flexibility in the AutoML pipeline in two stages: s
 <p>By default ‘prepend pipeline’, ‘Asynchronous EA’ and ‘FitBest’ are chosen for pre-processing, search and post-processing, respectively.
 However, it is easy to change this, or to change the hyperparameters with which each component is used.
 For example, searching with ‘Asynchronous Successive Halving’ and creating an ensemble during post-processing:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
-<span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="k">import</span> <span class="n">ASHA</span>  <span class="c1">#Asynchronous Successive Halving Algorithm</span>
-<span class="kn">from</span> <span class="nn">gama.postprocessing</span> <span class="k">import</span> <span class="n">Ensemble</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
+<span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="kn">import</span> <span class="n">AsynchronousSuccessiveHalving</span>
+<span class="kn">from</span> <span class="nn">gama.postprocessing</span> <span class="kn">import</span> <span class="n">EnsemblePostProcessing</span>
 
-<span class="n">custom_pipeline_gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="n">ASHA</span><span class="p">(),</span> <span class="n">post_processing</span><span class="o">=</span><span class="n">EnsemblePostProcessing</span><span class="p">())</span>
+<span class="n">custom_pipeline_gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="n">AsynchronousSuccessiveHalving</span><span class="p">(),</span> <span class="n">post_processing</span><span class="o">=</span><span class="n">EnsemblePostProcessing</span><span class="p">())</span>
 </pre></div>
 </div>
 <p>or using ‘Asynchronous EA’ but with custom hyperparameters:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="k">import</span> <span class="n">GamaClassifier</span>
-<span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="k">import</span> <span class="n">AsyncEA</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
+<span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="kn">import</span> <span class="n">AsyncEA</span>
 
 <span class="n">custom_pipeline_gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="n">AsyncEA</span><span class="p">(</span><span class="n">population_size</span><span class="o">=</span><span class="mi">30</span><span class="p">))</span>
 </pre></div>
