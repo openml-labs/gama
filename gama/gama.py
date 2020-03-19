@@ -7,7 +7,18 @@ import os
 import random
 import subprocess
 import time
-from typing import Union, Tuple, Optional, Dict, Type, List, Callable, Any, Iterable
+from typing import (
+    Union,
+    Tuple,
+    Optional,
+    Dict,
+    Type,
+    List,
+    Callable,
+    Any,
+    Iterable,
+    cast,
+)
 import warnings
 
 import pandas as pd
@@ -16,7 +27,7 @@ import stopit
 from sklearn.pipeline import Pipeline
 
 import gama.genetic_programming.compilers.scikitlearn
-from gama.genetic_programming.components import Individual
+from gama.genetic_programming.components import Individual, Fitness
 from gama.logging.machine_logging import log_event, TOKENS
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
@@ -425,7 +436,12 @@ class Gama(ABC):
             activity_meta=[self._post_processing.__class__.__name__],
         ):
             best_individuals = list(
-                reversed(sorted(self._final_pop, key=lambda ind: ind.fitness.values))
+                reversed(
+                    sorted(
+                        self._final_pop,
+                        key=lambda ind: cast(Fitness, ind.fitness).values,
+                    )
+                )
             )
             self._post_processing.dynamic_defaults(self)
             self.model = self._post_processing.post_process(
