@@ -10,6 +10,8 @@ env:
 jobs:
   include:
   - env: JOB=CHECK
+  - env: JOB=deploy
+    if: branch = master
 
 install:
   - ./ci_scripts/install.sh
@@ -17,3 +19,15 @@ script:
   - ./ci_scripts/script.sh
 after_success:
  - ./ci_scripts/after_success.sh
+
+before_deploy:
+  - "pip install -e .[all]"
+  - "sphinx-build -b html docs/source docs/build"
+deploy:
+  provider: pages
+  local_dir: docs/build
+  edge: true
+  token: $GITHUB_TOKEN
+  on:
+    branch: master
+    condition: $JOB = deploy
