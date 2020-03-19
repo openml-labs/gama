@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+
+Version 20.1.1
+--------------
+Features:
+ # 70: Exported code is now auto-formatted with Black.
+
+Maintenance:
+ - Docs are automatically built and deployed on a commit to master.
+ - Pre-commit configuration added to check formatting, style and type hints on commit.
+ - Black codestyle adapted, most drastic change is line length from 120 to 88.
+
 Version 20.1.0
 --------------
 Features:
