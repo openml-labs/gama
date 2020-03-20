@@ -6,12 +6,13 @@ env:
   - JOB=test SUITE=unit
   - JOB=test SUITE=system
 
-# Perform pre-commit checks only once:
+# - perform pre-commit checks only once
+# - perform doc build only on commit to develop or master
 jobs:
   include:
   - env: JOB=check
   - env: JOB=deploy
-    if: branch = master
+    if: (branch = master OR branch = develop OR branch = ci_script_check) AND NOT env($TRAVIS_PULL_REQUEST)
 
 install:
   - ./ci_scripts/install.sh
@@ -22,9 +23,8 @@ after_success:
 
 deploy:
   provider: pages
-  local_dir: docs/build
+  local_dir: docs/$TRAVIS_BRANCH
   edge: true
   token: $GITHUB_TOKEN
   on:
-    branch: master
     condition: $JOB = deploy
