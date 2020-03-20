@@ -2,6 +2,9 @@
 
 set -e
 
+echo $TRAVIS_PULL_REQUEST
+echo $TRAVIS_BRANCH
+
 if [ "$JOB" = "check" ] || [ "$JOB" = "deploy" ]; then
   pre-commit run --all-files
 fi
