@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [ "$JOB" = "check" ] || [ "$JOB" = "deploy" ]; then
   pre-commit run --all-files
 fi
