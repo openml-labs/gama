@@ -1,0 +1,754 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gama.postprocessing.ensemble &mdash; gama 20.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                20.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../technical_guide/index.html">Technical Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../postprocessing.html">gama.postprocessing</a> &raquo;</li>
+        
+      <li>gama.postprocessing.ensemble</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gama.postprocessing.ensemble</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">OneHotEncoder</span>
+
+<span class="kn">from</span> <span class="nn">gama.genetic_programming.components</span> <span class="kn">import</span> <span class="n">Individual</span>
+<span class="kn">from</span> <span class="nn">gama.postprocessing.base_post_processing</span> <span class="kn">import</span> <span class="n">BasePostProcessing</span>
+<span class="kn">from</span> <span class="nn">gama.utilities.evaluation_library</span> <span class="kn">import</span> <span class="n">EvaluationLibrary</span>
+<span class="kn">from</span> <span class="nn">gama.utilities.export</span> <span class="kn">import</span> <span class="n">imports_and_steps_for_individual</span>
+<span class="kn">from</span> <span class="nn">gama.utilities.metrics</span> <span class="kn">import</span> <span class="n">Metric</span><span class="p">,</span> <span class="n">MetricType</span>
+
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">gama.gama</span> <span class="kn">import</span> <span class="n">Gama</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">Model</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span>
+    <span class="s2">&quot;Model&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;individual&quot;</span><span class="p">,</span> <span class="s2">&quot;pipelines&quot;</span><span class="p">,</span> <span class="s2">&quot;predictions&quot;</span><span class="p">,</span> <span class="s2">&quot;validation_score&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="EnsemblePostProcessing"><a class="viewcode-back" href="../../../api/index.html#gama.postprocessing.EnsemblePostProcessing">[docs]</a><span class="k">class</span> <span class="nc">EnsemblePostProcessing</span><span class="p">(</span><span class="n">BasePostProcessing</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">time_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+        <span class="n">ensemble_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span>
+        <span class="n">hillclimb_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10_000</span><span class="p">,</span>
+        <span class="n">max_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Ensemble construction per Caruana et al.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        time_fraction: float (default=0.3)</span>
+<span class="sd">            Fraction of total time reserved for Ensemble building.</span>
+<span class="sd">        ensemble_size: int, optional (default=25)</span>
+<span class="sd">            Total number of models in the ensemble.</span>
+<span class="sd">            When a single model is chosen more than once, it will increase its weight</span>
+<span class="sd">            in the ensemble and *does* count towards this maximum.</span>
+<span class="sd">        hillclimb_size: int, optional (default=10_000)</span>
+<span class="sd">            Number of predictions that are used to determine the ensemble score</span>
+<span class="sd">            during hillclimbing. If `None`, use all.</span>
+<span class="sd">        max_models: int, optional (default=200)</span>
+<span class="sd">            Only consider the best `max_models` number of models. If `None`, use all.</span>
+<span class="sd">            Consequently also sets the max number of unique models in the ensemble.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">time_fraction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hyperparameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">ensemble_size</span><span class="o">=</span><span class="p">(</span><span class="n">ensemble_size</span><span class="p">,</span> <span class="mi">25</span><span class="p">),</span>
+            <span class="n">metric</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">evaluation_library</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">hillclimb_size</span><span class="o">=</span><span class="p">(</span><span class="n">hillclimb_size</span><span class="p">,</span> <span class="mi">10_000</span><span class="p">),</span>
+            <span class="n">max_models</span><span class="o">=</span><span class="p">(</span><span class="n">max_models</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Ensemble</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">dynamic_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gama</span><span class="p">:</span> <span class="s2">&quot;Gama&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_overwrite_hyperparameter_default</span><span class="p">(</span><span class="s2">&quot;metric&quot;</span><span class="p">,</span> <span class="n">gama</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_overwrite_hyperparameter_default</span><span class="p">(</span>
+            <span class="s2">&quot;evaluation_library&quot;</span><span class="p">,</span> <span class="n">gama</span><span class="o">.</span><span class="n">_evaluation_library</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">selection</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Individual</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span> <span class="o">=</span> <span class="n">build_fit_ensemble</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s2">&quot;ensemble_size&quot;</span><span class="p">],</span>
+            <span class="n">timeout</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s2">&quot;metric&quot;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">[</span><span class="s2">&quot;evaluation_library&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span>
+
+    <span class="k">def</span> <span class="nf">to_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">preprocessing</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Pipeline</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="p">,</span> <span class="n">EnsembleClassifier</span><span class="p">):</span>
+            <span class="n">voter</span> <span class="o">=</span> <span class="s2">&quot;VotingClassifier&quot;</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="p">,</span> <span class="n">EnsembleRegressor</span><span class="p">):</span>
+            <span class="n">voter</span> <span class="o">=</span> <span class="s2">&quot;VotingRegressor&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Can&#39;t export ensemble of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="n">all_imports</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sa">f</span><span class="s2">&quot;from sklearn.ensemble import </span><span class="si">{</span><span class="n">voter</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;from sklearn.pipeline import Pipeline&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">pipeline_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">pipeline_declarations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">pipeline_weights</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">imports</span><span class="p">,</span> <span class="n">steps</span> <span class="o">=</span> <span class="n">imports_and_steps_for_individual</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">individual</span><span class="p">)</span>
+            <span class="n">all_imports</span> <span class="o">=</span> <span class="n">all_imports</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">imports</span><span class="p">))</span>
+            <span class="n">steps_str</span> <span class="o">=</span> <span class="s2">&quot;,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;(&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;, </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">])</span>
+            <span class="n">pipeline_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;pipeline_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">pipeline_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pipeline_name</span><span class="p">)</span>
+            <span class="n">pipeline_declarations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pipeline_name</span><span class="si">}</span><span class="s2"> = Pipeline([</span><span class="si">{</span><span class="n">steps_str</span><span class="si">}</span><span class="s2">])&quot;</span><span class="p">)</span>
+            <span class="n">pipeline_weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
+
+        <span class="n">pipelines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;(&#39;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&#39;, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pipeline_names</span><span class="p">)]</span>
+        <span class="n">estimators</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pipelines</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="p">,</span> <span class="n">EnsembleClassifier</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">requires_probabilities</span><span class="p">:</span>
+                <span class="n">voting</span> <span class="o">=</span> <span class="s2">&quot;,&#39;soft&#39;&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">voting</span> <span class="o">=</span> <span class="s2">&quot;, &#39;hard&#39;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">voting</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># This parameter does not exist for VotingRegressor</span>
+
+        <span class="k">if</span> <span class="n">preprocessing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># We don&#39;t want to export the mapping of categorical encoders</span>
+            <span class="n">prepend</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">transformer</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">transformer</span> <span class="ow">in</span> <span class="n">preprocessing</span><span class="o">.</span><span class="n">steps</span>
+            <span class="p">]</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">transformer</span> <span class="ow">in</span> <span class="n">prepend</span><span class="p">:</span>
+                <span class="n">transformer</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># For encoders</span>
+                <span class="n">transformer_import</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="sa">f</span><span class="s2">&quot;from </span><span class="si">{</span><span class="n">transformer</span><span class="o">.</span><span class="vm">__module__</span><span class="si">}</span><span class="s2"> &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;import </span><span class="si">{</span><span class="n">transformer</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">}</span>
+                <span class="n">all_imports</span> <span class="o">=</span> <span class="n">all_imports</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">transformer_import</span><span class="p">)</span>
+
+        <span class="n">script</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">all_imports</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pipeline_declarations</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;ensemble = </span><span class="si">{</span><span class="n">voter</span><span class="si">}</span><span class="s2">([</span><span class="si">{</span><span class="n">estimators</span><span class="si">}</span><span class="s2">]</span><span class="si">{</span><span class="n">voting</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">pipeline_weights</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">preprocessing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pp_steps</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;(&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;, </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">prepend</span><span class="p">])</span>
+            <span class="n">script</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;pipeline = Pipeline([</span><span class="si">{</span><span class="n">pp_steps</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2"> (&#39;ensemble&#39;, ensemble)])</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">script</span></div>
+
+
+<span class="k">class</span> <span class="nc">Ensemble</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">metric</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">evaluation_library</span><span class="p">:</span> <span class="n">EvaluationLibrary</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">shrink_on_pickle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">downsample_to</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10_000</span><span class="p">,</span>
+        <span class="n">use_top_n_only</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Either model_library or model_library_directory must be specified.</span>
+<span class="sd">        If model_library is specified, model_library_directory is ignored.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        metric: string or Metric</span>
+<span class="sd">            Metric to optimize the ensemble towards.</span>
+<span class="sd">        y: pandas.DataFrame</span>
+<span class="sd">            True labels for the predictions made by the models in the library.</span>
+<span class="sd">        evaluation_library: `gama.utilities.evaluation_library.EvaluationLibrary`</span>
+<span class="sd">            A list of models from which an ensemble can be built.</span>
+<span class="sd">        shrink_on_pickle: bool (default=True)</span>
+<span class="sd">            If True, remove memory-intensive attributes that are required before pickle.</span>
+<span class="sd">            When unpickled, the model can be used to create predictions,</span>
+<span class="sd">            but the ensemble can&#39;t be changed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="n">Metric</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">Metric</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;metric must be specified as string or `gama.ea.metrics.Metric`.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">evaluation_library</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`evaluation_library` is None but must be EvaluationLibrary.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evaluation_library</span><span class="p">,</span> <span class="n">EvaluationLibrary</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;`evaluation_library` must be of type &quot;</span>
+                <span class="s2">&quot;gama.utilities.evaluation_library.EvaluationLibrary.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;y_true must be pd.DataFrame or pd.Series, is </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span> <span class="o">=</span> <span class="n">metric</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluation_library</span> <span class="o">=</span> <span class="n">evaluation_library</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model_library</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_top_n_only</span> <span class="o">=</span> <span class="n">use_top_n_only</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shrink_on_pickle</span> <span class="o">=</span> <span class="n">shrink_on_pickle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_transformation</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluation_library</span><span class="o">.</span><span class="n">_sample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># If the library stores sampled predictions, we match that first.</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluation_library</span><span class="o">.</span><span class="n">_sample</span><span class="p">]</span>
+
+        <span class="c1"># Then apply even more sampling if requested.</span>
+        <span class="k">if</span> <span class="n">downsample_to</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">downsample_to</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">downsample_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not downsampling because only </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2"> samples were stored.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="n">y</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_sample</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downsampling as training data exceeds </span><span class="si">{</span><span class="n">downsample_to</span><span class="si">}</span><span class="s2"> samples.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_sample</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span> <span class="n">downsample_to</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_prediction_sample</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_internal_score</span> <span class="o">=</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_models</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_maximize</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">model_library</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_library</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model_library</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">evaluation</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluation_library</span><span class="o">.</span><span class="n">n_best</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_top_n_only</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_transformation</span><span class="p">:</span>
+                    <span class="n">evaluation</span><span class="o">.</span><span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_transformation</span><span class="p">(</span>
+                        <span class="n">evaluation</span><span class="o">.</span><span class="n">predictions</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_sample</span><span class="p">:</span>
+                    <span class="n">evaluation</span><span class="o">.</span><span class="n">predictions</span> <span class="o">=</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">predictions</span><span class="p">[</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_sample</span>
+                    <span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_model_library</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">Model</span><span class="p">(</span>
+                        <span class="n">evaluation</span><span class="o">.</span><span class="n">individual</span><span class="o">.</span><span class="n">pipeline_str</span><span class="p">(),</span>
+                        <span class="n">evaluation</span><span class="o">.</span><span class="n">individual</span><span class="p">,</span>
+                        <span class="n">evaluation</span><span class="o">.</span><span class="n">estimators</span><span class="p">,</span>
+                        <span class="n">evaluation</span><span class="o">.</span><span class="n">predictions</span><span class="p">,</span>
+                        <span class="n">evaluation</span><span class="o">.</span><span class="n">score</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_library</span>
+
+    <span class="k">def</span> <span class="nf">_ensemble_validation_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction_to_validate</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Must be implemented by child class.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_total_fit_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">weight</span> <span class="k">for</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_models</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_total_model_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">weight</span> <span class="k">for</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+
+    <span class="k">def</span> <span class="nf">_averaged_validation_predictions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Weighted average of predictions of current models on the hillclimb set. &quot;&quot;&quot;</span>
+        <span class="n">weighted_sum_predictions</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">predictions</span> <span class="o">*</span> <span class="n">weight</span> <span class="k">for</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">weighted_sum_predictions</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_model_weights</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">build_initial_ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Add top n models in EvaluationLibrary to the ensemble.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n: int</span>
+<span class="sd">            Number of models to include.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Ensemble must include at least one model.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;The ensemble already contained models. Overwriting the ensemble.&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_models</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Since the model library only features unique models,</span>
+        <span class="c1"># we do not need to check for duplicates here.</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_library</span><span class="p">[:</span><span class="n">n</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;Initial ensemble created with score </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble_validation_score</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">add_weight</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Add a specific model to the ensemble or increases its weight. &quot;&quot;&quot;</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">individual</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">new_weight</span> <span class="o">=</span> <span class="n">weight</span> <span class="o">+</span> <span class="n">add_weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">individual</span><span class="o">.</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">new_weight</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Assigned a weight of </span><span class="si">{</span><span class="n">new_weight</span><span class="si">}</span><span class="s2"> to model </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">expand_ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Adds new models to the ensemble based on earlier given data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n: int</span>
+<span class="sd">            Number of models to add to current ensemble.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;n must be greater than 0.&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">best_addition_score</span> <span class="o">=</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+            <span class="n">current_weighted_average</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_averaged_validation_predictions</span><span class="p">()</span>
+            <span class="n">current_total_weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_model_weights</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_library</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">validation_score</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">candidate_pred</span> <span class="o">=</span> <span class="n">current_weighted_average</span> <span class="o">+</span> <span class="p">(</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">predictions</span> <span class="o">-</span> <span class="n">current_weighted_average</span>
+                <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">current_total_weight</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">candidate_ensemble_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble_validation_score</span><span class="p">(</span>
+                    <span class="n">candidate_pred</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">best_addition_score</span> <span class="o">&lt;</span> <span class="n">candidate_ensemble_score</span><span class="p">:</span>
+                    <span class="n">best_addition</span><span class="p">,</span> <span class="n">best_addition_score</span> <span class="o">=</span> <span class="n">model</span><span class="p">,</span> <span class="n">candidate_ensemble_score</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_model</span><span class="p">(</span><span class="n">best_addition</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal_score</span> <span class="o">=</span> <span class="n">best_addition_score</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;Ensemble size </span><span class="si">{}</span><span class="s2"> , best score: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_total_model_weights</span><span class="p">(),</span> <span class="n">best_addition_score</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">1e6</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Constructs an Ensemble out of the library of models.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x:</span>
+<span class="sd">            Data to fit the final selection of models on.</span>
+<span class="sd">        y:</span>
+<span class="sd">            Targets corresponding to features x.</span>
+<span class="sd">        timeout: int (default=1e6)</span>
+<span class="sd">            Maximum amount of time in seconds that is allowed for fitting pipelines.</span>
+<span class="sd">            If this time is exceeded, only pipelines fit until that point are taken</span>
+<span class="sd">            into account when making predictions.</span>
+<span class="sd">            Starting the parallelization takes roughly 4 seconds by itself.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;You need to call `build` to select models before fitting them.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">timeout</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;timeout must be greater than 0.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_models</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">estimator</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">pipelines</span>
+        <span class="p">]</span>
+        <span class="c1"># for (model, weight) in self._models.values():</span>
+
+        <span class="c1"># self._fit_models = []</span>
+        <span class="c1"># futures = set()</span>
+        <span class="c1"># with stopit.ThreadingTimeout(timeout) as c_mgr, AsyncEvaluator() as async_:</span>
+        <span class="c1">#     for (model, weight) in self._models.values():</span>
+        <span class="c1">#         futures.add(</span>
+        <span class="c1">#           async_.submit(fit_and_weight, (model.pipeline, X, y, weight))</span>
+        <span class="c1">#           )</span>
+        <span class="c1">#</span>
+        <span class="c1">#     for _ in self._models.values():</span>
+        <span class="c1">#         future = async_.wait_next()</span>
+        <span class="c1">#         pipeline, weight = future.result</span>
+        <span class="c1">#         if weight &gt; 0:</span>
+        <span class="c1">#             self._fit_models.append((pipeline, weight))</span>
+        <span class="c1">#</span>
+        <span class="c1"># if not c_mgr:</span>
+        <span class="c1">#     log.info(&quot;Fitting of ensemble stopped early.&quot;)</span>
+
+    <span class="k">def</span> <span class="nf">_get_weighted_mean_predictions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">predict_method</span><span class="o">=</span><span class="s2">&quot;predict&quot;</span><span class="p">):</span>
+        <span class="n">weighted_predictions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_models</span><span class="p">:</span>
+            <span class="n">target_prediction</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">predict_method</span><span class="p">)(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_transformation</span><span class="p">:</span>
+                <span class="n">target_prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_transformation</span><span class="p">(</span><span class="n">target_prediction</span><span class="p">)</span>
+            <span class="n">weighted_predictions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">target_prediction</span> <span class="o">*</span> <span class="n">weight</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">weighted_predictions</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_fit_weights</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;Ensemble with no models.&quot;</span>
+        <span class="n">_str_</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Ensemble of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="p">)</span><span class="si">}</span><span class="s2"> pipelines.</span><span class="se">\n</span><span class="s2">R</span><span class="se">\t</span><span class="s2">W</span><span class="se">\t</span><span class="s2">Score</span><span class="se">\t</span><span class="s2">Pipeline</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">models</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">validation_score</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">models</span><span class="p">):</span>
+            <span class="n">_str_</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">weight</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">validation_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">_str_</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shrink_on_pickle</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;Shrinking before pickle because shrink_on_pickle is True.&quot;</span>
+                <span class="s2">&quot;Removing anything that is not needed for predict-functionality.&quot;</span>
+                <span class="s2">&quot;Functionality to expand ensemble after unpickle is not available.&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_models</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model_library</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># self._y_true can not be removed as it is needed to ensure proper</span>
+            <span class="c1"># dimensionality of predictions.</span>
+            <span class="c1"># Alternatively, one could just save the number of classes instead.</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">fit_and_weight</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Fit the pipeline given the data. Update weight to 0 if fitting fails.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    args: Tuple</span>
+<span class="sd">        Expected Tuple of [Pipeline, X, y, weight].</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pipeline</span>
+<span class="sd">        The same pipeline that was provided as input.</span>
+<span class="sd">    weight</span>
+<span class="sd">        If fitting succeeded, return the input weight.</span>
+<span class="sd">        If *any* exception occurred during fitting, weight is 0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pipeline</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="n">args</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exception fitting </span><span class="si">{</span><span class="n">pipeline</span><span class="si">}</span><span class="s2">. Set weight to 0.&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">weight</span>
+
+
+<span class="k">class</span> <span class="nc">EnsembleClassifier</span><span class="p">(</span><span class="n">Ensemble</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">label_encoder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span> <span class="o">=</span> <span class="n">label_encoder</span>
+
+        <span class="c1"># For metrics that only require class labels,</span>
+        <span class="c1"># we still want to apply one-hot-encoding to average predictions.</span>
+        <span class="n">y_as_squeezed_array</span> <span class="o">=</span> <span class="n">y_true</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_one_hot_encoder</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">categories</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_one_hot_encoder</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y_as_squeezed_array</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">requires_probabilities</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_one_hot_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_sample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_prediction_sample</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="k">def</span> <span class="nf">one_hot_encode_predictions</span><span class="p">(</span><span class="n">predictions</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_one_hot_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_transformation</span> <span class="o">=</span> <span class="n">one_hot_encode_predictions</span>
+
+    <span class="k">def</span> <span class="nf">_ensemble_validation_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction_to_validate</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">prediction_to_validate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prediction_to_validate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_averaged_validation_predictions</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">requires_probabilities</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">maximizable_score</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">,</span> <span class="n">prediction_to_validate</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># argmax returns (N, 1) matrix, need to squeeze it to (N,) for scoring.</span>
+            <span class="n">class_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_one_hot_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span>
+                <span class="n">prediction_to_validate</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">maximizable_score</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">,</span> <span class="n">class_predictions</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">requires_probabilities</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Ensemble was tuned with a class-probabilities metric. &quot;</span>
+                <span class="s2">&quot;Using argmax of probabilities, which may not give optimal predictions.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">class_probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_weighted_mean_predictions</span><span class="p">(</span>
+                <span class="n">X</span><span class="p">,</span> <span class="s2">&quot;predict_proba&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">class_probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_weighted_mean_predictions</span><span class="p">(</span>
+                <span class="n">X</span><span class="p">,</span> <span class="s2">&quot;predict&quot;</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+
+        <span class="n">class_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_one_hot_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">class_probabilities</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span><span class="p">:</span>
+            <span class="n">class_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_label_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">class_predictions</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">class_predictions</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">requires_probabilities</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_weighted_mean_predictions</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s2">&quot;predict_proba&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Ensemble was tuned with a class label predictions metric, &quot;</span>
+                <span class="s2">&quot;not probabilities. Using weighted mean of class predictions.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_weighted_mean_predictions</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s2">&quot;predict&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">EnsembleRegressor</span><span class="p">(</span><span class="n">Ensemble</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_ensemble_validation_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction_to_validate</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">prediction_to_validate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prediction_to_validate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_averaged_validation_predictions</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">maximizable_score</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">,</span> <span class="n">prediction_to_validate</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_weighted_mean_predictions</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">build_fit_ensemble</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">:</span> <span class="n">Metric</span><span class="p">,</span>
+    <span class="n">evaluation_library</span><span class="p">:</span> <span class="n">EvaluationLibrary</span><span class="p">,</span>
+    <span class="n">encoder</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ensemble</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Construct an Ensemble of models, optimizing for metric. &quot;&quot;&quot;</span>
+    <span class="n">start_build</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Building ensemble.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">MetricType</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">:</span>
+        <span class="n">ensemble</span> <span class="o">=</span> <span class="n">EnsembleRegressor</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">evaluation_library</span><span class="p">)</span>  <span class="c1"># type: Ensemble</span>
+    <span class="k">elif</span> <span class="n">metric</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">MetricType</span><span class="o">.</span><span class="n">CLASSIFICATION</span><span class="p">:</span>
+        <span class="n">ensemble</span> <span class="o">=</span> <span class="n">EnsembleClassifier</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">evaluation_library</span><span class="o">=</span><span class="n">evaluation_library</span><span class="p">)</span>
+        <span class="n">ensemble</span><span class="o">.</span><span class="n">_label_encoder</span> <span class="o">=</span> <span class="n">encoder</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown metric task type </span><span class="si">{</span><span class="n">metric</span><span class="o">.</span><span class="n">task_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Starting with more models in the ensemble should help against overfitting,</span>
+        <span class="c1"># but depending on the total ensemble size, it might leave too little room</span>
+        <span class="c1"># to calibrate the weights or add new models. So we have some adaptive defaults.</span>
+        <span class="k">if</span> <span class="n">ensemble_size</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="n">ensemble</span><span class="o">.</span><span class="n">build_initial_ensemble</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ensemble</span><span class="o">.</span><span class="n">build_initial_ensemble</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="n">remainder</span> <span class="o">=</span> <span class="n">ensemble_size</span> <span class="o">-</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">_total_model_weights</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">remainder</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ensemble</span><span class="o">.</span><span class="n">expand_ensemble</span><span class="p">(</span><span class="n">remainder</span><span class="p">)</span>
+
+        <span class="n">build_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_build</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="o">-</span> <span class="n">build_time</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ensemble build took </span><span class="si">{</span><span class="n">build_time</span><span class="si">}</span><span class="s2">s. Fit with timeout </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2">s.&quot;</span><span class="p">)</span>
+        <span class="n">ensemble</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error during auto ensemble: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ensemble</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, Pieter Gijsbers
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
