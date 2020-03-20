@@ -528,7 +528,7 @@ def build_fit_ensemble(
     if metric.task_type == MetricType.REGRESSION:
         ensemble = EnsembleRegressor(metric, y, evaluation_library)  # type: Ensemble
     elif metric.task_type == MetricType.CLASSIFICATION:
-        ensemble = EnsembleClassifier(metric, y, evaluation_library)
+        ensemble = EnsembleClassifier(metric, y, evaluation_library=evaluation_library)
         ensemble._label_encoder = encoder
     else:
         raise ValueError(f"Unknown metric task type {metric.task_type}")
