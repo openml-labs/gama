@@ -21,11 +21,15 @@ script:
 after_success:
  - ./ci_scripts/after_success.sh
 
+before_deploy:
+ - ./ci_scripts/build_docs.sh
 deploy:
   provider: pages
-  local_dir: docs/$TRAVIS_BRANCH
-  edge: true
   token: $GITHUB_TOKEN
+  edge: true
+  keep_history: true
+  skip_cleanup: true
+  local_dir: docs/build
   on:
     condition: $JOB = deploy
     all_branches: true
