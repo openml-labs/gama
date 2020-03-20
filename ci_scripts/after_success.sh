@@ -5,5 +5,5 @@ if [ "$JOB" = "test" ]; then
   bash <(curl -s https://codecov.io/bash)
 fi
 if [ "$JOB" = "deploy" ]; then
-  sphinx-build -b html docs/source docs/build
+  sphinx-build -b html docs/source docs/$TRAVIS_BRANCH
 fi

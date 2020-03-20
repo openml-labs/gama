@@ -28,4 +28,4 @@ deploy:
   token: $GITHUB_TOKEN
   on:
     condition: $JOB = deploy
-    branch: master, develop, ci_script_check
+    all_branches: true
