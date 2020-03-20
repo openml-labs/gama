@@ -12,7 +12,9 @@ jobs:
   include:
   - env: JOB=check
   - env: JOB=deploy
-    if: (branch = master OR branch = develop OR branch = ci_script_check) AND NOT env($TRAVIS_PULL_REQUEST)
+    if: (branch = master OR branch = develop OR branch = ci_script_check) AND NOT env(TRAVIS_PULL_REQUEST)
+  - "echo $TRAVIS_BRANCH"
+    "echo $TRAVIS_PULL_REQUEST"
 
 install:
   - ./ci_scripts/install.sh
