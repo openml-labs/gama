@@ -20,6 +20,8 @@ script:
 after_success:
  - ./ci_scripts/after_success.sh
 
+before_deploy:
+ - ./ci_scripts/build_docs.sh
 deploy:
   provider: pages
   local_dir: docs/build
