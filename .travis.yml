@@ -12,7 +12,7 @@ jobs:
   include:
   - env: JOB=check
   - env: JOB=deploy
-    if: (branch = master OR branch = develop OR branch = ci_script_check) AND NOT pull_request
+    if: (branch = master OR branch = develop OR branch = ci_script_check) AND type = push
 
 install:
   - ./ci_scripts/install.sh
