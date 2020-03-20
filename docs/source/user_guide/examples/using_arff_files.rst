@@ -9,6 +9,7 @@ The example script can be run by using e.g.
 `breast_cancer_train.arff <https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_train.arff>`_ and
 `breast_cancer_test.arff <https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_test.arff>`_.
 The target should always be specified as the last column.
+Make sure you adjust the file path if not executed from the examples directory.
 
 
 .. file below is copied in by conf.py

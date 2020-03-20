@@ -41,33 +41,67 @@ When opening a pull request, make sure you have:
     - added tests where reasonable
     - refer to the issue and mention any additional information that might make reviewing the PR easier.
 
-Running unit tests
-******************
-To run the unit tests, make sure optional dependencies for developers are installed.
-From GAMA directory run::
+Setting up the development dependencies
+***************************************
+For development, you will need some additional packages for code style checks and running tests.
+Navigate to your GAMA directory and run::
 
-    pip install -e .[test]
+    pip install -e .[dev]
 
 This installs test dependencies such as ``pytest`` and plugins.
+It also installs `pre-commit <https://pre-commit.com/>`_,
+a tool for automatically running several style checks before any commit.
+Pre-commit will run `black <https://black.readthedocs.io/en/stable/>`_ code formatter,
+`flake8 <https://flake8.pycqa.org/en/latest/>`_ style checker and
+`mypy <https://mypy.readthedocs.io/en/stable/>`_ type checker before any commit.
+While pre-commit is installed through the above command,
+it itself needs to install the dependencies specified for our pre-commit workflow::
 
-The unit tests are separated into two suites: unit and system tests.
-Unit tests are designed to test isolated functions quickly.
-Due to the big configuration space and random nature of search,
-it is impossible to test all scenarios thoroughly in unit tests.
-System tests perform full AutoML runs (on tiny datasets) and are meant to pick up on things missed by unit tests.
-To run a test suite run::
+    pre-commit install
+
+Run ``pre-commit run --all-files`` to see the pre-commit in action, it should output::
+
+    black....................................................................Passed
+    mypy.....................................................................Passed
+    flake8...................................................................Passed
+
+You should now be set up for development!
+Pre-commit will run these tests whenever you attempt to make a commit.
+If any of the checks fail, the commit will be aborted and you will be able to make the required changes before attempting to commit again.
+Remember to add the updated file to your commit!
+We use pre-commit to ensure a consistent code style and make PR reviews easier.
+Note that pre-commit does not run any code tests.
+
+Running code tests
+******************
+If you followed the instructions above, the required test dependencies should be installed on your system.
+The tests are separated into unit and system tests, based on scope.
+
+Unit tests are for quickly testable isolated functions.
+Examples include creation of machine learning pipelines, selection procedures or data formatting.
+
+System tests perform full AutoML runs on tiny datasets with limited resources.
+They are meant to ensure that the individual snippets tested in unit tests are integrated well together.
+It also functions as a sanity check that the system as a whole produces reasonable results.
+While complete state coverage of the code will always be impossible for this type of system,
+the system tests aim to cover as much as possible within a small time frame.
+
+To run a test group run::
 
     pytest -sv -n 4 tests/SUITE
 
 where ``SUITE`` is either ``unit`` or ``system``.
-The ``-sv -n 4`` flags are optional, but give succinct feedback on what is being run (``-sv``) and run tests in parallel (``-n 4``).
+The ``-sv -n 4`` flags are optional,
+but give succinct feedback on what is being run (``-sv``) and run tests in parallel (``-n 4``).
 For more information, run ``pytest -h``.
 
 Generating Documentation
 ************************
 The documentation is generated with `Sphinx <https://www.sphinx-doc.org/en/master/>`_.
-Run::
+After updating the documentation, please build the new docs to verify everything works and looks as intended::
 
     sphinx-build -b html docs\source docs\build
 
 The html pages are now in the ``gama\docs\build`` directory.
+There is no need to upload the generated documentation.
+When a release happens, the commit to master will trigger the build and upload of the latest documentation.

@@ -25,22 +25,25 @@ def arff_to_pandas(file_path: str, encoding: Optional[str] = None) -> pd.DataFra
         with categorical columns having category dtype.
     """
     if not isinstance(file_path, str):
-        raise TypeError(f"`file_path` must be of type `str` but is of type {type(file_path)}")
+        raise TypeError(f"`file_path` must be of type `str` but is {type(file_path)}")
 
-    with open(file_path, 'r', encoding=encoding) as arff_file:
+    with open(file_path, "r", encoding=encoding) as arff_file:
         arff_dict = arff.load(arff_file)
 
-    attribute_names, data_types = zip(*arff_dict['attributes'])
-    data = pd.DataFrame(arff_dict['data'], columns=attribute_names)
-    for attribute_name, dtype in arff_dict['attributes']:
-        # 'real' and 'numeric' are probably interpreted correctly, date support needs to be added.
+    attribute_names, data_types = zip(*arff_dict["attributes"])
+    data = pd.DataFrame(arff_dict["data"], columns=attribute_names)
+    for attribute_name, dtype in arff_dict["attributes"]:
+        # 'real' and 'numeric' are probably interpreted correctly.
+        # Date support needs to be added.
         if isinstance(dtype, list):
-            data[attribute_name] = data[attribute_name].astype('category')
+            data[attribute_name] = data[attribute_name].astype("category")
     return data
 
 
-def X_y_from_arff(file_path: str, split_column: Optional[str] = None, encoding: Optional[str] = None) -> Tuple[pd.DataFrame, pd.Series]:
-    """ Load data from the ARFF file into pandas DataFrame and specified column to pd.Series. "
+def X_y_from_arff(
+    file_path: str, split_column: Optional[str] = None, encoding: Optional[str] = None
+) -> Tuple[pd.DataFrame, pd.Series]:
+    """ Load data from ARFF file into pd.DataFrame and specified column to pd.Series.
 
     Parameters
     ----------
@@ -65,44 +68,49 @@ def X_y_from_arff(file_path: str, split_column: Optional[str] = None, encoding: 
     elif split_column in data.columns:
         return data.loc[:, data.columns != split_column], data.loc[:, split_column]
     else:
-        raise ValueError(f"No column with name {split_column} found in ARFF file {file_path}")
+        raise ValueError(f"No column named {split_column} found in {file_path}")
 
 
 def load_feature_metadata_from_arff(file_path: str) -> Dict[str, str]:
     """ Load the header of the ARFF file and return the type of each attribute. """
-    data_header = '@data'
-    attribute_indicator = '@attribute'
+    data_header = "@data"
+    attribute_indicator = "@attribute"
     attributes = {}
-    with open(file_path, 'r') as fh:
+    with open(file_path, "r") as fh:
         line = fh.readline()
         while not line.lower().startswith(data_header):
             if line.lower().startswith(attribute_indicator):
                 # arff uses a space separator, but allows spaces in
                 # feature name (name must be quoted) and feature type (if nominal).
-                indicator, name_and_type = line.split(' ', 1)
+                indicator, name_and_type = line.split(" ", 1)
                 if name_and_type.startswith('"'):
                     name, data_type = name_and_type[1:].split('" ', 1)
                     name = name
                 else:
-                    name, data_type = name_and_type.split(' ', 1)
+                    name, data_type = name_and_type.split(" ", 1)
                 attributes[name] = data_type
             line = fh.readline()[:-1]  # remove newline character
     return attributes
 
 
-def heuristic_numpy_to_dataframe(X: np.ndarray, max_unique_values_cat: int = 10) -> pd.DataFrame:
+def heuristic_numpy_to_dataframe(
+    x: np.ndarray, max_unique_values_cat: int = 10
+) -> pd.DataFrame:
     """ Transform a numpy array to a typed pd.DataFrame. """
-    X_df = pd.DataFrame(X)
-    for column, n_unique in X_df.nunique(dropna=True).items():
+    x_df = pd.DataFrame(x)
+    for column, n_unique in x_df.nunique(dropna=True).items():
         if n_unique <= max_unique_values_cat:
-            X_df[column] = X_df[column].astype('category')
-    return X_df
+            x_df[column] = x_df[column].astype("category")
+    return x_df
 
 
-def format_x_y(x: Union[pd.DataFrame, np.ndarray], y: Union[pd.DataFrame, pd.Series, np.ndarray],
-               y_type: Type=pd.Series, remove_unlabeled: bool = True
-               ) -> Tuple[pd.DataFrame, Union[pd.DataFrame, pd.Series]]:
-    """ Takes various types of (X,y) data and converts it into a (pd.DataFrame, pd.Series) tuple.
+def format_x_y(
+    x: Union[pd.DataFrame, np.ndarray],
+    y: Union[pd.DataFrame, pd.Series, np.ndarray],
+    y_type: Type = pd.Series,
+    remove_unlabeled: bool = True,
+) -> Tuple[pd.DataFrame, Union[pd.DataFrame, pd.Series]]:
+    """ Take (X,y) data and convert it to a (pd.DataFrame, pd.Series) tuple.
 
     Parameters
     ----------
@@ -140,13 +148,19 @@ def format_x_y(x: Union[pd.DataFrame, np.ndarray], y: Union[pd.DataFrame, pd.Ser
         if not isinstance(y, pd.DataFrame):
             y = pd.DataFrame(y)
     else:
-        raise ValueError(f"`y_type` must be one of [pandas.Series, pandas.DataFrame] but is {y_type}.")
+        raise ValueError(f"`y_type` must be pd.Series or pd.DataFrame but is {y_type}.")
 
     if remove_unlabeled:
-        unlabeled = y[y.columns[0]].isnull() if isinstance(y, pd.DataFrame) else y.isnull()
+        if isinstance(y, pd.DataFrame):
+            unlabeled = y.iloc[:, 0].isnull()
+        else:
+            unlabeled = y.isnull()
+
         if unlabeled.any():
-            log.info(f"Target vector has been found to contain {sum(unlabeled)} NaN-labels, "
-                     f"these rows will be ignored.")
+            log.info(
+                f"Target vector has been found to contain {sum(unlabeled)} NaN-labels, "
+                f"these rows will be ignored."
+            )
             x, y = x.loc[~unlabeled], y.loc[~unlabeled]
 
     return x, y

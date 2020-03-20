@@ -1,11 +1,14 @@
 import logging
-from typing import List, Optional, Callable
+from typing import List, Optional
 
 import pandas as pd
 
 from gama.genetic_programming.components import Individual
 from gama.genetic_programming.operator_set import OperatorSet
-from gama.search_methods.base_search import BaseSearch, _check_base_search_hyperparameters
+from gama.search_methods.base_search import (
+    BaseSearch,
+    _check_base_search_hyperparameters,
+)
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 
 log = logging.getLogger(__name__)
@@ -13,7 +16,8 @@ log = logging.getLogger(__name__)
 
 class RandomSearch(BaseSearch):
     """ Perform random search over all possible pipelines. """
-    def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: int):
+
+    def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float):
         pass
 
     def search(self, operations: OperatorSet, start_candidates: List[Individual]):
@@ -21,10 +25,11 @@ class RandomSearch(BaseSearch):
 
 
 def random_search(
-        operations: OperatorSet,
-        output: List[Individual],
-        start_candidates: List[Individual],
-        max_evaluations: Optional[int] = None) -> List[Individual]:
+    operations: OperatorSet,
+    output: List[Individual],
+    start_candidates: List[Individual],
+    max_evaluations: Optional[int] = None,
+) -> List[Individual]:
     """ Perform random search over all possible pipelines.
 
     Parameters

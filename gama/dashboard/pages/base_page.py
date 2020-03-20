@@ -2,7 +2,6 @@ import abc
 
 
 class BasePage(abc.ABC):
-
     def __init__(self, name: str, alignment: int):
         """ Defines the basic behavior of a page.
 

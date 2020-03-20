@@ -12,16 +12,21 @@ class Activity(NamedTuple):
     name: str
     stopwatch: Stopwatch
     time_limit: Optional[int] = None
-    
+
     @property
     def time_left(self) -> float:
-        """ Time left in seconds. Raises a TypeError if `time_limit` was not specified. """
+        """ Time left in seconds.
+
+        Raises a TypeError if `time_limit` was not specified.
+        """
         return self.time_limit - self.stopwatch.elapsed_time
 
     @property
     def exceeded_limit(self) -> float:
-        """ True iff a limit was specified and its exceeded. False iff there is time left or no limit was specified. """
-        return (self.time_limit is not None) and (self.time_limit - self.stopwatch.elapsed_time < 0)
+        """ True iff a limit was specified and it is exceeded. """
+        if self.time_limit is not None:
+            return self.time_limit - self.stopwatch.elapsed_time < 0
+        return False
 
 
 class TimeKeeper:
@@ -37,19 +42,26 @@ class TimeKeeper:
 
         """
         self.total_time = total_time
-        self.current_activity = None
-        self.activities = []
+        self.current_activity: Optional[Activity] = None
+        self.activities: List[Activity] = []
 
     @property
     def total_time_remaining(self) -> float:
         """ Return time remaining in seconds. """
         if self.total_time is not None:
-            return self.total_time - sum(map(lambda a: a.stopwatch.elapsed_time, self.activities))
-        raise RuntimeError("Time Remaining only available if `total_time` was set on init.")
+            return self.total_time - sum(
+                map(lambda a: a.stopwatch.elapsed_time, self.activities)
+            )
+        raise RuntimeError(
+            "Time Remaining only available if `total_time` was set on init."
+        )
 
     @property
     def current_activity_time_elapsed(self) -> float:
-        """ Return elapsed time in seconds of current activity. Raise RuntimeError if no current activity. """
+        """ Return elapsed time in seconds of current activity.
+
+        Raise RuntimeError if no current activity.
+        """
         if self.current_activity is not None:
             return self.current_activity.stopwatch.elapsed_time
         else:
@@ -57,19 +69,30 @@ class TimeKeeper:
 
     @property
     def current_activity_time_left(self) -> float:
-        """ Return time left in seconds of current activity. Raise RuntimeError if no current activity. """
-        if self.current_activity is not None and self.current_activity.time_limit is not None:
-            return self.current_activity.time_limit - self.current_activity.stopwatch.elapsed_time
+        """ Return time left in seconds of current activity.
+
+        Raise RuntimeError if no current activity.
+        """
+        if (
+            self.current_activity is not None
+            and self.current_activity.time_limit is not None
+        ):
+            return (
+                self.current_activity.time_limit
+                - self.current_activity.stopwatch.elapsed_time
+            )
         elif self.current_activity is None:
             raise RuntimeError("No activity in progress.")
         else:
             raise RuntimeError("No time limit set for current activity.")
 
     @contextmanager
-    def start_activity(self,
-                       activity: str,
-                       time_limit: Optional[int] = None,
-                       activity_meta: Optional[List[Any]] = None) -> Iterator[Stopwatch]:
+    def start_activity(
+        self,
+        activity: str,
+        time_limit: Optional[int] = None,
+        activity_meta: Optional[List[Any]] = None,
+    ) -> Iterator[Stopwatch]:
         """ Mark the start of a new activity and automatically time its duration.
             TimeManager does not currently support nested activities.
 
@@ -78,7 +101,8 @@ class TimeKeeper:
         activity: str
             Name of the activity for reference in current activity or later look-ups.
         time_limit: int, optional (default=None)
-            Intended time limit of the activity in seconds. Used to calculate time remaining.
+            Intended time limit of the activity in seconds.
+            Used to calculate time remaining.
         activity_meta: List[Any], optional (default=None)
             Any additional information about the activity to be logged.
 

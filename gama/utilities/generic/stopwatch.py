@@ -29,7 +29,7 @@ class Stopwatch:
 
     @property
     def elapsed_time(self):
-        """ If used in with-statement, start since with-statement. If used after, time spent during with statement."""
+        """ Time spent in seconds during with-statement (so far, if not yet exited). """
         if self._is_running:
             return self._get_time() - self._start
         else:

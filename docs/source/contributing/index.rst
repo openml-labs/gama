@@ -20,5 +20,11 @@ When you are finished, make sure all the unit tests work and the documentation i
 In the pull request, mention the issue that discusses the contribution and please mention any additional information
 that might be useful for reviewing the changes.
 
+.. note::
+    We recently `blackened <https://black.readthedocs.io/en/stable/>`_ our code.
+    Before that we maintained a 120 character line limit, which far exceeds the limit
+    of 88 by black. Refactoring the code to read well at 88 characters is an ongoing process.
+
+
 .. include:: contributing.inc
     :start-line: 1

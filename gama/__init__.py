@@ -4,4 +4,4 @@ from .__version__ import __version__
 
 name = "gama"
 
-__all__ = ['GamaClassifier', 'GamaRegressor']
+__all__ = ["GamaClassifier", "GamaRegressor"]

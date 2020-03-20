@@ -8,17 +8,19 @@ Results of cancelled subprocesses may be ignored.
 but it has issues:
     - by default it waits for subprocesses to close on __exit__.
       Unfortunately it is possible the subprocesses can be running non-Python code,
-      e.g. a C implementation of SVC, meaning the subprocess won't end until the SVC fit is complete.
-    - even if that is overwritten and no wait is performed, the subprocess will throw an error when it is done.
-      Though that does not hinder the execution of the program, I don't want errors for expected behavior.
+      e.g. a C implementation of SVC whose subprocess won't end until fit is complete.
+    - even if that is overwritten and no wait is performed,
+      the subprocess will raise an error when it is done.
+      Though that does not hinder the execution of the program,
+      I don't want errors for expected behavior.
 """
-import itertools
 import logging
 import multiprocessing
 import queue
 import time
+import traceback
 import uuid
-from typing import Optional, Callable
+from typing import Optional, Callable, Dict, List
 
 log = logging.getLogger(__name__)
 
@@ -33,6 +35,7 @@ class AsyncFuture:
         self.kwargs = kwargs
         self.result = None
         self.exception = None
+        self.traceback = None
 
     def execute(self):
         """ Execute the function call `fn(*args, **kwargs)` and record results. """
@@ -40,15 +43,16 @@ class AsyncFuture:
             self.result = self.fn(*self.args, **self.kwargs)
         except Exception as e:
             self.exception = e
+            self.traceback = traceback.format_exc()
 
 
 class AsyncEvaluator:
-    """ ContextManager which manages subprocesses on which arbitrary* functions can be evaluated.
+    """ Manages subprocesses on which arbitrary functions can be evaluated.
 
-    * The function and all its arguments must be picklable.
-
-    You can not use the same AsyncEvaluator in two different contexts. Doing so raises a `RuntimeError`.
+    The function and all its arguments must be picklable.
+    Using the same AsyncEvaluator in two different contexts raises a `RuntimeError`.
     """
+
     n_jobs: int = multiprocessing.cpu_count()
 
     def __init__(self, n_workers: Optional[int] = None):
@@ -57,11 +61,11 @@ class AsyncEvaluator:
         ----------
         n_workers : int, optional (default=None)
             Maximum number of subprocesses to run for parallel evaluations.
-            If None, use `AsyncEvaluator.n_jobs` which defaults to multiprocessing.cpu_count().
+            Defaults to `AsyncEvaluator.n_jobs`, using all cores unless overwritten.
         """
         self._has_entered = False
-        self.futures = {}
-        self._processes = []
+        self.futures: Dict[uuid.UUID, AsyncFuture] = {}
+        self._processes: List[multiprocessing.Process] = []
         self._n_jobs = n_workers if n_workers is not None else AsyncEvaluator.n_jobs
 
         self._queue_manager = multiprocessing.Manager()
@@ -70,7 +74,9 @@ class AsyncEvaluator:
 
     def __enter__(self):
         if self._has_entered:
-            raise RuntimeError("You can not use the same AsyncEvaluator in two different contexts.")
+            raise RuntimeError(
+                "You can not use the same AsyncEvaluator in two different contexts."
+            )
         self._has_entered = True
 
         self._input_queue = self._queue_manager.Queue()
@@ -81,7 +87,7 @@ class AsyncEvaluator:
             subprocess = multiprocessing.Process(
                 target=evaluator_daemon,
                 args=(self._input_queue, self._output_queue),
-                daemon=True
+                daemon=True,
             )
             self._processes.append(subprocess)
             subprocess.start()
@@ -90,7 +96,8 @@ class AsyncEvaluator:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         log.debug(f"Terminating {len(self._processes)} subprocesses.")
-        # This is ugly as the subprocesses use shared queues and in direct conflict with guidelines:
+        # This is ugly as the subprocesses use shared queues.
+        # It is in direct conflict with guidelines:
         # https://docs.python.org/3/library/multiprocessing.html#all-start-methods
         for subprocess in self._processes:
             subprocess.terminate()
@@ -111,7 +118,8 @@ class AsyncEvaluator:
         Returns
         -------
         AsyncFuture
-            A Future of which the `result` or `exception` field will be populated once evaluation is finished.
+            A Future of which the `result` or `exception` field will be populated
+            once evaluation is finished.
         """
         future = AsyncFuture(fn, *args, **kwargs)
         self.futures[future.id] = future
@@ -143,26 +151,31 @@ class AsyncEvaluator:
         while True:
             try:
                 completed_future = self._output_queue.get(block=False)
-                matching_future = self.futures.pop(completed_future.id)
-                matching_future.result, matching_future.exception = completed_future.result, completed_future.exception
-                return matching_future
+                match = self.futures.pop(completed_future.id)
+                match.result, match.exception, match.traceback = (
+                    completed_future.result,
+                    completed_future.exception,
+                    completed_future.traceback,
+                )
+                return match
             except queue.Empty:
                 time.sleep(poll_time)
                 continue
 
 
 def evaluator_daemon(
-        input_queue: queue.Queue,
-        output_queue: queue.Queue,
-        print_exit_message: bool = True):
+    input_queue: queue.Queue, output_queue: queue.Queue, print_exit_message: bool = True
+):
     """ Function for daemon subprocess that evaluates functions from AsyncFutures.
 
     Parameters
     ----------
     input_queue: queue.Queue[AsyncFuture]
-        Queue to get AsyncFuture from. Queue should be managed by multiprocessing.manager.
+        Queue to get AsyncFuture from.
+        Queue should be managed by multiprocessing.manager.
     output_queue: queue.Queue[AsyncFuture]
-        Queue to put AsyncFuture to. Queue should be managed by multiprocessing.manager.
+        Queue to put AsyncFuture to.
+        Queue should be managed by multiprocessing.manager.
     print_exit_message: bool (default=True)
         If True, print to console the reason for shutting down.
         If False, shut down silently.
@@ -173,8 +186,8 @@ def evaluator_daemon(
             future.execute()
             output_queue.put(future)
     except KeyboardInterrupt:
-        shutdown_message = 'Helper process stopping due to keyboard interrupt.'
+        shutdown_message = "Helper process stopping due to keyboard interrupt."
     except (BrokenPipeError, EOFError):
-        shutdown_message = 'Helper process stopping due to a broken pipe or EOF.'
+        shutdown_message = "Helper process stopping due to a broken pipe or EOF."
     if print_exit_message:
         print(shutdown_message)

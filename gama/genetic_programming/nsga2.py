@@ -12,7 +12,6 @@ import numpy as np
 
 
 class NSGAMeta:
-
     def __init__(self, obj, metrics):
         self.obj = obj
         self.values = tuple((m(obj) for m in metrics))
@@ -21,21 +20,27 @@ class NSGAMeta:
         self.dominating = []
         self.domination_counter = 0
 
-    def dominates(self, other: 'NSGAMeta'):
+    def dominates(self, other: "NSGAMeta"):
         for self_val, other_val in zip(self.values, other.values):
             if self_val <= other_val:  # or maybe <?
                 return False
         return True
 
-    def crowd_compare(self, other: 'NSGAMeta'):
+    def crowd_compare(self, other: "NSGAMeta"):
         """ Favor higher rank, if equal, favor less crowded. """
-        self_better = (self.rank < other.rank or
-                       (self.rank == other.rank and self.distance > other.distance))
+        self_better = self.rank < other.rank or (
+            self.rank == other.rank and self.distance > other.distance
+        )
         return -1 if self_better else 1
 
 
-def nsga2_select(population: List[Any], n: int, metrics: List[Callable[[Any], float]]) -> List[Any]:
-    """ Select n pairs from the population through binary tournament selection based on crowding distance. """
+def nsga2_select(
+    population: List[Any], n: int, metrics: List[Callable[[Any], float]]
+) -> List[Any]:
+    """ Select n pairs from the population.
+
+     Selection is done through binary tournament selection based on crowding distance.
+    """
     # Entire population is returned, but with rank and distance information.
     candidates = nsga2(population, n=len(population), metrics=metrics, return_meta=True)
 
@@ -49,19 +54,27 @@ def nsga2_select(population: List[Any], n: int, metrics: List[Callable[[Any], fl
     return selected
 
 
-def nsga2(population: List[Any], n: int, metrics: List[Callable[[Any], float]], return_meta: bool=False) -> List[Any]:
-    """ Selects n individuals from the population to create offspring with according to NSGA-II.
+def nsga2(
+    population: List[Any],
+    n: int,
+    metrics: List[Callable[[Any], float]],
+    return_meta: bool = False,
+) -> List[Any]:
+    """ Selects n individuals from the population for offspring according to NSGA-II.
 
     Parameters
     ----------
     population: List[T]
         A list of objects.
     n: int
-        Number of objects to pick out of population. Must be greater than 0 and smaller than len(population).
+        Number of objects to pick out of population.
+        Must be greater than 0 and smaller than len(population).
     metrics: List[Callable[[T], float]]
-        List of functions which obtain the values for each dimension on which to compare elements of population.
+        List of functions which obtain the values for each dimension
+        on which to compare elements of population.
     return_meta: bool (default=False)
-        If True, return the selected individuals wrapped in a NSGAMeta class with information such as rank and distance.
+        If True, return the selected individuals wrapped in a NSGAMeta class,
+        with information such as rank and distance.
         If False, return the selected individuals as they were passed to this function.
 
     Returns
@@ -70,9 +83,9 @@ def nsga2(population: List[Any], n: int, metrics: List[Callable[[Any], float]], 
         A list of size n containing a subset of population.
     """
     if n == 0 or n > len(population):
-        raise ValueError(f"{n} is not a valid value for `n`, must be 0 < n < len(population) ({len(population)}).")
+        raise ValueError(f"n is {n} must be 0 < n < len(population)={len(population)}")
     population = [NSGAMeta(p, metrics) for p in population]
-    selection = []
+    selection: List[NSGAMeta] = []
     fronts = fast_non_dominated_sort(population)
     i = 0
 
@@ -92,7 +105,7 @@ def nsga2(population: List[Any], n: int, metrics: List[Callable[[Any], float]], 
 
 def fast_non_dominated_sort(P: List[NSGAMeta]) -> List[List[NSGAMeta]]:
     """ Sorts P into Pareto fronts. """
-    fronts = [[]]
+    fronts: List[List[NSGAMeta]] = [[]]
     for p, q in itertools.combinations(P, 2):
         if p.dominates(q):
             p.dominating.append(q)
@@ -121,13 +134,20 @@ def fast_non_dominated_sort(P: List[NSGAMeta]) -> List[List[NSGAMeta]]:
 
 def crowding_distance_assignment(I: List[NSGAMeta]) -> None:
     for m in range(len(I[0].values)):
-        I = sorted(I, key=lambda x: x.values[m])
-        I[0].distance = I[-1].distance = float('inf')
-        if I[-1].values[m] == I[0].values[m] or np.isinf(I[0].values[m]) or np.isinf(I[-1].values[m]):
+        I = sorted(I, key=lambda x: x.values[m])  # noqa: E741 'I' is name in paper
+        I[0].distance = I[-1].distance = float("inf")
+        if (
+            I[-1].values[m] == I[0].values[m]
+            or np.isinf(I[0].values[m])
+            or np.isinf(I[-1].values[m])
+        ):
             # Would raise divisionbyzero later, or give other numerical warnings.
-            # This typically happens only for the worst pareto front(s), so the inaccuracy in crowding distance for
-            # the remainder is not really a concern. Might consider immediately removing failing individuals.
+            # This typically happens only for the worst pareto front(s),
+            # so the inaccuracy in crowding distance for the remainder is not a concern.
+            # Might consider immediately removing failing individuals.
             continue
 
         for i_prev, i, i_next in zip(I, I[1:], I[2:]):
-            i.distance += (i_next.values[m] - i_prev.values[m]) / (I[-1].values[m] - I[0].values[m])
+            i.distance += (i_next.values[m] - i_prev.values[m]) / (
+                I[-1].values[m] - I[0].values[m]
+            )

@@ -1,16 +1,19 @@
 from typing import Callable, NamedTuple, Tuple
 
-# Defines an operator which takes input and produces output, e.g. a preprocessing or classification algorithm.
-Primitive = NamedTuple("Primitive",
-                       [("input", Tuple[str]),
-                        ("output", str),
-                        ("identifier", Callable)])
 
+class Primitive(NamedTuple):
+    """ Defines an operator which takes input and produces output.
 
-def primitive__str__(primitive) -> str:
-    """ str: e.g. "FastICA" """
-    return primitive.identifier.__name__
+    E.g. a preprocessing or classification algorithm.
+    """
 
+    input: Tuple[str]
+    output: str
+    identifier: Callable
 
-Primitive.__str__ = primitive__str__
-Primitive.__repr__ = primitive__str__
+    def __str__(self):
+        """ str: e.g. "FastICA" """
+        return self.identifier.__name__
+
+    def __repr__(self):
+        return str(self)
