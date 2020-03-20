@@ -13,5 +13,5 @@ if [ "$JOB" = "test" ]; then
 fi
 if [ "$JOB" = "deploy" ]; then
   pytest --cov=gama -sv -n 4 tests/unit/
-  pytest --cov=gama -sv -n 4 tests/system/
+  # pytest --cov=gama -sv -n 4 tests/system/
 fi

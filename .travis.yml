@@ -12,7 +12,7 @@ jobs:
   include:
   - env: JOB=check
   - env: JOB=deploy
-    if: (branch = master OR branch = develop OR branch = ci_script_check) AND NOT env(TRAVIS_PULL_REQUEST)
+    if: (branch = master OR branch = develop OR branch = ci_script_check) AND NOT pull_request
 
 install:
   - ./ci_scripts/install.sh
@@ -28,3 +28,4 @@ deploy:
   token: $GITHUB_TOKEN
   on:
     condition: $JOB = deploy
+    branch: master, develop, ci_script_check
