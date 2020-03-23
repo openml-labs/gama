@@ -28,10 +28,11 @@ Example::
 Resources
 *********
 
-``n_jobs``: ``int`` (default=-1)
+``n_jobs``: ``int, optional`` (default=None)
     Determines how many processes can be run in parallel during `fit`.
     This has the most influence over how many machine learning pipelines can be evaluated.
-    If it is set to -1, which is the default, all cores are used.
+    If it is set to -1, all cores are used.
+    If set to ``None`` (default), half the cores are used.
     Changing it to use a set amount of (fewer) cores will decrease the amount of pipelines evaluated,
     but is needed if you do not want GAMA to use all resources.
 

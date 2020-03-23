@@ -5,7 +5,7 @@ Dashboard
 
 .. note::
     The GAMA Dashboard is not done.
-    However, it is functional and released to get some early feedback.
+    However, it is functional and released to get some early feedback on what users would like to see included.
 
 GAMA Dashboard is a graphical user interface to start and monitor the AutoML search.
 It is available when GAMA has been installed with its visualization optional dependencies (`pip install gama[vis]`).

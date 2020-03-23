@@ -5,7 +5,7 @@ GAMA is a tool for Automated Machine Learning (AutoML).
 All you need to do is supply the data, and GAMA will automatically try to find a good *machine learning pipeline*.
 For the *machine learning pipeline* GAMA considers data preprocessing steps, various machine learning algorithms, and their possible hyperparameters configurations.
 This takes away the knowledge and labour intensive work of selecting the right algorithms and tuning their hyperparameters yourself.
-Using GAMA is as simple as using::
+Using GAMA is as simple as using a scikit-learn estimator::
 
 	from gama import GamaClassifier
 	automl =  GamaClassifier()
@@ -25,7 +25,7 @@ To get more basic information on GAMA and its AutoML functionality, read more in
 If you want find out everything there is to know about GAMA, also visit the :ref:`technical_guide_index`.
 It describes visualization of optimization logs, changing the AutoML pipeline, and more.
 If there are any questions you have that are not answered by the documentation, check the `issue page <https://github.com/PGijsbers/GAMA/issues>`_.
-If your question has not been answered there either, please open a new issue and label with the question label.
+If your question has not been answered there either, please open a new issue.
 
 .. note::
 
