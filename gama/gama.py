@@ -195,7 +195,7 @@ class Gama(ABC):
             random.seed(random_state)
             np.random.seed(random_state)
 
-        self._X: Optional[pd.DataFrame] = None
+        self._x: Optional[pd.DataFrame] = None
         self._y: Optional[pd.DataFrame] = None
         self._basic_encoding_pipeline: Optional[Pipeline] = None
         self._inferred_dtypes: List[Type] = []
@@ -409,8 +409,8 @@ class Gama(ABC):
         ):
             x, self._y = format_x_y(x, y)
             self._inferred_dtypes = x.dtypes
-            self._X, self._basic_encoding_pipeline = basic_encoding(x)
-            steps = basic_pipeline_extension(self._X)
+            self._x, self._basic_encoding_pipeline = basic_encoding(x)
+            steps = basic_pipeline_extension(self._x)
             #  steps = define_preprocessing_steps(
             #  self._X, max_extra_features_created=None, max_categories_for_one_hot=10
             #  )
@@ -445,7 +445,7 @@ class Gama(ABC):
             )
             self._post_processing.dynamic_defaults(self)
             self.model = self._post_processing.post_process(
-                self._X,
+                self._x,
                 self._y,
                 self._time_manager.total_time_remaining,
                 best_individuals,
@@ -464,7 +464,7 @@ class Gama(ABC):
 
         evaluate_pipeline = partial(
             gama.genetic_programming.compilers.scikitlearn.evaluate_pipeline,
-            x=self._X,
+            x=self._x,
             y_train=self._y,
             metrics=self._metrics,
         )
@@ -478,7 +478,7 @@ class Gama(ABC):
 
         try:
             with stopit.ThreadingTimeout(timeout):
-                self._search_method.dynamic_defaults(self._X, self._y, timeout)
+                self._search_method.dynamic_defaults(self._x, self._y, timeout)
                 self._search_method.search(self._operator_set, start_candidates=pop)
         except KeyboardInterrupt:
             log.info("Search phase terminated because of Keyboard Interrupt.")
