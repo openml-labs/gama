@@ -37,7 +37,12 @@ def imports_and_steps_for_individual(
     """
     imports = ["from numpy import nan", "from sklearn.pipeline import Pipeline"]
     for name, step in individual.pipeline.steps:
-        imports.append(f"from {step.__module__} import {step.__class__.__name__}")
+        # sklearn often contains classes in 'private' submodules
+        if step.__module__.split(".")[-1].startswith("_"):
+            module = ".".join(step.__module__.split(".")[:-1])
+        else:
+            module = step.__module__
+        imports.append(f"from {module} import {step.__class__.__name__}")
 
     # The pipeline consists of two steps:
     # - Data Preparation: SimpleImputer and possibly One-hot or Target encoding.
