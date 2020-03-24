@@ -76,13 +76,6 @@ def individual_to_python(
         ] + imports
     steps_str = ",\n".join([f"('{name}', {step})" for name, step in steps])
     pipeline = f"Pipeline([{steps_str}])"
-    script = (
-        "from sklearn.pipeline import Pipeline\n"
-        + "\n".join(imports)
-        + "\n\n"
-        + "pipeline = "
-        + pipeline
-        + "\n"
-    )
+    script = "\n".join(sorted(imports)) + "\n\n" + "pipeline = " + pipeline + "\n"
 
     return script

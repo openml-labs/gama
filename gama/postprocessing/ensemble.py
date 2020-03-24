@@ -131,7 +131,7 @@ class EnsemblePostProcessing(BasePostProcessing):
                 all_imports = all_imports.union(transformer_import)
 
         script = (
-            "\n".join(all_imports)
+            "\n".join(sorted(all_imports))
             + "\n\n"
             + "\n\n".join(pipeline_declarations)
             + "\n"
