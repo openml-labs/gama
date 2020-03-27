@@ -1,19 +1,23 @@
-import copy
 import uuid
 from collections import namedtuple
 import logging
 import random
 import time
-from typing import Optional, List, TYPE_CHECKING, Dict, Tuple
+from typing import Optional, List, TYPE_CHECKING, Dict, Tuple, Sequence
 
 import pandas as pd
-from sklearn.pipeline import Pipeline
+from sklearn.base import TransformerMixin
 from sklearn.preprocessing import OneHotEncoder
 
 from gama.genetic_programming.components import Individual
 from gama.postprocessing.base_post_processing import BasePostProcessing
 from gama.utilities.evaluation_library import EvaluationLibrary
-from gama.utilities.export import imports_and_steps_for_individual
+from gama.utilities.export import (
+    imports_and_steps_for_individual,
+    format_import,
+    format_pipeline,
+    transformers_to_str,
+)
 from gama.utilities.metrics import Metric, MetricType
 
 
@@ -80,7 +84,9 @@ class EnsemblePostProcessing(BasePostProcessing):
         )
         return self._ensemble
 
-    def to_code(self, preprocessing: Optional[Pipeline] = None) -> str:
+    def to_code(
+        self, preprocessing: Sequence[Tuple[str, TransformerMixin]] = None
+    ) -> str:
         if isinstance(self._ensemble, EnsembleClassifier):
             voter = "VotingClassifier"
         elif isinstance(self._ensemble, EnsembleRegressor):
@@ -88,25 +94,20 @@ class EnsemblePostProcessing(BasePostProcessing):
         else:
             raise RuntimeError(f"Can't export ensemble of type {type(self._ensemble)}.")
 
-        all_imports = {
+        imports = {
             f"from sklearn.ensemble import {voter}",
             "from sklearn.pipeline import Pipeline",
         }
 
-        pipeline_names = []
-        pipeline_declarations = []
-        pipeline_weights = []
+        pipelines = []
         for i, (model, weight) in enumerate(self._ensemble._models.values()):
-            imports, steps = imports_and_steps_for_individual(model.individual)
-            all_imports = all_imports.union(set(imports))
-            steps_str = ",\n".join([f"('{name}', {step})" for name, step in steps])
+            ind_imports, steps = imports_and_steps_for_individual(model.individual)
+            imports = imports.union(ind_imports)
             pipeline_name = f"pipeline_{i}"
-            pipeline_names.append(pipeline_name)
-            pipeline_declarations.append(f"{pipeline_name} = Pipeline([{steps_str}])")
-            pipeline_weights.append(weight)
+            pipelines.append(format_pipeline(steps, name=pipeline_name))
 
-        pipelines = [f"('{i}', {name})" for i, name in enumerate(pipeline_names)]
-        estimators = ",".join(pipelines)
+        estimators = ",".join([f"('{i}', pipeline_{i})" for i in range(len(pipelines))])
+        weights = [weight for _, weight in self._ensemble._models.values()]
 
         if isinstance(self._ensemble, EnsembleClassifier):
             if self._ensemble._metric.requires_probabilities:
@@ -117,29 +118,20 @@ class EnsemblePostProcessing(BasePostProcessing):
             voting = ""  # This parameter does not exist for VotingRegressor
 
         if preprocessing is not None:
-            # We don't want to export the mapping of categorical encoders
-            prepend = [
-                (name, copy.copy(transformer))
-                for name, transformer in preprocessing.steps
-            ]
-            for name, transformer in prepend:
-                transformer.mapping = None  # For encoders
-                transformer_import = {
-                    f"from {transformer.__module__} "
-                    f"import {transformer.__class__.__name__}"
-                }
-                all_imports = all_imports.union(transformer_import)
+            imports = imports.union({format_import(t) for _, t in preprocessing})
 
         script = (
-            "\n".join(sorted(all_imports))
+            "\n".join(sorted(imports))
             + "\n\n"
-            + "\n\n".join(pipeline_declarations)
+            + "\n\n".join(pipelines)
             + "\n"
-            + f"ensemble = {voter}([{estimators}]{voting},{pipeline_weights})\n"
+            + f"ensemble = {voter}([{estimators}]{voting},{weights})\n"
         )
         if preprocessing is not None:
-            pp_steps = "\n,".join([f"('{name}', {step})" for name, step in prepend])
-            script += f"pipeline = Pipeline([{pp_steps},\n ('ensemble', ensemble)])\n"
+            trans_strs = transformers_to_str([t for _, t in preprocessing])
+            names = [name for name, _ in preprocessing]
+            steps = list(zip(names, trans_strs))
+            script += format_pipeline(steps + [("ensemble", "ensemble")])
         return script
 
 

@@ -1,32 +1,36 @@
-from typing import Tuple, List
+import copy
+from typing import Tuple, List, Set
 
 from sklearn.base import TransformerMixin
-from sklearn.pipeline import Pipeline
-
 from gama.genetic_programming.components import Individual
 
 
-def model_to_python(pipeline: Pipeline) -> str:
-    """ Generate code for the machine learning pipeline represented by `individual`. """
-    imports = []
-    for name, step in pipeline.steps:
-        imports.append(f"from {step.__module__} import {step.__class__.__name__}")
+def transformers_to_str(transformers: List[TransformerMixin]) -> List[str]:
+    """ Format a transformer for code export, removes any mapping. """
+    copies = list(map(copy.copy, transformers))
+    for transformer in copies:
+        if hasattr(transformer, "mapping"):
+            transformer.mapping = None  # type: ignore  # ignore no attr 'mapping'
+    return list(map(str, copies))
 
-    script = (
-        "from sklearn.pipeline import Pipeline\n"
-        + "\n".join(imports)
-        + "\n\n"
-        + "pipeline = "
-        + str(pipeline)
-        + "\n"
-    )
 
-    return script
+def format_import(o: object) -> str:
+    """ Creates the import statement for `o`'s class. """
+    if o.__module__.split(".")[-1].startswith("_"):
+        module = ".".join(o.__module__.split(".")[:-1])
+    else:
+        module = o.__module__
+    return f"from {module} import {o.__class__.__name__}"
+
+
+def format_pipeline(steps: List[Tuple[str, str]], name: str = "pipeline"):
+    steps_str = ",\n".join([f"('{name}', {step})" for name, step in steps])
+    return f"{name} = Pipeline([{steps_str}])\n"
 
 
 def imports_and_steps_for_individual(
     individual: Individual,
-) -> Tuple[List[str], List[Tuple[str, str]]]:
+) -> Tuple[Set[str], List[Tuple[str, str]]]:
     """ Determine required imports and steps for the individual's pipeline.
 
     Returns two lists:
@@ -36,27 +40,9 @@ def imports_and_steps_for_individual(
     E.g. (["from sklearn.naive_bayes import GaussianNB"], [('0', 'GaussianNB()')])
     """
     imports = ["from numpy import nan", "from sklearn.pipeline import Pipeline"]
-    for name, step in individual.pipeline.steps:
-        # sklearn often contains classes in 'private' submodules
-        if step.__module__.split(".")[-1].startswith("_"):
-            module = ".".join(step.__module__.split(".")[:-1])
-        else:
-            module = step.__module__
-        imports.append(f"from {module} import {step.__class__.__name__}")
+    imports += [format_import(step) for name, step in individual.pipeline.steps]
 
-    # The pipeline consists of two steps:
-    # - Data Preparation: SimpleImputer and possibly One-hot or Target encoding.
-    # - The remainder: additional transformers and an estimator.
-    # Because the data preparation step is (currently) defined once
-    # and shared across all pipelines, this is not captured in the Individual itself.
-    # We have to extract it from the compiled pipeline.
     steps = []
-    n_data_preparation_steps = len(individual.pipeline.steps) - len(
-        individual.primitives
-    )
-    for name, step in individual.pipeline.steps[:n_data_preparation_steps]:
-        steps.append((name, step))
-
     for i, primitive_node in reversed(list(enumerate(individual.primitives))):
         steps.append((str(i), primitive_node.str_nonrecursive))
         for terminal in primitive_node._terminals:
@@ -65,7 +51,7 @@ def imports_and_steps_for_individual(
                     f"from {terminal.value.__module__} import {terminal.value.__name__}"  # type: ignore # noqa: E501
                 )
 
-    return imports, steps
+    return set(imports), steps
 
 
 def individual_to_python(
@@ -75,10 +61,7 @@ def individual_to_python(
     imports, steps = imports_and_steps_for_individual(individual)
     if prepend_steps is not None:
         steps = prepend_steps + steps
-        imports = [
-            f"from {step.__module__} import {step.__class__.__name__}"
-            for name, step in prepend_steps
-        ] + imports
+        imports = imports.union({format_import(step) for _, step in prepend_steps})
     steps_str = ",\n".join([f"('{name}', {step})" for name, step in steps])
     pipeline = f"Pipeline([{steps_str}])"
     script = "\n".join(sorted(imports)) + "\n\n" + "pipeline = " + pipeline + "\n"

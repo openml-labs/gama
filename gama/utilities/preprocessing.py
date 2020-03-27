@@ -1,8 +1,9 @@
 import logging
-from typing import Optional, Iterator
+from typing import Optional, Iterator, List, Tuple
 import category_encoders as ce
 import numpy as np
 import pandas as pd
+from sklearn.base import TransformerMixin
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 
@@ -62,7 +63,7 @@ def basic_encoding(x: pd.DataFrame):
     return x_enc, encoding_pipeline
 
 
-def basic_pipeline_extension(x: pd.DataFrame):
+def basic_pipeline_extension(x: pd.DataFrame) -> List[Tuple[str, TransformerMixin]]:
     """ Define a TargetEncoder and SimpleImputer.
 
     TargetEncoding is will encode categorical features with more than 10 unique values.
@@ -70,8 +71,8 @@ def basic_pipeline_extension(x: pd.DataFrame):
     """
     many_factor_features = list(find_categorical_columns(x, min_f=11))
     return [
-        ce.TargetEncoder(cols=many_factor_features),
-        SimpleImputer(strategy="median"),
+        ("target_enc", ce.TargetEncoder(cols=many_factor_features)),
+        ("imputation", SimpleImputer(strategy="median")),
     ]
 
 

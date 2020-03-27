@@ -4,6 +4,7 @@ import time
 from typing import Callable, Tuple, Optional, Sequence
 
 import stopit
+from sklearn.base import TransformerMixin
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import ShuffleSplit
 from sklearn.pipeline import Pipeline
@@ -28,17 +29,14 @@ def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
 def compile_individual(
     individual: Individual,
     parameter_checks=None,
-    preprocessing_steps: Sequence[object] = None,
+    preprocessing_steps: Sequence[Tuple[str, TransformerMixin]] = None,
 ) -> Pipeline:
     steps = [
         (str(i), primitive_node_to_sklearn(primitive))
         for i, primitive in enumerate(individual.primitives)
     ]
     if preprocessing_steps:
-        steps = steps + [
-            (str(i), step)
-            for (i, step) in enumerate(reversed(preprocessing_steps), start=len(steps))
-        ]
+        steps = steps + list(reversed(preprocessing_steps))
     return Pipeline(list(reversed(steps)))
 
 
