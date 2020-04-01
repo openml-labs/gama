@@ -28,7 +28,7 @@ class SpecialLabelEncoder(object):
         if self._fitted:
             return
         y = column_or_1d(y, warn=True)
-        self.classes_ = np.unique(y)
+        self.classes = np.unique(y)
         olabel = self.classes[1]
         if self._pos_label is not None and olabel != self._pos_label:
             for i, label in enumerate(self.classes):
