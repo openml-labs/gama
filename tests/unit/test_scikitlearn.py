@@ -59,7 +59,8 @@ def test_compile_individual(SS_BNB):
     assert isinstance(pipeline.steps[0][1], StandardScaler)
     assert isinstance(pipeline.steps[1][1], BernoulliNB)
 
-    extended_pipeline = compile_individual(SS_BNB, preprocessing_steps=[MinMaxScaler()])
+    mm_scale = [("scaler", MinMaxScaler())]
+    extended_pipeline = compile_individual(SS_BNB, preprocessing_steps=mm_scale)
     assert 3 == len(extended_pipeline.steps)
     assert isinstance(extended_pipeline.steps[0][1], MinMaxScaler)
     assert isinstance(extended_pipeline.steps[1][1], StandardScaler)
