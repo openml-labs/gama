@@ -8,6 +8,7 @@ from gama.genetic_programming.components import Individual
 from gama.genetic_programming.mutation import (
     mut_replace_terminal,
     mut_replace_primitive,
+    mut_insert,
     random_valid_mutation_in_place,
 )
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
@@ -40,6 +41,11 @@ def test_mut_replace_primitive_len_2(ForestPipeline, pset):
     _test_mutation(
         ForestPipeline, mut_replace_primitive, _mut_replace_primitive_is_applied, pset
     )
+
+
+def test_mut_insert(ForestPipeline, pset):
+    """ mut_insert inserts at least one primitive. """
+    _test_mutation(ForestPipeline, mut_insert, _mut_insert_is_applied, pset)
 
 
 def test_random_valid_mutation_with_all(ForestPipeline, pset):
