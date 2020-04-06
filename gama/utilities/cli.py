@@ -113,7 +113,7 @@ def parse_args():
         "-dry",
         dest="dry_run",
         action="store_true",
-        help="If True, execute the run without calling fit or exports.",
+        help="If True, execute without calling fit or exports.",
     )
 
     return parser.parse_args()
