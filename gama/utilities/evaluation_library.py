@@ -1,7 +1,7 @@
 import datetime
 import heapq
 import logging
-from typing import Tuple, List, Optional, Union
+from typing import Tuple, List, Optional, Union, Dict
 
 import numpy as np
 import pandas as pd
@@ -115,6 +115,12 @@ class EvaluationLibrary:
         self.other_evaluations: List[Evaluation] = []
         self._m = m
         self._sample_n = n
+        self.lookup: Dict[str, Evaluation] = {}
+
+        def main_node_str(e: Evaluation):
+            return str(e.individual.main_node)
+
+        self._lookup_key = main_node_str
 
         if sample is not None:
             self._sample = sample
@@ -124,7 +130,7 @@ class EvaluationLibrary:
             self._sample = "not set"
 
     @property
-    def evaluations(self):
+    def evaluations(self) -> List[Evaluation]:
         return self.top_evaluations + self.other_evaluations
 
     def determine_sample_indices(
@@ -201,6 +207,8 @@ class EvaluationLibrary:
             removed = heapq.heappushpop(self.top_evaluations, evaluation)
             removed.predictions, removed.estimators = None, None
             self.other_evaluations.append(removed)
+
+        self.lookup[self._lookup_key(evaluation)] = evaluation
 
     def n_best(self, n: int = 5) -> List[Evaluation]:
         """ Return the best `n` pipelines.

@@ -107,12 +107,10 @@ def test_evaluation_library_n_best(GNB):
     ), "`n > len(lib.top_evaluations)` should return all evaluations."
 
 
-def _test_subsample(sample, predictions, subsample):
+def _test_subsample(sample, predictions, subsample, individual):
     """ Test the `predictions` correctly get sampled to `subsample`. """
-    from ..conftest import GNB
-
     lib = EvaluationLibrary(sample=sample)
-    best_evaluation = _mock_evaluation(GNB, predictions=predictions)
+    best_evaluation = _mock_evaluation(individual, predictions=predictions)
     lib.save_evaluation(best_evaluation)
     assert (
         subsample.shape == best_evaluation.predictions.shape
@@ -129,6 +127,7 @@ def test_evaluation_library_sample_np2d_prediction(GNB):
         sample=np.asarray([0, 1, 3]),
         predictions=probabilities,
         subsample=probabilities[[0, 1, 3], :],
+        individual=GNB,
     )
 
 
@@ -139,6 +138,7 @@ def test_evaluation_library_sample_pd2d_prediction(GNB):
         sample=np.asarray([0, 1, 3]),
         predictions=probabilities,
         subsample=probabilities.iloc[[0, 1, 3], :],
+        individual=GNB,
     )
 
 
@@ -149,6 +149,7 @@ def test_evaluation_library_sample_np1d_prediction(GNB):
         sample=np.asarray([0, 1, 3]),
         predictions=probabilities,
         subsample=probabilities[[0, 1, 3]],
+        individual=GNB,
     )
 
 
@@ -159,4 +160,5 @@ def test_evaluation_library_sample_pd1d_prediction(GNB):
         sample=np.asarray([0, 1, 3]),
         predictions=probabilities,
         subsample=probabilities.iloc[[0, 1, 3]],
+        individual=GNB,
     )

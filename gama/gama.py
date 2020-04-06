@@ -234,6 +234,7 @@ class Gama(ABC):
             compile_=compile_individual,
             eliminate=eliminate_from_pareto,
             evaluate_callback=self._on_evaluation_completed,
+            completed_evaluations=self._evaluation_library.lookup,
         )
 
     def _np_to_matching_dataframe(self, x: np.ndarray) -> pd.DataFrame:

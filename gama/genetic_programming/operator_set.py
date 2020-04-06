@@ -20,6 +20,7 @@ class OperatorSet:
         eliminate,
         evaluate_callback,
         max_retry=50,
+        completed_evaluations=None,
     ):
         """
 
@@ -41,7 +42,7 @@ class OperatorSet:
         self._evaluate_callback = evaluate_callback
         self.evaluate = None
 
-        self._seen_individuals = {}
+        self._completed_evaluations = completed_evaluations
 
     def wait_next(self, async_evaluator):
         future = async_evaluator.wait_next()
@@ -75,8 +76,7 @@ class OperatorSet:
     def try_until_new(self, operator, *args, **kwargs):
         for _ in range(self._max_retry):
             individual, log_args = operator(*args, **kwargs)
-            if str(individual.main_node) not in self._seen_individuals:
-                # self._seen_individuals[str(individual.main_node)] = individual
+            if str(individual.main_node) not in self._completed_evaluations:
                 return individual, log_args
         else:
             log.debug(f"50 iterations of {operator.__name__} did not yield new ind.")
