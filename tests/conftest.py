@@ -12,6 +12,12 @@ def pset():
 
 
 @pytest.fixture
+def opset():
+    gc = GamaClassifier(config=clf_config, scoring="accuracy")
+    return gc._operator_set
+
+
+@pytest.fixture
 def GNB(pset):
     return Individual.from_string("GaussianNB(data)", pset, compile_individual)
 
