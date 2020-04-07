@@ -24,6 +24,7 @@ import warnings
 import pandas as pd
 import numpy as np
 import stopit
+from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
 
 import gama.genetic_programming.compilers.scikitlearn
@@ -195,9 +196,10 @@ class Gama(ABC):
             random.seed(random_state)
             np.random.seed(random_state)
 
-        self._X: Optional[pd.DataFrame] = None
+        self._x: Optional[pd.DataFrame] = None
         self._y: Optional[pd.DataFrame] = None
         self._basic_encoding_pipeline: Optional[Pipeline] = None
+        self._fixed_pipeline_extension: List[Tuple[str, TransformerMixin]] = []
         self._inferred_dtypes: List[Type] = []
         self.model: object = None
         self._final_pop: List[Individual] = []
@@ -232,6 +234,7 @@ class Gama(ABC):
             compile_=compile_individual,
             eliminate=eliminate_from_pareto,
             evaluate_callback=self._on_evaluation_completed,
+            completed_evaluations=self._evaluation_library.lookup,
         )
 
     def _np_to_matching_dataframe(self, x: np.ndarray) -> pd.DataFrame:
@@ -409,13 +412,10 @@ class Gama(ABC):
         ):
             x, self._y = format_x_y(x, y)
             self._inferred_dtypes = x.dtypes
-            self._X, self._basic_encoding_pipeline = basic_encoding(x)
-            steps = basic_pipeline_extension(self._X)
-            #  steps = define_preprocessing_steps(
-            #  self._X, max_extra_features_created=None, max_categories_for_one_hot=10
-            #  )
+            self._x, self._basic_encoding_pipeline = basic_encoding(x)
+            self._fixed_pipeline_extension = basic_pipeline_extension(self._x)
             self._operator_set._safe_compile = partial(
-                compile_individual, preprocessing_steps=steps
+                compile_individual, preprocessing_steps=self._fixed_pipeline_extension
             )
 
         fit_time = int(
@@ -445,7 +445,7 @@ class Gama(ABC):
             )
             self._post_processing.dynamic_defaults(self)
             self.model = self._post_processing.post_process(
-                self._X,
+                self._x,
                 self._y,
                 self._time_manager.total_time_remaining,
                 best_individuals,
@@ -464,7 +464,7 @@ class Gama(ABC):
 
         evaluate_pipeline = partial(
             gama.genetic_programming.compilers.scikitlearn.evaluate_pipeline,
-            x=self._X,
+            x=self._x,
             y_train=self._y,
             metrics=self._metrics,
         )
@@ -478,7 +478,7 @@ class Gama(ABC):
 
         try:
             with stopit.ThreadingTimeout(timeout):
-                self._search_method.dynamic_defaults(self._X, self._y, timeout)
+                self._search_method.dynamic_defaults(self._x, self._y, timeout)
                 self._search_method.search(self._operator_set, start_candidates=pop)
         except KeyboardInterrupt:
             log.info("Search phase terminated because of Keyboard Interrupt.")
@@ -523,7 +523,13 @@ class Gama(ABC):
         if raise_if_exists and os.path.isfile(file):
             raise FileExistsError(f"File {file} already exists.")
 
-        script_text = self._post_processing.to_code(self._basic_encoding_pipeline)
+        if self._basic_encoding_pipeline is not None:
+            script_text = self._post_processing.to_code(
+                self._basic_encoding_pipeline.steps + self._fixed_pipeline_extension
+            )
+        else:
+            script_text = self._post_processing.to_code(self._fixed_pipeline_extension)
+
         with open(file, "w") as fh:
             fh.write(script_text)
         subprocess.call(["black", file])

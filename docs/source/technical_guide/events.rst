@@ -7,14 +7,14 @@ It is also possible to programmatically receive updates of the optimization proc
 
     from gama import GamaClassifier
 
-    def process_individual(individual):
-        print('{} was evaluated. Fitness is {}.'.format(individual, individual.fitness.values))
+    def print_evaluation(evaluation):
+        print(f'{evaluation.individual.pipeline_str()} was evaluated. Fitness is {evaluation.score}.')
 
     automl = GamaClassifier()
-    automl.evaluation_completed(process_individual)
+    automl.evaluation_completed(print_evaluation)
     automl.fit(X, y)
 
-The function passed to ``evaluation_completed`` should take a ``gama.genetic_programming.components.individual.Individual``
+The function passed to ``evaluation_completed`` should take a ``gama.genetic_programming.utilities.evaluation_library.Evaluation``
 as single argument.
 Any exceptions raised but not handled in the callback will be ignored but logged at ``logging.WARNING`` level.
 During the callback a ``stopit.utils.TimeoutException`` may be raised.

@@ -1,8 +1,8 @@
 from abc import ABC
-from typing import List, Union, Dict, Any, Optional, Tuple, TYPE_CHECKING
+from typing import List, Union, Dict, Any, Tuple, TYPE_CHECKING, Sequence
 
 import pandas as pd
-from sklearn.pipeline import Pipeline
+from sklearn.base import TransformerMixin
 
 from gama.genetic_programming.components import Individual
 
@@ -85,12 +85,14 @@ class BasePostProcessing(ABC):
         """
         raise NotImplementedError("Method must be implemented by child class.")
 
-    def to_code(self, preprocessing: Optional[Pipeline] = None) -> str:
+    def to_code(
+        self, preprocessing: Sequence[Tuple[str, TransformerMixin]] = None
+    ) -> str:
         """ Generate Python code to reconstruct a pipeline that constructs the model.
 
         Parameters
         ----------
-        preprocessing: sklearn.pipeline.Pipeline, optional (default=None)
+        preprocessing: Sequence[TransformerMixin], optional (default=None)
             Preprocessing steps that need be executed before the model.
 
         Returns

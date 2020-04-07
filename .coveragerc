@@ -1,0 +1,6 @@
+[report]
+ignore_errors = True
+omit =
+    tests/*
+    gama/visualization/*.py
+    gama/dashboard/*.py

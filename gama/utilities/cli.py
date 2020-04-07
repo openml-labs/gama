@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 import pickle
 
 from gama import GamaClassifier, GamaRegressor
@@ -108,6 +109,12 @@ def parse_args():
         action="store_true",
         help="Report status updates to console.",
     )
+    parser.add_argument(
+        "-dry",
+        dest="dry_run",
+        action="store_true",
+        help="If True, execute without calling fit or exports.",
+    )
 
     return parser.parse_args()
 
@@ -119,6 +126,9 @@ def main():
     if args.input_file.lower().endswith(".csv"):
         raise NotImplementedError("CSV currently not supported.")
         # data = pd.read_csv(args.input_file, sep=args.separator)
+    elif not os.path.exists(args.input_file.lower()):
+        raise FileNotFoundError(args.input_file)
+
     if args.input_file.lower().endswith(".arff") and args.mode is None:
         # Determine the task type based on the target column in the arff file
         attributes = load_feature_metadata_from_arff(args.input_file)
@@ -134,6 +144,7 @@ def main():
             raise ValueError(
                 f"Target column {target} has type {target_type}, which GAMA can't model"
             )
+        print(f"Detected a {args.mode} problem.")
 
     print("CLI: Initializing GAMA")
     log_level = logging.INFO if args.verbose else logging.WARNING
@@ -155,19 +166,20 @@ def main():
     else:
         raise ValueError(f"Mode {args.mode} is not valid (--mode).")
 
-    print("CLI: Starting model search")
-    if args.input_file.lower().endswith(".arff"):
-        automl.fit_arff(args.input_file.lower(), target_column=args.target)
-    # else:
-    #    automl.fit(x, y)
+    if not args.dry_run:
+        print("CLI: Starting model search")
+        if args.input_file.lower().endswith(".arff"):
+            automl.fit_arff(args.input_file.lower(), target_column=args.target)
+        # else:
+        #    automl.fit(x, y)
 
-    # == Model Export ===
-    print("CLI: Exporting models.")
-    with open(args.output_file, "wb") as fh:
-        pickle.dump(automl.model, fh)
+        # == Model Export ===
+        print("CLI: Exporting models.")
+        with open(args.output_file, "wb") as fh:
+            pickle.dump(automl.model, fh)
 
-    if args.export_python is not None:
-        automl.export_script(args.export_python, raise_if_exists=False)
+        if args.export_python is not None:
+            automl.export_script(args.export_python, raise_if_exists=False)
     print("done!")
 
 

@@ -104,4 +104,4 @@ After updating the documentation, please build the new docs to verify everything
 
 The html pages are now in the ``gama\docs\build`` directory.
 There is no need to upload the generated documentation.
-When a release happens, the commit to master will trigger the build and upload of the latest documentation.
+A commit to master or develop will trigger the build and upload of the latest documentation.
