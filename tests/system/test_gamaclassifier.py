@@ -5,8 +5,10 @@ import pytest
 from typing import Type
 
 from sklearn.datasets import load_wine, load_breast_cancer
+from sklearn.ensemble import VotingClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, log_loss
+from sklearn.pipeline import Pipeline
 
 from gama.postprocessing import EnsemblePostProcessing
 from gama.search_methods import AsynchronousSuccessiveHalving, AsyncEA, RandomSearch
@@ -168,11 +170,22 @@ def _test_dataset_problem(
 
     score_to_match = logloss if metric == "log_loss" else accuracy
     assert score_to_match == pytest.approx(gama_score)
+    return gama
 
 
 def test_binary_classification_accuracy():
-    """ Binary classification, accuracy, numpy data. """
-    _test_dataset_problem(breast_cancer, "accuracy")
+    """ Binary classification, accuracy, numpy data and ensemble code export """
+    gama = _test_dataset_problem(breast_cancer, "accuracy")
+
+    x, y = breast_cancer["load"](return_X_y=True)
+    code = gama.export_script(file=None)
+    local = {}
+    exec(code, {}, local)
+    pipeline = local["pipeline"]  # should be defined in exported code
+    assert isinstance(pipeline, Pipeline)
+    assert isinstance(pipeline.steps[-1][-1], VotingClassifier)
+    pipeline.fit(x, y)
+    assert 0.9 < pipeline.score(x, y)
 
 
 def test_binary_classification_accuracy_asha():
