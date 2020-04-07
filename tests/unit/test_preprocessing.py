@@ -31,6 +31,28 @@ def test_format_x_y():
         well_formatted_x_y(*format_x_y(X, y, y_type=pd.DataFrame), y_type=pd.DataFrame)
 
 
+def test_format_x_y_missing_targets():
+    """ Samples with missing labels should be removed from training data. """
+
+    def well_formatted_x_y(x, y, y_type):
+        assert isinstance(x, pd.DataFrame)
+        assert isinstance(y, y_type)
+        assert len(x) == len(y)
+
+    from sklearn.datasets import load_digits
+
+    x, y = load_digits(return_X_y=True)
+    y = y.astype(float)
+    y[::2] = np.nan
+    x_, y_ = format_x_y(x, y)
+
+    assert (1797,) == y.shape
+    assert (898,) == y_.shape
+    assert np.array_equal(y[1::2], y_)
+    assert np.array_equal(x[1::2, :], x_)
+    well_formatted_x_y(x_, y_, y_type=pd.Series)
+
+
 def test_find_categorical_columns():
     twelve = pd.Series(list(range(1, 13)), dtype="category", name="twelve")
     six = pd.Series([1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6], dtype="category", name="six")
