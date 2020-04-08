@@ -17,7 +17,7 @@ from gama.logging.GamaReport import GamaReport
 
 class RunningPage(BasePage):
     def __init__(self):
-        super().__init__(name="Running", alignment=-1)
+        super().__init__(name="Running", alignment=1)
         self.cli = None
         self.id = "running-page"
         self.report = None
