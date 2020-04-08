@@ -160,7 +160,7 @@
 All you need to do is supply the data, and GAMA will automatically try to find a good <em>machine learning pipeline</em>.
 For the <em>machine learning pipeline</em> GAMA considers data preprocessing steps, various machine learning algorithms, and their possible hyperparameters configurations.
 This takes away the knowledge and labour intensive work of selecting the right algorithms and tuning their hyperparameters yourself.
-Using GAMA is as simple as using:</p>
+Using GAMA is as simple as using a scikit-learn estimator:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
 <span class="n">automl</span> <span class="o">=</span>  <span class="n">GamaClassifier</span><span class="p">()</span>
 <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
@@ -180,7 +180,7 @@ Using GAMA is as simple as using:</p>
 If you want find out everything there is to know about GAMA, also visit the <a class="reference internal" href="technical_guide/index.html#technical-guide-index"><span class="std std-ref">Technical Guide</span></a>.
 It describes visualization of optimization logs, changing the AutoML pipeline, and more.
 If there are any questions you have that are not answered by the documentation, check the <a class="reference external" href="https://github.com/PGijsbers/GAMA/issues">issue page</a>.
-If your question has not been answered there either, please open a new issue and label with the question label.</p>
+If your question has not been answered there either, please open a new issue.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/index.html">User Guide</a><ul>

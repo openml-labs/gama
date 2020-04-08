@@ -22,5 +22,6 @@ When supplying only numpy-arrays (e.g. through ``fit(X, y)``), GAMA can not know
 This means that GAMA might use a wrong feature transformation for the data (e.g. one-hot encoding on a numeric feature or scaling on a categorical feature).
 Note that this is not unique to GAMA, but any framework which accepts numeric input without meta-data.
 
-Unfortunately the ``date`` and ``string`` formats the ARFF file allows is not (fully) supported in GAMA yet,
-for the latest news, see `issue#2 <https://github.com/PGijsbers/gama/issues/2>`_.
+.. note::
+    Unfortunately the ``date`` and ``string`` formats the ARFF file allows is not (fully) supported in GAMA yet,
+    for the latest news, see `issue#2 <https://github.com/PGijsbers/gama/issues/2>`_.

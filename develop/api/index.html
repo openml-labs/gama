@@ -210,9 +210,9 @@
 <h2>GAMA<a class="headerlink" href="#gama" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="gamaclassifier">
 <h3>GamaClassifier<a class="headerlink" href="#gamaclassifier" title="Permalink to this headline">¶</a></h3>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.GamaClassifier">
-<em class="property">class </em><code class="sig-prename descclassname">gama.</code><code class="sig-name descname">GamaClassifier</code><span class="sig-paren">(</span><em class="sig-param">config=None</em>, <em class="sig-param">scoring='neg_log_loss'</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaClassifier.html#GamaClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.GamaClassifier" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.</code><code class="sig-name descname">GamaClassifier</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">scoring</span><span class="o">=</span><span class="default_value">'neg_log_loss'</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaClassifier.html#GamaClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.GamaClassifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gama with adaptations for (multi-class) classification.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -252,9 +252,9 @@ Should be an instantiated subclass of BasePostProcessing.</p></li>
 </div>
 <div class="section" id="gamaregressor">
 <h3>GamaRegressor<a class="headerlink" href="#gamaregressor" title="Permalink to this headline">¶</a></h3>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.GamaRegressor">
-<em class="property">class </em><code class="sig-prename descclassname">gama.</code><code class="sig-name descname">GamaRegressor</code><span class="sig-paren">(</span><em class="sig-param">config=None</em>, <em class="sig-param">scoring='neg_mean_squared_error'</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaRegressor.html#GamaRegressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.GamaRegressor" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.</code><code class="sig-name descname">GamaRegressor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">scoring</span><span class="o">=</span><span class="default_value">'neg_mean_squared_error'</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaRegressor.html#GamaRegressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.GamaRegressor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gama with adaptations for regression.</p>
 </dd></dl>
 
@@ -280,9 +280,9 @@ mean_squared_log_error, mean_absolute_error</p>
 <p>If you have a custom scoring function, you can define your own <code class="code docutils literal notranslate"><span class="pre">Metric</span></code>.</p>
 <div class="section" id="metric">
 <h3>Metric<a class="headerlink" href="#metric" title="Permalink to this headline">¶</a></h3>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.utilities.metrics.Metric">
-<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.metrics.</code><code class="sig-name descname">Metric</code><span class="sig-paren">(</span><em class="sig-param">metric_name: str</em>, <em class="sig-param">score_function: Callable</em>, <em class="sig-param">requires_probabilities: bool</em>, <em class="sig-param">maximize: bool</em>, <em class="sig-param">task_type: gama.utilities.metrics.MetricType</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/metrics.html#Metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.metrics.Metric" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.metrics.</code><code class="sig-name descname">Metric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric_name</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">score_function</span><span class="p">:</span> <span class="n">Callable</span></em>, <em class="sig-param"><span class="n">requires_probabilities</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span></em>, <em class="sig-param"><span class="n">maximize</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span></em>, <em class="sig-param"><span class="n">task_type</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#gama.utilities.metrics.MetricType" title="gama.utilities.metrics.MetricType">gama.utilities.metrics.MetricType</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/metrics.html#Metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.metrics.Metric" title="Permalink to this definition">¶</a></dt>
 <dd><p>A wrapper for a scoring function to provide additional meta-data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -302,17 +302,17 @@ describes if the metric should be computed with predicted probabilities.</p></li
 </div>
 <div class="section" id="metrictype">
 <h3>MetricType<a class="headerlink" href="#metrictype" title="Permalink to this headline">¶</a></h3>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.utilities.metrics.MetricType">
 <em class="property">class </em><code class="sig-prename descclassname">gama.utilities.metrics.</code><code class="sig-name descname">MetricType</code><a class="reference internal" href="../_modules/gama/utilities/metrics.html#MetricType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.metrics.MetricType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Metric types supported by GAMA.</p>
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="gama.utilities.metrics.MetricType.CLASSIFICATION">
 <code class="sig-name descname">CLASSIFICATION</code><em class="property">: int</em><em class="property"> = 1</em><a class="headerlink" href="#gama.utilities.metrics.MetricType.CLASSIFICATION" title="Permalink to this definition">¶</a></dt>
 <dd><p>discrete target</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="gama.utilities.metrics.MetricType.REGRESSION">
 <code class="sig-name descname">REGRESSION</code><em class="property">: int</em><em class="property"> = 2</em><a class="headerlink" href="#gama.utilities.metrics.MetricType.REGRESSION" title="Permalink to this definition">¶</a></dt>
 <dd><p>continuous target</p>
@@ -327,9 +327,9 @@ describes if the metric should be computed with predicted probabilities.</p></li
 <span id="search-methods"></span><h2>Search Methods<a class="headerlink" href="#module-gama.search_methods" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="asynchronoussuccessivehalving">
 <h3>AsynchronousSuccessiveHalving<a class="headerlink" href="#asynchronoussuccessivehalving" title="Permalink to this headline">¶</a></h3>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.search_methods.AsynchronousSuccessiveHalving">
-<em class="property">class </em><code class="sig-prename descclassname">gama.search_methods.</code><code class="sig-name descname">AsynchronousSuccessiveHalving</code><span class="sig-paren">(</span><em class="sig-param">reduction_factor: Optional[int] = None</em>, <em class="sig-param">minimum_resource: Optional[int] = None</em>, <em class="sig-param">maximum_resource: Optional[int] = None</em>, <em class="sig-param">minimum_early_stopping_rate: Optional[int] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/asha.html#AsynchronousSuccessiveHalving"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.AsynchronousSuccessiveHalving" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.search_methods.</code><code class="sig-name descname">AsynchronousSuccessiveHalving</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reduction_factor</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">minimum_resource</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">maximum_resource</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">minimum_early_stopping_rate</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/asha.html#AsynchronousSuccessiveHalving"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.AsynchronousSuccessiveHalving" title="Permalink to this definition">¶</a></dt>
 <dd><p>Asynchronous Halving Algorithm by Li et al.</p>
 <p>paper: <a class="reference external" href="https://arxiv.org/abs/1810.05934">https://arxiv.org/abs/1810.05934</a></p>
 <dl class="field-list simple">
@@ -348,9 +348,9 @@ This should not exceed the number of samples in the data.</p></li>
 </div>
 <div class="section" id="asyncea">
 <h3>AsyncEA<a class="headerlink" href="#asyncea" title="Permalink to this headline">¶</a></h3>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.search_methods.AsyncEA">
-<em class="property">class </em><code class="sig-prename descclassname">gama.search_methods.</code><code class="sig-name descname">AsyncEA</code><span class="sig-paren">(</span><em class="sig-param">population_size: Optional[int] = None</em>, <em class="sig-param">max_n_evaluations: Optional[int] = None</em>, <em class="sig-param">restart_callback: Optional[Callable[bool]] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/async_ea.html#AsyncEA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.AsyncEA" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.search_methods.</code><code class="sig-name descname">AsyncEA</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">population_size</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_n_evaluations</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">restart_callback</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Callable<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/async_ea.html#AsyncEA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.AsyncEA" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform asynchronous evolutionary optimization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -367,7 +367,7 @@ If None, the algorithm will be run until interrupted by the user or a timeout.</
 </div>
 <div class="section" id="randomsearch">
 <h3>RandomSearch<a class="headerlink" href="#randomsearch" title="Permalink to this headline">¶</a></h3>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.search_methods.RandomSearch">
 <em class="property">class </em><code class="sig-prename descclassname">gama.search_methods.</code><code class="sig-name descname">RandomSearch</code><a class="reference internal" href="../_modules/gama/search_methods/random_search.html#RandomSearch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.RandomSearch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform random search over all possible pipelines.</p>
@@ -389,14 +389,14 @@ Now each search method now consists of the search algorithm and (optionally) a m
 values based on the data.
 To keep these two functions together explicitly and keep naming consistent between different search methods,
 we bundle them in a class derived from <code class="code docutils literal notranslate"><span class="pre">BaseSearch</span></code>:</p>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.search_methods.base_search.BaseSearch">
 <em class="property">class </em><code class="sig-prename descclassname">gama.search_methods.base_search.</code><code class="sig-name descname">BaseSearch</code><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.base_search.BaseSearch" title="Permalink to this definition">¶</a></dt>
 <dd><p>All search methods should be derived from this class.
 This class should not be directly used to configure GAMA.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="gama.search_methods.base_search.BaseSearch.dynamic_defaults">
-<code class="sig-name descname">dynamic_defaults</code><span class="sig-paren">(</span><em class="sig-param">x: pandas.core.frame.DataFrame, y: Union[pandas.core.frame.DataFrame, pandas.core.series.Series], time_limit: float</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.dynamic_defaults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.base_search.BaseSearch.dynamic_defaults" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">dynamic_defaults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">y</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>pandas.core.frame.DataFrame<span class="p">, </span>pandas.core.series.Series<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">time_limit</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.dynamic_defaults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.base_search.BaseSearch.dynamic_defaults" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set hyperparameter defaults based on the dataset and time-constraints.</p>
 <p>Should be called before <code class="code docutils literal notranslate"><span class="pre">search</span></code>.</p>
 <dl class="field-list simple">
@@ -413,7 +413,7 @@ The time-limit might be an important factor in setting hyperparameter values</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="gama.search_methods.base_search.BaseSearch.hyperparameters">
 <em class="property">property </em><code class="sig-name descname">hyperparameters</code><a class="headerlink" href="#gama.search_methods.base_search.BaseSearch.hyperparameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hyperparameter (name, value) pairs as set/determined dynamically/default.</p>
@@ -424,9 +424,9 @@ will overwrite a static one.
 Dynamic default values only considered if <code class="code docutils literal notranslate"><span class="pre">dynamic_defaults</span></code> has been called.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="gama.search_methods.base_search.BaseSearch.search">
-<code class="sig-name descname">search</code><span class="sig-paren">(</span><em class="sig-param">operations: gama.genetic_programming.operator_set.OperatorSet, start_candidates: List[gama.genetic_programming.components.individual.Individual]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.base_search.BaseSearch.search" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">search</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operations</span><span class="p">:</span> <span class="n">gama.genetic_programming.operator_set.OperatorSet</span></em>, <em class="sig-param"><span class="n">start_candidates</span><span class="p">:</span> <span class="n">List<span class="p">[</span>gama.genetic_programming.components.individual.Individual<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.base_search.BaseSearch.search" title="Permalink to this definition">¶</a></dt>
 <dd><p>Execute search as configured.</p>
 <p>Sets <code class="code docutils literal notranslate"><span class="pre">output</span></code> field of this class to the best Individuals.</p>
 <dl class="field-list simple">
@@ -451,9 +451,9 @@ Refer to implemented search techniques for examples.</p>
 <span id="post-processing"></span><h2>Post-Processing<a class="headerlink" href="#module-gama.postprocessing" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="nopostprocessing">
 <h3>NoPostProcessing<a class="headerlink" href="#nopostprocessing" title="Permalink to this headline">¶</a></h3>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.postprocessing.NoPostProcessing">
-<em class="property">class </em><code class="sig-prename descclassname">gama.postprocessing.</code><code class="sig-name descname">NoPostProcessing</code><span class="sig-paren">(</span><em class="sig-param">time_fraction: float = 0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing.html#NoPostProcessing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.postprocessing.NoPostProcessing" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.postprocessing.</code><code class="sig-name descname">NoPostProcessing</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_fraction</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing.html#NoPostProcessing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.postprocessing.NoPostProcessing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does nothing, no time will be reserved for post-processing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -465,9 +465,9 @@ Refer to implemented search techniques for examples.</p>
 </div>
 <div class="section" id="bestfitpostprocessing">
 <h3>BestFitPostProcessing<a class="headerlink" href="#bestfitpostprocessing" title="Permalink to this headline">¶</a></h3>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.postprocessing.BestFitPostProcessing">
-<em class="property">class </em><code class="sig-prename descclassname">gama.postprocessing.</code><code class="sig-name descname">BestFitPostProcessing</code><span class="sig-paren">(</span><em class="sig-param">time_fraction: float = 0.1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/best_fit.html#BestFitPostProcessing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.postprocessing.BestFitPostProcessing" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.postprocessing.</code><code class="sig-name descname">BestFitPostProcessing</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_fraction</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/best_fit.html#BestFitPostProcessing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.postprocessing.BestFitPostProcessing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Post processing technique which trains the best found single pipeline.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -479,9 +479,9 @@ Refer to implemented search techniques for examples.</p>
 </div>
 <div class="section" id="ensemblepostprocessing">
 <h3>EnsemblePostProcessing<a class="headerlink" href="#ensemblepostprocessing" title="Permalink to this headline">¶</a></h3>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.postprocessing.EnsemblePostProcessing">
-<em class="property">class </em><code class="sig-prename descclassname">gama.postprocessing.</code><code class="sig-name descname">EnsemblePostProcessing</code><span class="sig-paren">(</span><em class="sig-param">time_fraction: float = 0.3</em>, <em class="sig-param">ensemble_size: Optional[int] = 25</em>, <em class="sig-param">hillclimb_size: Optional[int] = 10000</em>, <em class="sig-param">max_models: Optional[int] = 200</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/ensemble.html#EnsemblePostProcessing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.postprocessing.EnsemblePostProcessing" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.postprocessing.</code><code class="sig-name descname">EnsemblePostProcessing</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_fraction</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.3</span></em>, <em class="sig-param"><span class="n">ensemble_size</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">25</span></em>, <em class="sig-param"><span class="n">hillclimb_size</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">10000</span></em>, <em class="sig-param"><span class="n">max_models</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">200</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/ensemble.html#EnsemblePostProcessing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.postprocessing.EnsemblePostProcessing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Ensemble construction per Caruana et al.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -513,9 +513,9 @@ Consequently also sets the max number of unique models in the ensemble.</p></li>
 we refer to these non-static defaults as ‘dynamic defaults’.
 To keep these two functions together explicitly and keep naming consistent between different post-processing methods,
 we bundle them in a class derived from <code class="code docutils literal notranslate"><span class="pre">BasePostProcessing</span></code>:</p>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.postprocessing.BasePostProcessing">
-<em class="property">class </em><code class="sig-prename descclassname">gama.postprocessing.</code><code class="sig-name descname">BasePostProcessing</code><span class="sig-paren">(</span><em class="sig-param">time_fraction: float</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.postprocessing.BasePostProcessing" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.postprocessing.</code><code class="sig-name descname">BasePostProcessing</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_fraction</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.postprocessing.BasePostProcessing" title="Permalink to this definition">¶</a></dt>
 <dd><p>All post-processing methods should be derived from this class.
 This class should not be directly used to configure GAMA.</p>
 <dl class="field-list simple">
@@ -572,9 +572,9 @@ as long as a function has been provided to convert the individual to it.</p>
 </div></blockquote>
 <div class="section" id="individual">
 <h4>Individual<a class="headerlink" href="#individual" title="Permalink to this headline">¶</a></h4>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.genetic_programming.components.Individual">
-<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Individual</code><span class="sig-paren">(</span><em class="sig-param">main_node: gama.genetic_programming.components.primitive_node.PrimitiveNode</em>, <em class="sig-param">to_pipeline: Optional[Callable] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/individual.html#Individual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.Individual" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Individual</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">main_node</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.primitive_node.PrimitiveNode</span></em>, <em class="sig-param"><span class="n">to_pipeline</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Callable<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/individual.html#Individual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.Individual" title="Permalink to this definition">¶</a></dt>
 <dd><p>Collection of PrimitiveNodes which together specify a machine learning pipeline.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -590,7 +590,7 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 </div>
 <div class="section" id="primitive">
 <h4>Primitive<a class="headerlink" href="#primitive" title="Permalink to this headline">¶</a></h4>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.genetic_programming.components.Primitive">
 <em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Primitive</code><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive.html#Primitive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.Primitive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines an operator which takes input and produces output.</p>
@@ -601,9 +601,9 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 </div>
 <div class="section" id="primitivenode">
 <h4>PrimitiveNode<a class="headerlink" href="#primitivenode" title="Permalink to this headline">¶</a></h4>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.genetic_programming.components.PrimitiveNode">
-<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">PrimitiveNode</code><span class="sig-paren">(</span><em class="sig-param">primitive: gama.genetic_programming.components.primitive.Primitive, data_node: Union[PrimitiveNode, str], terminals: List[gama.genetic_programming.components.terminal.Terminal]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive_node.html#PrimitiveNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.PrimitiveNode" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">PrimitiveNode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">primitive</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.primitive.Primitive</span></em>, <em class="sig-param"><span class="n">data_node</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>PrimitiveNode<span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">terminals</span><span class="p">:</span> <span class="n">List<span class="p">[</span>gama.genetic_programming.components.terminal.Terminal<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive_node.html#PrimitiveNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.PrimitiveNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>An instantiation for a Primitive with specific Terminals.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -619,7 +619,7 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 </div>
 <div class="section" id="terminal">
 <h4>Terminal<a class="headerlink" href="#terminal" title="Permalink to this headline">¶</a></h4>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.genetic_programming.components.Terminal">
 <em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Terminal</code><a class="reference internal" href="../_modules/gama/genetic_programming/components/terminal.html#Terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.Terminal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Specifies a specific value for a specific type or input.</p>
@@ -633,9 +633,9 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 <span id="mutation"></span><h3>Mutation<a class="headerlink" href="#module-gama.genetic_programming.mutation" title="Permalink to this headline">¶</a></h3>
 <p>Contains mutation functions for genetic programming.
 Each mutation function takes an individual and modifies it in-place.</p>
-<dl class="function">
+<dl class="py function">
 <dt id="gama.genetic_programming.mutation.mut_insert">
-<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">mut_insert</code><span class="sig-paren">(</span><em class="sig-param">individual: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">primitive_set: dict</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_insert" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">mut_insert</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">individual</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.individual.Individual</span></em>, <em class="sig-param"><span class="n">primitive_set</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_insert" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mutate an Individual in-place by inserting a PrimitiveNode at a random location.</p>
 <p>The new PrimitiveNode will not be inserted as root node.</p>
 <dl class="field-list simple">
@@ -648,9 +648,9 @@ Each mutation function takes an individual and modifies it in-place.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="gama.genetic_programming.mutation.mut_replace_primitive">
-<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">mut_replace_primitive</code><span class="sig-paren">(</span><em class="sig-param">individual: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">primitive_set: dict</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_replace_primitive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_replace_primitive" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">mut_replace_primitive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">individual</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.individual.Individual</span></em>, <em class="sig-param"><span class="n">primitive_set</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_replace_primitive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_replace_primitive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mutates an Individual in-place by replacing one of its Primitives.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -662,9 +662,9 @@ Each mutation function takes an individual and modifies it in-place.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="gama.genetic_programming.mutation.mut_replace_terminal">
-<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">mut_replace_terminal</code><span class="sig-paren">(</span><em class="sig-param">individual: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">primitive_set: dict</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_replace_terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_replace_terminal" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">mut_replace_terminal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">individual</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.individual.Individual</span></em>, <em class="sig-param"><span class="n">primitive_set</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_replace_terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_replace_terminal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mutates an Individual in-place by replacing one of its Terminals.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -676,9 +676,9 @@ Each mutation function takes an individual and modifies it in-place.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="gama.genetic_programming.mutation.mut_shrink">
-<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">mut_shrink</code><span class="sig-paren">(</span><em class="sig-param">individual: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">primitive_set: dict = None</em>, <em class="sig-param">shrink_by: Optional[int] = None</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_shrink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_shrink" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">mut_shrink</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">individual</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.individual.Individual</span></em>, <em class="sig-param"><span class="n">primitive_set</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">shrink_by</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_shrink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_shrink" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mutates an Individual in-place by removing any number of primitive nodes.</p>
 <p>Primitive nodes are removed from the preprocessing end.</p>
 <dl class="field-list simple">
@@ -694,9 +694,9 @@ If None, a random number of primitives is removed.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="gama.genetic_programming.mutation.random_valid_mutation_in_place">
-<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">random_valid_mutation_in_place</code><span class="sig-paren">(</span><em class="sig-param">individual: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">primitive_set: dict</em>, <em class="sig-param">max_length: Optional[int] = None</em><span class="sig-paren">)</span> &#x2192; Callable<a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#random_valid_mutation_in_place"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.random_valid_mutation_in_place" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">random_valid_mutation_in_place</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">individual</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.individual.Individual</span></em>, <em class="sig-param"><span class="n">primitive_set</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></span></em>, <em class="sig-param"><span class="n">max_length</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; Callable<a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#random_valid_mutation_in_place"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.random_valid_mutation_in_place" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply a random valid mutation in place.</p>
 <p>The random mutation can be one of:</p>
 <blockquote>
@@ -728,9 +728,9 @@ If None, a random number of primitives is removed.</p></li>
 <div class="section" id="module-gama.genetic_programming.crossover">
 <span id="crossover"></span><h3>Crossover<a class="headerlink" href="#module-gama.genetic_programming.crossover" title="Permalink to this headline">¶</a></h3>
 <p>Functions which take two Individuals and produce at least one new Individual.</p>
-<dl class="function">
+<dl class="py function">
 <dt id="gama.genetic_programming.crossover.crossover_primitives">
-<code class="sig-prename descclassname">gama.genetic_programming.crossover.</code><code class="sig-name descname">crossover_primitives</code><span class="sig-paren">(</span><em class="sig-param">ind1: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">ind2: gama.genetic_programming.components.individual.Individual</em><span class="sig-paren">)</span> &#x2192; Tuple[gama.genetic_programming.components.individual.Individual, gama.genetic_programming.components.individual.Individual]<a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#crossover_primitives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.crossover.crossover_primitives" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">gama.genetic_programming.crossover.</code><code class="sig-name descname">crossover_primitives</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ind1</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.individual.Individual</span></em>, <em class="sig-param"><span class="n">ind2</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.individual.Individual</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>gama.genetic_programming.components.individual.Individual<span class="p">, </span>gama.genetic_programming.components.individual.Individual<span class="p">]</span><a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#crossover_primitives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.crossover.crossover_primitives" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crossover two individuals by exchanging any number of preprocessing steps.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -742,9 +742,9 @@ If None, a random number of primitives is removed.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="gama.genetic_programming.crossover.crossover_terminals">
-<code class="sig-prename descclassname">gama.genetic_programming.crossover.</code><code class="sig-name descname">crossover_terminals</code><span class="sig-paren">(</span><em class="sig-param">ind1: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">ind2: gama.genetic_programming.components.individual.Individual</em><span class="sig-paren">)</span> &#x2192; Tuple[gama.genetic_programming.components.individual.Individual, gama.genetic_programming.components.individual.Individual]<a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#crossover_terminals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.crossover.crossover_terminals" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">gama.genetic_programming.crossover.</code><code class="sig-name descname">crossover_terminals</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ind1</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.individual.Individual</span></em>, <em class="sig-param"><span class="n">ind2</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.individual.Individual</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>gama.genetic_programming.components.individual.Individual<span class="p">, </span>gama.genetic_programming.components.individual.Individual<span class="p">]</span><a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#crossover_terminals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.crossover.crossover_terminals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crossover two individuals in-place by exchanging two Terminals.</p>
 <p>Terminals must share output type but have different values.</p>
 <dl class="field-list simple">
@@ -757,9 +757,9 @@ If None, a random number of primitives is removed.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="gama.genetic_programming.crossover.random_crossover">
-<code class="sig-prename descclassname">gama.genetic_programming.crossover.</code><code class="sig-name descname">random_crossover</code><span class="sig-paren">(</span><em class="sig-param">ind1: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">ind2: gama.genetic_programming.components.individual.Individual</em>, <em class="sig-param">max_length: Optional[int] = None</em><span class="sig-paren">)</span> &#x2192; Tuple[gama.genetic_programming.components.individual.Individual, gama.genetic_programming.components.individual.Individual]<a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#random_crossover"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.crossover.random_crossover" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">gama.genetic_programming.crossover.</code><code class="sig-name descname">random_crossover</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ind1</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.individual.Individual</span></em>, <em class="sig-param"><span class="n">ind2</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.individual.Individual</span></em>, <em class="sig-param"><span class="n">max_length</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>gama.genetic_programming.components.individual.Individual<span class="p">, </span>gama.genetic_programming.components.individual.Individual<span class="p">]</span><a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#random_crossover"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.crossover.random_crossover" title="Permalink to this definition">¶</a></dt>
 <dd><p>Random valid crossover between two individuals in-place, if it can be done.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -797,9 +797,9 @@ See <a class="reference internal" href="../technical_guide/visualization.html#vi
 <p>Collection of generic components.</p>
 <div class="section" id="pareto-front">
 <h4>Pareto Front<a class="headerlink" href="#pareto-front" title="Permalink to this headline">¶</a></h4>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.utilities.generic.paretofront.ParetoFront">
-<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.paretofront.</code><code class="sig-name descname">ParetoFront</code><span class="sig-paren">(</span><em class="sig-param">start_list: Optional[List[Any]] = None</em>, <em class="sig-param">get_values_fn: Optional[Callable[Any</em>, <em class="sig-param">Tuple[Any</em>, <em class="sig-param">...]]] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/paretofront.html#ParetoFront"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.paretofront.ParetoFront" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.paretofront.</code><code class="sig-name descname">ParetoFront</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start_list</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">get_values_fn</span><span class="p">:</span> <span class="n">Optional[Callable[Any, Tuple[Any, …]]]</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/paretofront.html#ParetoFront"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.paretofront.ParetoFront" title="Permalink to this definition">¶</a></dt>
 <dd><p>A list of tuples in which no one tuple is dominated by another.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -816,7 +816,7 @@ If left None, it is assumed that items are already such tuples.</p></li>
 </div>
 <div class="section" id="stopwatch">
 <h4>Stopwatch<a class="headerlink" href="#stopwatch" title="Permalink to this headline">¶</a></h4>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.utilities.generic.stopwatch.Stopwatch">
 <em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.stopwatch.</code><code class="sig-name descname">Stopwatch</code><span class="sig-paren">(</span><em class="sig-param">timing_function=&lt;built-in function time&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/stopwatch.html#Stopwatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.stopwatch.Stopwatch" title="Permalink to this definition">¶</a></dt>
 <dd><p>A context manager that keeps track of wall clock time spent.</p>
@@ -830,9 +830,9 @@ If left None, it is assumed that items are already such tuples.</p></li>
 </div>
 <div class="section" id="timekeeper">
 <h4>Timekeeper<a class="headerlink" href="#timekeeper" title="Permalink to this headline">¶</a></h4>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.utilities.generic.timekeeper.TimeKeeper">
-<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.timekeeper.</code><code class="sig-name descname">TimeKeeper</code><span class="sig-paren">(</span><em class="sig-param">total_time: Optional[int] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/timekeeper.html#TimeKeeper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.timekeeper.TimeKeeper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.timekeeper.</code><code class="sig-name descname">TimeKeeper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">total_time</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/timekeeper.html#TimeKeeper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.timekeeper.TimeKeeper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simple object that helps keep track of time over multiple activities.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -851,9 +851,9 @@ If set to None, the <code class="code docutils literal notranslate"><span class=
 I tried using the built-in ProcessPoolExecutor, but it had short comings such as not being able to cancel
 jobs while they were running.</p>
 </div>
-<dl class="class">
+<dl class="py class">
 <dt id="gama.utilities.generic.async_evaluator.AsyncEvaluator">
-<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.async_evaluator.</code><code class="sig-name descname">AsyncEvaluator</code><span class="sig-paren">(</span><em class="sig-param">n_workers: Optional[int] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/async_evaluator.html#AsyncEvaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.async_evaluator.AsyncEvaluator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.async_evaluator.</code><code class="sig-name descname">AsyncEvaluator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n_workers</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/async_evaluator.html#AsyncEvaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.async_evaluator.AsyncEvaluator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Manages subprocesses on which arbitrary functions can be evaluated.</p>
 <p>The function and all its arguments must be picklable.
 Using the same AsyncEvaluator in two different contexts raises a <code class="code docutils literal notranslate"><span class="pre">RuntimeError</span></code>.</p>

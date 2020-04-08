@@ -180,8 +180,11 @@ Make sure you adjust the file path if not executed from the examples directory.<
 When supplying only numpy-arrays (e.g. through <code class="docutils literal notranslate"><span class="pre">fit(X,</span> <span class="pre">y)</span></code>), GAMA can not know if a particular feature is ordinal or numeric.
 This means that GAMA might use a wrong feature transformation for the data (e.g. one-hot encoding on a numeric feature or scaling on a categorical feature).
 Note that this is not unique to GAMA, but any framework which accepts numeric input without meta-data.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
 <p>Unfortunately the <code class="docutils literal notranslate"><span class="pre">date</span></code> and <code class="docutils literal notranslate"><span class="pre">string</span></code> formats the ARFF file allows is not (fully) supported in GAMA yet,
 for the latest news, see <a class="reference external" href="https://github.com/PGijsbers/gama/issues/2">issue#2</a>.</p>
+</div>
 </div>
 
 

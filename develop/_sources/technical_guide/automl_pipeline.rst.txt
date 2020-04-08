@@ -7,7 +7,7 @@ AutoML Pipeline
 An AutoML system performs several operations in its search for a model, and each of them may have several options and hyperparameters.
 An important decision is picking the search algorithm, which performs search over machine learning pipelines for your data.
 Another choice would be how to construct a model after search, e.g. by training the best pipeline or constructing an ensemble.
-Much like data processing algorithms can form a *machine learning pipeline*,
+Similarly to how data processing algorithms can form a *machine learning pipeline*,
 we will refer to a configuration of these AutoML components as an *AutoML Pipeline*.
 In GAMA we currently support flexibility in the AutoML pipeline in two stages: search and post-processing.
 
@@ -39,12 +39,12 @@ For example, searching with 'Asynchronous Successive Halving' and creating an en
     from gama.search_methods import AsynchronousSuccessiveHalving
     from gama.postprocessing import EnsemblePostProcessing
 
-    custom_pipeline_gama = GamaClassifier(search=AsynchronousSuccessiveHalving(), post_processing=EnsemblePostProcessing())
+    custom_pipeline_gama = GamaClassifier(search_method=AsynchronousSuccessiveHalving(), post_processing_method=EnsemblePostProcessing())
 
 or using 'Asynchronous EA' but with custom hyperparameters::
 
     from gama import GamaClassifier
     from gama.search_methods import AsyncEA
 
-    custom_pipeline_gama = GamaClassifier(search=AsyncEA(population_size=30))
+    custom_pipeline_gama = GamaClassifier(search_method=AsyncEA(population_size=30))
 

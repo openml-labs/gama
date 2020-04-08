@@ -5,7 +5,7 @@ Important Hyperparameters
 
 There are a lot of hyperparameters exposed in GAMA.
 In this section, you will find some hyperparameters you might want to set even if you otherwise use defaults.
-For more complete documentation on all hyperparameters, see `API documentation <https://pgijsbers.github.io/gama/api/index.html#api>`_.
+For more complete documentation on all hyperparameters, see :ref:`API documentation <api_doc>`.
 
 Optimization
 ************
@@ -14,7 +14,7 @@ Perhaps the most important hyperparameters are the ones that specify what to opt
 ``scoring``: ``string`` (default='log_loss' for classification and 'mean_squared_error' for regression)
     Sets the metric to optimize for. Make sure to optimize towards the metric that reflects well what is important to you.
     Valid options include `roc_auc`, `accuracy` and `log_loss` for classification, and `mean_squared_error` and `r2` for regression.
-    For more options see `API documentation <https://pgijsbers.github.io/gama/api/index.html#api>`_.
+    For more options see :ref:`API documentation <api_doc>`.
 
 ``regularize_length``: ``bool`` (default=True)
     If True, in addition to optimizing towards the metric set in ``scoring``, also guide the search towards shorter pipelines.
@@ -28,10 +28,11 @@ Example::
 Resources
 *********
 
-``n_jobs``: ``int`` (default=-1)
+``n_jobs``: ``int, optional`` (default=None)
     Determines how many processes can be run in parallel during `fit`.
     This has the most influence over how many machine learning pipelines can be evaluated.
-    If it is set to -1, which is the default, all cores are used.
+    If it is set to -1, all cores are used.
+    If set to ``None`` (default), half the cores are used.
     Changing it to use a set amount of (fewer) cores will decrease the amount of pipelines evaluated,
     but is needed if you do not want GAMA to use all resources.
 

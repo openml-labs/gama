@@ -183,7 +183,7 @@ This section will cover more advanced usage of GAMA, in particular it covers:</p
 <p>An AutoML system performs several operations in its search for a model, and each of them may have several options and hyperparameters.
 An important decision is picking the search algorithm, which performs search over machine learning pipelines for your data.
 Another choice would be how to construct a model after search, e.g. by training the best pipeline or constructing an ensemble.
-Much like data processing algorithms can form a <em>machine learning pipeline</em>,
+Similarly to how data processing algorithms can form a <em>machine learning pipeline</em>,
 we will refer to a configuration of these AutoML components as an <em>AutoML Pipeline</em>.
 In GAMA we currently support flexibility in the AutoML pipeline in two stages: search and post-processing.</p>
 <div class="section" id="search-algorithms">
@@ -213,14 +213,14 @@ For example, searching with ‘Asynchronous Successive Halving’ and creating a
 <span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="kn">import</span> <span class="n">AsynchronousSuccessiveHalving</span>
 <span class="kn">from</span> <span class="nn">gama.postprocessing</span> <span class="kn">import</span> <span class="n">EnsemblePostProcessing</span>
 
-<span class="n">custom_pipeline_gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="n">AsynchronousSuccessiveHalving</span><span class="p">(),</span> <span class="n">post_processing</span><span class="o">=</span><span class="n">EnsemblePostProcessing</span><span class="p">())</span>
+<span class="n">custom_pipeline_gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">search_method</span><span class="o">=</span><span class="n">AsynchronousSuccessiveHalving</span><span class="p">(),</span> <span class="n">post_processing_method</span><span class="o">=</span><span class="n">EnsemblePostProcessing</span><span class="p">())</span>
 </pre></div>
 </div>
 <p>or using ‘Asynchronous EA’ but with custom hyperparameters:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
 <span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="kn">import</span> <span class="n">AsyncEA</span>
 
-<span class="n">custom_pipeline_gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="n">AsyncEA</span><span class="p">(</span><span class="n">population_size</span><span class="o">=</span><span class="mi">30</span><span class="p">))</span>
+<span class="n">custom_pipeline_gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">search_method</span><span class="o">=</span><span class="n">AsyncEA</span><span class="p">(</span><span class="n">population_size</span><span class="o">=</span><span class="mi">30</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -392,15 +392,15 @@ If a list of values is provided instead, it will not use the shared hyperparamet
 <p>It is also possible to programmatically receive updates of the optimization process through the events:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
 
-<span class="k">def</span> <span class="nf">process_individual</span><span class="p">(</span><span class="n">individual</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> was evaluated. Fitness is </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">individual</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">print_evaluation</span><span class="p">(</span><span class="n">evaluation</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">evaluation</span><span class="o">.</span><span class="n">individual</span><span class="o">.</span><span class="n">pipeline_str</span><span class="p">()</span><span class="si">}</span><span class="s1"> was evaluated. Fitness is </span><span class="si">{</span><span class="n">evaluation</span><span class="o">.</span><span class="n">score</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
 
 <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">()</span>
-<span class="n">automl</span><span class="o">.</span><span class="n">evaluation_completed</span><span class="p">(</span><span class="n">process_individual</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">evaluation_completed</span><span class="p">(</span><span class="n">print_evaluation</span><span class="p">)</span>
 <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The function passed to <code class="docutils literal notranslate"><span class="pre">evaluation_completed</span></code> should take a <code class="docutils literal notranslate"><span class="pre">gama.genetic_programming.components.individual.Individual</span></code>
+<p>The function passed to <code class="docutils literal notranslate"><span class="pre">evaluation_completed</span></code> should take a <code class="docutils literal notranslate"><span class="pre">gama.genetic_programming.utilities.evaluation_library.Evaluation</span></code>
 as single argument.
 Any exceptions raised but not handled in the callback will be ignored but logged at <code class="docutils literal notranslate"><span class="pre">logging.WARNING</span></code> level.
 During the callback a <code class="docutils literal notranslate"><span class="pre">stopit.utils.TimeoutException</span></code> may be raised.

@@ -220,7 +220,8 @@ This can be done using the Github website, where a button should pop up on your 
 <blockquote>
 <div><ul class="simple">
 <li><p>updated the documentation</p></li>
-<li><p>added tests where reasonable</p></li>
+<li><p>added or updated tests where reasonable</p></li>
+<li><p>if there is a loss of test coverage, you should provide a reason</p></li>
 <li><p>refer to the issue and mention any additional information that might make reviewing the PR easier.</p></li>
 </ul>
 </div></blockquote>
@@ -275,6 +276,11 @@ the system tests aim to cover as much as possible within a small time frame.</p>
 The <code class="docutils literal notranslate"><span class="pre">-sv</span> <span class="pre">-n</span> <span class="pre">4</span></code> flags are optional,
 but give succinct feedback on what is being run (<code class="docutils literal notranslate"><span class="pre">-sv</span></code>) and run tests in parallel (<code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">4</span></code>).
 For more information, run <code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">-h</span></code>.</p>
+<p>To get a coverage report that reports which lines of code are (not) covered by tests,
+also provide the arguments <code class="docutils literal notranslate"><span class="pre">--cov=gama</span> <span class="pre">--cov-report</span> <span class="pre">term-missing</span></code>.
+This can help identify if parts of your PR are not covered by unit tests.
+When you generate a PR, a coverage report will also be generated and posted.
+Should the coverage decline, the PR will not be accepted unless a good reason is given for the decreased coverage.</p>
 </div>
 <div class="section" id="generating-documentation">
 <h2>Generating Documentation<a class="headerlink" href="#generating-documentation" title="Permalink to this headline">¶</a></h2>
@@ -285,7 +291,7 @@ After updating the documentation, please build the new docs to verify everything
 </div>
 <p>The html pages are now in the <code class="docutils literal notranslate"><span class="pre">gama\docs\build</span></code> directory.
 There is no need to upload the generated documentation.
-When a release happens, the commit to master will trigger the build and upload of the latest documentation.</p>
+A commit to master or develop will trigger the build and upload of the latest documentation.</p>
 </div>
 </div>
 

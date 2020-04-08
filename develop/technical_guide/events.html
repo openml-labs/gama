@@ -158,15 +158,15 @@
 <p>It is also possible to programmatically receive updates of the optimization process through the events:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
 
-<span class="k">def</span> <span class="nf">process_individual</span><span class="p">(</span><span class="n">individual</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> was evaluated. Fitness is </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">individual</span><span class="p">,</span> <span class="n">individual</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">print_evaluation</span><span class="p">(</span><span class="n">evaluation</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">evaluation</span><span class="o">.</span><span class="n">individual</span><span class="o">.</span><span class="n">pipeline_str</span><span class="p">()</span><span class="si">}</span><span class="s1"> was evaluated. Fitness is </span><span class="si">{</span><span class="n">evaluation</span><span class="o">.</span><span class="n">score</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
 
 <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">()</span>
-<span class="n">automl</span><span class="o">.</span><span class="n">evaluation_completed</span><span class="p">(</span><span class="n">process_individual</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">evaluation_completed</span><span class="p">(</span><span class="n">print_evaluation</span><span class="p">)</span>
 <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The function passed to <code class="docutils literal notranslate"><span class="pre">evaluation_completed</span></code> should take a <code class="docutils literal notranslate"><span class="pre">gama.genetic_programming.components.individual.Individual</span></code>
+<p>The function passed to <code class="docutils literal notranslate"><span class="pre">evaluation_completed</span></code> should take a <code class="docutils literal notranslate"><span class="pre">gama.genetic_programming.utilities.evaluation_library.Evaluation</span></code>
 as single argument.
 Any exceptions raised but not handled in the callback will be ignored but logged at <code class="docutils literal notranslate"><span class="pre">logging.WARNING</span></code> level.
 During the callback a <code class="docutils literal notranslate"><span class="pre">stopit.utils.TimeoutException</span></code> may be raised.
