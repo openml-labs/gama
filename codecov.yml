@@ -1,3 +1,7 @@
+codecov:
+  notify:
+    require_ci_to_pass: yes
+
 ignore:
   - "gama/visualization/.*"
   - "gama/utilities/cli.py"
