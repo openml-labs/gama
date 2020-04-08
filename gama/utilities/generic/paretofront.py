@@ -1,7 +1,8 @@
+from collections import Sequence
 from typing import Tuple, List, Optional, Callable, Any
 
 
-class ParetoFront(object):
+class ParetoFront(Sequence):
     """ A list of tuples in which no one tuple is dominated by another. """
 
     def __init__(
@@ -84,17 +85,6 @@ class ParetoFront(object):
     def clear(self):
         """ Removes all items from the Pareto front."""
         self._front = []
-
-    def __iter__(self):
-        self._iterator_index = 0
-        return self
-
-    def __next__(self):
-        if self._iterator_index >= len(self._front):
-            raise StopIteration
-
-        self._iterator_index += 1
-        return self._front[self._iterator_index - 1]
 
     def __len__(self):
         return len(self._front)

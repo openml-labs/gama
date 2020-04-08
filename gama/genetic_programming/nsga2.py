@@ -40,17 +40,25 @@ def nsga2_select(
     """ Select n pairs from the population.
 
      Selection is done through binary tournament selection based on crowding distance.
+     Parent pairs may be repeated, but each parent pair consists of two unique parents.
+     The population must be at least size 3 (otherwise it is trivial or impossible).
     """
+    if len(population) < 3:
+        raise ValueError("population must be at least size 3 for a pair to be selected")
+
     # Entire population is returned, but with rank and distance information.
     candidates = nsga2(population, n=len(population), metrics=metrics, return_meta=True)
 
-    def select_one():
-        ind1, ind2 = random.sample(candidates, k=2)
+    def select_one(exclude=None):
+        selected = random.sample(candidates, k=3)
+        ind1, ind2 = [s for s in selected if s != exclude][:2]
         return ind1 if ind1.crowd_compare(ind2) < 0 else ind2
 
     selected = []
     for _ in range(n):
-        selected.append((select_one().obj, select_one().obj))
+        first = select_one()
+        second = select_one(exclude=first)
+        selected.append((first.obj, second.obj))
     return selected
 
 

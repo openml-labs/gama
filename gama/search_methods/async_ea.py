@@ -120,7 +120,7 @@ def async_ea(
                         log_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
                         current_population.remove(to_remove[0])
 
-                if len(current_population) > 1:
+                if len(current_population) > 2:
                     new_individual = ops.create(current_population, 1)[0]
                     async_.submit(evaluate_log, new_individual)
 

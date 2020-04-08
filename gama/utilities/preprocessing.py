@@ -1,7 +1,6 @@
 import logging
 from typing import Optional, Iterator, List, Tuple
 import category_encoders as ce
-import numpy as np
 import pandas as pd
 from sklearn.base import TransformerMixin
 from sklearn.impute import SimpleImputer
@@ -74,95 +73,3 @@ def basic_pipeline_extension(x: pd.DataFrame) -> List[Tuple[str, TransformerMixi
         ("target_enc", ce.TargetEncoder(cols=many_factor_features)),
         ("imputation", SimpleImputer(strategy="median")),
     ]
-
-
-def define_preprocessing_steps(
-    x_df: pd.DataFrame,
-    max_extra_features_created: Optional[int] = None,
-    max_categories_for_one_hot: int = 10,
-):
-    """ Construct imputation and categorical preprocessing steps for the dataframe.
-
-    Parameters
-    ----------
-    x_df: pandas.DataFrame
-        Features of the data (i.e. without target label).
-    max_extra_features_created: int, optional (default=None)
-        WARNING! Currently not supported, the only valid value is None.
-
-        If set, dynamically decrease max_categories_for_one_hot as needed so as not to
-        create a greater amount of features than max_extra_features_created.
-    max_categories_for_one_hot: int (default=10)
-        Maximum amount of unique category levels to be considered for one hot encoding.
-
-    Returns
-    -------
-    List
-        List of preprocessing step objects.
-    """
-    if max_extra_features_created:
-        # Will determine max_categories_for_one_hot encoding
-        # based on how many total new features would be created.
-        raise NotImplementedError()
-
-    one_hot_columns = []
-    target_encoding_columns = []
-    ordinal_encoding_columns = []
-    for unique_values, dtype, column_index in zip(
-        x_df.apply(pd.Series.nunique), x_df.dtypes, x_df.columns
-    ):
-        if isinstance(dtype, pd.core.dtypes.dtypes.CategoricalDtype):
-            if unique_values > max_categories_for_one_hot:
-                target_encoding_columns.append(column_index)
-            elif unique_values < 2:
-                # Either a constant feature (which gets dropped),
-                # or a feature with one unique value and NaNs,
-                # where we will encode NaN as a value
-                ordinal_encoding_columns.append(column_index)
-            elif unique_values == 2:
-                if x_df[column_index].isnull().any():
-                    # Two unique values and at least one missing value, we apply OHE.
-                    one_hot_columns.append(column_index)
-                elif x_df[column_index].dtype.categories.dtype == np.dtype("O"):
-                    # Even with just two unique values,
-                    # map str to numeric for scikit-learn compatibility.
-                    ordinal_encoding_columns.append(column_index)
-                else:
-                    # Two unique values (two numbers, or a number and NaN)
-                    continue
-            else:
-                one_hot_columns.append(column_index)
-
-    nr_cat_features = sum(
-        isinstance(dtype, pd.core.dtypes.dtypes.CategoricalDtype)
-        for dtype in x_df.dtypes
-    )
-    log.debug(
-        f"Detected {nr_cat_features} categorical variables, of which:"
-        f" - {len(one_hot_columns)} are encoded with OneHotEncoding"
-        f" - {len(ordinal_encoding_columns)} are encoded with OrdinalEncoding"
-        f" - {len(target_encoding_columns)} are encoded with TargetEncoding."
-    )
-    steps = []
-    if ordinal_encoding_columns:
-        steps.append(
-            ce.OrdinalEncoder(
-                cols=ordinal_encoding_columns,
-                drop_invariant=True,
-                handle_missing="value",
-            )
-        )
-    if one_hot_columns:
-        steps.append(
-            ce.OneHotEncoder(cols=one_hot_columns, handle_missing="return_nan")
-        )
-    if target_encoding_columns:
-        steps.append(
-            ce.TargetEncoder(cols=target_encoding_columns, handle_missing="value")
-        )
-
-    # Always train an Imputer to impute missing data in the test set even if training
-    # data has no missing values.
-    # It would be better to only do this for the final pipeline.
-    steps.append(SimpleImputer(strategy="median"))
-    return steps

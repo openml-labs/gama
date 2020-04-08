@@ -489,7 +489,7 @@ class Gama(ABC):
         log.info(f"Search phase evaluated {n_evaluations} individuals.")
 
     def export_script(
-        self, file: str = "gama_pipeline.py", raise_if_exists: bool = False
+        self, file: Optional[str] = "gama_pipeline.py", raise_if_exists: bool = False
     ):
         """ Export a Python script which sets up the best found pipeline.
 
@@ -512,15 +512,16 @@ class Gama(ABC):
 
         Parameters
         ----------
-        file: str (default='gama_pipeline.py')
+        file: str, optional (default='gama_pipeline.py')
             Desired filename of the exported Python script.
+            If None, return the code as str instead, it will not be formatted(!).
         raise_if_exists: bool (default=False)
             If True, raise an error if the file already exists.
             If False, overwrite `file` if it already exists.
         """
         if self.model is None:
             raise RuntimeError(STR_NO_OPTIMAL_PIPELINE)
-        if raise_if_exists and os.path.isfile(file):
+        if raise_if_exists and file is not None and os.path.isfile(file):
             raise FileExistsError(f"File {file} already exists.")
 
         if self._basic_encoding_pipeline is not None:
@@ -530,9 +531,12 @@ class Gama(ABC):
         else:
             script_text = self._post_processing.to_code(self._fixed_pipeline_extension)
 
-        with open(file, "w") as fh:
-            fh.write(script_text)
-        subprocess.call(["black", file])
+        if file:
+            with open(file, "w") as fh:
+                fh.write(script_text)
+            subprocess.call(["black", file])
+        else:
+            return script_text
 
     def _safe_outside_call(self, fn):
         """ Calls fn logging and ignoring all exceptions except TimeoutException. """

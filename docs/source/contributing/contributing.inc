@@ -38,7 +38,8 @@ This can be done using the Github website, where a button should pop up on your 
 When opening a pull request, make sure you have:
 
     - updated the documentation
-    - added tests where reasonable
+    - added or updated tests where reasonable
+    - if there is a loss of test coverage, you should provide a reason
     - refer to the issue and mention any additional information that might make reviewing the PR easier.
 
 Setting up the development dependencies
@@ -94,6 +95,12 @@ where ``SUITE`` is either ``unit`` or ``system``.
 The ``-sv -n 4`` flags are optional,
 but give succinct feedback on what is being run (``-sv``) and run tests in parallel (``-n 4``).
 For more information, run ``pytest -h``.
+
+To get a coverage report that reports which lines of code are (not) covered by tests,
+also provide the arguments ``--cov=gama --cov-report term-missing``.
+This can help identify if parts of your PR are not covered by unit tests.
+When you generate a PR, a coverage report will also be generated and posted.
+Should the coverage decline, the PR will not be accepted unless a good reason is given for the decreased coverage.
 
 Generating Documentation
 ************************
