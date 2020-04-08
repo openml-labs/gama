@@ -11,6 +11,7 @@ Maintenance:
  - Docs are automatically built and deployed on a commit to master and develop.
  - Pre-commit configuration added to check formatting, style and type hints on commit.
  - Black codestyle adapted, most drastic change is line length from 120 to 88.
+ - Coverage increased by removing unused code, updating configuration, adding tests.
 
 Version 20.1.0
 --------------
