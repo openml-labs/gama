@@ -5,9 +5,11 @@ from typing import Optional, List, Dict, Tuple, Callable
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
+import dash_table
 from dash.dependencies import Input, Output, State
 
 from gama.dashboard.pages.base_page import BasePage
+from gama.data import arff_to_pandas
 
 
 class HomePage(BasePage):
@@ -271,7 +273,7 @@ def build_configuration_menu(app, controller) -> html.Div:
         id="go-button",
         block=True,
         color="success",
-        disabled=False,
+        disabled=True,
     )
 
     def start_gama(n_click, running_tab_style, *args):
@@ -298,6 +300,7 @@ def build_configuration_menu(app, controller) -> html.Div:
             State("max_eval_m", "value"),
             State("file-path-input", "value"),
             State("logpath", "value"),
+            State("target_dropdown", "value"),
         ],
     )(start_gama)
 
@@ -324,11 +327,38 @@ def build_data_navigator() -> html.Div:
         type="text",
     )
 
-    table_container = html.Div(id="table-container", children=["No data loaded."])
+    table_container = html.Div(
+        id="table-container", children=["No data loaded."], style={"margin": "10px"},
+    )
 
     def update_data_table(filename):
         if filename is not None and os.path.isfile(filename):
-            return "found a file!", False
+            df = arff_to_pandas(filename)
+            table = dash_table.DataTable(
+                id="table",
+                columns=[{"name": c, "id": c} for c in df.columns],
+                data=df.to_dict("records"),
+                editable=False,
+                style_table={"maxHeight": "500px", "overflowY": "scroll"},
+            )
+
+            target_select = dbc.FormGroup(
+                [
+                    dbc.Label("Target", html_for="target_dropdown", width=4),
+                    dbc.Col(
+                        dcc.Dropdown(
+                            id="target_dropdown",
+                            options=[{"label": c, "value": c} for c in df.columns],
+                            clearable=False,
+                            value=df.columns[-1],
+                            # persistence_type="session",
+                            # persistence=True,
+                        ),
+                    ),
+                ],
+                row=True,
+            )
+            return [target_select, table], False
         return filename, True
 
     HomePage.callbacks.append(
