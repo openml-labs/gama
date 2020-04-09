@@ -12,7 +12,6 @@ class Controller:
 
     def start_gama(
         self,
-        n_clicks,
         metric,
         regularize,
         n_jobs,

@@ -271,21 +271,24 @@ def build_configuration_menu(app, controller) -> html.Div:
         id="go-button",
         block=True,
         color="success",
-        disabled=True,
+        disabled=False,
     )
 
-    def start_gama(*args, **kwargs):
-        controller.start_gama(*args, **kwargs)
-        return "danger", dcc.Markdown("#### Stop!"), "Running"
+    def start_gama(n_click, running_tab_style, *args):
+        controller.start_gama(*args)
+        running_tab_style["display"] = "inline"
+        return "danger", dcc.Markdown("#### Stop!"), "Running", running_tab_style
 
     app.callback(
         [
             Output("go-button", "color"),
             Output("go-button", "children"),
             Output("page-tabs", "value"),
+            Output("Running-tab", "style"),
         ],
         [Input("go-button", "n_clicks")],
         [
+            State("Running-tab", "style"),
             State("metric_dropdown", "value"),
             State("regularize_length_switch", "value"),
             State("cpu_slider", "value"),
