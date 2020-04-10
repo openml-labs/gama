@@ -9,7 +9,7 @@ import dash_table
 from dash.dependencies import Input, Output, State
 
 from gama.dashboard.pages.base_page import BasePage
-from gama.data import arff_to_pandas
+from gama.data import arff_to_pandas, load_feature_metadata_from_arff
 
 
 class HomePage(BasePage):
@@ -333,14 +333,16 @@ def build_data_navigator() -> html.Div:
 
     def update_data_table(filename):
         if filename is not None and os.path.isfile(filename):
-            df = arff_to_pandas(filename)
-            table = dash_table.DataTable(
-                id="table",
-                columns=[{"name": c, "id": c} for c in df.columns],
-                data=df.to_dict("records"),
-                editable=False,
-                style_table={"maxHeight": "500px", "overflowY": "scroll"},
-            )
+            attributes = load_feature_metadata_from_arff(filename)
+            if False:
+                df = arff_to_pandas(filename)
+                _ = dash_table.DataTable(
+                    id="table",
+                    columns=[{"name": c, "id": c} for c in df.columns],
+                    data=df.to_dict("records"),
+                    editable=False,
+                    style_table={"maxHeight": "500px", "overflowY": "scroll"},
+                )
 
             target_select = dbc.FormGroup(
                 [
@@ -348,9 +350,9 @@ def build_data_navigator() -> html.Div:
                     dbc.Col(
                         dcc.Dropdown(
                             id="target_dropdown",
-                            options=[{"label": c, "value": c} for c in df.columns],
+                            options=[{"label": c, "value": c} for c in attributes],
                             clearable=False,
-                            value=df.columns[-1],
+                            value=list(attributes)[-1],
                             # persistence_type="session",
                             # persistence=True,
                         ),
@@ -358,7 +360,7 @@ def build_data_navigator() -> html.Div:
                 ],
                 row=True,
             )
-            return [target_select, table], False
+            return [target_select], False
         return filename, True
 
     HomePage.callbacks.append(
