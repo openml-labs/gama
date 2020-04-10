@@ -327,50 +327,83 @@ def build_data_navigator() -> html.Div:
         type="text",
     )
 
-    table_container = html.Div(
-        id="table-container", children=["No data loaded."], style={"margin": "10px"},
+    modes = ["None", "Small", "All"]
+    settings = dbc.FormGroup(
+        [
+            dbc.Label("Target", html_for="target_dropdown", width=2),
+            dbc.Col(
+                dcc.Dropdown(
+                    id="target_dropdown",
+                    options=[{"label": "-", "value": "a"}],
+                    clearable=False,
+                    value="a",
+                    # persistence_type="session",
+                    # persistence=True,
+                ),
+                width=4,
+            ),
+            dbc.Label("Preview Mode", html_for="preview_dropdown", width=2),
+            dbc.Col(
+                dcc.Dropdown(
+                    id="preview_dropdown",
+                    options=[{"label": m, "value": m.lower()} for m in modes],
+                    clearable=False,
+                    value="none",
+                    # persistence_type="session",
+                    # persistence=True,
+                ),
+                width=4,
+            ),
+        ],
+        row=True,
     )
 
-    def update_data_table(filename):
+    table_container = html.Div(id="table-container", children=["No data loaded."])
+
+    data_settings = html.Div(
+        id="data-settings-container",
+        children=[settings, table_container],
+        style={"margin": "10px"},
+    )
+
+    def update_data_table(filename, mode):
         if filename is not None and os.path.isfile(filename):
-            attributes = load_feature_metadata_from_arff(filename)
-            if False:
+            if mode in ["all", "small"]:
                 df = arff_to_pandas(filename)
-                _ = dash_table.DataTable(
+                if mode == "small":
+                    df = df.head(50)
+
+                data_table = dash_table.DataTable(
                     id="table",
                     columns=[{"name": c, "id": c} for c in df.columns],
                     data=df.to_dict("records"),
                     editable=False,
                     style_table={"maxHeight": "500px", "overflowY": "scroll"},
                 )
+                attributes = list(df.columns)
+            else:
+                data_table = "Preview not enabled."
+                attributes = list(load_feature_metadata_from_arff(filename))
 
-            target_select = dbc.FormGroup(
-                [
-                    dbc.Label("Target", html_for="target_dropdown", width=4),
-                    dbc.Col(
-                        dcc.Dropdown(
-                            id="target_dropdown",
-                            options=[{"label": c, "value": c} for c in attributes],
-                            clearable=False,
-                            value=list(attributes)[-1],
-                            # persistence_type="session",
-                            # persistence=True,
-                        ),
-                    ),
-                ],
-                row=True,
-            )
-            return [target_select], False
-        return filename, True
+            target_options = [{"label": c, "value": c} for c in attributes]
+            default_target = attributes[-1]
+
+            return [data_table], target_options, default_target, False
+        return ["No data loaded"], [{"label": "-", "value": "a"}], "a", True
 
     HomePage.callbacks.append(
         (
             (
                 [
                     Output("table-container", "children"),
+                    Output("target_dropdown", "options"),
+                    Output("target_dropdown", "value"),
                     Output("go-button", "disabled"),
                 ],
-                [Input("file-path-input", "value")],
+                [
+                    Input("file-path-input", "value"),
+                    Input("preview_dropdown", "value"),
+                ],
             ),
             update_data_table,
         )
@@ -380,7 +413,7 @@ def build_data_navigator() -> html.Div:
         children=[
             markdown_header("Data Navigator", level=2),
             upload_file,
-            table_container,
+            data_settings,
         ],
         style={"box-shadow": "1px 1px 1px black", "padding": "2%"},
     )
