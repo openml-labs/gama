@@ -468,9 +468,11 @@ class Gama(ABC):
             y_train=self._y,
             metrics=self._metrics,
         )
+        AsyncEvaluator.defaults = dict(evaluate_pipeline=evaluate_pipeline)
+
         self._operator_set.evaluate = partial(
             gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
-            evaluate_pipeline=evaluate_pipeline,
+            # evaluate_pipeline=evaluate_pipeline,
             timeout=self._max_eval_time,
             deadline=deadline,
             add_length_to_score=self._regularize_length,

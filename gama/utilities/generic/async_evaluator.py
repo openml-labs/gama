@@ -37,10 +37,12 @@ class AsyncFuture:
         self.exception = None
         self.traceback = None
 
-    def execute(self):
+    def execute(self, extra_kwargs):
         """ Execute the function call `fn(*args, **kwargs)` and record results. """
         try:
-            self.result = self.fn(*self.args, **self.kwargs)
+            # Don't update self.kwargs, as it will be pickled back to the main process
+            kwargs = {**self.kwargs, **extra_kwargs}
+            self.result = self.fn(*self.args, **kwargs)
         except Exception as e:
             self.exception = e
             self.traceback = traceback.format_exc()
@@ -51,11 +53,24 @@ class AsyncEvaluator:
 
     The function and all its arguments must be picklable.
     Using the same AsyncEvaluator in two different contexts raises a `RuntimeError`.
+
+    class variables:
+    n_jobs: int (default=multiprocessing.cpu_count())
+        The default number of subprocesses to spawn.
+        Ignored if the `n_workers` parameter is specified on init.
+    defaults: Dict, optional (default=None)
+        Default parameter values shared between all submit calls.
+        This allows these defaults to be transferred only once per process,
+        instead of twice per call (to and from the subprocess).
+        Only supports keyword arguments.
     """
 
     n_jobs: int = multiprocessing.cpu_count()
+    defaults: Dict = {}
 
-    def __init__(self, n_workers: Optional[int] = None):
+    def __init__(
+        self, n_workers: Optional[int] = None,
+    ):
         """
         Parameters
         ----------
@@ -86,7 +101,7 @@ class AsyncEvaluator:
         for _ in range(self._n_jobs):
             subprocess = multiprocessing.Process(
                 target=evaluator_daemon,
-                args=(self._input_queue, self._output_queue),
+                args=(self._input_queue, self._output_queue, AsyncEvaluator.defaults),
                 daemon=True,
             )
             self._processes.append(subprocess)
@@ -164,7 +179,10 @@ class AsyncEvaluator:
 
 
 def evaluator_daemon(
-    input_queue: queue.Queue, output_queue: queue.Queue, print_exit_message: bool = True
+    input_queue: queue.Queue,
+    output_queue: queue.Queue,
+    default_parameters: Optional[Dict] = None,
+    print_exit_message: bool = True,
 ):
     """ Function for daemon subprocess that evaluates functions from AsyncFutures.
 
@@ -176,6 +194,9 @@ def evaluator_daemon(
     output_queue: queue.Queue[AsyncFuture]
         Queue to put AsyncFuture to.
         Queue should be managed by multiprocessing.manager.
+    default_parameters: Dict, optional (default=None)
+        Additional parameters to pass to AsyncFuture.Execute.
+        This is useful to avoid passing lots of repetitive data through AsyncFuture.
     print_exit_message: bool (default=True)
         If True, print to console the reason for shutting down.
         If False, shut down silently.
@@ -183,7 +204,7 @@ def evaluator_daemon(
     try:
         while True:
             future = input_queue.get()
-            future.execute()
+            future.execute(default_parameters)
             output_queue.put(future)
     except KeyboardInterrupt:
         shutdown_message = "Helper process stopping due to keyboard interrupt."
