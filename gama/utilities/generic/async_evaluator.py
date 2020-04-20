@@ -14,15 +14,23 @@ but it has issues:
       Though that does not hinder the execution of the program,
       I don't want errors for expected behavior.
 """
+import datetime
 import logging
 import multiprocessing
+import os
 import queue
 import time
 import traceback
 import uuid
-from typing import Optional, Callable, Dict, List
+from typing import Optional, Callable, Dict, List, Union
+
+import psutil
+
+from gama.logging import MACHINE_LOG_LEVEL
+from gama.logging.utility_functions import MultiprocessingLogger
 
 log = logging.getLogger(__name__)
+_time_format = "%H:%M:%S.%f"
 
 
 class AsyncFuture:
@@ -84,8 +92,11 @@ class AsyncEvaluator:
         self._n_jobs = n_workers if n_workers is not None else AsyncEvaluator.n_jobs
 
         self._queue_manager = multiprocessing.Manager()
-        self._input_queue = self._queue_manager.Queue()
-        self._output_queue = self._queue_manager.Queue()
+        self._input = self._queue_manager.Queue()
+        self._output = self._queue_manager.Queue()
+        self._logger = MultiprocessingLogger()
+        pid = os.getpid()
+        self._main_process = psutil.Process(pid)
 
     def __enter__(self):
         if self._has_entered:
@@ -94,14 +105,16 @@ class AsyncEvaluator:
             )
         self._has_entered = True
 
-        self._input_queue = self._queue_manager.Queue()
-        self._output_queue = self._queue_manager.Queue()
+        self._input = self._queue_manager.Queue()
+        self._output = self._queue_manager.Queue()
 
-        log.debug(f"Starting {self._n_jobs} subprocesses.")
+        log.debug(
+            f"Process {self._main_process.pid} starting {self._n_jobs} subprocesses."
+        )
         for _ in range(self._n_jobs):
             subprocess = multiprocessing.Process(
                 target=evaluator_daemon,
-                args=(self._input_queue, self._output_queue, AsyncEvaluator.defaults),
+                args=(self._input, self._output, self._logger, AsyncEvaluator.defaults),
                 daemon=True,
             )
             self._processes.append(subprocess)
@@ -116,6 +129,7 @@ class AsyncEvaluator:
         # https://docs.python.org/3/library/multiprocessing.html#all-start-methods
         for subprocess in self._processes:
             subprocess.terminate()
+        self._logger.flush_to_log(log)
         return False
 
     def submit(self, fn: Callable, *args, **kwargs) -> AsyncFuture:
@@ -138,7 +152,7 @@ class AsyncEvaluator:
         """
         future = AsyncFuture(fn, *args, **kwargs)
         self.futures[future.id] = future
-        self._input_queue.put(future)
+        self._input.put(future)
         return future
 
     def wait_next(self, poll_time: float = 0.05) -> AsyncFuture:
@@ -165,24 +179,37 @@ class AsyncEvaluator:
 
         while True:
             try:
-                completed_future = self._output_queue.get(block=False)
+                self._logger.flush_to_log(log)
+                completed_future = self._output.get(block=False)
                 match = self.futures.pop(completed_future.id)
                 match.result, match.exception, match.traceback = (
                     completed_future.result,
                     completed_future.exception,
                     completed_future.traceback,
                 )
+                log_memory_usage(self._main_process, log)
                 return match
             except queue.Empty:
                 time.sleep(poll_time)
                 continue
 
 
+def log_memory_usage(
+    process: psutil.Process,
+    logger: Union[logging.Logger, MultiprocessingLogger],
+    level: int = MACHINE_LOG_LEVEL,
+):
+    """ Log the memory used by process in MB at level. """
+    mem_mb = process.memory_info()[0] / (2 ** 20)
+    timestamp = datetime.datetime.now().strftime(_time_format)
+    logger.log(level, f"M,{timestamp},{process.pid},{mem_mb}")
+
+
 def evaluator_daemon(
     input_queue: queue.Queue,
     output_queue: queue.Queue,
+    logger: MultiprocessingLogger = None,
     default_parameters: Optional[Dict] = None,
-    print_exit_message: bool = True,
 ):
     """ Function for daemon subprocess that evaluates functions from AsyncFutures.
 
@@ -194,21 +221,27 @@ def evaluator_daemon(
     output_queue: queue.Queue[AsyncFuture]
         Queue to put AsyncFuture to.
         Queue should be managed by multiprocessing.manager.
+    logger: MultiprocessingLogger, optional (default=None)
+        If provided, will write process information to this logger.
     default_parameters: Dict, optional (default=None)
         Additional parameters to pass to AsyncFuture.Execute.
         This is useful to avoid passing lots of repetitive data through AsyncFuture.
-    print_exit_message: bool (default=True)
-        If True, print to console the reason for shutting down.
-        If False, shut down silently.
     """
+    pid = os.getpid()
+    this_process = psutil.Process(pid)
+    if logger:
+        logger.debug(f"Evaluator Daemon started with PID {pid}")
+
     try:
         while True:
+            if logger:
+                log_memory_usage(this_process, logger)
             future = input_queue.get()
             future.execute(default_parameters)
             output_queue.put(future)
-    except KeyboardInterrupt:
-        shutdown_message = "Helper process stopping due to keyboard interrupt."
-    except (BrokenPipeError, EOFError):
-        shutdown_message = "Helper process stopping due to a broken pipe or EOF."
-    if print_exit_message:
-        print(shutdown_message)
+    except Exception as e:
+        # There are no plans currently for recovering from any exception:
+        if logger:
+            logger.debug(f"Daemon {pid} shutting down:{str(e)}")
+    # Not sure if required: give main process time to process log message.
+    time.sleep(5)
