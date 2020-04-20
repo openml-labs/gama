@@ -418,6 +418,32 @@ class Gama(ABC):
                 compile_individual, preprocessing_steps=self._fixed_pipeline_extension
             )
 
+            store_pipelines = (
+                self._evaluation_library._m is None or self._evaluation_library._m > 0
+            )
+            if store_pipelines and self._x.shape[0] * self._x.shape[1] > 6_000_000:
+                # if m > 0, we are storing models for each evaluation. For this size
+                # KNN will create models of about 76Mb in size, which is too big, so
+                # we exclude it from search:
+                log.info("Excluding KNN from search because the dataset is too big.")
+                from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+
+                self._pset["prediction"] = [
+                    p
+                    for p in self._pset["prediction"]
+                    if p.identifier not in [KNeighborsClassifier, KNeighborsRegressor]
+                ]
+
+            if store_pipelines and self._x.shape[1] > 50:
+                log.info("Data has too many features to include PolynomialFeatures")
+                from sklearn.preprocessing import PolynomialFeatures
+
+                self._pset["data"] = [
+                    p
+                    for p in self._pset["data"]
+                    if p.identifier not in [PolynomialFeatures]
+                ]
+
         fit_time = int(
             (1 - self._post_processing.time_fraction)
             * self._time_manager.total_time_remaining
