@@ -24,6 +24,11 @@ import traceback
 import uuid
 from typing import Optional, Callable, Dict, List, Union
 
+try:
+    import resource
+except ModuleNotFoundError:
+    resource = None  # type: ignore
+
 import psutil
 
 from gama.logging import MACHINE_LOG_LEVEL
@@ -74,6 +79,7 @@ class AsyncEvaluator:
     """
 
     n_jobs: int = multiprocessing.cpu_count()
+    memory_limit_mb: int = 2000
     defaults: Dict = {}
 
     def __init__(
@@ -114,7 +120,13 @@ class AsyncEvaluator:
         for _ in range(self._n_jobs):
             subprocess = multiprocessing.Process(
                 target=evaluator_daemon,
-                args=(self._input, self._output, self._logger, AsyncEvaluator.defaults),
+                args=(
+                    self._input,
+                    self._output,
+                    self._logger,
+                    AsyncEvaluator.memory_limit_mb,
+                    AsyncEvaluator.defaults,
+                ),
                 daemon=True,
             )
             self._processes.append(subprocess)
@@ -209,6 +221,7 @@ def evaluator_daemon(
     input_queue: queue.Queue,
     output_queue: queue.Queue,
     logger: MultiprocessingLogger = None,
+    memory_limit_mb: Optional[int] = None,
     default_parameters: Optional[Dict] = None,
 ):
     """ Function for daemon subprocess that evaluates functions from AsyncFutures.
@@ -223,6 +236,9 @@ def evaluator_daemon(
         Queue should be managed by multiprocessing.manager.
     logger: MultiprocessingLogger, optional (default=None)
         If provided, will write process information to this logger.
+    memory_limit_mb: int, optional (default=None)
+        Set a memory limit for the daemon (in megabytes).
+        Only supported on UNIX systems.
     default_parameters: Dict, optional (default=None)
         Additional parameters to pass to AsyncFuture.Execute.
         This is useful to avoid passing lots of repetitive data through AsyncFuture.
@@ -231,14 +247,22 @@ def evaluator_daemon(
     this_process = psutil.Process(pid)
     if logger:
         logger.debug(f"Evaluator Daemon started with PID {pid}")
+    if resource and memory_limit_mb:
+        limit = memory_limit_mb * (2 ** 20)
+        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
     try:
         while True:
             if logger:
                 log_memory_usage(this_process, logger)
-            future = input_queue.get()
-            future.execute(default_parameters)
-            output_queue.put(future)
+
+            try:
+                future = input_queue.get()
+                future.execute(default_parameters)
+                output_queue.put(future)
+            except MemoryError:
+                # Can happen, just restart, probably want to record the error instead.
+                del future
     except Exception as e:
         # There are no plans currently for recovering from any exception:
         if logger:
