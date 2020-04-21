@@ -2,6 +2,8 @@ import datetime
 import heapq
 import logging
 from typing import Tuple, List, Optional, Union, Dict
+import pickle
+import os
 
 import numpy as np
 import pandas as pd
@@ -91,6 +93,7 @@ class EvaluationLibrary:
         m: Optional[int] = 200,
         n: Optional[int] = 10_000,
         sample: Optional[np.ndarray] = None,
+        cache_directory: Optional[str] = "cache",
     ):
         """ Create an EvaluationLibrary for in-memory record of evaluations.
 
@@ -110,12 +113,20 @@ class EvaluationLibrary:
         sample: np.ndarray, optional (default=None)
             Instead of storing all predictions of the 'top m' evaluations,
             store only those with indices specified in this array.
+        cache_directory: str, optional (default="cache")
+            Directory to save evaluations to.
+            If none is provided, evaluations will be kept in memory.
+            For large datasets or a big number of models,
+            this can lead to memory issues.
         """
         self.top_evaluations: List[Evaluation] = []
         self.other_evaluations: List[Evaluation] = []
         self._m = m
         self._sample_n = n
         self.lookup: Dict[str, Evaluation] = {}
+        self._cache = cache_directory
+        if self._cache and not os.path.exists(self._cache):
+            os.mkdir(self._cache)
 
         def main_node_str(e: Evaluation):
             return str(e.individual.main_node)
@@ -200,26 +211,62 @@ class EvaluationLibrary:
         self._process_predictions(evaluation)
 
         if evaluation.error is not None:
+            evaluation.estimators, evaluation.predictions = None, None
             self.other_evaluations.append(evaluation)
         elif self._m is None or self._m > len(self.top_evaluations):
+            self._to_disk(evaluation)
             heapq.heappush(self.top_evaluations, evaluation)
         else:
             removed = heapq.heappushpop(self.top_evaluations, evaluation)
-            removed.predictions, removed.estimators = None, None
+            if removed == evaluation:
+                # new evaluation is not in heap, big memory items may be discarded
+                removed.predictions, removed.estimators = None, None
+            else:
+                # new evaluation is now on the heap, remove old from disk
+                self._to_disk(evaluation)
+                self._remove_from_disk(removed)
+
             self.other_evaluations.append(removed)
 
         self.lookup[self._lookup_key(evaluation)] = evaluation
 
-    def n_best(self, n: int = 5) -> List[Evaluation]:
+    def clear_cache(self):
+        for file in os.listdir(self._cache):
+            os.remove(os.path.join(self._cache, file))
+        os.rmdir(self._cache)
+
+    def n_best(self, n: int = 5, with_pipelines: bool = True) -> List[Evaluation]:
         """ Return the best `n` pipelines.
+        If `with_pipelines` then also return pipelines and predictions.
 
         Slower if `n` exceeds `m` given on initialization.
         """
-        if self._m is None or n <= self._m:
-            return [
-                e
-                for e in heapq.nlargest(n, self.top_evaluations)
-                if e.predictions is not None
-            ]
+        if self._m is None or n <= self._m or with_pipelines:
+            evs = heapq.nlargest(n, self.top_evaluations)
         else:
-            return list(reversed(sorted(self.evaluations)))[:n]
+            evs = list(reversed(sorted(self.evaluations)))[:n]
+
+        if with_pipelines:
+            return [self._from_disk(str(e.individual._id)) for e in evs]
+        return list(evs)
+
+    def _to_disk(self, evaluation):
+        if self._cache is None:
+            raise RuntimeError("No cache directory set")
+
+        id_ = str(evaluation.individual._id)
+        with open(os.path.join(self._cache, id_ + ".pkl"), "wb") as fh:
+            pickle.dump(evaluation, fh)
+        evaluation.estimators, evaluation.predictions = None, None
+
+    def _remove_from_disk(self, evaluation):
+        if self._cache is None:
+            raise RuntimeError("No cache directory set")
+        id_ = str(evaluation.individual._id)
+        os.remove(os.path.join(self._cache, id_ + ".pkl"))
+
+    def _from_disk(self, id_: str) -> Evaluation:
+        if self._cache is None:
+            raise RuntimeError("No cache directory set")
+        with open(os.path.join(self._cache, id_ + ".pkl"), "rb") as fh:
+            return pickle.load(fh)
