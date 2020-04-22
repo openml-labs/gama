@@ -77,7 +77,7 @@ class AsyncEvaluator:
     """
 
     n_jobs: int = multiprocessing.cpu_count()
-    memory_limit_mb: int = 2000
+    memory_limit_mb: int = 6000
     defaults: Dict = {}
 
     def __init__(
@@ -232,10 +232,16 @@ def evaluator_daemon(
     """
     try:
         while True:
-            future = input_queue.get()
-            future.execute(default_parameters)
-            if not (future.result and isinstance(future.result.error, MemoryError)):
-                # Can't pickle MemoryErrors. Should work around this later.
+            try:
+                future = input_queue.get()
+                future.execute(default_parameters)
+                if future.result and isinstance(future.result.error, MemoryError):
+                    # Can't pickle MemoryErrors. Should work around this later.
+                    future.result.error = "MemoryError"
+                output_queue.put(future)
+            except MemoryError:
+                del future.result
+                future.exception = "ProcessMemoryError"
                 output_queue.put(future)
     except Exception as e:
         # There are no plans currently for recovering from any exception:
