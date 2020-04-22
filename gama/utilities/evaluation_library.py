@@ -17,16 +17,6 @@ log = logging.getLogger(__name__)
 class Evaluation:
     """ Record relevant evaluation data of an individual. """
 
-    __slots__ = [
-        "individual",
-        "score",
-        "predictions",
-        "estimators",
-        "start_time",
-        "duration",
-        "error",
-    ]
-
     def __init__(
         self,
         individual: Individual,
@@ -39,14 +29,43 @@ class Evaluation:
     ):
         self.individual: Individual = individual
         self.score = score
-        self.estimators: Optional[List] = [] if estimators is None else estimators
+        self._estimators: Optional[List] = [] if estimators is None else estimators
         self.start_time = start_time
         self.duration = duration
         self.error = error
+        self._cache_file = None
 
         if isinstance(predictions, (pd.Series, pd.DataFrame)):
             predictions = predictions.values
-        self.predictions: Optional[np.ndarray] = predictions
+        self._predictions: Optional[np.ndarray] = predictions
+
+    def to_disk(self, directory):
+        self._cache_file = os.path.join(directory, str(self.individual._id) + ".pkl")
+        with open(self._cache_file, "wb") as fh:
+            pickle.dump((self._estimators, self._predictions), fh)
+        self._estimators, self._predictions = [], None
+
+    def remove_from_disk(self):
+        os.remove(os.path.join(self._cache_file))
+        self._cache_file = None
+
+    @property
+    def estimators(self):
+        if self._estimators or not self._cache_file:
+            return self._estimators
+        else:
+            with open(self._cache_file, "rb") as fh:
+                estimators, _ = pickle.load(fh)
+                return estimators
+
+    @property
+    def predictions(self):
+        if self._predictions is not None or not self._cache_file:
+            return self._predictions
+        else:
+            with open(self._cache_file, "rb") as fh:
+                _, predictions = pickle.load(fh)
+                return predictions
 
     # Is there a better way to do this?
     # Assignment in __init__ is not preferred even if it saves lines.
@@ -196,7 +215,7 @@ class EvaluationLibrary:
     def _process_predictions(self, evaluation: Evaluation):
         """ Downsample evaluation predictions if required. """
         if self._sample_n == 0:
-            evaluation.predictions = None
+            evaluation._predictions = None
         if evaluation.predictions is None:
             return  # Predictions either not provided or removed because sample_n is 0.
 
@@ -205,26 +224,26 @@ class EvaluationLibrary:
             self.determine_sample_indices(self._sample_n, len(evaluation.predictions))
 
         if self._sample is not None:
-            evaluation.predictions = evaluation.predictions[self._sample]
+            evaluation._predictions = evaluation.predictions[self._sample]
 
     def save_evaluation(self, evaluation: Evaluation) -> None:
         self._process_predictions(evaluation)
 
         if evaluation.error is not None:
-            evaluation.estimators, evaluation.predictions = None, None
+            evaluation._estimators, evaluation._predictions = None, None
             self.other_evaluations.append(evaluation)
         elif self._m is None or self._m > len(self.top_evaluations):
-            self._to_disk(evaluation)
+            evaluation.to_disk(self._cache)
             heapq.heappush(self.top_evaluations, evaluation)
         else:
             removed = heapq.heappushpop(self.top_evaluations, evaluation)
             if removed == evaluation:
                 # new evaluation is not in heap, big memory items may be discarded
-                removed.predictions, removed.estimators = None, None
+                removed._predictions, removed._estimators = None, None
             else:
                 # new evaluation is now on the heap, remove old from disk
-                self._to_disk(evaluation)
-                self._remove_from_disk(removed)
+                evaluation.to_disk(self._cache)
+                removed.remove_from_disk()
 
             self.other_evaluations.append(removed)
 
@@ -235,38 +254,12 @@ class EvaluationLibrary:
             os.remove(os.path.join(self._cache, file))
         os.rmdir(self._cache)
 
-    def n_best(self, n: int = 5, with_pipelines: bool = True) -> List[Evaluation]:
+    def n_best(self, n: int = 5, with_pipelines=True) -> List[Evaluation]:
         """ Return the best `n` pipelines.
-        If `with_pipelines` then also return pipelines and predictions.
 
         Slower if `n` exceeds `m` given on initialization.
         """
         if self._m is None or n <= self._m or with_pipelines:
-            evs = heapq.nlargest(n, self.top_evaluations)
+            return heapq.nlargest(n, self.top_evaluations)
         else:
-            evs = list(reversed(sorted(self.evaluations)))[:n]
-
-        if with_pipelines:
-            return [self._from_disk(str(e.individual._id)) for e in evs]
-        return list(evs)
-
-    def _to_disk(self, evaluation):
-        if self._cache is None:
-            raise RuntimeError("No cache directory set")
-
-        id_ = str(evaluation.individual._id)
-        with open(os.path.join(self._cache, id_ + ".pkl"), "wb") as fh:
-            pickle.dump(evaluation, fh)
-        evaluation.estimators, evaluation.predictions = None, None
-
-    def _remove_from_disk(self, evaluation):
-        if self._cache is None:
-            raise RuntimeError("No cache directory set")
-        id_ = str(evaluation.individual._id)
-        os.remove(os.path.join(self._cache, id_ + ".pkl"))
-
-    def _from_disk(self, id_: str) -> Evaluation:
-        if self._cache is None:
-            raise RuntimeError("No cache directory set")
-        with open(os.path.join(self._cache, id_ + ".pkl"), "rb") as fh:
-            return pickle.load(fh)
+            return list(reversed(sorted(self.evaluations)))[:n]
