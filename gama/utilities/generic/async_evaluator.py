@@ -22,7 +22,7 @@ import queue
 import time
 import traceback
 import uuid
-from typing import Optional, Callable, Dict, List, Union
+from typing import Optional, Callable, Dict, List
 
 try:
     import resource
@@ -32,10 +32,8 @@ except ModuleNotFoundError:
 import psutil
 
 from gama.logging import MACHINE_LOG_LEVEL
-from gama.logging.utility_functions import MultiprocessingLogger
 
 log = logging.getLogger(__name__)
-_time_format = "%H:%M:%S.%f"
 
 
 class AsyncFuture:
@@ -94,13 +92,12 @@ class AsyncEvaluator:
         """
         self._has_entered = False
         self.futures: Dict[uuid.UUID, AsyncFuture] = {}
-        self._processes: List[multiprocessing.Process] = []
+        self._processes: List[psutil.Process] = []
         self._n_jobs = n_workers if n_workers is not None else AsyncEvaluator.n_jobs
 
         self._queue_manager = multiprocessing.Manager()
         self._input = self._queue_manager.Queue()
         self._output = self._queue_manager.Queue()
-        self._logger = MultiprocessingLogger()
         pid = os.getpid()
         self._main_process = psutil.Process(pid)
 
@@ -118,19 +115,19 @@ class AsyncEvaluator:
             f"Process {self._main_process.pid} starting {self._n_jobs} subprocesses."
         )
         for _ in range(self._n_jobs):
-            subprocess = multiprocessing.Process(
+            mp_process = multiprocessing.Process(
                 target=evaluator_daemon,
-                args=(
-                    self._input,
-                    self._output,
-                    self._logger,
-                    AsyncEvaluator.memory_limit_mb,
-                    AsyncEvaluator.defaults,
-                ),
+                args=(self._input, self._output, AsyncEvaluator.defaults),
                 daemon=True,
             )
+            mp_process.start()
+
+            subprocess = psutil.Process(mp_process.pid)
             self._processes.append(subprocess)
-            subprocess.start()
+
+            if resource and AsyncEvaluator.memory_limit_mb:
+                limit = AsyncEvaluator.memory_limit_mb * (2 ** 20)
+                resource.prlimit(subprocess.pid, resource.RLIMIT_AS, (limit, limit))
 
         return self
 
@@ -141,7 +138,6 @@ class AsyncEvaluator:
         # https://docs.python.org/3/library/multiprocessing.html#all-start-methods
         for subprocess in self._processes:
             subprocess.terminate()
-        self._logger.flush_to_log(log)
         return False
 
     def submit(self, fn: Callable, *args, **kwargs) -> AsyncFuture:
@@ -191,7 +187,6 @@ class AsyncEvaluator:
 
         while True:
             try:
-                self._logger.flush_to_log(log)
                 completed_future = self._output.get(block=False)
                 match = self.futures.pop(completed_future.id)
                 match.result, match.exception, match.traceback = (
@@ -199,29 +194,23 @@ class AsyncEvaluator:
                     completed_future.exception,
                     completed_future.traceback,
                 )
-                log_memory_usage(self._main_process, log)
+                self._log_memory_usage()
                 return match
             except queue.Empty:
                 time.sleep(poll_time)
                 continue
 
-
-def log_memory_usage(
-    process: psutil.Process,
-    logger: Union[logging.Logger, MultiprocessingLogger],
-    level: int = MACHINE_LOG_LEVEL,
-):
-    """ Log the memory used by process in MB at level. """
-    mem_mb = process.memory_info()[0] / (2 ** 20)
-    timestamp = datetime.datetime.now().strftime(_time_format)
-    logger.log(level, f"M,{timestamp},{process.pid},{mem_mb}")
+    def _log_memory_usage(self):
+        processes = [self._main_process] + self._processes
+        mem_by_pid = [(p.pid, p.memory_info()[0] / (2 ** 20)) for p in processes]
+        mem_str = ",".join([f"{pid},{mem_mb}" for (pid, mem_mb) in mem_by_pid])
+        timestamp = datetime.datetime.now().isoformat()
+        log.log(MACHINE_LOG_LEVEL, f"M,{timestamp},{mem_str}")
 
 
 def evaluator_daemon(
     input_queue: queue.Queue,
     output_queue: queue.Queue,
-    logger: MultiprocessingLogger = None,
-    memory_limit_mb: Optional[int] = None,
     default_parameters: Optional[Dict] = None,
 ):
     """ Function for daemon subprocess that evaluates functions from AsyncFutures.
@@ -234,28 +223,12 @@ def evaluator_daemon(
     output_queue: queue.Queue[AsyncFuture]
         Queue to put AsyncFuture to.
         Queue should be managed by multiprocessing.manager.
-    logger: MultiprocessingLogger, optional (default=None)
-        If provided, will write process information to this logger.
-    memory_limit_mb: int, optional (default=None)
-        Set a memory limit for the daemon (in megabytes).
-        Only supported on UNIX systems.
     default_parameters: Dict, optional (default=None)
         Additional parameters to pass to AsyncFuture.Execute.
         This is useful to avoid passing lots of repetitive data through AsyncFuture.
     """
-    pid = os.getpid()
-    this_process = psutil.Process(pid)
-    if logger:
-        logger.debug(f"Evaluator Daemon started with PID {pid}")
-    if resource and memory_limit_mb:
-        limit = memory_limit_mb * (2 ** 20)
-        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
-
     try:
         while True:
-            if logger:
-                log_memory_usage(this_process, logger)
-
             try:
                 future = input_queue.get()
                 future.execute(default_parameters)
@@ -263,9 +236,8 @@ def evaluator_daemon(
             except MemoryError:
                 # Can happen, just restart, probably want to record the error instead.
                 del future
-    except Exception as e:
+    except Exception:
         # There are no plans currently for recovering from any exception:
-        if logger:
-            logger.debug(f"Daemon {pid} shutting down:{str(e)}")
+        pass
     # Not sure if required: give main process time to process log message.
     time.sleep(5)
