@@ -137,7 +137,10 @@ class AsyncEvaluator:
         # It is in direct conflict with guidelines:
         # https://docs.python.org/3/library/multiprocessing.html#all-start-methods
         for subprocess in self._processes:
-            subprocess.terminate()
+            try:
+                subprocess.terminate()
+            except psutil.NoSuchProcess:
+                log.debug(f"Daemon {subprocess.pid} stopped prematurely.")
         return False
 
     def submit(self, fn: Callable, *args, **kwargs) -> AsyncFuture:
@@ -231,8 +234,8 @@ def evaluator_daemon(
         while True:
             future = input_queue.get()
             future.execute(default_parameters)
-            # Can't pickle MemoryErrors. Should work around this later.
-            if not isinstance(future.result.error, MemoryError):
+            if not (future.result and isinstance(future.result.error, MemoryError)):
+                # Can't pickle MemoryErrors. Should work around this later.
                 output_queue.put(future)
     except Exception as e:
         # There are no plans currently for recovering from any exception:
