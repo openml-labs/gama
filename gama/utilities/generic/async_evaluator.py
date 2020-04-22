@@ -229,15 +229,13 @@ def evaluator_daemon(
     """
     try:
         while True:
-            try:
-                future = input_queue.get()
-                future.execute(default_parameters)
+            future = input_queue.get()
+            future.execute(default_parameters)
+            # Can't pickle MemoryErrors. Should work around this later.
+            if not isinstance(future.result.error, MemoryError):
                 output_queue.put(future)
-            except MemoryError:
-                # Can happen, just restart, probably want to record the error instead.
-                del future
-    except Exception:
+    except Exception as e:
         # There are no plans currently for recovering from any exception:
-        pass
+        print(f"Stopping daemon:{type(e)}:{str(e)}")
     # Not sure if required: give main process time to process log message.
     time.sleep(5)
