@@ -235,9 +235,14 @@ def evaluator_daemon(
             try:
                 future = input_queue.get()
                 future.execute(default_parameters)
-                if future.result and isinstance(future.result.error, MemoryError):
-                    # Can't pickle MemoryErrors. Should work around this later.
-                    future.result.error = "MemoryError"
+                if future.result:
+                    if isinstance(future.result, tuple):
+                        result = future.result[0]
+                    else:
+                        result = future.result
+                    if isinstance(result.error, MemoryError):
+                        # Can't pickle MemoryErrors. Should work around this later.
+                        result.error = "MemoryError"
                 output_queue.put(future)
             except MemoryError:
                 future.result = None
