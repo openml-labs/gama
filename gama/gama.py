@@ -90,6 +90,7 @@ class Gama(ABC):
         keep_analysis_log: Optional[str] = "gama.log",
         search_method: BaseSearch = AsyncEA(),
         post_processing_method: BasePostProcessing = BestFitPostProcessing(),
+        cache: str = "cache",
     ):
         """
 
@@ -145,6 +146,9 @@ class Gama(ABC):
         post_processing_method: BasePostProcessing (default=BestFitPostProcessing())
             Post-processing method to create a model after the search phase.
             Should be an instantiated subclass of BasePostProcessing.
+
+        cache: str (default="cache")
+            Directory to use to save intermediate results during search.
         """
         register_stream_log(verbosity)
         if keep_analysis_log is not None:
@@ -209,10 +213,11 @@ class Gama(ABC):
             self._evaluation_library = EvaluationLibrary(
                 m=post_processing_method.hyperparameters["max_models"],
                 n=post_processing_method.hyperparameters["hillclimb_size"],
+                cache_directory=cache,
             )
         else:
             # Don't keep memory-heavy evaluation meta-data (predictions, estimators)
-            self._evaluation_library = EvaluationLibrary(m=0)
+            self._evaluation_library = EvaluationLibrary(m=0, cache_directory=cache)
         self.evaluation_completed(self._evaluation_library.save_evaluation)
 
         self._pset, parameter_checks = pset_from_config(config)
@@ -476,6 +481,7 @@ class Gama(ABC):
                 self._time_manager.total_time_remaining,
                 best_individuals,
             )
+        self._evaluation_library.clear_cache()
 
     def _search_phase(self, warm_start: bool = False, timeout: float = 1e6):
         """ Invoke the search algorithm, populate `final_pop`. """
