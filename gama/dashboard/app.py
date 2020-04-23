@@ -81,11 +81,11 @@ def create_tabs(pages: List[BasePage]):
     left_aligned = [page for page in sorted_pages if page.alignment >= 0]
     right_aligned = [page for page in sorted_pages if page.alignment < 0]
     grouped_pages = left_aligned + right_aligned
-    tabs = [create_tab(page.name) for page in grouped_pages]
+    tabs = [create_tab(page.name, page.starts_hidden) for page in grouped_pages]
     return [dcc.Tabs(id="page-tabs", value=tabs[0].value, children=tabs)]
 
 
-def create_tab(name: str):
+def create_tab(name: str, invisible: bool):
     tab_style = {
         "color": "black",
         "width": "10%",
@@ -93,11 +93,13 @@ def create_tab(name: str):
         "border-top-right-radius": "3px",
         "border-bottom": "0px",  # bottom box-shadow still present
         "padding": "6px",
+        "display": "none" if invisible else "inline",
     }
     selected_tab_style = {
         **tab_style,
         "border-top": "3px solid #c81818",  # Highlight color (TU/e colored)
         "box-shadow": "1px 1px 0px white",  # removes bottom edge
+        "display": "inline",
     }
     return dcc.Tab(
         id=f"{name}-tab",

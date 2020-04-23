@@ -5,9 +5,11 @@ from typing import Optional, List, Dict, Tuple, Callable
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
+import dash_table
 from dash.dependencies import Input, Output, State
 
 from gama.dashboard.pages.base_page import BasePage
+from gama.data import arff_to_pandas, load_feature_metadata_from_arff
 
 
 class HomePage(BasePage):
@@ -274,18 +276,21 @@ def build_configuration_menu(app, controller) -> html.Div:
         disabled=True,
     )
 
-    def start_gama(*args, **kwargs):
-        controller.start_gama(*args, **kwargs)
-        return "danger", dcc.Markdown("#### Stop!"), "Running"
+    def start_gama(n_click, running_tab_style, *args):
+        controller.start_gama(*args)
+        running_tab_style["display"] = "inline"
+        return "danger", dcc.Markdown("#### Stop!"), "Running", running_tab_style
 
     app.callback(
         [
             Output("go-button", "color"),
             Output("go-button", "children"),
             Output("page-tabs", "value"),
+            Output("Running-tab", "style"),
         ],
         [Input("go-button", "n_clicks")],
         [
+            State("Running-tab", "style"),
             State("metric_dropdown", "value"),
             State("regularize_length_switch", "value"),
             State("cpu_slider", "value"),
@@ -295,6 +300,7 @@ def build_configuration_menu(app, controller) -> html.Div:
             State("max_eval_m", "value"),
             State("file-path-input", "value"),
             State("logpath", "value"),
+            State("target_dropdown", "value"),
         ],
     )(start_gama)
 
@@ -321,21 +327,83 @@ def build_data_navigator() -> html.Div:
         type="text",
     )
 
+    modes = ["None", "Small", "All"]
+    settings = dbc.FormGroup(
+        [
+            dbc.Label("Target", html_for="target_dropdown", width=2),
+            dbc.Col(
+                dcc.Dropdown(
+                    id="target_dropdown",
+                    options=[{"label": "-", "value": "a"}],
+                    clearable=False,
+                    value="a",
+                    # persistence_type="session",
+                    # persistence=True,
+                ),
+                width=4,
+            ),
+            dbc.Label("Preview Mode", html_for="preview_dropdown", width=2),
+            dbc.Col(
+                dcc.Dropdown(
+                    id="preview_dropdown",
+                    options=[{"label": m, "value": m.lower()} for m in modes],
+                    clearable=False,
+                    value="none",
+                    # persistence_type="session",
+                    # persistence=True,
+                ),
+                width=4,
+            ),
+        ],
+        row=True,
+    )
+
     table_container = html.Div(id="table-container", children=["No data loaded."])
 
-    def update_data_table(filename):
+    data_settings = html.Div(
+        id="data-settings-container",
+        children=[settings, table_container],
+        style={"margin": "10px"},
+    )
+
+    def update_data_table(filename, mode):
         if filename is not None and os.path.isfile(filename):
-            return "found a file!", False
-        return filename, True
+            if mode in ["all", "small"]:
+                df = arff_to_pandas(filename)
+                if mode == "small":
+                    df = df.head(50)
+
+                data_table = dash_table.DataTable(
+                    id="table",
+                    columns=[{"name": c, "id": c} for c in df.columns],
+                    data=df.to_dict("records"),
+                    editable=False,
+                    style_table={"maxHeight": "500px", "overflowY": "scroll"},
+                )
+                attributes = list(df.columns)
+            else:
+                data_table = "Preview not enabled."
+                attributes = list(load_feature_metadata_from_arff(filename))
+
+            target_options = [{"label": c, "value": c} for c in attributes]
+            default_target = attributes[-1]
+
+            return [data_table], target_options, default_target, False
+        return ["No data loaded"], [{"label": "-", "value": "a"}], "a", True
 
     HomePage.callbacks.append(
         (
             (
                 [
                     Output("table-container", "children"),
+                    Output("target_dropdown", "options"),
+                    Output("target_dropdown", "value"),
                     Output("go-button", "disabled"),
                 ],
-                [Input("file-path-input", "value")],
+                [
+                    Input("file-path-input", "value"),
+                    Input("preview_dropdown", "value"),
+                ],
             ),
             update_data_table,
         )
@@ -345,7 +413,7 @@ def build_data_navigator() -> html.Div:
         children=[
             markdown_header("Data Navigator", level=2),
             upload_file,
-            table_container,
+            data_settings,
         ],
         style={"box-shadow": "1px 1px 1px black", "padding": "2%"},
     )
