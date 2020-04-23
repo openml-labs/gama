@@ -240,7 +240,7 @@ def evaluator_daemon(
                     future.result.error = "MemoryError"
                 output_queue.put(future)
             except MemoryError:
-                del future.result
+                future.result = None
                 future.exception = "ProcessMemoryError"
                 output_queue.put(future)
     except Exception as e:
