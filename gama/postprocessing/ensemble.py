@@ -214,20 +214,17 @@ class Ensemble(object):
         if not self._model_library:
             self._model_library = []
             for evaluation in self.evaluation_library.n_best(self._use_top_n_only):
+                predictions = evaluation.predictions
                 if self._prediction_transformation:
-                    evaluation.predictions = self._prediction_transformation(
-                        evaluation.predictions
-                    )
+                    predictions = self._prediction_transformation(predictions)
                 if self._prediction_sample:
-                    evaluation.predictions = evaluation.predictions[
-                        self._prediction_sample
-                    ]
+                    predictions = predictions[self._prediction_sample]
                 self._model_library.append(
                     Model(
                         evaluation.individual.pipeline_str(),
                         evaluation.individual,
                         evaluation.estimators,
-                        evaluation.predictions,
+                        predictions,
                         evaluation.score,
                     )
                 )
