@@ -7,6 +7,7 @@ import os
 import random
 import subprocess
 import time
+import uuid
 from typing import (
     Union,
     Tuple,
@@ -90,7 +91,7 @@ class Gama(ABC):
         keep_analysis_log: Optional[str] = "gama.log",
         search_method: BaseSearch = AsyncEA(),
         post_processing_method: BasePostProcessing = BestFitPostProcessing(),
-        cache: str = "cache",
+        cache: Optional[str] = None,
     ):
         """
 
@@ -147,8 +148,9 @@ class Gama(ABC):
             Post-processing method to create a model after the search phase.
             Should be an instantiated subclass of BasePostProcessing.
 
-        cache: str (default="cache")
+        cache: str, optional (default=None)
             Directory to use to save intermediate results during search.
+            If set to None, generate a unique cache name.
         """
         register_stream_log(verbosity)
         if keep_analysis_log is not None:
@@ -209,6 +211,8 @@ class Gama(ABC):
         self._final_pop: List[Individual] = []
 
         self._subscribers: Dict[str, List[Callable]] = defaultdict(list)
+        if not cache:
+            cache = f"cache_{str(uuid.uuid4())}"
         if isinstance(post_processing_method, EnsemblePostProcessing):
             self._evaluation_library = EvaluationLibrary(
                 m=post_processing_method.hyperparameters["max_models"],
