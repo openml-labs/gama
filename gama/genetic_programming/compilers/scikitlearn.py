@@ -184,7 +184,7 @@ def evaluate_pipeline(
                 type(e),
                 e,
             )
-            return prediction, scores, None, e
+            return prediction, scores, estimators, e
 
     if c_mgr.state == c_mgr.INTERRUPTED:
         # A TimeoutException was raised, but not by the context manager.
@@ -200,6 +200,7 @@ def evaluate_pipeline(
             logger, TOKENS.EVALUATION_TIMEOUT, start_datetime, single_line_pipeline
         )
         logger.debug(f"Timeout after {timeout}s: {pipeline}")
+        return prediction, scores, estimators, stopit.TimeoutException()
 
     return prediction, tuple(scores), estimators, None
 
@@ -247,7 +248,7 @@ def evaluate_individual(
 
     with Stopwatch() as wall_time, Stopwatch(time.process_time) as process_time:
         evaluation = evaluate_pipeline(individual.pipeline, timeout=timeout, **kwargs)
-        result.predictions, result.score, result.estimators, result.error = evaluation
+        result._predictions, result.score, result._estimators, result.error = evaluation
     result.duration = wall_time.elapsed_time
 
     if add_length_to_score:

@@ -7,6 +7,7 @@ import os
 import random
 import subprocess
 import time
+import uuid
 from typing import (
     Union,
     Tuple,
@@ -90,6 +91,7 @@ class Gama(ABC):
         keep_analysis_log: Optional[str] = "gama.log",
         search_method: BaseSearch = AsyncEA(),
         post_processing_method: BasePostProcessing = BestFitPostProcessing(),
+        cache: Optional[str] = None,
     ):
         """
 
@@ -145,6 +147,10 @@ class Gama(ABC):
         post_processing_method: BasePostProcessing (default=BestFitPostProcessing())
             Post-processing method to create a model after the search phase.
             Should be an instantiated subclass of BasePostProcessing.
+
+        cache: str, optional (default=None)
+            Directory to use to save intermediate results during search.
+            If set to None, generate a unique cache name.
         """
         register_stream_log(verbosity)
         if keep_analysis_log is not None:
@@ -205,14 +211,17 @@ class Gama(ABC):
         self._final_pop: List[Individual] = []
 
         self._subscribers: Dict[str, List[Callable]] = defaultdict(list)
+        if not cache:
+            cache = f"cache_{str(uuid.uuid4())}"
         if isinstance(post_processing_method, EnsemblePostProcessing):
             self._evaluation_library = EvaluationLibrary(
                 m=post_processing_method.hyperparameters["max_models"],
                 n=post_processing_method.hyperparameters["hillclimb_size"],
+                cache_directory=cache,
             )
         else:
             # Don't keep memory-heavy evaluation meta-data (predictions, estimators)
-            self._evaluation_library = EvaluationLibrary(m=0)
+            self._evaluation_library = EvaluationLibrary(m=0, cache_directory=cache)
         self.evaluation_completed(self._evaluation_library.save_evaluation)
 
         self._pset, parameter_checks = pset_from_config(config)
@@ -418,6 +427,32 @@ class Gama(ABC):
                 compile_individual, preprocessing_steps=self._fixed_pipeline_extension
             )
 
+            store_pipelines = (
+                self._evaluation_library._m is None or self._evaluation_library._m > 0
+            )
+            if store_pipelines and self._x.shape[0] * self._x.shape[1] > 6_000_000:
+                # if m > 0, we are storing models for each evaluation. For this size
+                # KNN will create models of about 76Mb in size, which is too big, so
+                # we exclude it from search:
+                log.info("Excluding KNN from search because the dataset is too big.")
+                from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+
+                self._pset["prediction"] = [
+                    p
+                    for p in self._pset["prediction"]
+                    if p.identifier not in [KNeighborsClassifier, KNeighborsRegressor]
+                ]
+
+            if store_pipelines and self._x.shape[1] > 50:
+                log.info("Data has too many features to include PolynomialFeatures")
+                from sklearn.preprocessing import PolynomialFeatures
+
+                self._pset["data"] = [
+                    p
+                    for p in self._pset["data"]
+                    if p.identifier not in [PolynomialFeatures]
+                ]
+
         fit_time = int(
             (1 - self._post_processing.time_fraction)
             * self._time_manager.total_time_remaining
@@ -450,6 +485,7 @@ class Gama(ABC):
                 self._time_manager.total_time_remaining,
                 best_individuals,
             )
+        self._evaluation_library.clear_cache()
 
     def _search_phase(self, warm_start: bool = False, timeout: float = 1e6):
         """ Invoke the search algorithm, populate `final_pop`. """
@@ -468,9 +504,11 @@ class Gama(ABC):
             y_train=self._y,
             metrics=self._metrics,
         )
+        AsyncEvaluator.defaults = dict(evaluate_pipeline=evaluate_pipeline)
+
         self._operator_set.evaluate = partial(
             gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
-            evaluate_pipeline=evaluate_pipeline,
+            # evaluate_pipeline=evaluate_pipeline,
             timeout=self._max_eval_time,
             deadline=deadline,
             add_length_to_score=self._regularize_length,

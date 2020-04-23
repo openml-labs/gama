@@ -2,6 +2,8 @@ import datetime
 import heapq
 import logging
 from typing import Tuple, List, Optional, Union, Dict
+import pickle
+import os
 
 import numpy as np
 import pandas as pd
@@ -15,16 +17,6 @@ log = logging.getLogger(__name__)
 class Evaluation:
     """ Record relevant evaluation data of an individual. """
 
-    __slots__ = [
-        "individual",
-        "score",
-        "predictions",
-        "estimators",
-        "start_time",
-        "duration",
-        "error",
-    ]
-
     def __init__(
         self,
         individual: Individual,
@@ -37,14 +29,43 @@ class Evaluation:
     ):
         self.individual: Individual = individual
         self.score = score
-        self.estimators: Optional[List] = [] if estimators is None else estimators
+        self._estimators: Optional[List] = [] if estimators is None else estimators
         self.start_time = start_time
         self.duration = duration
         self.error = error
+        self._cache_file = None
 
         if isinstance(predictions, (pd.Series, pd.DataFrame)):
             predictions = predictions.values
-        self.predictions: Optional[np.ndarray] = predictions
+        self._predictions: Optional[np.ndarray] = predictions
+
+    def to_disk(self, directory):
+        self._cache_file = os.path.join(directory, str(self.individual._id) + ".pkl")
+        with open(self._cache_file, "wb") as fh:
+            pickle.dump((self._estimators, self._predictions), fh)
+        self._estimators, self._predictions = [], None
+
+    def remove_from_disk(self):
+        os.remove(os.path.join(self._cache_file))
+        self._cache_file = None
+
+    @property
+    def estimators(self):
+        if self._estimators or not self._cache_file:
+            return self._estimators
+        else:
+            with open(self._cache_file, "rb") as fh:
+                estimators, _ = pickle.load(fh)
+                return estimators
+
+    @property
+    def predictions(self):
+        if self._predictions is not None or not self._cache_file:
+            return self._predictions
+        else:
+            with open(self._cache_file, "rb") as fh:
+                _, predictions = pickle.load(fh)
+                return predictions
 
     # Is there a better way to do this?
     # Assignment in __init__ is not preferred even if it saves lines.
@@ -91,6 +112,7 @@ class EvaluationLibrary:
         m: Optional[int] = 200,
         n: Optional[int] = 10_000,
         sample: Optional[np.ndarray] = None,
+        cache_directory: str = "cache",
     ):
         """ Create an EvaluationLibrary for in-memory record of evaluations.
 
@@ -110,12 +132,19 @@ class EvaluationLibrary:
         sample: np.ndarray, optional (default=None)
             Instead of storing all predictions of the 'top m' evaluations,
             store only those with indices specified in this array.
+        cache_directory: str (default="cache")
+            Directory to save evaluations to.
+            For large datasets or a big number of models,
+            this can lead to memory issues.
         """
         self.top_evaluations: List[Evaluation] = []
         self.other_evaluations: List[Evaluation] = []
         self._m = m
         self._sample_n = n
         self.lookup: Dict[str, Evaluation] = {}
+        self._cache = os.path.expandvars(cache_directory)
+        if not os.path.exists(self._cache):
+            os.mkdir(self._cache)
 
         def main_node_str(e: Evaluation):
             return str(e.individual.main_node)
@@ -185,7 +214,7 @@ class EvaluationLibrary:
     def _process_predictions(self, evaluation: Evaluation):
         """ Downsample evaluation predictions if required. """
         if self._sample_n == 0:
-            evaluation.predictions = None
+            evaluation._predictions = None
         if evaluation.predictions is None:
             return  # Predictions either not provided or removed because sample_n is 0.
 
@@ -194,32 +223,42 @@ class EvaluationLibrary:
             self.determine_sample_indices(self._sample_n, len(evaluation.predictions))
 
         if self._sample is not None:
-            evaluation.predictions = evaluation.predictions[self._sample]
+            evaluation._predictions = evaluation.predictions[self._sample]
 
     def save_evaluation(self, evaluation: Evaluation) -> None:
         self._process_predictions(evaluation)
 
         if evaluation.error is not None:
+            evaluation._estimators, evaluation._predictions = None, None
             self.other_evaluations.append(evaluation)
         elif self._m is None or self._m > len(self.top_evaluations):
+            evaluation.to_disk(self._cache)
             heapq.heappush(self.top_evaluations, evaluation)
         else:
             removed = heapq.heappushpop(self.top_evaluations, evaluation)
-            removed.predictions, removed.estimators = None, None
+            if removed == evaluation:
+                # new evaluation is not in heap, big memory items may be discarded
+                removed._predictions, removed._estimators = None, None
+            else:
+                # new evaluation is now on the heap, remove old from disk
+                evaluation.to_disk(self._cache)
+                removed.remove_from_disk()
+
             self.other_evaluations.append(removed)
 
         self.lookup[self._lookup_key(evaluation)] = evaluation
 
-    def n_best(self, n: int = 5) -> List[Evaluation]:
+    def clear_cache(self):
+        for file in os.listdir(self._cache):
+            os.remove(os.path.join(self._cache, file))
+        os.rmdir(self._cache)
+
+    def n_best(self, n: int = 5, with_pipelines=True) -> List[Evaluation]:
         """ Return the best `n` pipelines.
 
         Slower if `n` exceeds `m` given on initialization.
         """
-        if self._m is None or n <= self._m:
-            return [
-                e
-                for e in heapq.nlargest(n, self.top_evaluations)
-                if e.predictions is not None
-            ]
+        if self._m is None or n <= self._m or with_pipelines:
+            return heapq.nlargest(n, self.top_evaluations)
         else:
             return list(reversed(sorted(self.evaluations)))[:n]

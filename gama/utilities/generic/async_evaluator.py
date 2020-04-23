@@ -14,13 +14,24 @@ but it has issues:
       Though that does not hinder the execution of the program,
       I don't want errors for expected behavior.
 """
+import datetime
 import logging
 import multiprocessing
+import os
 import queue
 import time
 import traceback
 import uuid
 from typing import Optional, Callable, Dict, List
+
+try:
+    import resource
+except ModuleNotFoundError:
+    resource = None  # type: ignore
+
+import psutil
+
+from gama.logging import MACHINE_LOG_LEVEL
 
 log = logging.getLogger(__name__)
 
@@ -37,10 +48,12 @@ class AsyncFuture:
         self.exception = None
         self.traceback = None
 
-    def execute(self):
+    def execute(self, extra_kwargs):
         """ Execute the function call `fn(*args, **kwargs)` and record results. """
         try:
-            self.result = self.fn(*self.args, **self.kwargs)
+            # Don't update self.kwargs, as it will be pickled back to the main process
+            kwargs = {**self.kwargs, **extra_kwargs}
+            self.result = self.fn(*self.args, **kwargs)
         except Exception as e:
             self.exception = e
             self.traceback = traceback.format_exc()
@@ -51,11 +64,25 @@ class AsyncEvaluator:
 
     The function and all its arguments must be picklable.
     Using the same AsyncEvaluator in two different contexts raises a `RuntimeError`.
+
+    class variables:
+    n_jobs: int (default=multiprocessing.cpu_count())
+        The default number of subprocesses to spawn.
+        Ignored if the `n_workers` parameter is specified on init.
+    defaults: Dict, optional (default=None)
+        Default parameter values shared between all submit calls.
+        This allows these defaults to be transferred only once per process,
+        instead of twice per call (to and from the subprocess).
+        Only supports keyword arguments.
     """
 
     n_jobs: int = multiprocessing.cpu_count()
+    memory_limit_mb: int = 6000
+    defaults: Dict = {}
 
-    def __init__(self, n_workers: Optional[int] = None):
+    def __init__(
+        self, n_workers: Optional[int] = None,
+    ):
         """
         Parameters
         ----------
@@ -65,12 +92,14 @@ class AsyncEvaluator:
         """
         self._has_entered = False
         self.futures: Dict[uuid.UUID, AsyncFuture] = {}
-        self._processes: List[multiprocessing.Process] = []
+        self._processes: List[psutil.Process] = []
         self._n_jobs = n_workers if n_workers is not None else AsyncEvaluator.n_jobs
 
         self._queue_manager = multiprocessing.Manager()
-        self._input_queue = self._queue_manager.Queue()
-        self._output_queue = self._queue_manager.Queue()
+        self._input = self._queue_manager.Queue()
+        self._output = self._queue_manager.Queue()
+        pid = os.getpid()
+        self._main_process = psutil.Process(pid)
 
     def __enter__(self):
         if self._has_entered:
@@ -79,18 +108,26 @@ class AsyncEvaluator:
             )
         self._has_entered = True
 
-        self._input_queue = self._queue_manager.Queue()
-        self._output_queue = self._queue_manager.Queue()
+        self._input = self._queue_manager.Queue()
+        self._output = self._queue_manager.Queue()
 
-        log.debug(f"Starting {self._n_jobs} subprocesses.")
+        log.debug(
+            f"Process {self._main_process.pid} starting {self._n_jobs} subprocesses."
+        )
         for _ in range(self._n_jobs):
-            subprocess = multiprocessing.Process(
+            mp_process = multiprocessing.Process(
                 target=evaluator_daemon,
-                args=(self._input_queue, self._output_queue),
+                args=(self._input, self._output, AsyncEvaluator.defaults),
                 daemon=True,
             )
+            mp_process.start()
+
+            subprocess = psutil.Process(mp_process.pid)
             self._processes.append(subprocess)
-            subprocess.start()
+
+            if resource and AsyncEvaluator.memory_limit_mb:
+                limit = AsyncEvaluator.memory_limit_mb * (2 ** 20)
+                resource.prlimit(subprocess.pid, resource.RLIMIT_AS, (limit, limit))
 
         return self
 
@@ -100,7 +137,10 @@ class AsyncEvaluator:
         # It is in direct conflict with guidelines:
         # https://docs.python.org/3/library/multiprocessing.html#all-start-methods
         for subprocess in self._processes:
-            subprocess.terminate()
+            try:
+                subprocess.terminate()
+            except psutil.NoSuchProcess:
+                log.debug(f"Daemon {subprocess.pid} stopped prematurely.")
         return False
 
     def submit(self, fn: Callable, *args, **kwargs) -> AsyncFuture:
@@ -123,7 +163,7 @@ class AsyncEvaluator:
         """
         future = AsyncFuture(fn, *args, **kwargs)
         self.futures[future.id] = future
-        self._input_queue.put(future)
+        self._input.put(future)
         return future
 
     def wait_next(self, poll_time: float = 0.05) -> AsyncFuture:
@@ -150,21 +190,31 @@ class AsyncEvaluator:
 
         while True:
             try:
-                completed_future = self._output_queue.get(block=False)
+                completed_future = self._output.get(block=False)
                 match = self.futures.pop(completed_future.id)
                 match.result, match.exception, match.traceback = (
                     completed_future.result,
                     completed_future.exception,
                     completed_future.traceback,
                 )
+                self._log_memory_usage()
                 return match
             except queue.Empty:
                 time.sleep(poll_time)
                 continue
 
+    def _log_memory_usage(self):
+        processes = [self._main_process] + self._processes
+        mem_by_pid = [(p.pid, p.memory_info()[0] / (2 ** 20)) for p in processes]
+        mem_str = ",".join([f"{pid},{mem_mb}" for (pid, mem_mb) in mem_by_pid])
+        timestamp = datetime.datetime.now().isoformat()
+        log.log(MACHINE_LOG_LEVEL, f"M,{timestamp},{mem_str}")
+
 
 def evaluator_daemon(
-    input_queue: queue.Queue, output_queue: queue.Queue, print_exit_message: bool = True
+    input_queue: queue.Queue,
+    output_queue: queue.Queue,
+    default_parameters: Optional[Dict] = None,
 ):
     """ Function for daemon subprocess that evaluates functions from AsyncFutures.
 
@@ -176,18 +226,30 @@ def evaluator_daemon(
     output_queue: queue.Queue[AsyncFuture]
         Queue to put AsyncFuture to.
         Queue should be managed by multiprocessing.manager.
-    print_exit_message: bool (default=True)
-        If True, print to console the reason for shutting down.
-        If False, shut down silently.
+    default_parameters: Dict, optional (default=None)
+        Additional parameters to pass to AsyncFuture.Execute.
+        This is useful to avoid passing lots of repetitive data through AsyncFuture.
     """
     try:
         while True:
-            future = input_queue.get()
-            future.execute()
-            output_queue.put(future)
-    except KeyboardInterrupt:
-        shutdown_message = "Helper process stopping due to keyboard interrupt."
-    except (BrokenPipeError, EOFError):
-        shutdown_message = "Helper process stopping due to a broken pipe or EOF."
-    if print_exit_message:
-        print(shutdown_message)
+            try:
+                future = input_queue.get()
+                future.execute(default_parameters)
+                if future.result:
+                    if isinstance(future.result, tuple):
+                        result = future.result[0]
+                    else:
+                        result = future.result
+                    if isinstance(result.error, MemoryError):
+                        # Can't pickle MemoryErrors. Should work around this later.
+                        result.error = "MemoryError"
+                output_queue.put(future)
+            except MemoryError:
+                future.result = None
+                future.exception = "ProcessMemoryError"
+                output_queue.put(future)
+    except Exception as e:
+        # There are no plans currently for recovering from any exception:
+        print(f"Stopping daemon:{type(e)}:{str(e)}")
+    # Not sure if required: give main process time to process log message.
+    time.sleep(5)
