@@ -1,4 +1,5 @@
 """ This module contains functions for loading data. """
+from collections import OrderedDict
 from typing import Tuple, Optional, Dict, Union, Type
 
 import arff
@@ -75,7 +76,7 @@ def load_feature_metadata_from_arff(file_path: str) -> Dict[str, str]:
     """ Load the header of the ARFF file and return the type of each attribute. """
     data_header = "@data"
     attribute_indicator = "@attribute"
-    attributes = {}
+    attributes = OrderedDict()
     with open(file_path, "r") as fh:
         line = fh.readline()
         while not line.lower().startswith(data_header):

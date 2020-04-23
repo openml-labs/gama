@@ -12,7 +12,6 @@ class Controller:
 
     def start_gama(
         self,
-        n_clicks,
         metric,
         regularize,
         n_jobs,
@@ -22,6 +21,7 @@ class Controller:
         max_eval_time_m,
         input_file,
         log_file,
+        target,
     ):
         # For some reason, 0 input registers as None.
         max_total_time_h = 0 if max_total_time_h is None else max_total_time_h
@@ -32,7 +32,7 @@ class Controller:
         max_eval_time = max_eval_time_h * 60 + max_eval_time_m
         command = (
             f'gama "{input_file}" -v -n {n_jobs} -t {max_total_time} '
-            f"--time_pipeline {max_eval_time} -log {log_file}"
+            f'--time_pipeline {max_eval_time} -log {log_file} --target "{target}"'
         )
         if regularize != "on":
             command += " --long"
