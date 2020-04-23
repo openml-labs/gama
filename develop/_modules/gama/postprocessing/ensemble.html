@@ -370,20 +370,17 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_library</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_model_library</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">evaluation</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluation_library</span><span class="o">.</span><span class="n">n_best</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_top_n_only</span><span class="p">):</span>
+                <span class="n">predictions</span> <span class="o">=</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">predictions</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_transformation</span><span class="p">:</span>
-                    <span class="n">evaluation</span><span class="o">.</span><span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_transformation</span><span class="p">(</span>
-                        <span class="n">evaluation</span><span class="o">.</span><span class="n">predictions</span>
-                    <span class="p">)</span>
+                    <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_transformation</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_sample</span><span class="p">:</span>
-                    <span class="n">evaluation</span><span class="o">.</span><span class="n">predictions</span> <span class="o">=</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">predictions</span><span class="p">[</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_sample</span>
-                    <span class="p">]</span>
+                    <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_prediction_sample</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_model_library</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">Model</span><span class="p">(</span>
                         <span class="n">evaluation</span><span class="o">.</span><span class="n">individual</span><span class="o">.</span><span class="n">pipeline_str</span><span class="p">(),</span>
                         <span class="n">evaluation</span><span class="o">.</span><span class="n">individual</span><span class="p">,</span>
                         <span class="n">evaluation</span><span class="o">.</span><span class="n">estimators</span><span class="p">,</span>
-                        <span class="n">evaluation</span><span class="o">.</span><span class="n">predictions</span><span class="p">,</span>
+                        <span class="n">predictions</span><span class="p">,</span>
                         <span class="n">evaluation</span><span class="o">.</span><span class="n">score</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="p">)</span>

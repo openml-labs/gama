@@ -168,13 +168,24 @@
 <span class="sd">      Though that does not hinder the execution of the program,</span>
 <span class="sd">      I don&#39;t want errors for expected behavior.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">queue</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">uuid</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">resource</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="n">resource</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">import</span> <span class="nn">psutil</span>
+
+<span class="kn">from</span> <span class="nn">gama.logging</span> <span class="kn">import</span> <span class="n">MACHINE_LOG_LEVEL</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -191,10 +202,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">traceback</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Execute the function call `fn(*args, **kwargs)` and record results. &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="c1"># Don&#39;t update self.kwargs, as it will be pickled back to the main process</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">extra_kwargs</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="n">e</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">traceback</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
@@ -205,11 +218,25 @@
 
 <span class="sd">    The function and all its arguments must be picklable.</span>
 <span class="sd">    Using the same AsyncEvaluator in two different contexts raises a `RuntimeError`.</span>
+
+<span class="sd">    class variables:</span>
+<span class="sd">    n_jobs: int (default=multiprocessing.cpu_count())</span>
+<span class="sd">        The default number of subprocesses to spawn.</span>
+<span class="sd">        Ignored if the `n_workers` parameter is specified on init.</span>
+<span class="sd">    defaults: Dict, optional (default=None)</span>
+<span class="sd">        Default parameter values shared between all submit calls.</span>
+<span class="sd">        This allows these defaults to be transferred only once per process,</span>
+<span class="sd">        instead of twice per call (to and from the subprocess).</span>
+<span class="sd">        Only supports keyword arguments.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+    <span class="n">memory_limit_mb</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6000</span>
+    <span class="n">defaults</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_workers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">n_workers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -219,12 +246,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_has_entered</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">,</span> <span class="n">AsyncFuture</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_processes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_processes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">=</span> <span class="n">n_workers</span> <span class="k">if</span> <span class="n">n_workers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">AsyncEvaluator</span><span class="o">.</span><span class="n">n_jobs</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_queue_manager</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_input_queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_queue_manager</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_output_queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_queue_manager</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_queue_manager</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_queue_manager</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_main_process</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_entered</span><span class="p">:</span>
@@ -233,18 +262,26 @@
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_has_entered</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_input_queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_queue_manager</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_output_queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_queue_manager</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_queue_manager</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_queue_manager</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
 
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span><span class="si">}</span><span class="s2"> subprocesses.&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Process </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_main_process</span><span class="o">.</span><span class="n">pid</span><span class="si">}</span><span class="s2"> starting </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span><span class="si">}</span><span class="s2"> subprocesses.&quot;</span>
+        <span class="p">)</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span><span class="p">):</span>
-            <span class="n">subprocess</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span>
+            <span class="n">mp_process</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span>
                 <span class="n">target</span><span class="o">=</span><span class="n">evaluator_daemon</span><span class="p">,</span>
-                <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_queue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_queue</span><span class="p">),</span>
+                <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output</span><span class="p">,</span> <span class="n">AsyncEvaluator</span><span class="o">.</span><span class="n">defaults</span><span class="p">),</span>
                 <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="n">mp_process</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+            <span class="n">subprocess</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">mp_process</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_processes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subprocess</span><span class="p">)</span>
-            <span class="n">subprocess</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">resource</span> <span class="ow">and</span> <span class="n">AsyncEvaluator</span><span class="o">.</span><span class="n">memory_limit_mb</span><span class="p">:</span>
+                <span class="n">limit</span> <span class="o">=</span> <span class="n">AsyncEvaluator</span><span class="o">.</span><span class="n">memory_limit_mb</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">20</span><span class="p">)</span>
+                <span class="n">resource</span><span class="o">.</span><span class="n">prlimit</span><span class="p">(</span><span class="n">subprocess</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">resource</span><span class="o">.</span><span class="n">RLIMIT_AS</span><span class="p">,</span> <span class="p">(</span><span class="n">limit</span><span class="p">,</span> <span class="n">limit</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="bp">self</span>
 
@@ -254,7 +291,10 @@
         <span class="c1"># It is in direct conflict with guidelines:</span>
         <span class="c1"># https://docs.python.org/3/library/multiprocessing.html#all-start-methods</span>
         <span class="k">for</span> <span class="n">subprocess</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processes</span><span class="p">:</span>
-            <span class="n">subprocess</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">subprocess</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">psutil</span><span class="o">.</span><span class="n">NoSuchProcess</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Daemon </span><span class="si">{</span><span class="n">subprocess</span><span class="o">.</span><span class="n">pid</span><span class="si">}</span><span class="s2"> stopped prematurely.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncFuture</span><span class="p">:</span>
@@ -277,7 +317,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">future</span> <span class="o">=</span> <span class="n">AsyncFuture</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">[</span><span class="n">future</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">future</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_input_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">future</span>
 
     <span class="k">def</span> <span class="nf">wait_next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">poll_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncFuture</span><span class="p">:</span>
@@ -304,21 +344,31 @@
 
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">completed_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_queue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">completed_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                 <span class="n">match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">completed_future</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
                 <span class="n">match</span><span class="o">.</span><span class="n">result</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">exception</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">traceback</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">completed_future</span><span class="o">.</span><span class="n">result</span><span class="p">,</span>
                     <span class="n">completed_future</span><span class="o">.</span><span class="n">exception</span><span class="p">,</span>
                     <span class="n">completed_future</span><span class="o">.</span><span class="n">traceback</span><span class="p">,</span>
                 <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_log_memory_usage</span><span class="p">()</span>
                 <span class="k">return</span> <span class="n">match</span>
             <span class="k">except</span> <span class="n">queue</span><span class="o">.</span><span class="n">Empty</span><span class="p">:</span>
                 <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">poll_time</span><span class="p">)</span>
-                <span class="k">continue</span></div>
+                <span class="k">continue</span>
+
+    <span class="k">def</span> <span class="nf">_log_memory_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">processes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_main_process</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processes</span>
+        <span class="n">mem_by_pid</span> <span class="o">=</span> <span class="p">[(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">memory_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">20</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">processes</span><span class="p">]</span>
+        <span class="n">mem_str</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">mem_mb</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">mem_mb</span><span class="p">)</span> <span class="ow">in</span> <span class="n">mem_by_pid</span><span class="p">])</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">MACHINE_LOG_LEVEL</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;M,</span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">mem_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">evaluator_daemon</span><span class="p">(</span>
-    <span class="n">input_queue</span><span class="p">:</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">,</span> <span class="n">output_queue</span><span class="p">:</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">,</span> <span class="n">print_exit_message</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">input_queue</span><span class="p">:</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">,</span>
+    <span class="n">output_queue</span><span class="p">:</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">,</span>
+    <span class="n">default_parameters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Function for daemon subprocess that evaluates functions from AsyncFutures.</span>
 
@@ -330,21 +380,33 @@
 <span class="sd">    output_queue: queue.Queue[AsyncFuture]</span>
 <span class="sd">        Queue to put AsyncFuture to.</span>
 <span class="sd">        Queue should be managed by multiprocessing.manager.</span>
-<span class="sd">    print_exit_message: bool (default=True)</span>
-<span class="sd">        If True, print to console the reason for shutting down.</span>
-<span class="sd">        If False, shut down silently.</span>
+<span class="sd">    default_parameters: Dict, optional (default=None)</span>
+<span class="sd">        Additional parameters to pass to AsyncFuture.Execute.</span>
+<span class="sd">        This is useful to avoid passing lots of repetitive data through AsyncFuture.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">future</span> <span class="o">=</span> <span class="n">input_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-            <span class="n">future</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
-            <span class="n">output_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-        <span class="n">shutdown_message</span> <span class="o">=</span> <span class="s2">&quot;Helper process stopping due to keyboard interrupt.&quot;</span>
-    <span class="k">except</span> <span class="p">(</span><span class="ne">BrokenPipeError</span><span class="p">,</span> <span class="ne">EOFError</span><span class="p">):</span>
-        <span class="n">shutdown_message</span> <span class="o">=</span> <span class="s2">&quot;Helper process stopping due to a broken pipe or EOF.&quot;</span>
-    <span class="k">if</span> <span class="n">print_exit_message</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">shutdown_message</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">future</span> <span class="o">=</span> <span class="n">input_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                <span class="n">future</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">default_parameters</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                        <span class="n">result</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">result</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="ne">MemoryError</span><span class="p">):</span>
+                        <span class="c1"># Can&#39;t pickle MemoryErrors. Should work around this later.</span>
+                        <span class="n">result</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;MemoryError&quot;</span>
+                <span class="n">output_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">MemoryError</span><span class="p">:</span>
+                <span class="n">future</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">future</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="s2">&quot;ProcessMemoryError&quot;</span>
+                <span class="n">output_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c1"># There are no plans currently for recovering from any exception:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stopping daemon:</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Not sure if required: give main process time to process log message.</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
 
            </div>

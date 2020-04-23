@@ -244,6 +244,8 @@ If <code class="code docutils literal notranslate"><span class="pre">None</span>
 <li><p><strong>search_method</strong> (<a class="reference internal" href="#gama.search_methods.base_search.BaseSearch" title="gama.search_methods.base_search.BaseSearch"><em>BaseSearch</em></a><em> (</em><em>default=AsyncEA</em><em>(</em><em>)</em><em>)</em>) – Search method to use to find good pipelines. Should be instantiated.</p></li>
 <li><p><strong>post_processing_method</strong> (<a class="reference internal" href="#gama.postprocessing.BasePostProcessing" title="gama.postprocessing.BasePostProcessing"><em>BasePostProcessing</em></a><em> (</em><em>default=BestFitPostProcessing</em><em>(</em><em>)</em><em>)</em>) – Post-processing method to create a model after the search phase.
 Should be an instantiated subclass of BasePostProcessing.</p></li>
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Directory to use to save intermediate results during search.
+If set to None, generate a unique cache name.</p></li>
 </ul>
 </dd>
 </dl>
@@ -855,6 +857,19 @@ jobs while they were running.</p>
 <dd><p>Manages subprocesses on which arbitrary functions can be evaluated.</p>
 <p>The function and all its arguments must be picklable.
 Using the same AsyncEvaluator in two different contexts raises a <code class="code docutils literal notranslate"><span class="pre">RuntimeError</span></code>.</p>
+<p>class variables:
+n_jobs: int (default=multiprocessing.cpu_count())</p>
+<blockquote>
+<div><p>The default number of subprocesses to spawn.
+Ignored if the <code class="code docutils literal notranslate"><span class="pre">n_workers</span></code> parameter is specified on init.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>defaults: Dict, optional (default=None)</dt><dd><p>Default parameter values shared between all submit calls.
+This allows these defaults to be transferred only once per process,
+instead of twice per call (to and from the subprocess).
+Only supports keyword arguments.</p>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>n_workers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Maximum number of subprocesses to run for parallel evaluations.
