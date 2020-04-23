@@ -23,6 +23,7 @@ import time
 import traceback
 import uuid
 from typing import Optional, Callable, Dict, List
+import gc
 
 try:
     import resource
@@ -243,10 +244,12 @@ def evaluator_daemon(
                     if isinstance(result.error, MemoryError):
                         # Can't pickle MemoryErrors. Should work around this later.
                         result.error = "MemoryError"
+                        gc.collect()
                 output_queue.put(future)
             except MemoryError:
                 future.result = None
                 future.exception = "ProcessMemoryError"
+                gc.collect()
                 output_queue.put(future)
     except Exception as e:
         # There are no plans currently for recovering from any exception:
