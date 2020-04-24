@@ -15,8 +15,7 @@ You can install them with::
 where `OPTIONAL` is one of:
 
  - `vis`: allows you to use the prototype dash app to visualize optimization traces.
- - `test`: to run GAMA's unit tests locally.
- - `doc`: to build docs locally.
+ - `dev`: sets up all required dependencies for development of GAMA.
  - `all`: all of the above.
 
 To see exactly what dependencies will be installed, see `setup.py <https://github.com/PGijsbers/gama/blob/master/setup.py>`_.

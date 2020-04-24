@@ -3,7 +3,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from gama import GamaRegressor
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     X, y = load_boston(return_X_y=True)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
 
@@ -13,4 +13,4 @@ if __name__ == '__main__':
 
     predictions = automl.predict(X_test)
 
-    print('MSE:', mean_squared_error(y_test, predictions))
+    print("MSE:", mean_squared_error(y_test, predictions))

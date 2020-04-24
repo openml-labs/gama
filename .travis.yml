@@ -2,15 +2,34 @@ language: python
 python:
   - "3.6"
   - "3.7"
-
 env:
-  - TEST_SUITE=unit
-  - TEST_SUITE=system
+  - JOB=test SUITE=unit
+  - JOB=test SUITE=system
+
+# - perform pre-commit checks only once
+# - perform doc build only on commit to develop or master
+jobs:
+  include:
+  - env: JOB=check
+  - env: JOB=deploy
+    if: (branch = master OR branch = develop) AND type = push
 
 install:
-  - pip install -e .[test]
+  - ./ci_scripts/install.sh
 script:
-  - pip list
-  - pytest --cov=gama -sv -n 4 tests/$TEST_SUITE/
+  - ./ci_scripts/script.sh
 after_success:
- - bash <(curl -s https://codecov.io/bash)
+ - ./ci_scripts/after_success.sh
+
+before_deploy:
+ - ./ci_scripts/build_docs.sh
+deploy:
+  provider: pages
+  token: $GITHUB_TOKEN
+  edge: true
+  local_dir: docs/build
+  keep_history: true
+  skip_cleanup: true
+  on:
+    all_branches: true
+    condition: $JOB = deploy

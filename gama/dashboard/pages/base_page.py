@@ -2,8 +2,7 @@ import abc
 
 
 class BasePage(abc.ABC):
-
-    def __init__(self, name: str, alignment: int):
+    def __init__(self, name: str, alignment: int, starts_hidden: bool = False):
         """ Defines the basic behavior of a page.
 
         Parameters
@@ -16,8 +15,12 @@ class BasePage(abc.ABC):
             Positive numbers are aligned to the left, negative to the right.
             Within the groups, bigger numbers are placed to the right.
             E.g.: [0][1][2] ... [-2][-1]
+
+        starts_hidden: bool (default=False)
+            If True, the tab is hidden by default as must be turned visible explicitly.
         """
         self.name = name
+        self.starts_hidden = starts_hidden
         self.alignment = alignment
         self.need_update = False
         self._content = None

@@ -9,6 +9,7 @@ The example script can be run by using e.g.
 `breast_cancer_train.arff <https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_train.arff>`_ and
 `breast_cancer_test.arff <https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_test.arff>`_.
 The target should always be specified as the last column.
+Make sure you adjust the file path if not executed from the examples directory.
 
 
 .. file below is copied in by conf.py
@@ -21,5 +22,6 @@ When supplying only numpy-arrays (e.g. through ``fit(X, y)``), GAMA can not know
 This means that GAMA might use a wrong feature transformation for the data (e.g. one-hot encoding on a numeric feature or scaling on a categorical feature).
 Note that this is not unique to GAMA, but any framework which accepts numeric input without meta-data.
 
-Unfortunately the ``date`` and ``string`` formats the ARFF file allows is not (fully) supported in GAMA yet,
-for the latest news, see `issue#2 <https://github.com/PGijsbers/gama/issues/2>`_.
+.. note::
+    Unfortunately the ``date`` and ``string`` formats the ARFF file allows is not (fully) supported in GAMA yet,
+    for the latest news, see `issue#2 <https://github.com/PGijsbers/gama/issues/2>`_.
