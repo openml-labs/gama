@@ -1,17 +1,22 @@
 Release Notes
 =============
 
-
-Version 20.1.1
+Version 20.2.0
 --------------
 Features:
  # 70: Exported code is now auto-formatted with Black.
+ - The Dashboard now has an Analysis tab that allows you to load old log files.
+ - The Dashboard Home tab allows you to view the data set.
+ - The Dashboard Home tab allows you to select a target column.
+ - Pipelines and estimators are now cached on disk again.
+ - KNN and PolynomialFeatures are now dynamically disabled based on dataset size.
 
 Maintenance:
  - Docs are automatically built and deployed on a commit to master and develop.
  - Pre-commit configuration added to check formatting, style and type hints on commit.
  - Black codestyle adapted, most drastic change is line length from 120 to 88.
  - Coverage increased by removing unused code, updating configuration, adding tests.
+ - Memory usage of all GAMA's processes is logged.
 
 Version 20.1.0
 --------------

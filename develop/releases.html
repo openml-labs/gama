@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Release Notes &mdash; gama 20.1.0 documentation</title>
+  <title>Release Notes &mdash; gama 20.2.0 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                20.1.0
+                20.2.0
               </div>
             
           
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="technical_guide/index.html">Technical Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Release Notes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#version-20-1-1">Version 20.1.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-20-2-0">Version 20.2.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-20-1-0">Version 20.1.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-20-0-0">Version 20.0.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-19-11-2">Version 19.11.2</a></li>
@@ -167,16 +167,22 @@
             
   <div class="section" id="release-notes">
 <h1>Release Notes<a class="headerlink" href="#release-notes" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="version-20-1-1">
-<h2>Version 20.1.1<a class="headerlink" href="#version-20-1-1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="version-20-2-0">
+<h2>Version 20.2.0<a class="headerlink" href="#version-20-2-0" title="Permalink to this headline">¶</a></h2>
 <dl class="simple">
-<dt>Features:</dt><dd><p># 70: Exported code is now auto-formatted with Black.</p>
+<dt>Features:</dt><dd><p># 70: Exported code is now auto-formatted with Black.
+- The Dashboard now has an Analysis tab that allows you to load old log files.
+- The Dashboard Home tab allows you to view the data set.
+- The Dashboard Home tab allows you to select a target column.
+- Pipelines and estimators are now cached on disk again.
+- KNN and PolynomialFeatures are now dynamically disabled based on dataset size.</p>
 </dd>
 <dt>Maintenance:</dt><dd><ul class="simple">
 <li><p>Docs are automatically built and deployed on a commit to master and develop.</p></li>
 <li><p>Pre-commit configuration added to check formatting, style and type hints on commit.</p></li>
 <li><p>Black codestyle adapted, most drastic change is line length from 120 to 88.</p></li>
 <li><p>Coverage increased by removing unused code, updating configuration, adding tests.</p></li>
+<li><p>Memory usage of all GAMA’s processes is logged.</p></li>
 </ul>
 </dd>
 </dl>
