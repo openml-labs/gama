@@ -1,0 +1,244 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>AutoML Pipeline &mdash; gama 20.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                20.2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Technical Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>AutoML Pipeline</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/technical_guide/automl_pipeline.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="automl-pipeline">
+<h1>AutoML Pipeline<a class="headerlink" href="#automl-pipeline" title="Permalink to this headline">¶</a></h1>
+<p>An AutoML system performs several operations in its search for a model, and each of them may have several options and hyperparameters.
+An important decision is picking the search algorithm, which performs search over machine learning pipelines for your data.
+Another choice would be how to construct a model after search, e.g. by training the best pipeline or constructing an ensemble.
+Similarly to how data processing algorithms can form a <em>machine learning pipeline</em>,
+we will refer to a configuration of these AutoML components as an <em>AutoML Pipeline</em>.
+In GAMA we currently support flexibility in the AutoML pipeline in two stages: search and post-processing.</p>
+<div class="section" id="search-algorithms">
+<h2>Search Algorithms<a class="headerlink" href="#search-algorithms" title="Permalink to this headline">¶</a></h2>
+<p>The following search algorithms are available in GAMA:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Random</span> <span class="pre">Search</span></code>: Randomly pick machine learning pipelines from the search space and evaluate them.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Asynchronous</span> <span class="pre">Evolutionary</span> <span class="pre">Algorithm</span></code>: Evolve a population of machine learning pipelines, drawing new machine learning pipelines from the best of the population.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Asynchronous</span> <span class="pre">Successive</span> <span class="pre">Halving</span> <span class="pre">Algorithm</span></code>: A bandit-based approach where many machine learning pipelines iteratively get evaluated and eliminated on bigger fractions of the data.</p></li>
+</ul>
+</div>
+<div class="section" id="post-processing">
+<h2>Post-processing<a class="headerlink" href="#post-processing" title="Permalink to this headline">¶</a></h2>
+<p>The following post-processing steps are available:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: no post-processing will be done. This means no final pipeline will be trained and <cite>predict</cite> and <cite>predict_proba</cite> will be unavailable. This can be interesting if you are only interested in the search procedure.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FitBest</span></code>: fit the single best machine learning pipeline found during search.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ensemble</span></code>: create an ensemble out of evaluated machine learning pipelines. This requires more time but can lead to better results.</p></li>
+</ul>
+</div>
+<div class="section" id="configuring-the-automl-pipeline">
+<h2>Configuring the AutoML pipeline<a class="headerlink" href="#configuring-the-automl-pipeline" title="Permalink to this headline">¶</a></h2>
+<p>By default ‘prepend pipeline’, ‘Asynchronous EA’ and ‘FitBest’ are chosen for pre-processing, search and post-processing, respectively.
+However, it is easy to change this, or to change the hyperparameters with which each component is used.
+For example, searching with ‘Asynchronous Successive Halving’ and creating an ensemble during post-processing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
+<span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="kn">import</span> <span class="n">AsynchronousSuccessiveHalving</span>
+<span class="kn">from</span> <span class="nn">gama.postprocessing</span> <span class="kn">import</span> <span class="n">EnsemblePostProcessing</span>
+
+<span class="n">custom_pipeline_gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">search_method</span><span class="o">=</span><span class="n">AsynchronousSuccessiveHalving</span><span class="p">(),</span> <span class="n">post_processing_method</span><span class="o">=</span><span class="n">EnsemblePostProcessing</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>or using ‘Asynchronous EA’ but with custom hyperparameters:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
+<span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="kn">import</span> <span class="n">AsyncEA</span>
+
+<span class="n">custom_pipeline_gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">search_method</span><span class="o">=</span><span class="n">AsyncEA</span><span class="p">(</span><span class="n">population_size</span><span class="o">=</span><span class="mi">30</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, Pieter Gijsbers
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

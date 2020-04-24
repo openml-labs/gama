@@ -1,0 +1,349 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>GAMA - Genetic Automated Machine learning Assistant &mdash; gama 20.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="User Guide" href="user_guide/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                20.2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technical_guide/index.html">Technical Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>GAMA - Genetic Automated Machine learning Assistant</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="gama-genetic-automated-machine-learning-assistant">
+<h1>GAMA - Genetic Automated Machine learning Assistant<a class="headerlink" href="#gama-genetic-automated-machine-learning-assistant" title="Permalink to this headline">¶</a></h1>
+<p>GAMA is a tool for Automated Machine Learning (AutoML).
+All you need to do is supply the data, and GAMA will automatically try to find a good <em>machine learning pipeline</em>.
+For the <em>machine learning pipeline</em> GAMA considers data preprocessing steps, various machine learning algorithms, and their possible hyperparameters configurations.
+This takes away the knowledge and labour intensive work of selecting the right algorithms and tuning their hyperparameters yourself.
+Using GAMA is as simple as using a scikit-learn estimator:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
+<span class="n">automl</span> <span class="o">=</span>  <span class="n">GamaClassifier</span><span class="p">()</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can install GAMA from PyPI with pip:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">gama</span>
+</pre></div>
+</div>
+<p>Or if you would like to include the graphical frontend:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">gama</span><span class="p">[</span><span class="n">vis</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>To get more basic information on GAMA and its AutoML functionality, read more in the <a class="reference internal" href="user_guide/index.html#user-guide-index"><span class="std std-ref">User Guide</span></a>.
+If you want find out everything there is to know about GAMA, also visit the <a class="reference internal" href="technical_guide/index.html#technical-guide-index"><span class="std std-ref">Technical Guide</span></a>.
+It describes visualization of optimization logs, changing the AutoML pipeline, and more.
+If there are any questions you have that are not answered by the documentation, check the <a class="reference external" href="https://github.com/PGijsbers/GAMA/issues">issue page</a>.
+If your question has not been answered there either, please open a new issue.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/index.html">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#classification">Classification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#regression">Regression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#using-arff-files">Using ARFF files</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#simple-features">Simple Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#command-line-interface">Command Line Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#code-export">Code Export</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#dashboard">Dashboard</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#home-tab">Home tab</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#running-tab">Running tab</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#analysis-tab">Analysis tab</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#important-hyperparameters">Important Hyperparameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#optimization">Optimization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#resources">Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#related-packages">Related Packages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#tpot">TPOT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#auto-sklearn">auto-sklearn</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="technical_guide/index.html">Technical Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="technical_guide/index.html#automl-pipeline">AutoML Pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="technical_guide/index.html#search-algorithms">Search Algorithms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="technical_guide/index.html#post-processing">Post-processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="technical_guide/index.html#configuring-the-automl-pipeline">Configuring the AutoML pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="technical_guide/index.html#logging">Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="technical_guide/index.html#gama-search-space-configuration">GAMA Search Space Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="technical_guide/index.html#events">Events</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/index.html#gama">GAMA</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#gamaclassifier">GamaClassifier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#gamaregressor">GamaRegressor</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/index.html#metrics">Metrics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#metric">Metric</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#metrictype">MetricType</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/index.html#module-gama.search_methods">Search Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#asynchronoussuccessivehalving">AsynchronousSuccessiveHalving</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#asyncea">AsyncEA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#randomsearch">RandomSearch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#developer-note">Developer Note</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/index.html#module-gama.postprocessing">Post-Processing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#nopostprocessing">NoPostProcessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#bestfitpostprocessing">BestFitPostProcessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#ensemblepostprocessing">EnsemblePostProcessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#id2">Developer Note</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/index.html#genetic-programming">Genetic Programming</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#module-gama.genetic_programming.components">Components</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/index.html#individual">Individual</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/index.html#primitive">Primitive</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/index.html#primitivenode">PrimitiveNode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/index.html#terminal">Terminal</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#module-gama.genetic_programming.mutation">Mutation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#module-gama.genetic_programming.crossover">Crossover</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/index.html#visualization">Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/index.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#generic">Generic</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/index.html#pareto-front">Pareto Front</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/index.html#stopwatch">Stopwatch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/index.html#timekeeper">Timekeeper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/index.html#asyncevaluator">AsyncEvaluator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#version-20-2-0">Version 20.2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#version-20-1-0">Version 20.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#version-20-0-0">Version 20.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#version-19-11-2">Version 19.11.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#version-19-11-1">Version 19.11.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#version-19-11-0">Version 19.11.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#version-19-08-0">Version 19.08.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#version-0-1-0">Version 0.1.0</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/index.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing/index.html#github-workflow-for-your-contribution">Github workflow for your contribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/index.html#setting-up-the-development-dependencies">Setting up the development dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/index.html#running-code-tests">Running code tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/index.html#generating-documentation">Generating Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing</a></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="user_guide/index.html" class="btn btn-neutral float-right" title="User Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, Pieter Gijsbers
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

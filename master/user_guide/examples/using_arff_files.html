@@ -1,0 +1,230 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Using ARFF files &mdash; gama 20.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                20.2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technical_guide/index.html">Technical Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li>Using ARFF files</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/user_guide/examples/using_arff_files.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="using-arff-files">
+<h1>Using ARFF files<a class="headerlink" href="#using-arff-files" title="Permalink to this headline">¶</a></h1>
+<p>GAMA supports data in <a class="reference external" href="https://www.cs.waikato.ac.nz/ml/weka/arff.html">ARFF</a> files directly, utilizing extra information given, such as which features are categorical.
+In the example below, make sure to replace the file paths to the ARFF files to be used.
+The example script can be run by using e.g.
+<a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_train.arff">breast_cancer_train.arff</a> and
+<a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_test.arff">breast_cancer_test.arff</a>.
+The target should always be specified as the last column.
+Make sure you adjust the file path if not executed from the examples directory.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="s2">&quot;../tests/data/breast_cancer_</span><span class="si">{}</span><span class="s2">.arff&quot;</span>
+
+    <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">keep_analysis_log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting `fit` which will take roughly 3 minutes.&quot;</span><span class="p">)</span>
+    <span class="n">automl</span><span class="o">.</span><span class="n">fit_arff</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">))</span>
+
+    <span class="n">label_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_arff</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
+    <span class="n">probability_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_proba_arff</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The GamaRegressor also has ARFF support.</p>
+<p>The advantage of using an ARFF file over something like a numpy-array, is that attribute types are specified.
+When supplying only numpy-arrays (e.g. through <code class="docutils literal notranslate"><span class="pre">fit(X,</span> <span class="pre">y)</span></code>), GAMA can not know if a particular feature is ordinal or numeric.
+This means that GAMA might use a wrong feature transformation for the data (e.g. one-hot encoding on a numeric feature or scaling on a categorical feature).
+Note that this is not unique to GAMA, but any framework which accepts numeric input without meta-data.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Unfortunately the <code class="docutils literal notranslate"><span class="pre">date</span></code> and <code class="docutils literal notranslate"><span class="pre">string</span></code> formats the ARFF file allows is not (fully) supported in GAMA yet,
+for the latest news, see <a class="reference external" href="https://github.com/PGijsbers/gama/issues/2">issue#2</a>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, Pieter Gijsbers
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

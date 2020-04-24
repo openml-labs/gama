@@ -1,0 +1,347 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Contributing &mdash; gama 20.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Citing" href="../citing.html" />
+    <link rel="prev" title="Release Notes" href="../releases.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                20.2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical_guide/index.html">Technical Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#github-workflow-for-your-contribution">Github workflow for your contribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-the-development-dependencies">Setting up the development dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-code-tests">Running code tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generating-documentation">Generating Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Contributing</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/contributing/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="contributing">
+<span id="contributing-index"></span><h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h1>
+<p>We greatly appreciate contributions and are happy to see you reading this section!
+This section explains the general workflow and has some documentation for development.
+If you need more information, please check out <a class="reference internal" href="#contributing-howto"><span class="std std-ref">Github workflow for your contribution</span></a>.
+To ensure a pleasant environment for everyone we ask that all our contributors adhere to the <a class="reference external" href="https://github.com/PGijsbers/gama/blob/master/code_of_conduct.md">code of conduct</a>.</p>
+<p>The best way to get started is by looking at the <a class="reference external" href="https://github.com/PGijsbers/GAMA/issues">Github Issues</a>.
+See if there is an open issue you would like to work on.
+If so, please comment on the issue first to make sure no double work is done.
+If you are interested in adding or improving something unlisted, please open a new issue first.
+Describe the planned contribution to see if it fits within our vision of the package,
+and for discussion on its implementation.</p>
+<p>Contributions should be developed on a separate branch created from the latest development branch.
+When you are finished, make sure all the unit tests work and the documentation is updated before submitting a pull request.
+In the pull request, mention the issue that discusses the contribution and please mention any additional information
+that might be useful for reviewing the changes.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We recently <a class="reference external" href="https://black.readthedocs.io/en/stable/">blackened</a> our code.
+Before that we maintained a 120 character line limit, which far exceeds the limit
+of 88 by black. Refactoring the code to read well at 88 characters is an ongoing process.</p>
+</div>
+<div class="section" id="github-workflow-for-your-contribution">
+<span id="contributing-howto"></span><h2>Github workflow for your contribution<a class="headerlink" href="#github-workflow-for-your-contribution" title="Permalink to this headline">¶</a></h2>
+<p>The workflow GAMA maintains is described in more detail in this
+<a class="reference external" href="https://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/">great blog post</a>
+by <a class="reference external" href="https://twitter.com/scott_lowe">&#64;scott_lowe</a>.
+Here follows a short version with little explanation, just some commands.</p>
+<p>First fork the GAMA Github repository:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>visit <a class="reference external" href="https://github.com/PGijsbers/gama">GAMA’s Github page</a></p></li>
+<li><p>click the ‘fork’ button in the top-right corner.</p></li>
+</ul>
+</div></blockquote>
+<p>Clone <em>your fork</em> to your local machine.
+Find the URL behind the green button ‘clone or download’, it should look like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">GITHUB_USER_NAME</span><span class="o">/</span><span class="n">gama</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+<p>Add the original GAMA repository as an additional remote:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">remote</span> <span class="n">add</span> <span class="n">upstream</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">PGijsbers</span><span class="o">/</span><span class="n">gama</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+<p>Create a branch to work on your contribution (from the directory that has your cloned repository):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="o">-</span><span class="n">b</span> <span class="o">&lt;</span><span class="n">your_branch_name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Now you can start working on your contribution!
+Push your changes back to your <code class="docutils literal notranslate"><span class="pre">origin</span></code> remote (the name of the automatically added remote):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">push</span> <span class="n">origin</span> <span class="o">&lt;</span><span class="n">your_branch_name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>If you are ready to have your changes added to the GAMA repository, open a pull request.
+This can be done using the Github website, where a button should pop up on your fork’s repository.</p>
+<p>When opening a pull request, make sure you have:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>updated the documentation</p></li>
+<li><p>added or updated tests where reasonable</p></li>
+<li><p>if there is a loss of test coverage, you should provide a reason</p></li>
+<li><p>refer to the issue and mention any additional information that might make reviewing the PR easier.</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="setting-up-the-development-dependencies">
+<h2>Setting up the development dependencies<a class="headerlink" href="#setting-up-the-development-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>For development, you will need some additional packages for code style checks and running tests.
+Navigate to your GAMA directory and run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span><span class="p">[</span><span class="n">dev</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This installs test dependencies such as <code class="docutils literal notranslate"><span class="pre">pytest</span></code> and plugins.
+It also installs <a class="reference external" href="https://pre-commit.com/">pre-commit</a>,
+a tool for automatically running several style checks before any commit.
+Pre-commit will run <a class="reference external" href="https://black.readthedocs.io/en/stable/">black</a> code formatter,
+<a class="reference external" href="https://flake8.pycqa.org/en/latest/">flake8</a> style checker and
+<a class="reference external" href="https://mypy.readthedocs.io/en/stable/">mypy</a> type checker before any commit.
+While pre-commit is installed through the above command,
+it itself needs to install the dependencies specified for our pre-commit workflow:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pre</span><span class="o">-</span><span class="n">commit</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>Run <code class="docutils literal notranslate"><span class="pre">pre-commit</span> <span class="pre">run</span> <span class="pre">--all-files</span></code> to see the pre-commit in action, it should output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">black</span><span class="o">....................................................................</span><span class="n">Passed</span>
+<span class="n">mypy</span><span class="o">.....................................................................</span><span class="n">Passed</span>
+<span class="n">flake8</span><span class="o">...................................................................</span><span class="n">Passed</span>
+</pre></div>
+</div>
+<p>You should now be set up for development!
+Pre-commit will run these tests whenever you attempt to make a commit.
+If any of the checks fail, the commit will be aborted and you will be able to make the required changes before attempting to commit again.
+Remember to add the updated file to your commit!
+We use pre-commit to ensure a consistent code style and make PR reviews easier.
+Note that pre-commit does not run any code tests.</p>
+</div>
+<div class="section" id="running-code-tests">
+<h2>Running code tests<a class="headerlink" href="#running-code-tests" title="Permalink to this headline">¶</a></h2>
+<p>If you followed the instructions above, the required test dependencies should be installed on your system.
+The tests are separated into unit and system tests, based on scope.</p>
+<p>Unit tests are for quickly testable isolated functions.
+Examples include creation of machine learning pipelines, selection procedures or data formatting.</p>
+<p>System tests perform full AutoML runs on tiny datasets with limited resources.
+They are meant to ensure that the individual snippets tested in unit tests are integrated well together.
+It also functions as a sanity check that the system as a whole produces reasonable results.
+While complete state coverage of the code will always be impossible for this type of system,
+the system tests aim to cover as much as possible within a small time frame.</p>
+<p>To run a test group run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pytest</span> <span class="o">-</span><span class="n">sv</span> <span class="o">-</span><span class="n">n</span> <span class="mi">4</span> <span class="n">tests</span><span class="o">/</span><span class="n">SUITE</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">SUITE</span></code> is either <code class="docutils literal notranslate"><span class="pre">unit</span></code> or <code class="docutils literal notranslate"><span class="pre">system</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">-sv</span> <span class="pre">-n</span> <span class="pre">4</span></code> flags are optional,
+but give succinct feedback on what is being run (<code class="docutils literal notranslate"><span class="pre">-sv</span></code>) and run tests in parallel (<code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">4</span></code>).
+For more information, run <code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">-h</span></code>.</p>
+<p>To get a coverage report that reports which lines of code are (not) covered by tests,
+also provide the arguments <code class="docutils literal notranslate"><span class="pre">--cov=gama</span> <span class="pre">--cov-report</span> <span class="pre">term-missing</span></code>.
+This can help identify if parts of your PR are not covered by unit tests.
+When you generate a PR, a coverage report will also be generated and posted.
+Should the coverage decline, the PR will not be accepted unless a good reason is given for the decreased coverage.</p>
+</div>
+<div class="section" id="generating-documentation">
+<h2>Generating Documentation<a class="headerlink" href="#generating-documentation" title="Permalink to this headline">¶</a></h2>
+<p>The documentation is generated with <a class="reference external" href="https://www.sphinx-doc.org/en/master/">Sphinx</a>.
+After updating the documentation, please build the new docs to verify everything works and looks as intended:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sphinx</span><span class="o">-</span><span class="n">build</span> <span class="o">-</span><span class="n">b</span> <span class="n">html</span> <span class="n">docs</span>\<span class="n">source</span> <span class="n">docs</span>\<span class="n">build</span>
+</pre></div>
+</div>
+<p>The html pages are now in the <code class="docutils literal notranslate"><span class="pre">gama\docs\build</span></code> directory.
+There is no need to upload the generated documentation.
+A commit to master or develop will trigger the build and upload of the latest documentation.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../citing.html" class="btn btn-neutral float-right" title="Citing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../releases.html" class="btn btn-neutral float-left" title="Release Notes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, Pieter Gijsbers
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

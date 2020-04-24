@@ -1,0 +1,345 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gama.genetic_programming.crossover &mdash; gama 20.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                20.2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../technical_guide/index.html">Technical Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>gama.genetic_programming.crossover</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gama.genetic_programming.crossover</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Functions which take two Individuals and produce at least one new Individual. &quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">from</span> <span class="nn">gama.genetic_programming.components</span> <span class="kn">import</span> <span class="n">Individual</span>
+
+
+<div class="viewcode-block" id="random_crossover"><a class="viewcode-back" href="../../../api/index.html#gama.genetic_programming.crossover.random_crossover">[docs]</a><span class="k">def</span> <span class="nf">random_crossover</span><span class="p">(</span>
+    <span class="n">ind1</span><span class="p">:</span> <span class="n">Individual</span><span class="p">,</span> <span class="n">ind2</span><span class="p">:</span> <span class="n">Individual</span><span class="p">,</span> <span class="n">max_length</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Individual</span><span class="p">,</span> <span class="n">Individual</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot; Random valid crossover between two individuals in-place, if it can be done.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ind1: Individual</span>
+<span class="sd">        The individual to crossover with ind2.</span>
+<span class="sd">    ind2: Individual</span>
+<span class="sd">        The individual to crossover with ind1.</span>
+<span class="sd">    max_length: int, optional(default=None)</span>
+<span class="sd">        The first individual in the returned tuple has at most `max_length` primitives.</span>
+<span class="sd">        Requires both provided individuals to contain at most `max_length` primitives.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        - If there is no valid crossover function for the two individuals.</span>
+<span class="sd">        - If `max_length` is set and either `ind1` or `ind2` contain</span>
+<span class="sd">          more primitives than `max_length`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">max_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ind1</span><span class="o">.</span><span class="n">primitives</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_length</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`individual1` (</span><span class="si">{</span><span class="n">ind1</span><span class="si">}</span><span class="s2">) exceeds `max_length` (</span><span class="si">{</span><span class="n">max_length</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">max_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ind2</span><span class="o">.</span><span class="n">primitives</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_length</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`individual2` (</span><span class="si">{</span><span class="n">ind2</span><span class="si">}</span><span class="s2">) exceeds `max_length` (</span><span class="si">{</span><span class="n">max_length</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">)</span>
+
+    <span class="n">crossover_choices</span> <span class="o">=</span> <span class="n">_valid_crossover_functions</span><span class="p">(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">crossover_choices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ind1</span><span class="o">.</span><span class="n">pipeline_str</span><span class="p">()</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">ind2</span><span class="o">.</span><span class="n">pipeline_str</span><span class="p">()</span><span class="si">}</span><span class="s2"> can&#39;t mate.&quot;</span><span class="p">)</span>
+    <span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">crossover_choices</span><span class="p">)(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">max_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ind1</span><span class="o">.</span><span class="n">primitives</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_length</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ind2</span><span class="p">,</span> <span class="n">ind1</span>
+    <span class="k">return</span> <span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span></div>
+
+
+<div class="viewcode-block" id="crossover_primitives"><a class="viewcode-back" href="../../../api/index.html#gama.genetic_programming.crossover.crossover_primitives">[docs]</a><span class="k">def</span> <span class="nf">crossover_primitives</span><span class="p">(</span>
+    <span class="n">ind1</span><span class="p">:</span> <span class="n">Individual</span><span class="p">,</span> <span class="n">ind2</span><span class="p">:</span> <span class="n">Individual</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Individual</span><span class="p">,</span> <span class="n">Individual</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot; Crossover two individuals by exchanging any number of preprocessing steps.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ind1: Individual</span>
+<span class="sd">        The individual to crossover with individual2.</span>
+<span class="sd">    ind2: Individual</span>
+<span class="sd">        The individual to crossover with individual1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">p1_node</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">ind1</span><span class="o">.</span><span class="n">primitives</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">p2_node</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">ind2</span><span class="o">.</span><span class="n">primitives</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">p1_node</span><span class="o">.</span><span class="n">_data_node</span><span class="p">,</span> <span class="n">p2_node</span><span class="o">.</span><span class="n">_data_node</span> <span class="o">=</span> <span class="n">p2_node</span><span class="o">.</span><span class="n">_data_node</span><span class="p">,</span> <span class="n">p1_node</span><span class="o">.</span><span class="n">_data_node</span>
+    <span class="k">return</span> <span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span></div>
+
+
+<div class="viewcode-block" id="crossover_terminals"><a class="viewcode-back" href="../../../api/index.html#gama.genetic_programming.crossover.crossover_terminals">[docs]</a><span class="k">def</span> <span class="nf">crossover_terminals</span><span class="p">(</span>
+    <span class="n">ind1</span><span class="p">:</span> <span class="n">Individual</span><span class="p">,</span> <span class="n">ind2</span><span class="p">:</span> <span class="n">Individual</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Individual</span><span class="p">,</span> <span class="n">Individual</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot; Crossover two individuals in-place by exchanging two Terminals.</span>
+
+<span class="sd">    Terminals must share output type but have different values.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ind1: Individual</span>
+<span class="sd">        The individual to crossover with individual2.</span>
+<span class="sd">    ind2: Individual</span>
+<span class="sd">        The individual to crossover with individual1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">_shared_terminals</span><span class="p">(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span><span class="p">,</span> <span class="n">with_indices</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_match</span><span class="o">=</span><span class="s2">&quot;different&quot;</span><span class="p">)</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">ind1_term</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">ind2_term</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">options</span><span class="p">))</span>
+    <span class="n">ind1</span><span class="o">.</span><span class="n">replace_terminal</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">ind2_term</span><span class="p">)</span>
+    <span class="n">ind2</span><span class="o">.</span><span class="n">replace_terminal</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">ind1_term</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span></div>
+
+
+<span class="k">def</span> <span class="nf">_shared_terminals</span><span class="p">(</span>
+    <span class="n">ind1</span><span class="p">:</span> <span class="n">Individual</span><span class="p">,</span>
+    <span class="n">ind2</span><span class="p">:</span> <span class="n">Individual</span><span class="p">,</span>
+    <span class="n">with_indices</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">value_match</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;different&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Finds all shared Terminals between two Individuals.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ind1: Individual</span>
+<span class="sd">    ind2: Individual</span>
+<span class="sd">    with_indices: bool (default=True)</span>
+<span class="sd">        If True, also return the indices of the Terminals w.r.t. the Individual.</span>
+<span class="sd">    value_match: str (default=&#39;different&#39;)</span>
+<span class="sd">        Indicates with matches to return, based on terminal values.</span>
+<span class="sd">        Accepted values are:</span>
+
+<span class="sd">         - &#39;different&#39;: only return terminals with different values from each other</span>
+<span class="sd">         - &#39;equal&#39;: only return terminals with equal values</span>
+<span class="sd">         - &#39;all&#39;: return all shared terminals regardless of value</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Sequence of Tuples with both Terminals, with the Terminal from ind1 first.</span>
+<span class="sd">        Tuple[Terminal, Terminal] if `with_indices` is False</span>
+<span class="sd">        Tuple[int, Terminal, int, Terminal] if `with_indices` is True,</span>
+<span class="sd">        each int specifies the index of the Terminal directly after.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">value_match</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;different&quot;</span><span class="p">,</span> <span class="s2">&quot;equal&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`value_match` (&#39;</span><span class="si">{</span><span class="n">value_match</span><span class="si">}</span><span class="s2">&#39;) is not valid.&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ind1_term</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ind1</span><span class="o">.</span><span class="n">terminals</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">ind2_term</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ind2</span><span class="o">.</span><span class="n">terminals</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">ind1_term</span><span class="o">.</span><span class="n">identifier</span> <span class="o">==</span> <span class="n">ind2_term</span><span class="o">.</span><span class="n">identifier</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">value_match</span> <span class="o">==</span> <span class="s2">&quot;different&quot;</span> <span class="ow">and</span> <span class="n">ind1_term</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">ind2_term</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">value_match</span> <span class="o">==</span> <span class="s2">&quot;equal&quot;</span> <span class="ow">and</span> <span class="n">ind1_term</span><span class="o">.</span><span class="n">value</span> <span class="o">!=</span> <span class="n">ind2_term</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">with_indices</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">ind1_term</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">ind2_term</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="p">(</span><span class="n">ind1_term</span><span class="p">,</span> <span class="n">ind2_term</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_valid_crossover_functions</span><span class="p">(</span><span class="n">ind1</span><span class="p">:</span> <span class="n">Individual</span><span class="p">,</span> <span class="n">ind2</span><span class="p">:</span> <span class="n">Individual</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot; Find all crossover functions that can produce new individuals from this input.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ind1: Individual</span>
+<span class="sd">        The individual to crossover with individual2.</span>
+<span class="sd">    ind2: Individual</span>
+<span class="sd">        The individual to crossover with individual1.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    List[Callable]</span>
+<span class="sd">        List of valid crossover functions given the content of ind1 and ind2.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">crossover_choices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="n">_shared_terminals</span><span class="p">(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span><span class="p">)):</span>
+        <span class="n">crossover_choices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">crossover_terminals</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">ind1</span><span class="o">.</span><span class="n">primitives</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">ind2</span><span class="o">.</span><span class="n">primitives</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">crossover_choices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">crossover_primitives</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">crossover_choices</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, Pieter Gijsbers
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
