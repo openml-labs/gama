@@ -26,6 +26,7 @@ class Evaluation:
         start_time: Optional[datetime.datetime] = None,
         duration: float = -1,
         error: str = None,
+        pid: Optional[int] = None,
     ):
         self.individual: Individual = individual
         self.score = score
@@ -33,6 +34,7 @@ class Evaluation:
         self.start_time = start_time
         self.duration = duration
         self.error = error
+        self.pid = pid
         self._cache_file = None
 
         if isinstance(predictions, (pd.Series, pd.DataFrame)):
