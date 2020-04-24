@@ -130,6 +130,7 @@ class AsyncEvaluator:
                 limit = AsyncEvaluator.memory_limit_mb * (2 ** 20)
                 resource.prlimit(subprocess.pid, resource.RLIMIT_AS, (limit, limit))
 
+        self._log_memory_usage()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
