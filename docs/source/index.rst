@@ -36,6 +36,7 @@ If your question has not been answered there either, please open a new issue.
    user_guide/index
    technical_guide/index
    api/index
+   benchmark
    releases
    contributing/index
    citing

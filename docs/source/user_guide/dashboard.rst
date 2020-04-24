@@ -1,5 +1,8 @@
 :orphan:
 
+
+.. _dashboard:
+
 Dashboard
 ---------
 
@@ -49,7 +52,7 @@ You see four main components on this page:
 Selecting a pipeline in the table or through the plot will update the other components.
 
 Analysis tab
-***********
+************
 
 The analysis tab is also available if you did not start a new GAMA run.
 On this tab, you can visualize search results from logs.

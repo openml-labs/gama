@@ -53,4 +53,4 @@ An overview the log levels:
 By default GAMA will also capture log output to a file named 'gama.log'.
 You can use the `keep_analysis_log` hyperparameter to specify the desired location and name of the log,
 or set it to `None` to prevent it being produced in the first place.
-As described in :ref:`visualization` this file can be used to generate visualizations about the optimization process.
+As described in :ref:`Dashboard` this file can be used to generate visualizations about the optimization process.
