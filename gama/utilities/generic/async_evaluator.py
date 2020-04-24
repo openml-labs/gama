@@ -23,6 +23,7 @@ import time
 import traceback
 import uuid
 from typing import Optional, Callable, Dict, List
+import gc
 
 try:
     import resource
@@ -77,7 +78,7 @@ class AsyncEvaluator:
     """
 
     n_jobs: int = multiprocessing.cpu_count()
-    memory_limit_mb: int = 6000
+    memory_limit_mb: Optional[int] = None
     defaults: Dict = {}
 
     def __init__(
@@ -129,6 +130,7 @@ class AsyncEvaluator:
                 limit = AsyncEvaluator.memory_limit_mb * (2 ** 20)
                 resource.prlimit(subprocess.pid, resource.RLIMIT_AS, (limit, limit))
 
+        self._log_memory_usage()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -243,10 +245,12 @@ def evaluator_daemon(
                     if isinstance(result.error, MemoryError):
                         # Can't pickle MemoryErrors. Should work around this later.
                         result.error = "MemoryError"
+                        gc.collect()
                 output_queue.put(future)
             except MemoryError:
                 future.result = None
                 future.exception = "ProcessMemoryError"
+                gc.collect()
                 output_queue.put(future)
     except Exception as e:
         # There are no plans currently for recovering from any exception:

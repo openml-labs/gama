@@ -1,5 +1,6 @@
 from datetime import datetime
 import logging
+import os
 import time
 from typing import Callable, Tuple, Optional, Sequence
 
@@ -239,7 +240,7 @@ def evaluate_individual(
     Evaluation
 
     """
-    result = Evaluation(individual)
+    result = Evaluation(individual, pid=os.getpid())
     result.start_time = datetime.now()
 
     if deadline is not None:

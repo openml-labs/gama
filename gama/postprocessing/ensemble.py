@@ -1,5 +1,5 @@
 import uuid
-from collections import namedtuple
+import copy
 import logging
 import random
 import time
@@ -11,7 +11,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 from gama.genetic_programming.components import Individual
 from gama.postprocessing.base_post_processing import BasePostProcessing
-from gama.utilities.evaluation_library import EvaluationLibrary
+from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
 from gama.utilities.export import (
     imports_and_steps_for_individual,
     format_import,
@@ -25,9 +25,6 @@ if TYPE_CHECKING:
     from gama.gama import Gama
 
 log = logging.getLogger(__name__)
-Model = namedtuple(
-    "Model", ["name", "individual", "pipelines", "predictions", "validation_score"]
-)
 
 
 class EnsemblePostProcessing(BasePostProcessing):
@@ -184,7 +181,7 @@ class Ensemble(object):
 
         self._metric = metric
         self.evaluation_library = evaluation_library
-        self._model_library: List[Model] = []
+        self._model_library: List[Evaluation] = []
         self._use_top_n_only = use_top_n_only
         self._shrink_on_pickle = shrink_on_pickle
         self._prediction_transformation = None
@@ -207,7 +204,7 @@ class Ensemble(object):
         self._internal_score = -float("inf")
         self._fit_models = None
         self._maximize = True
-        self._models: Dict[uuid.UUID, Tuple[Model, int]] = {}
+        self._models: Dict[uuid.UUID, Tuple[Evaluation, int]] = {}
 
     @property
     def model_library(self):
@@ -219,15 +216,10 @@ class Ensemble(object):
                     predictions = self._prediction_transformation(predictions)
                 if self._prediction_sample:
                     predictions = predictions[self._prediction_sample]
-                self._model_library.append(
-                    Model(
-                        evaluation.individual.pipeline_str(),
-                        evaluation.individual,
-                        evaluation.estimators,
-                        predictions,
-                        evaluation.score,
-                    )
-                )
+
+                e = copy.copy(evaluation)
+                e._predictions = predictions
+                self._model_library.append(e)
 
         return self._model_library
 
@@ -279,7 +271,7 @@ class Ensemble(object):
         model, weight = self._models.pop(model.individual._id, (model, 0))
         new_weight = weight + add_weight
         self._models[model.individual._id] = (model, new_weight)
-        log.debug(f"Assigned a weight of {new_weight} to model {model.name}")
+        log.debug(f"Weight {model.individual.short_name('>')} set to {new_weight}.")
 
     def expand_ensemble(self, n: int):
         """ Adds new models to the ensemble based on earlier given data.
@@ -297,7 +289,7 @@ class Ensemble(object):
             current_weighted_average = self._averaged_validation_predictions()
             current_total_weight = self._total_model_weights()
             for model in self.model_library:
-                if model.validation_score == 0:
+                if model.score == 0:
                     continue
                 candidate_pred = current_weighted_average + (
                     model.predictions - current_weighted_average
@@ -341,7 +333,7 @@ class Ensemble(object):
         self._fit_models = [
             (estimator, weight)
             for (model, weight) in self._models.values()
-            for estimator in model.pipelines
+            for estimator in model.estimators
         ]
         # for (model, weight) in self._models.values():
 
