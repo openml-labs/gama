@@ -3,6 +3,5 @@ codecov:
     require_ci_to_pass: yes
 
 ignore:
-  - "gama/visualization/.*"
   - "gama/utilities/cli.py"
-  - "gama/dashboard/*"
+  - "gama/dashboard/**/*"
