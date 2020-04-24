@@ -78,7 +78,7 @@ class AsyncEvaluator:
     """
 
     n_jobs: int = multiprocessing.cpu_count()
-    memory_limit_mb: int = 6000
+    memory_limit_mb: Optional[int] = None
     defaults: Dict = {}
 
     def __init__(
