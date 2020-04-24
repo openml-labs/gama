@@ -3,7 +3,7 @@
 Simple Features
 ---------------
 This section features a couple of simple to use features that might be interesting for a wide audience.
-For more advanced features, see the :ref:`_technical_guide_index`.
+For more advanced features, see the :ref:`Technical Guide`.
 
 Command Line Interface
 **********************
