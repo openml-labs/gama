@@ -168,7 +168,7 @@ def _test_dataset_problem(
         data["base_log_loss"] >= logloss
     ), "predictions should be at least as good as majority class."
 
-    score_to_match = logloss if metric == "log_loss" else accuracy
+    score_to_match = logloss if metric == "neg_log_loss" else accuracy
     assert score_to_match == pytest.approx(gama_score)
     return gama
 
@@ -202,7 +202,7 @@ def test_binary_classification_accuracy_random_search():
 
 def test_binary_classification_logloss():
     """ Binary classification, log loss (probabilities), numpy data, ASHA search. """
-    _test_dataset_problem(breast_cancer, "log_loss")
+    _test_dataset_problem(breast_cancer, "neg_log_loss")
 
 
 def test_multiclass_classification_accuracy():
@@ -212,7 +212,7 @@ def test_multiclass_classification_accuracy():
 
 def test_multiclass_classification_logloss():
     """ Multiclass classification, log loss (probabilities), numpy data. """
-    _test_dataset_problem(wine, "log_loss")
+    _test_dataset_problem(wine, "neg_log_loss")
 
 
 def test_string_label_classification_accuracy():
@@ -222,14 +222,14 @@ def test_string_label_classification_accuracy():
 
 def test_string_label_classification_log_loss():
     """ Binary classification, log loss (probabilities), target is str. """
-    _test_dataset_problem(breast_cancer, "log_loss", y_type=str)
+    _test_dataset_problem(breast_cancer, "neg_log_loss", y_type=str)
 
 
 def test_missing_value_classification_arff():
     """ Binary classification, log loss (probabilities), arff data. """
-    _test_dataset_problem(breast_cancer_missing, "log_loss", arff=True)
+    _test_dataset_problem(breast_cancer_missing, "neg_log_loss", arff=True)
 
 
 def test_missing_value_classification():
     """ Binary classification, log loss (probabilities), missing values. """
-    _test_dataset_problem(breast_cancer_missing, "log_loss", missing_values=True)
+    _test_dataset_problem(breast_cancer_missing, "neg_log_loss", missing_values=True)

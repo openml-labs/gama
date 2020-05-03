@@ -53,7 +53,7 @@ def _test_dataset_problem(data, metric):
 
 def test_regression_mean_squared_error():
     """ GamaRegressor works on all-numeric data. """
-    _test_dataset_problem(boston, "mean_squared_error")
+    _test_dataset_problem(boston, "neg_mean_squared_error")
 
 
 def test_missing_value_regression():
