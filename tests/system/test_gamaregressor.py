@@ -59,7 +59,7 @@ def test_regression_mean_squared_error():
 def test_missing_value_regression():
     """ GamaRegressor works when missing values are present. """
     data = boston
-    metric = "mean_squared_error"
+    metric = "neg_mean_squared_error"
     X, y = data["load"](return_X_y=True)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
     X_train[1:300:2, 0] = X_train[2:300:5, 1] = float("NaN")

@@ -20,6 +20,8 @@ from typing import Callable, Iterable, Tuple, Union, Dict
 import numpy as np
 import pandas as pd
 from sklearn import metrics
+from sklearn.metrics import get_scorer
+from sklearn.metrics._scorer import _ProbaScorer
 
 """
 Scikit-learn does not have an option to return predictions and score at the same time.
@@ -38,7 +40,6 @@ classification_metrics = dict(
     accuracy=(metrics.accuracy_score, False, True),
     roc_auc=(metrics.roc_auc_score, True, True),
     average_precision=(metrics.average_precision_score, True, True),
-    log_loss=(metrics.log_loss, True, False),
     neg_log_loss=(metrics.log_loss, True, False),
 )
 
@@ -58,13 +59,9 @@ regression_metrics: Dict[str, Tuple[Callable, bool, bool]] = dict(
     explained_variance=(metrics.explained_variance_score, False, True),
     r2=(metrics.r2_score, False, True),
     neg_mean_absolute_error=(metrics.mean_absolute_error, False, False),
-    mean_absolute_error=(metrics.mean_absolute_error, False, False),
     neg_mean_squared_log_error=(metrics.mean_squared_log_error, False, False),
-    mean_squared_log_error=(metrics.mean_squared_log_error, False, False),
     neg_median_absolute_error=(metrics.median_absolute_error, False, False),
-    median_absolute_error=(metrics.median_absolute_error, False, False),
     neg_mean_squared_error=(metrics.mean_squared_error, False, False),
-    mean_squared_error=(metrics.mean_squared_error, False, False),
 )
 
 all_metrics = {**classification_metrics, **regression_metrics}
@@ -107,7 +104,7 @@ class Metric:
         self.name = metric_name
         self._score_function = score_function
         self.requires_probabilities = requires_probabilities
-        self._optimize_modifier = 1 if maximize else -1
+        self._optimize_modifier = maximize
         self.task_type = task_type
 
     def score(self, y_true, predictions) -> float:
@@ -147,9 +144,13 @@ class Metric:
         else:
             raise ValueError(f"Metric not known: {metric_name}.")
 
-        score_fn, requires_probabilities, should_maximize = all_metrics[metric_name]
+        scorer = get_scorer(metric_name)
         return cls(
-            metric_name, score_fn, requires_probabilities, should_maximize, task_type,
+            metric_name,
+            scorer._score_func,
+            isinstance(scorer, _ProbaScorer),
+            scorer._sign,
+            task_type,
         )
 
 

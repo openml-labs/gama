@@ -24,8 +24,9 @@ def _test_metric(metric, y_true, y_pred, max_score, prediction_score):
 
         truth = y_format(y_true)
         prediction = pred_format(y_pred)
-        assert max_score == pytest.approx(metric.score(truth, truth))
-        assert prediction_score == pytest.approx(metric.score(truth, prediction))
+        assert max_score == pytest.approx(metric.maximizable_score(truth, truth))
+        score = pytest.approx(metric.maximizable_score(truth, prediction))
+        assert prediction_score == score
 
 
 def test_accuracy_numeric():
@@ -51,10 +52,10 @@ def test_accuracy_string():
 
 
 def test_logloss_numeric():
-    log_loss_metric = Metric.from_string("log_loss")
+    log_loss_metric = Metric.from_string("neg_log_loss")
     y_true = np.asarray([1, 0, 0, 0, 1])
     y_1_mistake_ohe = np.asarray([[0, 1], [0, 1], [1, 0], [1, 0], [0, 1]])
-    one_mistake_logloss = 6.907755278982137
+    one_mistake_logloss = -6.907755278982137
     _test_metric(
         log_loss_metric,
         y_true,
@@ -67,7 +68,7 @@ def test_logloss_numeric():
     y_probabilities = np.asarray(
         [[0.1, 0.9], [0.2, 0.8], [0.7, 0.3], [0.95, 0.05], [0.1, 0.9]]
     )
-    probabilities_logloss = 0.44562543641520713
+    probabilities_logloss = -0.44562543641520713
     _test_metric(
         log_loss_metric,
         y_true_ohe,
