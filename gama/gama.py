@@ -394,7 +394,7 @@ class Gama(ABC):
         x: Union[pd.DataFrame, np.ndarray],
         y: Union[pd.DataFrame, pd.Series, np.ndarray],
         warm_start: bool = False,
-    ) -> None:
+    ) -> "Gama":
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -486,6 +486,7 @@ class Gama(ABC):
                 best_individuals,
             )
         self._evaluation_library.clear_cache()
+        return self
 
     def _search_phase(self, warm_start: bool = False, timeout: float = 1e6):
         """ Invoke the search algorithm, populate `final_pop`. """
