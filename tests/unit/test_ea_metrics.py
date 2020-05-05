@@ -30,7 +30,7 @@ def _test_metric(metric, y_true, y_pred, max_score, prediction_score):
 
 
 def test_accuracy_numeric():
-    accuracy_metric = Metric.from_string("accuracy")
+    accuracy_metric = Metric("accuracy")
     y_true = np.asarray([1, 0, 0, 0, 1])
     y_1_mistake = np.asarray([1, 1, 0, 0, 1])
     _test_metric(
@@ -39,7 +39,7 @@ def test_accuracy_numeric():
 
 
 def test_accuracy_string():
-    accuracy_metric = Metric.from_string("accuracy")
+    accuracy_metric = Metric("accuracy")
     y_true_str = np.asarray([str(x) for x in [1, 0, 0, 0, 1]])
     y_1_mistake_str = np.asarray([str(x) for x in [1, 1, 0, 0, 1]])
     _test_metric(
@@ -52,7 +52,7 @@ def test_accuracy_string():
 
 
 def test_logloss_numeric():
-    log_loss_metric = Metric.from_string("neg_log_loss")
+    log_loss_metric = Metric("neg_log_loss")
     y_true = np.asarray([1, 0, 0, 0, 1])
     y_1_mistake_ohe = np.asarray([[0, 1], [0, 1], [1, 0], [1, 0], [0, 1]])
     one_mistake_logloss = -6.907755278982137
@@ -80,10 +80,10 @@ def test_logloss_numeric():
 
 def test_all_metrics_instantiate():
     for metric in all_metrics:
-        Metric.from_string(metric)
+        Metric(metric)
 
 
 def test_scoring_to_metric_mixed():
     metrics = list(all_metrics)
-    mixed_metrics = [Metric.from_string(metric) for metric in metrics[:2]] + metrics[2:]
+    mixed_metrics = [Metric(metric) for metric in metrics[:2]] + metrics[2:]
     scoring_to_metric(mixed_metrics)

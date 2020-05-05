@@ -75,8 +75,6 @@ def evaluate_pipeline(
         logger = log
     if not object_is_valid_pipeline(pipeline):
         raise TypeError(f"Pipeline must not be None and requires fit, predict, steps.")
-    if len(metrics) > 1:
-        raise NotImplementedError("Multiple metrics temporarily disabled.")
 
     start_datetime = datetime.now()
     prediction, estimators = None, None
