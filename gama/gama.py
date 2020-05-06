@@ -217,11 +217,11 @@ class Gama(ABC):
             self._evaluation_library = EvaluationLibrary(
                 m=post_processing_method.hyperparameters["max_models"],
                 n=post_processing_method.hyperparameters["hillclimb_size"],
-                cache_directory=cache,
+                cache=cache,
             )
         else:
             # Don't keep memory-heavy evaluation meta-data (predictions, estimators)
-            self._evaluation_library = EvaluationLibrary(m=0, cache_directory=cache)
+            self._evaluation_library = EvaluationLibrary(m=0, cache=cache)
         self.evaluation_completed(self._evaluation_library.save_evaluation)
 
         self._pset, parameter_checks = pset_from_config(config)
@@ -485,7 +485,6 @@ class Gama(ABC):
                 self._time_manager.total_time_remaining,
                 best_individuals,
             )
-        self._evaluation_library.clear_cache()
         return self
 
     def _search_phase(self, warm_start: bool = False, timeout: float = 1e6):

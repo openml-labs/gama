@@ -1,9 +1,14 @@
 from typing import Optional, Tuple, List, Union
+import uuid
 import numpy as np
 import pandas as pd
 
 from gama.genetic_programming.components import Individual
 from gama.utilities.evaluation_library import Evaluation, EvaluationLibrary
+
+
+def _short_name():
+    return str(uuid.uuid4())[:4]
 
 
 def _mock_evaluation(
@@ -56,8 +61,8 @@ def test_evaluation_convert_predictions_from_dataframe_to_nparray(GNB):
 
 def test_evaluation_library_max_number_evaluations(GNB):
     """ `max_number_of_evaluations` restricts the size of `top_evaluations`. """
-    lib200 = EvaluationLibrary(m=200, sample=None)
-    lib_unlimited = EvaluationLibrary(m=None, sample=None)
+    lib200 = EvaluationLibrary(m=200, sample=None, cache=_short_name())
+    lib_unlimited = EvaluationLibrary(m=None, sample=None, cache=_short_name())
 
     worst_evaluation = _mock_evaluation(GNB, score=(0.0, 0.0, 0.0))
     lib200.save_evaluation(worst_evaluation)
@@ -83,7 +88,7 @@ def test_evaluation_library_max_number_evaluations(GNB):
 
 def test_evaluation_library_n_best(GNB):
     """ Test `n_best` normal usage.  """
-    lib = EvaluationLibrary(m=None, sample=None)
+    lib = EvaluationLibrary(m=None, sample=None, cache=_short_name())
 
     best_evaluation = _mock_evaluation(GNB, score=(1.0, 1.0, 1.0))
     worst_evaluation = _mock_evaluation(GNB, score=(0.0, 0.0, 0.0))
@@ -109,7 +114,7 @@ def test_evaluation_library_n_best(GNB):
 
 def _test_subsample(sample, predictions, subsample, individual):
     """ Test the `predictions` correctly get sampled to `subsample`. """
-    lib = EvaluationLibrary(sample=sample)
+    lib = EvaluationLibrary(sample=sample, cache=_short_name())
     best_evaluation = _mock_evaluation(individual, predictions=predictions)
     lib.save_evaluation(best_evaluation)
     assert (

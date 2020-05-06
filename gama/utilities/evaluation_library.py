@@ -114,7 +114,7 @@ class EvaluationLibrary:
         m: Optional[int] = 200,
         n: Optional[int] = 10_000,
         sample: Optional[np.ndarray] = None,
-        cache_directory: str = "cache",
+        cache: str = "cache",
     ):
         """ Create an EvaluationLibrary for in-memory record of evaluations.
 
@@ -134,7 +134,7 @@ class EvaluationLibrary:
         sample: np.ndarray, optional (default=None)
             Instead of storing all predictions of the 'top m' evaluations,
             store only those with indices specified in this array.
-        cache_directory: str (default="cache")
+        cache: str (default="cache")
             Directory to save evaluations to.
             For large datasets or a big number of models,
             this can lead to memory issues.
@@ -144,7 +144,7 @@ class EvaluationLibrary:
         self._m = m
         self._sample_n = n
         self.lookup: Dict[str, Evaluation] = {}
-        self._cache = os.path.expandvars(cache_directory)
+        self._cache = os.path.expandvars(cache)
         if not os.path.exists(self._cache):
             os.mkdir(self._cache)
 
@@ -159,6 +159,10 @@ class EvaluationLibrary:
             self._sample = None
         else:
             self._sample = "not set"
+
+    def __del__(self):
+        if os.path.exists(self._cache):
+            self.clear_cache()
 
     @property
     def evaluations(self) -> List[Evaluation]:
