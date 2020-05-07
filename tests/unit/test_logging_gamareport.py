@@ -43,7 +43,7 @@ def test_gamareport_asha_from_log():
 
 def test_gamareport_asyncEA_from_log():
     """ GamaReport can be constructed from a log that recorded AsyncEA. """
-    log_file = "tests/data/amazon_asyncEA.log"
+    log_file = "tests/data/async_ea.log"
     report = GamaReport(logfile=log_file, name=None)
     assert report.name == log_file
     assert "AsyncEA()" == report.search_method
