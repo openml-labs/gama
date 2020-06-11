@@ -265,41 +265,13 @@ If set to None, generate a unique cache name.</p></li>
 </div>
 <div class="section" id="metrics">
 <span id="id1"></span><h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-gama.utilities.metrics"></span><p>This module defines the built-in metrics for GAMA.</p>
-<p>The valid metrics depend on the type of task. Many scikit-learn metrics are available.
-For classification, the following metrics are available:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>accuracy, roc_auc, average_precision, log_loss</p></li>
-<li><p>micro, macro, weighted and sample averages for precision, recall and f1</p></li>
-</ul>
-</div></blockquote>
-<p>For regression, the following metrics are available:</p>
-<blockquote>
-<div><p>explained_variance, r2, median_absolute_error, mean_squared_error,
-mean_squared_log_error, mean_absolute_error</p>
-</div></blockquote>
-<p>Whether to minimize or maximize is determined automatically.</p>
-<p>If you have a custom scoring function, you can define your own <code class="code docutils literal notranslate"><span class="pre">Metric</span></code>.</p>
+<span class="target" id="module-gama.utilities.metrics"></span><p>If you have a custom scoring function, you can define your own <code class="code docutils literal notranslate"><span class="pre">Metric</span></code>.</p>
 <div class="section" id="metric">
 <h3>Metric<a class="headerlink" href="#metric" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt id="gama.utilities.metrics.Metric">
-<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.metrics.</code><code class="sig-name descname">Metric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric_name</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">score_function</span><span class="p">:</span> <span class="n">Callable</span></em>, <em class="sig-param"><span class="n">requires_probabilities</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span></em>, <em class="sig-param"><span class="n">maximize</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span></em>, <em class="sig-param"><span class="n">task_type</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#gama.utilities.metrics.MetricType" title="gama.utilities.metrics.MetricType">gama.utilities.metrics.MetricType</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/metrics.html#Metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.metrics.Metric" title="Permalink to this definition">¶</a></dt>
-<dd><p>A wrapper for a scoring function to provide additional meta-data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>metric_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Name of the metric.</p></li>
-<li><p><strong>score_function</strong> (<em>Callable</em>) – Takes either predicted targets or predicted probabilities and
-the true target values to calculate a score.</p></li>
-<li><p><strong>requires_probabilities</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – For classification metrics only,
-describes if the metric should be computed with predicted probabilities.</p></li>
-<li><p><strong>maximize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If True, indicates that maximizing the score corresponds to better models.</p></li>
-<li><p><strong>task_type</strong> (<a class="reference internal" href="#gama.utilities.metrics.MetricType" title="gama.utilities.metrics.MetricType"><em>MetricType</em></a>) – Type of the machine learning task.</p></li>
-</ul>
-</dd>
-</dl>
+<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.metrics.</code><code class="sig-name descname">Metric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scorer</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>sklearn.metrics._scorer._BaseScorer<span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/metrics.html#Metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.metrics.Metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>A thin layer around the <code class="code docutils literal notranslate"><span class="pre">scorer</span></code> class of scikit-learn.</p>
 </dd></dl>
 
 </div>
@@ -307,17 +279,17 @@ describes if the metric should be computed with predicted probabilities.</p></li
 <h3>MetricType<a class="headerlink" href="#metrictype" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt id="gama.utilities.metrics.MetricType">
-<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.metrics.</code><code class="sig-name descname">MetricType</code><a class="reference internal" href="../_modules/gama/utilities/metrics.html#MetricType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.metrics.MetricType" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.metrics.</code><code class="sig-name descname">MetricType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/metrics.html#MetricType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.metrics.MetricType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Metric types supported by GAMA.</p>
 <dl class="py attribute">
 <dt id="gama.utilities.metrics.MetricType.CLASSIFICATION">
-<code class="sig-name descname">CLASSIFICATION</code><em class="property">: int</em><em class="property"> = 1</em><a class="headerlink" href="#gama.utilities.metrics.MetricType.CLASSIFICATION" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">CLASSIFICATION</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></em><em class="property"> = 1</em><a class="headerlink" href="#gama.utilities.metrics.MetricType.CLASSIFICATION" title="Permalink to this definition">¶</a></dt>
 <dd><p>discrete target</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="gama.utilities.metrics.MetricType.REGRESSION">
-<code class="sig-name descname">REGRESSION</code><em class="property">: int</em><em class="property"> = 2</em><a class="headerlink" href="#gama.utilities.metrics.MetricType.REGRESSION" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">REGRESSION</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></em><em class="property"> = 2</em><a class="headerlink" href="#gama.utilities.metrics.MetricType.REGRESSION" title="Permalink to this definition">¶</a></dt>
 <dd><p>continuous target</p>
 </dd></dl>
 
@@ -595,7 +567,7 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 <h4>Primitive<a class="headerlink" href="#primitive" title="Permalink to this headline">¶</a></h4>
 <dl class="py class">
 <dt id="gama.genetic_programming.components.Primitive">
-<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Primitive</code><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive.html#Primitive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.Primitive" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Primitive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">output</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">identifier</span><span class="p">:</span> <span class="n">Callable</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive.html#Primitive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.Primitive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines an operator which takes input and produces output.</p>
 <p>E.g. a preprocessing or classification algorithm.</p>
 <p>Create new instance of Primitive(input, output, identifier)</p>
@@ -624,7 +596,7 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 <h4>Terminal<a class="headerlink" href="#terminal" title="Permalink to this headline">¶</a></h4>
 <dl class="py class">
 <dt id="gama.genetic_programming.components.Terminal">
-<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Terminal</code><a class="reference internal" href="../_modules/gama/genetic_programming/components/terminal.html#Terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.Terminal" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Terminal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></span></em>, <em class="sig-param"><span class="n">output</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">identifier</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/terminal.html#Terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.Terminal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Specifies a specific value for a specific type or input.</p>
 <p>E.g. a value for a hyperparameter for an algorithm.</p>
 <p>Create new instance of Terminal(value, output, identifier)</p>
