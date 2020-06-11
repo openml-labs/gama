@@ -160,7 +160,7 @@ class Ensemble(object):
             but the ensemble can't be changed.
         """
         if isinstance(metric, str):
-            metric = Metric.from_string(metric)
+            metric = Metric(metric)
         elif not isinstance(metric, Metric):
             raise ValueError(
                 "metric must be specified as string or `gama.ea.metrics.Metric`."

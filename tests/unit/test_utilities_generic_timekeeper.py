@@ -4,7 +4,7 @@ from gama.utilities.generic.timekeeper import TimeKeeper
 
 
 def _time_approx(seconds: int):
-    return pytest.approx(seconds, abs=0.02)
+    return pytest.approx(seconds, abs=0.03)
 
 
 def test_timekeeper_total_time_remaning_error_if_total_time_zero():

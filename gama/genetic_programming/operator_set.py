@@ -60,6 +60,7 @@ class OperatorSet:
                 log,
                 TOKENS.EVALUATION_RESULT,
                 individual.fitness.start_time,
+                evaluation.pid,
                 individual.fitness.wallclock_time,
                 individual.fitness.process_time,
                 individual.fitness.values,
