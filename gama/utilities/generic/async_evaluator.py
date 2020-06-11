@@ -212,6 +212,8 @@ class AsyncEvaluator:
 
     def _control_memory_usage(self, threshold=0.05):
         """ Dynamically restarts or kills processes to adhere to memory constraints. """
+        if AsyncEvaluator.memory_limit_mb is None:
+            return
         # If the memory usage of all processes (the main process, and the evaluation
         # subprocesses) exceeds the maximum allowed memory usage, we have to terminate
         # one of them.
