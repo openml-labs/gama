@@ -1,10 +1,11 @@
 import subprocess
+import sys
 from typing import List
 import gama
 
 
 def cli_command(file) -> List[str]:
-    return ["python", "gama/utilities/cli.py", file, "-dry"]
+    return [sys.executable, "gama/utilities/cli.py", file, "-dry"]
 
 
 def test_classifier_invocation():
