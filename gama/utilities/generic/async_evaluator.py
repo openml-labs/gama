@@ -118,16 +118,7 @@ class AsyncEvaluator:
             f"Process {self._main_process.pid} starting {self._n_jobs} subprocesses."
         )
         for _ in range(self._n_jobs):
-            mp_process = multiprocessing.Process(
-                target=evaluator_daemon,
-                args=(self._input, self._output, AsyncEvaluator.defaults),
-                daemon=True,
-            )
-            mp_process.start()
-
-            subprocess = psutil.Process(mp_process.pid)
-            self._processes.append(subprocess)
-
+            self._start_worker_process()
             # if resource and AsyncEvaluator.memory_limit_mb:
             #     limit = AsyncEvaluator.memory_limit_mb * (2 ** 20)
             #     resource.prlimit(subprocess.pid, resource.RLIMIT_AS, (limit, limit))
@@ -210,6 +201,23 @@ class AsyncEvaluator:
                 time.sleep(poll_time)
                 continue
 
+    def _start_worker_process(self) -> psutil.Process:
+        """ Start a new worker node and add it to the process pool. """
+        mp_process = multiprocessing.Process(
+            target=evaluator_daemon,
+            args=(self._input, self._output, AsyncEvaluator.defaults),
+            daemon=True,
+        )
+        mp_process.start()
+        subprocess = psutil.Process(mp_process.pid)
+        self._processes.append(subprocess)
+        return subprocess
+
+    def _stop_worker_process(self, process: psutil.Process):
+        """ Terminate a new worker node and remove it from the process pool. """
+        process.terminate()
+        self._processes.remove(process)
+
     def _control_memory_usage(self, threshold=0.05):
         """ Dynamically restarts or kills processes to adhere to memory constraints. """
         if AsyncEvaluator.memory_limit_mb is None:
@@ -242,30 +250,22 @@ class AsyncEvaluator:
             self._log_memory_usage()
             self._mem_violations += 1
             # Find the process with the most memory usage, that is not the main process
-            _, proc = max(mem_proc[1:])
+            _, proc = max(mem_proc[1:], key=lambda t: t[0])
             n_evaluations = self._mem_violations + self._mem_behaved
             fail_ratio = self._mem_violations / n_evaluations
             if fail_ratio < threshold or len(self._processes) == 1:
                 # restart `pid`
                 log.info(f"Terminating {proc.pid} due to memory usage.")
-                proc.terminate()
-                self._processes.remove(proc)
+                self._stop_worker_process(proc)
                 log.info("Starting new evaluations process.")
-                mp_process = multiprocessing.Process(
-                    target=evaluator_daemon,
-                    args=(self._input, self._output, AsyncEvaluator.defaults),
-                    daemon=True,
-                )
-                mp_process.start()
-                subprocess = psutil.Process(mp_process.pid)
-                self._processes.append(subprocess)
+                self._start_worker_process()
             else:
                 # More than one process left alive and a violation of the threshold,
                 # requires killing a subprocess.
                 self._mem_behaved = 0
                 self._mem_violations = 0
                 log.info(f"Terminating {proc.pid} due to memory usage.")
-                proc.terminate()
+                self._stop_worker_process(proc)
             # todo: update the Future of the evaluation that was terminated.
 
     def _log_memory_usage(self):
