@@ -281,9 +281,9 @@ class Gama(ABC):
         x = self._prepare_for_prediction(x)
         return self._predict(x)
 
-    def predict_arff(
+    def predict_from_file(
         self,
-        arff_file_path: str,
+        file_path: str,
         target_column: Optional[str] = None,
         encoding: Optional[str] = None,
     ) -> np.ndarray:
@@ -291,7 +291,7 @@ class Gama(ABC):
 
         Parameters
         ----------
-        arff_file_path: str
+        file_path: str
             An ARFF file with the same columns as the one that used in fit.
             Target column must be present in file, but its values are ignored.
         target_column: str, optional (default=None)
@@ -305,9 +305,12 @@ class Gama(ABC):
         numpy.ndarray
             array with predictions for each row in the ARFF file.
         """
-        x, _ = X_y_from_arff(
-            arff_file_path, split_column=target_column, encoding=encoding
-        )
+        if file_path.endswith(".arff"):
+            x, _ = X_y_from_arff(
+                file_path, split_column=target_column, encoding=encoding
+            )
+        else:
+            raise ValueError("Files without arff extension not supported.")
         x = self._prepare_for_prediction(x)
         return self._predict(x)
 
@@ -363,9 +366,9 @@ class Gama(ABC):
         )
         return self.score(x, y)
 
-    def fit_arff(
+    def fit_from_file(
         self,
-        arff_file_path: str,
+        file_path: str,
         target_column: Optional[str] = None,
         encoding: Optional[str] = None,
         *args,
@@ -375,7 +378,7 @@ class Gama(ABC):
 
         Parameters
         ----------
-        arff_file_path: str
+        file_path: str
             Path to an ARFF file containing the training data.
         target_column: str, optional (default=None)
             Specifies which column the model should predict.
@@ -384,9 +387,12 @@ class Gama(ABC):
             Encoding of the ARFF file.
 
         """
-        x, y = X_y_from_arff(
-            arff_file_path, split_column=target_column, encoding=encoding
-        )
+        if file_path.endswith(".arff"):
+            x, y = X_y_from_arff(
+                file_path, split_column=target_column, encoding=encoding
+            )
+        else:
+            raise ValueError("Files without arff extension not supported.")
         self.fit(x, y, *args, **kwargs)
 
     def fit(

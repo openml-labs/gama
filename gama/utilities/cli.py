@@ -169,7 +169,7 @@ def main():
     if not args.dry_run:
         print("CLI: Starting model search")
         if args.input_file.lower().endswith(".arff"):
-            automl.fit_arff(args.input_file.lower(), target_column=args.target)
+            automl.fit_from_file(args.input_file.lower(), target_column=args.target)
         # else:
         #    automl.fit(x, y)
 
