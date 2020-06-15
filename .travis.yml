@@ -11,6 +11,7 @@ env:
 jobs:
   include:
   - env: JOB=check
+    python: 3.8
   - env: JOB=deploy
     if: (branch = master OR branch = develop) AND type = push
 
