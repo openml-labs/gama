@@ -1,7 +1,7 @@
 """ This module contains functions for loading data. """
 from collections import OrderedDict
 import csv
-from typing import Tuple, Optional, Dict, Union, Type
+from typing import Tuple, Optional, Dict, Union, Type, List
 
 import arff
 import numpy as np
@@ -9,6 +9,26 @@ import pandas as pd
 from pandas.api.types import is_numeric_dtype
 
 from gama.utilities.preprocessing import log
+
+
+CSV_SNIFF_SIZE = 2 ** 12
+
+
+def load_csv_header(file_path: str, **kwargs) -> List[str]:
+    """ Return column names in the header, or 0...N if no header is present. """
+    with open(file_path, "r") as csv_file:
+        has_header = csv.Sniffer().has_header(csv_file.read(CSV_SNIFF_SIZE))
+        csv_file.seek(0)
+        if "sep" not in kwargs:
+            dialect = csv.Sniffer().sniff(csv_file.read(CSV_SNIFF_SIZE))
+            kwargs["sep"] = dialect.delimiter
+            csv_file.seek(0)
+        first_line = csv_file.readline()
+
+    if has_header:
+        return first_line.split(kwargs["sep"])
+    else:
+        return [str(i) for i, _ in enumerate(first_line.split(kwargs["sep"]))]
 
 
 def csv_to_pandas(file_path: str, **kwargs) -> pd.DataFrame:
@@ -31,7 +51,7 @@ def csv_to_pandas(file_path: str, **kwargs) -> pd.DataFrame:
     """
     if "header" not in kwargs:
         with open(file_path, "r") as csv_file:
-            has_header = csv.Sniffer().has_header(csv_file.read(2048))
+            has_header = csv.Sniffer().has_header(csv_file.read(CSV_SNIFF_SIZE))
         kwargs["header"] = 0 if has_header else None
 
     df = pd.read_csv(file_path, **kwargs)
@@ -88,6 +108,33 @@ def arff_to_pandas(
     return data
 
 
+def file_to_pandas(
+    file_path: str, encoding: Optional[str] = None, **kwargs
+) -> pd.DataFrame:
+    """ Load ARFF/csv file into pd.DataFrame.
+
+    Parameters
+    ----------
+    file_path: str
+        path to the csv or ARFF file.
+    encoding: str, optional
+        Encoding, only used for ARFF files.
+    kwargs:
+        Any arguments for arff.load or pandas.read_csv
+
+    Returns
+    -------
+    pd.DataFrame
+    """
+    if file_path.endswith(".arff"):
+        data = arff_to_pandas(file_path, encoding, **kwargs)
+    elif file_path.endswith(".csv"):
+        data = csv_to_pandas(file_path, **kwargs)
+    else:
+        raise ValueError("Only csv and arff files supported.")
+    return data
+
+
 def X_y_from_file(
     file_path: str,
     split_column: Optional[str] = None,
@@ -114,19 +161,28 @@ def X_y_from_file(
     Tuple[pd.DataFrame, pd.Series]
         Features (everything except split_column) and targets (split_column).
     """
-    if file_path.endswith(".arff"):
-        data = arff_to_pandas(file_path, encoding, **kwargs)
-    elif file_path.endswith(".csv"):
-        data = csv_to_pandas(file_path, **kwargs)
-    else:
-        raise ValueError("Only csv and arff files supported.")
-
+    data = file_to_pandas(file_path, encoding, **kwargs)
     if split_column is None:
         return data.iloc[:, :-1], data.iloc[:, -1]
     elif split_column in data.columns:
         return data.loc[:, data.columns != split_column], data.loc[:, split_column]
     else:
         raise ValueError(f"No column named {split_column} found in {file_path}")
+
+
+def load_feature_metadata_from_file(file_path: str) -> Dict[str, str]:
+    """ Load the header of the csv or ARFF file, return the type of each attribute.
+
+    For csv files, presence of a header is detected with the Python csv parser.
+    If no header is present in the csv file, the columns will be labeled with a number.
+    Additionally, the column types is not inferred for csv files.
+    """
+    if file_path.lower().endswith(".arff"):
+        return load_feature_metadata_from_arff(file_path)
+    elif file_path.lower().endswith(".csv"):
+        return {c: "" for c in load_csv_header(file_path)}
+    else:
+        raise ValueError("Only csv and arff files are supported.")
 
 
 def load_feature_metadata_from_arff(file_path: str) -> Dict[str, str]:
