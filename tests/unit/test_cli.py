@@ -15,6 +15,14 @@ def test_classifier_invocation():
     assert "classification" in str(process.stdout)
 
 
+def test_classifier_invocation_csv():
+    command = cli_command("tests/data/openml_d_23380.csv")
+    command.extend("--target TR".split(" "))
+    process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    assert 0 == process.returncode, process.stderr
+    assert "classification" in str(process.stdout)
+
+
 def test_regressor_invocation():
     command = cli_command("tests/data/boston.arff")
     process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
