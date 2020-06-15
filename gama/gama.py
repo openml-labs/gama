@@ -36,7 +36,7 @@ from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
 from gama.utilities.metrics import scoring_to_metric
 
 from gama.__version__ import __version__
-from gama.data import X_y_from_arff, format_x_y
+from gama.data import X_y_from_file, format_x_y
 from gama.search_methods.async_ea import AsyncEA
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.logging.utility_functions import register_stream_log, register_file_log
@@ -305,12 +305,7 @@ class Gama(ABC):
         numpy.ndarray
             array with predictions for each row in the ARFF file.
         """
-        if file_path.endswith(".arff"):
-            x, _ = X_y_from_arff(
-                file_path, split_column=target_column, encoding=encoding
-            )
-        else:
-            raise ValueError("Files without arff extension not supported.")
+        x, _ = X_y_from_file(file_path, split_column=target_column, encoding=encoding)
         x = self._prepare_for_prediction(x)
         return self._predict(x)
 
@@ -361,7 +356,7 @@ class Gama(ABC):
         float
             The score obtained on the given test data according to the `scoring` metric.
         """
-        x, y = X_y_from_arff(
+        x, y = X_y_from_file(
             arff_file_path, split_column=target_column, encoding=encoding
         )
         return self.score(x, y)
@@ -387,12 +382,7 @@ class Gama(ABC):
             Encoding of the ARFF file.
 
         """
-        if file_path.endswith(".arff"):
-            x, y = X_y_from_arff(
-                file_path, split_column=target_column, encoding=encoding
-            )
-        else:
-            raise ValueError("Files without arff extension not supported.")
+        x, y = X_y_from_file(file_path, split_column=target_column, encoding=encoding)
         self.fit(x, y, *args, **kwargs)
 
     def fit(

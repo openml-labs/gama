@@ -1,12 +1,35 @@
 """ This module contains functions for loading data. """
 from collections import OrderedDict
+import csv
 from typing import Tuple, Optional, Dict, Union, Type
 
 import arff
 import numpy as np
 import pandas as pd
+from pandas.api.types import is_numeric_dtype
 
 from gama.utilities.preprocessing import log
+
+
+def csv_to_pandas(file_path: str) -> pd.DataFrame:
+    with open(file_path, "r") as csv_file:
+        has_header = csv.Sniffer().has_header(csv_file.read(2048))
+    df = pd.read_csv(file_path, header=0 if has_header else None)
+
+    # Since CSV files do not have type annotation, we must infer their type to
+    # know which preprocessing steps to apply. All `str` columns and int-like columns
+    # with <=10 unique values are considered categorical.
+    for column, n_unique in df.nunique(dropna=True).items():
+        if df[column].dtype == "object":
+            df[column] = df[column].astype("category")
+        elif n_unique <= 10 and is_numeric_dtype(df[column]):
+            for x in df[column].dropna().unique():
+                if isinstance(x, float) and not x.is_integer():
+                    break
+            else:
+                df[column] = df[column].astype("category")
+
+    return df
 
 
 def arff_to_pandas(file_path: str, encoding: Optional[str] = None) -> pd.DataFrame:
@@ -41,10 +64,10 @@ def arff_to_pandas(file_path: str, encoding: Optional[str] = None) -> pd.DataFra
     return data
 
 
-def X_y_from_arff(
+def X_y_from_file(
     file_path: str, split_column: Optional[str] = None, encoding: Optional[str] = None
 ) -> Tuple[pd.DataFrame, pd.Series]:
-    """ Load data from ARFF file into pd.DataFrame and specified column to pd.Series.
+    """ Load ARFF/csv file into pd.DataFrame and specified column to pd.Series.
 
     Parameters
     ----------
@@ -62,7 +85,12 @@ def X_y_from_arff(
     Tuple[pd.DataFrame, pd.Series]
         Features (everything except split_column) and targets (split_column).
     """
-    data = arff_to_pandas(file_path, encoding)
+    if file_path.endswith(".arff"):
+        data = arff_to_pandas(file_path, encoding)
+    elif file_path.endswith(".csv"):
+        data = csv_to_pandas(file_path)
+    else:
+        raise ValueError("Only csv and arff files supported.")
 
     if split_column is None:
         return data.iloc[:, :-1], data.iloc[:, -1]
