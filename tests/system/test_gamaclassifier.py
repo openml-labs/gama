@@ -113,7 +113,7 @@ def _test_dataset_problem(
         class_predictions = gama.predict_from_file(
             test_path, target_column=data["target"]
         )
-        class_probabilities = gama.predict_proba_arff(
+        class_probabilities = gama.predict_proba_from_file(
             test_path, target_column=data["target"]
         )
         gama_score = gama.score_from_file(test_path)

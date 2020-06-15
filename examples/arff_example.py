@@ -8,4 +8,4 @@ if __name__ == "__main__":
     automl.fit_from_file(file_path.format("train"))
 
     label_predictions = automl.predict_from_file(file_path.format("test"))
-    probability_predictions = automl.predict_proba_arff(file_path.format("test"))
+    probability_predictions = automl.predict_proba_from_file(file_path.format("test"))

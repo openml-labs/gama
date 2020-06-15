@@ -93,7 +93,7 @@ class GamaClassifier(Gama):
         x = self._prepare_for_prediction(x)
         return self._predict_proba(x)
 
-    def predict_proba_arff(
+    def predict_proba_from_file(
         self,
         arff_file_path: str,
         target_column: Optional[str] = None,
