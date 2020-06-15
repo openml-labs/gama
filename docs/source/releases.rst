@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 20.2.1
+--------------
+Features:
+ # 66: csv files are now supported.
+    Call `fit_arff` is now `fit_from_file` which accepts both arff and csv files.
+    The CLI interface and Gama Dashboard also allow for csv files.
+
 Version 20.2.0
 --------------
 Features:
