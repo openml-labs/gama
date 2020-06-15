@@ -11,10 +11,30 @@ from pandas.api.types import is_numeric_dtype
 from gama.utilities.preprocessing import log
 
 
-def csv_to_pandas(file_path: str) -> pd.DataFrame:
-    with open(file_path, "r") as csv_file:
-        has_header = csv.Sniffer().has_header(csv_file.read(2048))
-    df = pd.read_csv(file_path, header=0 if has_header else None)
+def csv_to_pandas(file_path: str, **kwargs) -> pd.DataFrame:
+    """ Load data from the csv file into a pd.DataFrame.
+
+    Parameters
+    ----------
+    file_path: str
+        Path of the csv file
+    kwargs:
+        Additional arguments for pandas.read_csv.
+        If not specified, the presence of the header and the delimiter token are
+        both detected automatically.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A dataframe of the data in the ARFF file,
+        with categorical columns having category dtype.
+    """
+    if "header" not in kwargs:
+        with open(file_path, "r") as csv_file:
+            has_header = csv.Sniffer().has_header(csv_file.read(2048))
+        kwargs["header"] = 0 if has_header else None
+
+    df = pd.read_csv(file_path, **kwargs)
 
     # Since CSV files do not have type annotation, we must infer their type to
     # know which preprocessing steps to apply. All `str` columns and int-like columns
@@ -32,7 +52,9 @@ def csv_to_pandas(file_path: str) -> pd.DataFrame:
     return df
 
 
-def arff_to_pandas(file_path: str, encoding: Optional[str] = None) -> pd.DataFrame:
+def arff_to_pandas(
+    file_path: str, encoding: Optional[str] = None, **kwargs
+) -> pd.DataFrame:
     """ Load data from the ARFF file into a pd.DataFrame.
 
     Parameters
@@ -41,6 +63,8 @@ def arff_to_pandas(file_path: str, encoding: Optional[str] = None) -> pd.DataFra
         Path of the ARFF file
     encoding: str, optional
         Encoding of the ARFF file.
+    **kwargs:
+        Any arugments for arff.load.
 
     Returns
     -------
@@ -52,7 +76,7 @@ def arff_to_pandas(file_path: str, encoding: Optional[str] = None) -> pd.DataFra
         raise TypeError(f"`file_path` must be of type `str` but is {type(file_path)}")
 
     with open(file_path, "r", encoding=encoding) as arff_file:
-        arff_dict = arff.load(arff_file)
+        arff_dict = arff.load(arff_file, **kwargs)
 
     attribute_names, data_types = zip(*arff_dict["attributes"])
     data = pd.DataFrame(arff_dict["data"], columns=attribute_names)
@@ -65,7 +89,10 @@ def arff_to_pandas(file_path: str, encoding: Optional[str] = None) -> pd.DataFra
 
 
 def X_y_from_file(
-    file_path: str, split_column: Optional[str] = None, encoding: Optional[str] = None
+    file_path: str,
+    split_column: Optional[str] = None,
+    encoding: Optional[str] = None,
+    **kwargs,
 ) -> Tuple[pd.DataFrame, pd.Series]:
     """ Load ARFF/csv file into pd.DataFrame and specified column to pd.Series.
 
@@ -78,7 +105,9 @@ def X_y_from_file(
         Value should either match a column name or None.
         If None is specified, the last column is returned separately.
     encoding: str, optional
-        Encoding of the ARFF file.
+        Encoding, only used for ARFF files.
+    kwargs:
+        Any arguments for arff.load or pandas.read_csv
 
     Returns
     -------
@@ -86,9 +115,9 @@ def X_y_from_file(
         Features (everything except split_column) and targets (split_column).
     """
     if file_path.endswith(".arff"):
-        data = arff_to_pandas(file_path, encoding)
+        data = arff_to_pandas(file_path, encoding, **kwargs)
     elif file_path.endswith(".csv"):
-        data = csv_to_pandas(file_path)
+        data = csv_to_pandas(file_path, **kwargs)
     else:
         raise ValueError("Only csv and arff files supported.")
 

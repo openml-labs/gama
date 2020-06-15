@@ -116,7 +116,7 @@ def _test_dataset_problem(
         class_probabilities = gama.predict_proba_arff(
             test_path, target_column=data["target"]
         )
-        gama_score = gama.score_arff(test_path)
+        gama_score = gama.score_from_file(test_path)
     else:
         X, y = data["load"](return_X_y=True)
         if y_type == str:
