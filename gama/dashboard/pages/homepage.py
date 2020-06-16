@@ -9,7 +9,7 @@ import dash_table
 from dash.dependencies import Input, Output, State
 
 from gama.dashboard.pages.base_page import BasePage
-from gama.data import arff_to_pandas, load_feature_metadata_from_arff
+from gama.data import file_to_pandas, load_feature_metadata_from_file
 
 
 class HomePage(BasePage):
@@ -369,7 +369,7 @@ def build_data_navigator() -> html.Div:
     def update_data_table(filename, mode):
         if filename is not None and os.path.isfile(filename):
             if mode in ["all", "small"]:
-                df = arff_to_pandas(filename)
+                df = file_to_pandas(filename)
                 if mode == "small":
                     df = df.head(50)
 
@@ -383,7 +383,7 @@ def build_data_navigator() -> html.Div:
                 attributes = list(df.columns)
             else:
                 data_table = "Preview not enabled."
-                attributes = list(load_feature_metadata_from_arff(filename))
+                attributes = list(load_feature_metadata_from_file(filename))
 
             target_options = [{"label": c, "value": c} for c in attributes]
             default_target = attributes[-1]

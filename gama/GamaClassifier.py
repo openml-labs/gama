@@ -7,7 +7,7 @@ from sklearn.base import ClassifierMixin
 from sklearn.preprocessing import LabelEncoder
 
 from .gama import Gama
-from gama.data import X_y_from_arff
+from gama.data import X_y_from_file
 from gama.configuration.classification import clf_config
 from gama.utilities.metrics import scoring_to_metric
 
@@ -93,7 +93,7 @@ class GamaClassifier(Gama):
         x = self._prepare_for_prediction(x)
         return self._predict_proba(x)
 
-    def predict_proba_arff(
+    def predict_proba_from_file(
         self,
         arff_file_path: str,
         target_column: Optional[str] = None,
@@ -119,7 +119,7 @@ class GamaClassifier(Gama):
             The array is of shape (N, K) where N is len(X),
             and K is the number of class labels found in `y` of `fit`.
         """
-        x, _ = X_y_from_arff(arff_file_path, target_column, encoding)
+        x, _ = X_y_from_file(arff_file_path, target_column, encoding)
         x = self._prepare_for_prediction(x)
         return self._predict_proba(x)
 
