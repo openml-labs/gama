@@ -23,7 +23,7 @@ def load_csv_header(file_path: str, **kwargs) -> List[str]:
             dialect = csv.Sniffer().sniff(csv_file.read(CSV_SNIFF_SIZE))
             kwargs["sep"] = dialect.delimiter
             csv_file.seek(0)
-        first_line = csv_file.readline()
+        first_line = csv_file.readline()[:-1]
 
     if has_header:
         return first_line.split(kwargs["sep"])
