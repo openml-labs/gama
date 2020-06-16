@@ -7,6 +7,10 @@ Features:
  # 66: csv files are now supported.
     Call `fit_arff` is now `fit_from_file` which accepts both arff and csv files.
     The CLI interface and Gama Dashboard also allow for csv files.
+ # 92: You can specify a memory limit through `max_memory_mb` hyperparameter.
+    GAMA does not guarantee it will not violate the constraint, but violations
+    should be infrequent and minor. Feel free to open an issue if you experience a
+    violation which does not minor.
 
 Version 20.2.0
 --------------
