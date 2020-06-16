@@ -87,6 +87,7 @@ class Gama(ABC):
         max_total_time: int = 3600,
         max_eval_time: Optional[int] = None,
         n_jobs: Optional[int] = None,
+        max_memory_mb: Optional[int] = None,
         verbosity: int = logging.WARNING,
         keep_analysis_log: Optional[str] = "gama.log",
         search_method: BaseSearch = AsyncEA(),
@@ -133,6 +134,12 @@ class Gama(ABC):
             Accepted values are positive integers, -1 or None.
             If -1 is specified, multiprocessing.cpu_count() processes are created.
             If None is specified, multiprocessing.cpu_count() / 2 processes are created.
+
+        max_memory_mb: int, optional (default=None)
+            Sets the total amount of memory GAMA is allowed to use (in megabytes).
+            If not set, GAMA will use as much as it needs.
+            GAMA is not guaranteed to respect this limit at all times,
+            but it should never violate it for too long.
 
         verbosity: int (default=logging.WARNING)
             Sets the level of log messages to be automatically output to terminal.
@@ -190,6 +197,9 @@ class Gama(ABC):
                 f"is not allowed. max_eval_time set to {max_total_time}."
             )
             max_eval_time = max_total_time
+
+        if max_memory_mb is not None:
+            AsyncEvaluator.memory_limit_mb = max_memory_mb
 
         self._max_eval_time = max_eval_time
         self._time_manager = TimeKeeper(max_total_time)
