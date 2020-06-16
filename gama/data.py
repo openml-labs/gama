@@ -1,15 +1,80 @@
 """ This module contains functions for loading data. """
 from collections import OrderedDict
-from typing import Tuple, Optional, Dict, Union, Type
+import csv
+from typing import Tuple, Optional, Dict, Union, Type, List
 
 import arff
 import numpy as np
 import pandas as pd
+from pandas.api.types import is_numeric_dtype
 
 from gama.utilities.preprocessing import log
 
 
-def arff_to_pandas(file_path: str, encoding: Optional[str] = None) -> pd.DataFrame:
+CSV_SNIFF_SIZE = 2 ** 12
+
+
+def load_csv_header(file_path: str, **kwargs) -> List[str]:
+    """ Return column names in the header, or 0...N if no header is present. """
+    with open(file_path, "r") as csv_file:
+        has_header = csv.Sniffer().has_header(csv_file.read(CSV_SNIFF_SIZE))
+        csv_file.seek(0)
+        if "sep" not in kwargs:
+            dialect = csv.Sniffer().sniff(csv_file.read(CSV_SNIFF_SIZE))
+            kwargs["sep"] = dialect.delimiter
+            csv_file.seek(0)
+        first_line = csv_file.readline()[:-1]
+
+    if has_header:
+        return first_line.split(kwargs["sep"])
+    else:
+        return [str(i) for i, _ in enumerate(first_line.split(kwargs["sep"]))]
+
+
+def csv_to_pandas(file_path: str, **kwargs) -> pd.DataFrame:
+    """ Load data from the csv file into a pd.DataFrame.
+
+    Parameters
+    ----------
+    file_path: str
+        Path of the csv file
+    kwargs:
+        Additional arguments for pandas.read_csv.
+        If not specified, the presence of the header and the delimiter token are
+        both detected automatically.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A dataframe of the data in the ARFF file,
+        with categorical columns having category dtype.
+    """
+    if "header" not in kwargs:
+        with open(file_path, "r") as csv_file:
+            has_header = csv.Sniffer().has_header(csv_file.read(CSV_SNIFF_SIZE))
+        kwargs["header"] = 0 if has_header else None
+
+    df = pd.read_csv(file_path, **kwargs)
+
+    # Since CSV files do not have type annotation, we must infer their type to
+    # know which preprocessing steps to apply. All `str` columns and int-like columns
+    # with <=10 unique values are considered categorical.
+    for column, n_unique in df.nunique(dropna=True).items():
+        if df[column].dtype == "object":
+            df[column] = df[column].astype("category")
+        elif n_unique <= 10 and is_numeric_dtype(df[column]):
+            for x in df[column].dropna().unique():
+                if isinstance(x, float) and not x.is_integer():
+                    break
+            else:
+                df[column] = df[column].astype("category")
+
+    return df
+
+
+def arff_to_pandas(
+    file_path: str, encoding: Optional[str] = None, **kwargs
+) -> pd.DataFrame:
     """ Load data from the ARFF file into a pd.DataFrame.
 
     Parameters
@@ -18,6 +83,8 @@ def arff_to_pandas(file_path: str, encoding: Optional[str] = None) -> pd.DataFra
         Path of the ARFF file
     encoding: str, optional
         Encoding of the ARFF file.
+    **kwargs:
+        Any arugments for arff.load.
 
     Returns
     -------
@@ -29,7 +96,7 @@ def arff_to_pandas(file_path: str, encoding: Optional[str] = None) -> pd.DataFra
         raise TypeError(f"`file_path` must be of type `str` but is {type(file_path)}")
 
     with open(file_path, "r", encoding=encoding) as arff_file:
-        arff_dict = arff.load(arff_file)
+        arff_dict = arff.load(arff_file, **kwargs)
 
     attribute_names, data_types = zip(*arff_dict["attributes"])
     data = pd.DataFrame(arff_dict["data"], columns=attribute_names)
@@ -41,10 +108,40 @@ def arff_to_pandas(file_path: str, encoding: Optional[str] = None) -> pd.DataFra
     return data
 
 
-def X_y_from_arff(
-    file_path: str, split_column: Optional[str] = None, encoding: Optional[str] = None
+def file_to_pandas(
+    file_path: str, encoding: Optional[str] = None, **kwargs
+) -> pd.DataFrame:
+    """ Load ARFF/csv file into pd.DataFrame.
+
+    Parameters
+    ----------
+    file_path: str
+        path to the csv or ARFF file.
+    encoding: str, optional
+        Encoding, only used for ARFF files.
+    kwargs:
+        Any arguments for arff.load or pandas.read_csv
+
+    Returns
+    -------
+    pd.DataFrame
+    """
+    if file_path.endswith(".arff"):
+        data = arff_to_pandas(file_path, encoding, **kwargs)
+    elif file_path.endswith(".csv"):
+        data = csv_to_pandas(file_path, **kwargs)
+    else:
+        raise ValueError("Only csv and arff files supported.")
+    return data
+
+
+def X_y_from_file(
+    file_path: str,
+    split_column: Optional[str] = None,
+    encoding: Optional[str] = None,
+    **kwargs,
 ) -> Tuple[pd.DataFrame, pd.Series]:
-    """ Load data from ARFF file into pd.DataFrame and specified column to pd.Series.
+    """ Load ARFF/csv file into pd.DataFrame and specified column to pd.Series.
 
     Parameters
     ----------
@@ -55,21 +152,37 @@ def X_y_from_arff(
         Value should either match a column name or None.
         If None is specified, the last column is returned separately.
     encoding: str, optional
-        Encoding of the ARFF file.
+        Encoding, only used for ARFF files.
+    kwargs:
+        Any arguments for arff.load or pandas.read_csv
 
     Returns
     -------
     Tuple[pd.DataFrame, pd.Series]
         Features (everything except split_column) and targets (split_column).
     """
-    data = arff_to_pandas(file_path, encoding)
-
+    data = file_to_pandas(file_path, encoding, **kwargs)
     if split_column is None:
         return data.iloc[:, :-1], data.iloc[:, -1]
     elif split_column in data.columns:
         return data.loc[:, data.columns != split_column], data.loc[:, split_column]
     else:
         raise ValueError(f"No column named {split_column} found in {file_path}")
+
+
+def load_feature_metadata_from_file(file_path: str) -> Dict[str, str]:
+    """ Load the header of the csv or ARFF file, return the type of each attribute.
+
+    For csv files, presence of a header is detected with the Python csv parser.
+    If no header is present in the csv file, the columns will be labeled with a number.
+    Additionally, the column types is not inferred for csv files.
+    """
+    if file_path.lower().endswith(".arff"):
+        return load_feature_metadata_from_arff(file_path)
+    elif file_path.lower().endswith(".csv"):
+        return {c: "" for c in load_csv_header(file_path)}
+    else:
+        raise ValueError("Only csv and arff files are supported.")
 
 
 def load_feature_metadata_from_arff(file_path: str) -> Dict[str, str]:

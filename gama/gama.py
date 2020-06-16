@@ -36,7 +36,7 @@ from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
 from gama.utilities.metrics import scoring_to_metric
 
 from gama.__version__ import __version__
-from gama.data import X_y_from_arff, format_x_y
+from gama.data import X_y_from_file, format_x_y
 from gama.search_methods.async_ea import AsyncEA
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.logging.utility_functions import register_stream_log, register_file_log
@@ -291,32 +291,35 @@ class Gama(ABC):
         x = self._prepare_for_prediction(x)
         return self._predict(x)
 
-    def predict_arff(
+    def predict_from_file(
         self,
-        arff_file_path: str,
+        file_path: str,
         target_column: Optional[str] = None,
         encoding: Optional[str] = None,
+        **kwargs,
     ) -> np.ndarray:
         """ Predict the target for input found in the ARFF file.
 
         Parameters
         ----------
-        arff_file_path: str
-            An ARFF file with the same columns as the one that used in fit.
+        file_path: str
+            A csv or ARFF file with the same columns as the one that used in fit.
             Target column must be present in file, but its values are ignored.
         target_column: str, optional (default=None)
             Specifies which column the model should predict.
             If left None, the last column is taken to be the target.
         encoding: str, optional
             Encoding of the ARFF file.
+        **kwargs:
+            Any additional arguments for calls to pandas.read_csv or arff.load.
 
         Returns
         -------
         numpy.ndarray
             array with predictions for each row in the ARFF file.
         """
-        x, _ = X_y_from_arff(
-            arff_file_path, split_column=target_column, encoding=encoding
+        x, _ = X_y_from_file(
+            file_path, split_column=target_column, encoding=encoding, **kwargs
         )
         x = self._prepare_for_prediction(x)
         return self._predict(x)
@@ -345,59 +348,65 @@ class Gama(ABC):
         )
         return self._metrics[0].score(y, predictions)
 
-    def score_arff(
+    def score_from_file(
         self,
-        arff_file_path: str,
+        file_path: str,
         target_column: Optional[str] = None,
         encoding: Optional[str] = None,
+        **kwargs,
     ) -> float:
         """ Calculate `self.scoring` metric of the model on data in the file.
 
         Parameters
         ----------
-        arff_file_path: str
-            An ARFF file with which to calculate the score.
+        file_path: str
+            A csv or ARFF file with which to calculate the score.
         target_column: str, optional (default=None)
             Specifies which column the model should predict.
             If left None, the last column is taken to be the target.
         encoding: str, optional
             Encoding of the ARFF file.
+        **kwargs:
+            Any additional arguments for calls to pandas.read_csv or arff.load.
 
         Returns
         -------
         float
             The score obtained on the given test data according to the `scoring` metric.
         """
-        x, y = X_y_from_arff(
-            arff_file_path, split_column=target_column, encoding=encoding
+        x, y = X_y_from_file(
+            file_path, split_column=target_column, encoding=encoding, **kwargs
         )
         return self.score(x, y)
 
-    def fit_arff(
+    def fit_from_file(
         self,
-        arff_file_path: str,
+        file_path: str,
         target_column: Optional[str] = None,
         encoding: Optional[str] = None,
-        *args,
+        warm_start: bool = False,
         **kwargs,
     ) -> None:
         """ Find and fit a model to predict the target column (last) from other columns.
 
         Parameters
         ----------
-        arff_file_path: str
-            Path to an ARFF file containing the training data.
+        file_path: str
+            Path to a csv or ARFF file containing the training data.
         target_column: str, optional (default=None)
             Specifies which column the model should predict.
             If left None, the last column is taken to be the target.
         encoding: str, optional
-            Encoding of the ARFF file.
+            Encoding of the file.
+        warm_start: bool (default=False)
+            Indicates the optimization should continue using the last individuals of the
+            previous `fit` call.
+        **kwargs:
+            Any additional arguments for calls to pandas.read_csv or arff.load.
 
         """
-        x, y = X_y_from_arff(
-            arff_file_path, split_column=target_column, encoding=encoding
-        )
-        self.fit(x, y, *args, **kwargs)
+        x, y = X_y_from_file(file_path, target_column, encoding, **kwargs)
+        self.fit(x, y, warm_start)
 
     def fit(
         self,

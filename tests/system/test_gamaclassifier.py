@@ -109,12 +109,14 @@ def _test_dataset_problem(
         y_test = [str(val) for val in y_test]
 
         with Stopwatch() as sw:
-            gama.fit_arff(train_path, target_column=data["target"])
-        class_predictions = gama.predict_arff(test_path, target_column=data["target"])
-        class_probabilities = gama.predict_proba_arff(
+            gama.fit_from_file(train_path, target_column=data["target"])
+        class_predictions = gama.predict_from_file(
             test_path, target_column=data["target"]
         )
-        gama_score = gama.score_arff(test_path)
+        class_probabilities = gama.predict_proba_from_file(
+            test_path, target_column=data["target"]
+        )
+        gama_score = gama.score_from_file(test_path)
     else:
         X, y = data["load"](return_X_y=True)
         if y_type == str:

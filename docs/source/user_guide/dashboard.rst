@@ -22,7 +22,7 @@ Starting GAMA Dashboard will open a new tab in your webbrowser which will show t
 .. image:: images/DashboardHome.png
 
 On the left you can configure GAMA, on the right you can select the dataset you want to perform AutoML on.
-To provide a dataset, specify the path to the ARFF-file which contains your data.
+To provide a dataset, specify the path to the csv or ARFF-file which contains your data.
 Once the dataset has been set, the `Go!`-button on the bottom left will be enabled.
 When you are satisfied with your chosen configuration, press the `Go!`-button to start GAMA.
 This will take you to the 'Running' tab.
