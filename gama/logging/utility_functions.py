@@ -79,6 +79,8 @@ class MultiprocessingLogger(object):
                 log.log(level, message)
             except queue.Empty:
                 break
+            except TypeError as e:
+                log.warning(f"TypeError while flushing to log: {str(e)}")
 
         if i > 0:
             log.debug("Flushed {} log messages.".format(i))

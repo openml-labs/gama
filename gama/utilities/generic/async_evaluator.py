@@ -19,6 +19,7 @@ import logging
 import multiprocessing
 import os
 import queue
+import struct
 import time
 import traceback
 import uuid
@@ -95,6 +96,8 @@ class AsyncEvaluator:
         self.futures: Dict[uuid.UUID, AsyncFuture] = {}
         self._processes: List[psutil.Process] = []
         self._n_jobs = n_workers if n_workers is not None else AsyncEvaluator.n_jobs
+        self._mem_violations = 0
+        self._mem_behaved = 0
 
         self._queue_manager = multiprocessing.Manager()
         self._input = self._queue_manager.Queue()
@@ -116,19 +119,10 @@ class AsyncEvaluator:
             f"Process {self._main_process.pid} starting {self._n_jobs} subprocesses."
         )
         for _ in range(self._n_jobs):
-            mp_process = multiprocessing.Process(
-                target=evaluator_daemon,
-                args=(self._input, self._output, AsyncEvaluator.defaults),
-                daemon=True,
-            )
-            mp_process.start()
-
-            subprocess = psutil.Process(mp_process.pid)
-            self._processes.append(subprocess)
-
-            if resource and AsyncEvaluator.memory_limit_mb:
-                limit = AsyncEvaluator.memory_limit_mb * (2 ** 20)
-                resource.prlimit(subprocess.pid, resource.RLIMIT_AS, (limit, limit))
+            self._start_worker_process()
+            # if resource and AsyncEvaluator.memory_limit_mb:
+            #     limit = AsyncEvaluator.memory_limit_mb * (2 ** 20)
+            #     resource.prlimit(subprocess.pid, resource.RLIMIT_AS, (limit, limit))
 
         self._log_memory_usage()
         return self
@@ -192,6 +186,8 @@ class AsyncEvaluator:
 
         while True:
             try:
+                self._control_memory_usage()
+                self._log_memory_usage()
                 completed_future = self._output.get(block=False)
                 match = self.futures.pop(completed_future.id)
                 match.result, match.exception, match.traceback = (
@@ -199,11 +195,79 @@ class AsyncEvaluator:
                     completed_future.exception,
                     completed_future.traceback,
                 )
-                self._log_memory_usage()
+                self._mem_behaved += 1
+                # self._log_memory_usage()
                 return match
             except queue.Empty:
                 time.sleep(poll_time)
                 continue
+
+    def _start_worker_process(self) -> psutil.Process:
+        """ Start a new worker node and add it to the process pool. """
+        mp_process = multiprocessing.Process(
+            target=evaluator_daemon,
+            args=(self._input, self._output, AsyncEvaluator.defaults),
+            daemon=True,
+        )
+        mp_process.start()
+        subprocess = psutil.Process(mp_process.pid)
+        self._processes.append(subprocess)
+        return subprocess
+
+    def _stop_worker_process(self, process: psutil.Process):
+        """ Terminate a new worker node and remove it from the process pool. """
+        process.terminate()
+        self._processes.remove(process)
+
+    def _control_memory_usage(self, threshold=0.05):
+        """ Dynamically restarts or kills processes to adhere to memory constraints. """
+        if AsyncEvaluator.memory_limit_mb is None:
+            return
+        # If the memory usage of all processes (the main process, and the evaluation
+        # subprocesses) exceeds the maximum allowed memory usage, we have to terminate
+        # one of them.
+        # If we were never to start new processes, eventually all subprocesses would
+        # likely be killed due to 'silly' pipelines (e.g. multiple polynomial feature
+        # steps).
+        # On the other hand if there is e.g. a big dataset, by always restarting we
+        # will set up the same scenario for failure over and over again.
+        # So we want to dynamically find the right amount of evaluation processes, such
+        # that the total memory usage is not exceeded "too often".
+        # Here `threshold` defines the ratio of processes that should be allowed to
+        # fail due to memory constraints. Setting it too high might lead to aggressive
+        # subprocess killing and underutilizing compute resources. If it is too low,
+        # the number of concurrent jobs might shrink too slowly inducing a lot of
+        # loss in compute time due to interrupted evaluations.
+        # ! Like the rest of this module, I hate to use custom code with this,
+        # in particular there is a risk that terminating the process might leave
+        # the multiprocess queue broken.
+        processes = [self._main_process] + self._processes
+        mem_proc = [(p.memory_info()[0] / (2 ** 20), p) for p in processes]
+        if sum(map(lambda x: x[0], mem_proc)) > AsyncEvaluator.memory_limit_mb:
+            log.info(
+                f"GAMA exceeded memory usage "
+                f"({self._mem_violations}, {self._mem_behaved})."
+            )
+            self._log_memory_usage()
+            self._mem_violations += 1
+            # Find the process with the most memory usage, that is not the main process
+            _, proc = max(mem_proc[1:], key=lambda t: t[0])
+            n_evaluations = self._mem_violations + self._mem_behaved
+            fail_ratio = self._mem_violations / n_evaluations
+            if fail_ratio < threshold or len(self._processes) == 1:
+                # restart `pid`
+                log.info(f"Terminating {proc.pid} due to memory usage.")
+                self._stop_worker_process(proc)
+                log.info("Starting new evaluations process.")
+                self._start_worker_process()
+            else:
+                # More than one process left alive and a violation of the threshold,
+                # requires killing a subprocess.
+                self._mem_behaved = 0
+                self._mem_violations = 0
+                log.info(f"Terminating {proc.pid} due to memory usage.")
+                self._stop_worker_process(proc)
+            # todo: update the Future of the evaluation that was terminated.
 
     def _log_memory_usage(self):
         processes = [self._main_process] + self._processes
@@ -247,13 +311,14 @@ def evaluator_daemon(
                         result.error = "MemoryError"
                         gc.collect()
                 output_queue.put(future)
-            except MemoryError:
+            except (MemoryError, struct.error) as e:
                 future.result = None
-                future.exception = "ProcessMemoryError"
+                future.exception = str(type(e))
                 gc.collect()
                 output_queue.put(future)
     except Exception as e:
         # There are no plans currently for recovering from any exception:
         print(f"Stopping daemon:{type(e)}:{str(e)}")
+        traceback.print_exc()
     # Not sure if required: give main process time to process log message.
     time.sleep(5)
