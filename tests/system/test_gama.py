@@ -11,7 +11,7 @@ from gama import GamaClassifier
 
 @pytest.fixture
 def gamaclassifier():
-    return GamaClassifier(random_state=0, max_total_time=60)
+    return GamaClassifier(random_state=0, max_total_time=60, max_memory_mb=2_000)
 
 
 def _gama_on_digits(gama):
