@@ -19,6 +19,7 @@ import logging
 import multiprocessing
 import os
 import queue
+import struct
 import time
 import traceback
 import uuid
@@ -310,13 +311,14 @@ def evaluator_daemon(
                         result.error = "MemoryError"
                         gc.collect()
                 output_queue.put(future)
-            except MemoryError:
+            except (MemoryError, struct.error) as e:
                 future.result = None
-                future.exception = "ProcessMemoryError"
+                future.exception = str(type(e))
                 gc.collect()
                 output_queue.put(future)
     except Exception as e:
         # There are no plans currently for recovering from any exception:
         print(f"Stopping daemon:{type(e)}:{str(e)}")
+        traceback.print_exc()
     # Not sure if required: give main process time to process log message.
     time.sleep(5)
