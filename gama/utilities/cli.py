@@ -105,7 +105,11 @@ def parse_args():
 
     # Extra
     parser.add_argument(
-        "-log", dest="logpath", default=None, type=str, help="File to store GAMA's log."
+        "-outdir",
+        dest="outdir",
+        default=None,
+        type=str,
+        help="Directory to store GAMA logs",
     )
     parser.add_argument(
         "-v",
@@ -154,7 +158,8 @@ def main():
         max_eval_time=args.max_eval_time_m * 60,
         n_jobs=args.n_jobs,
         verbosity=log_level,
-        keep_analysis_log=args.logpath,
+        output_directory=args.outdir,
+        store_logs=not args.dry_run,
     )
     if args.metric:
         configuration["scoring"] = args.metric
@@ -177,6 +182,8 @@ def main():
 
         if args.export_python is not None:
             automl.export_script(args.export_python, raise_if_exists=False)
+    else:
+        automl.cleanup("all")
     print("done!")
 
 

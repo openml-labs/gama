@@ -34,6 +34,7 @@ def _test_gama_regressor(gama, X_train, X_test, y_train, y_test, data, metric):
     assert (
         data["base_mse"] >= mse
     ), "predictions should be at least as good as predicting mean."
+    gama.cleanup("all")
 
 
 def _test_dataset_problem(data, metric):
@@ -47,6 +48,7 @@ def _test_dataset_problem(data, metric):
         n_jobs=1,
         max_eval_time=300,
         post_processing_method=EnsemblePostProcessing(ensemble_size=5),
+        store_logs=False,
     )
     _test_gama_regressor(gama, *split_data, data, metric)
 
@@ -65,5 +67,7 @@ def test_missing_value_regression():
     X_train[1:300:2, 0] = X_train[2:300:5, 1] = float("NaN")
     X_test[1:100:2, 0] = X_test[2:100:5, 1] = float("NaN")
 
-    gama = GamaRegressor(random_state=0, max_total_time=TOTAL_TIME_S, scoring=metric)
+    gama = GamaRegressor(
+        random_state=0, max_total_time=TOTAL_TIME_S, scoring=metric, store_logs=False
+    )
     _test_gama_regressor(gama, X_train, X_test, y_train, y_test, data, metric)

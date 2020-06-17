@@ -1,3 +1,4 @@
+import shutil
 from abc import ABC
 from collections import defaultdict
 from functools import partial
@@ -89,10 +90,10 @@ class Gama(ABC):
         n_jobs: Optional[int] = None,
         max_memory_mb: Optional[int] = None,
         verbosity: int = logging.WARNING,
-        keep_analysis_log: Optional[str] = "gama.log",
         search_method: BaseSearch = AsyncEA(),
         post_processing_method: BasePostProcessing = BestFitPostProcessing(),
-        cache: Optional[str] = None,
+        output_directory: Optional[str] = None,
+        store_logs: bool = True,
     ):
         """
 
@@ -144,10 +145,6 @@ class Gama(ABC):
         verbosity: int (default=logging.WARNING)
             Sets the level of log messages to be automatically output to terminal.
 
-        keep_analysis_log: str, optional (default='gama.log')
-            If non-empty str, specify filepath where the log should be stored.
-            If `None`, no log is stored.
-
         search_method: BaseSearch (default=AsyncEA())
             Search method to use to find good pipelines. Should be instantiated.
 
@@ -155,16 +152,23 @@ class Gama(ABC):
             Post-processing method to create a model after the search phase.
             Should be an instantiated subclass of BasePostProcessing.
 
-        cache: str, optional (default=None)
-            Directory to use to save intermediate results during search.
-            If set to None, generate a unique cache name.
-        """
-        register_stream_log(verbosity)
-        if keep_analysis_log is not None:
-            register_file_log(keep_analysis_log)
+        output_directory: str, optional (default=None)
+            Directory to use to save GAMA output. This includes both intermediate
+            results during search and logs.
+            If set to None, generate a unique name ("gama_HEXCODE").
 
-        if keep_analysis_log is not None and not os.path.isabs(keep_analysis_log):
-            keep_analysis_log = os.path.abspath(keep_analysis_log)
+        store_logs: bool (default=True)
+            If enabled, store logs of GAMAs evaluations and resource usage.
+        """
+        if not output_directory:
+            output_directory = f"gama_{str(uuid.uuid4())}"
+        self.output_directory = os.path.abspath(output_directory)
+        if not os.path.exists(self.output_directory):
+            os.mkdir(self.output_directory)
+
+        register_stream_log(verbosity)
+        if store_logs:
+            register_file_log(os.path.join(output_directory, "gama.log"))
 
         arguments = ",".join(
             [f"{k}={v}" for (k, v) in locals().items() if k not in ["self", "config"]]
@@ -177,16 +181,17 @@ class Gama(ABC):
             n_jobs = multiprocessing.cpu_count() // 2
             log.debug("n_jobs defaulted to %d", n_jobs)
 
+        err = ""
         if max_total_time is None or max_total_time <= 0:
-            raise ValueError(
-                f"Expect positive int for max_total_time, got {max_total_time}."
-            )
+            err = f"Expect positive int for max_total_time, got {max_total_time}."
         if max_eval_time is not None and max_eval_time <= 0:
-            raise ValueError(
-                f"Expect None or positive int for max_eval_time, got {max_eval_time}."
-            )
+            err = f"Expect None or positive int for max_eval_time, got {max_eval_time}."
         if n_jobs < -1 or n_jobs == 0:
-            raise ValueError(f"n_jobs should be -1 or positive int but is {n_jobs}.")
+            err = f"n_jobs should be -1 or positive int but is {n_jobs}."
+        if err:
+            self.cleanup("all")
+            raise ValueError(err)
+
         AsyncEvaluator.n_jobs = n_jobs
 
         if max_eval_time is None:
@@ -221,17 +226,16 @@ class Gama(ABC):
         self._final_pop: List[Individual] = []
 
         self._subscribers: Dict[str, List[Callable]] = defaultdict(list)
-        if not cache:
-            cache = f"cache_{str(uuid.uuid4())}"
+        cache_directory = os.path.join(self.output_directory, "cache")
         if isinstance(post_processing_method, EnsemblePostProcessing):
             self._evaluation_library = EvaluationLibrary(
                 m=post_processing_method.hyperparameters["max_models"],
                 n=post_processing_method.hyperparameters["hillclimb_size"],
-                cache=cache,
+                cache=cache_directory,
             )
         else:
             # Don't keep memory-heavy evaluation meta-data (predictions, estimators)
-            self._evaluation_library = EvaluationLibrary(m=0, cache=cache)
+            self._evaluation_library = EvaluationLibrary(m=0, cache=cache_directory)
         self.evaluation_completed(self._evaluation_library.save_evaluation)
 
         self._pset, parameter_checks = pset_from_config(config)
@@ -255,6 +259,17 @@ class Gama(ABC):
             evaluate_callback=self._on_evaluation_completed,
             completed_evaluations=self._evaluation_library.lookup,
         )
+
+    def cleanup(self, which="evaluations"):
+        cache_directory = os.path.join(self.output_directory, "cache")
+        if which in ["logs", "all"]:
+            for file in os.listdir(self.output_directory):
+                if file.endswith(".log"):
+                    os.remove(os.path.join(self.output_directory, file))
+        if which in ["evaluations", "all"] and os.path.exists(cache_directory):
+            shutil.rmtree(cache_directory)
+        if which == "all":
+            os.rmdir(self.output_directory)
 
     def _np_to_matching_dataframe(self, x: np.ndarray) -> pd.DataFrame:
         """ Format np array to dataframe whose column types match the training data. """

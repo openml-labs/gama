@@ -97,6 +97,7 @@ def _test_dataset_problem(
         search_method=search,
         n_jobs=1,
         post_processing_method=EnsemblePostProcessing(ensemble_size=5),
+        store_logs=False,
     )
     if arff:
         train_path = f"tests/data/{data['name']}_train.arff"
@@ -172,6 +173,7 @@ def _test_dataset_problem(
 
     score_to_match = logloss if metric == "neg_log_loss" else accuracy
     assert score_to_match == pytest.approx(gama_score)
+    gama.cleanup("all")
     return gama
 
 
