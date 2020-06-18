@@ -1,5 +1,4 @@
 import logging
-from functools import partial
 from typing import Optional, Any, Tuple, Dict, List, Callable
 
 import pandas as pd
@@ -7,7 +6,6 @@ import pandas as pd
 from gama.genetic_programming.components import Individual
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.logging.machine_logging import TOKENS, log_event
-from gama.logging.utility_functions import MultiprocessingLogger
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 
@@ -91,9 +89,6 @@ def async_ea(
         )
 
     max_pop_size = population_size
-    logger = MultiprocessingLogger()
-
-    evaluate_log = partial(ops.evaluate, logger=logger)
 
     current_population = output
     n_evaluated_individuals = 0
@@ -105,13 +100,12 @@ def async_ea(
             current_population[:] = []
             log.info("Starting EA with new population.")
             for individual in start_candidates:
-                async_.submit(evaluate_log, individual)
+                async_.submit(ops.evaluate, individual)
 
             while (max_n_evaluations is None) or (
                 n_evaluated_individuals < max_n_evaluations
             ):
                 future = ops.wait_next(async_)
-                logger.flush_to_log(log)
                 if future.exception is None:
                     individual = future.result.individual
                     current_population.append(individual)
@@ -122,7 +116,7 @@ def async_ea(
 
                 if len(current_population) > 2:
                     new_individual = ops.create(current_population, 1)[0]
-                    async_.submit(evaluate_log, new_individual)
+                    async_.submit(ops.evaluate, new_individual)
 
                 should_restart = restart_callback is not None and restart_callback()
                 n_evaluated_individuals += 1

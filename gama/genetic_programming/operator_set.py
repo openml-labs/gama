@@ -54,19 +54,6 @@ class OperatorSet:
                 if not full_evaluation:
                     # We don't process low-fidelity evaluations here (for now?).
                     return future
-
-            individual = evaluation.individual
-            log_event(
-                log,
-                TOKENS.EVALUATION_RESULT,
-                individual.fitness.start_time,
-                evaluation.pid,
-                individual.fitness.wallclock_time,
-                individual.fitness.process_time,
-                individual.fitness.values,
-                individual._id,
-                individual.pipeline_str(),
-            )
             if self._evaluate_callback is not None:
                 self._evaluate_callback(evaluation)
 

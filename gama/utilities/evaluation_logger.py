@@ -48,6 +48,7 @@ class EvaluationLogger:
                 ),
                 score=partial(nested_getattr, attr="individual.fitness.values"),
                 pipeline=lambda e: e.individual.pipeline_str(),
+                error=operator.attrgetter("error"),
             )
         else:
             self.fields = fields

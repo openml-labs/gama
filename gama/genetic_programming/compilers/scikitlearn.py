@@ -14,8 +14,6 @@ from gama.utilities.generic.stopwatch import Stopwatch
 import numpy as np
 from gama.utilities.metrics import Metric
 from gama.genetic_programming.components import Individual, PrimitiveNode, Fitness
-from gama.logging.utility_functions import MultiprocessingLogger
-from gama.logging.machine_logging import TOKENS, log_event
 
 log = logging.getLogger(__name__)
 
@@ -52,14 +50,7 @@ def object_is_valid_pipeline(o):
 
 
 def evaluate_pipeline(
-    pipeline,
-    x,
-    y_train,
-    timeout: float,
-    metrics: Tuple[Metric],
-    cv=5,
-    logger=None,
-    subsample=None,
+    pipeline, x, y_train, timeout: float, metrics: Tuple[Metric], cv=5, subsample=None,
 ) -> Tuple:
     """ Score `pipeline` with k-fold CV according to `metrics` on (a subsample of) X, y
 
@@ -71,12 +62,9 @@ def evaluate_pipeline(
         estimators: list of fitted pipelines if successful, None if not
         error: None if successful, otherwise an Exception
     """
-    if not logger:
-        logger = log
     if not object_is_valid_pipeline(pipeline):
         raise TypeError(f"Pipeline must not be None and requires fit, predict, steps.")
 
-    start_datetime = datetime.now()
     prediction, estimators = None, None
     # default score for e.g. timeout or failure
     scores = tuple([float("-inf")] * len(metrics))
@@ -123,36 +111,16 @@ def evaluate_pipeline(
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            if isinstance(logger, MultiprocessingLogger):
-                logger.debug(f"{type(e)} raised during evaluation.")
-            else:
-                logger.debug(f"{type(e)} raised during evaluation.", exc_info=True)
-
-            single_line_pipeline = str(pipeline).replace("\n", "")
-            log_event(
-                logger,
-                TOKENS.EVALUATION_ERROR,
-                start_datetime,
-                single_line_pipeline,
-                type(e),
-                e,
-            )
             return prediction, scores, estimators, e
 
     if c_mgr.state == c_mgr.INTERRUPTED:
         # A TimeoutException was raised, but not by the context manager.
         # This indicates that the outer context manager (the ea) timed out.
-        logger.info("Outer-timeout during evaluation of {}".format(pipeline))
         raise stopit.utils.TimeoutException()
 
     if not c_mgr:
         # For now we treat an eval timeout the same way as
         # e.g. NaN exceptions and use the default score.
-        single_line_pipeline = str(pipeline).replace("\n", "")
-        log_event(
-            logger, TOKENS.EVALUATION_TIMEOUT, start_datetime, single_line_pipeline
-        )
-        logger.debug(f"Timeout after {timeout}s: {pipeline}")
         return prediction, scores, estimators, stopit.TimeoutException()
 
     return prediction, tuple(scores), estimators, None
