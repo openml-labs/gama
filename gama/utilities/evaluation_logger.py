@@ -35,17 +35,23 @@ class EvaluationLogger:
         self._file_path = file_path
         self._sep = separator
 
-        self.fields = dict(
-            id=partial(nested_getattr, attr="individual._id"),
-            pid=operator.attrgetter("pid"),
-            t_start=partial(nested_getattr, attr="individual.fitness.start_time"),
-            t_wallclock=partial(
-                nested_getattr, attr="individual.fitness.wallclock_time"
-            ),
-            t_process=partial(nested_getattr, attr="individual.fitness.process_time"),
-            score=partial(nested_getattr, attr="individual.fitness.values"),
-            pipeline=lambda e: e.individual.pipeline_str(),
-        )
+        if fields is None:
+            self.fields: Dict[str, Callable[[Evaluation], str]] = dict(
+                id=partial(nested_getattr, attr="individual._id"),
+                pid=operator.attrgetter("pid"),
+                t_start=partial(nested_getattr, attr="individual.fitness.start_time"),
+                t_wallclock=partial(
+                    nested_getattr, attr="individual.fitness.wallclock_time"
+                ),
+                t_process=partial(
+                    nested_getattr, attr="individual.fitness.process_time"
+                ),
+                score=partial(nested_getattr, attr="individual.fitness.values"),
+                pipeline=lambda e: e.individual.pipeline_str(),
+            )
+        else:
+            self.fields = fields
+
         self.log_line(list(self.fields))
 
     def log_line(self, values: Iterable[str]):
