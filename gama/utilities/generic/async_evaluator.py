@@ -15,25 +15,23 @@ but it has issues:
       I don't want errors for expected behavior.
 """
 import datetime
+import gc
 import logging
 import multiprocessing
 import os
+import psutil
 import queue
 import struct
 import time
 import traceback
-import uuid
 from typing import Optional, Callable, Dict, List
-import gc
+import uuid
 
 try:
     import resource
 except ModuleNotFoundError:
     resource = None  # type: ignore
 
-import psutil
-
-from gama.logging import MACHINE_LOG_LEVEL
 
 log = logging.getLogger(__name__)
 
@@ -68,9 +66,6 @@ class AsyncEvaluator:
     Using the same AsyncEvaluator in two different contexts raises a `RuntimeError`.
 
     class variables:
-    n_jobs: int (default=multiprocessing.cpu_count())
-        The default number of subprocesses to spawn.
-        Ignored if the `n_workers` parameter is specified on init.
     defaults: Dict, optional (default=None)
         Default parameter values shared between all submit calls.
         This allows these defaults to be transferred only once per process,
@@ -78,12 +73,13 @@ class AsyncEvaluator:
         Only supports keyword arguments.
     """
 
-    n_jobs: int = multiprocessing.cpu_count()
-    memory_limit_mb: Optional[int] = None
     defaults: Dict = {}
 
     def __init__(
-        self, n_workers: Optional[int] = None,
+        self,
+        n_workers: Optional[int] = None,
+        memory_limit_mb: Optional[int] = None,
+        logfile: Optional[str] = None,
     ):
         """
         Parameters
@@ -91,13 +87,21 @@ class AsyncEvaluator:
         n_workers : int, optional (default=None)
             Maximum number of subprocesses to run for parallel evaluations.
             Defaults to `AsyncEvaluator.n_jobs`, using all cores unless overwritten.
+        memory_limit_mb : int, optional (default=None)
+            The maximum number of megabytes that this process and its subprocesses
+            may use in total. If None, no limit is enforced.
+            There is no guarantee the limit is not violated.
+        logfile : str, optional (default=None)
+            If set, recorded resource usage will be written to this file.
         """
         self._has_entered = False
         self.futures: Dict[uuid.UUID, AsyncFuture] = {}
         self._processes: List[psutil.Process] = []
-        self._n_jobs = n_workers if n_workers is not None else AsyncEvaluator.n_jobs
+        self._n_jobs = n_workers
+        self._memory_limit_mb = memory_limit_mb
         self._mem_violations = 0
         self._mem_behaved = 0
+        self._logfile = logfile
 
         self._queue_manager = multiprocessing.Manager()
         self._input = self._queue_manager.Queue()
@@ -221,7 +225,7 @@ class AsyncEvaluator:
 
     def _control_memory_usage(self, threshold=0.05):
         """ Dynamically restarts or kills processes to adhere to memory constraints. """
-        if AsyncEvaluator.memory_limit_mb is None:
+        if self._memory_limit_mb is None:
             return
         # If the memory usage of all processes (the main process, and the evaluation
         # subprocesses) exceeds the maximum allowed memory usage, we have to terminate
@@ -243,7 +247,7 @@ class AsyncEvaluator:
         # the multiprocess queue broken.
         processes = [self._main_process] + self._processes
         mem_proc = [(p.memory_info()[0] / (2 ** 20), p) for p in processes]
-        if sum(map(lambda x: x[0], mem_proc)) > AsyncEvaluator.memory_limit_mb:
+        if sum(map(lambda x: x[0], mem_proc)) > self._memory_limit_mb:
             log.info(
                 f"GAMA exceeded memory usage "
                 f"({self._mem_violations}, {self._mem_behaved})."
@@ -270,11 +274,15 @@ class AsyncEvaluator:
             # todo: update the Future of the evaluation that was terminated.
 
     def _log_memory_usage(self):
+        if not self._logfile:
+            return
         processes = [self._main_process] + self._processes
         mem_by_pid = [(p.pid, p.memory_info()[0] / (2 ** 20)) for p in processes]
         mem_str = ",".join([f"{pid},{mem_mb}" for (pid, mem_mb) in mem_by_pid])
         timestamp = datetime.datetime.now().isoformat()
-        log.log(MACHINE_LOG_LEVEL, f"M,{timestamp},{mem_str}")
+
+        with open(self._logfile, "a") as memory_log:
+            memory_log.write(f"{timestamp},{mem_str}\n")
 
 
 def evaluator_daemon(

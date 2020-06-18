@@ -1,7 +1,7 @@
 import shutil
 from abc import ABC
 from collections import defaultdict
-from functools import partial
+from functools import partial, partialmethod
 import logging
 import multiprocessing
 import os
@@ -192,7 +192,16 @@ class Gama(ABC):
             self.cleanup("all")
             raise ValueError(err)
 
-        AsyncEvaluator.n_jobs = n_jobs
+        setattr(
+            AsyncEvaluator,
+            "__init__",
+            partialmethod(
+                AsyncEvaluator.__init__,
+                n_workers=multiprocessing.cpu_count() if n_jobs is None else n_jobs,
+                memory_limit_mb=max_memory_mb,
+                logfile=os.path.join(self.output_directory, "memory.log"),
+            ),
+        )
 
         if max_eval_time is None:
             max_eval_time = round(0.1 * max_total_time)
@@ -202,9 +211,6 @@ class Gama(ABC):
                 f"is not allowed. max_eval_time set to {max_total_time}."
             )
             max_eval_time = max_total_time
-
-        if max_memory_mb is not None:
-            AsyncEvaluator.memory_limit_mb = max_memory_mb
 
         self._max_eval_time = max_eval_time
         self._time_manager = TimeKeeper(max_total_time)
