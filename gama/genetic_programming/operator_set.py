@@ -1,7 +1,6 @@
 from collections.abc import Sequence
 import logging
 
-from gama.logging.machine_logging import TOKENS
 from .components import Individual
 from .components.individual import Origin
 
@@ -76,7 +75,7 @@ class OperatorSet:
         def mate_with_log():
             new_individual1, new_individual2 = ind1.copy_as_new(), ind2.copy_as_new()
             self._mate(new_individual1, new_individual2, *args, **kwargs)
-            new_individual1.origin = Origin([ind1._id, ind2._id], TOKENS.CROSSOVER)
+            new_individual1.origin = Origin([ind1._id, ind2._id], "cx")
             return new_individual1
 
         individual = self.try_until_new(mate_with_log)

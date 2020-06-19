@@ -2,7 +2,6 @@ from contextlib import contextmanager
 from typing import Iterator, Optional, NamedTuple, List, Any
 import logging
 
-from gama.logging.machine_logging import log_event, TOKENS
 from .stopwatch import Stopwatch
 
 log = logging.getLogger(__name__)
@@ -113,13 +112,11 @@ class TimeKeeper:
         """
         if activity_meta is None:
             activity_meta = []
-        log_event(log, TOKENS.PHASE_START, activity, *activity_meta)
+        log.info(f"Starting {activity}: {','.join(map(str, activity_meta))}")
 
         with Stopwatch() as sw:
             self.current_activity = Activity(activity, sw, time_limit)
             self.activities.append(self.current_activity)
             yield sw
         self.current_activity = None
-
-        log_event(log, TOKENS.PHASE_END, activity, *activity_meta)
-        log.info("{} took {:.4f}s.".format(activity, sw.elapsed_time))
+        log.info(f"Stopping {activity} after {sw.elapsed_time:.4f}s.")

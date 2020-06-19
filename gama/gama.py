@@ -31,7 +31,6 @@ from sklearn.pipeline import Pipeline
 
 import gama.genetic_programming.compilers.scikitlearn
 from gama.genetic_programming.components import Individual, Fitness
-from gama.logging.machine_logging import log_event, TOKENS
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
 from gama.utilities.metrics import scoring_to_metric
@@ -40,7 +39,7 @@ from gama.__version__ import __version__
 from gama.data import X_y_from_file, format_x_y
 from gama.search_methods.async_ea import AsyncEA
 from gama.utilities.generic.timekeeper import TimeKeeper
-from gama.logging.utility_functions import register_stream_log, register_file_log
+from gama.logging.utility_functions import register_stream_log
 from gama.utilities.preprocessing import (
     basic_encoding,
     basic_pipeline_extension,
@@ -168,14 +167,16 @@ class Gama(ABC):
 
         register_stream_log(verbosity)
         if store_logs:
-            register_file_log(os.path.join(output_directory, "gama.log"))
+            log_file = os.path.join(output_directory, "gama.log")
+            log_handler = logging.FileHandler(log_file)
+            log_handler.setLevel(logging.DEBUG)
+            log.addHandler(log_handler)
 
         arguments = ",".join(
             [f"{k}={v}" for (k, v) in locals().items() if k not in ["self", "config"]]
         )
         log.info(f"Using GAMA version {__version__}.")
         log.info(f"{self.__class__.__name__}({arguments})")
-        log_event(log, TOKENS.INIT, arguments)
 
         if n_jobs is None:
             n_jobs = multiprocessing.cpu_count() // 2

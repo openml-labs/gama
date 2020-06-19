@@ -8,7 +8,6 @@ import stopit
 
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.search_methods.base_search import BaseSearch
-from gama.logging.machine_logging import log_event
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.genetic_programming.components.individual import Individual
 
@@ -169,15 +168,15 @@ def asha(
                     rung_individuals[rung].append((loss, individual))
                     # Due to `evaluate` returning additional information (like rung),
                     # evaluations are not automatically logged, so we do it here.
-                    log_event(
-                        log,
-                        ASHA_LOG_TOKEN,
-                        rung,
-                        individual.fitness.wallclock_time,
-                        individual.fitness.values,
-                        individual._id,
-                        individual.pipeline_str(),
-                    )
+                    # log_event(
+                    #     log,
+                    #     ASHA_LOG_TOKEN,
+                    #     rung,
+                    #     individual.fitness.wallclock_time,
+                    #     individual.fitness.values,
+                    #     individual._id,
+                    #     individual.pipeline_str(),
+                    # )
 
                 start_new_job()
 

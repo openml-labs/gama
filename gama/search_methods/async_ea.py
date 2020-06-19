@@ -8,7 +8,6 @@ import pandas as pd
 from gama.genetic_programming.components import Individual
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.logging.evaluation_logger import EvaluationLogger
-from gama.logging.machine_logging import TOKENS, log_event
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 
@@ -139,7 +138,6 @@ def async_ea(
                     current_population.append(individual)
                     if len(current_population) > max_pop_size:
                         to_remove = ops.eliminate(current_population, 1)
-                        log_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
                         current_population.remove(to_remove[0])
 
                 if len(current_population) > 2:
@@ -150,7 +148,6 @@ def async_ea(
                 n_evaluated_individuals += 1
                 if should_restart:
                     log.info("Restart criterion met. Creating new random population.")
-                    log_event(log, TOKENS.EA_RESTART, n_evaluated_individuals)
                     start_candidates = [ops.individual() for _ in range(max_pop_size)]
                     break
 
