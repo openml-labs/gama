@@ -34,7 +34,7 @@ from gama.genetic_programming.components import Individual, Fitness
 from gama.logging.machine_logging import log_event, TOKENS
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
-from gama.utilities.evaluation_logger import EvaluationLogger
+from gama.logging.evaluation_logger import EvaluationLogger
 from gama.utilities.metrics import scoring_to_metric
 
 from gama.__version__ import __version__
