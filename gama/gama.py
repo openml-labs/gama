@@ -384,7 +384,7 @@ class Gama(ABC):
         file_path: str,
         target_column: Optional[str] = None,
         encoding: Optional[str] = None,
-        warm_start: bool = False,
+        warm_start: Optional[List[Individual]] = None,
         **kwargs,
     ) -> None:
         """ Find and fit a model to predict the target column (last) from other columns.
@@ -398,9 +398,9 @@ class Gama(ABC):
             If left None, the last column is taken to be the target.
         encoding: str, optional
             Encoding of the file.
-        warm_start: bool (default=False)
-            Indicates the optimization should continue using the last individuals of the
-            previous `fit` call.
+        warm_start: List[Individual], optional (default=None)
+            A list of individual to start the search  procedure with.
+            If None is given, random start candidates are generated.
         **kwargs:
             Any additional arguments for calls to pandas.read_csv or arff.load.
 
@@ -412,7 +412,7 @@ class Gama(ABC):
         self,
         x: Union[pd.DataFrame, np.ndarray],
         y: Union[pd.DataFrame, pd.Series, np.ndarray],
-        warm_start: bool = False,
+        warm_start: Optional[List[Individual]] = None,
     ) -> "Gama":
         """ Find and fit a model to predict target y from X.
 
@@ -430,9 +430,9 @@ class Gama(ABC):
         y: pandas.DataFrame, pandas.Series or numpy.ndarray, shape = [n_samples,]
             Target values.
             If a DataFrame is provided, assumes the first column contains target values.
-        warm_start: bool (default=False)
-            Indicates the optimization should continue using the last individuals of the
-            previous `fit` call.
+        warm_start: List[Individual], optional (default=None)
+            A list of individual to start the search  procedure with.
+            If None is given, random start candidates are generated.
         """
 
         with self._time_manager.start_activity(
@@ -506,13 +506,15 @@ class Gama(ABC):
             )
         return self
 
-    def _search_phase(self, warm_start: bool = False, timeout: float = 1e6):
+    def _search_phase(
+        self, warm_start: Optional[List[Individual]] = None, timeout: float = 1e6
+    ):
         """ Invoke the search algorithm, populate `final_pop`. """
-        if warm_start and not self._final_pop:
-            pop = [ind for ind in self._final_pop]
+        if warm_start:
+            if not all([isinstance(i, Individual) for i in warm_start]):
+                raise TypeError("`warm_start` must be a list of Individual.")
+            pop = warm_start
         else:
-            if warm_start:
-                log.warning("Warm-start True but no earlier fit. Using new population.")
             pop = [self._operator_set.individual() for _ in range(50)]
 
         deadline = time.time() + timeout
