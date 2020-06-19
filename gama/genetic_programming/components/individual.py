@@ -28,7 +28,7 @@ class Individual:
     ):
         self.fitness: Optional[Fitness] = None
         self.main_node = main_node
-        self.origin = None
+        self.origin = Origin([], "unknown")
         self._id = uuid.uuid4()
         self._to_pipeline = to_pipeline
 

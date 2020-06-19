@@ -34,7 +34,6 @@ from gama.genetic_programming.components import Individual, Fitness
 from gama.logging.machine_logging import log_event, TOKENS
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
-from gama.logging.evaluation_logger import EvaluationLogger
 from gama.utilities.metrics import scoring_to_metric
 
 from gama.__version__ import __version__
@@ -244,7 +243,7 @@ class Gama(ABC):
             # Don't keep memory-heavy evaluation meta-data (predictions, estimators)
             self._evaluation_library = EvaluationLibrary(m=0, cache=cache_directory)
         self.evaluation_completed(self._evaluation_library.save_evaluation)
-        e = EvaluationLogger(os.path.join(self.output_directory, "evaluations.log"))
+        e = search_method.logger(os.path.join(self.output_directory, "evaluations.log"))
         self.evaluation_completed(e.log_evaluation)
 
         self._pset, parameter_checks = pset_from_config(config)

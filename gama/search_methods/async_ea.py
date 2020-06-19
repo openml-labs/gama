@@ -1,10 +1,13 @@
 import logging
+import os
+from functools import partial
 from typing import Optional, Any, Tuple, Dict, List, Callable
 
 import pandas as pd
 
 from gama.genetic_programming.components import Individual
 from gama.genetic_programming.operator_set import OperatorSet
+from gama.logging.evaluation_logger import EvaluationLogger
 from gama.logging.machine_logging import TOKENS, log_event
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
@@ -42,6 +45,7 @@ class AsyncEA(BaseSearch):
             max_n_evaluations=(max_n_evaluations, None),
         )
         self.output = []
+        self.logger = EvolutionLogger
 
     def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float):
         pass
@@ -50,6 +54,30 @@ class AsyncEA(BaseSearch):
         self.output = async_ea(
             operations, self.output, start_candidates, **self.hyperparameters
         )
+
+
+class EvolutionLogger(EvaluationLogger):
+    """ Logs the origin of the candidate in addition to its evaluation. """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        def get_parent(evaluation, n) -> str:
+            """ retrieves the nth parent if it exists, '' otherwise. """
+            if len(evaluation.individual.origin.parents) > n:
+                return evaluation.individual.origin.parents[n]
+            return ""
+
+        extra_fields = dict(
+            parent0=partial(get_parent, n=0),
+            parent1=partial(get_parent, n=1),
+            origin=lambda e: e.individual.origin.operation,
+        )
+        self.fields.update(extra_fields)
+
+        # the base init already wrote the (incomplete) header, redo:
+        os.remove(self._file_path)
+        self.log_line(list(self.fields))
 
 
 def async_ea(
