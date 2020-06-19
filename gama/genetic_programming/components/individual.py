@@ -1,9 +1,14 @@
 import uuid
-from typing import List, Callable, Optional
+from typing import List, Callable, Optional, NamedTuple
 
 from .fitness import Fitness
 from .primitive_node import PrimitiveNode
 from .terminal import Terminal
+
+
+class Origin(NamedTuple):
+    parents: List[str]  # ids of parents only
+    operation: str  # operation that created the individual from the parents
 
 
 class Individual:
@@ -23,6 +28,7 @@ class Individual:
     ):
         self.fitness: Optional[Fitness] = None
         self.main_node = main_node
+        self.origin = None
         self._id = uuid.uuid4()
         self._to_pipeline = to_pipeline
 
