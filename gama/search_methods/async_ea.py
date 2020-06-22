@@ -1,5 +1,4 @@
 import logging
-import os
 from functools import partial
 from typing import Optional, Any, Tuple, Dict, List, Callable
 
@@ -44,7 +43,21 @@ class AsyncEA(BaseSearch):
             max_n_evaluations=(max_n_evaluations, None),
         )
         self.output = []
-        self.logger = EvolutionLogger
+
+        def get_parent(evaluation, n) -> str:
+            """ retrieves the nth parent if it exists, '' otherwise. """
+            if len(evaluation.individual.meta.get("parents", [])) > n:
+                return evaluation.individual.meta["parents"][n]
+            return ""
+
+        self.logger = partial(
+            EvaluationLogger,
+            extra_fields=dict(
+                parent0=partial(get_parent, n=0),
+                parent1=partial(get_parent, n=1),
+                origin=lambda e: e.individual.meta.get("origin", "unknown"),
+            ),
+        )
 
     def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float):
         pass
@@ -53,30 +66,6 @@ class AsyncEA(BaseSearch):
         self.output = async_ea(
             operations, self.output, start_candidates, **self.hyperparameters
         )
-
-
-class EvolutionLogger(EvaluationLogger):
-    """ Logs the origin of the candidate in addition to its evaluation. """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        def get_parent(evaluation, n) -> str:
-            """ retrieves the nth parent if it exists, '' otherwise. """
-            if len(evaluation.individual.origin.parents) > n:
-                return evaluation.individual.origin.parents[n]
-            return ""
-
-        extra_fields = dict(
-            parent0=partial(get_parent, n=0),
-            parent1=partial(get_parent, n=1),
-            origin=lambda e: e.individual.origin.operation,
-        )
-        self.fields.update(extra_fields)
-
-        # the base init already wrote the (incomplete) header, redo:
-        os.remove(self._file_path)
-        self.log_line(list(self.fields))
 
 
 def async_ea(

@@ -170,13 +170,19 @@ class Gama(ABC):
             log_file = os.path.join(output_directory, "gama.log")
             log_handler = logging.FileHandler(log_file)
             log_handler.setLevel(logging.DEBUG)
-            log.addHandler(log_handler)
+            log_format = logging.Formatter("[%(asctime)s - %(name)s] %(message)s")
+            log_handler.setFormatter(log_format)
+            logging.getLogger("gama").addHandler(log_handler)
 
         arguments = ",".join(
-            [f"{k}={v}" for (k, v) in locals().items() if k not in ["self", "config"]]
+            [
+                f"{k}={v}"
+                for (k, v) in locals().items()
+                if k not in ["self", "config", "log_file", "log_handler", "log_format"]
+            ]
         )
         log.info(f"Using GAMA version {__version__}.")
-        log.info(f"{self.__class__.__name__}({arguments})")
+        log.info(f"INIT:{self.__class__.__name__}({arguments})")
 
         if n_jobs is None:
             n_jobs = multiprocessing.cpu_count() // 2
@@ -565,7 +571,6 @@ class Gama(ABC):
             log.info("Search phase terminated because of Keyboard Interrupt.")
 
         self._final_pop = self._search_method.output
-        log.debug([str(i) for i in self._final_pop[:100]])
         n_evaluations = len(self._evaluation_library.evaluations)
         log.info(f"Search phase evaluated {n_evaluations} individuals.")
 

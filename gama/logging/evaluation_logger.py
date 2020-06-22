@@ -19,18 +19,24 @@ class EvaluationLogger:
         file_path: str,
         separator: str = ";",
         fields: Optional[Dict[str, Callable[[Evaluation], str]]] = None,
+        extra_fields: Optional[Dict[str, Callable[[Evaluation], str]]] = None,
     ):
         """ Formats evaluations for output to a csv file.
 
-        :param file_path: str
+        Parameters
+        ----------
+        file_path: str
             The log file to write to.
-        :param separator: str (default=';')
+        separator: str (default=';')
             The delimiter for the csv file.
             Note that the default `fields` results in ',' is cell values.
-        :param fields: Dict[str, Callable[[Evaluation], str]], optional (default=None)
+        fields: Dict[str, Callable[[Evaluation], str]], optional (default=None)
             Mapping of column names to a function which extracts the corresponding
             value from an evaluation.
             If None, a default set of columns is used.
+        extra_fields: Dict[str, Callable[[Evaluation], str]], optional (default=None)
+            Additional fields to log. Useful if you want to keep the default `fields`,
+            but need additional information.
         """
         self._file_path = file_path
         self._sep = separator
@@ -52,6 +58,9 @@ class EvaluationLogger:
             )
         else:
             self.fields = fields
+
+        if extra_fields is not None:
+            self.fields.update(extra_fields)
 
         self.log_line(list(self.fields))
 

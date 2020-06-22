@@ -112,11 +112,12 @@ class TimeKeeper:
         """
         if activity_meta is None:
             activity_meta = []
-        log.info(f"Starting {activity}: {','.join(map(str, activity_meta))}")
+        act = f"{activity} {','.join(map(str, activity_meta))}"
+        log.info(f"START: {act}")
 
         with Stopwatch() as sw:
             self.current_activity = Activity(activity, sw, time_limit)
             self.activities.append(self.current_activity)
             yield sw
         self.current_activity = None
-        log.info(f"Stopping {activity} after {sw.elapsed_time:.4f}s.")
+        log.info(f"STOP: {act} after {sw.elapsed_time:.4f}s.")

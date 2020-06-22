@@ -1,8 +1,6 @@
-from collections.abc import Sequence
 import logging
 
 from .components import Individual
-from .components.individual import Origin
 
 log = logging.getLogger(__name__)
 
@@ -48,12 +46,6 @@ class OperatorSet:
         future = async_evaluator.wait_next()
         if future.result is not None:
             evaluation = future.result
-            if isinstance(evaluation, Sequence):
-                # This signature is currently only for an ASHA evaluation result
-                evaluation, loss, rung, full_evaluation = evaluation
-                if not full_evaluation:
-                    # We don't process low-fidelity evaluations here (for now?).
-                    return future
             if self._evaluate_callback is not None:
                 self._evaluate_callback(evaluation)
 
@@ -75,7 +67,7 @@ class OperatorSet:
         def mate_with_log():
             new_individual1, new_individual2 = ind1.copy_as_new(), ind2.copy_as_new()
             self._mate(new_individual1, new_individual2, *args, **kwargs)
-            new_individual1.origin = Origin([ind1._id, ind2._id], "cx")
+            new_individual1.meta = dict(parents=[ind1._id, ind2._id], origin="cx")
             return new_individual1
 
         individual = self.try_until_new(mate_with_log)
@@ -85,7 +77,7 @@ class OperatorSet:
         def mutate_with_log():
             new_individual = ind.copy_as_new()
             mutator = self._mutate(new_individual, *args, **kwargs)
-            new_individual.origin = Origin([ind._id], mutator.__name__)
+            new_individual.meta = dict(parents=[ind._id], origin=mutator.__name__)
             return new_individual
 
         ind = self.try_until_new(mutate_with_log)
@@ -98,7 +90,7 @@ class OperatorSet:
         else:
             compile_ = self._compile
         ind = Individual(expression, to_pipeline=compile_)
-        ind.origin = Origin(parents=[], operation="new")
+        ind.meta["origin"] = "new"
         return ind
 
     def create(self, *args, **kwargs):
