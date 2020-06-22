@@ -27,12 +27,17 @@ class GamaReport:
                 - evaluations.log
                 - resources.log
         """
+        self._log_directory = os.path.expanduser(log_directory)
+        self.name = log_directory.split("\\")[-1]
+        self.phases: List[Tuple[str, str, datetime, float]] = []
+        self._last_tell = 0
+        self.evaluations: pd.DataFrame = pd.DataFrame()
+        self.individuals: Dict[str, Individual] = dict()
 
+        # Parse initialization/progress information from gama.log
         with open(os.path.join(log_directory, "gama.log")) as fh:
             gama_lines = fh.readlines()
 
-        self.name = log_directory.split("\\")[-1]
-        self.phases: List[Tuple[str, str, datetime, float]] = []
         for line in gama_lines:
             if "INIT:" in line:
                 self.hyperparameters = init_to_hps(line)
@@ -51,54 +56,64 @@ class GamaReport:
             self.metrics += ["length"]
 
         self.incomplete = len(self.phases) < 3
-
-        self.evaluations = evaluations_to_dataframe(
-            os.path.join(log_directory, "evaluations.log"), self.metrics
-        )
-
-        # This can take a while for long logs (e.g. ~1sec for 10k individuals)
-        self.individuals: Dict[str, Individual] = {
-            id_: Individual.from_string(pipeline, pset)
-            for id_, pipeline in zip(self.evaluations.id, self.evaluations.pipeline)
-        }
-
-        # [ ] Allow for updates
+        self.update()  # updates self.evaluations and self.method_data
         # [ ] Dashboard -- how point to directory??
 
         self.search_method = self.hyperparameters["search_method"]
         self.method_data = self.evaluations
 
-    # def update(self) -> bool:
-    #     new_lines = _find_new_lines(self._filename, start_from=self._lines_read)
-    #     if len(new_lines) > 0:
-    #         self._lines_read += len(new_lines)
-    #         print(f"read {len(new_lines)} new lines")
-    #         events_by_type = _lines_to_dict(new_lines)
-    #         if len(self.evaluations) == 0:
-    #             search_start = None
-    #         else:
-    #             search_start = self.evaluations.start.min()
-    #         start_n = self.evaluations.n.max()
-    #         if math.isnan(start_n):
-    #             start_n = -1
-    #
-    #         new_evaluations = _evaluations_to_dataframe(
-    #             events_by_type[TOKENS.EVALUATION_RESULT],
-    #             metric_names=self.metrics,
-    #             search_start=search_start,
-    #             start_n=start_n + 1,
-    #         )
-    #         self.evaluations = pd.concat([self.evaluations, new_evaluations])
-    #         for metric in self.metrics:
-    #             self.evaluations[f"{metric}_cummax"] = self.evaluations[
-    #                 metric
-    #             ].cummax()  # noqa: E501
-    #         new_individuals = {
-    #             id_: Individual.from_string(pipeline, pset)
-    #             for id_, pipeline in zip(new_evaluations.id, new_evaluations.pipeline)
-    #         }
-    #         self.individuals.update(new_individuals)
-    #     return len(new_lines) > 0
+    def update(self) -> bool:
+        with open(os.path.join(self._log_directory, "evaluations.log"), "r") as fh:
+            header = fh.readline()[:-1]
+            self._last_tell = max(self._last_tell, fh.tell())
+            fh.seek(self._last_tell)
+            try:
+                df = pd.read_csv(fh, sep=";", header=None, index_col=False)
+            except pd.errors.EmptyDataError:
+                return False
+            self._last_tell = fh.tell()
+
+            df.columns = header.split(";")
+            df["n"] = df.index
+            df = df.rename(columns=dict(t_start="start", t_wallclock="duration"))
+
+            def tuple_to_metrics(tuple_str):
+                return pd.Series([float(value) for value in tuple_str[1:-1].split(",")])
+
+            df[self.metrics] = df.score.apply(tuple_to_metrics)
+            df.start = pd.to_datetime(df.start)  # needed?
+            df.duration = pd.to_timedelta(df.duration, unit="s")
+
+            new_individuals = {
+                id_: Individual.from_string(pipeline, pset)
+                for id_, pipeline in zip(df.id, df.pipeline)
+            }
+
+            # Merge with previous records
+            self.individuals.update(new_individuals)
+            if self.evaluations.empty:
+                self.evaluations = df
+            else:
+                df["n"] += self.evaluations.n.max() + 1
+                self.evaluations = pd.concat([self.evaluations, df])
+            df = self.evaluations
+
+            search_start = df.start.min()
+            for metric in self.metrics:
+                df[f"{metric}_cummax"] = df[metric].cummax()
+            if len(df.start) > 0:
+                df["relative_end"] = (
+                    (df.start + df.duration) - search_start
+                ).dt.total_seconds()
+            else:
+                df["relative_end"] = pd.Series()
+        return True
+
+    @property
+    def successful_evaluations(self):
+        """ Return only evaluations that completed successfully """
+        with pd.option_context("mode.use_inf_as_na", True):
+            return self.evaluations[~self.evaluations[self.metrics].isna().any(axis=1)]
 
 
 # new
@@ -108,36 +123,4 @@ def init_to_hps(init_line: str) -> Dict[str, str]:
     # only supports one nested level - will do proper parsing later
     for token in ["()", "(", ")", ",,"]:
         all_arguments = all_arguments.replace(token, ",")
-    print(all_arguments)
     return dict(hp.split("=") for hp in all_arguments.split(","))  # type: ignore
-
-
-# def _find_new_lines(logfile: str, start_from: int = 0) -> List[str]:
-#     with open(logfile, "r") as fh:
-#         log_lines = [line.rstrip() for line in fh.readlines()]
-#     new_lines = log_lines[start_from:]
-#     return new_lines
-
-
-def evaluations_to_dataframe(file: str, metric_names: List[str]):
-    df = pd.read_csv(file, sep=";")
-    df["n"] = df.index
-    df = df.rename(columns=dict(t_start="start", t_wallclock="duration"))
-
-    def tuple_to_metrics(tuple_str):
-        return pd.Series([float(value) for value in tuple_str[1:-1].split(",")])
-
-    df[metric_names] = df.score.apply(tuple_to_metrics)
-    for metric in metric_names:
-        df[f"{metric}_cummax"] = df[metric].cummax()
-
-    df.start = pd.to_datetime(df.start)  # needed?
-    df.duration = pd.to_timedelta(df.duration, unit="s")
-    search_start = df.start.min()
-    if len(df.start) > 0:
-        df["relative_end"] = (
-            (df.start + df.duration) - search_start
-        ).dt.total_seconds()
-    else:
-        df["relative_end"] = pd.Series()
-    return df

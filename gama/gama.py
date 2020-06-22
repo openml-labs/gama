@@ -161,13 +161,13 @@ class Gama(ABC):
         """
         if not output_directory:
             output_directory = f"gama_{str(uuid.uuid4())}"
-        self.output_directory = os.path.abspath(output_directory)
+        self.output_directory = os.path.abspath(os.path.expanduser(output_directory))
         if not os.path.exists(self.output_directory):
             os.mkdir(self.output_directory)
 
         register_stream_log(verbosity)
         if store_logs:
-            log_file = os.path.join(output_directory, "gama.log")
+            log_file = os.path.join(self.output_directory, "gama.log")
             log_handler = logging.FileHandler(log_file)
             log_handler.setLevel(logging.DEBUG)
             log_format = logging.Formatter("[%(asctime)s - %(name)s] %(message)s")

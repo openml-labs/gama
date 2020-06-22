@@ -264,7 +264,7 @@ def build_configuration_menu(app, controller) -> html.Div:
     )
 
     # Advanced
-    log_path = text_input("Logfile Path", "gama.log", "logpath")
+    log_path = text_input("Log Directory", "~/GamaLog", "logpath")
     advanced = collapsable_section("Advanced", [log_path], start_open=False)
 
     # Go!

@@ -1,4 +1,4 @@
-import base64
+# import base64
 from typing import Dict, List, Optional
 
 import dash_core_components as dcc
@@ -175,14 +175,15 @@ class AnalysisPage(BasePage):
         # global aggregate_dataframe
         if list_of_contents is not None:
             for content, filename in zip(list_of_contents, list_of_names):
-                content_type, content_string = content.split(",")
-                decoded = base64.b64decode(content_string).decode("utf-8")
-                log_lines = decoded.splitlines()
-                report = GamaReport(log_lines=log_lines, name=filename)
+                # content_type, content_string = content.split(",")
+                # decoded = base64.b64decode(content_string).decode("utf-8")
+                # log_lines = decoded.splitlines()
+                dirname = r"C:\Users\Work\GamaLog"
+                report = GamaReport(dirname)
                 self.reports[filename] = report
 
-                eval_copy = report.evaluations.copy()
-                eval_copy["search_method"] = report.search_method
+                # eval_copy = report.evaluations.copy()
+                # eval_copy["search_method"] = report.search_method
                 # if aggregate_dataframe is None:
                 #     eval_copy["log_no"] = 0
                 #     eval_copy["filename"] = filename
