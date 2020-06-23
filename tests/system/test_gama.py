@@ -32,11 +32,10 @@ def test_full_system_single_core():
         random_state=0,
         max_total_time=60,
         max_memory_mb=2_000,
-        store_logs=False,
+        store="nothing",
         n_jobs=1,
     )
     _gama_on_digits(automl)
-    automl.cleanup("all")
 
 
 def test_full_system_multi_core():
@@ -44,8 +43,7 @@ def test_full_system_multi_core():
         random_state=0,
         max_total_time=60,
         max_memory_mb=4_000,
-        store_logs=False,
+        store="nothing",
         n_jobs=2,
     )
     _gama_on_digits(automl)
-    automl.cleanup("all")

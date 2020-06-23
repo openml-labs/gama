@@ -92,7 +92,7 @@ class Gama(ABC):
         search_method: BaseSearch = AsyncEA(),
         post_processing_method: BasePostProcessing = BestFitPostProcessing(),
         output_directory: Optional[str] = None,
-        store_logs: bool = True,
+        store: str = "logs",
     ):
         """
 
@@ -156,8 +156,12 @@ class Gama(ABC):
             results during search and logs.
             If set to None, generate a unique name ("gama_HEXCODE").
 
-        store_logs: bool (default=True)
-            If enabled, store logs of GAMAs evaluations and resource usage.
+        store: str (default='logs')
+            Determines which data is stored after each run:
+             - 'nothing': keep nothing from this run
+             - 'models': keep only cache with models and predictions
+             - 'logs': keep only the logs
+             - 'all': keep logs and cache with models and predictions
         """
         if not output_directory:
             output_directory = f"gama_{str(uuid.uuid4())}"
@@ -166,7 +170,7 @@ class Gama(ABC):
             os.mkdir(self.output_directory)
 
         register_stream_log(verbosity)
-        if store_logs:
+        if store in ["logs", "all"]:
             log_file = os.path.join(self.output_directory, "gama.log")
             log_handler = logging.FileHandler(log_file)
             log_handler.setLevel(logging.DEBUG)
@@ -225,6 +229,7 @@ class Gama(ABC):
         self._regularize_length = regularize_length
         self._search_method: BaseSearch = search_method
         self._post_processing = post_processing_method
+        self._store = store
 
         if random_state is not None:
             random.seed(random_state)
@@ -277,6 +282,9 @@ class Gama(ABC):
 
     def cleanup(self, which="evaluations"):
         cache_directory = os.path.join(self.output_directory, "cache")
+        if not os.path.exists(self.output_directory):
+            return  # Cleanup has been called previously
+
         if which in ["logs", "all"]:
             for file in os.listdir(self.output_directory):
                 if file.endswith(".log"):
@@ -534,6 +542,8 @@ class Gama(ABC):
                 self._time_manager.total_time_remaining,
                 best_individuals,
             )
+        to_clean = dict(nothing="all", logs="evaluations", models="logs")
+        self.cleanup(to_clean[self._store])
         return self
 
     def _search_phase(self, warm_start: bool = False, timeout: float = 1e6):

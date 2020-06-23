@@ -97,7 +97,7 @@ def _test_dataset_problem(
         search_method=search,
         n_jobs=1,
         post_processing_method=EnsemblePostProcessing(ensemble_size=5),
-        store_logs=False,
+        store="nothing",
     )
     if arff:
         train_path = f"tests/data/{data['name']}_train.arff"
