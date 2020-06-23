@@ -1,5 +1,3 @@
-import pytest
-
 import pandas as pd
 from sklearn.datasets import load_digits
 from sklearn.preprocessing import LabelEncoder
@@ -7,11 +5,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import log_loss
 
 from gama import GamaClassifier
-
-
-@pytest.fixture
-def gamaclassifier():
-    return GamaClassifier(random_state=0, max_total_time=60, max_memory_mb=2_000)
 
 
 def _gama_on_digits(gama):
@@ -34,15 +27,23 @@ def _gama_on_digits(gama):
     )
 
 
-def test_full_system_single_core(gamaclassifier):
-    from gama.utilities.generic.async_evaluator import AsyncEvaluator
+def test_full_system_single_core():
+    automl = GamaClassifier(
+        random_state=0,
+        max_total_time=60,
+        max_memory_mb=2_000,
+        store="nothing",
+        n_jobs=1,
+    )
+    _gama_on_digits(automl)
 
-    AsyncEvaluator.n_jobs = 1
-    _gama_on_digits(gamaclassifier)
 
-
-def test_full_system_multi_core(gamaclassifier):
-    from gama.utilities.generic.async_evaluator import AsyncEvaluator
-
-    AsyncEvaluator.n_jobs = 2
-    _gama_on_digits(gamaclassifier)
+def test_full_system_multi_core():
+    automl = GamaClassifier(
+        random_state=0,
+        max_total_time=60,
+        max_memory_mb=4_000,
+        store="nothing",
+        n_jobs=2,
+    )
+    _gama_on_digits(automl)

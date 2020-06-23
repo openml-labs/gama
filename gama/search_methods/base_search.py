@@ -5,6 +5,7 @@ import pandas as pd
 
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.components import Individual
+from gama.logging.evaluation_logger import EvaluationLogger
 
 
 class BaseSearch(ABC):
@@ -16,6 +17,7 @@ class BaseSearch(ABC):
         # hyperparameters can be used to safe/process search hyperparameters
         self._hyperparameters: Dict[str, Tuple[Any, Any]] = dict()
         self.output: List[Individual] = []
+        self.logger = EvaluationLogger
 
     def __str__(self):
         # Not sure if I should report actual used hyperparameters (i.e. include default)

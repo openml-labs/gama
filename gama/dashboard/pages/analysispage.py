@@ -1,4 +1,8 @@
 import base64
+import itertools
+import os
+import shutil
+import uuid
 from typing import Dict, List, Optional
 
 import dash_core_components as dcc
@@ -174,25 +178,21 @@ class AnalysisPage(BasePage):
     def load_logs(self, list_of_contents, list_of_names):
         # global aggregate_dataframe
         if list_of_contents is not None:
+            tmp_dir = f"tmp_{str(uuid.uuid4())}"
+            os.makedirs(tmp_dir)
             for content, filename in zip(list_of_contents, list_of_names):
                 content_type, content_string = content.split(",")
                 decoded = base64.b64decode(content_string).decode("utf-8")
-                log_lines = decoded.splitlines()
-                report = GamaReport(log_lines=log_lines, name=filename)
-                self.reports[filename] = report
+                with open(os.path.join(tmp_dir, filename), "w") as fh:
+                    fh.write(decoded)
 
-                eval_copy = report.evaluations.copy()
-                eval_copy["search_method"] = report.search_method
-                # if aggregate_dataframe is None:
-                #     eval_copy["log_no"] = 0
-                #     eval_copy["filename"] = filename
-                #     aggregate_dataframe = eval_copy
-                # else:
-                #     eval_copy["log_no"] = len(
-                #         aggregate_dataframe["log_no"].unique())
-                #     eval_copy["filename"] = filename
-                #     aggregate_dataframe = pd.concat(
-                #         [aggregate_dataframe, eval_copy])
+            report = GamaReport(tmp_dir)
+            report_name = report.search_method
+            for i in itertools.count():
+                if f"{report_name}_{i}" not in self.reports:
+                    break
+            self.reports[f"{report_name}_{i}"] = report
+            shutil.rmtree(tmp_dir)
             return [{"label": logname, "value": logname} for logname in self.reports]
         return []
 

@@ -20,7 +20,7 @@ class Controller:
         max_eval_time_h,
         max_eval_time_m,
         input_file,
-        log_file,
+        log_dir,
         target,
     ):
         # For some reason, 0 input registers as None.
@@ -32,7 +32,7 @@ class Controller:
         max_eval_time = max_eval_time_h * 60 + max_eval_time_m
         command = (
             f'gama "{input_file}" -v -n {n_jobs} -t {max_total_time} '
-            f'--time_pipeline {max_eval_time} -log {log_file} --target "{target}"'
+            f'--time_pipeline {max_eval_time} -outdir {log_dir} --target "{target}"'
         )
         if regularize != "on":
             command += " --long"
@@ -42,7 +42,7 @@ class Controller:
         command = shlex.split(command)
         # fake_command = ['python', '-h']
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-        self._on_gama_started(process, log_file)
+        self._on_gama_started(process, log_dir)
 
     def _on_gama_started(self, process, log_file):
         for subscriber in self._subscribers["gama_started"]:

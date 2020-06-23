@@ -160,10 +160,6 @@ class EvaluationLibrary:
         else:
             self._sample = "not set"
 
-    def __del__(self):
-        if os.path.exists(self._cache):
-            self.clear_cache()
-
     @property
     def evaluations(self) -> List[Evaluation]:
         return self.top_evaluations + self.other_evaluations

@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Callable, Optional
+from typing import List, Callable, Optional, Dict, Any
 
 from .fitness import Fitness
 from .primitive_node import PrimitiveNode
@@ -23,6 +23,7 @@ class Individual:
     ):
         self.fitness: Optional[Fitness] = None
         self.main_node = main_node
+        self.meta: Dict[str, Any] = dict()
         self._id = uuid.uuid4()
         self._to_pipeline = to_pipeline
 

@@ -6,8 +6,7 @@ import pandas as pd
 
 from gama.genetic_programming.components import Individual
 from gama.genetic_programming.operator_set import OperatorSet
-from gama.logging.machine_logging import TOKENS, log_event
-from gama.logging.utility_functions import MultiprocessingLogger
+from gama.logging.evaluation_logger import EvaluationLogger
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 
@@ -44,6 +43,21 @@ class AsyncEA(BaseSearch):
             max_n_evaluations=(max_n_evaluations, None),
         )
         self.output = []
+
+        def get_parent(evaluation, n) -> str:
+            """ retrieves the nth parent if it exists, '' otherwise. """
+            if len(evaluation.individual.meta.get("parents", [])) > n:
+                return evaluation.individual.meta["parents"][n]
+            return ""
+
+        self.logger = partial(
+            EvaluationLogger,
+            extra_fields=dict(
+                parent0=partial(get_parent, n=0),
+                parent1=partial(get_parent, n=1),
+                origin=lambda e: e.individual.meta.get("origin", "unknown"),
+            ),
+        )
 
     def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float):
         pass
@@ -91,9 +105,6 @@ def async_ea(
         )
 
     max_pop_size = population_size
-    logger = MultiprocessingLogger()
-
-    evaluate_log = partial(ops.evaluate, logger=logger)
 
     current_population = output
     n_evaluated_individuals = 0
@@ -105,30 +116,27 @@ def async_ea(
             current_population[:] = []
             log.info("Starting EA with new population.")
             for individual in start_candidates:
-                async_.submit(evaluate_log, individual)
+                async_.submit(ops.evaluate, individual)
 
             while (max_n_evaluations is None) or (
                 n_evaluated_individuals < max_n_evaluations
             ):
                 future = ops.wait_next(async_)
-                logger.flush_to_log(log)
                 if future.exception is None:
                     individual = future.result.individual
                     current_population.append(individual)
                     if len(current_population) > max_pop_size:
                         to_remove = ops.eliminate(current_population, 1)
-                        log_event(log, TOKENS.EA_REMOVE_IND, to_remove[0])
                         current_population.remove(to_remove[0])
 
                 if len(current_population) > 2:
                     new_individual = ops.create(current_population, 1)[0]
-                    async_.submit(evaluate_log, new_individual)
+                    async_.submit(ops.evaluate, new_individual)
 
                 should_restart = restart_callback is not None and restart_callback()
                 n_evaluated_individuals += 1
                 if should_restart:
                     log.info("Restart criterion met. Creating new random population.")
-                    log_event(log, TOKENS.EA_RESTART, n_evaluated_individuals)
                     start_candidates = [ops.individual() for _ in range(max_pop_size)]
                     break
 

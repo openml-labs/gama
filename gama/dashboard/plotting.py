@@ -127,7 +127,7 @@ def plot_preset_graph(reports: List[GamaReport], preset: Optional[str]):
         for report in reports:
             if report.search_method == "AsynchronousSuccessiveHalving":
                 count_by_rung = (
-                    report.method_data.groupby(by="rung").n.count().reset_index()
+                    report.evaluations.groupby(by="rung").n.count().reset_index()
                 )
                 plots.append(
                     go.Bar(x=count_by_rung.rung, y=count_by_rung.n, name=report.name)
@@ -141,7 +141,7 @@ def plot_preset_graph(reports: List[GamaReport], preset: Optional[str]):
         for report in reports:
             if report.search_method == "AsynchronousSuccessiveHalving":
                 duration_by_rung = (
-                    report.method_data.groupby(by="rung").duration.sum().reset_index()
+                    report.evaluations.groupby(by="rung").duration.sum().reset_index()
                 )
                 duration_by_rung.duration = duration_by_rung.duration.dt.total_seconds()
                 plots.append(
