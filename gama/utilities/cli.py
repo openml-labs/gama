@@ -159,7 +159,7 @@ def main():
         n_jobs=args.n_jobs,
         verbosity=log_level,
         output_directory=args.outdir,
-        store_logs=not args.dry_run,
+        store="nothing" if args.dry_run else "logs",
     )
     if args.metric:
         configuration["scoring"] = args.metric
