@@ -28,7 +28,7 @@ class GamaReport:
                 - resources.log
         """
         self._log_directory = os.path.expanduser(log_directory)
-        self.name = log_directory.split("\\")[-1]
+        self.name = os.path.split(log_directory)[-1]
         self.phases: List[Tuple[str, str, datetime, float]] = []
         self._last_tell = 0
         self.evaluations: pd.DataFrame = pd.DataFrame()
@@ -60,7 +60,6 @@ class GamaReport:
         # [ ] Dashboard -- how point to directory?? => #97
 
         self.search_method = self.hyperparameters["search_method"]
-        self.method_data = self.evaluations
 
     def update(self, force: bool = False) -> bool:
         if not force and not self.incomplete:
