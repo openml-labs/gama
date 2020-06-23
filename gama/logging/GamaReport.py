@@ -56,13 +56,16 @@ class GamaReport:
             self.metrics += ["length"]
 
         self.incomplete = len(self.phases) < 3
-        self.update()  # updates self.evaluations and self.method_data
-        # [ ] Dashboard -- how point to directory??
+        self.update(force=True)  # updates self.evaluations and self.method_data
+        # [ ] Dashboard -- how point to directory?? => #97
 
         self.search_method = self.hyperparameters["search_method"]
         self.method_data = self.evaluations
 
-    def update(self) -> bool:
+    def update(self, force: bool = False) -> bool:
+        if not force and not self.incomplete:
+            return False
+
         with open(os.path.join(self._log_directory, "evaluations.log"), "r") as fh:
             header = fh.readline()[:-1]
             self._last_tell = max(self._last_tell, fh.tell())
