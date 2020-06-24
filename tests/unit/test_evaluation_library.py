@@ -64,65 +64,76 @@ def test_evaluation_library_max_number_evaluations(GNB):
     lib200 = EvaluationLibrary(m=200, sample=None, cache=_short_name())
     lib_unlimited = EvaluationLibrary(m=None, sample=None, cache=_short_name())
 
-    worst_evaluation = _mock_evaluation(GNB, score=(0.0, 0.0, 0.0))
-    lib200.save_evaluation(worst_evaluation)
-    lib_unlimited.save_evaluation(worst_evaluation)
+    try:
+        worst_evaluation = _mock_evaluation(GNB, score=(0.0, 0.0, 0.0))
+        lib200.save_evaluation(worst_evaluation)
+        lib_unlimited.save_evaluation(worst_evaluation)
 
-    for _ in range(200):
-        lib200.save_evaluation(_mock_evaluation(GNB))
-        lib_unlimited.save_evaluation(_mock_evaluation(GNB))
+        for _ in range(200):
+            lib200.save_evaluation(_mock_evaluation(GNB))
+            lib_unlimited.save_evaluation(_mock_evaluation(GNB))
 
-    assert 200 == len(
-        lib200.top_evaluations
-    ), "After 201 evaluations, lib200 should be at its cap of 200."
-    assert (
-        worst_evaluation not in lib200.top_evaluations
-    ), "The worst of 201 evaluations should not be present."
-    assert 201 == len(
-        lib_unlimited.top_evaluations
-    ), "All evaluations should be present."
-    assert (
-        worst_evaluation in lib_unlimited.top_evaluations
-    ), "All evaluations should be present."
+        assert 200 == len(
+            lib200.top_evaluations
+        ), "After 201 evaluations, lib200 should be at its cap of 200."
+        assert (
+            worst_evaluation not in lib200.top_evaluations
+        ), "The worst of 201 evaluations should not be present."
+        assert 201 == len(
+            lib_unlimited.top_evaluations
+        ), "All evaluations should be present."
+        assert (
+            worst_evaluation in lib_unlimited.top_evaluations
+        ), "All evaluations should be present."
+    finally:
+        lib200.clear_cache()
+        lib_unlimited.clear_cache()
 
 
 def test_evaluation_library_n_best(GNB):
     """ Test `n_best` normal usage.  """
     lib = EvaluationLibrary(m=None, sample=None, cache=_short_name())
 
-    best_evaluation = _mock_evaluation(GNB, score=(1.0, 1.0, 1.0))
-    worst_evaluation = _mock_evaluation(GNB, score=(0.0, 0.0, 0.0))
-    lib.save_evaluation(best_evaluation)
-    lib.save_evaluation(worst_evaluation)
+    try:
+        best_evaluation = _mock_evaluation(GNB, score=(1.0, 1.0, 1.0))
+        worst_evaluation = _mock_evaluation(GNB, score=(0.0, 0.0, 0.0))
+        lib.save_evaluation(best_evaluation)
+        lib.save_evaluation(worst_evaluation)
 
-    for _ in range(10):
-        lib.save_evaluation(_mock_evaluation(GNB))
+        for _ in range(10):
+            lib.save_evaluation(_mock_evaluation(GNB))
 
-    assert (
-        len(lib.n_best(10)) == 10
-    ), "n_best(10) should return 10 results as more than 10 evaluations are saved."
-    assert (
-        best_evaluation is lib.n_best(10)[0]
-    ), "`best_evaluation` should be number one in `n_best`"
-    assert worst_evaluation not in lib.n_best(
-        10
-    ), "`worst_evaluation` should not be in the top 10 of 12 evaluations."
-    assert (
-        len(lib.n_best(100)) == 12
-    ), "`n > len(lib.top_evaluations)` should return all evaluations."
+        assert (
+            len(lib.n_best(10)) == 10
+        ), "n_best(10) should return 10 results as more than 10 evaluations are saved."
+        assert (
+            best_evaluation is lib.n_best(10)[0]
+        ), "`best_evaluation` should be number one in `n_best`"
+        assert worst_evaluation not in lib.n_best(
+            10
+        ), "`worst_evaluation` should not be in the top 10 of 12 evaluations."
+        assert (
+            len(lib.n_best(100)) == 12
+        ), "`n > len(lib.top_evaluations)` should return all evaluations."
+    finally:
+        lib.clear_cache()
 
 
 def _test_subsample(sample, predictions, subsample, individual):
     """ Test the `predictions` correctly get sampled to `subsample`. """
     lib = EvaluationLibrary(sample=sample, cache=_short_name())
-    best_evaluation = _mock_evaluation(individual, predictions=predictions)
-    lib.save_evaluation(best_evaluation)
-    assert (
-        subsample.shape == best_evaluation.predictions.shape
-    ), "Subsample does not have expected shape."
-    assert np.array_equal(
-        subsample, best_evaluation.predictions
-    ), "Content of subsample differs from expected."
+
+    try:
+        best_evaluation = _mock_evaluation(individual, predictions=predictions)
+        lib.save_evaluation(best_evaluation)
+        assert (
+            subsample.shape == best_evaluation.predictions.shape
+        ), "Subsample does not have expected shape."
+        assert np.array_equal(
+            subsample, best_evaluation.predictions
+        ), "Content of subsample differs from expected."
+    finally:
+        lib.clear_cache()
 
 
 def test_evaluation_library_sample_np2d_prediction(GNB):
