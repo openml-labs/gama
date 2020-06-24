@@ -169,7 +169,9 @@ def evaluate_individual(
 
     with Stopwatch() as wall_time, Stopwatch(time.process_time) as process_time:
         evaluation = evaluate_pipeline(individual.pipeline, timeout=timeout, **kwargs)
-        result._predictions, result.score, result._estimators, result.error = evaluation
+        result._predictions, result.score, result._estimators, error = evaluation
+        if error is not None:
+            result.error = f"{type(error)} {str(error)}"
     result.duration = wall_time.elapsed_time
 
     if add_length_to_score:
