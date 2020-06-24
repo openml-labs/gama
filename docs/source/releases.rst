@@ -3,6 +3,15 @@ Release Notes
 
 Version 20.2.1
 --------------
+Changes:
+ # 24: Changes to logging
+    The structure of the log file(s) have changed.
+    The goal is to make the log files easier to use, by making them easier to read and
+    easier to extend write behavior.
+    There will now be three log files, one which contains just evaluation data, one which contains progress data, and one which contains resource usage data.
+    For more information see :ref:`Logging` in the technical guide.
+
+
 Features:
  # 66: csv files are now supported.
     Call `fit_arff` is now `fit_from_file` which accepts both arff and csv files.
