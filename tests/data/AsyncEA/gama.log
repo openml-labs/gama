@@ -1,5 +1,5 @@
 [2020-06-23 11:28:40,355 - gama.gama] Using GAMA version 20.2.0.
-[2020-06-23 11:28:40,355 - gama.gama] INIT:GamaClassifier(scoring=neg_log_loss,regularize_length=True,max_pipeline_length=None,random_state=0,max_total_time=60,max_eval_time=None,n_jobs=2,max_memory_mb=4000,verbosity=30,search_method=AsyncEA(),post_processing_method=NoPostProcessing(),output_directory=gama_44ffb942-7a33-4c54-b762-29c014fa1afc,store_logs=True)
+[2020-06-23 11:28:40,355 - gama.gama] INIT:GamaClassifier(scoring=neg_log_loss,regularize_length=True,max_pipeline_length=None,random_state=0,max_total_time=60,max_eval_time=None,n_jobs=2,max_memory_mb=4000,verbosity=30,search=AsyncEA(),post_processing=NoPostProcessing(),output_directory=gama_44ffb942-7a33-4c54-b762-29c014fa1afc,store_logs=True)
 [2020-06-23 11:28:40,440 - gama.utilities.generic.timekeeper] START: preprocessing default
 [2020-06-23 11:28:40,609 - gama.utilities.generic.timekeeper] STOP: preprocessing default after 0.1693s.
 [2020-06-23 11:28:40,609 - gama.utilities.generic.timekeeper] START: search AsyncEA

@@ -47,7 +47,7 @@ def _test_dataset_problem(data, metric):
         scoring=metric,
         n_jobs=1,
         max_eval_time=300,
-        post_processing_method=EnsemblePostProcessing(ensemble_size=5),
+        post_processing=EnsemblePostProcessing(ensemble_size=5),
         store="nothing",
     )
     _test_gama_regressor(gama, *split_data, data, metric)

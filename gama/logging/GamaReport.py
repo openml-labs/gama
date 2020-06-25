@@ -59,7 +59,7 @@ class GamaReport:
         self.update(force=True)  # updates self.evaluations and self.method_data
         # [ ] Dashboard -- how point to directory?? => #97
 
-        self.search_method = self.hyperparameters["search_method"]
+        self.search_method = self.hyperparameters["search"]
 
     def update(self, force: bool = False) -> bool:
         if not force and not self.incomplete:

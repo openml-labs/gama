@@ -94,9 +94,9 @@ def _test_dataset_problem(
         random_state=0,
         max_total_time=max_time,
         scoring=metric,
-        search_method=search,
+        search=search,
         n_jobs=1,
-        post_processing_method=EnsemblePostProcessing(ensemble_size=5),
+        post_processing=EnsemblePostProcessing(ensemble_size=5),
         store="nothing",
     )
     if arff:
