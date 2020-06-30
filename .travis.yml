@@ -13,6 +13,7 @@ jobs:
   - env: JOB=check
     python: 3.8
   - env: JOB=deploy
+    python: 3.8
     if: (branch = master OR branch = develop) AND type = push
 
 install:
