@@ -12,7 +12,9 @@ Bibtex will be added after publication.
 Listings
 ********
 Listing 1:
-.. code-block:: python
+
+.. code-block:: Python
+
     from gama import GamaClassifier
     from gama.search_methods import AsynchronousSuccessiveHalving
     from gama.postprocessing import EnsemblePostProcessing

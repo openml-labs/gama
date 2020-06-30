@@ -9,7 +9,7 @@ Changes:
     The goal is to make the log files easier to use, by making them easier to read and
     easier to extend write behavior.
     There will now be three log files, one which contains just evaluation data, one which contains progress data, and one which contains resource usage data.
-    For more information see :ref:`Logging` in the technical guide.
+    For more information see :ref:`logging-section` in the technical guide.
 
 
 Features:
