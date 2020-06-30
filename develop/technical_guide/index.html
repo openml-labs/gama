@@ -1,15 +1,18 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Technical Guide &mdash; gama 20.2.0 documentation</title>
+  <title>Technical Guide &mdash; gama 20.2.1 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
 
   
   
@@ -17,7 +20,9 @@
   
 
   
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -29,10 +34,6 @@
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="API" href="../api/index.html" />
@@ -50,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> gama
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> gama
           
 
           
@@ -60,7 +61,7 @@
             
             
               <div class="version">
-                20.2.0
+                20.2.1
               </div>
             
           
@@ -77,6 +78,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -102,12 +104,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../benchmark.html">Benchmark Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Papers</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -146,7 +149,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../index.html">Docs</a> &raquo;</li>
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Technical Guide</li>
     
@@ -223,25 +226,30 @@ For example, searching with ‘Asynchronous Successive Halving’ and creating a
 <span class="n">custom_pipeline_gama</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">search_method</span><span class="o">=</span><span class="n">AsyncEA</span><span class="p">(</span><span class="n">population_size</span><span class="o">=</span><span class="mi">30</span><span class="p">))</span>
 </pre></div>
 </div>
-</div>
-</div>
 <hr class="docutils" />
+</div>
+</div>
 <div class="section" id="logging">
-<h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
+<span id="logging-section"></span><h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
 <p>GAMA makes use of the default Python <a class="reference external" href="https://docs.python.org/3.5/library/logging.html">logging</a> module.
-This means logs can be captured at different levels, and handled by one of several StreamHandlers.
-In addition to the Python built-in log levels GAMA introduces one level below <code class="code docutils literal notranslate"><span class="pre">logging.DEBUG</span></code>, explicitly for log
-messages that are meant to be parsed by a program later.</p>
+This means logs can be captured at different levels, and handled by one of several StreamHandlers.</p>
 <p>The most common logging use cases are to write a comprehensive log to file, as well as print important messages to <code class="code docutils literal notranslate"><span class="pre">stdout</span></code>.
 Writing log messages to <code class="code docutils literal notranslate"><span class="pre">stdout</span></code> is directly supported by GAMA through the <code class="code docutils literal notranslate"><span class="pre">verbosity</span></code> hyperparameter
 (which defaults to <code class="code docutils literal notranslate"><span class="pre">logging.WARNING</span></code>).</p>
-<p>Logging all log messages to file is not entirely supported directly.
-Instead, GAMA provides a <code class="code docutils literal notranslate"><span class="pre">keep_analysis_log</span></code> hyperparameter.
-When set (by providing the name of the file to write to), it will only write <em>most</em> information to file.
-In particular it will write any log messages at <code class="code docutils literal notranslate"><span class="pre">logging.WARNING</span></code>, <code class="code docutils literal notranslate"><span class="pre">logging.CRITICAL</span></code> and <code class="code docutils literal notranslate"><span class="pre">logging.ERROR</span></code>, as
-well as all messages at the <code class="code docutils literal notranslate"><span class="pre">MACHINE_LOG_LEVEL</span></code> - the log level introduced by GAMA.
-The <code class="code docutils literal notranslate"><span class="pre">MACHINE_LOG_LEVEL</span></code> write messages in a structured way, so that they may easily be parsed by a program later.
-By default GAMA writes to ‘gama.log’.</p>
+<p>By default GAMA will also save several different logs.
+This can be turned off by the <code class="code docutils literal notranslate"><span class="pre">store</span></code> hyperparameter.
+The <code class="code docutils literal notranslate"><span class="pre">store</span></code> hyperparameter allows you to store the logs, as well as models and predictions.
+By default logs are kept (which includes evaluation data), but models and predictions are discarded.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">output_directory</span></code> hyperparameter determines where this data is stored, by default a unique name is generated.
+In the output directory you will find three files and a subdirectory:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘evaluations.log’: a csv file (with ‘;’ as separator) in which each evaluation is stored.</p></li>
+<li><p>‘gama.log’: A loosely structured file with general (human readable) information of the GAMA run.</p></li>
+<li><p>‘resources.log’: A record of the memory usage for each of GAMA’s processes over time.</p></li>
+<li><p>cache directory: contains evaluated models and predictions, only if <code class="code docutils literal notranslate"><span class="pre">store</span></code> is ‘all’ or ‘models’</p></li>
+</ul>
+</div></blockquote>
 <p>If you want other behavior, the logging module offers you great flexibility on making your own variations.
 The following script writes any log messages of <code class="code docutils literal notranslate"><span class="pre">logging.DEBUG</span></code> or up to both file and console:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
@@ -263,18 +271,13 @@ The following script writes any log messages of <code class="code docutils liter
 An overview the log levels:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><code class="code docutils literal notranslate"><span class="pre">MACHINE_LOG_LEVEL</span> <span class="pre">(5)</span></code>: Messages mostly meant to be parsed by a program.</p></li>
 <li><p><code class="code docutils literal notranslate"><span class="pre">DEBUG</span></code>: Messages for developers.</p></li>
 <li><p><code class="code docutils literal notranslate"><span class="pre">INFO</span></code>: General information about the optimization process.</p></li>
 <li><p><code class="code docutils literal notranslate"><span class="pre">WARNING</span></code>: Serious errors that do not prohibit GAMA from running to completion (but results could be suboptimal).</p></li>
 <li><p><code class="code docutils literal notranslate"><span class="pre">ERROR</span></code>: Errors which prevent GAMA from running to completion.</p></li>
 </ul>
 </div></blockquote>
-<p>By default GAMA will also capture log output to a file named ‘gama.log’.
-You can use the <code class="code docutils literal notranslate"><span class="pre">keep_analysis_log</span></code> hyperparameter to specify the desired location and name of the log,
-or set it to <code class="code docutils literal notranslate"><span class="pre">None</span></code> to prevent it being produced in the first place.
-As described in <a class="reference internal" href="../user_guide/index.html#dashboard"><span class="std std-ref">Dashboard</span></a> this file can be used to generate visualizations about the optimization process.</p>
-<hr class="docutils" />
+<p>As described in <a class="reference internal" href="../user_guide/index.html#dashboard-section"><span class="std std-ref">Dashboard</span></a> the files in the output directory can be used to generate visualizations about the optimization process.</p>
 <hr class="docutils" />
 </div>
 <div class="section" id="gama-search-space-configuration">
@@ -380,11 +383,19 @@ and continue as normal.</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2018-2020, Pieter Gijsbers
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -395,7 +406,6 @@ and continue as normal.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

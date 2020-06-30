@@ -1,15 +1,18 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Citing &mdash; gama 20.2.0 documentation</title>
+  <title>Papers &mdash; gama 20.2.1 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
 
   
   
@@ -17,7 +20,9 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -29,10 +34,6 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Contributing" href="contributing/index.html" /> 
@@ -49,7 +50,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> gama
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> gama
           
 
           
@@ -59,7 +60,7 @@
             
             
               <div class="version">
-                20.2.0
+                20.2.1
               </div>
             
           
@@ -76,6 +77,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -90,12 +92,23 @@
 <li class="toctree-l1"><a class="reference internal" href="benchmark.html">Benchmark Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing/index.html">Contributing</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Citing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Papers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gama-a-general-automated-machine-learning-assistant">GAMA: a General Automated Machine learning Assistant</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#listings">Listings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gama-genetic-automated-machine-learning-assistant">GAMA: Genetic Automated Machine learning Assistant</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Listings</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -134,9 +147,9 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Citing</li>
+      <li>Papers</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -155,10 +168,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="citing">
-<h1>Citing<a class="headerlink" href="#citing" title="Permalink to this headline">¶</a></h1>
-<p>If you want to cite GAMA, please cite the <a class="reference external" href="http://joss.theoj.org/papers/10.21105/joss.01132">JOSS article</a>.
-Here’s the bibtex:</p>
+  <div class="section" id="papers">
+<h1>Papers<a class="headerlink" href="#papers" title="Permalink to this headline">¶</a></h1>
+<p>This page contains bibtex entries for each paper, as well as up-to-date code listings from each paper.
+Unless you want to reference a specific paper, when citing GAMA please cite the <a class="reference external" href="http://joss.theoj.org/papers/10.21105/joss.01132">JOSS article</a>.</p>
+<div class="section" id="gama-a-general-automated-machine-learning-assistant">
+<h2>GAMA: a General Automated Machine learning Assistant<a class="headerlink" href="#gama-a-general-automated-machine-learning-assistant" title="Permalink to this headline">¶</a></h2>
+<p>Features GAMA 20.2.1</p>
+<p>Bibtex will be added after publication.</p>
+<div class="section" id="listings">
+<h3>Listings<a class="headerlink" href="#listings" title="Permalink to this headline">¶</a></h3>
+<p>Listing 1:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
+<span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="kn">import</span> <span class="n">AsynchronousSuccessiveHalving</span>
+<span class="kn">from</span> <span class="nn">gama.postprocessing</span> <span class="kn">import</span> <span class="n">EnsemblePostProcessing</span>
+
+<span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span>
+    <span class="n">search_method</span><span class="o">=</span><span class="n">AsynchronousSuccessiveHalving</span><span class="p">(),</span>
+    <span class="n">post_processing_method</span><span class="o">=</span><span class="n">EnsemblePostProcessing</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="gama-genetic-automated-machine-learning-assistant">
+<h2>GAMA: Genetic Automated Machine learning Assistant<a class="headerlink" href="#gama-genetic-automated-machine-learning-assistant" title="Permalink to this headline">¶</a></h2>
+<p>Features GAMA 19.01.0</p>
 <div class="highlight-latex notranslate"><div class="highlight"><pre><span></span>@article<span class="nb">{</span>Gijsbers2019,
   doi = <span class="nb">{</span>10.21105/joss.01132<span class="nb">}</span>,
   url = <span class="nb">{</span>https://doi.org/10.21105/joss.01132<span class="nb">}</span>,
@@ -173,6 +211,11 @@ Here’s the bibtex:</p>
   journal = <span class="nb">{</span>Journal of Open Source Software<span class="nb">}</span>
 <span class="nb">}</span>
 </pre></div>
+</div>
+<div class="section" id="id1">
+<h3>Listings<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>This paper features no listings.</p>
+</div>
 </div>
 </div>
 
@@ -194,11 +237,19 @@ Here’s the bibtex:</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2018-2020, Pieter Gijsbers
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -209,7 +260,6 @@ Here’s the bibtex:</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

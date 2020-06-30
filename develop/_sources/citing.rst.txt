@@ -1,8 +1,36 @@
-Citing
+Papers
 ======
+This page contains bibtex entries for each paper, as well as up-to-date code listings from each paper.
+Unless you want to reference a specific paper, when citing GAMA please cite the `JOSS article <http://joss.theoj.org/papers/10.21105/joss.01132>`_.
 
-If you want to cite GAMA, please cite the `JOSS article <http://joss.theoj.org/papers/10.21105/joss.01132>`_.
-Here's the bibtex:
+GAMA: a General Automated Machine learning Assistant
+----------------------------------------------------
+Features GAMA 20.2.1
+
+Bibtex will be added after publication.
+
+Listings
+********
+Listing 1:
+
+.. code-block:: Python
+
+    from gama import GamaClassifier
+    from gama.search_methods import AsynchronousSuccessiveHalving
+    from gama.postprocessing import EnsemblePostProcessing
+
+    automl = GamaClassifier(
+        search_method=AsynchronousSuccessiveHalving(),
+        post_processing_method=EnsemblePostProcessing()
+    )
+    automl.fit(X, y)
+    automl.predict(X_test)
+    automl.fit(X_test, y_test)
+
+
+GAMA: Genetic Automated Machine learning Assistant
+--------------------------------------------------
+Features GAMA 19.01.0
 
 .. code-block:: latex
 
@@ -19,3 +47,7 @@ Here's the bibtex:
       title = {{GAMA}: Genetic Automated Machine learning Assistant},
       journal = {Journal of Open Source Software}
     }
+
+Listings
+********
+This paper features no listings.
