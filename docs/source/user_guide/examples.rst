@@ -9,5 +9,5 @@ Examples
 .. include:: examples/regression_example.rst
     :start-line: 1
 
-.. include:: examples/using_arff_files.rst
+.. include:: examples/using_files_directly.rst
     :start-line: 1

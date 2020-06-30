@@ -3,8 +3,10 @@ import logging
 import os
 import pickle
 
+from pandas.api.types import is_categorical_dtype
+
 from gama import GamaClassifier, GamaRegressor
-from gama.data import load_feature_metadata_from_arff
+from gama.data import X_y_from_file
 
 
 def parse_args():
@@ -14,19 +16,21 @@ def parse_args():
     parser.add_argument(
         "input_file",
         type=str,
-        help="An ARFF file with the data to optimize a model for.",
+        help="A csv or ARFF file with the data to optimize a model for.",
     )
 
     io_group = parser.add_argument_group("File I/O")
 
-    # io_group.add_argument(
-    #     '-sep',
-    #     dest='separator',
-    #     type=str,
-    #     default=',',
-    #     help=("For CSV files only, the character used
-    #     to separate columns in the input file. (default=',')")
-    # )
+    io_group.add_argument(
+        "-sep",
+        dest="separator",
+        type=str,
+        default=None,
+        help=(
+            "For CSV files: the character used to separate values in the input file."
+            "If none is given, the Python parser will be used to infer it."
+        ),
+    )
     io_group.add_argument(
         "--target",
         dest="target",
@@ -101,7 +105,11 @@ def parse_args():
 
     # Extra
     parser.add_argument(
-        "-log", dest="logpath", default=None, type=str, help="File to store GAMA's log."
+        "-outdir",
+        dest="outdir",
+        default=None,
+        type=str,
+        help="Directory to store GAMA logs",
     )
     parser.add_argument(
         "-v",
@@ -123,27 +131,23 @@ def main():
     args = parse_args()
 
     print("CLI: Processing input")
-    if args.input_file.lower().endswith(".csv"):
-        raise NotImplementedError("CSV currently not supported.")
-        # data = pd.read_csv(args.input_file, sep=args.separator)
-    elif not os.path.exists(args.input_file.lower()):
+    if not os.path.exists(args.input_file.lower()):
         raise FileNotFoundError(args.input_file)
+    if args.input_file.lower().split(".")[-1] not in ["csv", "arff"]:
+        raise ValueError("Unknown file extension. Please use csv or arff.")
 
-    if args.input_file.lower().endswith(".arff") and args.mode is None:
-        # Determine the task type based on the target column in the arff file
-        attributes = load_feature_metadata_from_arff(args.input_file)
-        target = list(attributes)[-1] if args.target is None else args.target
-        target_type = attributes[target]
-        if "{" in target_type:
-            # Nominal features are denoted by listen all their values, eg.
-            # {VALUE_1, VALUE_2, ...}
+    kwargs = {}
+    if args.input_file.lower().endswith(".csv") and args.separator is not None:
+        kwargs["sep"] = args.seperator
+
+    x, y = X_y_from_file(
+        file_path=args.input_file.lower(), split_column=args.target, **kwargs,
+    )
+    if args.mode is None:
+        if is_categorical_dtype(y.dtype):
             args.mode = "classification"
-        elif target_type.lower() == "real":
-            args.mode = "regression"
         else:
-            raise ValueError(
-                f"Target column {target} has type {target_type}, which GAMA can't model"
-            )
+            args.mode = "regression"
         print(f"Detected a {args.mode} problem.")
 
     print("CLI: Initializing GAMA")
@@ -154,7 +158,8 @@ def main():
         max_eval_time=args.max_eval_time_m * 60,
         n_jobs=args.n_jobs,
         verbosity=log_level,
-        keep_analysis_log=args.logpath,
+        output_directory=args.outdir,
+        store="nothing" if args.dry_run else "logs",
     )
     if args.metric:
         configuration["scoring"] = args.metric
@@ -168,10 +173,7 @@ def main():
 
     if not args.dry_run:
         print("CLI: Starting model search")
-        if args.input_file.lower().endswith(".arff"):
-            automl.fit_arff(args.input_file.lower(), target_column=args.target)
-        # else:
-        #    automl.fit(x, y)
+        automl.fit(x, y)
 
         # == Model Export ===
         print("CLI: Exporting models.")
@@ -180,6 +182,8 @@ def main():
 
         if args.export_python is not None:
             automl.export_script(args.export_python, raise_if_exists=False)
+    else:
+        automl.cleanup("all")
     print("done!")
 
 

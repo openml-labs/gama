@@ -1,0 +1,13 @@
+[2020-06-23 11:28:40,355 - gama.gama] Using GAMA version 20.2.0.
+[2020-06-23 11:28:40,355 - gama.gama] INIT:GamaClassifier(scoring=neg_log_loss,regularize_length=True,max_pipeline_length=None,random_state=0,max_total_time=60,max_eval_time=None,n_jobs=2,max_memory_mb=4000,verbosity=30,search=AsyncEA(),post_processing=NoPostProcessing(),output_directory=gama_44ffb942-7a33-4c54-b762-29c014fa1afc,store_logs=True)
+[2020-06-23 11:28:40,440 - gama.utilities.generic.timekeeper] START: preprocessing default
+[2020-06-23 11:28:40,609 - gama.utilities.generic.timekeeper] STOP: preprocessing default after 0.1693s.
+[2020-06-23 11:28:40,609 - gama.utilities.generic.timekeeper] START: search AsyncEA
+[2020-06-23 11:28:41,543 - gama.utilities.generic.async_evaluator] Process 16456 starting 2 subprocesses.
+[2020-06-23 11:28:44,534 - gama.search_methods.async_ea] Starting EA with new population.
+[2020-06-23 11:28:53,108 - gama.genetic_programming.operator_set] 50 iterations of mate_with_log did not yield new ind.
+[2020-06-23 11:29:39,645 - gama.utilities.generic.async_evaluator] Terminating 2 subprocesses.
+[2020-06-23 11:29:39,663 - gama.gama] Search phase evaluated 90 individuals.
+[2020-06-23 11:29:39,663 - gama.utilities.generic.timekeeper] STOP: search AsyncEA after 59.0542s.
+[2020-06-23 11:29:39,663 - gama.utilities.generic.timekeeper] START: postprocess NoPostProcessing
+[2020-06-23 11:29:39,663 - gama.utilities.generic.timekeeper] STOP: postprocess NoPostProcessing after 0.0000s.

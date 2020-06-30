@@ -5,7 +5,7 @@ if __name__ == "__main__":
 
     automl = GamaClassifier(max_total_time=180, keep_analysis_log=None, n_jobs=1)
     print("Starting `fit` which will take roughly 3 minutes.")
-    automl.fit_arff(file_path.format("train"))
+    automl.fit_from_file(file_path.format("train"))
 
-    label_predictions = automl.predict_arff(file_path.format("test"))
-    probability_predictions = automl.predict_proba_arff(file_path.format("test"))
+    label_predictions = automl.predict_from_file(file_path.format("test"))
+    probability_predictions = automl.predict_proba_from_file(file_path.format("test"))

@@ -7,8 +7,8 @@ import pandas as pd
 import stopit
 
 from gama.genetic_programming.operator_set import OperatorSet
+from gama.logging.evaluation_logger import EvaluationLogger
 from gama.search_methods.base_search import BaseSearch
-from gama.logging.machine_logging import log_event
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.genetic_programming.components.individual import Individual
 
@@ -50,6 +50,11 @@ class AsynchronousSuccessiveHalving(BaseSearch):
             minimum_early_stopping_rate=(minimum_early_stopping_rate, 1),
         )
         self.output = []
+
+        self.logger = partial(
+            EvaluationLogger,
+            extra_fields=dict(rung=lambda e: e.individual.meta.get("rung", "unknown")),
+        )
 
     def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float):
         # `maximum_resource` is the number of samples used in the highest rung.
@@ -151,7 +156,6 @@ def asha(
                     evaluate,
                     individual,
                     rung,
-                    rung == max(rungs),
                     subsample=rung_resources[rung],
                     timeout=(10 + (time_penalty * 600)),
                 )
@@ -164,21 +168,10 @@ def asha(
             ):
                 future = operations.wait_next(async_)
                 if future.result is not None:
-                    evaluation, loss, rung, _ = future.result
-                    individual = evaluation.individual
+                    rung = future.result.individual.meta["rung"]
+                    loss = future.result.score[0]
+                    individual = future.result.individual
                     rung_individuals[rung].append((loss, individual))
-                    # Due to `evaluate` returning additional information (like rung),
-                    # evaluations are not automatically logged, so we do it here.
-                    log_event(
-                        log,
-                        ASHA_LOG_TOKEN,
-                        rung,
-                        individual.fitness.wallclock_time,
-                        individual.fitness.values,
-                        individual._id,
-                        individual.pipeline_str(),
-                    )
-
                 start_new_job()
 
             highest_rung_reached = max(rungs)
@@ -194,6 +187,7 @@ def asha(
         return list(map(lambda p: p[1], rung_individuals[highest_rung_reached]))
 
 
-def evaluate_on_rung(individual, rung, report, evaluate_individual, *args, **kwargs):
+def evaluate_on_rung(individual, rung, evaluate_individual, *args, **kwargs):
     evaluation = evaluate_individual(individual, *args, **kwargs)
-    return evaluation, evaluation.score[0], rung, report
+    evaluation.individual.meta["rung"] = rung
+    return evaluation

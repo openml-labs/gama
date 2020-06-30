@@ -8,7 +8,6 @@ import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 from plotly import graph_objects as go
 from dash.dependencies import Input, Output, State
-import pandas as pd
 
 from gama.dashboard.components.cli_window import CLIWindow
 from gama.dashboard.pages.base_page import BasePage
@@ -84,14 +83,14 @@ class RunningPage(BasePage):
                 raise PreventUpdate  # report does not exist
             else:
                 self.report = GamaReport(self.log_file)
+                if self.report.evaluations.empty:
+                    raise PreventUpdate
         elif not self.report.update() and not self.need_update:
             raise PreventUpdate  # report is not updated
 
         start_update = time.time()
         selected_pipeline = page_store.get("selected_pipeline", None)
-
-        with pd.option_context("mode.use_inf_as_na", True):
-            evaluations = self.report.evaluations.dropna()
+        evaluations = self.report.successful_evaluations
 
         self.need_update = False
         scatters = self.scatter_plot(
@@ -169,6 +168,9 @@ class RunningPage(BasePage):
             for id_ in evaluations.id
         ]
 
+        print(evaluations.head())
+        print(evaluations[metric_one])
+        print(evaluations[metric_two])
         all_scatter = go.Scatter(
             x=evaluations[metric_one],
             y=-evaluations[metric_two],
@@ -182,7 +184,7 @@ class RunningPage(BasePage):
 
     def gama_started(self, process, log_file):
         self.cli.monitor(process)
-        self.log_file = log_file
+        self.log_file = os.path.expanduser(log_file)
 
     def plot_area(self):
         scatter = dcc.Graph(

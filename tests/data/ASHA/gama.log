@@ -1,0 +1,16 @@
+[2020-06-23 11:32:21,756 - gama.gama] Using GAMA version 20.2.0.
+[2020-06-23 11:32:21,756 - gama.gama] INIT:GamaClassifier(scoring=neg_log_loss,regularize_length=True,max_pipeline_length=None,random_state=0,max_total_time=60,max_eval_time=None,n_jobs=2,max_memory_mb=4000,verbosity=30,search=AsynchronousSuccessiveHalving(),post_processing=NoPostProcessing(),output_directory=gama_26f7146a-6522-4cdc-a95a-e13ca13b93bb,store_logs=True)
+[2020-06-23 11:32:21,841 - gama.utilities.generic.timekeeper] START: preprocessing default
+[2020-06-23 11:32:22,017 - gama.utilities.generic.timekeeper] STOP: preprocessing default after 0.1761s.
+[2020-06-23 11:32:22,017 - gama.utilities.generic.timekeeper] START: search AsynchronousSuccessiveHalving
+[2020-06-23 11:32:22,962 - gama.utilities.generic.async_evaluator] Process 8580 starting 2 subprocesses.
+[2020-06-23 11:32:26,088 - gama.search_methods.asha] ASHA start
+[2020-06-23 11:33:21,034 - gama.utilities.generic.async_evaluator] Terminating 2 subprocesses.
+[2020-06-23 11:33:21,034 - gama.search_methods.asha] ASHA ended due to timeout.
+[2020-06-23 11:33:21,034 - gama.search_methods.asha] [5] 3
+[2020-06-23 11:33:21,034 - gama.search_methods.asha] [18] 2
+[2020-06-23 11:33:21,034 - gama.search_methods.asha] [62] 1
+[2020-06-23 11:33:21,034 - gama.gama] Search phase evaluated 85 individuals.
+[2020-06-23 11:33:21,034 - gama.utilities.generic.timekeeper] STOP: search AsynchronousSuccessiveHalving after 59.0176s.
+[2020-06-23 11:33:21,034 - gama.utilities.generic.timekeeper] START: postprocess NoPostProcessing
+[2020-06-23 11:33:21,035 - gama.utilities.generic.timekeeper] STOP: postprocess NoPostProcessing after 0.0000s.

@@ -1,0 +1,11 @@
+[2020-06-23 11:37:21,917 - gama.gama] Using GAMA version 20.2.0.
+[2020-06-23 11:37:21,918 - gama.gama] INIT:GamaClassifier(scoring=neg_log_loss,regularize_length=True,max_pipeline_length=None,random_state=0,max_total_time=60,max_eval_time=None,n_jobs=2,max_memory_mb=4000,verbosity=30,search=RandomSearch(),post_processing=NoPostProcessing(),output_directory=gama_ab7d36de-5f2e-46de-9959-b459d5395870,store_logs=True)
+[2020-06-23 11:37:21,998 - gama.utilities.generic.timekeeper] START: preprocessing default
+[2020-06-23 11:37:22,185 - gama.utilities.generic.timekeeper] STOP: preprocessing default after 0.1873s.
+[2020-06-23 11:37:22,185 - gama.utilities.generic.timekeeper] START: search RandomSearch
+[2020-06-23 11:37:23,159 - gama.utilities.generic.async_evaluator] Process 14596 starting 2 subprocesses.
+[2020-06-23 11:38:21,221 - gama.utilities.generic.async_evaluator] Terminating 2 subprocesses.
+[2020-06-23 11:38:21,230 - gama.gama] Search phase evaluated 69 individuals.
+[2020-06-23 11:38:21,230 - gama.utilities.generic.timekeeper] STOP: search RandomSearch after 59.0452s.
+[2020-06-23 11:38:21,230 - gama.utilities.generic.timekeeper] START: postprocess NoPostProcessing
+[2020-06-23 11:38:21,230 - gama.utilities.generic.timekeeper] STOP: postprocess NoPostProcessing after 0.0000s.

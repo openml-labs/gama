@@ -1,14 +1,23 @@
 import subprocess
+import sys
 from typing import List
 import gama
 
 
 def cli_command(file) -> List[str]:
-    return ["python", "gama/utilities/cli.py", file, "-dry"]
+    return [sys.executable, "gama/utilities/cli.py", file, "-dry"]
 
 
 def test_classifier_invocation():
     command = cli_command("tests/data/breast_cancer_train.arff")
+    process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    assert 0 == process.returncode, process.stderr
+    assert "classification" in str(process.stdout)
+
+
+def test_classifier_invocation_csv():
+    command = cli_command("tests/data/openml_d_23380.csv")
+    command.extend("--target TR".split(" "))
     process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     assert 0 == process.returncode, process.stderr
     assert "classification" in str(process.stdout)

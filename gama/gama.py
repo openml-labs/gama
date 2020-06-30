@@ -1,6 +1,7 @@
+import shutil
 from abc import ABC
 from collections import defaultdict
-from functools import partial
+from functools import partial, partialmethod
 import logging
 import multiprocessing
 import os
@@ -30,16 +31,15 @@ from sklearn.pipeline import Pipeline
 
 import gama.genetic_programming.compilers.scikitlearn
 from gama.genetic_programming.components import Individual, Fitness
-from gama.logging.machine_logging import log_event, TOKENS
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
 from gama.utilities.metrics import scoring_to_metric
 
 from gama.__version__ import __version__
-from gama.data import X_y_from_arff, format_x_y
+from gama.data import X_y_from_file, format_x_y
 from gama.search_methods.async_ea import AsyncEA
 from gama.utilities.generic.timekeeper import TimeKeeper
-from gama.logging.utility_functions import register_stream_log, register_file_log
+from gama.logging.utility_functions import register_stream_log
 from gama.utilities.preprocessing import (
     basic_encoding,
     basic_pipeline_extension,
@@ -87,11 +87,12 @@ class Gama(ABC):
         max_total_time: int = 3600,
         max_eval_time: Optional[int] = None,
         n_jobs: Optional[int] = None,
+        max_memory_mb: Optional[int] = None,
         verbosity: int = logging.WARNING,
-        keep_analysis_log: Optional[str] = "gama.log",
-        search_method: BaseSearch = AsyncEA(),
-        post_processing_method: BasePostProcessing = BestFitPostProcessing(),
-        cache: Optional[str] = None,
+        search: BaseSearch = AsyncEA(),
+        post_processing: BasePostProcessing = BestFitPostProcessing(),
+        output_directory: Optional[str] = None,
+        store: str = "logs",
     ):
         """
 
@@ -134,53 +135,84 @@ class Gama(ABC):
             If -1 is specified, multiprocessing.cpu_count() processes are created.
             If None is specified, multiprocessing.cpu_count() / 2 processes are created.
 
+        max_memory_mb: int, optional (default=None)
+            Sets the total amount of memory GAMA is allowed to use (in megabytes).
+            If not set, GAMA will use as much as it needs.
+            GAMA is not guaranteed to respect this limit at all times,
+            but it should never violate it for too long.
+
         verbosity: int (default=logging.WARNING)
             Sets the level of log messages to be automatically output to terminal.
 
-        keep_analysis_log: str, optional (default='gama.log')
-            If non-empty str, specify filepath where the log should be stored.
-            If `None`, no log is stored.
-
-        search_method: BaseSearch (default=AsyncEA())
+        search: BaseSearch (default=AsyncEA())
             Search method to use to find good pipelines. Should be instantiated.
 
-        post_processing_method: BasePostProcessing (default=BestFitPostProcessing())
+        post_processing: BasePostProcessing (default=BestFitPostProcessing())
             Post-processing method to create a model after the search phase.
             Should be an instantiated subclass of BasePostProcessing.
 
-        cache: str, optional (default=None)
-            Directory to use to save intermediate results during search.
-            If set to None, generate a unique cache name.
-        """
-        register_stream_log(verbosity)
-        if keep_analysis_log is not None:
-            register_file_log(keep_analysis_log)
+        output_directory: str, optional (default=None)
+            Directory to use to save GAMA output. This includes both intermediate
+            results during search and logs.
+            If set to None, generate a unique name ("gama_HEXCODE").
 
-        if keep_analysis_log is not None and not os.path.isabs(keep_analysis_log):
-            keep_analysis_log = os.path.abspath(keep_analysis_log)
+        store: str (default='logs')
+            Determines which data is stored after each run:
+             - 'nothing': keep nothing from this run
+             - 'models': keep only cache with models and predictions
+             - 'logs': keep only the logs
+             - 'all': keep logs and cache with models and predictions
+        """
+        if not output_directory:
+            output_directory = f"gama_{str(uuid.uuid4())}"
+        self.output_directory = os.path.abspath(os.path.expanduser(output_directory))
+        if not os.path.exists(self.output_directory):
+            os.mkdir(self.output_directory)
+
+        register_stream_log(verbosity)
+        if store in ["logs", "all"]:
+            log_file = os.path.join(self.output_directory, "gama.log")
+            log_handler = logging.FileHandler(log_file)
+            log_handler.setLevel(logging.DEBUG)
+            log_format = logging.Formatter("[%(asctime)s - %(name)s] %(message)s")
+            log_handler.setFormatter(log_format)
+            logging.getLogger("gama").addHandler(log_handler)
 
         arguments = ",".join(
-            [f"{k}={v}" for (k, v) in locals().items() if k not in ["self", "config"]]
+            [
+                f"{k}={v}"
+                for (k, v) in locals().items()
+                if k not in ["self", "config", "log_file", "log_handler", "log_format"]
+            ]
         )
         log.info(f"Using GAMA version {__version__}.")
-        log.info(f"{self.__class__.__name__}({arguments})")
-        log_event(log, TOKENS.INIT, arguments)
+        log.info(f"INIT:{self.__class__.__name__}({arguments})")
 
         if n_jobs is None:
             n_jobs = multiprocessing.cpu_count() // 2
             log.debug("n_jobs defaulted to %d", n_jobs)
 
+        err = ""
         if max_total_time is None or max_total_time <= 0:
-            raise ValueError(
-                f"Expect positive int for max_total_time, got {max_total_time}."
-            )
+            err = f"Expect positive int for max_total_time, got {max_total_time}."
         if max_eval_time is not None and max_eval_time <= 0:
-            raise ValueError(
-                f"Expect None or positive int for max_eval_time, got {max_eval_time}."
-            )
+            err = f"Expect None or positive int for max_eval_time, got {max_eval_time}."
         if n_jobs < -1 or n_jobs == 0:
-            raise ValueError(f"n_jobs should be -1 or positive int but is {n_jobs}.")
-        AsyncEvaluator.n_jobs = n_jobs
+            err = f"n_jobs should be -1 or positive int but is {n_jobs}."
+        if err:
+            self.cleanup("all")
+            raise ValueError(err)
+
+        setattr(
+            AsyncEvaluator,
+            "__init__",
+            partialmethod(
+                AsyncEvaluator.__init__,
+                n_workers=multiprocessing.cpu_count() if n_jobs is None else n_jobs,
+                memory_limit_mb=max_memory_mb,
+                logfile=os.path.join(self.output_directory, "memory.log"),
+            ),
+        )
 
         if max_eval_time is None:
             max_eval_time = round(0.1 * max_total_time)
@@ -195,8 +227,9 @@ class Gama(ABC):
         self._time_manager = TimeKeeper(max_total_time)
         self._metrics: Tuple[Metric, ...] = scoring_to_metric(scoring)
         self._regularize_length = regularize_length
-        self._search_method: BaseSearch = search_method
-        self._post_processing = post_processing_method
+        self._search_method: BaseSearch = search
+        self._post_processing = post_processing
+        self._store = store
 
         if random_state is not None:
             random.seed(random_state)
@@ -211,18 +244,19 @@ class Gama(ABC):
         self._final_pop: List[Individual] = []
 
         self._subscribers: Dict[str, List[Callable]] = defaultdict(list)
-        if not cache:
-            cache = f"cache_{str(uuid.uuid4())}"
-        if isinstance(post_processing_method, EnsemblePostProcessing):
+        cache_directory = os.path.join(self.output_directory, "cache")
+        if isinstance(post_processing, EnsemblePostProcessing):
             self._evaluation_library = EvaluationLibrary(
-                m=post_processing_method.hyperparameters["max_models"],
-                n=post_processing_method.hyperparameters["hillclimb_size"],
-                cache_directory=cache,
+                m=post_processing.hyperparameters["max_models"],
+                n=post_processing.hyperparameters["hillclimb_size"],
+                cache=cache_directory,
             )
         else:
             # Don't keep memory-heavy evaluation meta-data (predictions, estimators)
-            self._evaluation_library = EvaluationLibrary(m=0, cache_directory=cache)
+            self._evaluation_library = EvaluationLibrary(m=0, cache=cache_directory)
         self.evaluation_completed(self._evaluation_library.save_evaluation)
+        e = search.logger(os.path.join(self.output_directory, "evaluations.log"))
+        self.evaluation_completed(e.log_evaluation)
 
         self._pset, parameter_checks = pset_from_config(config)
 
@@ -245,6 +279,20 @@ class Gama(ABC):
             evaluate_callback=self._on_evaluation_completed,
             completed_evaluations=self._evaluation_library.lookup,
         )
+
+    def cleanup(self, which="evaluations"):
+        cache_directory = os.path.join(self.output_directory, "cache")
+        if not os.path.exists(self.output_directory):
+            return  # Cleanup has been called previously
+
+        if which in ["logs", "all"]:
+            for file in os.listdir(self.output_directory):
+                if file.endswith(".log"):
+                    os.remove(os.path.join(self.output_directory, file))
+        if which in ["evaluations", "all"] and os.path.exists(cache_directory):
+            shutil.rmtree(cache_directory)
+        if which == "all":
+            os.rmdir(self.output_directory)
 
     def _np_to_matching_dataframe(self, x: np.ndarray) -> pd.DataFrame:
         """ Format np array to dataframe whose column types match the training data. """
@@ -281,32 +329,35 @@ class Gama(ABC):
         x = self._prepare_for_prediction(x)
         return self._predict(x)
 
-    def predict_arff(
+    def predict_from_file(
         self,
-        arff_file_path: str,
+        file_path: str,
         target_column: Optional[str] = None,
         encoding: Optional[str] = None,
+        **kwargs,
     ) -> np.ndarray:
         """ Predict the target for input found in the ARFF file.
 
         Parameters
         ----------
-        arff_file_path: str
-            An ARFF file with the same columns as the one that used in fit.
+        file_path: str
+            A csv or ARFF file with the same columns as the one that used in fit.
             Target column must be present in file, but its values are ignored.
         target_column: str, optional (default=None)
             Specifies which column the model should predict.
             If left None, the last column is taken to be the target.
         encoding: str, optional
             Encoding of the ARFF file.
+        **kwargs:
+            Any additional arguments for calls to pandas.read_csv or arff.load.
 
         Returns
         -------
         numpy.ndarray
             array with predictions for each row in the ARFF file.
         """
-        x, _ = X_y_from_arff(
-            arff_file_path, split_column=target_column, encoding=encoding
+        x, _ = X_y_from_file(
+            file_path, split_column=target_column, encoding=encoding, **kwargs
         )
         x = self._prepare_for_prediction(x)
         return self._predict(x)
@@ -335,66 +386,72 @@ class Gama(ABC):
         )
         return self._metrics[0].score(y, predictions)
 
-    def score_arff(
+    def score_from_file(
         self,
-        arff_file_path: str,
+        file_path: str,
         target_column: Optional[str] = None,
         encoding: Optional[str] = None,
+        **kwargs,
     ) -> float:
         """ Calculate `self.scoring` metric of the model on data in the file.
 
         Parameters
         ----------
-        arff_file_path: str
-            An ARFF file with which to calculate the score.
+        file_path: str
+            A csv or ARFF file with which to calculate the score.
         target_column: str, optional (default=None)
             Specifies which column the model should predict.
             If left None, the last column is taken to be the target.
         encoding: str, optional
             Encoding of the ARFF file.
+        **kwargs:
+            Any additional arguments for calls to pandas.read_csv or arff.load.
 
         Returns
         -------
         float
             The score obtained on the given test data according to the `scoring` metric.
         """
-        x, y = X_y_from_arff(
-            arff_file_path, split_column=target_column, encoding=encoding
+        x, y = X_y_from_file(
+            file_path, split_column=target_column, encoding=encoding, **kwargs
         )
         return self.score(x, y)
 
-    def fit_arff(
+    def fit_from_file(
         self,
-        arff_file_path: str,
+        file_path: str,
         target_column: Optional[str] = None,
         encoding: Optional[str] = None,
-        *args,
+        warm_start: Optional[List[Individual]] = None,
         **kwargs,
     ) -> None:
         """ Find and fit a model to predict the target column (last) from other columns.
 
         Parameters
         ----------
-        arff_file_path: str
-            Path to an ARFF file containing the training data.
+        file_path: str
+            Path to a csv or ARFF file containing the training data.
         target_column: str, optional (default=None)
             Specifies which column the model should predict.
             If left None, the last column is taken to be the target.
         encoding: str, optional
-            Encoding of the ARFF file.
+            Encoding of the file.
+        warm_start: List[Individual], optional (default=None)
+            A list of individual to start the search  procedure with.
+            If None is given, random start candidates are generated.
+        **kwargs:
+            Any additional arguments for calls to pandas.read_csv or arff.load.
 
         """
-        x, y = X_y_from_arff(
-            arff_file_path, split_column=target_column, encoding=encoding
-        )
-        self.fit(x, y, *args, **kwargs)
+        x, y = X_y_from_file(file_path, target_column, encoding, **kwargs)
+        self.fit(x, y, warm_start)
 
     def fit(
         self,
         x: Union[pd.DataFrame, np.ndarray],
         y: Union[pd.DataFrame, pd.Series, np.ndarray],
-        warm_start: bool = False,
-    ) -> None:
+        warm_start: Optional[List[Individual]] = None,
+    ) -> "Gama":
         """ Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -411,9 +468,9 @@ class Gama(ABC):
         y: pandas.DataFrame, pandas.Series or numpy.ndarray, shape = [n_samples,]
             Target values.
             If a DataFrame is provided, assumes the first column contains target values.
-        warm_start: bool (default=False)
-            Indicates the optimization should continue using the last individuals of the
-            previous `fit` call.
+        warm_start: List[Individual], optional (default=None)
+            A list of individual to start the search  procedure with.
+            If None is given, random start candidates are generated.
         """
 
         with self._time_manager.start_activity(
@@ -485,15 +542,19 @@ class Gama(ABC):
                 self._time_manager.total_time_remaining,
                 best_individuals,
             )
-        self._evaluation_library.clear_cache()
+        to_clean = dict(nothing="all", logs="evaluations", models="logs")
+        self.cleanup(to_clean[self._store])
+        return self
 
-    def _search_phase(self, warm_start: bool = False, timeout: float = 1e6):
+    def _search_phase(
+        self, warm_start: Optional[List[Individual]] = None, timeout: float = 1e6
+    ):
         """ Invoke the search algorithm, populate `final_pop`. """
-        if warm_start and not self._final_pop:
-            pop = [ind for ind in self._final_pop]
+        if warm_start:
+            if not all([isinstance(i, Individual) for i in warm_start]):
+                raise TypeError("`warm_start` must be a list of Individual.")
+            pop = warm_start
         else:
-            if warm_start:
-                log.warning("Warm-start True but no earlier fit. Using new population.")
             pop = [self._operator_set.individual() for _ in range(50)]
 
         deadline = time.time() + timeout
@@ -522,7 +583,6 @@ class Gama(ABC):
             log.info("Search phase terminated because of Keyboard Interrupt.")
 
         self._final_pop = self._search_method.output
-        log.debug([str(i) for i in self._final_pop[:100]])
         n_evaluations = len(self._evaluation_library.evaluations)
         log.info(f"Search phase evaluated {n_evaluations} individuals.")
 

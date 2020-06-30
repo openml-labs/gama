@@ -5,17 +5,15 @@ import time
 from typing import Callable, Tuple, Optional, Sequence
 
 import stopit
-from sklearn.base import TransformerMixin
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.model_selection import ShuffleSplit
+from sklearn.base import TransformerMixin, is_classifier
+from sklearn.model_selection import ShuffleSplit, cross_validate, check_cv
 from sklearn.pipeline import Pipeline
 
 from gama.utilities.evaluation_library import Evaluation
 from gama.utilities.generic.stopwatch import Stopwatch
+import numpy as np
 from gama.utilities.metrics import Metric
 from gama.genetic_programming.components import Individual, PrimitiveNode, Fitness
-from gama.logging.utility_functions import MultiprocessingLogger
-from gama.logging.machine_logging import TOKENS, log_event
 
 log = logging.getLogger(__name__)
 
@@ -41,80 +39,6 @@ def compile_individual(
     return Pipeline(list(reversed(steps)))
 
 
-def cross_val_train_predict(
-    estimator, x, y, predict_method: str = "predict", cv: int = 5
-):
-    """ Return fit estimators and predictions of each (Stratified) fold. """
-    from sklearn.base import clone, is_classifier
-    from sklearn.model_selection._split import check_cv
-    from sklearn.utils.metaestimators import _safe_split
-    import numpy as np
-
-    splitter = check_cv(cv, y, classifier=is_classifier(estimator))
-
-    estimators = []
-    predictions = None
-    for train, test in splitter.split(x, y):
-        x_train, y_train = _safe_split(estimator, x, y, train)
-        x_test, _ = _safe_split(estimator, x, y, test, train)
-
-        fold_estimator = clone(estimator)
-        fold_predict = getattr(fold_estimator, predict_method)
-
-        fold_estimator.fit(x_train, y_train)
-        estimators.append(fold_estimator)
-        fold_prediction = fold_predict(x_test)
-
-        if predictions is None:
-            if fold_prediction.ndim == 2:
-                predictions = np.empty(shape=(len(y), fold_prediction.shape[1]))
-            else:
-                predictions = np.empty(shape=(len(y),))
-
-        predictions[test] = fold_prediction
-
-    return predictions, estimators
-
-
-def cross_val_predict_score(estimator, X, y_train, metrics=None, **kwargs):
-    """ Return scores, fit estimators and predictions of each (Stratified) fold.
-
-    :param y_train: target in appropriate format for training (typically (N,))
-    """
-    if not all(isinstance(metric, Metric) for metric in metrics):
-        raise ValueError(
-            f"All `metrics` must be an instance of `metrics.Metric`, "
-            f"is {[type(metric) for metric in metrics]}."
-        )
-
-    predictions_are_probabilities = any(m.requires_probabilities for m in metrics)
-    method = "predict_proba" if predictions_are_probabilities else "predict"
-    # predictions = cross_val_predict(estimator, X, y_train, method=method, **kwargs)
-    predictions, estimators = cross_val_train_predict(
-        estimator, X, y_train, predict_method=method
-    )
-
-    if predictions.ndim == 2 and predictions.shape[1] == 1:
-        predictions = predictions.squeeze()
-
-    scores = []
-    for metric in metrics:
-        if metric.requires_probabilities:
-            # `predictions` are of shape (N,K), ground truth to be formatted accordingly
-            y_ohe = (
-                OneHotEncoder().fit_transform(y_train.values.reshape(-1, 1)).toarray()
-            )
-            scores.append(metric.maximizable_score(y_ohe, predictions))
-        elif predictions_are_probabilities:
-            # Metric requires no probabilities, but probabilities were predicted.
-            scores.append(metric.maximizable_score(y_train, predictions.argmax(axis=1)))
-        else:
-            # No metric requires probabilities, so `predictions` is an array of labels.
-            scores.append(metric.maximizable_score(y_train, predictions))
-
-    return predictions, scores, estimators
-
-
 def object_is_valid_pipeline(o):
     """ Determines if object behaves like a scikit-learn pipeline. """
     return (
@@ -126,14 +50,7 @@ def object_is_valid_pipeline(o):
 
 
 def evaluate_pipeline(
-    pipeline,
-    x,
-    y_train,
-    timeout: float,
-    metrics="accuracy",
-    cv=5,
-    logger=None,
-    subsample=None,
+    pipeline, x, y_train, timeout: float, metrics: Tuple[Metric], cv=5, subsample=None,
 ) -> Tuple:
     """ Score `pipeline` with k-fold CV according to `metrics` on (a subsample of) X, y
 
@@ -145,12 +62,9 @@ def evaluate_pipeline(
         estimators: list of fitted pipelines if successful, None if not
         error: None if successful, otherwise an Exception
     """
-    if not logger:
-        logger = log
     if not object_is_valid_pipeline(pipeline):
         raise TypeError(f"Pipeline must not be None and requires fit, predict, steps.")
 
-    start_datetime = datetime.now()
     prediction, estimators = None, None
     # default score for e.g. timeout or failure
     scores = tuple([float("-inf")] * len(metrics))
@@ -162,45 +76,51 @@ def evaluate_pipeline(
                 idx, _ = next(sampler.split(x))
                 x, y_train = x.iloc[idx, :], y_train[idx]
 
-            prediction, scores, estimators = cross_val_predict_score(
-                pipeline, x, y_train, cv=cv, metrics=metrics
+            splitter = check_cv(cv, y_train, is_classifier(pipeline))
+            result = cross_validate(
+                pipeline,
+                x,
+                y_train,
+                cv=splitter,
+                return_estimator=True,
+                scoring=[m.name for m in metrics],
+                error_score="raise",
             )
+            scores = tuple([np.mean(result[f"test_{m.name}"]) for m in metrics])
+            estimators = result["estimator"]
+
+            for (estimator, (_, test)) in zip(estimators, splitter.split(x, y_train)):
+                if any([m.requires_probabilities for m in metrics]):
+                    fold_pred = estimator.predict_proba(x.iloc[test, :])
+                else:
+                    fold_pred = estimator.predict(x.iloc[test, :])
+
+                if prediction is None:
+                    if fold_pred.ndim == 2:
+                        prediction = np.empty(shape=(len(y_train), fold_pred.shape[1]))
+                    else:
+                        prediction = np.empty(shape=(len(y_train),))
+                prediction[test] = fold_pred
+
+            # prediction, scores, estimators = cross_val_predict_score(
+            #     pipeline, x, y_train, cv=cv, metrics=metrics
+            # )
         except stopit.TimeoutException:
             # This exception is handled by the ThreadingTimeout context manager.
             raise
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            if isinstance(logger, MultiprocessingLogger):
-                logger.debug(f"{type(e)} raised during evaluation.")
-            else:
-                logger.debug(f"{type(e)} raised during evaluation.", exc_info=True)
-
-            single_line_pipeline = str(pipeline).replace("\n", "")
-            log_event(
-                logger,
-                TOKENS.EVALUATION_ERROR,
-                start_datetime,
-                single_line_pipeline,
-                type(e),
-                e,
-            )
             return prediction, scores, estimators, e
 
     if c_mgr.state == c_mgr.INTERRUPTED:
         # A TimeoutException was raised, but not by the context manager.
         # This indicates that the outer context manager (the ea) timed out.
-        logger.info("Outer-timeout during evaluation of {}".format(pipeline))
         raise stopit.utils.TimeoutException()
 
     if not c_mgr:
         # For now we treat an eval timeout the same way as
         # e.g. NaN exceptions and use the default score.
-        single_line_pipeline = str(pipeline).replace("\n", "")
-        log_event(
-            logger, TOKENS.EVALUATION_TIMEOUT, start_datetime, single_line_pipeline
-        )
-        logger.debug(f"Timeout after {timeout}s: {pipeline}")
         return prediction, scores, estimators, stopit.TimeoutException()
 
     return prediction, tuple(scores), estimators, None
@@ -249,7 +169,9 @@ def evaluate_individual(
 
     with Stopwatch() as wall_time, Stopwatch(time.process_time) as process_time:
         evaluation = evaluate_pipeline(individual.pipeline, timeout=timeout, **kwargs)
-        result._predictions, result.score, result._estimators, result.error = evaluation
+        result._predictions, result.score, result._estimators, error = evaluation
+        if error is not None:
+            result.error = f"{type(error)} {str(error)}"
     result.duration = wall_time.elapsed_time
 
     if add_length_to_score:
