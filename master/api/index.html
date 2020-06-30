@@ -1,15 +1,18 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API &mdash; gama 20.2.0 documentation</title>
+  <title>API &mdash; gama 20.2.1 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
 
   
   
@@ -17,7 +20,9 @@
   
 
   
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -29,10 +34,6 @@
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Benchmark Results" href="../benchmark.html" />
@@ -50,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> gama
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> gama
           
 
           
@@ -60,7 +61,7 @@
             
             
               <div class="version">
-                20.2.0
+                20.2.1
               </div>
             
           
@@ -77,6 +78,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -140,12 +142,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../benchmark.html">Benchmark Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Papers</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -184,7 +187,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../index.html">Docs</a> &raquo;</li>
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>API</li>
     
@@ -206,7 +209,7 @@
            <div itemprop="articleBody">
             
   <div class="section" id="api">
-<h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
+<span id="api-doc"></span><h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="gama">
 <h2>GAMA<a class="headerlink" href="#gama" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="gamaclassifier">
@@ -239,14 +242,27 @@ If None, set to 0.1 * max_total_time.</p></li>
 Accepted values are positive integers, -1 or None.
 If -1 is specified, multiprocessing.cpu_count() processes are created.
 If None is specified, multiprocessing.cpu_count() / 2 processes are created.</p></li>
+<li><p><strong>max_memory_mb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Sets the total amount of memory GAMA is allowed to use (in megabytes).
+If not set, GAMA will use as much as it needs.
+GAMA is not guaranteed to respect this limit at all times,
+but it should never violate it for too long.</p></li>
 <li><p><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> (</em><em>default=logging.WARNING</em><em>)</em>) – Sets the level of log messages to be automatically output to terminal.</p></li>
-<li><p><strong>keep_analysis_log</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em><em> (</em><em>default='gama.log'</em><em>)</em>) – If non-empty str, specify filepath where the log should be stored.
-If <code class="code docutils literal notranslate"><span class="pre">None</span></code>, no log is stored.</p></li>
-<li><p><strong>search_method</strong> (<a class="reference internal" href="#gama.search_methods.base_search.BaseSearch" title="gama.search_methods.base_search.BaseSearch"><em>BaseSearch</em></a><em> (</em><em>default=AsyncEA</em><em>(</em><em>)</em><em>)</em>) – Search method to use to find good pipelines. Should be instantiated.</p></li>
-<li><p><strong>post_processing_method</strong> (<a class="reference internal" href="#gama.postprocessing.BasePostProcessing" title="gama.postprocessing.BasePostProcessing"><em>BasePostProcessing</em></a><em> (</em><em>default=BestFitPostProcessing</em><em>(</em><em>)</em><em>)</em>) – Post-processing method to create a model after the search phase.
+<li><p><strong>search</strong> (<a class="reference internal" href="#gama.search_methods.base_search.BaseSearch" title="gama.search_methods.base_search.BaseSearch"><em>BaseSearch</em></a><em> (</em><em>default=AsyncEA</em><em>(</em><em>)</em><em>)</em>) – Search method to use to find good pipelines. Should be instantiated.</p></li>
+<li><p><strong>post_processing</strong> (<a class="reference internal" href="#gama.postprocessing.BasePostProcessing" title="gama.postprocessing.BasePostProcessing"><em>BasePostProcessing</em></a><em> (</em><em>default=BestFitPostProcessing</em><em>(</em><em>)</em><em>)</em>) – Post-processing method to create a model after the search phase.
 Should be an instantiated subclass of BasePostProcessing.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Directory to use to save intermediate results during search.
-If set to None, generate a unique cache name.</p></li>
+<li><p><strong>output_directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Directory to use to save GAMA output. This includes both intermediate
+results during search and logs.
+If set to None, generate a unique name (“gama_HEXCODE”).</p></li>
+<li><p><strong>store</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> (</em><em>default='logs'</em><em>)</em>) – <dl class="simple">
+<dt>Determines which data is stored after each run:</dt><dd><ul>
+<li><p>’nothing’: keep nothing from this run</p></li>
+<li><p>’models’: keep only cache with models and predictions</p></li>
+<li><p>’logs’: keep only the logs</p></li>
+<li><p>’all’: keep logs and cache with models and predictions</p></li>
+</ul>
+</dd>
+</dl>
+</p></li>
 </ul>
 </dd>
 </dl>
@@ -265,41 +281,13 @@ If set to None, generate a unique cache name.</p></li>
 </div>
 <div class="section" id="metrics">
 <span id="id1"></span><h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-gama.utilities.metrics"></span><p>This module defines the built-in metrics for GAMA.</p>
-<p>The valid metrics depend on the type of task. Many scikit-learn metrics are available.
-For classification, the following metrics are available:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>accuracy, roc_auc, average_precision, log_loss</p></li>
-<li><p>micro, macro, weighted and sample averages for precision, recall and f1</p></li>
-</ul>
-</div></blockquote>
-<p>For regression, the following metrics are available:</p>
-<blockquote>
-<div><p>explained_variance, r2, median_absolute_error, mean_squared_error,
-mean_squared_log_error, mean_absolute_error</p>
-</div></blockquote>
-<p>Whether to minimize or maximize is determined automatically.</p>
-<p>If you have a custom scoring function, you can define your own <code class="code docutils literal notranslate"><span class="pre">Metric</span></code>.</p>
+<span class="target" id="module-gama.utilities.metrics"></span><p>If you have a custom scoring function, you can define your own <code class="code docutils literal notranslate"><span class="pre">Metric</span></code>.</p>
 <div class="section" id="metric">
 <h3>Metric<a class="headerlink" href="#metric" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt id="gama.utilities.metrics.Metric">
-<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.metrics.</code><code class="sig-name descname">Metric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric_name</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">score_function</span><span class="p">:</span> <span class="n">Callable</span></em>, <em class="sig-param"><span class="n">requires_probabilities</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span></em>, <em class="sig-param"><span class="n">maximize</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span></em>, <em class="sig-param"><span class="n">task_type</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#gama.utilities.metrics.MetricType" title="gama.utilities.metrics.MetricType">gama.utilities.metrics.MetricType</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/metrics.html#Metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.metrics.Metric" title="Permalink to this definition">¶</a></dt>
-<dd><p>A wrapper for a scoring function to provide additional meta-data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>metric_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Name of the metric.</p></li>
-<li><p><strong>score_function</strong> (<em>Callable</em>) – Takes either predicted targets or predicted probabilities and
-the true target values to calculate a score.</p></li>
-<li><p><strong>requires_probabilities</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – For classification metrics only,
-describes if the metric should be computed with predicted probabilities.</p></li>
-<li><p><strong>maximize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If True, indicates that maximizing the score corresponds to better models.</p></li>
-<li><p><strong>task_type</strong> (<a class="reference internal" href="#gama.utilities.metrics.MetricType" title="gama.utilities.metrics.MetricType"><em>MetricType</em></a>) – Type of the machine learning task.</p></li>
-</ul>
-</dd>
-</dl>
+<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.metrics.</code><code class="sig-name descname">Metric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scorer</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>sklearn.metrics._scorer._BaseScorer<span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/metrics.html#Metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.metrics.Metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>A thin layer around the <code class="code docutils literal notranslate"><span class="pre">scorer</span></code> class of scikit-learn.</p>
 </dd></dl>
 
 </div>
@@ -307,17 +295,17 @@ describes if the metric should be computed with predicted probabilities.</p></li
 <h3>MetricType<a class="headerlink" href="#metrictype" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt id="gama.utilities.metrics.MetricType">
-<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.metrics.</code><code class="sig-name descname">MetricType</code><a class="reference internal" href="../_modules/gama/utilities/metrics.html#MetricType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.metrics.MetricType" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.metrics.</code><code class="sig-name descname">MetricType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/metrics.html#MetricType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.metrics.MetricType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Metric types supported by GAMA.</p>
 <dl class="py attribute">
 <dt id="gama.utilities.metrics.MetricType.CLASSIFICATION">
-<code class="sig-name descname">CLASSIFICATION</code><em class="property">: int</em><em class="property"> = 1</em><a class="headerlink" href="#gama.utilities.metrics.MetricType.CLASSIFICATION" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">CLASSIFICATION</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></em><em class="property"> = 1</em><a class="headerlink" href="#gama.utilities.metrics.MetricType.CLASSIFICATION" title="Permalink to this definition">¶</a></dt>
 <dd><p>discrete target</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="gama.utilities.metrics.MetricType.REGRESSION">
-<code class="sig-name descname">REGRESSION</code><em class="property">: int</em><em class="property"> = 2</em><a class="headerlink" href="#gama.utilities.metrics.MetricType.REGRESSION" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">REGRESSION</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></em><em class="property"> = 2</em><a class="headerlink" href="#gama.utilities.metrics.MetricType.REGRESSION" title="Permalink to this definition">¶</a></dt>
 <dd><p>continuous target</p>
 </dd></dl>
 
@@ -353,7 +341,7 @@ This should not exceed the number of samples in the data.</p></li>
 <h3>AsyncEA<a class="headerlink" href="#asyncea" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt id="gama.search_methods.AsyncEA">
-<em class="property">class </em><code class="sig-prename descclassname">gama.search_methods.</code><code class="sig-name descname">AsyncEA</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">population_size</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_n_evaluations</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">restart_callback</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Callable<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/async_ea.html#AsyncEA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.AsyncEA" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.search_methods.</code><code class="sig-name descname">AsyncEA</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">population_size</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_n_evaluations</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">restart_callback</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Callable<span class="p">[</span><span class="p">]</span><span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/async_ea.html#AsyncEA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.AsyncEA" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform asynchronous evolutionary optimization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -595,7 +583,7 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 <h4>Primitive<a class="headerlink" href="#primitive" title="Permalink to this headline">¶</a></h4>
 <dl class="py class">
 <dt id="gama.genetic_programming.components.Primitive">
-<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Primitive</code><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive.html#Primitive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.Primitive" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Primitive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">output</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">identifier</span><span class="p">:</span> <span class="n">Callable</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive.html#Primitive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.Primitive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines an operator which takes input and produces output.</p>
 <p>E.g. a preprocessing or classification algorithm.</p>
 <p>Create new instance of Primitive(input, output, identifier)</p>
@@ -624,7 +612,7 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 <h4>Terminal<a class="headerlink" href="#terminal" title="Permalink to this headline">¶</a></h4>
 <dl class="py class">
 <dt id="gama.genetic_programming.components.Terminal">
-<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Terminal</code><a class="reference internal" href="../_modules/gama/genetic_programming/components/terminal.html#Terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.Terminal" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">Terminal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></span></em>, <em class="sig-param"><span class="n">output</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">identifier</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/terminal.html#Terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.Terminal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Specifies a specific value for a specific type or input.</p>
 <p>E.g. a value for a hyperparameter for an algorithm.</p>
 <p>Create new instance of Terminal(value, output, identifier)</p>
@@ -800,7 +788,7 @@ Requires both provided individuals to contain at most <code class="code docutils
 <h4>Pareto Front<a class="headerlink" href="#pareto-front" title="Permalink to this headline">¶</a></h4>
 <dl class="py class">
 <dt id="gama.utilities.generic.paretofront.ParetoFront">
-<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.paretofront.</code><code class="sig-name descname">ParetoFront</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start_list</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">get_values_fn</span><span class="p">:</span> <span class="n">Optional[Callable[Any, Tuple[Any, …]]]</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/paretofront.html#ParetoFront"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.paretofront.ParetoFront" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.paretofront.</code><code class="sig-name descname">ParetoFront</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start_list</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">get_values_fn</span><span class="p">:</span> <span class="n">Optional[Callable[[Any], Tuple[Any, …]]]</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/paretofront.html#ParetoFront"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.paretofront.ParetoFront" title="Permalink to this definition">¶</a></dt>
 <dd><p>A list of tuples in which no one tuple is dominated by another.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -854,27 +842,28 @@ jobs while they were running.</p>
 </div>
 <dl class="py class">
 <dt id="gama.utilities.generic.async_evaluator.AsyncEvaluator">
-<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.async_evaluator.</code><code class="sig-name descname">AsyncEvaluator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n_workers</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/async_evaluator.html#AsyncEvaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.async_evaluator.AsyncEvaluator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.async_evaluator.</code><code class="sig-name descname">AsyncEvaluator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n_workers</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">memory_limit_mb</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logfile</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/async_evaluator.html#AsyncEvaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.async_evaluator.AsyncEvaluator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Manages subprocesses on which arbitrary functions can be evaluated.</p>
 <p>The function and all its arguments must be picklable.
 Using the same AsyncEvaluator in two different contexts raises a <code class="code docutils literal notranslate"><span class="pre">RuntimeError</span></code>.</p>
 <p>class variables:
-n_jobs: int (default=multiprocessing.cpu_count())</p>
+defaults: Dict, optional (default=None)</p>
 <blockquote>
-<div><p>The default number of subprocesses to spawn.
-Ignored if the <code class="code docutils literal notranslate"><span class="pre">n_workers</span></code> parameter is specified on init.</p>
-</div></blockquote>
-<dl class="simple">
-<dt>defaults: Dict, optional (default=None)</dt><dd><p>Default parameter values shared between all submit calls.
+<div><p>Default parameter values shared between all submit calls.
 This allows these defaults to be transferred only once per process,
 instead of twice per call (to and from the subprocess).
 Only supports keyword arguments.</p>
-</dd>
-</dl>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>n_workers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Maximum number of subprocesses to run for parallel evaluations.
-Defaults to <code class="code docutils literal notranslate"><span class="pre">AsyncEvaluator.n_jobs</span></code>, using all cores unless overwritten.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_workers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Maximum number of subprocesses to run for parallel evaluations.
+Defaults to <code class="code docutils literal notranslate"><span class="pre">AsyncEvaluator.n_jobs</span></code>, using all cores unless overwritten.</p></li>
+<li><p><strong>memory_limit_mb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – The maximum number of megabytes that this process and its subprocesses
+may use in total. If None, no limit is enforced.
+There is no guarantee the limit is not violated.</p></li>
+<li><p><strong>logfile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – If set, recorded resource usage will be written to this file.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -904,11 +893,19 @@ Defaults to <code class="code docutils literal notranslate"><span class="pre">As
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2018-2020, Pieter Gijsbers
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -919,7 +916,6 @@ Defaults to <code class="code docutils literal notranslate"><span class="pre">As
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

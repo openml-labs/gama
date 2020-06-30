@@ -1,15 +1,18 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Examples &mdash; gama 20.2.0 documentation</title>
+  <title>Examples &mdash; gama 20.2.1 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
 
   
   
@@ -17,7 +20,9 @@
   
 
   
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -29,10 +34,6 @@
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
 </head>
@@ -48,7 +49,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> gama
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> gama
           
 
           
@@ -58,7 +59,7 @@
             
             
               <div class="version">
-                20.2.0
+                20.2.1
               </div>
             
           
@@ -75,6 +76,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -89,12 +91,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../benchmark.html">Benchmark Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Papers</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -133,7 +136,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../index.html">Docs</a> &raquo;</li>
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Examples</li>
     
@@ -213,14 +216,16 @@
 </div>
 <p>By default, GamaRegressor will optimize towards <cite>mean squared error</cite>.</p>
 </div>
-<div class="section" id="using-arff-files">
-<h2>Using ARFF files<a class="headerlink" href="#using-arff-files" title="Permalink to this headline">¶</a></h2>
-<p>GAMA supports data in <a class="reference external" href="https://www.cs.waikato.ac.nz/ml/weka/arff.html">ARFF</a> files directly, utilizing extra information given, such as which features are categorical.
-In the example below, make sure to replace the file paths to the ARFF files to be used.
+<div class="section" id="using-files-directly">
+<h2>Using Files Directly<a class="headerlink" href="#using-files-directly" title="Permalink to this headline">¶</a></h2>
+<p>You can load data directly from csv and <a class="reference external" href="https://www.cs.waikato.ac.nz/ml/weka/arff.html">ARFF</a> files.
+For ARFF files, GAMA can utilize extra information given, such as which features are categorical.
+For csv files GAMA will infer column types, but this might lead to mistakes.
+In the example below, make sure to replace the file paths to the files to be used.
 The example script can be run by using e.g.
 <a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_train.arff">breast_cancer_train.arff</a> and
 <a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_test.arff">breast_cancer_test.arff</a>.
-The target should always be specified as the last column.
+The target should always be specified as the last column, unless the <cite>target_column</cite> is specified.
 Make sure you adjust the file path if not executed from the examples directory.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
 
@@ -229,15 +234,15 @@ Make sure you adjust the file path if not executed from the examples directory.<
 
     <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">keep_analysis_log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting `fit` which will take roughly 3 minutes.&quot;</span><span class="p">)</span>
-    <span class="n">automl</span><span class="o">.</span><span class="n">fit_arff</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">))</span>
+    <span class="n">automl</span><span class="o">.</span><span class="n">fit_from_file</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">))</span>
 
-    <span class="n">label_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_arff</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
-    <span class="n">probability_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_proba_arff</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
+    <span class="n">label_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_from_file</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
+    <span class="n">probability_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_proba_from_file</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>The GamaRegressor also has ARFF support.</p>
-<p>The advantage of using an ARFF file over something like a numpy-array, is that attribute types are specified.
-When supplying only numpy-arrays (e.g. through <code class="docutils literal notranslate"><span class="pre">fit(X,</span> <span class="pre">y)</span></code>), GAMA can not know if a particular feature is ordinal or numeric.
+<p>The GamaRegressor also has csv and ARFF support.</p>
+<p>The advantage of using an ARFF file over something like a numpy-array or a csv file is that attribute types are specified.
+When supplying only numpy-arrays (e.g. through <code class="docutils literal notranslate"><span class="pre">fit(X,</span> <span class="pre">y)</span></code>), GAMA can not know if a particular feature is nominal or numeric.
 This means that GAMA might use a wrong feature transformation for the data (e.g. one-hot encoding on a numeric feature or scaling on a categorical feature).
 Note that this is not unique to GAMA, but any framework which accepts numeric input without meta-data.</p>
 <div class="admonition note">
@@ -259,11 +264,19 @@ for the latest news, see <a class="reference external" href="https://github.com/
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2018-2020, Pieter Gijsbers
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -274,7 +287,6 @@ for the latest news, see <a class="reference external" href="https://github.com/
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

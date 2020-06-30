@@ -1,15 +1,18 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>User Guide &mdash; gama 20.2.0 documentation</title>
+  <title>User Guide &mdash; gama 20.2.1 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
 
   
   
@@ -17,7 +20,9 @@
   
 
   
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -29,10 +34,6 @@
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Technical Guide" href="../technical_guide/index.html" />
@@ -50,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> gama
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> gama
           
 
           
@@ -60,7 +61,7 @@
             
             
               <div class="version">
-                20.2.0
+                20.2.1
               </div>
             
           
@@ -77,6 +78,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -90,7 +92,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#classification">Classification</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#regression">Regression</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#using-arff-files">Using ARFF files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-files-directly">Using Files Directly</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#simple-features">Simple Features</a><ul>
@@ -121,12 +123,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../benchmark.html">Benchmark Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Papers</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -165,7 +168,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../index.html">Docs</a> &raquo;</li>
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>User Guide</li>
     
@@ -289,14 +292,16 @@ Changes to the code directly affect the installed GAMA package without requiring
 </div>
 <p>By default, GamaRegressor will optimize towards <cite>mean squared error</cite>.</p>
 </div>
-<div class="section" id="using-arff-files">
-<h3>Using ARFF files<a class="headerlink" href="#using-arff-files" title="Permalink to this headline">¶</a></h3>
-<p>GAMA supports data in <a class="reference external" href="https://www.cs.waikato.ac.nz/ml/weka/arff.html">ARFF</a> files directly, utilizing extra information given, such as which features are categorical.
-In the example below, make sure to replace the file paths to the ARFF files to be used.
+<div class="section" id="using-files-directly">
+<h3>Using Files Directly<a class="headerlink" href="#using-files-directly" title="Permalink to this headline">¶</a></h3>
+<p>You can load data directly from csv and <a class="reference external" href="https://www.cs.waikato.ac.nz/ml/weka/arff.html">ARFF</a> files.
+For ARFF files, GAMA can utilize extra information given, such as which features are categorical.
+For csv files GAMA will infer column types, but this might lead to mistakes.
+In the example below, make sure to replace the file paths to the files to be used.
 The example script can be run by using e.g.
 <a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_train.arff">breast_cancer_train.arff</a> and
 <a class="reference external" href="https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_test.arff">breast_cancer_test.arff</a>.
-The target should always be specified as the last column.
+The target should always be specified as the last column, unless the <cite>target_column</cite> is specified.
 Make sure you adjust the file path if not executed from the examples directory.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
 
@@ -305,15 +310,15 @@ Make sure you adjust the file path if not executed from the examples directory.<
 
     <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">keep_analysis_log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting `fit` which will take roughly 3 minutes.&quot;</span><span class="p">)</span>
-    <span class="n">automl</span><span class="o">.</span><span class="n">fit_arff</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">))</span>
+    <span class="n">automl</span><span class="o">.</span><span class="n">fit_from_file</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">))</span>
 
-    <span class="n">label_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_arff</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
-    <span class="n">probability_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_proba_arff</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
+    <span class="n">label_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_from_file</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
+    <span class="n">probability_predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict_proba_from_file</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>The GamaRegressor also has ARFF support.</p>
-<p>The advantage of using an ARFF file over something like a numpy-array, is that attribute types are specified.
-When supplying only numpy-arrays (e.g. through <code class="docutils literal notranslate"><span class="pre">fit(X,</span> <span class="pre">y)</span></code>), GAMA can not know if a particular feature is ordinal or numeric.
+<p>The GamaRegressor also has csv and ARFF support.</p>
+<p>The advantage of using an ARFF file over something like a numpy-array or a csv file is that attribute types are specified.
+When supplying only numpy-arrays (e.g. through <code class="docutils literal notranslate"><span class="pre">fit(X,</span> <span class="pre">y)</span></code>), GAMA can not know if a particular feature is nominal or numeric.
 This means that GAMA might use a wrong feature transformation for the data (e.g. one-hot encoding on a numeric feature or scaling on a categorical feature).
 Note that this is not unique to GAMA, but any framework which accepts numeric input without meta-data.</p>
 <div class="admonition note">
@@ -327,11 +332,11 @@ for the latest news, see <a class="reference external" href="https://github.com/
 <div class="section" id="simple-features">
 <h2>Simple Features<a class="headerlink" href="#simple-features" title="Permalink to this headline">¶</a></h2>
 <p>This section features a couple of simple to use features that might be interesting for a wide audience.
-For more advanced features, see the <span class="xref std std-ref">Technical Guide</span>.</p>
+For more advanced features, see the <a class="reference internal" href="../technical_guide/index.html#technical-guide-index"><span class="std std-ref">Technical Guide</span></a>.</p>
 <div class="section" id="command-line-interface">
 <h3>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h3>
 <p>GAMA may also be called from a terminal, but the tool currently supports only part of all Python functionality.
-In particular it can only load data from <cite>.arff</cite> files and AutoML pipeline configuration is not available.
+In particular it can only load data from <cite>.csv</cite> or <cite>.arff</cite> files and AutoML pipeline configuration is not available.
 The tool will produce a single pickled scikit-learn model (by default named ‘gama_model.pkl’),
 code export is also available.
 Please see <cite>gama -h</cite> for all options.</p>
@@ -343,11 +348,12 @@ Please see <cite>gama -h</cite> for all options.</p>
 </div>
 </div>
 <div class="section" id="dashboard">
-<span id="id1"></span><h2>Dashboard<a class="headerlink" href="#dashboard" title="Permalink to this headline">¶</a></h2>
+<span id="dashboard-section"></span><h2>Dashboard<a class="headerlink" href="#dashboard" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The GAMA Dashboard is not done.
-However, it is functional and released to get some early feedback on what users would like to see included.</p>
+However, it is functional and released to get some early feedback on what users would like to see included.
+The near future may see a reimplementation, see <a class="reference external" href="https://github.com/PGijsbers/gama/issues/97">#97</a>.</p>
 </div>
 <p>GAMA Dashboard is a graphical user interface to start and monitor the AutoML search.
 It is available when GAMA has been installed with its visualization optional dependencies (<cite>pip install gama[vis]</cite>).
@@ -357,7 +363,7 @@ To start GAMA Dashboard call <cite>gamadash</cite> from the command line.</p>
 <p>Starting GAMA Dashboard will open a new tab in your webbrowser which will show the GAMA Dashboard Home page:</p>
 <img alt="../_images/DashboardHome.png" src="../_images/DashboardHome.png" />
 <p>On the left you can configure GAMA, on the right you can select the dataset you want to perform AutoML on.
-To provide a dataset, specify the path to the ARFF-file which contains your data.
+To provide a dataset, specify the path to the csv or ARFF-file which contains your data.
 Once the dataset has been set, the <cite>Go!</cite>-button on the bottom left will be enabled.
 When you are satisfied with your chosen configuration, press the <cite>Go!</cite>-button to start GAMA.
 This will take you to the ‘Running’ tab.</p>
@@ -388,8 +394,9 @@ It is possible to sort and filter based on performance.</p></li>
 On this tab, you can visualize search results from logs.</p>
 <img alt="../_images/analysis_empty.png" src="../_images/analysis_empty.png" />
 <p>Clicking ‘Select or drop log(s)’ in the top-right corner opens a file explorer which lets you select file(s) to load.
-Select a log file generated by a GAMA run, here we use the example log found <a class="reference external" href="https://github.com/PGijsbers/gama/blob/master/tests/data/airline_run_0.log">here</a>.
-After loading the file, you can toggle its visualization by clicking the checkbox that appears next to the file name.
+Select both the ‘gama.log’ and ‘evaluation.log’ files from your directory together.
+For example the the logs found <a class="reference external" href="https://github.com/PGijsbers/gama/blob/master/tests/data/AsyncEA">here</a>.
+After loading the files, you can toggle its visualization by clicking the checkbox that appears next to the file name.
 The first visualization you will see is the best obtained score as a function of the number of evaluated pipelines:</p>
 <img alt="../_images/analysis_load.png" src="../_images/analysis_load.png" />
 <p>In the top right you will find a dropdown ‘Visualization Presets’ which allow you to see other visualizations.
@@ -417,9 +424,9 @@ For more complete documentation on all hyperparameters, see <a class="reference 
 <h3>Optimization<a class="headerlink" href="#optimization" title="Permalink to this headline">¶</a></h3>
 <p>Perhaps the most important hyperparameters are the ones that specify what to optimize for, these are:</p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">scoring</span></code>: <code class="docutils literal notranslate"><span class="pre">string</span></code> (default=’log_loss’ for classification and ‘mean_squared_error’ for regression)</dt><dd><p>Sets the metric to optimize for. Make sure to optimize towards the metric that reflects well what is important to you.
-Valid options include <cite>roc_auc</cite>, <cite>accuracy</cite> and <cite>log_loss</cite> for classification, and <cite>mean_squared_error</cite> and <cite>r2</cite> for regression.
-For more options see <a class="reference internal" href="../api/index.html#api-doc"><span class="std std-ref">API documentation</span></a>.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">scoring</span></code>: <code class="docutils literal notranslate"><span class="pre">string</span></code> (default=’neg_log_loss’ for classification and ‘mean_squared_error’ for regression)</dt><dd><p>Sets the metric to optimize for. Make sure to optimize towards the metric that reflects well what is important to you.
+Any string that can construct a scikit-learn scorer is accepted, see <a class="reference external" href="https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter">this page</a> for more information.
+Valid options include <cite>roc_auc</cite>, <cite>accuracy</cite> and <cite>neg_log_loss</cite> for classification, and <cite>neg_mean_squared_error</cite> and <cite>r2</cite> for regression.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">regularize_length</span></code>: <code class="docutils literal notranslate"><span class="pre">bool</span></code> (default=True)</dt><dd><p>If True, in addition to optimizing towards the metric set in <code class="docutils literal notranslate"><span class="pre">scoring</span></code>, also guide the search towards shorter pipelines.
 This setting currently has no effect for non-default search methods.</p>
@@ -474,7 +481,7 @@ TPOT uses a synchronous form of evolution, whereas GAMA uses asynchronous evolut
 The advantage of asynchronous evolution is that in theory it is able to utilize computing resources better.
 This is due to generation-based evolution waiting for the last individual in the population to be evaluated in each generation,
 whereas asynchronous evolution does not have any point where all evaluations need to be finished at the same time.</p>
-<p>TPOT sports some great user-friendly features such as a less limited command-line interface, support for csv files
+<p>TPOT sports some great user-friendly features such as a less limited command-line interface
 and <a class="reference external" href="https://dask.org/">DASK</a> integration (which allows the use of a Dask cluster for pipeline evaluations and further optimizations).</p>
 <p>GAMA focuses more on extensibility and research friendliness,
 with the ability to configure your AutoML pipeline (for instance using a different search strategy),
@@ -509,11 +516,19 @@ Auto-sklearn won ChaLearn AutoML challenge 1 and 2.</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2018-2020, Pieter Gijsbers
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -524,7 +539,6 @@ Auto-sklearn won ChaLearn AutoML challenge 1 and 2.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

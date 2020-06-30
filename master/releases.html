@@ -1,15 +1,18 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Release Notes &mdash; gama 20.2.0 documentation</title>
+  <title>Release Notes &mdash; gama 20.2.1 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
 
   
   
@@ -17,7 +20,9 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -29,10 +34,6 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Contributing" href="contributing/index.html" />
@@ -50,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> gama
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> gama
           
 
           
@@ -60,7 +61,7 @@
             
             
               <div class="version">
-                20.2.0
+                20.2.1
               </div>
             
           
@@ -77,6 +78,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -90,6 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="benchmark.html">Benchmark Results</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Release Notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-20-2-1">Version 20.2.1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-20-2-0">Version 20.2.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-20-1-0">Version 20.1.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-20-0-0">Version 20.0.0</a></li>
@@ -101,12 +104,13 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="contributing/index.html">Contributing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Papers</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -145,7 +149,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Release Notes</li>
     
@@ -168,6 +172,30 @@
             
   <div class="section" id="release-notes">
 <h1>Release Notes<a class="headerlink" href="#release-notes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="version-20-2-1">
+<h2>Version 20.2.1<a class="headerlink" href="#version-20-2-1" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt>Changes:</dt><dd><dl class="simple">
+<dt># 24: Changes to logging</dt><dd><p>The structure of the log file(s) have changed.
+The goal is to make the log files easier to use, by making them easier to read and
+easier to extend write behavior.
+There will now be three log files, one which contains just evaluation data, one which contains progress data, and one which contains resource usage data.
+For more information see <a class="reference internal" href="technical_guide/logging.html#logging-section"><span class="std std-ref">Logging</span></a> in the technical guide.</p>
+</dd>
+</dl>
+</dd>
+<dt>Features:</dt><dd><dl class="simple">
+<dt># 66: csv files are now supported.</dt><dd><p>Call <cite>fit_arff</cite> is now <cite>fit_from_file</cite> which accepts both arff and csv files.
+The CLI interface and Gama Dashboard also allow for csv files.</p>
+</dd>
+<dt># 92: You can specify a memory limit through <cite>max_memory_mb</cite> hyperparameter.</dt><dd><p>GAMA does not guarantee it will not violate the constraint, but violations
+should be infrequent and minor. Feel free to open an issue if you experience a
+violation which does not minor.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</div>
 <div class="section" id="version-20-2-0">
 <h2>Version 20.2.0<a class="headerlink" href="#version-20-2-0" title="Permalink to this headline">¶</a></h2>
 <dl class="simple">
@@ -303,11 +331,19 @@ If left unset, the last column of the ARFF file is assumed to be the target colu
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2018-2020, Pieter Gijsbers
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -318,7 +354,6 @@ If left unset, the last column of the ARFF file is assumed to be the target colu
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

@@ -1,15 +1,18 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Important Hyperparameters &mdash; gama 20.2.0 documentation</title>
+  <title>Important Hyperparameters &mdash; gama 20.2.1 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
 
   
   
@@ -17,7 +20,9 @@
   
 
   
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -29,10 +34,6 @@
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
 </head>
@@ -48,7 +49,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> gama
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> gama
           
 
           
@@ -58,7 +59,7 @@
             
             
               <div class="version">
-                20.2.0
+                20.2.1
               </div>
             
           
@@ -75,6 +76,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -89,12 +91,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../benchmark.html">Benchmark Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Papers</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -133,7 +136,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../index.html">Docs</a> &raquo;</li>
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Important Hyperparameters</li>
     
@@ -163,9 +166,9 @@ For more complete documentation on all hyperparameters, see <a class="reference 
 <h2>Optimization<a class="headerlink" href="#optimization" title="Permalink to this headline">¶</a></h2>
 <p>Perhaps the most important hyperparameters are the ones that specify what to optimize for, these are:</p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">scoring</span></code>: <code class="docutils literal notranslate"><span class="pre">string</span></code> (default=’log_loss’ for classification and ‘mean_squared_error’ for regression)</dt><dd><p>Sets the metric to optimize for. Make sure to optimize towards the metric that reflects well what is important to you.
-Valid options include <cite>roc_auc</cite>, <cite>accuracy</cite> and <cite>log_loss</cite> for classification, and <cite>mean_squared_error</cite> and <cite>r2</cite> for regression.
-For more options see <a class="reference internal" href="../api/index.html#api-doc"><span class="std std-ref">API documentation</span></a>.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">scoring</span></code>: <code class="docutils literal notranslate"><span class="pre">string</span></code> (default=’neg_log_loss’ for classification and ‘mean_squared_error’ for regression)</dt><dd><p>Sets the metric to optimize for. Make sure to optimize towards the metric that reflects well what is important to you.
+Any string that can construct a scikit-learn scorer is accepted, see <a class="reference external" href="https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter">this page</a> for more information.
+Valid options include <cite>roc_auc</cite>, <cite>accuracy</cite> and <cite>neg_log_loss</cite> for classification, and <cite>neg_mean_squared_error</cite> and <cite>r2</cite> for regression.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">regularize_length</span></code>: <code class="docutils literal notranslate"><span class="pre">bool</span></code> (default=True)</dt><dd><p>If True, in addition to optimizing towards the metric set in <code class="docutils literal notranslate"><span class="pre">scoring</span></code>, also guide the search towards shorter pipelines.
 This setting currently has no effect for non-default search methods.</p>
@@ -211,11 +214,19 @@ The default is set to five minutes. For large datasets, more time may be needed 
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2018-2020, Pieter Gijsbers
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -226,7 +237,6 @@ The default is set to five minutes. For large datasets, more time may be needed 
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

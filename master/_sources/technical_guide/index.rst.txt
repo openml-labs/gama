@@ -20,10 +20,6 @@ This section will cover more advanced usage of GAMA, in particular it covers:
 .. include:: logging.rst
     :start-line: 1
 
-----
-
-.. include:: visualization.rst
-    :start-line: 5
 
 ----
 

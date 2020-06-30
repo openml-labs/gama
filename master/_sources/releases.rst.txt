@@ -1,6 +1,26 @@
 Release Notes
 =============
 
+Version 20.2.1
+--------------
+Changes:
+ # 24: Changes to logging
+    The structure of the log file(s) have changed.
+    The goal is to make the log files easier to use, by making them easier to read and
+    easier to extend write behavior.
+    There will now be three log files, one which contains just evaluation data, one which contains progress data, and one which contains resource usage data.
+    For more information see :ref:`logging-section` in the technical guide.
+
+
+Features:
+ # 66: csv files are now supported.
+    Call `fit_arff` is now `fit_from_file` which accepts both arff and csv files.
+    The CLI interface and Gama Dashboard also allow for csv files.
+ # 92: You can specify a memory limit through `max_memory_mb` hyperparameter.
+    GAMA does not guarantee it will not violate the constraint, but violations
+    should be infrequent and minor. Feel free to open an issue if you experience a
+    violation which does not minor.
+
 Version 20.2.0
 --------------
 Features:
