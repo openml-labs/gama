@@ -11,10 +11,10 @@ Optimization
 ************
 Perhaps the most important hyperparameters are the ones that specify what to optimize for, these are:
 
-``scoring``: ``string`` (default='log_loss' for classification and 'mean_squared_error' for regression)
+``scoring``: ``string`` (default='neg_log_loss' for classification and 'mean_squared_error' for regression)
     Sets the metric to optimize for. Make sure to optimize towards the metric that reflects well what is important to you.
-    Valid options include `roc_auc`, `accuracy` and `log_loss` for classification, and `mean_squared_error` and `r2` for regression.
-    For more options see :ref:`API documentation <api_doc>`.
+    Any string that can construct a scikit-learn scorer is accepted, see `this page <https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter>`_ for more information.
+    Valid options include `roc_auc`, `accuracy` and `neg_log_loss` for classification, and `neg_mean_squared_error` and `r2` for regression.
 
 ``regularize_length``: ``bool`` (default=True)
     If True, in addition to optimizing towards the metric set in ``scoring``, also guide the search towards shorter pipelines.

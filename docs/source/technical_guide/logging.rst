@@ -2,6 +2,7 @@
 
 .. default-role:: code
 
+.. _logging-section:
 
 Logging
 -------
@@ -51,4 +52,4 @@ An overview the log levels:
  - `WARNING`: Serious errors that do not prohibit GAMA from running to completion (but results could be suboptimal).
  - `ERROR`: Errors which prevent GAMA from running to completion.
 
-As described in :ref:`Dashboard` the files in the output directory can be used to generate visualizations about the optimization process.
+As described in :ref:`dashboard-section` the files in the output directory can be used to generate visualizations about the optimization process.

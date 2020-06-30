@@ -89,8 +89,8 @@ class Gama(ABC):
         n_jobs: Optional[int] = None,
         max_memory_mb: Optional[int] = None,
         verbosity: int = logging.WARNING,
-        search_method: BaseSearch = AsyncEA(),
-        post_processing_method: BasePostProcessing = BestFitPostProcessing(),
+        search: BaseSearch = AsyncEA(),
+        post_processing: BasePostProcessing = BestFitPostProcessing(),
         output_directory: Optional[str] = None,
         store: str = "logs",
     ):
@@ -144,10 +144,10 @@ class Gama(ABC):
         verbosity: int (default=logging.WARNING)
             Sets the level of log messages to be automatically output to terminal.
 
-        search_method: BaseSearch (default=AsyncEA())
+        search: BaseSearch (default=AsyncEA())
             Search method to use to find good pipelines. Should be instantiated.
 
-        post_processing_method: BasePostProcessing (default=BestFitPostProcessing())
+        post_processing: BasePostProcessing (default=BestFitPostProcessing())
             Post-processing method to create a model after the search phase.
             Should be an instantiated subclass of BasePostProcessing.
 
@@ -227,8 +227,8 @@ class Gama(ABC):
         self._time_manager = TimeKeeper(max_total_time)
         self._metrics: Tuple[Metric, ...] = scoring_to_metric(scoring)
         self._regularize_length = regularize_length
-        self._search_method: BaseSearch = search_method
-        self._post_processing = post_processing_method
+        self._search_method: BaseSearch = search
+        self._post_processing = post_processing
         self._store = store
 
         if random_state is not None:
@@ -245,17 +245,17 @@ class Gama(ABC):
 
         self._subscribers: Dict[str, List[Callable]] = defaultdict(list)
         cache_directory = os.path.join(self.output_directory, "cache")
-        if isinstance(post_processing_method, EnsemblePostProcessing):
+        if isinstance(post_processing, EnsemblePostProcessing):
             self._evaluation_library = EvaluationLibrary(
-                m=post_processing_method.hyperparameters["max_models"],
-                n=post_processing_method.hyperparameters["hillclimb_size"],
+                m=post_processing.hyperparameters["max_models"],
+                n=post_processing.hyperparameters["hillclimb_size"],
                 cache=cache_directory,
             )
         else:
             # Don't keep memory-heavy evaluation meta-data (predictions, estimators)
             self._evaluation_library = EvaluationLibrary(m=0, cache=cache_directory)
         self.evaluation_completed(self._evaluation_library.save_evaluation)
-        e = search_method.logger(os.path.join(self.output_directory, "evaluations.log"))
+        e = search.logger(os.path.join(self.output_directory, "evaluations.log"))
         self.evaluation_completed(e.log_evaluation)
 
         self._pset, parameter_checks = pset_from_config(config)

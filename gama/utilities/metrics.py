@@ -42,7 +42,7 @@ class Metric:
         self.scorer = scorer
         self.name = reversed_scorers[scorer]
         self.requires_probabilities = (
-            isinstance(scorer, _ProbaScorer) or metric == "roc_auc"
+            isinstance(scorer, _ProbaScorer) or self.name == "roc_auc"
         )
 
         if self.name in classification_metrics:

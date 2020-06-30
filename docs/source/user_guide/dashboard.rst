@@ -1,7 +1,7 @@
 :orphan:
 
 
-.. _dashboard:
+.. _dashboard-section:
 
 Dashboard
 ---------
