@@ -123,16 +123,6 @@ class RunningPage(BasePage):
         ]
         row_id = [i for i, id_ in enumerate(evaluations.id) if id_ == selected_pipeline]
 
-        def format_pipeline(ind):
-            pipeline_elements = []
-            for primitive_node in reversed(ind.primitives):
-                pipeline_elements.append(html.B(str(primitive_node._primitive)))
-                pipeline_elements.append(html.Br())
-                for terminal in primitive_node._terminals:
-                    pipeline_elements.append(f"    {terminal}")
-                    pipeline_elements.append(html.Br())
-            return pipeline_elements
-
         if selected_pipeline is None:
             pl_viz_data = None
         else:
@@ -238,3 +228,34 @@ class RunningPage(BasePage):
                 "whiteSpace": "pre-wrap",
             },
         )
+
+
+def format_pipeline(ind, how="html"):
+    """ Format each Step and Hyperparameter. Steps in bold, hps indented by 4 spaces.
+
+    Parameters
+    ----------
+    ind
+    how: "html" or "markdown"
+
+    Returns
+    -------
+    List of Html elements or List of markdown strings.
+
+    """
+    pipeline_elements = []
+    for primitive_node in reversed(ind.primitives):
+        if how == "html":
+            pipeline_elements.append(html.B(str(primitive_node._primitive)))
+            pipeline_elements.append(html.Br())
+        elif how == "markdown":
+            pipeline_elements.append(f"**{primitive_node._primitive}**  ")
+
+        for terminal in primitive_node._terminals:
+            if how == "html":
+                pipeline_elements.append(f"    {terminal}")
+                pipeline_elements.append(html.Br())
+            elif how == "markdown":
+                # in the converted html, using normal whitespace is collapsed.
+                pipeline_elements.append(f"{'&nbsp;' * 4}{terminal}  ")
+    return pipeline_elements

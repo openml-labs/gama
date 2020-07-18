@@ -7,10 +7,13 @@ from typing import Dict, List, Optional
 
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table
 from dash.dependencies import Input, Output, State
+import pandas as pd
 
 from gama.dashboard.pages.base_page import BasePage
 from gama.logging.GamaReport import GamaReport
+from .runningpage import format_pipeline
 from ..plotting import plot_preset_graph
 
 
@@ -58,6 +61,7 @@ class AnalysisPage(BasePage):
             {"label": "Evaluation Times", "value": "evaluation_times_dist"},
             {"label": "Evaluations by Rung", "value": "n_by_rung"},
             {"label": "Time by Rung", "value": "time_by_rung"},
+            {"label": "Table", "value": "table"},
             # {"label": "Custom", "value": "custom"},
         ]
 
@@ -94,6 +98,9 @@ class AnalysisPage(BasePage):
         # left
 
         dashboard_graph = dcc.Graph(id="dashboard-graph")
+        self.dbg = dashboard_graph
+        dashboard_table = html.Div(id="db-table", children=["'Tis a table"])
+        self.dbt = dashboard_table
 
         # third_width = {"width": "30%", "display": "inline-block"}
         # plot_control_container = html.Div(
@@ -142,7 +149,7 @@ class AnalysisPage(BasePage):
                 # graph_update_timer,
                 # graph_update_trigger,
             ],
-            style={"float": "left", "width": "85%"},
+            style={"float": "left", "width": "85%", "height": "1000px"},
         )
 
         # right
@@ -166,7 +173,10 @@ class AnalysisPage(BasePage):
         )(self.load_logs)
 
         app.callback(
-            Output("dashboard-graph", "figure"),
+            [
+                Output("visualization-container", "children"),
+                Output("dashboard-graph", "figure"),
+            ],
             [
                 Input("select-log-checklist", "value"),
                 Input("preset-dropdown", "value"),
@@ -226,6 +236,66 @@ class AnalysisPage(BasePage):
             # filtered_aggregate = aggregate_dataframe[
             #     aggregate_dataframe.filename.isin(logs)
             # ]
-            return plot_preset_graph([self.reports[log] for log in logs], preset_value)
+            if preset_value == "table":
+                return [self.make_table({log: self.reports[log] for log in logs})], {}
+            else:
+                print("plotting")
+                return (
+                    [self.dbg],
+                    plot_preset_graph(
+                        [self.reports[log] for log in logs], preset_value
+                    ),
+                )
         else:
-            return {}
+            return [self.dbg], {}
+
+    def make_table(self, reports):
+        combined_df = pd.DataFrame()
+
+        for name, report in reports.items():
+            report.evaluations["log"] = name
+            df = report.evaluations
+            df[[report.metrics[0], "length"]] = df["score"].apply(
+                lambda x: pd.Series(x[1:-1].split(","))
+            )
+            df["length"] = -df["length"].astype(float)
+            combined_df = combined_df.append(df)
+
+        def full_to_short(pl: str) -> str:
+            steps = pl.split(",")[0].split("(")[:-1]
+            return " > ".join(list(reversed(steps)))
+
+        combined_df["pipeline"] = combined_df["pipeline"].apply(full_to_short)
+
+        show_cols = ["log", "n", "length", report.metrics[0], "pipeline"]
+        data_table = dash_table.DataTable(
+            id="table",
+            columns=[{"name": c, "id": c} for c in show_cols],
+            data=combined_df.to_dict("records"),
+            editable=False,
+            #  fixed_rows={'headers': True}, adds a scroll y
+            style_cell={"textAlign": "left"},
+            tooltip_data=[
+                {
+                    report.metrics[0]: {
+                        "value": row["error"] if row["error"] != "None" else "",
+                        "type": "markdown",
+                    },
+                    "pipeline": {
+                        "value": "\n".join(
+                            format_pipeline(
+                                report.individuals[row["id"]], how="markdown"
+                            )
+                        ),
+                        "type": "markdown",
+                    },
+                }
+                for row in combined_df.to_dict("rows")
+            ],
+            style_cell_conditional=[{"if": {"column_id": "length"}, "width": "80px"}],
+            tooltip_duration=None,
+            filter_action="native",
+            sort_action="native",
+        )
+
+        return data_table
