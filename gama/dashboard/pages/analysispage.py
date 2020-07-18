@@ -247,7 +247,7 @@ class AnalysisPage(BasePage):
                     ),
                 )
         else:
-            return [self.dbg], {}
+            return [html.Div(children=["Select a log on the right."])], {}
 
     def make_table(self, reports):
         combined_df = pd.DataFrame()
