@@ -202,6 +202,7 @@ class AnalysisPage(BasePage):
                 if f"{report_name}_{i}" not in self.reports:
                     break
             self.reports[f"{report_name}_{i}"] = report
+            report.name = f"{report_name}_{i}"
             shutil.rmtree(tmp_dir)
             return [{"label": logname, "value": logname} for logname in self.reports]
         return []
