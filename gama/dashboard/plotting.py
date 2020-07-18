@@ -175,7 +175,7 @@ def individual_plot(report: GamaReport, x_axis: str, y_axis: str, mode: str):
         name=f"{report.name}",
         x=report.evaluations[x_axis],
         y=report.evaluations[y_axis],
-        text=[ind.short_name for ind in report.individuals.values()],
+        text=[ind.short_name() for ind in report.individuals.values()],
         mode=mode,
     )
 
