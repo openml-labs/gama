@@ -422,13 +422,13 @@ class EnsembleClassifier(Ensemble):
 
         # For metrics that only require class labels,
         # we still want to apply one-hot-encoding to average predictions.
-        y_as_squeezed_array = y_true.values.reshape(-1, 1)
+        y_as_squeezed_array = y_true.to_numpy().reshape(-1, 1)
         self._one_hot_encoder = OneHotEncoder(categories="auto")
         self._one_hot_encoder.fit(y_as_squeezed_array)
 
         if self._metric.requires_probabilities:
             self._y = self._one_hot_encoder.transform(
-                self._y.values.reshape(-1, 1)
+                self._y.to_numpy().reshape(-1, 1)
             ).toarray()
             if self._prediction_sample is not None:
                 self._y = self._y[self._prediction_sample]
