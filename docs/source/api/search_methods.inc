@@ -34,7 +34,7 @@ To keep these two functions together explicitly and keep naming consistent betwe
 we bundle them in a class derived from `BaseSearch`:
 
 .. autoclass:: gama.search_methods.base_search.BaseSearch
-    :members:
+    :members: search, dynamic_defaults
 
 The function which implements the search algorithm can expect to be interrupted by a stopit.TimeoutException at any time.
 This indicates the search algorithm should stop and its output should be set to your class' `output` member.
