@@ -10,6 +10,7 @@ Another choice would be how to construct a model after search, e.g. by training 
 Similarly to how data processing algorithms can form a *machine learning pipeline*,
 we will refer to a configuration of these AutoML components as an *AutoML Pipeline*.
 In GAMA we currently support flexibility in the AutoML pipeline in two stages: search and post-processing.
+See :ref:`add_your_own` for more information on how to add your own.
 
 Search Algorithms
 *****************
