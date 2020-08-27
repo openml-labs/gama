@@ -67,7 +67,6 @@ class AsyncEvaluator:
     The function and all its arguments must be picklable.
     Using the same AsyncEvaluator in two different contexts raises a `RuntimeError`.
 
-    class variables:
     defaults: Dict, optional (default=None)
         Default parameter values shared between all submit calls.
         This allows these defaults to be transferred only once per process,
