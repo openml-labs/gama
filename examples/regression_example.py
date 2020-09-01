@@ -7,7 +7,7 @@ if __name__ == "__main__":
     X, y = load_boston(return_X_y=True)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
 
-    automl = GamaRegressor(max_total_time=180, keep_analysis_log=None, n_jobs=1)
+    automl = GamaRegressor(max_total_time=180, store="nothing", n_jobs=1)
     print("Starting `fit` which will take roughly 3 minutes.")
     automl.fit(X_train, y_train)
 

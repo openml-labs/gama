@@ -10,6 +10,7 @@ base = [
     "numpy>=1.14.0",
     "scipy>=1.0.0",
     "scikit-learn>=0.20.0",
+    "pandas>=1.0,<1.1",
     "stopit>=1.1.1",
     "liac-arff>=2.2.2",
     "category-encoders>=1.2.8",
@@ -30,7 +31,7 @@ test = [
     "pre-commit==2.1.1",
     "pytest>=4.4.0",
     "pytest-mock",
-    "pytest-xdist",
+    "pytest-xdist<2.0.0",
     "codecov",
     "pytest-cov",
 ]
