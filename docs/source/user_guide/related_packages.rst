@@ -4,7 +4,7 @@ Related Packages
 ----------------
 
 There are many different AutoML packages in Python and other languages.
-`This page <https://openml.github.io/automlbenchmark/automl_overview.html>`_ of the AutoML Benchmark project has an overview of commonly used open source AutoML frameworks.
+`This webpage <https://openml.github.io/automlbenchmark/automl_overview.html>`_ of the AutoML Benchmark project has an overview of commonly used open source AutoML frameworks.
 Another nice overview of papers and projects is gathered at `this Github repo <https://github.com/hibayesian/awesome-automl-papers#projects>`_.
 
 .. note::
