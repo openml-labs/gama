@@ -13,7 +13,6 @@ from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.genetic_programming.components.individual import Individual
 
 log = logging.getLogger(__name__)
-ASHA_LOG_TOKEN = "ASHA"
 
 
 class AsynchronousSuccessiveHalving(BaseSearch):
