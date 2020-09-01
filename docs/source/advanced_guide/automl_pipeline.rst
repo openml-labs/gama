@@ -40,12 +40,12 @@ For example, searching with 'Asynchronous Successive Halving' and creating an en
     from gama.search_methods import AsynchronousSuccessiveHalving
     from gama.postprocessing import EnsemblePostProcessing
 
-    custom_pipeline_gama = GamaClassifier(search_method=AsynchronousSuccessiveHalving(), post_processing_method=EnsemblePostProcessing())
+    custom_pipeline_gama = GamaClassifier(search=AsynchronousSuccessiveHalving(), post_processing=EnsemblePostProcessing())
 
 or using 'Asynchronous EA' but with custom hyperparameters::
 
     from gama import GamaClassifier
     from gama.search_methods import AsyncEA
 
-    custom_pipeline_gama = GamaClassifier(search_method=AsyncEA(population_size=30))
+    custom_pipeline_gama = GamaClassifier(search=AsyncEA(population_size=30))
 

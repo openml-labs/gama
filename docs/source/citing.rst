@@ -9,8 +9,8 @@ Features GAMA 20.2.1
 
 Bibtex will be added after publication.
 
-Listings
-********
+Up-to-date Listings
+*******************
 Listing 1:
 
 .. code-block:: Python
@@ -20,8 +20,8 @@ Listing 1:
     from gama.postprocessing import EnsemblePostProcessing
 
     automl = GamaClassifier(
-        search_method=AsynchronousSuccessiveHalving(),
-        post_processing_method=EnsemblePostProcessing()
+        search=AsynchronousSuccessiveHalving(),
+        post_processing=EnsemblePostProcessing()
     )
     automl.fit(X, y)
     automl.predict(X_test)
