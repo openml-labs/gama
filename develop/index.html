@@ -87,7 +87,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/index.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="technical_guide/index.html">Technical Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_guide/index.html">Advanced Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="benchmark.html">Benchmark Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
@@ -181,7 +181,7 @@ Using GAMA is as simple as using a scikit-learn estimator:</p>
 </pre></div>
 </div>
 <p>To get more basic information on GAMA and its AutoML functionality, read more in the <a class="reference internal" href="user_guide/index.html#user-guide-index"><span class="std std-ref">User Guide</span></a>.
-If you want find out everything there is to know about GAMA, also visit the <a class="reference internal" href="technical_guide/index.html#technical-guide-index"><span class="std std-ref">Technical Guide</span></a>.
+If you want find out everything there is to know about GAMA, also visit the <a class="reference internal" href="advanced_guide/index.html#advanced-guide-index"><span class="std std-ref">Advanced Guide</span></a>.
 It describes visualization of optimization logs, changing the AutoML pipeline, and more.
 If there are any questions you have that are not answered by the documentation, check the <a class="reference external" href="https://github.com/PGijsbers/GAMA/issues">issue page</a>.
 If your question has not been answered there either, please open a new issue.</p>
@@ -218,16 +218,29 @@ If your question has not been answered there either, please open a new issue.</p
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="technical_guide/index.html">Technical Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="technical_guide/index.html#automl-pipeline">AutoML Pipeline</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="technical_guide/index.html#search-algorithms">Search Algorithms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="technical_guide/index.html#post-processing">Post-processing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="technical_guide/index.html#configuring-the-automl-pipeline">Configuring the AutoML pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_guide/index.html">Advanced Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced_guide/index.html#automl-pipeline">AutoML Pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="advanced_guide/index.html#search-algorithms">Search Algorithms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="advanced_guide/index.html#post-processing">Post-processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="advanced_guide/index.html#configuring-the-automl-pipeline">Configuring the AutoML pipeline</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="technical_guide/index.html#logging">Logging</a></li>
-<li class="toctree-l2"><a class="reference internal" href="technical_guide/index.html#gama-search-space-configuration">GAMA Search Space Configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="technical_guide/index.html#events">Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced_guide/index.html#gama-search-space-configuration">GAMA Search Space Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced_guide/index.html#logging">Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced_guide/index.html#events">Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced_guide/index.html#developers-notes">Developers Notes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="advanced_guide/index.html#adding-your-own-search-or-postprocessing">Adding Your Own Search or Postprocessing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="advanced_guide/index.html#search">Search</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="advanced_guide/index.html#init"><code class="code docutils literal notranslate"><span class="pre">__init__</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="advanced_guide/index.html#dynamic-defaults"><code class="code docutils literal notranslate"><span class="pre">dynamic_defaults</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="advanced_guide/index.html#id2"><code class="code docutils literal notranslate"><span class="pre">search</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="advanced_guide/index.html#postprocessing">PostProcessing</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a><ul>
@@ -245,14 +258,12 @@ If your question has not been answered there either, please open a new issue.</p
 <li class="toctree-l3"><a class="reference internal" href="api/index.html#asynchronoussuccessivehalving">AsynchronousSuccessiveHalving</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/index.html#asyncea">AsyncEA</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/index.html#randomsearch">RandomSearch</a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/index.html#developer-note">Developer Note</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="api/index.html#module-gama.postprocessing">Post-Processing</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/index.html#nopostprocessing">NoPostProcessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/index.html#bestfitpostprocessing">BestFitPostProcessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/index.html#ensemblepostprocessing">EnsemblePostProcessing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/index.html#id2">Developer Note</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="api/index.html#genetic-programming">Genetic Programming</a><ul>
@@ -267,7 +278,6 @@ If your question has not been answered there either, please open a new issue.</p
 <li class="toctree-l3"><a class="reference internal" href="api/index.html#module-gama.genetic_programming.crossover">Crossover</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="api/index.html#visualization">Visualization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/index.html#utilities">Utilities</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/index.html#generic">Generic</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="api/index.html#pareto-front">Pareto Front</a></li>
@@ -305,11 +315,11 @@ If your question has not been answered there either, please open a new issue.</p
 </li>
 <li class="toctree-l1"><a class="reference internal" href="citing.html">Papers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="citing.html#gama-a-general-automated-machine-learning-assistant">GAMA: a General Automated Machine learning Assistant</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="citing.html#listings">Listings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="citing.html#up-to-date-listings">Up-to-date Listings</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="citing.html#gama-genetic-automated-machine-learning-assistant">GAMA: Genetic Automated Machine learning Assistant</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="citing.html#id1">Listings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="citing.html#listings">Listings</a></li>
 </ul>
 </li>
 </ul>

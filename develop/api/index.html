@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Benchmark Results" href="../benchmark.html" />
-    <link rel="prev" title="Technical Guide" href="../technical_guide/index.html" /> 
+    <link rel="prev" title="Advanced Guide" href="../advanced_guide/index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -88,7 +88,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../technical_guide/index.html">Technical Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_guide/index.html">Advanced Guide</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#gama">GAMA</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#gamaclassifier">GamaClassifier</a></li>
@@ -104,14 +104,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#asynchronoussuccessivehalving">AsynchronousSuccessiveHalving</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#asyncea">AsyncEA</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#randomsearch">RandomSearch</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#developer-note">Developer Note</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-gama.postprocessing">Post-Processing</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#nopostprocessing">NoPostProcessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#bestfitpostprocessing">BestFitPostProcessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ensemblepostprocessing">EnsemblePostProcessing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id2">Developer Note</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#genetic-programming">Genetic Programming</a><ul>
@@ -126,7 +124,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#module-gama.genetic_programming.crossover">Crossover</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#visualization">Visualization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#utilities">Utilities</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#generic">Generic</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#pareto-front">Pareto Front</a></li>
@@ -230,7 +227,7 @@ Short pipelines should then be preferred over long ones.</p></li>
 <li><p><strong>max_pipeline_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – If set, limit the maximum number of steps in any evaluated pipeline.
 Encoding and imputation are excluded.</p></li>
 <li><p><strong>config</strong> (<em>Dict</em>) – Specifies available components and their valid hyperparameter settings.
-For more information, see <a class="reference internal" href="../technical_guide/index.html#search-space-configuration"><span class="std std-ref">GAMA Search Space Configuration</span></a>.</p></li>
+For more information, see <a class="reference internal" href="../advanced_guide/index.html#search-space-configuration"><span class="std std-ref">GAMA Search Space Configuration</span></a>.</p></li>
 <li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Seed for the random number generators used in the process.
 However, with <code class="code docutils literal notranslate"><span class="pre">n_jobs</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>,
 there will be randomization introduced by multi-processing.
@@ -247,8 +244,8 @@ If not set, GAMA will use as much as it needs.
 GAMA is not guaranteed to respect this limit at all times,
 but it should never violate it for too long.</p></li>
 <li><p><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> (</em><em>default=logging.WARNING</em><em>)</em>) – Sets the level of log messages to be automatically output to terminal.</p></li>
-<li><p><strong>search</strong> (<a class="reference internal" href="#gama.search_methods.base_search.BaseSearch" title="gama.search_methods.base_search.BaseSearch"><em>BaseSearch</em></a><em> (</em><em>default=AsyncEA</em><em>(</em><em>)</em><em>)</em>) – Search method to use to find good pipelines. Should be instantiated.</p></li>
-<li><p><strong>post_processing</strong> (<a class="reference internal" href="#gama.postprocessing.BasePostProcessing" title="gama.postprocessing.BasePostProcessing"><em>BasePostProcessing</em></a><em> (</em><em>default=BestFitPostProcessing</em><em>(</em><em>)</em><em>)</em>) – Post-processing method to create a model after the search phase.
+<li><p><strong>search</strong> (<em>BaseSearch</em><em> (</em><em>default=AsyncEA</em><em>(</em><em>)</em><em>)</em>) – Search method to use to find good pipelines. Should be instantiated.</p></li>
+<li><p><strong>post_processing</strong> (<em>BasePostProcessing</em><em> (</em><em>default=BestFitPostProcessing</em><em>(</em><em>)</em><em>)</em>) – Post-processing method to create a model after the search phase.
 Should be an instantiated subclass of BasePostProcessing.</p></li>
 <li><p><strong>output_directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Directory to use to save GAMA output. This includes both intermediate
 results during search and logs.
@@ -365,77 +362,6 @@ If None, the algorithm will be run until interrupted by the user or a timeout.</
 </dd></dl>
 
 </div>
-<div class="section" id="developer-note">
-<h3>Developer Note<a class="headerlink" href="#developer-note" title="Permalink to this headline">¶</a></h3>
-<p>Each search method consists of two parts:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>a class that is used to store its configuration and determine default values</p></li>
-<li><p>a function which implements the search algorithm</p></li>
-</ul>
-</div></blockquote>
-<p>Some algorithms’ hyperparameters’ default values are best specified based on characteristics of the dataset,
-we refer to these non-static defaults as ‘dynamic defaults’.
-Now each search method now consists of the search algorithm and (optionally) a method to determine default
-values based on the data.
-To keep these two functions together explicitly and keep naming consistent between different search methods,
-we bundle them in a class derived from <code class="code docutils literal notranslate"><span class="pre">BaseSearch</span></code>:</p>
-<dl class="py class">
-<dt id="gama.search_methods.base_search.BaseSearch">
-<em class="property">class </em><code class="sig-prename descclassname">gama.search_methods.base_search.</code><code class="sig-name descname">BaseSearch</code><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.base_search.BaseSearch" title="Permalink to this definition">¶</a></dt>
-<dd><p>All search methods should be derived from this class.
-This class should not be directly used to configure GAMA.</p>
-<dl class="py method">
-<dt id="gama.search_methods.base_search.BaseSearch.dynamic_defaults">
-<code class="sig-name descname">dynamic_defaults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">y</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>pandas.core.frame.DataFrame<span class="p">, </span>pandas.core.series.Series<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">time_limit</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)">None</a><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.dynamic_defaults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.base_search.BaseSearch.dynamic_defaults" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set hyperparameter defaults based on the dataset and time-constraints.</p>
-<p>Should be called before <code class="code docutils literal notranslate"><span class="pre">search</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>pandas.DataFrame</em>) – Features of the data.</p></li>
-<li><p><strong>y</strong> (<em>pandas.DataFrame</em><em> or </em><em>pandas.Series</em>) – Labels of the data.</p></li>
-<li><p><strong>time_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Time in seconds available for search and selecting dynamic defaults.
-There is no need to adhere to this explicitly,
-a <code class="code docutils literal notranslate"><span class="pre">stopit.utils.TimeoutException</span></code> will be raised.
-The time-limit might be an important factor in setting hyperparameter values</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="gama.search_methods.base_search.BaseSearch.hyperparameters">
-<em class="property">property </em><code class="sig-name descname">hyperparameters</code><a class="headerlink" href="#gama.search_methods.base_search.BaseSearch.hyperparameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Hyperparameter (name, value) pairs as set/determined dynamically/default.</p>
-<p>Values may have been set directly, through dynamic defaults or static defaults.
-This is also the order in which the value of a hyperparameter is checked,
-i.e. a user set value wil overwrite any other value, and a dynamic default
-will overwrite a static one.
-Dynamic default values only considered if <code class="code docutils literal notranslate"><span class="pre">dynamic_defaults</span></code> has been called.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="gama.search_methods.base_search.BaseSearch.search">
-<code class="sig-name descname">search</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operations</span><span class="p">:</span> <span class="n">gama.genetic_programming.operator_set.OperatorSet</span></em>, <em class="sig-param"><span class="n">start_candidates</span><span class="p">:</span> <span class="n">List<span class="p">[</span>gama.genetic_programming.components.individual.Individual<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.search_methods.base_search.BaseSearch.search" title="Permalink to this definition">¶</a></dt>
-<dd><p>Execute search as configured.</p>
-<p>Sets <code class="code docutils literal notranslate"><span class="pre">output</span></code> field of this class to the best Individuals.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>operations</strong> (<em>OperatorSet</em>) – Has methods to create new individuals, evaluate individuals and more.</p></li>
-<li><p><strong>start_candidates</strong> (<em>List</em><em>[</em><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a><em>]</em>) – A list of individuals to be considered before all others.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<p>The function which implements the search algorithm can expect to be interrupted by a stopit.TimeoutException at any time.
-This indicates the search algorithm should stop and its output should be set to your class’ <code class="code docutils literal notranslate"><span class="pre">output</span></code> member.
-Refer to implemented search techniques for examples.</p>
-</div>
 </div>
 <hr class="docutils" />
 <div class="section" id="module-gama.postprocessing">
@@ -490,48 +416,6 @@ Consequently also sets the max number of unique models in the ensemble.</p></li>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="id2">
-<h3>Developer Note<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
-<p>Each post processing method consists of two parts:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>a class that is used to store its configuration and determine default values</p></li>
-<li><p>a function which implements the search algorithm</p></li>
-</ul>
-</div></blockquote>
-<p>Some algorithms’ hyperparameters’ default values are best specified based on characteristics of the dataset,
-we refer to these non-static defaults as ‘dynamic defaults’.
-To keep these two functions together explicitly and keep naming consistent between different post-processing methods,
-we bundle them in a class derived from <code class="code docutils literal notranslate"><span class="pre">BasePostProcessing</span></code>:</p>
-<dl class="py class">
-<dt id="gama.postprocessing.BasePostProcessing">
-<em class="property">class </em><code class="sig-prename descclassname">gama.postprocessing.</code><code class="sig-name descname">BasePostProcessing</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_fraction</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.postprocessing.BasePostProcessing" title="Permalink to this definition">¶</a></dt>
-<dd><p>All post-processing methods should be derived from this class.
-This class should not be directly used to configure GAMA.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Fraction of total time that to be reserved for this post-processing step.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<p>Through the dynamic defaults function, a post-processing method can retrieve any necessary information from GAMA.
-Of particular interest may be the directory which caches predictions of each evaluated pipeline.
-Through the time_fraction hyperparameter each method should also indicate what fraction of total time to reserve
-for the post-processing phase. For instance, when a post-processing object’s <code class="code docutils literal notranslate"><span class="pre">time_fraction</span></code> is <code class="code docutils literal notranslate"><span class="pre">0.3</span></code> and GAMA
-is initiated with <code class="code docutils literal notranslate"><span class="pre">max_total_time=3600</span></code>, then <code class="code docutils literal notranslate"><span class="pre">3600*0.3=1080</span></code> seconds are reserved for the post-processing phase.
-Refer to implemented post-processing techniques for examples.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>While hard, it is important to provide an accurate estimate for <code class="code docutils literal notranslate"><span class="pre">time_fraction</span></code>. If you reserve too much time,
-it means that the search procedure will have to be cut off unnecessarily early. If too little time is reserved,
-GAMA will interrupt the post-processing step and return control to the user.
-It is generally hard to know to how much to reserve, and is likely dependent on the dataset and number of evaluated
-pipelines in search. We would like to implement ways in which post-processing methods have access to these
-statistics and allow them to update their time estimate, so that less time is wasted on too long or too short
-post-processing phases.</p>
-</div>
 </div>
 </div>
 <hr class="docutils" />
@@ -594,7 +478,7 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 <h4>PrimitiveNode<a class="headerlink" href="#primitivenode" title="Permalink to this headline">¶</a></h4>
 <dl class="py class">
 <dt id="gama.genetic_programming.components.PrimitiveNode">
-<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">PrimitiveNode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">primitive</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.primitive.Primitive</span></em>, <em class="sig-param"><span class="n">data_node</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>PrimitiveNode<span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">terminals</span><span class="p">:</span> <span class="n">List<span class="p">[</span>gama.genetic_programming.components.terminal.Terminal<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive_node.html#PrimitiveNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.PrimitiveNode" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">PrimitiveNode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">primitive</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.primitive.Primitive</span></em>, <em class="sig-param"><span class="n">data_node</span><span class="p">:</span> <span class="n">Union<span class="p">[</span><a class="reference internal" href="#gama.genetic_programming.components.PrimitiveNode" title="gama.genetic_programming.components.PrimitiveNode">PrimitiveNode</a><span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">terminals</span><span class="p">:</span> <span class="n">List<span class="p">[</span>gama.genetic_programming.components.terminal.Terminal<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive_node.html#PrimitiveNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.PrimitiveNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>An instantiation for a Primitive with specific Terminals.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -775,10 +659,6 @@ Requires both provided individuals to contain at most <code class="code docutils
 </div>
 </div>
 <hr class="docutils" />
-<div class="section" id="visualization">
-<h2>Visualization<a class="headerlink" href="#visualization" title="Permalink to this headline">¶</a></h2>
-</div>
-<hr class="docutils" />
 <div class="section" id="utilities">
 <h2>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="generic">
@@ -788,7 +668,7 @@ Requires both provided individuals to contain at most <code class="code docutils
 <h4>Pareto Front<a class="headerlink" href="#pareto-front" title="Permalink to this headline">¶</a></h4>
 <dl class="py class">
 <dt id="gama.utilities.generic.paretofront.ParetoFront">
-<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.paretofront.</code><code class="sig-name descname">ParetoFront</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start_list</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">get_values_fn</span><span class="p">:</span> <span class="n">Optional[Callable[[Any], Tuple[Any, …]]]</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/paretofront.html#ParetoFront"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.paretofront.ParetoFront" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.paretofront.</code><code class="sig-name descname">ParetoFront</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start_list</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">get_values_fn</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Callable<span class="p">[</span><span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">, </span><span class="p">…</span><span class="p">]</span><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/paretofront.html#ParetoFront"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.paretofront.ParetoFront" title="Permalink to this definition">¶</a></dt>
 <dd><p>A list of tuples in which no one tuple is dominated by another.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -846,14 +726,13 @@ jobs while they were running.</p>
 <dd><p>Manages subprocesses on which arbitrary functions can be evaluated.</p>
 <p>The function and all its arguments must be picklable.
 Using the same AsyncEvaluator in two different contexts raises a <code class="code docutils literal notranslate"><span class="pre">RuntimeError</span></code>.</p>
-<p>class variables:
-defaults: Dict, optional (default=None)</p>
-<blockquote>
-<div><p>Default parameter values shared between all submit calls.
+<dl class="simple">
+<dt>defaults: Dict, optional (default=None)</dt><dd><p>Default parameter values shared between all submit calls.
 This allows these defaults to be transferred only once per process,
 instead of twice per call (to and from the subprocess).
 Only supports keyword arguments.</p>
-</div></blockquote>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -884,7 +763,7 @@ There is no guarantee the limit is not violated.</p></li>
         <a href="../benchmark.html" class="btn btn-neutral float-right" title="Benchmark Results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../technical_guide/index.html" class="btn btn-neutral float-left" title="Technical Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../advanced_guide/index.html" class="btn btn-neutral float-left" title="Advanced Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

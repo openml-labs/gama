@@ -36,7 +36,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Technical Guide" href="../technical_guide/index.html" />
+    <link rel="next" title="Advanced Guide" href="../advanced_guide/index.html" />
     <link rel="prev" title="GAMA - Genetic Automated Machine learning Assistant" href="../index.html" /> 
 </head>
 
@@ -118,7 +118,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../technical_guide/index.html">Technical Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_guide/index.html">Advanced Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../benchmark.html">Benchmark Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
@@ -248,7 +248,7 @@ Changes to the code directly affect the installed GAMA package without requiring
         <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span>
     <span class="p">)</span>
 
-    <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">keep_analysis_log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="s2">&quot;nothing&quot;</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting `fit` which will take roughly 3 minutes.&quot;</span><span class="p">)</span>
     <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
@@ -277,7 +277,7 @@ Changes to the code directly affect the installed GAMA package without requiring
     <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_boston</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaRegressor</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">keep_analysis_log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaRegressor</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="s2">&quot;nothing&quot;</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting `fit` which will take roughly 3 minutes.&quot;</span><span class="p">)</span>
     <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
@@ -308,7 +308,7 @@ Make sure you adjust the file path if not executed from the examples directory.<
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">file_path</span> <span class="o">=</span> <span class="s2">&quot;../tests/data/breast_cancer_</span><span class="si">{}</span><span class="s2">.arff&quot;</span>
 
-    <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">keep_analysis_log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span><span class="n">max_total_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="s2">&quot;nothing&quot;</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting `fit` which will take roughly 3 minutes.&quot;</span><span class="p">)</span>
     <span class="n">automl</span><span class="o">.</span><span class="n">fit_from_file</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">))</span>
 
@@ -332,7 +332,7 @@ for the latest news, see <a class="reference external" href="https://github.com/
 <div class="section" id="simple-features">
 <h2>Simple Features<a class="headerlink" href="#simple-features" title="Permalink to this headline">¶</a></h2>
 <p>This section features a couple of simple to use features that might be interesting for a wide audience.
-For more advanced features, see the <a class="reference internal" href="../technical_guide/index.html#technical-guide-index"><span class="std std-ref">Technical Guide</span></a>.</p>
+For more advanced features, see the <a class="reference internal" href="../advanced_guide/index.html#advanced-guide-index"><span class="std std-ref">Advanced Guide</span></a>.</p>
 <div class="section" id="command-line-interface">
 <h3>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h3>
 <p>GAMA may also be called from a terminal, but the tool currently supports only part of all Python functionality.
@@ -464,7 +464,7 @@ The default is set to five minutes. For large datasets, more time may be needed 
 <div class="section" id="related-packages">
 <h2>Related Packages<a class="headerlink" href="#related-packages" title="Permalink to this headline">¶</a></h2>
 <p>There are many different AutoML packages in Python and other languages.
-<a class="reference external" href="https://openml.github.io/automlbenchmark/automl_overview.html">This page</a> of the AutoML Benchmark project has an overview of commonly used open source AutoML frameworks.
+<a class="reference external" href="https://openml.github.io/automlbenchmark/automl_overview.html">This webpage</a> of the AutoML Benchmark project has an overview of commonly used open source AutoML frameworks.
 Another nice overview of papers and projects is gathered at <a class="reference external" href="https://github.com/hibayesian/awesome-automl-papers#projects">this Github repo</a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -504,7 +504,7 @@ Auto-sklearn won ChaLearn AutoML challenge 1 and 2.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../technical_guide/index.html" class="btn btn-neutral float-right" title="Technical Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../advanced_guide/index.html" class="btn btn-neutral float-right" title="Advanced Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="../index.html" class="btn btn-neutral float-left" title="GAMA - Genetic Automated Machine learning Assistant" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

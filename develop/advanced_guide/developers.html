@@ -1,0 +1,408 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Developers Notes &mdash; gama 20.2.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> gama
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                20.2.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Advanced Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark.html">Benchmark Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Papers</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">gama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Developers Notes</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/advanced_guide/developers.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="developers-notes">
+<h1>Developers Notes<a class="headerlink" href="#developers-notes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="adding-your-own-search-or-postprocessing">
+<span id="add-your-own"></span><h2>Adding Your Own Search or Postprocessing<a class="headerlink" href="#adding-your-own-search-or-postprocessing" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is not set in stone. As more AutoML pipeline steps are added by more people,
+we expect to identify parts of the interface to be improved. We can’t do this without your feedback!
+Feel free to get in touch, preferably in the form of a public discussion on a Github issue, and let us
+know what difficulties you encounter, or what works well!</p>
+</div>
+<p>This section contains information about implementing your own Search or Postprocessing procedures.
+To keep interfaces uniform across the different search or postprocesing implementations, each should derive from their respective baseclass (<cite>BaseSearch</cite> and <cite>BasePostProcessing</cite>).
+They each have their own processing method (<cite>search</cite> for <cite>BaseSearch</cite> and <cite>post_process</cite> for <cite>BasePostProcessing</cite>) which should be implemented.
+We will show example implementations further down.</p>
+<p>Your Search or Postprocessing algorithm may feature hyperparameters, care should be taken to provide good default values.
+For some algorithms, hyperparameter default values are best specified based on characteristics of the dataset.
+For instance, with big datasets it might be useful to perform (some of) the workload on a subset of the data.
+We refer to these data-dependent non-static defaults as ‘dynamic defaults’.
+Both <cite>BaseSearch</cite> and <cite>BasePostProcessing</cite> feature a <cite>dynamic_defaults</cite> method which is called before <cite>search</cite> and <cite>…</cite>, respectively.
+This allows you to overwrite default hyperparameter values based on the dataset properties.
+The hyperparameter values with which your search or postprocessing will be called is determined in the following order:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>User specified values are used if specified (e.g. <cite>EnsemblePostProcessing(n=25)</cite>)</p></li>
+<li><p>Otherwise the values determined by <cite>dynamic_defaults</cite> are used</p></li>
+<li><p>If neither are specified, the static default values are used.</p></li>
+</ul>
+</div></blockquote>
+<div class="section" id="search">
+<h3>Search<a class="headerlink" href="#search" title="Permalink to this headline">¶</a></h3>
+<p>To implement your own search procedure, create a class which derives from the base class:</p>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.search_methods.base_search.</code><code class="sig-name descname">BaseSearch</code><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>All search methods should be derived from this class.
+This class should not be directly used to configure GAMA.</p>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">dynamic_defaults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">y</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>pandas.core.frame.DataFrame<span class="p">, </span>pandas.core.series.Series<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">time_limit</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)">None</a><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.dynamic_defaults"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set hyperparameter defaults based on the dataset and time-constraints.</p>
+<p>Should be called before <cite>search</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>pandas.DataFrame</em>) – Features of the data.</p></li>
+<li><p><strong>y</strong> (<em>pandas.DataFrame</em><em> or </em><em>pandas.Series</em>) – Labels of the data.</p></li>
+<li><p><strong>time_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Time in seconds available for search and selecting dynamic defaults.
+There is no need to adhere to this explicitly,
+a <cite>stopit.utils.TimeoutException</cite> will be raised.
+The time-limit might be an important factor in setting hyperparameter values</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">hyperparameters</code></dt>
+<dd><p>Hyperparameter (name, value) pairs as set/determined dynamically/default.</p>
+<p>Values may have been set directly, through dynamic defaults or static defaults.
+This is also the order in which the value of a hyperparameter is checked,
+i.e. a user set value wil overwrite any other value, and a dynamic default
+will overwrite a static one.
+Dynamic default values only considered if <cite>dynamic_defaults</cite> has been called.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">search</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operations</span><span class="p">:</span> <span class="n">gama.genetic_programming.operator_set.OperatorSet</span></em>, <em class="sig-param"><span class="n">start_candidates</span><span class="p">:</span> <span class="n">List<span class="p">[</span>gama.genetic_programming.components.individual.Individual<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.search"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Execute search as configured.</p>
+<p>Sets <cite>output</cite> field of this class to the best Individuals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>operations</strong> (<em>OperatorSet</em>) – Has methods to create new individuals, evaluate individuals and more.</p></li>
+<li><p><strong>start_candidates</strong> (<em>List</em><em>[</em><a class="reference internal" href="../api/index.html#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a><em>]</em>) – A list of individuals to be considered before all others.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p>You can use existing search implementations as a reference.</p>
+<div class="section" id="init">
+<h4><cite>__init__</cite><a class="headerlink" href="#init" title="Permalink to this headline">¶</a></h4>
+<p>To allow us to identify which hyperparameters are set by the user, and which are defaults, the default values for each hyperparameter in the <cite>__init__</cite> method should be <cite>None</cite>.</p>
+<p>In search methods, each evaluation of a machine learning pipeline is logged automatically.
+Default data recorded includes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>a string representation of the pipeline</p></li>
+<li><p>the scores of the pipeline according to the specified metrics</p></li>
+<li><p>any errors that occurred during evaluation</p></li>
+</ul>
+</div></blockquote>
+<p>It is possible to add additional fields to be recorded for each pipeline, as shown here.
+The <cite>extra_fields</cite> of the <cite>EvaluationLogger</cite> expects a dictionary,
+which maps the name of a field to the method which extracts the information that should be recorded.
+In this case we are interested to know the parent of each evaluated pipeline, so we might later inspect a pipeline’s “lineage”.</p>
+</div>
+<div class="section" id="dynamic-defaults">
+<h4><cite>dynamic_defaults</cite><a class="headerlink" href="#dynamic-defaults" title="Permalink to this headline">¶</a></h4>
+<p>Hyperparameters such as population size might make for good candidates for dynamic defaults.
+However it is not obvious what the relationship should be.
+For this reason, we choose not to work with dynamic defaults in this search strategy.
+Perhaps in the future, when we have adequate data to model the relationship we can determine useful default values.</p>
+<p>You can find an example usage of dynamic defaults in the Asynchronous Successive Halving Algorithm search.</p>
+</div>
+<div class="section" id="id1">
+<h4><cite>search</cite><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<p>This method should execute the search for a good machine learning pipeline.
+The search should always take into account the <cite>start_candidates</cite> in some form.
+This allows the search start point to be set by the user or a warm start step.
+In this evolutionary optimization, they form the initial population.</p>
+<p>The search algorithm should update the <cite>output</cite> field of the <cite>Search</cite> object, and behave nicely when interrupted with a <cite>TimeoutException</cite>.
+This allows GAMA to control when to shut down search (and continue with post processing).</p>
+</div>
+</div>
+<div class="section" id="postprocessing">
+<h3>PostProcessing<a class="headerlink" href="#postprocessing" title="Permalink to this headline">¶</a></h3>
+<p>PostProcessing follows a similar pattern, where the class should allow initialization with its hyperparameters,
+an implementation of dynamic defaults (optional), and a <cite>post_process</cite> function.</p>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.postprocessing.</code><code class="sig-name descname">BasePostProcessing</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_fraction</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>All post-processing methods should be derived from this class.
+This class should not be directly used to configure GAMA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Fraction of total time that to be reserved for this post-processing step.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">hyperparameters</code></dt>
+<dd><p>Hyperparameter (name, value) pairs.</p>
+<p>Value determined by user &gt; dynamic default &gt; static default.
+Dynamic default values only considered if <cite>dynamic_defaults</cite> has been called.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">post_process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">y</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>pandas.core.frame.DataFrame<span class="p">, </span>pandas.core.series.Series<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">timeout</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em>, <em class="sig-param"><span class="n">selection</span><span class="p">:</span> <span class="n">List<span class="p">[</span>gama.genetic_programming.components.individual.Individual<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing.post_process"><span class="viewcode-link">[source]</span></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>pd.DataFrame</em>) – all training features</p></li>
+<li><p><strong>y</strong> (<em>Union</em><em>[</em><em>pd.DataFrame</em><em>, </em><em>pd.Series</em><em>]</em>) – all training labels</p></li>
+<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – allowed time in seconds for post-processing</p></li>
+<li><p><strong>selection</strong> (<em>List</em><em>[</em><a class="reference internal" href="../api/index.html#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a><em>]</em>) – individuals selected by the search space, ordered best first</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A model with <cite>predict</cite> and optionally <cite>predict_proba</cite>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">to_code</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">preprocessing</span><span class="p">:</span> <span class="n">Sequence<span class="p">[</span>Tuple<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>sklearn.base.TransformerMixin<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing.to_code"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Generate Python code to reconstruct a pipeline that constructs the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>preprocessing</strong> (<em>Sequence</em><em>[</em><em>TransformerMixin</em><em>]</em><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Preprocessing steps that need be executed before the model.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A string of Python code that sets a ‘pipeline’ variable to the pipeline that
+defines the final pipeline generated by post-processing.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p>Unlike the search methods, which are not required to have any hyperparameter, post processing is required to have a default value for <cite>time_fraction</cite>.
+<cite>time_fraction</cite> is the fraction of the total time that should be reserved for the post processing method (as set on initialization through <cite>max_total_time</cite>).
+For instance, when a post-processing object’s <cite>time_fraction</cite> is <cite>0.3</cite> and GAMA is initiated with <cite>max_total_time=3600</cite>,
+then <cite>3600*0.3=1080</cite> seconds are reserved for the post-processing phase.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While hard, it is important to provide an accurate estimate for <cite>time_fraction</cite>. If you reserve too much time,
+it means that the search procedure will have to be cut off unnecessarily early. If too little time is reserved,
+GAMA will interrupt the post-processing step and return control to the user.
+It is generally hard to know to how much to reserve, and is likely dependent on the dataset and number of evaluated
+pipelines in search. We would like to implement ways in which post-processing methods have access to these
+statistics and allow them to update their time estimate, so that less time is wasted on too long or too short
+post-processing phases.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2018-2020, Pieter Gijsbers
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

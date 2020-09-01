@@ -87,18 +87,18 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="user_guide/index.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="technical_guide/index.html">Technical Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_guide/index.html">Advanced Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="benchmark.html">Benchmark Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing/index.html">Contributing</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Papers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#gama-a-general-automated-machine-learning-assistant">GAMA: a General Automated Machine learning Assistant</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#listings">Listings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#up-to-date-listings">Up-to-date Listings</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#gama-genetic-automated-machine-learning-assistant">GAMA: Genetic Automated Machine learning Assistant</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Listings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#listings">Listings</a></li>
 </ul>
 </li>
 </ul>
@@ -176,16 +176,16 @@ Unless you want to reference a specific paper, when citing GAMA please cite the 
 <h2>GAMA: a General Automated Machine learning Assistant<a class="headerlink" href="#gama-a-general-automated-machine-learning-assistant" title="Permalink to this headline">¶</a></h2>
 <p>Features GAMA 20.2.1</p>
 <p>Bibtex will be added after publication.</p>
-<div class="section" id="listings">
-<h3>Listings<a class="headerlink" href="#listings" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="up-to-date-listings">
+<h3>Up-to-date Listings<a class="headerlink" href="#up-to-date-listings" title="Permalink to this headline">¶</a></h3>
 <p>Listing 1:</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gama</span> <span class="kn">import</span> <span class="n">GamaClassifier</span>
 <span class="kn">from</span> <span class="nn">gama.search_methods</span> <span class="kn">import</span> <span class="n">AsynchronousSuccessiveHalving</span>
 <span class="kn">from</span> <span class="nn">gama.postprocessing</span> <span class="kn">import</span> <span class="n">EnsemblePostProcessing</span>
 
 <span class="n">automl</span> <span class="o">=</span> <span class="n">GamaClassifier</span><span class="p">(</span>
-    <span class="n">search_method</span><span class="o">=</span><span class="n">AsynchronousSuccessiveHalving</span><span class="p">(),</span>
-    <span class="n">post_processing_method</span><span class="o">=</span><span class="n">EnsemblePostProcessing</span><span class="p">()</span>
+    <span class="n">search</span><span class="o">=</span><span class="n">AsynchronousSuccessiveHalving</span><span class="p">(),</span>
+    <span class="n">post_processing</span><span class="o">=</span><span class="n">EnsemblePostProcessing</span><span class="p">()</span>
 <span class="p">)</span>
 <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
@@ -212,8 +212,8 @@ Unless you want to reference a specific paper, when citing GAMA please cite the 
 <span class="nb">}</span>
 </pre></div>
 </div>
-<div class="section" id="id1">
-<h3>Listings<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="listings">
+<h3>Listings<a class="headerlink" href="#listings" title="Permalink to this headline">¶</a></h3>
 <p>This paper features no listings.</p>
 </div>
 </div>
