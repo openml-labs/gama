@@ -285,6 +285,12 @@ also provide the arguments <code class="docutils literal notranslate"><span clas
 This can help identify if parts of your PR are not covered by unit tests.
 When you generate a PR, a coverage report will also be generated and posted.
 Should the coverage decline, the PR will not be accepted unless a good reason is given for the decreased coverage.</p>
+<p>Some unit tests require files.
+The paths to these files are specified in a way that assume the repository root directory as the working directory.
+For example, the tests in <cite>tests/unit/test_data.py</cite> refer to the file <cite>tests/unit/data/openml_d_23380.csv</cite>.
+When running your unit tests from an IDE, this may cause the files not to be found if it is not the default working directory for tests.
+In PyCharm, go to <cite>Run &gt; Edit Configurations… &gt; Templates &gt; Python tests &gt; Pytest `
+and fill in `working directory</cite> in the template to be the directory where <cite>tests</cite> resides (e.g. <cite>~/gama</cite>).</p>
 </div>
 <div class="section" id="generating-documentation">
 <h2>Generating Documentation<a class="headerlink" href="#generating-documentation" title="Permalink to this headline">¶</a></h2>

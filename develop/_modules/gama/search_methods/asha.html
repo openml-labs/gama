@@ -171,7 +171,6 @@
 <span class="kn">from</span> <span class="nn">gama.genetic_programming.components.individual</span> <span class="kn">import</span> <span class="n">Individual</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-<span class="n">ASHA_LOG_TOKEN</span> <span class="o">=</span> <span class="s2">&quot;ASHA&quot;</span>
 
 
 <div class="viewcode-block" id="AsynchronousSuccessiveHalving"><a class="viewcode-back" href="../../../api/index.html#gama.search_methods.AsynchronousSuccessiveHalving">[docs]</a><span class="k">class</span> <span class="nc">AsynchronousSuccessiveHalving</span><span class="p">(</span><span class="n">BaseSearch</span><span class="p">):</span>
@@ -263,7 +262,6 @@
 <span class="sd">        Individuals of the highest rung in which</span>
 <span class="sd">        at least one individual has been evaluated.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">evaluate</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">evaluate_on_rung</span><span class="p">,</span> <span class="n">evaluate_individual</span><span class="o">=</span><span class="n">operations</span><span class="o">.</span><span class="n">evaluate</span><span class="p">)</span>
 
     <span class="c1"># Note that here we index the rungs by all possible rungs (0..ceil(log_eta(R/r))),</span>
     <span class="c1"># and ignore the first minimum_early_stopping_rate rungs.</span>
@@ -276,6 +274,9 @@
         <span class="n">rung</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">minimum_resource</span> <span class="o">*</span> <span class="p">(</span><span class="n">reduction_factor</span> <span class="o">**</span> <span class="n">rung</span><span class="p">),</span> <span class="n">maximum_resource</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">rung</span> <span class="ow">in</span> <span class="n">rungs</span>
     <span class="p">}</span>
+    <span class="n">evaluate</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
+        <span class="n">evaluate_on_rung</span><span class="p">,</span> <span class="n">evaluate_individual</span><span class="o">=</span><span class="n">operations</span><span class="o">.</span><span class="n">evaluate</span><span class="p">,</span> <span class="n">max_rung</span><span class="o">=</span><span class="n">max_rung</span>
+    <span class="p">)</span>
 
     <span class="c1"># Highest rungs first is how we typically iterate them</span>
     <span class="c1"># Should we just use lists of lists/heaps instead?</span>
@@ -345,9 +346,14 @@
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">rung_individuals</span><span class="p">[</span><span class="n">highest_rung_reached</span><span class="p">]))</span>
 
 
-<span class="k">def</span> <span class="nf">evaluate_on_rung</span><span class="p">(</span><span class="n">individual</span><span class="p">,</span> <span class="n">rung</span><span class="p">,</span> <span class="n">evaluate_individual</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">evaluate_on_rung</span><span class="p">(</span><span class="n">individual</span><span class="p">,</span> <span class="n">rung</span><span class="p">,</span> <span class="n">max_rung</span><span class="p">,</span> <span class="n">evaluate_individual</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="n">evaluation</span> <span class="o">=</span> <span class="n">evaluate_individual</span><span class="p">(</span><span class="n">individual</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="n">evaluation</span><span class="o">.</span><span class="n">individual</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;rung&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rung</span>
+    <span class="c1"># We want to avoid saving evaluations that are not on the max rung to disk,</span>
+    <span class="c1"># because we only want to use pipelines evaluated on the max rung after search.</span>
+    <span class="c1"># We&#39;re working on a better way to relay this information, this is temporary.</span>
+    <span class="k">if</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">error</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">rung</span> <span class="o">!=</span> <span class="n">max_rung</span><span class="p">:</span>
+        <span class="n">evaluation</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;Not a full evaluation.&quot;</span>
     <span class="k">return</span> <span class="n">evaluation</span>
 </pre></div>
 
