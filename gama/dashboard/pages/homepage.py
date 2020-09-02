@@ -9,7 +9,7 @@ import dash_table
 from dash.dependencies import Input, Output, State
 
 from gama.dashboard.pages.base_page import BasePage
-from gama.data import file_to_pandas, load_feature_metadata_from_file
+from gama.data_loading import file_to_pandas, load_feature_metadata_from_file
 
 
 class HomePage(BasePage):

@@ -9,7 +9,7 @@ from sklearn.pipeline import Pipeline
 log = logging.getLogger(__name__)
 
 
-def find_categorical_columns(
+def select_categorical_columns(
     df: pd.DataFrame,
     min_f: Optional[int] = None,
     max_f: Optional[int] = None,
@@ -49,8 +49,8 @@ def basic_encoding(x: pd.DataFrame):
       - Ordinal encoding for features with 2 or fewer unique values.
       - One hot encoding for features with at most 10 unique values.
      """
-    binary_features = list(find_categorical_columns(x, max_f=2))
-    leq_10_features = list(find_categorical_columns(x, min_f=3, max_f=10))
+    binary_features = list(select_categorical_columns(x, max_f=2))
+    leq_10_features = list(select_categorical_columns(x, min_f=3, max_f=10))
 
     encoding_pipeline = Pipeline(
         steps=[
@@ -68,7 +68,7 @@ def basic_pipeline_extension(x: pd.DataFrame) -> List[Tuple[str, TransformerMixi
     TargetEncoding is will encode categorical features with more than 10 unique values.
     SimpleImputer imputes with the median.
     """
-    many_factor_features = list(find_categorical_columns(x, min_f=11))
+    many_factor_features = list(select_categorical_columns(x, min_f=11))
     return [
         ("target_enc", ce.TargetEncoder(cols=many_factor_features)),
         ("imputation", SimpleImputer(strategy="median")),

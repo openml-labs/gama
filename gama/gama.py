@@ -36,7 +36,8 @@ from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
 from gama.utilities.metrics import scoring_to_metric
 
 from gama.__version__ import __version__
-from gama.data import X_y_from_file, format_x_y
+from gama.data_loading import X_y_from_file
+from gama.data_formatting import format_x_y
 from gama.search_methods.async_ea import AsyncEA
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.logging.utility_functions import register_stream_log

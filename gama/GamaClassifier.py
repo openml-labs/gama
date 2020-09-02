@@ -7,7 +7,7 @@ from sklearn.base import ClassifierMixin
 from sklearn.preprocessing import LabelEncoder
 
 from .gama import Gama
-from gama.data import X_y_from_file
+from gama.data_loading import X_y_from_file
 from gama.configuration.classification import clf_config
 from gama.utilities.metrics import scoring_to_metric
 
