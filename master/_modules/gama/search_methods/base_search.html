@@ -86,7 +86,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../technical_guide/index.html">Technical Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../advanced_guide/index.html">Advanced Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../benchmark.html">Benchmark Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../releases.html">Release Notes</a></li>
@@ -166,7 +166,7 @@
 <span class="kn">from</span> <span class="nn">gama.logging.evaluation_logger</span> <span class="kn">import</span> <span class="n">EvaluationLogger</span>
 
 
-<div class="viewcode-block" id="BaseSearch"><a class="viewcode-back" href="../../../api/index.html#gama.search_methods.base_search.BaseSearch">[docs]</a><span class="k">class</span> <span class="nc">BaseSearch</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseSearch"><a class="viewcode-back" href="../../../advanced_guide/index.html#gama.search_methods.base_search.BaseSearch">[docs]</a><span class="k">class</span> <span class="nc">BaseSearch</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; All search methods should be derived from this class.</span>
 <span class="sd">    This class should not be directly used to configure GAMA.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -209,7 +209,7 @@
         <span class="n">set_value</span><span class="p">,</span> <span class="n">default_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyperparameters</span><span class="p">[</span><span class="n">hyperparameter</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_hyperparameters</span><span class="p">[</span><span class="n">hyperparameter</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">set_value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
-<div class="viewcode-block" id="BaseSearch.dynamic_defaults"><a class="viewcode-back" href="../../../api/index.html#gama.search_methods.base_search.BaseSearch.dynamic_defaults">[docs]</a>    <span class="k">def</span> <span class="nf">dynamic_defaults</span><span class="p">(</span>
+<div class="viewcode-block" id="BaseSearch.dynamic_defaults"><a class="viewcode-back" href="../../../advanced_guide/index.html#gama.search_methods.base_search.BaseSearch.dynamic_defaults">[docs]</a>    <span class="k">def</span> <span class="nf">dynamic_defaults</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span> <span class="n">time_limit</span><span class="p">:</span> <span class="nb">float</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Set hyperparameter defaults based on the dataset and time-constraints.</span>
@@ -231,7 +231,7 @@
         <span class="c1"># updates self.hyperparameters defaults</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Must be implemented by child class.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseSearch.search"><a class="viewcode-back" href="../../../api/index.html#gama.search_methods.base_search.BaseSearch.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operations</span><span class="p">:</span> <span class="n">OperatorSet</span><span class="p">,</span> <span class="n">start_candidates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Individual</span><span class="p">]):</span>
+<div class="viewcode-block" id="BaseSearch.search"><a class="viewcode-back" href="../../../advanced_guide/index.html#gama.search_methods.base_search.BaseSearch.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operations</span><span class="p">:</span> <span class="n">OperatorSet</span><span class="p">,</span> <span class="n">start_candidates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Individual</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot; Execute search as configured.</span>
 
 <span class="sd">        Sets `output` field of this class to the best Individuals.</span>
