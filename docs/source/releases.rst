@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 20.2.2
+--------------
+
+Maintenance:
+ - Minor refactoring
+ - Updated and expanded documentation
+
+Bugfixes:
+ - Avoid a cache-related error when using ASHA search.
+
 Version 20.2.1
 --------------
 Changes:
