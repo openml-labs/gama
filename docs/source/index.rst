@@ -22,7 +22,7 @@ Or if you would like to include the graphical frontend::
     pip install gama[vis]
 
 To get more basic information on GAMA and its AutoML functionality, read more in the :ref:`user_guide_index`.
-If you want find out everything there is to know about GAMA, also visit the :ref:`technical_guide_index`.
+If you want find out everything there is to know about GAMA, also visit the :ref:`advanced_guide_index`.
 It describes visualization of optimization logs, changing the AutoML pipeline, and more.
 If there are any questions you have that are not answered by the documentation, check the `issue page <https://github.com/PGijsbers/GAMA/issues>`_.
 If your question has not been answered there either, please open a new issue.
@@ -31,7 +31,7 @@ If your question has not been answered there either, please open a new issue.
    :includehidden:
 
    user_guide/index
-   technical_guide/index
+   advanced_guide/index
    api/index
    benchmark
    releases

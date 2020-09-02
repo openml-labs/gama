@@ -6,7 +6,7 @@ import pickle
 from pandas.api.types import is_categorical_dtype
 
 from gama import GamaClassifier, GamaRegressor
-from gama.data import X_y_from_file
+from gama.data_loading import X_y_from_file
 
 
 def parse_args():

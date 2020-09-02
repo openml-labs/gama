@@ -102,6 +102,13 @@ This can help identify if parts of your PR are not covered by unit tests.
 When you generate a PR, a coverage report will also be generated and posted.
 Should the coverage decline, the PR will not be accepted unless a good reason is given for the decreased coverage.
 
+Some unit tests require files.
+The paths to these files are specified in a way that assume the repository root directory as the working directory.
+For example, the tests in `tests/unit/test_data.py` refer to the file `tests/unit/data/openml_d_23380.csv`.
+When running your unit tests from an IDE, this may cause the files not to be found if it is not the default working directory for tests.
+In PyCharm, go to `Run > Edit Configurations... > Templates > Python tests > Pytest `
+and fill in `working directory` in the template to be the directory where `tests` resides (e.g. `~/gama`).
+
 Generating Documentation
 ************************
 The documentation is generated with `Sphinx <https://www.sphinx-doc.org/en/master/>`_.

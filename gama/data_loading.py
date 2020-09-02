@@ -1,34 +1,39 @@
 """ This module contains functions for loading data. """
 from collections import OrderedDict
 import csv
-from typing import Tuple, Optional, Dict, Union, Type, List
+from typing import Tuple, Optional, Dict, List
 
 import arff
-import numpy as np
 import pandas as pd
-from pandas.api.types import is_numeric_dtype
 
-from gama.utilities.preprocessing import log
-
+from gama.data_formatting import infer_categoricals_inplace
 
 CSV_SNIFF_SIZE = 2 ** 12
 
 
+def sniff_csv_meta(file_path: str) -> Tuple[str, bool]:
+    """ Determine the csv delimiter and whether it has a header """
+    with open(file_path, "r") as csv_file:
+        first_bytes = csv_file.read(2 ** 12)
+    sep = csv.Sniffer().sniff(first_bytes).delimiter
+    has_header = csv.Sniffer().has_header(first_bytes)
+    return sep, has_header
+
+
 def load_csv_header(file_path: str, **kwargs) -> List[str]:
     """ Return column names in the header, or 0...N if no header is present. """
+    if not file_path.endswith(".csv"):
+        raise ValueError(f"{file_path} is not a file with .csv extension.")
+    sep, has_header = sniff_csv_meta(file_path)
+    sep = kwargs.get("sep", sep)
+
     with open(file_path, "r") as csv_file:
-        has_header = csv.Sniffer().has_header(csv_file.read(CSV_SNIFF_SIZE))
-        csv_file.seek(0)
-        if "sep" not in kwargs:
-            dialect = csv.Sniffer().sniff(csv_file.read(CSV_SNIFF_SIZE))
-            kwargs["sep"] = dialect.delimiter
-            csv_file.seek(0)
         first_line = csv_file.readline()[:-1]
 
     if has_header:
-        return first_line.split(kwargs["sep"])
+        return first_line.split(sep)
     else:
-        return [str(i) for i, _ in enumerate(first_line.split(kwargs["sep"]))]
+        return [str(i) for i, _ in enumerate(first_line.split(sep))]
 
 
 def csv_to_pandas(file_path: str, **kwargs) -> pd.DataFrame:
@@ -49,26 +54,15 @@ def csv_to_pandas(file_path: str, **kwargs) -> pd.DataFrame:
         A dataframe of the data in the ARFF file,
         with categorical columns having category dtype.
     """
-    if "header" not in kwargs:
-        with open(file_path, "r") as csv_file:
-            has_header = csv.Sniffer().has_header(csv_file.read(CSV_SNIFF_SIZE))
-        kwargs["header"] = 0 if has_header else None
+    if "header" not in kwargs or "sep" not in kwargs:
+        sep, has_header = sniff_csv_meta(file_path)
+        kwargs["sep"] = kwargs.get("sep", sep)
+        kwargs["header"] = kwargs.get("header", 0 if has_header else None)
 
-    df = pd.read_csv(file_path, **kwargs)
-
+    df = pd.read_csv(file_path, **kwargs).infer_objects()
     # Since CSV files do not have type annotation, we must infer their type to
-    # know which preprocessing steps to apply. All `str` columns and int-like columns
-    # with <=10 unique values are considered categorical.
-    for column, n_unique in df.nunique(dropna=True).items():
-        if df[column].dtype == "object":
-            df[column] = df[column].astype("category")
-        elif n_unique <= 10 and is_numeric_dtype(df[column]):
-            for x in df[column].dropna().unique():
-                if isinstance(x, float) and not x.is_integer():
-                    break
-            else:
-                df[column] = df[column].astype("category")
-
+    # know which preprocessing steps to apply.
+    infer_categoricals_inplace(df)
     return df
 
 
@@ -92,9 +86,6 @@ def arff_to_pandas(
         A dataframe of the data in the ARFF file,
         with categorical columns having category dtype.
     """
-    if not isinstance(file_path, str):
-        raise TypeError(f"`file_path` must be of type `str` but is {type(file_path)}")
-
     with open(file_path, "r", encoding=encoding) as arff_file:
         arff_dict = arff.load(arff_file, **kwargs)
 
@@ -182,7 +173,7 @@ def load_feature_metadata_from_file(file_path: str) -> Dict[str, str]:
     elif file_path.lower().endswith(".csv"):
         return {c: "" for c in load_csv_header(file_path)}
     else:
-        raise ValueError("Only csv and arff files are supported.")
+        raise ValueError("Only csv and arff files supported.")
 
 
 def load_feature_metadata_from_arff(file_path: str) -> Dict[str, str]:
@@ -205,76 +196,3 @@ def load_feature_metadata_from_arff(file_path: str) -> Dict[str, str]:
                 attributes[name] = data_type
             line = fh.readline()[:-1]  # remove newline character
     return attributes
-
-
-def heuristic_numpy_to_dataframe(
-    x: np.ndarray, max_unique_values_cat: int = 10
-) -> pd.DataFrame:
-    """ Transform a numpy array to a typed pd.DataFrame. """
-    x_df = pd.DataFrame(x)
-    for column, n_unique in x_df.nunique(dropna=True).items():
-        if n_unique <= max_unique_values_cat:
-            x_df[column] = x_df[column].astype("category")
-    return x_df
-
-
-def format_x_y(
-    x: Union[pd.DataFrame, np.ndarray],
-    y: Union[pd.DataFrame, pd.Series, np.ndarray],
-    y_type: Type = pd.Series,
-    remove_unlabeled: bool = True,
-) -> Tuple[pd.DataFrame, Union[pd.DataFrame, pd.Series]]:
-    """ Take (X,y) data and convert it to a (pd.DataFrame, pd.Series) tuple.
-
-    Parameters
-    ----------
-    x: pandas.DataFrame or numpy.ndarray
-    y: pandas.DataFrame, pandas.Series or numpy.ndarray
-    y_type: Type (default=pandas.Series)
-    remove_unlabeled: bool (default=True)
-        If true, remove all rows associated with unlabeled data (NaN in y).
-
-    Returns
-    -------
-    Tuple[pandas.DataFrame, pandas.DataFrame or pandas.Series]
-        X and y, where X is formatted as pd.DataFrame and y is formatted as `y_type`.
-    """
-    if not isinstance(x, (np.ndarray, pd.DataFrame)):
-        raise TypeError("X must be either np.ndarray or pd.DataFrame.")
-    if not isinstance(y, (np.ndarray, pd.Series, pd.DataFrame)):
-        raise TypeError("y must be np.ndarray, pd.Series or pd.DataFrame.")
-
-    if isinstance(x, np.ndarray):
-        x = heuristic_numpy_to_dataframe(x)
-    if isinstance(y, np.ndarray) and y.ndim == 2:
-        # Either indicator matrix or should be a vector.
-        if y.shape[1] > 1:
-            y = np.argmax(y, axis=1)
-        else:
-            y = y.squeeze()
-
-    if y_type == pd.Series:
-        if isinstance(y, pd.DataFrame):
-            y = y.squeeze()
-        elif isinstance(y, np.ndarray):
-            y = pd.Series(y)
-    elif y_type == pd.DataFrame:
-        if not isinstance(y, pd.DataFrame):
-            y = pd.DataFrame(y)
-    else:
-        raise ValueError(f"`y_type` must be pd.Series or pd.DataFrame but is {y_type}.")
-
-    if remove_unlabeled:
-        if isinstance(y, pd.DataFrame):
-            unlabeled = y.iloc[:, 0].isnull()
-        else:
-            unlabeled = y.isnull()
-
-        if unlabeled.any():
-            log.info(
-                f"Target vector has been found to contain {sum(unlabeled)} NaN-labels, "
-                f"these rows will be ignored."
-            )
-            x, y = x.loc[~unlabeled], y.loc[~unlabeled]
-
-    return x, y

@@ -10,6 +10,7 @@ Another choice would be how to construct a model after search, e.g. by training 
 Similarly to how data processing algorithms can form a *machine learning pipeline*,
 we will refer to a configuration of these AutoML components as an *AutoML Pipeline*.
 In GAMA we currently support flexibility in the AutoML pipeline in two stages: search and post-processing.
+See :ref:`add_your_own` for more information on how to add your own.
 
 Search Algorithms
 *****************
@@ -39,12 +40,12 @@ For example, searching with 'Asynchronous Successive Halving' and creating an en
     from gama.search_methods import AsynchronousSuccessiveHalving
     from gama.postprocessing import EnsemblePostProcessing
 
-    custom_pipeline_gama = GamaClassifier(search_method=AsynchronousSuccessiveHalving(), post_processing_method=EnsemblePostProcessing())
+    custom_pipeline_gama = GamaClassifier(search=AsynchronousSuccessiveHalving(), post_processing=EnsemblePostProcessing())
 
 or using 'Asynchronous EA' but with custom hyperparameters::
 
     from gama import GamaClassifier
     from gama.search_methods import AsyncEA
 
-    custom_pipeline_gama = GamaClassifier(search_method=AsyncEA(population_size=30))
+    custom_pipeline_gama = GamaClassifier(search=AsyncEA(population_size=30))
 
