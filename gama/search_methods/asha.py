@@ -104,7 +104,6 @@ def asha(
         Individuals of the highest rung in which
         at least one individual has been evaluated.
     """
-    evaluate = partial(evaluate_on_rung, evaluate_individual=operations.evaluate)
 
     # Note that here we index the rungs by all possible rungs (0..ceil(log_eta(R/r))),
     # and ignore the first minimum_early_stopping_rate rungs.
@@ -117,6 +116,9 @@ def asha(
         rung: min(minimum_resource * (reduction_factor ** rung), maximum_resource)
         for rung in rungs
     }
+    evaluate = partial(
+        evaluate_on_rung, evaluate_individual=operations.evaluate, max_rung=max_rung
+    )
 
     # Highest rungs first is how we typically iterate them
     # Should we just use lists of lists/heaps instead?
@@ -186,7 +188,12 @@ def asha(
         return list(map(lambda p: p[1], rung_individuals[highest_rung_reached]))
 
 
-def evaluate_on_rung(individual, rung, evaluate_individual, *args, **kwargs):
+def evaluate_on_rung(individual, rung, max_rung, evaluate_individual, *args, **kwargs):
     evaluation = evaluate_individual(individual, *args, **kwargs)
     evaluation.individual.meta["rung"] = rung
+    # We want to avoid saving evaluations that are not on the max rung to disk,
+    # because we only want to use pipelines evaluated on the max rung after search.
+    # We're working on a better way to relay this information, this is temporary.
+    if evaluation.error is None and rung != max_rung:
+        evaluation.error = "Not a full evaluation."
     return evaluation
