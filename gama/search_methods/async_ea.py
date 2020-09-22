@@ -120,13 +120,12 @@ def async_ea(
         for individual in start_candidates:
             future = client.submit(ops.evaluate, individual)
             future_obj.append(future)
-        i=0
-        while (max_n_evaluations is None) or (
-            n_evaluated_individuals < max_n_evaluations
-        ):
-            for futures, result in as_completed(future_obj, with_results=True):
+        # while (max_n_evaluations is None) or (
+        #     n_evaluated_individuals < max_n_evaluations
+        # ):
+        for futures, result in as_completed(future_obj, with_results=True):
+            if (max_n_evaluations is None) or (n_evaluated_individuals < max_n_evaluations):
                 future = futures
-                i = i + 1
                 individual = future.result().individual
                 current_population.append(individual)
                 if len(current_population) > max_pop_size:
@@ -143,5 +142,7 @@ def async_ea(
                     log.info("Restart criterion met. Creating new random population.")
                     start_candidates = [ops.individual() for _ in range(max_pop_size)]
                     break
+            else:
+                break
 
     return current_population

@@ -56,13 +56,16 @@ def random_search(
     for individual in start_candidates:
         future = client.submit(operations.evaluate, individual)
         future_obj.append(future)
-    while (max_evaluations is None) or (len(output) < max_evaluations):
-        for futures, result in as_completed(future_obj, with_results=True):
-            print(futures)
+    # while (max_evaluations is None) or (len(output) < max_evaluations):
+    for futures, result in as_completed(future_obj, with_results=True):
+        print(futures)
+        if(max_evaluations is None) or (len(output) < max_evaluations):
             future = futures
             if future is not None:
                 output.append(future.result().individual)
             client.submit(operations.evaluate, operations.individual())
+        else:
+            break
 
     return output
 
