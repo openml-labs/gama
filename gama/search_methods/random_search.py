@@ -9,7 +9,8 @@ from gama.search_methods.base_search import (
     BaseSearch,
     _check_base_search_hyperparameters,
 )
-from gama.utilities.generic.async_evaluator import AsyncEvaluator
+
+from dask.distributed import Client, wait, as_completed
 
 log = logging.getLogger(__name__)
 
@@ -50,15 +51,18 @@ def random_search(
         All evaluated individuals.
     """
     _check_base_search_hyperparameters(operations, output, start_candidates)
-
-    with AsyncEvaluator() as async_:
-        for individual in start_candidates:
-            async_.submit(operations.evaluate, individual)
-
-        while (max_evaluations is None) or (len(output) < max_evaluations):
-            future = operations.wait_next(async_)
-            if future.result is not None:
-                output.append(future.result.individual)
-            async_.submit(operations.evaluate, operations.individual())
+    client = Client()
+    future_obj = []
+    for individual in start_candidates:
+        future = client.submit(operations.evaluate, individual)
+        future_obj.append(future)
+    while (max_evaluations is None) or (len(output) < max_evaluations):
+        for futures, result in as_completed(future_obj, with_results=True):
+            print(futures)
+            future = futures
+            if future is not None:
+                output.append(future.result().individual)
+            client.submit(operations.evaluate, operations.individual())
 
     return output
+

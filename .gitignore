@@ -9,3 +9,5 @@ docs/source/generated/*
 *.egg-info
 *.log
 *.ipynb_checkpoints*
+
+dask-worker-space/dask-worker-space/

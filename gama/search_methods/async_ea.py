@@ -12,6 +12,8 @@ from gama.utilities.generic.async_evaluator import AsyncEvaluator
 
 log = logging.getLogger(__name__)
 
+from dask.distributed import Client, wait, as_completed
+
 
 class AsyncEA(BaseSearch):
     """ Perform asynchronous evolutionary optimization.
@@ -105,33 +107,35 @@ def async_ea(
         )
 
     max_pop_size = population_size
-
     current_population = output
     n_evaluated_individuals = 0
+    client = Client()
+    should_restart = True
+    while should_restart:
+        should_restart = False
+        current_population[:] = []
+        log.info("Starting EA with new population.")
+        future_obj = []
 
-    with AsyncEvaluator() as async_:
-        should_restart = True
-        while should_restart:
-            should_restart = False
-            current_population[:] = []
-            log.info("Starting EA with new population.")
-            for individual in start_candidates:
-                async_.submit(ops.evaluate, individual)
-
-            while (max_n_evaluations is None) or (
-                n_evaluated_individuals < max_n_evaluations
-            ):
-                future = ops.wait_next(async_)
-                if future.exception is None:
-                    individual = future.result.individual
-                    current_population.append(individual)
-                    if len(current_population) > max_pop_size:
-                        to_remove = ops.eliminate(current_population, 1)
-                        current_population.remove(to_remove[0])
+        for individual in start_candidates:
+            future = client.submit(ops.evaluate, individual)
+            future_obj.append(future)
+        i=0
+        while (max_n_evaluations is None) or (
+            n_evaluated_individuals < max_n_evaluations
+        ):
+            for futures, result in as_completed(future_obj, with_results=True):
+                future = futures
+                i = i + 1
+                individual = future.result().individual
+                current_population.append(individual)
+                if len(current_population) > max_pop_size:
+                    to_remove = ops.eliminate(current_population, 1)
+                    current_population.remove(to_remove[0])
 
                 if len(current_population) > 2:
                     new_individual = ops.create(current_population, 1)[0]
-                    async_.submit(ops.evaluate, new_individual)
+                    client.submit(ops.evaluate, new_individual)
 
                 should_restart = restart_callback is not None and restart_callback()
                 n_evaluated_individuals += 1
