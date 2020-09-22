@@ -11,6 +11,7 @@ from gama.logging.evaluation_logger import EvaluationLogger
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.genetic_programming.components.individual import Individual
+from dask.distributed import Client, wait, as_completed
 
 log = logging.getLogger(__name__)
 
@@ -145,37 +146,45 @@ def asha(
             return start_candidates.pop(), minimum_early_stopping_rate
         else:
             return operations.individual(), minimum_early_stopping_rate
+    future_obj = []
 
     try:
-        with AsyncEvaluator() as async_:
+        with Client() as client:
+
             log.info("ASHA start")
 
             def start_new_job():
                 individual, rung = get_job()
                 time_penalty = rung_resources[rung] / max(rung_resources.values())
-                async_.submit(
+                future_job = client.submit(
                     evaluate,
                     individual,
                     rung,
                     subsample=rung_resources[rung],
                     timeout=(10 + (time_penalty * 600)),
                 )
-
+                return future_job
             for _ in range(8):
-                start_new_job()
+                future_ = start_new_job()
+                future_obj.append(future_)
+            print(future_obj)
+            for futures, result in as_completed(future_obj, with_results=True):
+                future = futures
+                print(future.result())
+                if (max_full_evaluations is None) or (
+                        len(rung_individuals[max_rung]) < max_full_evaluations):
+                    if future.result() is not None:
+                        rung = future.result().individual.meta["rung"]
+                        loss = future.result().score[0]
+                        individual = future.result().individual
+                        rung_individuals[rung].append((loss, individual))
+                    start_new_job()
 
-            while (max_full_evaluations is None) or (
-                len(rung_individuals[max_rung]) < max_full_evaluations
-            ):
-                future = operations.wait_next(async_)
-                if future.result is not None:
-                    rung = future.result.individual.meta["rung"]
-                    loss = future.result.score[0]
-                    individual = future.result.individual
-                    rung_individuals[rung].append((loss, individual))
-                start_new_job()
+                else:
+                    break
 
             highest_rung_reached = max(rungs)
+
     except stopit.TimeoutException:
         log.info("ASHA ended due to timeout.")
         reached_rungs = (rung for rung, inds in rung_individuals.items() if inds != [])
@@ -185,6 +194,8 @@ def asha(
     finally:
         for rung, individuals in rung_individuals.items():
             log.info(f"[{len(individuals)}] {rung}")
+        print(rung_individuals[highest_rung_reached])
+        print(list(map(lambda p: p[1], rung_individuals[highest_rung_reached])))
         return list(map(lambda p: p[1], rung_individuals[highest_rung_reached]))
 
 
