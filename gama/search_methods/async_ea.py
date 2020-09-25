@@ -120,10 +120,8 @@ def async_ea(
         for individual in start_candidates:
             future = client.submit(ops.evaluate, individual)
             future_obj.append(future)
-        # while (max_n_evaluations is None) or (
-        #     n_evaluated_individuals < max_n_evaluations
-        # ):
-        for futures, result in as_completed(future_obj, with_results=True):
+        seq = as_completed(future_obj, with_results=True)
+        for futures, result in seq:
             if (max_n_evaluations is None) or (n_evaluated_individuals < max_n_evaluations):
                 future = futures
                 individual = future.result().individual
@@ -134,7 +132,7 @@ def async_ea(
 
                 if len(current_population) > 2:
                     new_individual = ops.create(current_population, 1)[0]
-                    client.submit(ops.evaluate, new_individual)
+                    seq.add(client.submit(ops.evaluate, new_individual))
 
                 should_restart = restart_callback is not None and restart_callback()
                 n_evaluated_individuals += 1

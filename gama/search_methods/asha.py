@@ -149,7 +149,7 @@ def asha(
     future_obj = []
 
     try:
-        with Client() as client:
+        with Client(threads_per_worker=4, n_workers=4) as client:
 
             log.info("ASHA start")
 
@@ -168,18 +168,20 @@ def asha(
                 future_ = start_new_job()
                 future_obj.append(future_)
             print(future_obj)
-            for futures, result in as_completed(future_obj, with_results=True):
+            seq = as_completed(future_obj, with_results=True)
+            for futures, result in seq:
                 future = futures
-                print(future.result())
                 if (max_full_evaluations is None) or (
                         len(rung_individuals[max_rung]) < max_full_evaluations):
                     if future.result() is not None:
                         rung = future.result().individual.meta["rung"]
+                        print(rung)
+
                         loss = future.result().score[0]
                         individual = future.result().individual
                         rung_individuals[rung].append((loss, individual))
-                    start_new_job()
-
+                    future_new = start_new_job()
+                    seq.add(future_new)
                 else:
                     break
 
@@ -194,7 +196,7 @@ def asha(
     finally:
         for rung, individuals in rung_individuals.items():
             log.info(f"[{len(individuals)}] {rung}")
-        print(rung_individuals[highest_rung_reached])
+        print(rung_individuals)
         print(list(map(lambda p: p[1], rung_individuals[highest_rung_reached])))
         return list(map(lambda p: p[1], rung_individuals[highest_rung_reached]))
 
