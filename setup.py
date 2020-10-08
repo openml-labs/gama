@@ -16,7 +16,7 @@ base = [
     "category-encoders>=1.2.8",
     "black==19.10b0",
     "psutil",
-    "dask distributed"
+    "distributed"
 ]
 
 vis = [
