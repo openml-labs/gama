@@ -430,7 +430,7 @@ The hyperparameter values with which your search or postprocessing will be calle
 This class should not be directly used to configure GAMA.</p>
 <dl class="py method">
 <dt>
-<code class="sig-name descname">dynamic_defaults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">y</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>pandas.core.frame.DataFrame<span class="p">, </span>pandas.core.series.Series<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">time_limit</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)">None</a><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.dynamic_defaults"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">dynamic_defaults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">y</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>pandas.core.frame.DataFrame<span class="p">, </span>pandas.core.series.Series<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">time_limit</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.dynamic_defaults"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Set hyperparameter defaults based on the dataset and time-constraints.</p>
 <p>Should be called before <code class="code docutils literal notranslate"><span class="pre">search</span></code>.</p>
 <dl class="field-list simple">
@@ -438,7 +438,7 @@ This class should not be directly used to configure GAMA.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>pandas.DataFrame</em>) – Features of the data.</p></li>
 <li><p><strong>y</strong> (<em>pandas.DataFrame</em><em> or </em><em>pandas.Series</em>) – Labels of the data.</p></li>
-<li><p><strong>time_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Time in seconds available for search and selecting dynamic defaults.
+<li><p><strong>time_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Time in seconds available for search and selecting dynamic defaults.
 There is no need to adhere to this explicitly,
 a <code class="code docutils literal notranslate"><span class="pre">stopit.utils.TimeoutException</span></code> will be raised.
 The time-limit might be an important factor in setting hyperparameter values</p></li>
@@ -517,12 +517,12 @@ This allows GAMA to control when to shut down search (and continue with post pro
 an implementation of dynamic defaults (optional), and a <code class="code docutils literal notranslate"><span class="pre">post_process</span></code> function.</p>
 <dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">gama.postprocessing.</code><code class="sig-name descname">BasePostProcessing</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_fraction</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.postprocessing.</code><code class="sig-name descname">BasePostProcessing</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_fraction</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>All post-processing methods should be derived from this class.
 This class should not be directly used to configure GAMA.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Fraction of total time that to be reserved for this post-processing step.</p>
+<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Fraction of total time that to be reserved for this post-processing step.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -535,13 +535,13 @@ Dynamic default values only considered if <code class="code docutils literal not
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">post_process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">y</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>pandas.core.frame.DataFrame<span class="p">, </span>pandas.core.series.Series<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">timeout</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em>, <em class="sig-param"><span class="n">selection</span><span class="p">:</span> <span class="n">List<span class="p">[</span>gama.genetic_programming.components.individual.Individual<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing.post_process"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">post_process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">y</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>pandas.core.frame.DataFrame<span class="p">, </span>pandas.core.series.Series<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">timeout</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></span></em>, <em class="sig-param"><span class="n">selection</span><span class="p">:</span> <span class="n">List<span class="p">[</span>gama.genetic_programming.components.individual.Individual<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)">object</a><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing.post_process"><span class="viewcode-link">[source]</span></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>pd.DataFrame</em>) – all training features</p></li>
 <li><p><strong>y</strong> (<em>Union</em><em>[</em><em>pd.DataFrame</em><em>, </em><em>pd.Series</em><em>]</em>) – all training labels</p></li>
-<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – allowed time in seconds for post-processing</p></li>
+<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – allowed time in seconds for post-processing</p></li>
 <li><p><strong>selection</strong> (<em>List</em><em>[</em><a class="reference internal" href="../api/index.html#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a><em>]</em>) – individuals selected by the search space, ordered best first</p></li>
 </ul>
 </dd>
@@ -556,7 +556,7 @@ Dynamic default values only considered if <code class="code docutils literal not
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">to_code</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">preprocessing</span><span class="p">:</span> <span class="n">Sequence<span class="p">[</span>Tuple<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>sklearn.base.TransformerMixin<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing.to_code"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">to_code</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">preprocessing</span><span class="p">:</span> <span class="n">Sequence<span class="p">[</span>Tuple<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">, </span>sklearn.base.TransformerMixin<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing.to_code"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Generate Python code to reconstruct a pipeline that constructs the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -567,7 +567,7 @@ Dynamic default values only considered if <code class="code docutils literal not
 defines the final pipeline generated by post-processing.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
