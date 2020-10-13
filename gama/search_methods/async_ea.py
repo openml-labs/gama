@@ -4,6 +4,7 @@ from typing import Optional, Any, Tuple, Dict, List, Callable
 
 import pandas as pd
 
+from dask.distributed import Client, as_completed
 from gama.genetic_programming.components import Individual
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.logging.evaluation_logger import EvaluationLogger
@@ -11,7 +12,6 @@ from gama.search_methods.base_search import BaseSearch
 
 log = logging.getLogger(__name__)
 
-from dask.distributed import Client, as_completed
 
 
 class AsyncEA(BaseSearch):

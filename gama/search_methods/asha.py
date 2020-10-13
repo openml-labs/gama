@@ -9,7 +9,6 @@ import stopit
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.logging.evaluation_logger import EvaluationLogger
 from gama.search_methods.base_search import BaseSearch
-from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.genetic_programming.components.individual import Individual
 from dask.distributed import Client, as_completed
 
