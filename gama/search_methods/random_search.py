@@ -10,7 +10,7 @@ from gama.search_methods.base_search import (
     _check_base_search_hyperparameters,
 )
 
-from dask.distributed import Client, wait, as_completed
+from dask.distributed import Client, as_completed
 
 log = logging.getLogger(__name__)
 
@@ -56,7 +56,6 @@ def random_search(
     for individual in start_candidates:
         future = client.submit(operations.evaluate, individual)
         future_obj.append(future)
-    # while (max_evaluations is None) or (len(output) < max_evaluations):
     seq = as_completed(future_obj, with_results=True)
     for futures, result in seq:
         if(max_evaluations is None) or (len(output) < max_evaluations):
