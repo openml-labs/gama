@@ -12,7 +12,7 @@ from gama.utilities.generic.async_evaluator import AsyncEvaluator
 
 log = logging.getLogger(__name__)
 
-from dask.distributed import Client, wait, as_completed
+from dask.distributed import Client, as_completed
 
 
 class AsyncEA(BaseSearch):
