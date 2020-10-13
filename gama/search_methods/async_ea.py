@@ -8,7 +8,6 @@ from gama.genetic_programming.components import Individual
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.logging.evaluation_logger import EvaluationLogger
 from gama.search_methods.base_search import BaseSearch
-from gama.utilities.generic.async_evaluator import AsyncEvaluator
 
 log = logging.getLogger(__name__)
 
