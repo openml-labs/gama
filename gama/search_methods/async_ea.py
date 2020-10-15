@@ -13,7 +13,6 @@ from gama.search_methods.base_search import BaseSearch
 log = logging.getLogger(__name__)
 
 
-
 class AsyncEA(BaseSearch):
     """ Perform asynchronous evolutionary optimization.
 
@@ -121,7 +120,9 @@ def async_ea(
             future_obj.append(future)
         seq = as_completed(future_obj, with_results=True)
         for futures, result in seq:
-            if (max_n_evaluations is None) or (n_evaluated_individuals < max_n_evaluations):
+            if (max_n_evaluations is None) or (
+                n_evaluated_individuals < max_n_evaluations
+            ):
                 future = futures
                 individual = future.result().individual
                 current_population.append(individual)

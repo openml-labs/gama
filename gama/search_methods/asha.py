@@ -145,6 +145,7 @@ def asha(
             return start_candidates.pop(), minimum_early_stopping_rate
         else:
             return operations.individual(), minimum_early_stopping_rate
+
     future_obj = []
 
     try:
@@ -163,6 +164,7 @@ def asha(
                     timeout=(10 + (time_penalty * 600)),
                 )
                 return future_job
+
             for _ in range(8):
                 future_ = start_new_job()
                 future_obj.append(future_)
@@ -170,7 +172,8 @@ def asha(
             for futures, result in seq:
                 future = futures
                 if (max_full_evaluations is None) or (
-                        len(rung_individuals[max_rung]) < max_full_evaluations):
+                    len(rung_individuals[max_rung]) < max_full_evaluations
+                ):
                     if future.result() is not None:
                         rung = future.result().individual.meta["rung"]
                         loss = future.result().score[0]

@@ -58,7 +58,7 @@ def random_search(
         future_obj.append(future)
     seq = as_completed(future_obj, with_results=True)
     for futures, result in seq:
-        if(max_evaluations is None) or (len(output) < max_evaluations):
+        if (max_evaluations is None) or (len(output) < max_evaluations):
             future = futures
             if future is not None:
                 output.append(future.result().individual)
@@ -67,4 +67,3 @@ def random_search(
             break
 
     return output
-
