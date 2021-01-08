@@ -31,6 +31,7 @@ from sklearn.pipeline import Pipeline
 
 import gama.genetic_programming.compilers.scikitlearn
 from gama.genetic_programming.components import Individual, Fitness
+from gama.search_methods import RandomSearch
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
 from gama.utilities.metrics import scoring_to_metric
@@ -568,12 +569,17 @@ class Gama(ABC):
         )
         AsyncEvaluator.defaults = dict(evaluate_pipeline=evaluate_pipeline)
 
-        self._operator_set.evaluate = partial(
-            gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
-            # evaluate_pipeline=evaluate_pipeline,
+        evaluate_kwargs: Dict[str, Any] = dict(
             timeout=self._max_eval_time,
             deadline=deadline,
             add_length_to_score=self._regularize_length,
+        )
+        if isinstance(self._search_method, RandomSearch):
+            evaluate_kwargs["evaluate_pipeline"] = evaluate_pipeline
+
+        self._operator_set.evaluate = partial(
+            gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
+            **evaluate_kwargs,
         )
 
         try:

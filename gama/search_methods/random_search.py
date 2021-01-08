@@ -1,7 +1,9 @@
 import logging
 from typing import List, Optional
 
+from dask.distributed import Client, as_completed
 import pandas as pd
+import stopit
 
 from gama.genetic_programming.components import Individual
 from gama.genetic_programming.operator_set import OperatorSet
@@ -9,7 +11,6 @@ from gama.search_methods.base_search import (
     BaseSearch,
     _check_base_search_hyperparameters,
 )
-from gama.utilities.generic.async_evaluator import AsyncEvaluator
 
 log = logging.getLogger(__name__)
 
@@ -51,14 +52,21 @@ def random_search(
     """
     _check_base_search_hyperparameters(operations, output, start_candidates)
 
-    with AsyncEvaluator() as async_:
-        for individual in start_candidates:
-            async_.submit(operations.evaluate, individual)
-
-        while (max_evaluations is None) or (len(output) < max_evaluations):
-            future = operations.wait_next(async_)
-            if future.result is not None:
-                output.append(future.result.individual)
-            async_.submit(operations.evaluate, operations.individual())
+    with Client() as client:
+        try:
+            futures = client.map(operations.evaluate, start_candidates)
+            ac = as_completed(futures, with_results=True)
+            for future, result in ac:
+                if result.error is None:
+                    output.append(result.individual)
+                new_future = client.submit(operations.evaluate, operations.individual())
+                ac.add(new_future)
+                if (max_evaluations is not None) and (len(output) >= max_evaluations):
+                    log.info("Stopping due to maximum number of evaluations performed.")
+                    break
+        except stopit.TimeoutException:
+            pass
+        finally:
+            ac.clear()
 
     return output
