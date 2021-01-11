@@ -42,7 +42,7 @@ The following script writes any log messages of `logging.DEBUG` or up to both fi
     gama_log.addHandler(fh_log)
 
     # The verbosity hyperparameter sets up an StreamHandler to `stdout`.
-    automl = GamaClassifier(max_total_time=180, verbosity=logging.DEBUG, keep_analysis_log=None)
+    automl = GamaClassifier(max_total_time=180, verbosity=logging.DEBUG, store="nothing")
 
 Running the above script will create the 'logfile.txt' file with all log messages that could also be seen in the console.
 An overview the log levels:
