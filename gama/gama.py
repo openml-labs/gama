@@ -479,8 +479,13 @@ class Gama(ABC):
         ):
             x, self._y = format_x_y(x, y)
             self._inferred_dtypes = x.dtypes
-            self._x, self._basic_encoding_pipeline = basic_encoding(x)
-            self._fixed_pipeline_extension = basic_pipeline_extension(self._x)
+            is_classification = hasattr(self, "_label_encoder")
+            self._x, self._basic_encoding_pipeline = basic_encoding(
+                x, is_classification
+            )
+            self._fixed_pipeline_extension = basic_pipeline_extension(
+                self._x, is_classification
+            )
             self._operator_set._safe_compile = partial(
                 compile_individual, preprocessing_steps=self._fixed_pipeline_extension
             )
