@@ -1,2 +1,2 @@
 # format: YY.minor.micro
-__version__ = "20.2.2"
+__version__ = "21.1.0"
