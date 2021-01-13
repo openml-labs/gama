@@ -20,11 +20,10 @@ class Activity(NamedTuple):
         """
         return self.time_limit - self.stopwatch.elapsed_time
 
-    @property
-    def exceeded_limit(self) -> float:
-        """ True iff a limit was specified and it is exceeded. """
+    def exceeded_limit(self, margin: float = 0.0) -> float:
+        """ True iff a limit was specified and it is exceeded by `margin` seconds. """
         if self.time_limit is not None:
-            return self.time_limit - self.stopwatch.elapsed_time < 0
+            return self.time_limit - self.stopwatch.elapsed_time < -margin
         return False
 
 

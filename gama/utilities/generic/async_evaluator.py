@@ -104,9 +104,9 @@ class AsyncEvaluator:
         self._mem_behaved = 0
         self._logfile = logfile
 
-        self._queue_manager = multiprocessing.Manager()
-        self._input = self._queue_manager.Queue()
-        self._output = self._queue_manager.Queue()
+        self._input: multiprocessing.Queue = multiprocessing.Queue()
+        self._output: multiprocessing.Queue = multiprocessing.Queue()
+        self._command: multiprocessing.Queue = multiprocessing.Queue()
         pid = os.getpid()
         self._main_process = psutil.Process(pid)
 
@@ -117,31 +117,21 @@ class AsyncEvaluator:
             )
         self._has_entered = True
 
-        self._input = self._queue_manager.Queue()
-        self._output = self._queue_manager.Queue()
+        self._input = multiprocessing.Queue()
+        self._output = multiprocessing.Queue()
 
         log.debug(
             f"Process {self._main_process.pid} starting {self._n_jobs} subprocesses."
         )
         for _ in range(self._n_jobs):
             self._start_worker_process()
-            # if resource and AsyncEvaluator.memory_limit_mb:
-            #     limit = AsyncEvaluator.memory_limit_mb * (2 ** 20)
-            #     resource.prlimit(subprocess.pid, resource.RLIMIT_AS, (limit, limit))
-
         self._log_memory_usage()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        log.debug(f"Terminating {len(self._processes)} subprocesses.")
-        # This is ugly as the subprocesses use shared queues.
-        # It is in direct conflict with guidelines:
-        # https://docs.python.org/3/library/multiprocessing.html#all-start-methods
-        for subprocess in self._processes:
-            try:
-                subprocess.terminate()
-            except psutil.NoSuchProcess:
-                log.debug(f"Daemon {subprocess.pid} stopped prematurely.")
+        log.debug(f"Signaling {len(self._processes)} subprocesses to stop.")
+        for _ in self._processes:
+            self._command.put("stop")
         return False
 
     def submit(self, fn: Callable, *args, **kwargs) -> AsyncFuture:
@@ -190,30 +180,29 @@ class AsyncEvaluator:
             raise RuntimeError("No Futures queued, must call `submit` first.")
 
         while True:
+            self._control_memory_usage()
+            self._log_memory_usage()
+
             try:
-                self._control_memory_usage()
-                self._log_memory_usage()
                 completed_future = self._output.get(block=False)
-                match = self.futures.pop(completed_future.id)
-                match.result, match.exception, match.traceback = (
-                    completed_future.result,
-                    completed_future.exception,
-                    completed_future.traceback,
-                )
-                self._mem_behaved += 1
-                return match
             except queue.Empty:
                 time.sleep(poll_time)
                 continue
-            except multiprocessing.managers.RemoteError as e:
-                log.warning(f"Encountered RemoteError: {str(e)}", exc_info=True)
-                time.sleep(poll_time)
+
+            match = self.futures.pop(completed_future.id)
+            match.result, match.exception, match.traceback = (
+                completed_future.result,
+                completed_future.exception,
+                completed_future.traceback,
+            )
+            self._mem_behaved += 1
+            return match
 
     def _start_worker_process(self) -> psutil.Process:
         """ Start a new worker node and add it to the process pool. """
         mp_process = multiprocessing.Process(
             target=evaluator_daemon,
-            args=(self._input, self._output, AsyncEvaluator.defaults),
+            args=(self._input, self._output, self._command, AsyncEvaluator.defaults),
             daemon=True,
         )
         mp_process.start()
@@ -299,6 +288,7 @@ class AsyncEvaluator:
 def evaluator_daemon(
     input_queue: queue.Queue,
     output_queue: queue.Queue,
+    command_queue: queue.Queue,
     default_parameters: Optional[Dict] = None,
 ):
     """ Function for daemon subprocess that evaluates functions from AsyncFutures.
@@ -311,6 +301,9 @@ def evaluator_daemon(
     output_queue: queue.Queue[AsyncFuture]
         Queue to put AsyncFuture to.
         Queue should be managed by multiprocessing.manager.
+    command_queue: queue.Queue[Str]
+        Queue to put commands for the subprocess.
+        Queue should be managed by multiprocessing.manager.
     default_parameters: Dict, optional (default=None)
         Additional parameters to pass to AsyncFuture.Execute.
         This is useful to avoid passing lots of repetitive data through AsyncFuture.
@@ -318,7 +311,13 @@ def evaluator_daemon(
     try:
         while True:
             try:
-                future = input_queue.get()
+                command_queue.get(block=False)
+                break
+            except queue.Empty:
+                pass
+
+            try:
+                future = input_queue.get(block=False)
                 future.execute(default_parameters)
                 if future.result:
                     if isinstance(future.result, tuple):
@@ -335,9 +334,9 @@ def evaluator_daemon(
                 future.exception = str(type(e))
                 gc.collect()
                 output_queue.put(future)
+            except queue.Empty:
+                pass
     except Exception as e:
         # There are no plans currently for recovering from any exception:
         print(f"Stopping daemon:{type(e)}:{str(e)}")
         traceback.print_exc()
-    # Not sure if required: give main process time to process log message.
-    time.sleep(5)

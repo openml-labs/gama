@@ -473,6 +473,7 @@ class Gama(ABC):
             A list of individual to start the search  procedure with.
             If None is given, random start candidates are generated.
         """
+        self._time_manager = TimeKeeper(self._time_manager.total_time)
 
         with self._time_manager.start_activity(
             "preprocessing", activity_meta=["default"]
@@ -560,6 +561,8 @@ class Gama(ABC):
             if not all([isinstance(i, Individual) for i in warm_start]):
                 raise TypeError("`warm_start` must be a list of Individual.")
             pop = warm_start
+        elif warm_start is None and len(self._final_pop) > 0:
+            pop = self._final_pop
         else:
             pop = [self._operator_set.individual() for _ in range(50)]
 
@@ -655,8 +658,13 @@ class Gama(ABC):
             # Note KeyboardInterrupts are not exceptions and get elevated to the caller.
             log.warning("Exception during callback.", exc_info=True)
 
-        if self._time_manager.current_activity.exceeded_limit:
-            log.info("Time exceeded during callback, but exception was swallowed.")
+        if self._time_manager.current_activity.exceeded_limit(margin=3.0):
+            # If time exceeds during a safe callback, the timeout exception *might*
+            # have been swallowed. This can result in GAMA running indefinitely.
+            # However in rare conditions it can be that the TimeoutException is still
+            # being processed, which means we should not raise a new one yet.
+            # That's why we raise the exception only if sufficient time has passed
+            # since it should have been handled (3 seconds).
             raise stopit.utils.TimeoutException
 
     def _on_evaluation_completed(self, evaluation: Evaluation):
