@@ -63,7 +63,10 @@ from gama.postprocessing import (
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.utilities.metrics import Metric
 
+# Avoid stopit from logging warnings every time a pipeline evaluation times out
+logging.getLogger("stopit").setLevel(logging.ERROR)
 log = logging.getLogger(__name__)
+
 
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
