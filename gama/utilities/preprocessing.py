@@ -42,34 +42,44 @@ def select_categorical_columns(
                 yield column
 
 
-def basic_encoding(x: pd.DataFrame):
+def basic_encoding(x: pd.DataFrame, is_classification: bool):
     """ Perform 'basic' encoding of categorical features.
 
      Specifically, perform:
       - Ordinal encoding for features with 2 or fewer unique values.
       - One hot encoding for features with at most 10 unique values.
+      - Ordinal encoding for features with 11+ unique values, if y is categorical.
      """
-    binary_features = list(select_categorical_columns(x, max_f=2))
+    ord_features = list(select_categorical_columns(x, max_f=2))
+    if is_classification:
+        ord_features.extend(select_categorical_columns(x, min_f=11))
     leq_10_features = list(select_categorical_columns(x, min_f=3, max_f=10))
 
-    encoding_pipeline = Pipeline(
-        steps=[
-            ("ord-enc", ce.OrdinalEncoder(cols=binary_features, drop_invariant=True)),
-            ("oh-enc", ce.OneHotEncoder(cols=leq_10_features, handle_missing="ignore")),
-        ]
-    )
-    x_enc = encoding_pipeline.fit_transform(x, y=None)  # Is this allowed?
+    encoding_steps = [
+        ("ord-enc", ce.OrdinalEncoder(cols=ord_features, drop_invariant=True)),
+        ("oh-enc", ce.OneHotEncoder(cols=leq_10_features, handle_missing="ignore")),
+    ]
+    encoding_pipeline = Pipeline(encoding_steps)
+    x_enc = encoding_pipeline.fit_transform(x, y=None)  # Is this dangerous?
     return x_enc, encoding_pipeline
 
 
-def basic_pipeline_extension(x: pd.DataFrame) -> List[Tuple[str, TransformerMixin]]:
+def basic_pipeline_extension(
+    x: pd.DataFrame, is_classification: bool
+) -> List[Tuple[str, TransformerMixin]]:
     """ Define a TargetEncoder and SimpleImputer.
 
-    TargetEncoding is will encode categorical features with more than 10 unique values.
-    SimpleImputer imputes with the median.
+    TargetEncoding is will encode categorical features with more than 10 unique values,
+    if y is not categorical. SimpleImputer imputes with the median.
     """
-    many_factor_features = list(select_categorical_columns(x, min_f=11))
-    return [
-        ("target_enc", ce.TargetEncoder(cols=many_factor_features)),
-        ("imputation", SimpleImputer(strategy="median")),
-    ]
+    # These steps need to be in the pipeline because they need to be trained each fold.
+    extension_steps = []
+    if not is_classification:
+        # TargetEncoder is broken with categorical target
+        many_factor_features = list(select_categorical_columns(x, min_f=11))
+        extension_steps.append(
+            ("target_enc", ce.TargetEncoder(cols=many_factor_features))
+        )
+    extension_steps.append(("imputation", SimpleImputer(strategy="median")))
+
+    return extension_steps

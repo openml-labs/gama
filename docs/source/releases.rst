@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 21.1.0
+--------------
+
+Features:
+ - The ``warm_start`` parameter of ``fit()`` had a slight behavior change (see docs).
+ - Fit can now be called more than once. It will use the same time constraint as the first fit call.
+
+Bugfixes:
+ - TargetEncoder is no longer used for Classification tasks, since there is a `bug <https://github.com/scikit-learn-contrib/category_encoders/issues/182>`_ that prevents it from working as intended.
+
+
 Version 20.2.2
 --------------
 

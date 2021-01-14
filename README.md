@@ -45,7 +45,7 @@ if __name__ == '__main__':
     X, y = load_breast_cancer(return_X_y=True)
     X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
 
-    automl = GamaClassifier(max_total_time=180, keep_analysis_log=None)
+    automl = GamaClassifier(max_total_time=180, store="nothing")
     print("Starting `fit` which will take roughly 3 minutes.")
     automl.fit(X_train, y_train)
 
