@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>API &mdash; gama 20.2.2 documentation</title>
+  <title>API &mdash; gama 21.0.0 documentation</title>
   
 
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -29,7 +32,6 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -51,7 +53,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> gama
+            <a href="../index.html" class="icon icon-home"> gama
           
 
           
@@ -61,7 +63,7 @@
             
             
               <div class="version">
-                20.2.2
+                21.0.0
               </div>
             
           
@@ -180,6 +182,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -191,7 +195,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../_sources/api/index.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -478,7 +482,7 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 <h4>PrimitiveNode<a class="headerlink" href="#primitivenode" title="Permalink to this headline">¶</a></h4>
 <dl class="py class">
 <dt id="gama.genetic_programming.components.PrimitiveNode">
-<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">PrimitiveNode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">primitive</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.primitive.Primitive</span></em>, <em class="sig-param"><span class="n">data_node</span><span class="p">:</span> <span class="n">Union<span class="p">[</span><a class="reference internal" href="#gama.genetic_programming.components.PrimitiveNode" title="gama.genetic_programming.components.PrimitiveNode">PrimitiveNode</a><span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">terminals</span><span class="p">:</span> <span class="n">List<span class="p">[</span>gama.genetic_programming.components.terminal.Terminal<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive_node.html#PrimitiveNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.PrimitiveNode" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.genetic_programming.components.</code><code class="sig-name descname">PrimitiveNode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">primitive</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.primitive.Primitive</span></em>, <em class="sig-param"><span class="n">data_node</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>gama.genetic_programming.components.primitive_node.PrimitiveNode<span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">terminals</span><span class="p">:</span> <span class="n">List<span class="p">[</span>gama.genetic_programming.components.terminal.Terminal<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive_node.html#PrimitiveNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.components.PrimitiveNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>An instantiation for a Primitive with specific Terminals.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -553,7 +557,7 @@ Each mutation function takes an individual and modifies it in-place.</p>
 
 <dl class="py function">
 <dt id="gama.genetic_programming.mutation.mut_shrink">
-<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">mut_shrink</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">individual</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.individual.Individual</span></em>, <em class="sig-param"><span class="n">primitive_set</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">shrink_by</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_shrink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_shrink" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">gama.genetic_programming.mutation.</code><code class="sig-name descname">mut_shrink</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">individual</span><span class="p">:</span> <span class="n">gama.genetic_programming.components.individual.Individual</span></em>, <em class="sig-param"><span class="n">primitive_set</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">shrink_by</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_shrink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_shrink" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mutates an Individual in-place by removing any number of primitive nodes.</p>
 <p>Primitive nodes are removed from the preprocessing end.</p>
 <dl class="field-list simple">
@@ -722,7 +726,7 @@ jobs while they were running.</p>
 </div>
 <dl class="py class">
 <dt id="gama.utilities.generic.async_evaluator.AsyncEvaluator">
-<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.async_evaluator.</code><code class="sig-name descname">AsyncEvaluator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n_workers</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">memory_limit_mb</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logfile</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/async_evaluator.html#AsyncEvaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.async_evaluator.AsyncEvaluator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">gama.utilities.generic.async_evaluator.</code><code class="sig-name descname">AsyncEvaluator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n_workers</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">memory_limit_mb</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logfile</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">wait_time_before_forced_shutdown</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span> <span class="o">=</span> <span class="default_value">10</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/async_evaluator.html#AsyncEvaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gama.utilities.generic.async_evaluator.AsyncEvaluator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Manages subprocesses on which arbitrary functions can be evaluated.</p>
 <p>The function and all its arguments must be picklable.
 Using the same AsyncEvaluator in two different contexts raises a <code class="code docutils literal notranslate"><span class="pre">RuntimeError</span></code>.</p>
@@ -742,6 +746,8 @@ Defaults to <code class="code docutils literal notranslate"><span class="pre">As
 may use in total. If None, no limit is enforced.
 There is no guarantee the limit is not violated.</p></li>
 <li><p><strong>logfile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – If set, recorded resource usage will be written to this file.</p></li>
+<li><p><strong>wait_time_before_forced_shutdown</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> (</em><em>default=10</em><em>)</em>) – Number of seconds to wait between asking the worker processes to shut down
+and terminating them forcefully if they failed to do so.</p></li>
 </ul>
 </dd>
 </dl>
@@ -757,37 +763,29 @@ There is no guarantee the limit is not violated.</p></li>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="../benchmark.html" class="btn btn-neutral float-right" title="Benchmark Results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="../advanced_guide/index.html" class="btn btn-neutral float-left" title="Advanced Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="../benchmark.html" class="btn btn-neutral float-right" title="Benchmark Results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../advanced_guide/index.html" class="btn btn-neutral float-left" title="Advanced Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2018-2020, Pieter Gijsbers
+        &#169; Copyright 2018-2021, Pieter Gijsbers.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
