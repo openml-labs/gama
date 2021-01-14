@@ -81,6 +81,7 @@ class AsyncEvaluator:
         n_workers: Optional[int] = None,
         memory_limit_mb: Optional[int] = None,
         logfile: Optional[str] = None,
+        wait_time_before_forced_shutdown: int = 10,
     ):
         """
         Parameters
@@ -94,6 +95,9 @@ class AsyncEvaluator:
             There is no guarantee the limit is not violated.
         logfile : str, optional (default=None)
             If set, recorded resource usage will be written to this file.
+        wait_time_before_forced_shutdown : int (default=10)
+            Number of seconds to wait between asking the worker processes to shut down
+            and terminating them forcefully if they failed to do so.
         """
         self._has_entered = False
         self.futures: Dict[uuid.UUID, AsyncFuture] = {}
@@ -103,6 +107,7 @@ class AsyncEvaluator:
         self._mem_violations = 0
         self._mem_behaved = 0
         self._logfile = logfile
+        self._wait_time_before_forced_shutdown = wait_time_before_forced_shutdown
 
         self._input: multiprocessing.Queue = multiprocessing.Queue()
         self._output: multiprocessing.Queue = multiprocessing.Queue()
@@ -130,8 +135,22 @@ class AsyncEvaluator:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         log.debug(f"Signaling {len(self._processes)} subprocesses to stop.")
+
         for _ in self._processes:
             self._command.put("stop")
+
+        for i in range(self._wait_time_before_forced_shutdown + 1):
+            if self._command.empty():
+                break
+            time.sleep(1)
+        else:
+            # A non-empty command queue indicates a process(es) was unable to shut down.
+            # All processes need to be terminated to free resources.
+            for process in self._processes:
+                try:
+                    process.terminate()
+                except psutil.NoSuchProcess:
+                    pass
         return False
 
     def submit(self, fn: Callable, *args, **kwargs) -> AsyncFuture:
