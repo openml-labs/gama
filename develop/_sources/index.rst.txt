@@ -1,4 +1,4 @@
-GAMA - Genetic Automated Machine learning Assistant
+GAMA - General Automated Machine learning Assistant
 ===================================================
 
 GAMA is a tool for Automated Machine Learning (AutoML).
