@@ -63,7 +63,10 @@ from gama.postprocessing import (
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.utilities.metrics import Metric
 
+# Avoid stopit from logging warnings every time a pipeline evaluation times out
+logging.getLogger("stopit").setLevel(logging.ERROR)
 log = logging.getLogger(__name__)
+
 
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
@@ -473,14 +476,20 @@ class Gama(ABC):
             A list of individual to start the search  procedure with.
             If None is given, random start candidates are generated.
         """
+        self._time_manager = TimeKeeper(self._time_manager.total_time)
 
         with self._time_manager.start_activity(
             "preprocessing", activity_meta=["default"]
         ):
             x, self._y = format_x_y(x, y)
             self._inferred_dtypes = x.dtypes
-            self._x, self._basic_encoding_pipeline = basic_encoding(x)
-            self._fixed_pipeline_extension = basic_pipeline_extension(self._x)
+            is_classification = hasattr(self, "_label_encoder")
+            self._x, self._basic_encoding_pipeline = basic_encoding(
+                x, is_classification
+            )
+            self._fixed_pipeline_extension = basic_pipeline_extension(
+                self._x, is_classification
+            )
             self._operator_set._safe_compile = partial(
                 compile_individual, preprocessing_steps=self._fixed_pipeline_extension
             )
@@ -555,6 +564,8 @@ class Gama(ABC):
             if not all([isinstance(i, Individual) for i in warm_start]):
                 raise TypeError("`warm_start` must be a list of Individual.")
             pop = warm_start
+        elif warm_start is None and len(self._final_pop) > 0:
+            pop = self._final_pop
         else:
             pop = [self._operator_set.individual() for _ in range(50)]
 
@@ -650,8 +661,13 @@ class Gama(ABC):
             # Note KeyboardInterrupts are not exceptions and get elevated to the caller.
             log.warning("Exception during callback.", exc_info=True)
 
-        if self._time_manager.current_activity.exceeded_limit:
-            log.info("Time exceeded during callback, but exception was swallowed.")
+        if self._time_manager.current_activity.exceeded_limit(margin=3.0):
+            # If time exceeds during a safe callback, the timeout exception *might*
+            # have been swallowed. This can result in GAMA running indefinitely.
+            # However in rare conditions it can be that the TimeoutException is still
+            # being processed, which means we should not raise a new one yet.
+            # That's why we raise the exception only if sufficient time has passed
+            # since it should have been handled (3 seconds).
             raise stopit.utils.TimeoutException
 
     def _on_evaluation_completed(self, evaluation: Evaluation):

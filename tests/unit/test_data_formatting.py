@@ -28,7 +28,7 @@ class TestFormatY:
         y_in = pd.Series([0, 0, 1, 1])
         y_out = format_y(y_in, y_type=pd.Series)
         assert isinstance(y_out, pd.Series)
-        assert y_out.dtype == "category"
+        assert pd.api.types.is_integer_dtype(y_out)
 
     def test_format_y_to_series_reals(self):
         y_in = pd.Series([0, 0, 0.5, 1, 1])

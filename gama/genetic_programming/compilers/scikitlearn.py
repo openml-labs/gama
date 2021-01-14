@@ -64,6 +64,8 @@ def evaluate_pipeline(
     """
     if not object_is_valid_pipeline(pipeline):
         raise TypeError(f"Pipeline must not be None and requires fit, predict, steps.")
+    if not timeout > 0:
+        raise ValueError(f"`timeout` must be greater than 0, is {timeout}.")
 
     prediction, estimators = None, None
     # default score for e.g. timeout or failure
