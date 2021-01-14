@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 21.1.0
+Version 21.0.0
 --------------
 
 Features:
