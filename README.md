@@ -1,5 +1,5 @@
 # GAMA
-**G**enetic **A**utomated **M**achine learning **A**ssistant  
+**G**eneral **A**utomated **M**achine learning **A**ssistant  
 An automated machine learning tool based on genetic programming.  
 Make sure to check out the [documentation](https://pgijsbers.github.io/gama/).
 
