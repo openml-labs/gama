@@ -54,8 +54,6 @@ def format_y(
             y = y.squeeze()
         elif isinstance(y, np.ndarray):
             y = pd.Series(y)
-        if series_looks_categorical(y):
-            y = y.astype("category")
     elif y_type == pd.DataFrame:
         if not isinstance(y, pd.DataFrame):
             y = pd.DataFrame(y)
