@@ -51,7 +51,7 @@ def random_search(
         All evaluated individuals.
     """
     _check_base_search_hyperparameters(operations, output, start_candidates)
-    client = Client()
+    client = Client(silence_logs=logging.ERROR)
     future_obj = []
     for individual in start_candidates:
         future = client.submit(operations.evaluate, individual)
