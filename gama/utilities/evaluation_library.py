@@ -247,7 +247,6 @@ class EvaluationLibrary:
                 removed.remove_from_disk()
 
             self.other_evaluations.append(removed)
-
         self.lookup[self._lookup_key(evaluation)] = evaluation
 
     def clear_cache(self):

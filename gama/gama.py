@@ -31,7 +31,8 @@ from sklearn.pipeline import Pipeline
 
 import gama.genetic_programming.compilers.scikitlearn
 from gama.genetic_programming.components import Individual, Fitness
-from gama.search_methods import RandomSearch
+
+# from gama.search_methods import RandomSearch
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
 from gama.utilities.metrics import scoring_to_metric
@@ -526,7 +527,7 @@ class Gama(ABC):
 
         with self._time_manager.start_activity(
             "postprocess",
-            time_limit=int(self._time_manager.total_time_remaining),
+            time_limit=int(self._time_manager.total_time_remaining) + 500,
             activity_meta=[self._post_processing.__class__.__name__],
         ):
             best_individuals = list(
@@ -569,19 +570,13 @@ class Gama(ABC):
         )
         AsyncEvaluator.defaults = dict(evaluate_pipeline=evaluate_pipeline)
 
-        evaluate_kwargs: Dict[str, Any] = dict(
+        self._operator_set._evaluate = partial(
+            gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
+            evaluate_pipeline=evaluate_pipeline,
             timeout=self._max_eval_time,
             deadline=deadline,
             add_length_to_score=self._regularize_length,
         )
-        if isinstance(self._search_method, RandomSearch):
-            evaluate_kwargs["evaluate_pipeline"] = evaluate_pipeline
-
-        self._operator_set.evaluate = partial(
-            gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
-            **evaluate_kwargs,
-        )
-
         try:
             with stopit.ThreadingTimeout(timeout):
                 self._search_method.dynamic_defaults(self._x, self._y, timeout)
@@ -661,6 +656,7 @@ class Gama(ABC):
             raise stopit.utils.TimeoutException
 
     def _on_evaluation_completed(self, evaluation: Evaluation):
+        print("Calling from ", self, "to", self._subscribers["evaluation_completed"])
         for callback in self._subscribers["evaluation_completed"]:
             self._safe_outside_call(partial(callback, evaluation))
 

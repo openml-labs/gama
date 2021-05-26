@@ -38,9 +38,14 @@ class OperatorSet:
         self._max_retry = max_retry
         self._evaluate = None
         self._evaluate_callback = evaluate_callback
-        self.evaluate = None
 
         self._completed_evaluations = completed_evaluations
+
+    def evaluate(self, *args, **kwargs):
+        evaluation = self._evaluate(*args, **kwargs)
+        if evaluation is not None and self._evaluate_callback is not None:
+            self._evaluate_callback(evaluation)
+        return evaluation
 
     def wait_next(self, async_evaluator):
         future = async_evaluator.wait_next()

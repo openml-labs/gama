@@ -173,10 +173,10 @@ def evaluate_individual(
                 individual.pipeline, timeout=timeout, **kwargs
             )
             result._predictions, result.score, result._estimators, error = evaluation
+            if error is not None:
+                result.error = f"{type(error)} {str(error)}"
         else:
-            error = RuntimeError("Insufficient time to start evaluation.")
-        if error is not None:
-            result.error = f"{type(error)} {str(error)}"
+            result.error = f"Too little time left to evaluate a pipeline."
     result.duration = wall_time.elapsed_time
 
     if add_length_to_score:

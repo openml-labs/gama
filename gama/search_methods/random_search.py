@@ -3,7 +3,8 @@ from typing import List, Optional
 
 from dask.distributed import Client, as_completed
 import pandas as pd
-import stopit
+
+# import stopit
 
 from gama.genetic_programming.components import Individual
 from gama.genetic_programming.operator_set import OperatorSet
@@ -51,22 +52,19 @@ def random_search(
         All evaluated individuals.
     """
     _check_base_search_hyperparameters(operations, output, start_candidates)
-
-    with Client() as client:
-        try:
-            futures = client.map(operations.evaluate, start_candidates)
-            ac = as_completed(futures, with_results=True)
-            for future, result in ac:
-                if result.error is None:
-                    output.append(result.individual)
-                new_future = client.submit(operations.evaluate, operations.individual())
-                ac.add(new_future)
-                if (max_evaluations is not None) and (len(output) >= max_evaluations):
-                    log.info("Stopping due to maximum number of evaluations performed.")
-                    break
-        except stopit.TimeoutException:
-            pass
-        finally:
-            ac.clear()
+    client = Client(silence_logs=logging.ERROR)
+    future_obj = []
+    for individual in start_candidates:
+        future = client.submit(operations.evaluate, individual)
+        future_obj.append(future)
+    seq = as_completed(future_obj, with_results=True)
+    for futures, result in seq:
+        if (max_evaluations is None) or (len(output) < max_evaluations):
+            future = futures
+            if future is not None:
+                output.append(result.individual)
+            seq.add(client.submit(operations.evaluate, operations.individual()))
+        else:
+            break
 
     return output
