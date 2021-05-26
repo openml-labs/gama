@@ -168,8 +168,13 @@ def evaluate_individual(
         timeout = min(timeout, time_to_deadline)
 
     with Stopwatch() as wall_time, Stopwatch(time.process_time) as process_time:
-        evaluation = evaluate_pipeline(individual.pipeline, timeout=timeout, **kwargs)
-        result._predictions, result.score, result._estimators, error = evaluation
+        if timeout >= 1:
+            evaluation = evaluate_pipeline(
+                individual.pipeline, timeout=timeout, **kwargs
+            )
+            result._predictions, result.score, result._estimators, error = evaluation
+        else:
+            error = RuntimeError("Insufficient time to start evaluation.")
         if error is not None:
             result.error = f"{type(error)} {str(error)}"
     result.duration = wall_time.elapsed_time
