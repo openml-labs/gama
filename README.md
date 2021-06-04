@@ -23,7 +23,7 @@ Using this log, insight can be obtained on the behaviour of the search procedure
 For example, it can produce a graph that shows pipeline fitness over time:
 ![graph of fitness over time](https://github.com/PGijsbers/gama/blob/master/docs/source/technical_guide/images/viz.gif)
 
-For more examples and information on the visualization, see [the technical guide](https://pgijsbers.github.io/gama/master/user_guide/index.html#dashboard).
+For more examples and information on the visualization, see [the technical guide](https://openml-labs.github.io/gama/master/user_guide/index.html#dashboard).
 
 ## Installing GAMA
 
