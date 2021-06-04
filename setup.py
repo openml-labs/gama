@@ -54,7 +54,7 @@ setup(
     url="https://github.com/PGijsbers/GAMA",
     project_urls={
         "Bug Tracker": "https://github.com/PGijsbers/gama/issues",
-        "Documentation": "https://pgijsbers.github.io/gama/",
+        "Documentation": "https://openml-labs.github.io/gama/",
         "Source Code": "https://github.com/PGijsbers/gama",
     },
     packages=find_packages(exclude=["tests", "tests.*"]),
