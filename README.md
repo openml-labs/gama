@@ -34,9 +34,9 @@ You can install GAMA with pip: `pip install gama`
 
 The following example uses AutoML to find a machine learning pipeline that classifies breast cancer as malign or benign.
 See the documentation for examples in
-[classification](https://pgijsbers.github.io/gama/master/user_guide/index.html#classification),
-[regression](https://pgijsbers.github.io/gama/master/user_guide/index.html#regression),
-using [ARFF as input](https://pgijsbers.github.io/gama/master/user_guide/index.html#using-arff-files).
+[classification](https://openml-labs.github.io/gama/master/user_guide/index.html#classification),
+[regression](https://openml-labs.github.io/gama/master/user_guide/index.html#regression),
+using [ARFF as input](https://openml-labs.github.io/gama/master/user_guide/index.html#using-arff-files).
 
 ```python
 from sklearn.datasets import load_breast_cancer
