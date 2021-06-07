@@ -13,7 +13,7 @@ The results are obtained on non-aws hardware.
 Additionally, GAMA was ran with a one-hour time constraint instead of four hours, other conditions are equal.
 It is important to point out that the constrained runtime might both be bad (less time to search), but also good (less opportunity to overfit).
 The restriction is in place due to our compute budget.
-The raw data is `here <https://github.com/PGijsbers/gama/tree/develop/data/GAMA_20_2_1.csv>`_.
+The raw data is `here <https://github.com/openml-labs/gama/tree/develop/data/GAMA_20_2_1.csv>`_.
 
 .. image:: images/binary_results_stripplot.png
 

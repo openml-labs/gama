@@ -8,8 +8,8 @@ For ARFF files, GAMA can utilize extra information given, such as which features
 For csv files GAMA will infer column types, but this might lead to mistakes.
 In the example below, make sure to replace the file paths to the files to be used.
 The example script can be run by using e.g.
-`breast_cancer_train.arff <https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_train.arff>`_ and
-`breast_cancer_test.arff <https://github.com/PGijsbers/gama/tree/master/gama/tests/data/breast_cancer_test.arff>`_.
+`breast_cancer_train.arff <https://github.com/openml-labs/gama/tree/master/gama/tests/data/breast_cancer_train.arff>`_ and
+`breast_cancer_test.arff <https://github.com/openml-labs/gama/tree/master/gama/tests/data/breast_cancer_test.arff>`_.
 The target should always be specified as the last column, unless the `target_column` is specified.
 Make sure you adjust the file path if not executed from the examples directory.
 
@@ -26,4 +26,4 @@ Note that this is not unique to GAMA, but any framework which accepts numeric in
 
 .. note::
     Unfortunately the ``date`` and ``string`` formats the ARFF file allows is not (fully) supported in GAMA yet,
-    for the latest news, see `issue#2 <https://github.com/PGijsbers/gama/issues/2>`_.
+    for the latest news, see `issue#2 <https://github.com/openml-labs/gama/issues/2>`_.
