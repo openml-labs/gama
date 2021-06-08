@@ -1,4 +1,5 @@
 # GAMA
+
 **G**eneral **A**utomated **M**achine learning **A**ssistant  
 An automated machine learning tool based on genetic programming.  
 Make sure to check out the [documentation](https://pgijsbers.github.io/gama/).
@@ -7,7 +8,7 @@ Make sure to check out the [documentation](https://pgijsbers.github.io/gama/).
 [![codecov](https://codecov.io/gh/PGijsbers/gama/branch/master/graph/badge.svg)](https://codecov.io/gh/PGijsbers/gama)
 [![DOI](http://joss.theoj.org/papers/10.21105/joss.01132/status.svg)](https://doi.org/10.21105/joss.01132)
 
------------------------------------------------------------------------------------------------------------------------
+---
 
 GAMA is an AutoML package for end-users and AutoML researchers.
 It generates optimized machine learning pipelines given specific input data and resource constraints.
@@ -21,20 +22,22 @@ In addition to its general use AutoML functionality, GAMA aims to serve AutoML r
 During the optimization process, GAMA keeps an extensive log of progress made.
 Using this log, insight can be obtained on the behaviour of the search procedure.
 For example, it can produce a graph that shows pipeline fitness over time:
-![graph of fitness over time](https://github.com/PGijsbers/gama/blob/master/docs/source/technical_guide/images/viz.gif)
+![graph of fitness over time](https://github.com/openml-lab/gama/blob/master/docs/source/technical_guide/images/viz.gif)
 
-For more examples and information on the visualization, see [the technical guide](https://pgijsbers.github.io/gama/master/user_guide/index.html#dashboard).
+For more examples and information on the visualization, see [the technical guide](https://openml-labs.github.io/gama/master/user_guide/index.html#dashboard).
 
 ## Installing GAMA
 
 You can install GAMA with pip: `pip install gama`
 
 ## Minimal Example
+
 The following example uses AutoML to find a machine learning pipeline that classifies breast cancer as malign or benign.
-See the documentation for examples in 
-[classification](https://pgijsbers.github.io/gama/master/user_guide/index.html#classification),
-[regression](https://pgijsbers.github.io/gama/master/user_guide/index.html#regression),
-using [ARFF as input](https://pgijsbers.github.io/gama/master/user_guide/index.html#using-arff-files).
+See the documentation for examples in
+[classification](https://openml-labs.github.io/gama/master/user_guide/index.html#classification),
+[regression](https://openml-labs.github.io/gama/master/user_guide/index.html#regression),
+using [ARFF as input](https://openml-labs.github.io/gama/master/user_guide/index.html#using-arff-files).
+
 ```python
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
@@ -57,10 +60,13 @@ if __name__ == '__main__':
     # the `score` function outputs the score on the metric optimized towards (by default, `log_loss`)
     print('log_loss', automl.score(X_test, y_test))
 ```
-*note*: By default, GamaClassifier optimizes towards `log_loss`.
+
+_note_: By default, GamaClassifier optimizes towards `log_loss`.
 
 ## Citing
+
 If you want to cite GAMA, please use [our JOSS publication](http://joss.theoj.org/papers/10.21105/joss.01132).
+
 ```latex
 @article{Gijsbers2019,
   doi = {10.21105/joss.01132},

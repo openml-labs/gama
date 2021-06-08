@@ -11,8 +11,8 @@ It is possible to modify this search space, changing the algorithms or hyperpara
 
 The search space is determined by the `search_space` dictionary passed upon initialization.
 The defaults are found in
-`classification.py <https://github.com/PGijsbers/gama/tree/master/gama/configuration/classification.py>`_ and
-`regression.py <https://github.com/PGijsbers/gama/tree/master/gama/configuration/regression.py>`_
+`classification.py <https://github.com/openml-labs/gama/tree/master/gama/configuration/classification.py>`_ and
+`regression.py <https://github.com/openml-labs/gama/tree/master/gama/configuration/regression.py>`_
 for the GamaClassifier and GamaRegressor, respectively.
 
 A sample of algorithms that GAMA uses by default:

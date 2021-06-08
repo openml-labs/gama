@@ -18,7 +18,7 @@ where `OPTIONAL` is one of:
  - `dev`: sets up all required dependencies for development of GAMA.
  - `all`: all of the above.
 
-To see exactly what dependencies will be installed, see `setup.py <https://github.com/PGijsbers/gama/blob/master/setup.py>`_.
+To see exactly what dependencies will be installed, see `setup.py <https://github.com/openml-labs/gama/blob/master/setup.py>`_.
 If you plan on developing GAMA, cloning the repository and installing locally is advised::
 
     git clone https://github.com/PGijsbers/gama.git
