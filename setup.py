@@ -51,7 +51,7 @@ setup(
     long_description_content_type="text/markdown",
     author="Pieter Gijsbers",
     author_email="p.gijsbers@tue.nl",
-    url="https://github.com/PGijsbers/GAMA",
+    url="https://github.com/openml-labs/GAMA",
     project_urls={
         "Bug Tracker": "https://github.com/openml-labs/gama/issues",
         "Documentation": "https://openml-labs.github.io/gama/",
@@ -59,7 +59,7 @@ setup(
     },
     packages=find_packages(exclude=["tests", "tests.*"]),
     install_requires=base,
-    extras_require={"vis": vis, "dev": dev, "all": all_, },
+    extras_require={"vis": vis, "dev": dev, "all": all_,},
     python_requires=">=3.6.0",
     entry_points={
         "console_scripts": [

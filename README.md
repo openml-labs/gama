@@ -2,10 +2,10 @@
 
 **G**eneral **A**utomated **M**achine learning **A**ssistant  
 An automated machine learning tool based on genetic programming.  
-Make sure to check out the [documentation](https://pgijsbers.github.io/gama/).
+Make sure to check out the [documentation](https://openml-labs.github.io/gama/).
 
-[![Build Status](https://travis-ci.org/PGijsbers/gama.svg?branch=master)](https://travis-ci.org/PGijsbers/gama)
-[![codecov](https://codecov.io/gh/PGijsbers/gama/branch/master/graph/badge.svg)](https://codecov.io/gh/PGijsbers/gama)
+[![Build Status](https://travis-ci.org/openml-labs/gama.svg?branch=master)](https://travis-ci.org/openml-labs/gama)
+[![codecov](https://codecov.io/gh/openml-labs/gama/branch/master/graph/badge.svg)](https://codecov.io/gh/openml-labs/gama)
 [![DOI](http://joss.theoj.org/papers/10.21105/joss.01132/status.svg)](https://doi.org/10.21105/joss.01132)
 
 ---
