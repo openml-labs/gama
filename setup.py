@@ -51,7 +51,7 @@ setup(
     long_description_content_type="text/markdown",
     author="Pieter Gijsbers",
     author_email="p.gijsbers@tue.nl",
-    url="https://github.com/PGijsbers/GAMA",
+    url="https://github.com/openml-labs/GAMA",
     project_urls={
         "Bug Tracker": "https://github.com/openml-labs/gama/issues",
         "Documentation": "https://openml-labs.github.io/gama/",
