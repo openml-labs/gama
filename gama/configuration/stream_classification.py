@@ -1,6 +1,11 @@
 import numpy as np
 
 #classifiers
+from river.tree import HoeffdingAdaptiveTreeClassifier
+from river.ensemble import LeveragingBaggingClassifier
+from river.neighbors import KNNADWINClassifier
+
+#preprocessing
 from river.preprocessing import (
     AdaptiveStandardScaler,
     Binarizer,
@@ -9,11 +14,6 @@ from river.preprocessing import (
     Normalizer,
     RobustScaler,
     StandardScaler)
-
-#preprocessing
-from river.tree import HoeffdingAdaptiveTreeClassifier
-from river.ensemble import LeveragingBaggingClassifier
-from river.neighbors import KNNADWINClassifier
 
 #feature extraction
 from river.feature_extraction import PolynomialExtender

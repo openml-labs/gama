@@ -30,6 +30,7 @@ from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
 
 import gama.genetic_programming.compilers.scikitlearn
+import gama.genetic_programming.compilers.river_compiler
 from gama.genetic_programming.components import Individual, Fitness
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
@@ -55,6 +56,8 @@ from gama.genetic_programming.operations import create_random_expression
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
+from gama.genetic_programming.compilers.river_compiler import compile_individual
+
 from gama.postprocessing import (
     BestFitPostProcessing,
     BasePostProcessing,
@@ -97,6 +100,7 @@ class Gama(ABC):
         post_processing: BasePostProcessing = BestFitPostProcessing(),
         output_directory: Optional[str] = None,
         store: str = "logs",
+        online_learning: bool = False
     ):
         """
 
@@ -166,6 +170,9 @@ class Gama(ABC):
              - 'models': keep only cache with models and predictions
              - 'logs': keep only the logs
              - 'all': keep logs and cache with models and predictions
+
+        online_learning: bool (default=False)
+            If True, GAMA runs on online_learning mode with River pipelines.
         """
         if not output_directory:
             output_directory = f"gama_{str(uuid.uuid4())}"
@@ -234,6 +241,12 @@ class Gama(ABC):
         self._search_method: BaseSearch = search
         self._post_processing = post_processing
         self._store = store
+        self._online_learning = online_learning
+
+        if self._online_learning:
+            self._compiler = gama.genetic_programming.compilers.scikitlearn
+        else:
+            self._compiler = gama.genetic_programming.compilers.river_compiler
 
         if random_state is not None:
             random.seed(random_state)
@@ -572,7 +585,7 @@ class Gama(ABC):
         deadline = time.time() + timeout
 
         evaluate_pipeline = partial(
-            gama.genetic_programming.compilers.scikitlearn.evaluate_pipeline,
+            self._compiler.evaluate_pipeline,
             x=self._x,
             y_train=self._y,
             metrics=self._metrics,
@@ -580,7 +593,7 @@ class Gama(ABC):
         AsyncEvaluator.defaults = dict(evaluate_pipeline=evaluate_pipeline)
 
         self._operator_set.evaluate = partial(
-            gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
+            self._compiler.evaluate_individual,
             # evaluate_pipeline=evaluate_pipeline,
             timeout=self._max_eval_time,
             deadline=deadline,
