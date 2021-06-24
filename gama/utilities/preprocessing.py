@@ -6,6 +6,7 @@ from sklearn.base import TransformerMixin
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 
+
 log = logging.getLogger(__name__)
 
 
@@ -81,5 +82,14 @@ def basic_pipeline_extension(
             ("target_enc", ce.TargetEncoder(cols=many_factor_features))
         )
     extension_steps.append(("imputation", SimpleImputer(strategy="median")))
+
+    return extension_steps
+
+def river_pipeline_extension(
+    x: pd.DataFrame, is_classification: bool
+) -> List[Tuple[str]]:
+
+    extension_steps = []
+    #not implemented
 
     return extension_steps

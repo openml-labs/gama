@@ -45,6 +45,7 @@ from gama.logging.utility_functions import register_stream_log
 from gama.utilities.preprocessing import (
     basic_encoding,
     basic_pipeline_extension,
+    river_pipeline_extension,
 )
 from gama.genetic_programming.mutation import random_valid_mutation_in_place
 from gama.genetic_programming.crossover import random_crossover
@@ -243,7 +244,7 @@ class Gama(ABC):
         self._store = store
         self._online_learning = online_learning
 
-        if self._online_learning:
+        if not self._online_learning:
             self._compiler = gama.genetic_programming.compilers.scikitlearn
         else:
             self._compiler = gama.genetic_programming.compilers.river_compiler
@@ -500,9 +501,14 @@ class Gama(ABC):
             self._x, self._basic_encoding_pipeline = basic_encoding(
                 x, is_classification
             )
-            self._fixed_pipeline_extension = basic_pipeline_extension(
-                self._x, is_classification
-            )
+            if not self._online_learning:
+                self._fixed_pipeline_extension = basic_pipeline_extension(
+                    self._x, is_classification
+                )
+            else:
+                self._fixed_pipeline_extension = river_pipeline_extension(
+                    self._x, is_classification
+                )
             self._operator_set._safe_compile = partial(
                 compile_individual, preprocessing_steps=self._fixed_pipeline_extension
             )
