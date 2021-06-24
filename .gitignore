@@ -10,3 +10,7 @@ docs/source/generated/*
 *.log
 *.ipynb_checkpoints*
 venv/
+
+gama/genetic_programming/.DS_Store
+
+.DS_Store

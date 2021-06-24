@@ -5,9 +5,17 @@ import time
 from typing import Callable, Tuple, Optional, Sequence
 
 import stopit
-from sklearn.base import TransformerMixin, is_classifier
-from sklearn.model_selection import ShuffleSplit, cross_validate, check_cv
-from sklearn.pipeline import Pipeline
+#from sklearn.base import TransformerMixin, is_classifier
+from river.base import Classifier
+from river.evaluate import progressive_val_score
+
+#from sklearn.model_selection import ShuffleSplit, cross_validate, check_cv
+from river.compose.pipeline import Pipeline #River pipeline instead
+# we dont have cross valudate checkcv and is classifier equivalent in river, we do have metrics.workswith though
+# shuffle split is also just suffle streamer and then there isa splitter
+
+from river.stream import shuffle
+from river import metrics
 
 from gama.utilities.evaluation_library import Evaluation
 from gama.utilities.generic.stopwatch import Stopwatch
@@ -17,6 +25,7 @@ from gama.genetic_programming.components import Individual, PrimitiveNode, Fitne
 
 log = logging.getLogger(__name__)
 
+# Use progressive_val_score instead of cross validate
 
 def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
     hyperparameters = {
@@ -28,7 +37,8 @@ def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
 def compile_individual(
     individual: Individual,
     parameter_checks=None,
-    preprocessing_steps: Sequence[Tuple[str, TransformerMixin]] = None,
+    preprocessing_steps: Sequence[Tuple[str, Classifier
+    ]] = None,
 ) -> Pipeline:
     steps = [
         (str(i), primitive_node_to_sklearn(primitive))
@@ -50,7 +60,7 @@ def object_is_valid_pipeline(o):
 
 
 def evaluate_pipeline(
-    pipeline, x, y_train, timeout: float, metrics: Tuple[Metric], cv=5, subsample=None,
+    pipeline, x, y_train, timeout: float, cv=5, subsample=None,
 ) -> Tuple:
     """ Score `pipeline` with k-fold CV according to `metrics` on (a subsample of) X, y
 
@@ -69,39 +79,39 @@ def evaluate_pipeline(
 
     prediction, estimators = None, None
     # default score for e.g. timeout or failure
-    scores = tuple([float("-inf")] * len(metrics))
+    # scores = tuple([float("-inf")] * len(metrics))
 
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
             if isinstance(subsample, int) and subsample < len(y_train):
-                sampler = ShuffleSplit(n_splits=1, train_size=subsample, random_state=0)
-                idx, _ = next(sampler.split(x))
+                # sampler = ShuffleSplit(n_splits=1, train_size=subsample, random_state=0)
+                idx, _ = len(x)*0.3
                 x, y_train = x.iloc[idx, :], y_train[idx]
-
-            splitter = check_cv(cv, y_train, is_classifier(pipeline))
-            result = cross_validate(
-                pipeline,
-                x,
-                y_train,
-                cv=splitter,
-                return_estimator=True,
-                scoring=[m.name for m in metrics],
-                error_score="raise",
+                dataset = []
+                for a, b in x, y_train:
+                    dataset.append((a,b))
+            # splitter = check_cv(cv, y_train, is_classifier(pipeline))#todo replace here
+            result = progressive_val_score(
+                model=pipeline,
+                dataset=dataset,
+                metric=metrics.Accuracy(),# TODO: Create metric class
             )
-            scores = tuple([np.mean(result[f"test_{m.name}"]) for m in metrics])
-            estimators = result["estimator"]
-
+            scores = tuple((result[f"Accuracy"]))
+            estimators = pipeline
+            fold_pred = []
             for (estimator, (_, test)) in zip(estimators, splitter.split(x, y_train)):
-                if any([m.requires_probabilities for m in metrics]):
-                    fold_pred = estimator.predict_proba(x.iloc[test, :])
-                else:
-                    fold_pred = estimator.predict(x.iloc[test, :])
+                # if any([m.requires_probabilities for m in metrics]):
+                #     fold_pred = estimator.predict_proba(x.iloc[test, :])
+                # else:
+                for x_one in x.iloc[test, :]:
+                    fold_pred_one = estimator.predict_one(x_one)
+                    fold_pred.append(fold_pred_one)
 
                 if prediction is None:
-                    if fold_pred.ndim == 2:
-                        prediction = np.empty(shape=(len(y_train), fold_pred.shape[1]))
-                    else:
-                        prediction = np.empty(shape=(len(y_train),))
+                    # if fold_pred.ndim == 2:
+                    #     prediction = np.empty(shape=(len(y_train), fold_pred.shape[1]))
+                    # else:
+                    prediction = np.empty(shape=(len(y_train),))
                 prediction[test] = fold_pred
 
             # prediction, scores, estimators = cross_val_predict_score(
