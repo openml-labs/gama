@@ -1,6 +1,6 @@
 import river
 
-clf_cofig = {
+clf_config_online = {
     river.ensemble.adaptive_random_forest.AdaptiveRandomForestClassifier: {'disable_weighted_vote': False,
                                                                            'drift_detector': (
                                                                            river.drift.adwin.ADWIN, {'delta': 0.001}),

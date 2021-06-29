@@ -9,6 +9,7 @@ from sklearn.preprocessing import LabelEncoder
 from .gama import Gama
 from gama.data_loading import X_y_from_file
 from gama.configuration.classification import clf_config
+from gama.configuration.river_classification import clf_config_online
 from gama.utilities.metrics import scoring_to_metric
 
 
@@ -18,7 +19,10 @@ class GamaClassifier(Gama):
     def __init__(self, config=None, scoring="neg_log_loss", *args, **kwargs):
         if not config:
             # Do this to avoid the whole dictionary being included in the documentation.
-            config = clf_config
+            if not self._online_learning:
+                config = clf_config
+            else:
+                config = clf_config_online
 
         self._metrics = scoring_to_metric(scoring)
         if any(metric.requires_probabilities for metric in self._metrics):
