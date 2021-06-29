@@ -60,7 +60,7 @@ def object_is_valid_pipeline(o):
 
 
 def evaluate_pipeline(
-    pipeline, x, y_train, timeout: float, cv=5, subsample=None,
+    pipeline, x, y_train, timeout: float,metrics_: Tuple[Metric], cv=5, subsample=None,
 ) -> Tuple:
     """ Score `pipeline` with k-fold CV according to `metrics` on (a subsample of) X, y
 
@@ -90,16 +90,15 @@ def evaluate_pipeline(
                 dataset = []
                 for a, b in x, y_train:
                     dataset.append((a,b))
-            # splitter = check_cv(cv, y_train, is_classifier(pipeline))#todo replace here
             result = progressive_val_score(
                 model=pipeline,
                 dataset=dataset,
-                metric=metrics.Accuracy(),# TODO: Create metric class
+                metric=metrics.Accuracy(),
             )
             scores = tuple((result[f"Accuracy"]))
             estimators = pipeline
             fold_pred = []
-            for (estimator, (_, test)) in zip(estimators, splitter.split(x, y_train)):
+            for (estimator, (_, test)) in zip(estimators,  splitter.split(x, y_train)):
                 # if any([m.requires_probabilities for m in metrics]):
                 #     fold_pred = estimator.predict_proba(x.iloc[test, :])
                 # else:
