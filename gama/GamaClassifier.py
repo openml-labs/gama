@@ -4,6 +4,7 @@ from typing import Union, Optional
 import numpy as np
 import pandas as pd
 from sklearn.base import ClassifierMixin
+from river.base import Classifier
 from sklearn.preprocessing import LabelEncoder
 
 from .gama import Gama
@@ -33,8 +34,8 @@ class GamaClassifier(Gama):
                 for (alg, hp) in config.items()
                 if not (
                     inspect.isclass(alg)
-                    and issubclass(alg, ClassifierMixin)
-                    and not hasattr(alg(), "predict_proba")
+                    and any(issubclass(alg, baseclass) for baseclass in [ClassifierMixin, Classifier])
+                    and not any(hasattr(alg(), attr) for attr in ["predict_proba", "predict_proba_one"])
                 )
             }
 

@@ -27,17 +27,7 @@ clf_config_online = {
                                              'C': 1.4142135623730951,
                                              'alpha': 0.9,
                                              'p': 2},
-    river.linear_model.glm.LogisticRegression: {'clip_gradient': 1000000000000.0,
-                                                'initializer': (river.optim.initializers.Zeros, {}),
-                                                'intercept_init': 0.0,
-                                                'intercept_lr': (
-                                                river.optim.schedulers.Constant, {'learning_rate': 0.01}),
-                                                'l2': 0.0,
-                                                'loss': (
-                                                river.optim.losses.Log, {'weight_neg': 1.0, 'weight_pos': 1.0}),
-                                                'optimizer': (river.optim.sgd.SGD,
-                                                              {'lr': (river.optim.schedulers.Constant,
-                                                                      {'learning_rate': 0.01})})},
+
     river.linear_model.pa.PAClassifier: {'C': 1.0,
                                          'learn_intercept': True,
                                          'mode': 1},

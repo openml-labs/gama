@@ -590,19 +590,12 @@ class Gama(ABC):
 
         deadline = time.time() + timeout
 
-        if not self._online_learning:
-            evaluate_pipeline = partial(
-                self._compiler.evaluate_pipeline,
-                x=self._x,
-                y_train=self._y,
-                metrics=self._metrics,
-            )
-        else:
-            evaluate_pipeline = partial(
-                self._compiler.evaluate_pipeline,
-                x=self._x,
-                y_train=self._y,
-            )
+        evaluate_pipeline = partial(
+            self._compiler.evaluate_pipeline,
+            x=self._x,
+            y_train=self._y,
+            metrics=self._metrics,
+        )
 
         AsyncEvaluator.defaults = dict(evaluate_pipeline=evaluate_pipeline)
 
