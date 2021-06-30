@@ -21,7 +21,7 @@ class GamaClassifier(Gama):
 
         if not config:
             # Do this to avoid the whole dictionary being included in the documentation.
-            if not self._online_learning:
+            if not self.online_learning:
                 config = clf_config
             else:
                 config = clf_config_online
