@@ -17,7 +17,8 @@ from gama.utilities.metrics import scoring_to_metric
 class GamaClassifier(Gama):
     """ Gama with adaptations for (multi-class) classification. """
 
-    def __init__(self, config=None, scoring="neg_log_loss", *args, **kwargs):
+    def __init__(self, config=None, scoring="neg_log_loss", online_learning: bool = False, *args, **kwargs):
+        self._online_learning = online_learning
         if not config:
             # Do this to avoid the whole dictionary being included in the documentation.
             if not self._online_learning:
