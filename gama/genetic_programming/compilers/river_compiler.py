@@ -15,7 +15,7 @@ from river.compose.pipeline import Pipeline #River pipeline instead
 # shuffle split is also just suffle streamer and then there isa splitter
 
 from river.stream import shuffle
-from river import metrics
+from river.metrics import Accuracy
 
 from gama.utilities.evaluation_library import Evaluation
 from gama.utilities.generic.stopwatch import Stopwatch
@@ -51,16 +51,10 @@ def compile_individual(
 
 def object_is_valid_pipeline(o):
     """ Determines if object behaves like a scikit-learn pipeline. """
-    return (
-        o is not None
-        and hasattr(o, "fit")
-        and hasattr(o, "predict")
-        and hasattr(o, "steps")
-    )
-
+    return True
 
 def evaluate_pipeline(
-    pipeline, x, y_train, timeout: float,metrics_: Tuple[Metric], cv=5, subsample=None,
+    pipeline, x, y_train, timeout: float,metrics: Tuple[Metric], cv=5, subsample=None,
 ) -> Tuple:
     """ Score `pipeline` with k-fold CV according to `metrics` on (a subsample of) X, y
 
@@ -79,7 +73,7 @@ def evaluate_pipeline(
 
     prediction, estimators = None, None
     # default score for e.g. timeout or failure
-    # scores = tuple([float("-inf")] * len(metrics))
+    scores = tuple([float("-inf")])
 
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
@@ -93,12 +87,13 @@ def evaluate_pipeline(
             result = progressive_val_score(
                 model=pipeline,
                 dataset=dataset,
-                metric=metrics.Accuracy(),
+                metric=Accuracy(),
             )
-            scores = tuple((result[f"Accuracy"]))
+            scores = tuple((result["Accuracy"]))
             estimators = pipeline
             fold_pred = []
             for (estimator, (_, test)) in zip(estimators,  splitter.split(x, y_train)):
+                # if any([m.requires_probabilities for m in metrics]):
                 # if any([m.requires_probabilities for m in metrics]):
                 #     fold_pred = estimator.predict_proba(x.iloc[test, :])
                 # else:
