@@ -201,11 +201,11 @@ class EvaluationLibrary:
                 self._sample = np.random.choice(
                     range(prediction_size), size=n, replace=False
                 )
-            elif stratify is not None and n < len(stratify):
-                splitter = StratifiedShuffleSplit(n_splits=1, train_size=n)
-                self._sample, _ = next(
-                    splitter.split(np.zeros(len(stratify)), stratify)
-                )
+            # elif stratify is not None and n < len(stratify):
+            #     splitter = StratifiedShuffleSplit(n_splits=1, train_size=n)
+            #     self._sample, _ = next(
+            #         splitter.split(np.zeros(len(stratify)), stratify)
+            #     )
             else:
                 # Specified sample size exceeds size of predictions
                 self._sample = None
