@@ -10,7 +10,7 @@ from sklearn.preprocessing import LabelEncoder
 from .gama import Gama
 from gama.data_loading import X_y_from_file
 from gama.configuration.classification import clf_config
-from gama.configuration.river_classification import clf_config_online
+from gama.configuration.stream_classification import clf_config_online
 from gama.utilities.metrics import scoring_to_metric
 
 
@@ -26,7 +26,6 @@ class GamaClassifier(Gama):
             else:
                 config = clf_config_online
 
-        config = clf_config_online
         self._metrics = scoring_to_metric(scoring)
         if any(metric.requires_probabilities for metric in self._metrics):
             # we don't want classifiers that do not have `predict_proba`,

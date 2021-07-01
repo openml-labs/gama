@@ -21,7 +21,7 @@ from river.feature_extraction import PolynomialExtender
 #feature selection
 from river.feature_selection import SelectKBest
 
-clf_config = {
+clf_config_online = {
     "alpha": [1e-3, 1e-2, 1e-1, 1.0, 10.0, 100.0],
     "fit_prior": [True, False],
     "min_samples_split": range(2, 21),

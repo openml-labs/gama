@@ -1,19 +1,19 @@
 import river
 
 clf_config_online = {
-    river.ensemble.adaptive_random_forest.AdaptiveRandomForestClassifier: {'disable_weighted_vote': False,
+    river.ensemble.adaptive_random_forest.AdaptiveRandomForestClassifier: {'disable_weighted_vote': [False],
                                                                            'drift_detector': (
                                                                            river.drift.adwin.ADWIN, {'delta': 0.001}),
-                                                                           'grace_period': 50,
-                                                                           'lambda_value': 6,
+                                                                           'grace_period': [50],
+                                                                           'lambda_value': [6],
                                                                            'leaf_prediction': 'nba',
                                                                            'max_depth': None,
                                                                            'max_features': 'sqrt',
-                                                                           'max_size': 32,
-                                                                           'memory_estimate_period': 2000000,
+                                                                           'max_size': [32],
+                                                                           'memory_estimate_period': [2000000],
                                                                            'metric': (river.metrics.accuracy.Accuracy,
                                                                                       {'cm': None}),
-                                                                           'n_models': 10,
+                                                                           'n_models': [10],
                                                                            'nb_threshold': 0,
                                                                            'nominal_attributes': None,
                                                                            'seed': None,
