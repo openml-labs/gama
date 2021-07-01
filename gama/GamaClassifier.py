@@ -26,6 +26,7 @@ class GamaClassifier(Gama):
             else:
                 config = clf_config_online
 
+        config = clf_config_online
         self._metrics = scoring_to_metric(scoring)
         if any(metric.requires_probabilities for metric in self._metrics):
             # we don't want classifiers that do not have `predict_proba`,
