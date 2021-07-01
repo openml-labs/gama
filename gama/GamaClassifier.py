@@ -18,10 +18,10 @@ class GamaClassifier(Gama):
     """ Gama with adaptations for (multi-class) classification. """
 
     def __init__(self, config=None, scoring="neg_log_loss", online_learning = False, *args, **kwargs):
-
+        self._online_learning = online_learning
         if not config:
             # Do this to avoid the whole dictionary being included in the documentation.
-            if not self.online_learning:
+            if not self._online_learning:
                 config = clf_config
             else:
                 config = clf_config_online
