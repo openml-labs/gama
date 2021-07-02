@@ -27,6 +27,7 @@ class GamaClassifier(Gama):
                 config = clf_config_online
 
         self._metrics = scoring_to_metric(scoring)
+        """
         if any(metric.requires_probabilities for metric in self._metrics):
             # we don't want classifiers that do not have `predict_proba`,
             # because then we have to start doing one hot encodings of predictions etc.
@@ -39,7 +40,7 @@ class GamaClassifier(Gama):
                     and not any(hasattr(alg(), attr) for attr in ["predict_proba", "predict_proba_one"])
                 )
             }
-
+        """
         self._label_encoder = None
         super().__init__(*args, **kwargs, config=config, scoring=scoring, online_learning=online_learning)
 
