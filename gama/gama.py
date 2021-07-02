@@ -516,7 +516,6 @@ class Gama(ABC):
             self._operator_set._safe_compile = partial(
                 compile_individual, preprocessing_steps=self._fixed_pipeline_extension
             )
-
             store_pipelines = (
                 self._evaluation_library._m is None or self._evaluation_library._m > 0
             )
@@ -532,7 +531,6 @@ class Gama(ABC):
                     for p in self._pset["prediction"]
                     if p.identifier not in [KNeighborsClassifier, KNeighborsRegressor]
                 ]
-
             if store_pipelines and self._x.shape[1] > 50:
                 log.info("Data has too many features to include PolynomialFeatures")
                 from sklearn.preprocessing import PolynomialFeatures
@@ -575,8 +573,9 @@ class Gama(ABC):
                 self._time_manager.total_time_remaining,
                 best_individuals,
             )
-        to_clean = dict(nothing="all", logs="evaluations", models="logs")
-        self.cleanup(to_clean[self._store])
+        if not self._store == "all":
+            to_clean = dict(nothing="all", logs="evaluations", models="logs")
+            self.cleanup(to_clean[self._store])
         return self
 
     def _search_phase(

@@ -91,6 +91,7 @@ class OperatorSet:
             compile_ = self._compile
         ind = Individual(expression, to_pipeline=compile_)
         ind.meta["origin"] = "new"
+
         return ind
 
     def create(self, *args, **kwargs):
