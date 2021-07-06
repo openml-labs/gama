@@ -57,10 +57,18 @@ class GamaClassifier(Gama):
         numpy.ndarray
             Array with predictions of shape (N,) where N is len(X).
         """
-        y = self.model.predict(x)  # type: ignore
+        if not self._online_learning:
+            y = self.model.predict(x)  # type: ignore
+            if y[0] not in self._label_encoder.classes_:
+                y = self._label_encoder.inverse_transform(y)
+        else:
+            """
+            y_pred = []
+            for x_i in x:
+                y_pred.append(self.model.predict_one(x_i))
+            y = np.array(y_pred) """
+            y = 999  #not implemented
         # Decode the predicted labels - necessary only if ensemble is not used.
-        if y[0] not in self._label_encoder.classes_:
-            y = self._label_encoder.inverse_transform(y)
         return y
 
     def _predict_proba(self, x: pd.DataFrame):

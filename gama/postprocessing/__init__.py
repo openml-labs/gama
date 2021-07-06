@@ -1,6 +1,7 @@
 from gama.postprocessing.base_post_processing import BasePostProcessing
 from gama.postprocessing.best_fit import BestFitPostProcessing
 from gama.postprocessing.ensemble import EnsemblePostProcessing
+from gama.postprocessing.best_fit_online import BestFitOnlinePostProcessing
 
 
 class NoPostProcessing(BasePostProcessing):
@@ -13,4 +14,4 @@ class NoPostProcessing(BasePostProcessing):
         return None
 
 
-__all__ = ["NoPostProcessing", "BestFitPostProcessing", "EnsemblePostProcessing"]
+__all__ = ["NoPostProcessing", "BestFitPostProcessing", "EnsemblePostProcessing", "BestFitOnlinePostProcessing"]

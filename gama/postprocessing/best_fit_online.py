@@ -1,7 +1,7 @@
 from typing import List, Optional, Sequence, Tuple
 
 import pandas as pd
-from sklearn.base import TransformerMixin
+from river.base import Transformer
 
 from gama.genetic_programming.components import Individual
 from gama.postprocessing.base_post_processing import BasePostProcessing
@@ -11,9 +11,9 @@ from gama.utilities.export import (
     format_import,
     format_pipeline,
 )
+from river import compat
 
-
-class BestFitPostProcessing(BasePostProcessing):
+class BestFitOnlinePostProcessing(BasePostProcessing):
     """ Post processing technique which trains the best found single pipeline. """
 
     def __init__(self, time_fraction: float = 0.1):
@@ -24,10 +24,12 @@ class BestFitPostProcessing(BasePostProcessing):
         self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]
     ) -> object:
         self._selected_individual = selection[0]
-        return self._selected_individual.pipeline.fit(x, y)
+        #for i in range(0,len(x)):
+        #    self._selected_individual.pipeline.learn_one(x.iloc[i],y[i])
+        return self._selected_individual.pipeline
 
     def to_code(
-        self, preprocessing: Sequence[Tuple[str, TransformerMixin]] = None
+        self, preprocessing: Sequence[Tuple[str, Transformer]] = None
     ) -> str:
         if self._selected_individual is None:
             raise RuntimeError("`to_code` can only be called after `post_process`.")

@@ -63,6 +63,7 @@ from gama.postprocessing import (
     BestFitPostProcessing,
     BasePostProcessing,
     EnsemblePostProcessing,
+    BestFitOnlinePostProcessing,
 )
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.utilities.metrics import Metric
