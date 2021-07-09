@@ -28,7 +28,6 @@ cls = GamaClassifier(max_total_time=60,
 
 cls.fit(X,y)
 
-#model = compose.Pipeline(mod for mod in cls.model.steps.items())
 """
 steps = iter(cls.model.steps.values())
 
@@ -38,6 +37,7 @@ river_model = compose.Pipeline(final[0][1])
 for i in range(0,len(X)):
     river_model = river_model.learn_one(X.iloc[i],y[i])
 """
+print(cls.model)
 y_pred = []
 for i in range(0, len(X_test)):
     y_pred.append(cls.model.predict_one(X_test.iloc[i]))
