@@ -25,9 +25,14 @@ class BestFitOnlinePostProcessing(BasePostProcessing):
     ) -> object:
         self._selected_individual = selection[0]
         #TO BE CHANGED
-        steps = iter(self._selected_individual.pipeline.steps.values())
-        final = next(steps)
-        river_model = compose.Pipeline(final[0][1])
+        steps = list(self._selected_individual.pipeline.steps.values())
+        for i in range(len(steps[0])):
+            if i == 0:
+                river_model = steps[0][i][1]
+            else:
+                river_model |= steps[0][i][1]
+        # final = next(steps)
+        # river_model = compose.Pipeline(final[0][1])
         for i in range(0, len(x)):
             river_model = river_model.learn_one(x.iloc[i], y[i])
 
