@@ -552,8 +552,9 @@ class Gama(ABC):
                 self._time_manager.total_time_remaining,
                 best_individuals,
             )
-        to_clean = dict(nothing="all", logs="evaluations", models="logs")
-        self.cleanup(to_clean[self._store])
+        if not self._store == "all":
+            to_clean = dict(nothing="all", logs="evaluations", models="logs")
+            self.cleanup(to_clean[self._store])
         return self
 
     def _search_phase(
