@@ -61,5 +61,18 @@ clf_config_online = {
         "q_inf": np.arange(0,1,0.05),
         "q_sup": np.arange(0,1,0.05)
     },
+    StandardScaler: {},
+    AdaptiveStandardScaler: {"alpha": np.arange(0.1, 1, 0.1)},
+    MaxAbsScaler: {},
+    MinMaxScaler: {},
+    Normalizer: {
+        "order": [1, 2],
+    },
+    Binarizer: {"threshold": np.arange(0.0, 1.01, 0.05)},
+    PolynomialExtender: {
+        "degree": [2, 3, 4],
+        "interaction_only": [True, False],
+        "include_bias": [True, False]
+    },
 
 }
