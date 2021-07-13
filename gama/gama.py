@@ -102,7 +102,8 @@ class Gama(ABC):
         post_processing: BasePostProcessing = BestFitPostProcessing(),
         output_directory: Optional[str] = None,
         store: str = "logs",
-        online_learning: bool = False
+        online_learning: bool = False,
+        online_scoring: str = 'accuracy'
     ):
         """
 
@@ -248,6 +249,7 @@ class Gama(ABC):
         if not self._online_learning:
             self._compiler = gama.genetic_programming.compilers.scikitlearn
             from gama.genetic_programming.compilers.scikitlearn import compile_individual
+            self._metrics = online_scoring
 
         else:
             self._compiler = gama.genetic_programming.compilers.river_compiler

@@ -8,7 +8,7 @@ import stopit
 #from sklearn.base import TransformerMixin, is_classifier
 from river.base import Classifier
 from river.evaluate import progressive_val_score
-
+from gama.utilities.river_metrics import get_metric
 #from sklearn.model_selection import ShuffleSplit, cross_validate, check_cv
 from river.compose.pipeline import Pipeline #River pipeline instead
 # we dont have cross valudate checkcv and is classifier equivalent in river, we do have metrics.workswith though
@@ -54,7 +54,7 @@ def object_is_valid_pipeline(o):
     return True
 
 def evaluate_pipeline(
-    pipeline, x, y_train, timeout: float,metrics: Tuple[Metric], cv=5, subsample=None,
+    pipeline, x, y_train, timeout: float,metrics: str = 'accuracy', cv=5, subsample=None,
 ) -> Tuple:
     """ Score `pipeline` with k-fold CV according to `metrics` on (a subsample of) X, y
 
@@ -74,7 +74,7 @@ def evaluate_pipeline(
     prediction, estimators = None, None
     # default score for e.g. timeout or failure
     scores = tuple([float("-inf")])
-
+    river_metric = get_metric(metrics)
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
             if isinstance(subsample, int) and subsample < len(y_train):
@@ -87,7 +87,7 @@ def evaluate_pipeline(
             result = progressive_val_score(
                 model=pipeline,
                 dataset=dataset,
-                metric=Accuracy(),
+                metric=river_metric,
             )
             scores = tuple((result["Accuracy"]))
             estimators = pipeline
