@@ -51,7 +51,7 @@ def mut_replace_primitive(individual: Individual, primitive_set: dict) -> None:
         return len(primitive_set[primitive._primitive.output]) > 1
 
     primitives = list(filter(primitive_replaceable, enumerate(individual.primitives)))
-    if primitives == 0:
+    if len(primitives) == 0:
         raise ValueError("Individual has no primitives suitable for replacement.")
 
     primitive_index, old_primitive_node = random.choice(primitives)
@@ -148,7 +148,12 @@ def random_valid_mutation_in_place(
             partial(mut_shrink, shrink_by=n_primitives - max_length)
         )
     else:
-        available_mutations.append(mut_replace_primitive)
+        replaceable_primitives = filter(
+            lambda p: len(primitive_set[p._primitive.output]) > 1, individual.primitives
+        )
+        if len(list(replaceable_primitives)) > 1:
+            available_mutations.append(mut_replace_primitive)
+
         if max_length is None or n_primitives < max_length:
             available_mutations.append(mut_insert)
         if n_primitives > 1:
