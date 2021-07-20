@@ -30,7 +30,7 @@ from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
 
 import gama.genetic_programming.compilers.scikitlearn
-from gama.genetic_programming.components import Individual, Fitness
+from gama.genetic_programming.components import Individual, Fitness, DATA_TERMINAL
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
 from gama.utilities.metrics import scoring_to_metric
@@ -264,6 +264,18 @@ class Gama(ABC):
 
         self._pset, parameter_checks = pset_from_config(config)
 
+        if DATA_TERMINAL not in self._pset:
+            if max_pipeline_length is None:
+                log.info(
+                    "Setting `max_pipeline_length` to 1 "
+                    "because there are no preprocessing steps in the search space."
+                )
+                max_pipeline_length = 1
+            elif max_pipeline_length > 1:
+                raise ValueError(
+                    f"`max_pipeline_length` can't be {max_pipeline_length} "
+                    "because there are no preprocessing steps in the search space."
+                )
         max_start_length = 3 if max_pipeline_length is None else max_pipeline_length
         self._operator_set = OperatorSet(
             mutate=partial(
