@@ -491,7 +491,8 @@ class Gama(ABC):
                 self._x, is_classification
             )
             self._operator_set._safe_compile = partial(
-                compile_individual, preprocessing_steps=self._fixed_pipeline_extension
+                self._operator_set._compile,
+                preprocessing_steps=self._fixed_pipeline_extension,
             )
 
             store_pipelines = (
