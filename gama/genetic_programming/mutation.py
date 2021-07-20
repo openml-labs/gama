@@ -51,7 +51,7 @@ def mut_replace_primitive(individual: Individual, primitive_set: dict) -> None:
         return len(primitive_set[primitive._primitive.output]) > 1
 
     primitives = list(filter(primitive_replaceable, enumerate(individual.primitives)))
-    if primitives == 0:
+    if len(primitives) == 0:
         raise ValueError("Individual has no primitives suitable for replacement.")
 
     primitive_index, old_primitive_node = random.choice(primitives)
