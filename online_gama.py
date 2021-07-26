@@ -20,7 +20,7 @@ from river import compose
 #Gama online - initial pipeline optimization
 
 cls = GamaClassifier(max_total_time=60,
-                       #scoring='accuracy',
+                       #scoring='ccuracy',
                        search = RandomSearch(),
                        online_learning = True,
                        post_processing = BestFitOnlinePostProcessing(),
