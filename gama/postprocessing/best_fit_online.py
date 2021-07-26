@@ -35,7 +35,7 @@ class BestFitOnlinePostProcessing(BasePostProcessing):
         # final = next(steps)
         # river_model = compose.Pipeline(final[0][1])
         for i in range(0, len(x)):
-            river_model = river_model.learn_one(x.iloc[i], y[i])
+            river_model.learn_one(x.iloc[i], y[i])
 
         #self._selected_individual.pipeline = river_model
 
