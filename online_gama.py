@@ -40,7 +40,7 @@ for i in range(0,len(X)):
 print(cls.model)
 y_pred = []
 for i in range(0, len(X_test)):
-    y_pred.append(cls.model.predict_one(X_test.iloc[i]))
+    y_pred.append(cls.model.predict_one(X_test.iloc[i].to_dict()))
 
 b_acc = sklearn.metrics.balanced_accuracy_score(y_test, y_pred)  # equivalent to ROC_AUC in binary case
 acc = sklearn.metrics.accuracy_score(y_test, y_pred)
