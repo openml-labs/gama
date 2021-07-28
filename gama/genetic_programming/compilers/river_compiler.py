@@ -77,17 +77,18 @@ def evaluate_pipeline(
     river_metric = get_metric(metrics)
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
-            if isinstance(subsample, int) and subsample < len(y_train):
-                # sampler = ShuffleSplit(n_splits=1, train_size=subsample, random_state=0)
-                idx, _ = len(x)*0.3
-                x, y_train = x.iloc[idx, :], y_train[idx]
-                dataset = []
-                for a, b in x, y_train:
-                    dataset.append((a,b))
+            #if isinstance(subsample, int) and subsample < len(y_train):
+            # sampler = ShuffleSplit(n_splits=1, train_size=subsample, random_state=0)
+            idx, _ = len(x)*0.3
+            x, y_train = x.iloc[idx, :], y_train[idx]
+            dataset = []
+            for a, b in x, y_train:
+                dataset.append((a,b))
             result = progressive_val_score(
                 model=pipeline,
                 dataset=dataset,
                 metric=river_metric,
+                print_every=100,
             )
             scores = tuple((result["Accuracy"]))
             estimators = pipeline

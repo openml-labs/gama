@@ -249,12 +249,11 @@ class Gama(ABC):
         if not self._online_learning:
             self._compiler = gama.genetic_programming.compilers.scikitlearn
             from gama.genetic_programming.compilers.scikitlearn import compile_individual
-            self._metrics = online_scoring
 
         else:
             self._compiler = gama.genetic_programming.compilers.river_compiler
             from gama.genetic_programming.compilers.river_compiler import compile_individual
-
+            self._metrics = online_scoring
 
         if random_state is not None:
             random.seed(random_state)

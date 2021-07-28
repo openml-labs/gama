@@ -13,18 +13,18 @@ X_test = B[1].iloc[:,0:-1]
 y_test = B[1].iloc[:,-1]
 
 from gama import GamaClassifier
-from gama.search_methods import RandomSearch
+from gama.search_methods import RandomSearch, AsynchronousSuccessiveHalving]
 from gama.postprocessing import BestFitOnlinePostProcessing
 from river import compose
 
 #Gama online - initial pipeline optimization
 
 cls = GamaClassifier(max_total_time=60,
-                       #scoring='ccuracy',
                        search = RandomSearch(),
                        online_learning = True,
                        post_processing = BestFitOnlinePostProcessing(),
-                       store = 'all')
+                       store = 'all',
+                       online_scoring = 'balanced_accuracy')
 
 cls.fit(X,y)
 
