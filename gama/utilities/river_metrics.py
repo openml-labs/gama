@@ -74,3 +74,5 @@ def get_metric(metric):
         return Accuracy()
     elif metric == 'balanced_accuracy':
         return BalancedAccuracy()
+    elif metric == 'f1':
+        return F1()
