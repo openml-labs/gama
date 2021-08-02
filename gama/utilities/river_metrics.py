@@ -5,7 +5,7 @@ from river.metrics import BinaryMetric
 # from river.metrics import ClassificationReport
 # from river.metrics import CohenKappa
 # from river.metrics import Completeness
-# from river.metrics import ConfusionMatrix
+from river.metrics import ConfusionMatrix
 # from river.metrics import CrossEntropy
 # from river.metrics import ExactMatch
 # from river.metrics import ExampleF1
@@ -80,3 +80,5 @@ def get_metric(metric):
         return ROCAUC()
     elif metric == 'rmse':
         return RMSE()
+    elif metric == 'confusion_matrix':
+        return ConfusionMatrix()
