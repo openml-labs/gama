@@ -12,7 +12,7 @@ from river.metrics import BinaryMetric
 # from river.metrics import ExampleFBeta
 # from river.metrics import ExamplePrecision
 # from river.metrics import ExampleRecall
-# from river.metrics import F1
+from river.metrics import F1
 # from river.metrics import FBeta
 # from river.metrics import FowlkesMallows
 # from river.metrics import GeometricMean
