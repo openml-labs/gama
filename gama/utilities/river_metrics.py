@@ -51,7 +51,7 @@ from river.metrics import BinaryMetric
 # from river.metrics import Q0
 # from river.metrics import Q2
 # from river.metrics import R2
-# from river.metrics import RMSE
+from river.metrics import RMSE
 # from river.metrics import RMSLE
 from river.metrics import ROCAUC
 # from river.metrics import Rand
@@ -78,3 +78,5 @@ def get_metric(metric):
         return F1()
     elif metric == 'roc_auc':
         return ROCAUC()
+    elif metric == 'rmse':
+        return RMSE()
