@@ -53,7 +53,7 @@ from river.metrics import BinaryMetric
 # from river.metrics import R2
 # from river.metrics import RMSE
 # from river.metrics import RMSLE
-# from river.metrics import ROCAUC
+from river.metrics import ROCAUC
 # from river.metrics import Rand
 # from river.metrics import Recall
 # from river.metrics import RegressionMetric
@@ -76,3 +76,5 @@ def get_metric(metric):
         return BalancedAccuracy()
     elif metric == 'f1':
         return F1()
+    elif metric == 'roc_auc':
+        return ROCAUC()
