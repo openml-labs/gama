@@ -33,7 +33,7 @@ class BestFitOnlinePostProcessing(BasePostProcessing):
             else:
                 river_model |= steps[0][i][1]
 
-        print(river_model)
+        #print(river_model)
         # final = next(steps)
         # river_model = compose.Pipeline(final[0][1])
         for i in range(0, len(x)):
