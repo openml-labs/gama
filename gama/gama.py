@@ -194,7 +194,10 @@ class Gama(ABC):
 
         if n_jobs is None:
             n_jobs = multiprocessing.cpu_count() // 2
-            log.debug("n_jobs defaulted to %d", n_jobs)
+            log.debug("n_jobs defaulted to %d.", n_jobs)
+        elif n_jobs == -1:
+            n_jobs = multiprocessing.cpu_count()
+            log.debug("n_jobs set to use all %d cores.", n_jobs)
 
         err = ""
         if max_total_time is None or max_total_time <= 0:
@@ -212,7 +215,7 @@ class Gama(ABC):
             "__init__",
             partialmethod(
                 AsyncEvaluator.__init__,
-                n_workers=multiprocessing.cpu_count() if n_jobs is None else n_jobs,
+                n_workers=n_jobs,
                 memory_limit_mb=max_memory_mb,
                 logfile=os.path.join(self.output_directory, "memory.log"),
             ),
