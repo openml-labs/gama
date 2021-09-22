@@ -21,7 +21,7 @@ from river.drift import ADWIN
 data_loc = '/home/bcelik/SEA_Abrubt_5.arff'     #needs to be arff
 initial_batch = 5000                            #initial set of samples to train automl
 sliding_window = 1000                           #update set of samples to train automl at drift points (must be smaller than or equal to initial batch size
-online_metric = metrics.Accuracy()                #river metric to evaluate online learning
+online_metric = metrics.Accuracy()              #river metric to evaluate online learning
 drift_detector = ADWIN()
 
 #Data
@@ -33,7 +33,7 @@ y = B[:].iloc[:,-1]
 
 #Algorithm selection and hyperparameter tuning
 
-cls = GamaClassifier(max_total_time=60,
+cls = GamaClassifier(max_total_time=600,
                        scoring='accuracy',
                        search = AsyncEA(),
                        online_learning = True,
@@ -60,7 +60,7 @@ for i in range(initial_batch+1,len(X)):
     if in_drift:
         print(f"Change detected at data point {i} and current performance is at {online_metric}")
         #re-optimize pipelines with sliding window
-        cls = GamaClassifier(max_total_time=60,
+        cls = GamaClassifier(max_total_time=600,
                              scoring='accuracy',
                              search=AsyncEA(),
                              online_learning=True,
