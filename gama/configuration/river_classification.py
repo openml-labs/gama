@@ -31,7 +31,7 @@ clf_config_online = {
     "min_samples_leaf": range(1, 21),
     KNNADWINClassifier: {
         "n_neighbors": range(1, 15),
-        "window_size": [100, 500, 1000, 1500, 2000],
+        "window_size": [100, 500, 750, 1000],
         "leaf_size": range(5, 50, 5),
         "p": np.arange(1, 2, 0.2)
     },
