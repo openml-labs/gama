@@ -18,7 +18,7 @@ from river.drift import EDDM
 
 #User parameters
 
-data_loc = '/home/bcelik/DATA/Real/electricity-normalized.arff'     #needs to be arff
+data_loc = 'data_streams/electricity-normalized.arff'     #needs to be arff
 initial_batch = 5000                            #initial set of samples to train automl
 sliding_window = 1000                           #update set of samples to train automl at drift points (must be smaller than or equal to initial batch size
 online_metric = metrics.Accuracy()              #river metric to evaluate online learning

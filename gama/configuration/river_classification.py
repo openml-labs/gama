@@ -25,10 +25,6 @@ from river.feature_extraction import PolynomialExtender
 #from river.feature_selection import SelectKBest
 
 clf_config_online = {
-    "alpha": [1e-3, 1e-2, 1e-1, 1.0, 10.0, 100.0],
-    "fit_prior": [True, False],
-    "min_samples_split": range(2, 21),
-    "min_samples_leaf": range(1, 21),
     KNNADWINClassifier: {
         "n_neighbors": range(1, 15),
         "window_size": [100, 500, 750, 1000],
@@ -50,7 +46,7 @@ clf_config_online = {
     },
     LeveragingBaggingClassifier: {
         "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(),  linear_model.Perceptron(), tree.ExtremelyFastDecisionTreeClassifier()] ,
-        "n_models": range(1,10),
+        "n_models": range(1,20),
         "w": range(1,10),
         "adwin_delta": [0.001, 0.002, 0.005, 0.01],
         "bagging_method": ["bag", "me", "half", "wt", "subag"],
@@ -58,8 +54,8 @@ clf_config_online = {
     RobustScaler: {
         "with_centering": [True, False],
         "with_scaling": [True, False],
-        "q_inf": np.arange(0,1,0.05),
-        "q_sup": np.arange(0,1,0.05)
+        "q_inf": np.arange(0,0.5,0.05),
+        "q_sup": np.arange(0.55,1,0.05)
     },
     StandardScaler: {},
     AdaptiveStandardScaler: {"alpha": np.arange(0.1, 1, 0.1)},
