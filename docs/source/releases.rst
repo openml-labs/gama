@@ -4,6 +4,9 @@ Release Notes
 Version 21.0.1
 --------------
 
+News:
+ - We have a logo! Check out our README, or `images\logos` for several renders.
+
 Bugfixes:
  - Check if `max_pipeline_length` is compatible with the search space, i.e. if there are no preprocessing steps in the search space it is set to 1 and raises an error if already set to a value greater than 1.
  - `mut_replace_primitive` mutation is no longer considered if there are no suitable replacements for any primitive in the individual.
