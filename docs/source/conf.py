@@ -32,6 +32,10 @@ for file in os.listdir(example_dir):
     dest_path = os.path.join(example_doc_dir, file)
     shutil.copyfile(source_path, dest_path)
 
+logo = "Logo-on-white-text-on-transparent.png"
+favicon = "Color-Transparent.svg"
+html_logo = f"../../images/logos/{logo}"
+html_favicon = f"../../images/logos/{favicon}"
 
 # -- General configuration ------------------------------------------------
 
@@ -109,8 +113,8 @@ html_theme = "sphinx_rtd_theme"
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#
-# html_theme_options = {}
+# https://sphinx-rtd-theme.readthedocs.io/en/stable/configuring.html
+html_theme_options = dict(logo_only=True)
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
