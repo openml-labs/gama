@@ -1,4 +1,4 @@
-# GAMA
+![GAMA logo](https://github.com/openml-lab/gama/blob/master/docs/source/technical_guide/images/logos/Logo-With-Grey-Name-Transparent.png)
 
 **G**eneral **A**utomated **M**achine learning **A**ssistant  
 An automated machine learning tool based on genetic programming.  
