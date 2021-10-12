@@ -9,6 +9,7 @@ Bugfixes:
  - `mut_replace_primitive` mutation is no longer considered if there are no suitable replacements for any primitive in the individual.
  - Setting `store` to `"all"`.
  - Setting `n_jobs` to `-1` once more correctly creates one subprocess per core.
+ - No longer leave zombie processes when `fit` is called more than once per process.
 
 Contributors (alphabetical order):
  - @Bilgecelik

@@ -143,15 +143,27 @@ class AsyncEvaluator:
             if self._command.empty():
                 break
             time.sleep(1)
-        else:
-            # A non-empty command queue indicates a process(es) was unable to shut down.
-            # All processes need to be terminated to free resources.
-            for process in self._processes:
-                try:
-                    process.terminate()
-                except psutil.NoSuchProcess:
-                    pass
+
+        self.clear_queue(self._input)
+        self.clear_queue(self._output)
+        self.clear_queue(self._command)
+
+        # Even processes which 'stop' need to be 'waited',
+        # otherwise they become zombie processes.
+        while len(self._processes) > 0:
+            try:
+                self._stop_worker_process(self._processes[0])
+            except psutil.NoSuchProcess:
+                pass
         return False
+
+    def clear_queue(self, queue: multiprocessing.Queue):
+        while not queue.empty():
+            try:
+                queue.get(timeout=0.001)
+            except:
+                pass
+        queue.close()
 
     def submit(self, fn: Callable, *args, **kwargs) -> AsyncFuture:
         """ Submit fn(*args, **kwargs) to be evaluated on a subprocess.
@@ -232,6 +244,7 @@ class AsyncEvaluator:
     def _stop_worker_process(self, process: psutil.Process):
         """ Terminate a new worker node and remove it from the process pool. """
         process.terminate()
+        process.wait(timeout=60)
         self._processes.remove(process)
 
     def _control_memory_usage(self, threshold=0.05):
