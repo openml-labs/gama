@@ -13,6 +13,9 @@ def nested_getattr(o, attr):
     return o
 
 
+def get_pipeline_str(evaluation) -> str:
+    return evaluation.individual.pipeline_str()
+
 class EvaluationLogger:
     def __init__(
         self,
@@ -53,7 +56,7 @@ class EvaluationLogger:
                     nested_getattr, attr="individual.fitness.process_time"
                 ),
                 score=partial(nested_getattr, attr="individual.fitness.values"),
-                pipeline=lambda e: e.individual.pipeline_str(),
+                pipeline=get_pipeline_str,
                 error=operator.attrgetter("error"),
             )
         else:

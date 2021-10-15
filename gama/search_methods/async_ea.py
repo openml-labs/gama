@@ -13,6 +13,15 @@ from gama.utilities.generic.async_evaluator import AsyncEvaluator
 log = logging.getLogger(__name__)
 
 
+def get_parent(evaluation, n) -> str:
+    """ retrieves the nth parent if it exists, '' otherwise. """
+    if len(evaluation.individual.meta.get("parents", [])) > n:
+        return evaluation.individual.meta["parents"][n]
+    return ""
+
+def get_origin(evaluation) -> str:
+    return evaluation.individual.meta.get("origin", "unknown")
+
 class AsyncEA(BaseSearch):
     """ Perform asynchronous evolutionary optimization.
 
@@ -44,18 +53,12 @@ class AsyncEA(BaseSearch):
         )
         self.output = []
 
-        def get_parent(evaluation, n) -> str:
-            """ retrieves the nth parent if it exists, '' otherwise. """
-            if len(evaluation.individual.meta.get("parents", [])) > n:
-                return evaluation.individual.meta["parents"][n]
-            return ""
-
         self.logger = partial(
             EvaluationLogger,
             extra_fields=dict(
                 parent0=partial(get_parent, n=0),
                 parent1=partial(get_parent, n=1),
-                origin=lambda e: e.individual.meta.get("origin", "unknown"),
+                origin=get_origin,
             ),
         )
 

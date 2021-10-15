@@ -90,6 +90,10 @@ class Evaluation:
         return self.score.__ge__(other.score)
 
 
+def main_node_str(e: Evaluation):
+    return str(e.individual.main_node)
+
+
 class EvaluationLibrary:
     """ Maintains an in-memory record of evaluations.
 
@@ -147,9 +151,6 @@ class EvaluationLibrary:
         self._cache = os.path.expandvars(cache)
         if not os.path.exists(self._cache):
             os.mkdir(self._cache)
-
-        def main_node_str(e: Evaluation):
-            return str(e.individual.main_node)
 
         self._lookup_key = main_node_str
 
