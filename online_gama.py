@@ -4,7 +4,7 @@ import arff
 import sklearn.metrics
 
 #Data prep
-a = arff.load(open('/home/bcelik/SEA_Abrubt_5.arff', 'r'),encode_nominal=True)
+a = arff.load(open('data_streams/SEA_Abrubt_5.arff', 'r'),encode_nominal=True)
 B = np.array_split(pd.DataFrame(a["data"]),500)
 #B[0]
 X = B[0].iloc[:,0:-1]
@@ -13,7 +13,7 @@ X_test = B[1].iloc[:,0:-1]
 y_test = B[1].iloc[:,-1]
 
 from gama import GamaClassifier
-from gama.search_methods import RandomSearch, AsynchronousSuccessiveHalving]
+from gama.search_methods import RandomSearch, AsynchronousSuccessiveHalving
 from gama.postprocessing import BestFitOnlinePostProcessing
 from river import compose
 
