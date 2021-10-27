@@ -3,6 +3,7 @@
 
 #imports
 
+import subprocess
 import numpy as np
 import pandas as pd
 import arff
@@ -61,12 +62,14 @@ for i in range(initial_batch+1,len(X)):
     if in_drift:
         print(f"Change detected at data point {i} and current performance is at {online_metric}")
         #re-optimize pipelines with sliding window
-        cls = GamaClassifier(max_total_time=60,
+        cls = GamaClassifier(max_total_time=180,
                              scoring='accuracy',
                              search=AsyncEA(),
                              online_learning=True,
                              post_processing=BestFitOnlinePostProcessing(),
-                             store='all')
+                             warm_start =
+                             #store='all'
+                             )
         X_sliding = X.iloc[(i-sliding_window):i].reset_index(drop=True)
         y_sliding = y[(i-sliding_window):i].reset_index(drop=True)
         cls.fit(X_sliding, y_sliding)
