@@ -61,7 +61,7 @@ clf_config_online = {
     },
     LeveragingBaggingClassifier: {
         "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(),  linear_model.Perceptron(),
-                  tree.ExtremelyFastDecisionTreeClassifier(), tree.HoeffdingTreeClassifier] ,
+                  tree.ExtremelyFastDecisionTreeClassifier(), tree.HoeffdingTreeClassifier()] ,
         "n_models": range(1,20),
         "w": range(1,10),
         "adwin_delta": [0.001, 0.002, 0.005, 0.01],
@@ -69,17 +69,17 @@ clf_config_online = {
     },
     ADWINBaggingClassifier:{
         "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(),  linear_model.Perceptron(),
-                  tree.ExtremelyFastDecisionTreeClassifier(), tree.HoeffdingTreeClassifier] ,
+                  tree.ExtremelyFastDecisionTreeClassifier(), tree.HoeffdingTreeClassifier()] ,
         "n_models": range(1,20)
     },
     AdaBoostClassifier: {
         "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(), linear_model.Perceptron(),
-                  tree.ExtremelyFastDecisionTreeClassifier(), tree.HoeffdingTreeClassifier],
+                  tree.ExtremelyFastDecisionTreeClassifier(), tree.HoeffdingTreeClassifier()],
         "n_models": range(1, 20)
     },
     SRPClassifier: {
         "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(), linear_model.Perceptron(),
-                  tree.ExtremelyFastDecisionTreeClassifier(), tree.HoeffdingTreeClassifier],
+                  tree.ExtremelyFastDecisionTreeClassifier(), tree.HoeffdingTreeClassifier()],
         "n_models": range(1, 20),
         "subspace_size": np.arange(0.1,1,0.1),
         "training_method": ["subspaces","resampling","patches"],
