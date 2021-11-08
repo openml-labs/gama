@@ -50,7 +50,7 @@ clf_config_online = {
     },
     AdaptiveRandomForestClassifier: {
         "n_models": range(1,20),
-        "max_features": ["int", "sqrt", "log2", None],
+        "max_features": [int, float, "sqrt", "log2", None],
         "lambda_value": range(2,10),
         "grace_period":range(50, 350),
         "split_criterion": ["info_gain", "gini", "hellinger"],
