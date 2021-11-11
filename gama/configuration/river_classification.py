@@ -8,7 +8,6 @@ from river.ensemble import LeveragingBaggingClassifier
 from river.ensemble import ADWINBaggingClassifier
 from river.ensemble import AdaBoostClassifier
 from river.ensemble import AdaptiveRandomForestClassifier
-from river.ensemble import SRPClassifier
 from river import tree
 from river import linear_model
 
@@ -51,7 +50,7 @@ clf_config_online = {
     },
     AdaptiveRandomForestClassifier: {
         "n_models": range(1,20),
-        "max_features": [int, float, "sqrt", "log2", None],
+        "max_features": [0.2, 0.5, 0.7, 1.0, "sqrt", "log2", None],
         "lambda_value": range(2,10),
         "grace_period":range(50, 350),
         "split_criterion": ["info_gain", "gini", "hellinger"],
@@ -78,14 +77,6 @@ clf_config_online = {
                   tree.ExtremelyFastDecisionTreeClassifier(), tree.HoeffdingTreeClassifier()],
         "n_models": range(1, 20)
     },
-    # SRPClassifier: {
-    #     "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(), linear_model.Perceptron(),
-    #               tree.ExtremelyFastDecisionTreeClassifier(), tree.HoeffdingTreeClassifier()],
-    #     "n_models": range(1, 20),
-    #     "subspace_size": np.arange(0.1,1,0.1),
-    #     "training_method": ["subspaces","resampling","patches"],
-    #     "lam": range(2,10)
-    # },
     RobustScaler: {
         "with_centering": [True, False],
         "with_scaling": [True, False],
