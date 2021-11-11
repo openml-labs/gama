@@ -42,7 +42,8 @@ clf_config_online = {
         "tie_threshold": np.arange(0.02, 0.08, 0.01),
         "leaf_prediction": ["mc", "nb", "nba"],
         "nb_threshold": range(0, 50, 10),
-        # "splitter": ["tree.splitter.EBSTSplitter", "tree.splitter.HistogramSplitter",
+        # "splitter": ["tree.splitter.EBSTSplitter", "t
+        # ree.splitter.HistogramSplitter",
         #             "tree.splitter.TEBSTSplitter", "tree.splitter.GaussianSplitter"],
         "bootstrap_sampling": [True, False],
         "drift_window_threshold": range(100, 500, 100),
@@ -77,14 +78,14 @@ clf_config_online = {
                   tree.ExtremelyFastDecisionTreeClassifier(), tree.HoeffdingTreeClassifier()],
         "n_models": range(1, 20)
     },
-    SRPClassifier: {
-        "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(), linear_model.Perceptron(),
-                  tree.ExtremelyFastDecisionTreeClassifier(), tree.HoeffdingTreeClassifier()],
-        "n_models": range(1, 20),
-        "subspace_size": np.arange(0.1,1,0.1),
-        "training_method": ["subspaces","resampling","patches"],
-        "lam": range(2,10)
-    },
+    # SRPClassifier: {
+    #     "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(), linear_model.Perceptron(),
+    #               tree.ExtremelyFastDecisionTreeClassifier(), tree.HoeffdingTreeClassifier()],
+    #     "n_models": range(1, 20),
+    #     "subspace_size": np.arange(0.1,1,0.1),
+    #     "training_method": ["subspaces","resampling","patches"],
+    #     "lam": range(2,10)
+    # },
     RobustScaler: {
         "with_centering": [True, False],
         "with_scaling": [True, False],
