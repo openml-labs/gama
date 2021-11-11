@@ -34,7 +34,7 @@ y = B[:].iloc[:,-1]
 
 #Algorithm selection and hyperparameter tuning
 
-cls = GamaClassifier(max_total_time=60,
+cls = GamaClassifier(max_total_time=30,
                        scoring='accuracy',
                        search = AsyncEA(),
                        online_learning = True,
@@ -62,12 +62,11 @@ for i in range(initial_batch+1,len(X)):
     if in_drift:
         print(f"Change detected at data point {i} and current performance is at {online_metric}")
         #re-optimize pipelines with sliding window
-        cls = GamaClassifier(max_total_time=180,
+        cls = GamaClassifier(max_total_time=30,
                              scoring='accuracy',
                              search=AsyncEA(),
                              online_learning=True,
                              post_processing=BestFitOnlinePostProcessing(),
-                             warm_start =
                              #store='all'
                              )
         X_sliding = X.iloc[(i-sliding_window):i].reset_index(drop=True)

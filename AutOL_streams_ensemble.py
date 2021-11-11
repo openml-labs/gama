@@ -38,14 +38,14 @@ y = B[:].iloc[:,-1]
 
 cls = GamaClassifier(max_total_time=60,
                        scoring='accuracy',
-                       search = AsyncEA(),
+                       search = RandomSearch(),
                        online_learning = True,
                        post_processing = BestFitOnlinePostProcessing(),
                      )
 
 cls.fit(X.iloc[0:initial_batch],y[0:initial_batch])
 print(f'Initial model is {cls.model} and hyperparameters are: {cls.model._get_params()}')
-breakpoint()
+
 
 base_model = neighbors.KNNClassifier()
 base_model.learn_one((X.iloc[i].to_dict(), int(y[i])) for i in range(0,initial_batch))
@@ -54,7 +54,6 @@ base_model.learn_one((X.iloc[i].to_dict(), int(y[i])) for i in range(0,initial_b
 
 backup_ensemble = ensemble.VotingClassifier(neighbors.KNNClassifier() |
                                             cls)
-breakpoint()
 
 for i in range(initial_batch+1,len(X)):
     #Test then train - by one
@@ -86,7 +85,7 @@ for i in range(initial_batch+1,len(X)):
         #re-optimize pipelines with sliding window
         cls = GamaClassifier(max_total_time=60,
                              scoring='accuracy',
-                             search=AsyncEA(),
+                             search=RandomSearch(),
                              online_learning=True,
                              post_processing=BestFitOnlinePostProcessing(),
                              )
