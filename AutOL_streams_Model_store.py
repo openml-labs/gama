@@ -70,29 +70,43 @@ for i in range(initial_batch+1,len(X)):
             for i in range(len(model_store)):
                 score_arr.append(evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), model_store[i],
                                                metrics.Accuracy()))
-        curr_model_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), cls, metrics.Accuracy())
+        curr_model_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), cls.model, metrics.Accuracy())
         if len(model_store) < 10:
             model_store.append(cls.model)
-        elif curr_model_score > any in score_arr :
+        elif curr_model_score > any(score_arr) :
             low_model_score = min(score_arr)
             low_model = score_arr.index(low_model_score)
             model_store = model_store.pop(low_model)
             model_store.append(cls.model)
         print(f"Change detected at data point {i} and current performance is at {online_metric}")
         #re-optimize pipelines with sliding window
+        print(model_store)
         cls = GamaClassifier(max_total_time=180,
-                             scoring='accuracy',
-                             search=AsyncEA(),
-                             online_learning=True,
-                             post_processing=BestFitOnlinePostProcessing(),
-                                                          #store='all'
-                             )
+                         scoring='accuracy',
+                         search=AsyncEA(),
+                         online_learning=True,
+                         post_processing=BestFitOnlinePostProcessing(),
+                         # store='all'
+                         )
 
-        X_sliding = X.iloc[(i-sliding_window):i].reset_index(drop=True)
-        y_sliding = y[(i-sliding_window):i].reset_index(drop=True)
+        X_sliding = X.iloc[(i - sliding_window):i].reset_index(drop=True)
+        y_sliding = y[(i - sliding_window):i].reset_index(drop=True)
 
         cls.fit(X_sliding, y_sliding)
         print(f'Current model is {cls.model} and hyperparameters are: {cls.model._get_params()}')
 
+def classifier_search_gama(X,y):
+    cls = GamaClassifier(max_total_time=180,
+                         scoring='accuracy',
+                         search=AsyncEA(),
+                         online_learning=True,
+                         post_processing=BestFitOnlinePostProcessing(),
+                         # store='all'
+                         )
 
+    X_sliding = X.iloc[(i - sliding_window):i].reset_index(drop=True)
+    y_sliding = y[(i - sliding_window):i].reset_index(drop=True)
 
+    cls.fit(X_sliding, y_sliding)
+    print(f'Current model is {cls.model} and hyperparameters are: {cls.model._get_params()}')
+    return cls
