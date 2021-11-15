@@ -73,7 +73,7 @@ for i in range(initial_batch+1,len(X)):
         curr_model_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), cls.model, metrics.Accuracy())
         if len(model_store) < 10:
             model_store.append(cls.model)
-        elif curr_model_score > any(score_arr) :
+        elif curr_model_score > any(score_arr):
             low_model_score = min(score_arr)
             low_model = score_arr.index(low_model_score)
             model_store = model_store.pop(low_model)
@@ -110,3 +110,21 @@ def classifier_search_gama(X,y):
     cls.fit(X_sliding, y_sliding)
     print(f'Current model is {cls.model} and hyperparameters are: {cls.model._get_params()}')
     return cls
+
+def model_store_computation(model_store, i, X, y):
+    X_sliding = X.iloc[(i - sliding_window):i].reset_index(drop=True)
+    y_sliding = y[(i - sliding_window):i].reset_index(drop=True)
+    score_arr = []
+    if len(model_store) > 2:
+        for i in range(len(model_store)):
+            score_arr.append(evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), model_store[i],
+                                                            metrics.Accuracy()))
+    curr_model_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), cls.model,
+                                                      metrics.Accuracy())
+    if len(model_store) < 10:
+        model_store.append(cls.model)
+    elif curr_model_score > any(score_arr):
+        low_model_score = min(score_arr)
+        low_model = score_arr.index(low_model_score)
+        model_store = model_store.pop(low_model)
+        model_store.append(cls.model)
