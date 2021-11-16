@@ -36,7 +36,7 @@ y = B[:].iloc[:,-1]
 
 #Algorithm selection and hyperparameter tuning
 
-cls = GamaClassifier(max_total_time=60,
+cls = GamaClassifier(max_total_time=10,
                        scoring='accuracy',
                        search = AsyncEA(),
                        online_learning = True,
@@ -65,22 +65,26 @@ for i in range(initial_batch+1,len(X)):
         #Sliding window at the time of drift
         X_sliding = X.iloc[(i-sliding_window):i].reset_index(drop=True)
         y_sliding = y[(i-sliding_window):i].reset_index(drop=True)
-        score_arr = []
         if len(model_store) > 2:
+            score_arr = []
+
             for i in range(len(model_store)):
-                score_arr.append(evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), model_store[i],
-                                               metrics.Accuracy()))
+                score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), model_store[i],
+                                               metrics.Accuracy())
+                score_arr.append(score.get())
+            print(score_arr)
+
         curr_model_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), cls.model, metrics.Accuracy())
-        if len(model_store) < 10:
+        print(curr_model_score.get())
+        if len(model_store) < 5:
             model_store.append(cls.model)
-        elif curr_model_score > any(score_arr):
+        elif curr_model_score.get() > any(score_arr):
             low_model_score = min(score_arr)
             low_model = score_arr.index(low_model_score)
             model_store = model_store.pop(low_model)
             model_store.append(cls.model)
         print(f"Change detected at data point {i} and current performance is at {online_metric}")
         #re-optimize pipelines with sliding window
-        print(model_store)
         cls = GamaClassifier(max_total_time=180,
                          scoring='accuracy',
                          search=AsyncEA(),
