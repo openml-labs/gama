@@ -18,6 +18,7 @@ from river.drift import EDDM
 from river import evaluate
 from river import stream
 from river import ensemble
+from river import datasets
 
 #User parameters
 
@@ -36,32 +37,27 @@ y = B[:].iloc[:,-1]
 
 #Algorithm selection and hyperparameter tuning
 
-cls = GamaClassifier(max_total_time=60,
+Auto_pipeline = GamaClassifier(max_total_time=60,
                        scoring='accuracy',
                        search = RandomSearch(),
                        online_learning = True,
                        post_processing = BestFitOnlinePostProcessing(),
                      )
 
-cls.fit(X.iloc[0:initial_batch],y[0:initial_batch])
-print(f'Initial model is {cls.model} and hyperparameters are: {cls.model._get_params()}')
+Auto_pipeline.fit(X.iloc[0:initial_batch],y[0:initial_batch])
+print(f'Initial model is {Auto_pipeline.model} and hyperparameters are: {Auto_pipeline.model._get_params()}')
 
-
-base_model = neighbors.KNNClassifier()
-base_model.learn_one((X.iloc[i].to_dict(), int(y[i])) for i in range(0,initial_batch))
 
 #Online learning
 
-backup_ensemble = ensemble.VotingClassifier(neighbors.KNNClassifier() |
-                                            cls)
+Backup_ensemble = ensemble.VotingClassifier([Auto_pipeline.model])
 
+Online_model = Auto_pipeline.model
 for i in range(initial_batch+1,len(X)):
     #Test then train - by one
-    y_pred = cls.model.predict_one(X.iloc[i].to_dict())
+    y_pred = Online_model.predict_one(X.iloc[i].to_dict())
     online_metric = online_metric.update(y[i], y_pred)
-    cls.model = cls.model.learn_one(X.iloc[i].to_dict(), int(y[i]))
-
-    #backup_ensemble.learn_one(X.iloc[i].to_dict(), int(y[i]))               # train ensemble at the background with each new sample
+    Online_model = Online_model.learn_one(X.iloc[i].to_dict(), int(y[i]))
 
     #Print performance every x interval
     if i%1000 == 0:
@@ -76,24 +72,33 @@ for i in range(initial_batch+1,len(X)):
         X_sliding = X.iloc[(i-sliding_window):i].reset_index(drop=True)
         y_sliding = y[(i-sliding_window):i].reset_index(drop=True)
 
-        #Compare ensemble and replace current model if better
-        perf_ensemble = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), backup_ensemble, metrics.Accuracy())
-        perf_model = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), cls, metrics.Accuracy())
-
-        if perf_ensemble > perf_model:
-            cls = backup_ensemble
         #re-optimize pipelines with sliding window
-        cls = GamaClassifier(max_total_time=60,
+        Auto_pipeline = GamaClassifier(max_total_time=60,
                              scoring='accuracy',
                              search=RandomSearch(),
                              online_learning=True,
                              post_processing=BestFitOnlinePostProcessing(),
                              )
-        cls.fit(X_sliding, y_sliding)
-        backup_ensemble |= cls
-        print(f'Current model is {cls.model} and hyperparameters are: {cls.model._get_params()}')
+        Auto_pipeline.fit(X_sliding, y_sliding)
 
-        # How does ensembling work with possible prepocessors in models,
-        # votingclassifier only ensembles classifiers and take their vote.
-        # Bagging classifier resamples only classifier models.
+        #Ensemble performance comparison
+        dataset = datasets.Phishing()   # nevermind here, i just wanted to check if code works with any data, then i will convert sliding windows to river data.
+
+        Perf_ensemble = evaluate.progressive_val_score(dataset, Backup_ensemble, online_metric)
+        Perf_automodel = evaluate.progressive_val_score(dataset, Auto_pipeline, online_metric)
+        if Perf_ensemble > Perf_automodel:
+            Online_model = Backup_ensemble
+            print("Online model is updated with Backup Ensemble.")
+        else:
+            Online_model = Auto_pipeline
+            print("Online model is updated with latest AutoML pipeline.")
+
+        #Ensemble update with new model, remove oldest model if ensemble is full
+        Backup_ensemble.models.append(Auto_pipeline.model)
+        if len(Backup_ensemble.models) > 10:
+            Backup_ensemble.models.pop(0)
+
+        print(f'Current model is {Online_model} and hyperparameters are: {Online_model._get_params()}')
+
+
 
