@@ -39,7 +39,7 @@ cls = GamaClassifier(max_total_time=30,
                        search = AsyncEA(),
                        online_learning = True,
                        post_processing = BestFitOnlinePostProcessing(),
-                       #store = 'all'
+                       store = 'nothing'
                      )
 
 cls.fit(X.iloc[0:initial_batch],y[0:initial_batch])

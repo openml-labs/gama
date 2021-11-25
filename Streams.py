@@ -17,7 +17,8 @@ from river import linear_model
 from river import tree
 from river import evaluate
 from river import datasets
-import pprint
+from river import stream
+
 
 #User parameters
 
@@ -30,30 +31,30 @@ drift_detector = EDDM()
 #Data
 
 B = pd.DataFrame(arff.load(open(data_loc, 'r'),encode_nominal=True)["data"])
+B = B[~((B.iloc[:,0:-1] == 0).any(axis=1))].reset_index(drop=True)
 
-X = B[:].iloc[:,0:-1]
-y = B[:].iloc[:,-1]
+X = B.iloc[:,0:-1]
+y = B.iloc[:,-1]
 
-model_1 = neighbors.KNNClassifier()
+
+model_1 = tree.ExtremelyFastDecisionTreeClassifier()
 model_2 = preprocessing.StandardScaler() | linear_model.Perceptron()
 model_3 = preprocessing.AdaptiveStandardScaler() | tree.HoeffdingAdaptiveTreeClassifier()
 model_4 = tree.HoeffdingAdaptiveTreeClassifier()
 
 
-dataset = datasets.Phishing()
+#dataset = datasets.Phishing()
+dataset = []
+for xi, yi in stream.iter_pandas(X, y):
+    dataset.append((xi,yi))
 
 metric = metrics.Accuracy()
 backup_ensemble = ensemble.VotingClassifier([model_1, model_2, model_3])
 evaluate.progressive_val_score(dataset, backup_ensemble, metric)
 print("ensemble: ", metric)
 print(backup_ensemble._get_params())
-breakpoint()
 
-backup_ensemble.models.append(model_4)
-evaluate.progressive_val_score(dataset, backup_ensemble, metric)
-print("ensemble: ", metric)
-print(backup_ensemble._get_params())
-breakpoint()
+
 
 # for i in range(initial_batch+1,len(X)):
 #     #Test then train - by onelene

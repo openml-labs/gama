@@ -22,9 +22,16 @@ from river import datasets
 
 #User parameters
 
-data_loc = 'data_streams/SEA_Abrubt_5.arff'     #needs to be arff
-initial_batch = 5000                            #initial set of samples to train automl
-sliding_window = 1000                           #update set of samples to train automl at drift points (must be smaller than or equal to initial batch size
+import sys
+print(sys.argv[0]) # prints python_script.py
+print(sys.argv[1]) # prints dataset no
+print(sys.argv[2]) # prints initial batch size
+print(sys.argv[3]) # prints sliding window size
+print(sys.argv[4]) # prints online metric
+
+data_loc = 'data_streams/electricity-normalized.arff'     #needs to be arff
+initial_batch = int(sys.argv[1])                            #initial set of samples to train automl
+sliding_window = 3000                           #update set of samples to train automl at drift points (must be smaller than or equal to initial batch size
 online_metric = metrics.Accuracy()              #river metric to evaluate online learning
 drift_detector = EDDM()
 
@@ -82,15 +89,18 @@ for i in range(initial_batch+1,len(X)):
         Auto_pipeline.fit(X_sliding, y_sliding)
 
         #Ensemble performance comparison
-        dataset = datasets.Phishing()   # nevermind here, i just wanted to check if code works with any data, then i will convert sliding windows to river data.
+        dataset = []
+        for xi, yi in stream.iter_pandas(X_sliding, y_sliding):
+            dataset.append((xi, yi))
 
-        Perf_ensemble = evaluate.progressive_val_score(dataset, Backup_ensemble, online_metric)
-        Perf_automodel = evaluate.progressive_val_score(dataset, Auto_pipeline, online_metric)
-        if Perf_ensemble > Perf_automodel:
+        Perf_ensemble = evaluate.progressive_val_score(dataset, Backup_ensemble, metrics.Accuracy())
+        Perf_automodel = evaluate.progressive_val_score(dataset, Auto_pipeline.model, metrics.Accuracy())
+
+        if Perf_ensemble.get() > Perf_automodel.get():
             Online_model = Backup_ensemble
             print("Online model is updated with Backup Ensemble.")
         else:
-            Online_model = Auto_pipeline
+            Online_model = Auto_pipeline.model
             print("Online model is updated with latest AutoML pipeline.")
 
         #Ensemble update with new model, remove oldest model if ensemble is full
