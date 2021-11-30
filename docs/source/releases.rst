@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 21.0.1
+--------------
+
+Features:
+ - Add a ``goal`` hyperparameter to all GAMA estimators which let you specify the goal
+   of your AutoML execution. Currently ``simplicity`` can be specified to create a
+   simple model, and ``performance`` can be used to generate the best possible model.
+   It is still possible to manually set the search and post processing methods.
+
+
 Version 21.0.0
 --------------
 

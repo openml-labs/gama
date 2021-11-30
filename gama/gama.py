@@ -93,10 +93,11 @@ class Gama(ABC):
         n_jobs: Optional[int] = None,
         max_memory_mb: Optional[int] = None,
         verbosity: int = logging.WARNING,
-        search: BaseSearch = AsyncEA(),
-        post_processing: BasePostProcessing = BestFitPostProcessing(),
+        search: Optional[BaseSearch] = None,
+        post_processing: Optional[BasePostProcessing] = None,
         output_directory: Optional[str] = None,
         store: str = "logs",
+        goal: str = "simplicity",
     ):
         """
 
@@ -148,12 +149,14 @@ class Gama(ABC):
         verbosity: int (default=logging.WARNING)
             Sets the level of log messages to be automatically output to terminal.
 
-        search: BaseSearch (default=AsyncEA())
+        search: BaseSearch, optional
             Search method to use to find good pipelines. Should be instantiated.
+            Default depends on ``goal``.
 
-        post_processing: BasePostProcessing (default=BestFitPostProcessing())
+        post_processing: BasePostProcessing, optional
             Post-processing method to create a model after the search phase.
             Should be an instantiated subclass of BasePostProcessing.
+            Default depends on ``goal``.
 
         output_directory: str, optional (default=None)
             Directory to use to save GAMA output. This includes both intermediate
@@ -166,7 +169,24 @@ class Gama(ABC):
              - 'models': keep only cache with models and predictions
              - 'logs': keep only the logs
              - 'all': keep logs and cache with models and predictions
+
+        goal: str (default='simplicity')
+            Determines the steps of the AutoML pipeline when they are not
+            provided explicitly, based on the given goal.
+            One of:
+                - simplicity: Create a simple pipeline with good performance.
+                - performance: Try to get the best performing model.
         """
+        if search is None:
+            search = AsyncEA()
+        if post_processing is None:
+            if goal == 'simplicity':
+                post_processing = BestFitPostProcessing()
+            elif goal == 'performance':
+                post_processing = EnsemblePostProcessing()
+            else:
+                raise ValueError(f"Unknown value for `goal`: '{goal}'")
+
         if not output_directory:
             output_directory = f"gama_{str(uuid.uuid4())}"
         self.output_directory = os.path.abspath(os.path.expanduser(output_directory))
