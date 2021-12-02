@@ -13,7 +13,7 @@ from gama.search_methods import AsyncEA
 from gama.search_methods import RandomSearch
 from gama.search_methods import AsynchronousSuccessiveHalving
 from gama.postprocessing import BestFitOnlinePostProcessing
-
+from multiprocessing import Pool
 from river import metrics
 from river.drift import EDDM
 from river import evaluate
@@ -28,6 +28,52 @@ online_metric = metrics.Accuracy()              #river metric to evaluate online
 drift_detector = EDDM()
 
 #Data
+# def classifier_search_gama(X,y):
+#     cls = GamaClassifier(max_total_time=180,
+#                          scoring='accuracy',
+#                          search=AsyncEA(),
+#                          online_learning=True,
+#                          post_processing=BestFitOnlinePostProcessing(),
+#                          # store='all'
+#                          )
+#
+#     X_sliding = X.iloc[(i - sliding_window):i].reset_index(drop=True)
+#     y_sliding = y[(i - sliding_window):i].reset_index(drop=True)
+#
+#     cls.fit(X_sliding, y_sliding)
+#     print(f'Current model is {cls.model} and hyperparameters are: {cls.model._get_params()}')
+#     return cls
+#
+# def model_store_computation(model_store, i, X, y):
+#     print(i)
+#     X_sliding = X.iloc[(i - sliding_window):i].reset_index(drop=True)
+#     y_sliding = y[(i - sliding_window):i].reset_index(drop=True)
+#     if len(model_store) > 2:
+#         score_arr = []
+#
+#         for j in range(len(model_store)):
+#             score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), model_store[j],
+#                                                    metrics.Accuracy())
+#             score_arr.append(score.get())
+#         print(score_arr)
+#
+#     curr_model_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), cls.model,
+#                                                       metrics.Accuracy())
+#     print(curr_model_score.get())
+#     if len(model_store) < 5:
+#         model_store.append(cls.model)
+#     elif curr_model_score.get() > any(score_arr):
+#         print('Current model added to Model Store')
+#         low_model_score = min(score_arr)
+#         low_model = score_arr.index(low_model_score)
+#         model_store = model_store.pop(low_model)
+#         model_store.append(cls.model)
+#     max_score = max(score_arr)
+#     max_model_index = score_arr.index(max_score)
+#     max_model = model_store[max_model_index]
+#     return model_store, max_score, max_model, curr_model_score
+
+
 
 B = pd.DataFrame(arff.load(open(data_loc, 'r'),encode_nominal=True)["data"])
 
@@ -61,7 +107,11 @@ for i in range(initial_batch+1,len(X)):
     #Check for drift
     in_drift, in_warning = drift_detector.update(int(y_pred == y[i]))
     if in_drift:
-
+        # Functions can also be used but not doing them not to maintain homogenity in experimental code
+        # model_store,max_model = model_store_computation(model_store, i, X, y)
+        # cls = classifier_search_gama(X, y)
+        #
+        # print(cls)
         #Sliding window at the time of drift
         X_sliding = X.iloc[(i-sliding_window):i].reset_index(drop=True)
         y_sliding = y[(i-sliding_window):i].reset_index(drop=True)
@@ -99,36 +149,3 @@ for i in range(initial_batch+1,len(X)):
         cls.fit(X_sliding, y_sliding)
         print(f'Current model is {cls.model} and hyperparameters are: {cls.model._get_params()}')
 
-def classifier_search_gama(X,y):
-    cls = GamaClassifier(max_total_time=180,
-                         scoring='accuracy',
-                         search=AsyncEA(),
-                         online_learning=True,
-                         post_processing=BestFitOnlinePostProcessing(),
-                         # store='all'
-                         )
-
-    X_sliding = X.iloc[(i - sliding_window):i].reset_index(drop=True)
-    y_sliding = y[(i - sliding_window):i].reset_index(drop=True)
-
-    cls.fit(X_sliding, y_sliding)
-    print(f'Current model is {cls.model} and hyperparameters are: {cls.model._get_params()}')
-    return cls
-
-def model_store_computation(model_store, i, X, y):
-    X_sliding = X.iloc[(i - sliding_window):i].reset_index(drop=True)
-    y_sliding = y[(i - sliding_window):i].reset_index(drop=True)
-    score_arr = []
-    if len(model_store) > 2:
-        for i in range(len(model_store)):
-            score_arr.append(evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), model_store[i],
-                                                            metrics.Accuracy()))
-    curr_model_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), cls.model,
-                                                      metrics.Accuracy())
-    if len(model_store) < 10:
-        model_store.append(cls.model)
-    elif curr_model_score > any(score_arr):
-        low_model_score = min(score_arr)
-        low_model = score_arr.index(low_model_score)
-        model_store = model_store.pop(low_model)
-        model_store.append(cls.model)
