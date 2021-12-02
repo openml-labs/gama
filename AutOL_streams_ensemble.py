@@ -22,21 +22,22 @@ from river import datasets
 
 #Datasets
 datasets =['data_streams/electricity-normalized.arff',      #0
-           'data_streams/Forestcover.arff',                 #1
-           'data_streams/new_airlines.arff',                #2
-           'data_streams/new_IMDB_drama.arff',              #3
-           'data_streams/new_ldpa.arff',                    #4
-           'data_streams/new_pokerhand-normalized.arff',    #5
-           'data_streams/new_Run_or_walk_information.arff', #6
-           'data_streams/SEA_Abrubt_5.arff',                #7
-           'data_streams/HYPERPLANE_01.arff',               #8
-           'data_streams/SEA_Mixed_5.arff' ]                #9
+           'data_streams/new_airlines.arff',                #1
+           'data_streams/new_IMDB_drama.arff',              #2
+           'data_streams/SEA_Abrubt_5.arff',                #3
+           'data_streams/HYPERPLANE_01.arff',               #4
+           'data_streams/SEA_Mixed_5.arff',                 #5
+           'data_streams/Forestcover.arff',                 #6
+           'data_streams/new_ldpa.arff',                    #7
+           'data_streams/new_pokerhand-normalized.arff',    #8
+           'data_streams/new_Run_or_walk_information.arff', #9
+           ]
 #Metrics
 gama_metrics = ['accuracy',              #0
-           'balanced_accuracy',     #1
-           'f1',                    #2
-           'roc_auc',               #3
-           'rmse']                  #4
+                'balanced_accuracy',     #1
+                'f1',                    #2
+                'roc_auc',               #3
+                'rmse']                  #4
 online_metrics = [metrics.Accuracy(),               #0
            metrics.BalancedAccuracy(),              #1
            metrics.F1(),                            #2
