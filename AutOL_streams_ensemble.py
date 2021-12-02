@@ -20,19 +20,49 @@ from river import stream
 from river import ensemble
 from river import datasets
 
+#Datasets
+datasets =['data_streams/electricity-normalized.arff',      #0
+           'data_streams/Forestcover.arff',                 #1
+           'data_streams/new_airlines.arff',                #2
+           'data_streams/new_IMDB_drama.arff',              #3
+           'data_streams/new_ldpa.arff',                    #4
+           'data_streams/new_pokerhand-normalized.arff',    #5
+           'data_streams/new_Run_or_walk_information.arff', #6
+           'data_streams/SEA_Abrubt_5.arff',                #7
+           'data_streams/HYPERPLANE_01.arff',               #8
+           'data_streams/SEA_Mixed_5.arff' ]                #9
+#Metrics
+gama_metrics = ['accuracy',              #0
+           'balanced_accuracy',     #1
+           'f1',                    #2
+           'roc_auc',               #3
+           'rmse']                  #4
+online_metrics = [metrics.Accuracy(),               #0
+           metrics.BalancedAccuracy(),              #1
+           metrics.F1(),                            #2
+           metrics.ROCAUC(),                        #3
+           metrics.RMSE()]                          #4
+
+#Search algorithms
+search_algs = [RandomSearch(),                      #0
+               AsyncEA(),                           #1
+               AsynchronousSuccessiveHalving()]     #2
 #User parameters
 
 import sys
 print(sys.argv[0]) # prints python_script.py
-print(sys.argv[1]) # prints dataset no
-print(sys.argv[2]) # prints initial batch size
-print(sys.argv[3]) # prints sliding window size
-print(sys.argv[4]) # prints online metric
+print(f"Data stream is {datasets[int(sys.argv[1])]}.")                      # prints dataset no
+print(f"Initial batch size is {int(sys.argv[2])}.")                         # prints initial batch size
+print(f"Sliding window size is {int(sys.argv[3])}.")                        # prints sliding window size
+print(f"Gama performance metric is {gama_metrics[int(sys.argv[4])]}.")      # prints gama performance metric
+print(f"Online performance metric is {online_metrics[int(sys.argv[5])]}.")  # prints online performance metric
+print(f"Time budget for GAMA is {int(sys.argv[6])}.")                       # prints time budget for GAMA
+print(f"Search algorithm for GAMA is {search_algs[int(sys.argv[7])]}.")     # prints search algorithm for GAMA
 
-data_loc = 'data_streams/electricity-normalized.arff'     #needs to be arff
-initial_batch = int(sys.argv[1])                            #initial set of samples to train automl
-sliding_window = 3000                           #update set of samples to train automl at drift points (must be smaller than or equal to initial batch size
-online_metric = metrics.Accuracy()              #river metric to evaluate online learning
+data_loc = datasets[int(sys.argv[1])]               #needs to be arff
+initial_batch = int(sys.argv[2])                    #initial set of samples to train automl
+sliding_window = int(sys.argv[3])                   #update set of samples to train automl at drift points (must be smaller than or equal to initial batch size
+online_metric  = online_metrics[int(sys.argv[5])]   #river metric to evaluate online learning
 drift_detector = EDDM()
 
 #Data
@@ -44,9 +74,9 @@ y = B[:].iloc[:,-1]
 
 #Algorithm selection and hyperparameter tuning
 
-Auto_pipeline = GamaClassifier(max_total_time=60,
-                       scoring='accuracy',
-                       search = RandomSearch(),
+Auto_pipeline = GamaClassifier(max_total_time=int(sys.argv[6]),
+                       scoring= gama_metrics[int(sys.argv[4])] ,
+                       search = search_algs[int(sys.argv[7])],
                        online_learning = True,
                        post_processing = BestFitOnlinePostProcessing(),
                      )
@@ -80,12 +110,12 @@ for i in range(initial_batch+1,len(X)):
         y_sliding = y[(i-sliding_window):i].reset_index(drop=True)
 
         #re-optimize pipelines with sliding window
-        Auto_pipeline = GamaClassifier(max_total_time=60,
-                             scoring='accuracy',
-                             search=RandomSearch(),
-                             online_learning=True,
-                             post_processing=BestFitOnlinePostProcessing(),
-                             )
+        Auto_pipeline = GamaClassifier(max_total_time=int(sys.argv[6]),
+                                       scoring= gama_metrics[int(sys.argv[4])],
+                                       search=search_algs[int(sys.argv[7])],
+                                       online_learning=True,
+                                       post_processing=BestFitOnlinePostProcessing(),
+                                       )
         Auto_pipeline.fit(X_sliding, y_sliding)
 
         #Ensemble performance comparison
