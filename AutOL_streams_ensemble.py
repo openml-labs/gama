@@ -6,6 +6,7 @@
 import numpy as np
 import pandas as pd
 import arff
+import sys
 
 from gama import GamaClassifier
 from gama.search_methods import AsyncEA
@@ -50,7 +51,6 @@ search_algs = [RandomSearch(),                      #0
                AsynchronousSuccessiveHalving()]     #2
 #User parameters
 
-import sys
 print(sys.argv[0]) # prints python_script.py
 print(f"Data stream is {datasets[int(sys.argv[1])]}.")                      # prints dataset no
 print(f"Initial batch size is {int(sys.argv[2])}.")                         # prints initial batch size
