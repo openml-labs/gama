@@ -167,7 +167,15 @@ for i in range(initial_batch+1,len(X)):
                                        )
         Auto_pipeline.fit(X_sliding, y_sliding)
 
-        if len(model_store) > 5:
+        curr_model_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), Auto_pipeline.model,
+                                                          metrics.Accuracy())
+        print(curr_model_score.get())
+
+        if len(model_store) < 5:
+            print('current model added to model store')
+            model_store.append(Auto_pipeline.model)
+
+        elif len(model_store) > 5:
             print('')
             score_arr = []
 
@@ -176,31 +184,27 @@ for i in range(initial_batch+1,len(X)):
                                                        metrics.Accuracy())
                 score_arr.append(score.get())
 
-        curr_model_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), cls.model, metrics.Accuracy())
-        print(curr_model_score.get())
+            if curr_model_score.get() > any(score_arr):
+                low_model_score = min(score_arr)
+                low_model = score_arr.index(low_model_score)
+                model_store = model_store.pop(low_model)
+                model_store.append(Auto_pipeline.model)
+                max_score = max(score_arr)
+                max_model_index = score_arr.index(max_score)
+                max_model = model_store[max_model_index]
 
-        if len(model_store) < 5:
-            print('current model added to model store')
-            model_store.append(cls.model)
-        elif curr_model_score.get() > any(score_arr):
-            low_model_score = min(score_arr)
-            low_model = score_arr.index(low_model_score)
-            model_store = model_store.pop(low_model)
-            model_store.append(cls.model)
-        max_score = max(score_arr)
-        max_model_index = score_arr.index(max_score)
-        max_model = model_store[max_model_index]
-
-        automl_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), Auto_pipeline.model, metrics.Accuracy())
-        if automl_score_score > max_score:
-            print("Online model is updated with latest AutoML pipeline.")
-            cls = Auto_pipeline.model
-        elif automl_score < max_score:
-            print("Online model is updated with Model Store pipeline.")
-            cls = max_model
+                automl_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), Auto_pipeline.model, metrics.Accuracy())
+                if automl_score > max_score:
+                    print("Online model is updated with latest AutoML pipeline.")
+                    cls = Auto_pipeline.model
+                    pass
+                elif automl_score < max_score:
+                    print("Online model is updated with Model Store pipeline.")
+                    cls = max_model
+                    pass
+        cls = Auto_pipeline.model
 
         print(f"Change detected at data point {i} and current performance is at {online_metric}")
         #re-optimize pipelines with sliding window
 
-        print(f'Current model is {cls.model} and hyperparameters are: {cls.model._get_params()}')
 
