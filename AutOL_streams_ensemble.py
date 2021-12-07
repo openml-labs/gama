@@ -24,14 +24,16 @@ from river import datasets
 #Datasets
 datasets =['data_streams/electricity-normalized.arff',      #0
            'data_streams/new_airlines.arff',                #1
-           'data_streams/new_IMDB_drama.arff',              #2
-           'data_streams/SEA_Abrubt_5.arff',                #3
-           'data_streams/HYPERPLANE_01.arff',               #4
-           'data_streams/SEA_Mixed_5.arff',                 #5
-           'data_streams/Forestcover.arff',                 #6
-           'data_streams/new_ldpa.arff',                    #7
-           'data_streams/new_pokerhand-normalized.arff',    #8
-           'data_streams/new_Run_or_walk_information.arff', #9
+           'data_streams/new_IMDB_drama.arff',              #2      - target at the beginning
+           'data_streams/new_vehicle_sensIT.arff',          #3      - target at the beginning
+           'data_streams/SEA_Abrubt_5.arff',                #4
+           'data_streams/HYPERPLANE_01.arff',               #5
+           'data_streams/SEA_Mixed_5.arff',                 #6
+           'data_streams/Forestcover.arff',                 #7      - for later
+           'data_streams/new_ldpa.arff',                    #8      - for later
+           'data_streams/new_pokerhand-normalized.arff',    #9      - for later
+           'data_streams/new_Run_or_walk_information.arff', #10     - for later
+
            ]
 #Metrics
 gama_metrics = ['accuracy',              #0
@@ -69,6 +71,21 @@ drift_detector = EDDM()
 #Data
 
 B = pd.DataFrame(arff.load(open(data_loc, 'r'),encode_nominal=True)["data"])
+
+# Preprocessing of data: Drop NaNs, move target to the end, check for zero values
+
+if int(sys.argv[1]) in [2,3]:
+    columns = B.columns.values.tolist()
+    columns.remove(0)
+    columns.append(0)
+    B = B.reindex(columns, axis=1)
+
+if pd.isnull(B.iloc[:, :]).any().any():
+    print("Data X contains NaN values. The rows that contain NaN values will be dropped.")
+    B.dropna(inplace=True)
+
+if B.eq(0).any().any():
+    print("Data contains zero values. They are not removed but might cause issues with some River learners.")
 
 X = B[:].iloc[:,0:-1]
 y = B[:].iloc[:,-1]
