@@ -21,6 +21,8 @@ from river import stream
 from river import ensemble
 from river import datasets
 
+from skmultiflow import drift_detection
+
 #Datasets
 datasets =['data_streams/electricity-normalized.arff',      #0
            'data_streams/new_airlines.arff',                #1
@@ -66,7 +68,8 @@ data_loc = datasets[int(sys.argv[1])]               #needs to be arff
 initial_batch = int(sys.argv[2])                    #initial set of samples to train automl
 sliding_window = int(sys.argv[3])                   #update set of samples to train automl at drift points (must be smaller than or equal to initial batch size
 online_metric  = online_metrics[int(sys.argv[5])]   #river metric to evaluate online learning
-drift_detector = EDDM()
+#drift_detector = EDDM()                            #river drift detector - issues
+drift_detector = drift_detection.EDDM()             #multiflow drift detector
 
 #Data
 
@@ -118,9 +121,10 @@ for i in range(initial_batch+1,len(X)):
     if i%1000 == 0:
         print(f'Test batch - {i} with {online_metric}')
 
-    #Check for drift
-    in_drift, in_warning = drift_detector.update(int(y_pred == y[i]))
-    if in_drift:
+    # Check for drift
+
+    drift_detector.add_element(int(y_pred != y[i]))
+    if drift_detector.detected_change():
         print(f"Change detected at data point {i} and current performance is at {online_metric}")
 
         #Sliding window at the time of drift
