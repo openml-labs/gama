@@ -28,12 +28,12 @@ from river.feature_extraction import PolynomialExtender
 #from river.feature_selection import SelectKBest
 
 clf_config_online = {
-    KNNADWINClassifier: {
-        "n_neighbors": range(1, 15),
-        "window_size": [100, 500, 750, 1000],
-        "leaf_size": range(5, 50, 5),
-        "p": np.arange(1, 2, 0.2)
-    },
+    # KNNADWINClassifier: {
+    #     "n_neighbors": range(1, 15),
+    #     "window_size": [100, 500, 750, 1000],
+    #     "leaf_size": range(5, 50, 5),
+    #     "p": np.arange(1, 2, 0.2)
+    # },
     HoeffdingAdaptiveTreeClassifier: {
         "grace_period": range(50, 350),
         "split_criterion": ["info_gain", "gini", "hellinger"],
