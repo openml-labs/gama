@@ -66,7 +66,7 @@ print(f"Search algorithm for GAMA is {search_algs[int(sys.argv[7])]}.")
 
 wandb.init(
 
-    project="Model-Store",
+    project="Model-Store-demo-2",
     config={
         "dataset": datasets[int(sys.argv[1])],
         "batch_size": int(sys.argv[2]),
@@ -132,7 +132,7 @@ for i in range(initial_batch + 1, len(X)):
     drift_detector.add_element(int(y_pred != y[i]))
     if drift_detector.detected_change():
         print(f"Change detected at data point {i} and current performance is at {online_metric}")
-        wandb.log({"drift_point": i, "current_performace": online_metric})
+        wandb.log({"drift_point": i, "current_performace": online_metric.get()})
         # Functions can also be used but not doing them not to maintain homogenity in experimental code
         # model_store,max_model = model_store_computation(model_store, i, X, y)
         # cls = classifier_search_gama(X, y)
@@ -153,7 +153,7 @@ for i in range(initial_batch + 1, len(X)):
         curr_model_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), Auto_pipeline.model,
                                                           metrics.Accuracy())
         print(curr_model_score.get())
-        wandb.log({"automl_score": curr_model_score.get(), "automl_model":Auto_pipeline.model._get_params()})
+        wandb.log({"automl_score": curr_model_score.get()})
         cls = Auto_pipeline.model
         print(f'Model store len=  {len(model_store)}')
         wandb.log({"model_store_len": len(model_store)})
@@ -173,7 +173,7 @@ for i in range(initial_batch + 1, len(X)):
             max_model_index = score_arr.index(max_score)
             max_model = model_store[max_model_index]
             print(f'max model score ={max_score} || current model score {curr_model_score.get()}')
-            wandb.log({"max_model_score": max_score, "max_model": max_model._get_params()})
+            wandb.log({"max_model_score": max_score,})
             if curr_model_score.get() > max_score:
                 print("Online model is updated with latest AutoML pipeline.")
                 cls = Auto_pipeline.model
@@ -191,7 +191,7 @@ for i in range(initial_batch + 1, len(X)):
 
                 # automl_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), Auto_pipeline.model, metrics.Accuracy())
         print(f'Current model is {cls} and hyperparameters are: {cls._get_params()}')
-        wandb.log({"current_model":cls._get_params()})
+        # wandb.log({"current_model":cls._get_params()})
         drift_detector.reset()
 
         # re-optimize pipelines with sliding window
