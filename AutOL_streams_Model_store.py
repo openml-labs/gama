@@ -20,7 +20,7 @@ from river import evaluate
 from river import stream
 from river import ensemble
 from river import datasets
-
+from skmultiflow import drift_detection
 #Datasets
 datasets =['data_streams/electricity-normalized.arff',      #0
            'data_streams/new_airlines.arff',                #1
@@ -67,7 +67,8 @@ data_loc = datasets[int(sys.argv[1])]               #needs to be arff
 initial_batch = int(sys.argv[2])                    #initial set of samples to train automl
 sliding_window = int(sys.argv[3])                   #update set of samples to train automl at drift points (must be smaller than or equal to initial batch size
 online_metric  = online_metrics[int(sys.argv[5])]   #river metric to evaluate online learning
-drift_detector = EDDM()
+# drift_detector = EDDM()
+drift_detector = drift_detection.EDDM()             #multiflow drift detector
 
 #Data
 # def classifier_search_gama(X,y):
@@ -119,6 +120,21 @@ drift_detector = EDDM()
 
 B = pd.DataFrame(arff.load(open(data_loc, 'r'),encode_nominal=True)["data"])
 
+# Preprocessing of data: Drop NaNs, move target to the end, check for zero values
+
+if int(sys.argv[1]) in [2,3]:
+    columns = B.columns.values.tolist()
+    columns.remove(0)
+    columns.append(0)
+    B = B.reindex(columns, axis=1)
+
+if pd.isnull(B.iloc[:, :]).any().any():
+    print("Data X contains NaN values. The rows that contain NaN values will be dropped.")
+    B.dropna(inplace=True)
+
+if B.eq(0).any().any():
+    print("Data contains zero values. They are not removed but might cause issues with some River learners.")
+
 X = B[:].iloc[:,0:-1]
 y = B[:].iloc[:,-1]
 
@@ -146,9 +162,8 @@ for i in range(initial_batch+1,len(X)):
     if i%1000 == 0:
         print(f'Test batch - {i} with {online_metric}')
 
-    #Check for drift
-    in_drift, in_warning = drift_detector.update(int(y_pred == y[i]))
-    if in_drift:
+    drift_detector.add_element(int(y_pred != y[i]))
+    if drift_detector.detected_change():
         print(f"Change detected at data point {i} and current performance is at {online_metric}")
         # Functions can also be used but not doing them not to maintain homogenity in experimental code
         # model_store,max_model = model_store_computation(model_store, i, X, y)
@@ -170,41 +185,42 @@ for i in range(initial_batch+1,len(X)):
         curr_model_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), Auto_pipeline.model,
                                                           metrics.Accuracy())
         print(curr_model_score.get())
-
+        cls = Auto_pipeline.model
+        print(f'Model store len=  {len(model_store)}')
         if len(model_store) < 5:
             print('current model added to model store')
             model_store.append(Auto_pipeline.model)
 
-        elif len(model_store) > 5:
-            print('')
+        if len(model_store) >= 5:
+            print('code ACTIVATED')
             score_arr = []
 
             for i in range(len(model_store)):
                 score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), model_store[i],
                                                        metrics.Accuracy())
                 score_arr.append(score.get())
-
+            max_score = max(score_arr)
+            max_model_index = score_arr.index(max_score)
+            max_model = model_store[max_model_index]
+            print(f'max model score ={max_score} || current model score {curr_model_score.get()}')
+            if curr_model_score.get() > max_score:
+                print("Online model is updated with latest AutoML pipeline.")
+                cls = Auto_pipeline.model
+            if curr_model_score.get() < max_score:
+                print("Online model is updated with Model Store pipeline.")
+                cls = max_model
             if curr_model_score.get() > any(score_arr):
+                print('model store computation')
                 low_model_score = min(score_arr)
                 low_model = score_arr.index(low_model_score)
                 model_store = model_store.pop(low_model)
                 model_store.append(Auto_pipeline.model)
-                max_score = max(score_arr)
-                max_model_index = score_arr.index(max_score)
-                max_model = model_store[max_model_index]
 
-                automl_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), Auto_pipeline.model, metrics.Accuracy())
-                if automl_score > max_score:
-                    print("Online model is updated with latest AutoML pipeline.")
-                    cls = Auto_pipeline.model
-                    pass
-                elif automl_score < max_score:
-                    print("Online model is updated with Model Store pipeline.")
-                    cls = max_model
-                    pass
-        cls = Auto_pipeline.model
 
-        print(f"Change detected at data point {i} and current performance is at {online_metric}")
+                # automl_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), Auto_pipeline.model, metrics.Accuracy())
+        print(f'Current model is {cls} and hyperparameters are: {cls._get_params()}')
+        drift_detector.reset()
+
         #re-optimize pipelines with sliding window
 
 
