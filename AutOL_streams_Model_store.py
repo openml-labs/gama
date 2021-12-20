@@ -112,6 +112,7 @@ Auto_pipeline = GamaClassifier(max_total_time=int(sys.argv[6]),
                                search=search_algs[int(sys.argv[7])],
                                online_learning=True,
                                post_processing=BestFitOnlinePostProcessing(),
+                               store='nothing'
                                )
 
 Auto_pipeline.fit(X.iloc[0:initial_batch], y[0:initial_batch])
@@ -147,7 +148,7 @@ for i in range(initial_batch + 1, len(X)):
                                        search=search_algs[int(sys.argv[7])],
                                        online_learning=True,
                                        post_processing=BestFitOnlinePostProcessing(),
-                                       )
+                                       store='nothing')
         Auto_pipeline.fit(X_sliding, y_sliding)
 
         curr_model_score = evaluate.progressive_val_score(stream.iter_pandas(X_sliding, y_sliding), Auto_pipeline.model,
