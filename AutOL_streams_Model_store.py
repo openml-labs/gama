@@ -66,7 +66,8 @@ print(f"Search algorithm for GAMA is {search_algs[int(sys.argv[7])]}.")
 
 wandb.init(
 
-    project="Model-Store-demo-2",
+    project="Model-Store-cluster-1",
+    entity="autoriver",
     config={
         "dataset": datasets[int(sys.argv[1])],
         "batch_size": int(sys.argv[2]),
@@ -99,7 +100,7 @@ if pd.isnull(B.iloc[:, :]).any().any():
     print("Data X contains NaN values. The rows that contain NaN values will be dropped.")
     B.dropna(inplace=True)
 
-if B.eq(0).any().any():
+if B[:].iloc[:,0:-1].eq(0).any().any():
     print("Data contains zero values. They are not removed but might cause issues with some River learners.")
 
 X = B[:].iloc[:, 0:-1]
@@ -121,6 +122,8 @@ print(f'Initial model is {Auto_pipeline.model} and hyperparameters are: {Auto_pi
 cls = Auto_pipeline.model
 # Online learning
 model_store = []
+last_training_point = initial_batch
+
 for i in range(initial_batch + 1, len(X)):
     # Test then train - by one
     y_pred = cls.predict_one(X.iloc[i].to_dict())
@@ -131,8 +134,20 @@ for i in range(initial_batch + 1, len(X)):
         print(f'Test batch - {i} with {online_metric}')
 
     drift_detector.add_element(int(y_pred != y[i]))
-    if drift_detector.detected_change():
-        print(f"Change detected at data point {i} and current performance is at {online_metric}")
+    if (drift_detector.detected_change()) or ((i - last_training_point) > 50000):
+        if i - last_training_point < 1000:
+            continue
+        if drift_detector.detected_change():
+            print(f"Change detected at data point {i} and current performance is at {online_metric}")
+            if live_plot:
+                wandb.log({"drift_point": i, "current_point": i, "Prequential performance": online_metric.get()})
+        if (i - last_training_point) > 50000:
+            print(f"No drift but retraining point {i} and current performance is at {online_metric}")
+            if live_plot:
+                wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
+
+        last_training_point = i
+
         wandb.log({"drift_point": i, "current_performace": online_metric.get()})
         # Functions can also be used but not doing them not to maintain homogenity in experimental code
         # model_store,max_model = model_store_computation(model_store, i, X, y)
@@ -156,6 +171,7 @@ for i in range(initial_batch + 1, len(X)):
         print(curr_model_score.get())
         wandb.log({"automl_score": curr_model_score.get()})
         cls = Auto_pipeline.model
+        print(f'AutoML model is {cls} and hyperparameters are: {cls._get_params()}')
         print(f'Model store len=  {len(model_store)}')
         wandb.log({"model_store_len": len(model_store)})
         if len(model_store) < 5:
