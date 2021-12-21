@@ -66,7 +66,7 @@ print(f"Search algorithm for GAMA is {search_algs[int(sys.argv[7])]}.")
 
 wandb.init(
 
-    project="Model-Store-cluster-1",
+    project="Model-Store-cluster-2",
     entity="autoriver",
     config={
         "dataset": datasets[int(sys.argv[1])],
