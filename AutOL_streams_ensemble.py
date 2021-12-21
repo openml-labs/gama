@@ -22,6 +22,9 @@ from river import ensemble
 from river import datasets
 
 from skmultiflow import drift_detection
+import matplotlib.pyplot as plt
+import wandb
+
 
 #Datasets
 datasets =['data_streams/electricity-normalized.arff',      #0
@@ -70,7 +73,21 @@ sliding_window = int(sys.argv[3])                   #update set of samples to tr
 online_metric  = online_metrics[int(sys.argv[5])]   #river metric to evaluate online learning
 #drift_detector = EDDM()                            #river drift detector - issues
 drift_detector = drift_detection.EDDM()             #multiflow drift detector
+live_plot = False
 
+#Plot initialization
+if live_plot:
+    wandb.init(
+        project="Ensemble-demo",
+        config={
+            "dataset": datasets[int(sys.argv[1])],
+            "batch_size": int(sys.argv[2]),
+            "sliding_window": int(sys.argv[3]),
+            "gama_performance_metric": int(sys.argv[4]),
+            "online_performance_metric": int(sys.argv[5]),
+            "time_budget_gama": int(sys.argv[6]),
+            "search_algorithm": int(sys.argv[7])
+        })
 #Data
 
 B = pd.DataFrame(arff.load(open(data_loc, 'r'),encode_nominal=True)["data"])
@@ -87,7 +104,7 @@ if pd.isnull(B.iloc[:, :]).any().any():
     print("Data X contains NaN values. The rows that contain NaN values will be dropped.")
     B.dropna(inplace=True)
 
-if B.eq(0).any().any():
+if B[:].iloc[:,0:-1].eq(0).any().any():
     print("Data contains zero values. They are not removed but might cause issues with some River learners.")
 
 X = B[:].iloc[:,0:-1]
@@ -100,6 +117,7 @@ Auto_pipeline = GamaClassifier(max_total_time=int(sys.argv[6]),
                        search = search_algs[int(sys.argv[7])],
                        online_learning = True,
                        post_processing = BestFitOnlinePostProcessing(),
+                       store='nothing',
                      )
 
 Auto_pipeline.fit(X.iloc[0:initial_batch],y[0:initial_batch])
@@ -111,21 +129,36 @@ print(f'Initial model is {Auto_pipeline.model} and hyperparameters are: {Auto_pi
 Backup_ensemble = ensemble.VotingClassifier([Auto_pipeline.model])
 
 Online_model = Auto_pipeline.model
-for i in range(initial_batch+1,len(X)):
+count_drift = 0
+last_training_point = initial_batch
+for i in range(initial_batch+1,len(B)):
     #Test then train - by one
     y_pred = Online_model.predict_one(X.iloc[i].to_dict())
     online_metric = online_metric.update(y[i], y_pred)
     Online_model = Online_model.learn_one(X.iloc[i].to_dict(), int(y[i]))
 
     #Print performance every x interval
+
     if i%1000 == 0:
         print(f'Test batch - {i} with {online_metric}')
-
+        if live_plot:
+            wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
     # Check for drift
 
     drift_detector.add_element(int(y_pred != y[i]))
-    if drift_detector.detected_change():
-        print(f"Change detected at data point {i} and current performance is at {online_metric}")
+    if (drift_detector.detected_change()) or ((i - last_training_point) > 50000):
+        if i - last_training_point < 1000:
+            continue
+        if drift_detector.detected_change():
+            print(f"Change detected at data point {i} and current performance is at {online_metric}")
+            if live_plot:
+                wandb.log({"drift_point": i, "current_point": i, "Prequential performance": online_metric.get()})
+        if (i - last_training_point) > 50000:
+            print(f"No drift but retraining point {i} and current performance is at {online_metric}")
+            if live_plot:
+                wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
+
+        last_training_point = i
 
         #Sliding window at the time of drift
         X_sliding = X.iloc[(i-sliding_window):i].reset_index(drop=True)
@@ -137,6 +170,7 @@ for i in range(initial_batch+1,len(X)):
                                        search=search_algs[int(sys.argv[7])],
                                        online_learning=True,
                                        post_processing=BestFitOnlinePostProcessing(),
+                                       store='nothing',
                                        )
         Auto_pipeline.fit(X_sliding, y_sliding)
 
@@ -161,6 +195,5 @@ for i in range(initial_batch+1,len(X)):
             Backup_ensemble.models.pop(0)
 
         print(f'Current model is {Online_model} and hyperparameters are: {Online_model._get_params()}')
-
 
 

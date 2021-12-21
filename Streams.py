@@ -20,10 +20,17 @@ from river import evaluate
 from river import datasets
 from river import stream
 
+import matplotlib.pyplot as plt
+plt.ion() ## Note this correction
+fig=plt.figure()
+#plt.axis([0,10000,0,1])
+x_plot=[]
+y_plot=[]
+plt.show(block=False)
 
 #User parameters
 
-data_loc = 'data_streams/HYPERPLANE_01.arff'     #needs to be arff
+data_loc = 'data_streams/HYPERPLANE_01.arff'    #needs to be arff
 initial_batch = 5000                            #initial set of samples to train automl
 sliding_window = 1000                           #update set of samples to train automl at drift points (must be smaller than or equal to initial batch size
 online_metric = metrics.Accuracy()              #river metric to evaluate online learning
@@ -42,16 +49,24 @@ model_1 = tree.ExtremelyFastDecisionTreeClassifier()
 model_2 = preprocessing.StandardScaler() | linear_model.Perceptron()
 model_3 = preprocessing.AdaptiveStandardScaler() | tree.HoeffdingAdaptiveTreeClassifier()
 model_4 = tree.HoeffdingAdaptiveTreeClassifier()
+model_5 = ensemble.LeveragingBaggingClassifier(model=tree.HoeffdingAdaptiveTreeClassifier())
+
+model = model_5
 
 for i in range(initial_batch+1,len(X)):
     #Test then train - by one
-    y_pred = model_1.predict_one(X.iloc[i].to_dict())
+    y_pred = model.predict_one(X.iloc[i].to_dict())
     online_metric = online_metric.update(y[i], y_pred)
-    model_1 = model_1.learn_one(X.iloc[i].to_dict(), int(y[i]))
+    model = model.learn_one(X.iloc[i].to_dict(), int(y[i]))
 
     #Print performance every x interval
     if i%1000 == 0:
         print(f'Test batch - {i} with {online_metric}')
+        x_plot.append(i)
+        y_plot.append(online_metric.get())
+        plt.plot(x_plot, y_plot)
+        plt.draw()
+        plt.pause(0.0001)
 
     #Check for drift
     #in_drift, in_warning = drift_detector.update(int(y_pred == y[i]))
