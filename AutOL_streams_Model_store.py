@@ -139,12 +139,9 @@ for i in range(initial_batch + 1, len(X)):
             continue
         if drift_detector.detected_change():
             print(f"Change detected at data point {i} and current performance is at {online_metric}")
-            if live_plot:
-                wandb.log({"drift_point": i, "current_point": i, "Prequential performance": online_metric.get()})
         if (i - last_training_point) > 50000:
             print(f"No drift but retraining point {i} and current performance is at {online_metric}")
-            if live_plot:
-                wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
+            wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
 
         last_training_point = i
 
