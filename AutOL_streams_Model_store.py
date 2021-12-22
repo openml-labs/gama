@@ -55,14 +55,7 @@ search_algs = [RandomSearch(),  # 0
                AsynchronousSuccessiveHalving()]
 
 # User parameters
-print(sys.argv[0])  # prints python_script.py
-print(f"Data stream is {datasets[int(sys.argv[1])]}.")  # prints dataset no
-print(f"Initial batch size is {int(sys.argv[2])}.")  # prints initial batch size
-print(f"Sliding window size is {int(sys.argv[3])}.")  # prints sliding window size
-print(f"Gama performance metric is {gama_metrics[int(sys.argv[4])]}.")  # prints gama performance metric
-print(f"Online performance metric is {online_metrics[int(sys.argv[5])]}.")  # prints online performance metric
-print(f"Time budget for GAMA is {int(sys.argv[6])}.")  # prints time budget for GAMA
-print(f"Search algorithm for GAMA is {search_algs[int(sys.argv[7])]}.")
+
 
 wandb.init(
 
@@ -77,6 +70,17 @@ wandb.init(
         "time_budget_gama": int(sys.argv[6]),
         "search_algorithm": int(sys.argv[7])
     })
+
+
+print(sys.argv[0])  # prints python_script.py
+print(f"Data stream is {datasets[int(sys.argv[1])]}.")  # prints dataset no
+print(f"Initial batch size is {int(sys.argv[2])}.")  # prints initial batch size
+print(f"Sliding window size is {int(sys.argv[3])}.")  # prints sliding window size
+print(f"Gama performance metric is {gama_metrics[int(sys.argv[4])]}.")  # prints gama performance metric
+print(f"Online performance metric is {online_metrics[int(sys.argv[5])]}.")  # prints online performance metric
+print(f"Time budget for GAMA is {int(sys.argv[6])}.")  # prints time budget for GAMA
+print(f"Search algorithm for GAMA is {search_algs[int(sys.argv[7])]}.")
+
 
 data_loc = datasets[int(sys.argv[1])]  # needs to be arff
 initial_batch = int(sys.argv[2])  # initial set of samples to train automl
@@ -144,7 +148,6 @@ for i in range(initial_batch + 1, len(X)):
             wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
 
         last_training_point = i
-
         wandb.log({"drift_point": i, "current_performace": online_metric.get()})
         # Functions can also be used but not doing them not to maintain homogenity in experimental code
         # model_store,max_model = model_store_computation(model_store, i, X, y)
