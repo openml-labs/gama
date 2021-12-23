@@ -65,20 +65,21 @@ _note_: By default, GamaClassifier optimizes towards `log_loss`.
 
 ## Citing
 
-If you want to cite GAMA, please use [our JOSS publication](http://joss.theoj.org/papers/10.21105/joss.01132).
+If you want to cite GAMA, please use [our ECML-PKDD 2020 Demo Track publication](https://link.springer.com/chapter/10.1007/978-3-030-67670-4_39).
 
 ```latex
-@article{Gijsbers2019,
-  doi = {10.21105/joss.01132},
-  url = {https://doi.org/10.21105/joss.01132},
-  year  = {2019},
-  month = {jan},
-  publisher = {The Open Journal},
-  volume = {4},
-  number = {33},
-  pages = {1132},
-  author = {Pieter Gijsbers and Joaquin Vanschoren},
-  title = {{GAMA}: Genetic Automated Machine learning Assistant},
-  journal = {Journal of Open Source Software}
+@article{DBLP:journals/corr/abs-2007-04911,
+  author    = {Pieter Gijsbers and
+               Joaquin Vanschoren},
+  title     = {{GAMA:} a General Automated Machine learning Assistant},
+  journal   = {CoRR},
+  volume    = {abs/2007.04911},
+  year      = {2020},
+  url       = {https://arxiv.org/abs/2007.04911},
+  eprinttype = {arXiv},
+  eprint    = {2007.04911},
+  timestamp = {Mon, 20 Jul 2020 14:20:39 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-2007-04911.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 ```

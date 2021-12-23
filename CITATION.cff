@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software in a publication, please cite the metadata from preferred-citation."
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Gijsbers"
+    given-names: "Pieter"
+    orcid: "https://orcid.org/0000-0001-7346-8075"
+  - family-names: "Vanschoren"
+    given-names: "Joaquin"
+    orcid: "https://orcid.org/0000-0001-7044-9805"
+  journal: "CoRR"
+  title: "GAMA: a General Automated Machine learning Assistant"
+  abstract: "The General Automated Machine learning Assistant (GAMA) is a modular AutoML system developed to empower users to track and control how AutoML algorithms search for optimal machine learning pipelines, and facilitate AutoML research itself. In contrast to current, often black-box systems, GAMA allows users to plug in different AutoML and post-processing techniques, logs and visualizes the search process, and supports easy benchmarking. It currently features three AutoML search algorithms, two model post-processing steps, and is designed to allow for more components to be added."
+  volume: abs/2007.04911
+  year: 2020
+  start: 560
+  end: 564
+  pages: 5
+  doi: 10.1007/978-3-030-67670-4_39
+  url: https://arxiv.org/abs/2007.04911
