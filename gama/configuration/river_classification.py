@@ -58,7 +58,9 @@ clf_config_online = {
         "tie_threshold": np.arange(0.02, 0.08, 0.01),
         "leaf_prediction": ["mc", "nb", "nba"],
         "nb_threshold": range(0, 50, 10),
-        "max_size": [3]
+        "max_size": [3],
+        "stop_mem_management": [True],
+        "remove_poor_attrs": [True],
     },
     LeveragingBaggingClassifier: {
         "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(),  linear_model.Perceptron(),
