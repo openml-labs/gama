@@ -19,7 +19,6 @@ from river.drift import EDDM
 from river import evaluate
 from river import stream
 from river import ensemble
-from river import datasets
 
 from skmultiflow import drift_detection
 import matplotlib.pyplot as plt
@@ -73,12 +72,13 @@ sliding_window = int(sys.argv[3])                   #update set of samples to tr
 online_metric  = online_metrics[int(sys.argv[5])]   #river metric to evaluate online learning
 #drift_detector = EDDM()                            #river drift detector - issues
 drift_detector = drift_detection.EDDM()             #multiflow drift detector
-live_plot = False
+live_plot = True
 
 #Plot initialization
 if live_plot:
     wandb.init(
         project="Ensemble-demo",
+        entity = "autoriver",
         config={
             "dataset": datasets[int(sys.argv[1])],
             "batch_size": int(sys.argv[2]),
@@ -88,6 +88,8 @@ if live_plot:
             "time_budget_gama": int(sys.argv[6]),
             "search_algorithm": int(sys.argv[7])
         })
+    model_table = wandb.Table(columns=["Change point", "Model", "Model setting"])
+
 #Data
 
 B = pd.DataFrame(arff.load(open(data_loc, 'r'),encode_nominal=True)["data"])
@@ -156,7 +158,7 @@ for i in range(initial_batch+1,len(B)):
         if (i - last_training_point) > 50000:
             print(f"No drift but retraining point {i} and current performance is at {online_metric}")
             if live_plot:
-                wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
+                wandb.log({"drift_point": i, "current_point": i, "Prequential performance": online_metric.get()})
 
         last_training_point = i
 
@@ -185,9 +187,13 @@ for i in range(initial_batch+1,len(B)):
         if Perf_ensemble.get() > Perf_automodel.get():
             Online_model = Backup_ensemble
             print("Online model is updated with Backup Ensemble.")
+            if live_plot:
+                wandb.log({"current_point": i, "model_update": 2})
         else:
             Online_model = Auto_pipeline.model
             print("Online model is updated with latest AutoML pipeline.")
+            if live_plot:
+                wandb.log({"current_point": i, "model_update": 1})
 
         #Ensemble update with new model, remove oldest model if ensemble is full
         Backup_ensemble.models.append(Auto_pipeline.model)
@@ -195,5 +201,8 @@ for i in range(initial_batch+1,len(B)):
             Backup_ensemble.models.pop(0)
 
         print(f'Current model is {Online_model} and hyperparameters are: {Online_model._get_params()}')
+        if live_plot:
+            model_table.add_data(i, str(Online_model), str(Online_model._get_params()))
+            wandb.log({"Selected pipelines": model_table})
 
 

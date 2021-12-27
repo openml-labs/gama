@@ -9,27 +9,26 @@ import arff
 
 from skmultiflow import drift_detection
 
-from river import metrics
 from river.drift import EDDM
 from river import neighbors
 from river import ensemble
 from river import preprocessing
 from river import linear_model
 from river import tree
-from river import naive_bayes
 from river import evaluate
 from river import datasets
 from river import stream
+from river import naive_bayes
 from sklearn.ensemble import GradientBoostingClassifier
 
 import wandb
 
+from sklearn import metrics
 
 #User parameters
 
 data_loc = 'data_streams/SEA_Abrubt_5.arff'     #needs to be arff
 initial_batch = 1000                            #initial set of samples to train automl
-online_metric = metrics.Accuracy()              #river metric to evaluate online learning
 #drift_detector = EDDM()
 drift_detector = drift_detection.EDDM()
 live_plot = True
@@ -41,7 +40,6 @@ if live_plot:
         entity = "autoriver",
         config={
             "dataset": data_loc,
-            "online_performance_metric": online_metric,
         })
 
 
@@ -53,41 +51,31 @@ B = B[~((B.iloc[:,0:-1] == 0).any(axis=1))].reset_index(drop=True)
 X = B.iloc[:,0:-1]
 y = B.iloc[:,-1]
 
-model_1 = tree.ExtremelyFastDecisionTreeClassifier()
-model_2 = preprocessing.StandardScaler() | linear_model.Perceptron()
-model_3 = preprocessing.AdaptiveStandardScaler() | tree.HoeffdingAdaptiveTreeClassifier()
-model_4 = tree.HoeffdingAdaptiveTreeClassifier()
-model_5 = ensemble.LeveragingBaggingClassifier(model=tree.HoeffdingAdaptiveTreeClassifier())
-model_6 = preprocessing.StandardScaler() | neighbors.KNNClassifier()
-model_7 = naive_bayes.BernoulliNB()
-
-model = model_7
+#model = preprocessing.StandardScaler() | linear_model.Perceptron()
+model = naive_bayes.BernoulliNB()
 
 #initial training
-for i in range(0,initial_batch):
-    model = model.learn_one(X.iloc[i].to_dict(), int(y[i]))
+#breakpoint()
+model = model.learn_many(X.iloc[0:initial_batch], y[0:initial_batch])
 
-
-for i in range(initial_batch+1,len(X)):
+for i in range(initial_batch+1,len(X),1000):
     #Test then train - by one
-    y_pred = model.predict_one(X.iloc[i].to_dict())
-    online_metric = online_metric.update(y[i], y_pred)
-    model = model.learn_one(X.iloc[i].to_dict(), int(y[i]))
+    y_pred = 1 * model.predict_many(X.iloc[i:i+1000])
+    y_pred = y_pred.astype(int)
+    performance = metrics.accuracy_score(y[i:i+1000], y_pred)
+    print(f'Test batch - {i} with {performance}')
+    model = model.learn_many(X.iloc[i:i+1000], y[i:i+1000])
+
 
     #Print performance every x interval
-    if i%1000 == 0:
-        print(f'Test batch - {i} with {online_metric}')
+    for j in range(i,i+999):
         if live_plot:
-            wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
-
-    #Check for drift
-    #in_drift, in_warning = drift_detector.update(int(y_pred == y[i]))
-    drift_detector.add_element(int(y_pred != y[i]))
-    #if in_drift:
-    if drift_detector.detected_change():
-        print(f"Change detected at data point {i} and current performance is at {online_metric}")
-        if live_plot:
-            wandb.log({"drift_point": i, "current_point": i, "Prequential performance": online_metric.get()})
+            wandb.log({"current_point": j, "Batch performance": performance})
+        drift_detector.add_element(int(y_pred[j] != int(y[j])))
+        if drift_detector.detected_change():
+            print(f"Change detected at data point {j} and current performance is at {performance}")
+            if live_plot:
+                wandb.log({"drift_point": j, "current_point": j, "Prequential performance": performance})
 
 # #dataset = datasets.Phishing()
 # dataset = []

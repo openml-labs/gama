@@ -57,7 +57,8 @@ clf_config_online = {
         "split_confidence": [1e-9, 1e-7, 1e-4, 1e-2],
         "tie_threshold": np.arange(0.02, 0.08, 0.01),
         "leaf_prediction": ["mc", "nb", "nba"],
-        "nb_threshold": range(0, 50, 10)
+        "nb_threshold": range(0, 50, 10),
+        "max_size": [3]
     },
     LeveragingBaggingClassifier: {
         "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(),  linear_model.Perceptron(),
@@ -74,7 +75,7 @@ clf_config_online = {
     },
     AdaBoostClassifier: {
         "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(), linear_model.Perceptron(),
-                 tree.ExtremelyFastDecisionTreeClassifier(), tree.HoeffdingTreeClassifier()],
+                 tree.HoeffdingTreeClassifier()],
         "n_models": range(1, 20)
     },
     RobustScaler: {
