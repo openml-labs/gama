@@ -46,7 +46,11 @@ clf_config_online = {
         #             "tree.splitter.TEBSTSplitter", "tree.splitter.GaussianSplitter"],
         "bootstrap_sampling": [True, False],
         "drift_window_threshold": range(100, 500, 100),
-        "adwin_confidence": [2e-4, 2e-3, 2e-2]
+        "adwin_confidence": [2e-4, 2e-3, 2e-2],
+        "max_size": [16],
+        "memory_estimate_period":[10000],
+        "stop_mem_management": [True],
+        "remove_poor_attrs": [True],
     },
     AdaptiveRandomForestClassifier: {
         "n_models": range(1,20),
@@ -58,9 +62,10 @@ clf_config_online = {
         "tie_threshold": np.arange(0.02, 0.08, 0.01),
         "leaf_prediction": ["mc", "nb", "nba"],
         "nb_threshold": range(0, 50, 10),
-        "max_size": [3],
+        "max_size": [16],
         "stop_mem_management": [True],
         "remove_poor_attrs": [True],
+        "memory_estimate_period": [10000]
     },
     LeveragingBaggingClassifier: {
         "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(),  linear_model.Perceptron(),
