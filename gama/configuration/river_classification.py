@@ -48,7 +48,7 @@ clf_config_online = {
         "drift_window_threshold": range(100, 500, 100),
         "adwin_confidence": [2e-4, 2e-3, 2e-2],
         "max_size": [16],
-        "memory_estimate_period":[10000],
+        "memory_estimate_period":[1000],
         "stop_mem_management": [True],
         "remove_poor_attrs": [True],
     },
@@ -65,11 +65,11 @@ clf_config_online = {
         "max_size": [16],
         "stop_mem_management": [True],
         "remove_poor_attrs": [True],
-        "memory_estimate_period": [10000]
+        "memory_estimate_period": [1000]
     },
     LeveragingBaggingClassifier: {
         "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(),  linear_model.Perceptron(),
-                  tree.HoeffdingTreeClassifier(max_size=16, memory_estimate_period=10000, stop_mem_management=True,
+                  tree.HoeffdingTreeClassifier(max_size=16, memory_estimate_period=1000, stop_mem_management=True,
                                                remove_poor_attrs =True)],
         "n_models": range(1,20),
         "w": range(1,10),
@@ -78,13 +78,13 @@ clf_config_online = {
     },
     ADWINBaggingClassifier:{
         "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(),  linear_model.Perceptron(),
-                  tree.HoeffdingTreeClassifier(max_size=16, memory_estimate_period=10000, stop_mem_management=True,
+                  tree.HoeffdingTreeClassifier(max_size=16, memory_estimate_period=1000, stop_mem_management=True,
                                                remove_poor_attrs=True)],
         "n_models": range(1,20)
     },
     AdaBoostClassifier: {
         "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(), linear_model.Perceptron(),
-                  tree.HoeffdingTreeClassifier(max_size=16, memory_estimate_period=10000, stop_mem_management=True,
+                  tree.HoeffdingTreeClassifier(max_size=16, memory_estimate_period=1000, stop_mem_management=True,
                                                remove_poor_attrs=True)],
         "n_models": range(1, 20)
     },
