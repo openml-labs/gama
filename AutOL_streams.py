@@ -73,7 +73,7 @@ live_plot = True
 #Plot initialization
 if live_plot:
     wandb.init(
-        project="Ensemble-demo",
+        project="Basic-demo",
         entity = "autoriver",
         config={
             "dataset": datasets[int(sys.argv[1])],
@@ -109,12 +109,12 @@ y = B[:].iloc[:,-1]
 
 #Algorithm selection and hyperparameter tuning
 
-cls = GamaClassifier(max_total_time=30,
-                       scoring='accuracy',
-                       search = AsyncEA(),
-                       online_learning = True,
-                       post_processing = BestFitOnlinePostProcessing(),
-                       store = 'nothing'
+cls = GamaClassifier(max_total_time=int(sys.argv[6]),
+                     scoring=gama_metrics[int(sys.argv[4])],
+                     search=search_algs[int(sys.argv[7])],
+                     online_learning=True,
+                     post_processing=BestFitOnlinePostProcessing(),
+                     store='nothing',
                      )
 
 cls.fit(X.iloc[0:initial_batch],y[0:initial_batch])
@@ -137,14 +137,14 @@ for i in range(initial_batch+1,len(B)):
 
     #Check for drift
     drift_detector.add_element(int(y_pred != y[i]))
-    if (drift_detector.detected_change()) or ((i - last_training_point) > 500000):
+    if (drift_detector.detected_change()) or ((i - last_training_point) > 50000):
         if i - last_training_point < 1000:
             continue
         if drift_detector.detected_change():
             print(f"Change detected at data point {i} and current performance is at {online_metric}")
             if live_plot:
                 wandb.log({"drift_point": i, "current_point": i, "Prequential performance": online_metric.get()})
-        if (i - last_training_point) > 500000:
+        if (i - last_training_point) > 50000:
             print(f"No drift but retraining point {i} and current performance is at {online_metric}")
             if live_plot:
                 wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
@@ -156,12 +156,12 @@ for i in range(initial_batch+1,len(B)):
         y_sliding = y[(i-sliding_window):i].reset_index(drop=True)
 
         #re-optimize pipelines with sliding window
-        cls = GamaClassifier(max_total_time=30,
-                             scoring='accuracy',
-                             search=AsyncEA(),
+        cls = GamaClassifier(max_total_time=int(sys.argv[6]),
+                             scoring=gama_metrics[int(sys.argv[4])],
+                             search=search_algs[int(sys.argv[7])],
                              online_learning=True,
                              post_processing=BestFitOnlinePostProcessing(),
-                             store='nothing'
+                             store='nothing',
                              )
         cls.fit(X_sliding, y_sliding)
         print(f'Current model is {cls.model} and hyperparameters are: {cls.model._get_params()}')
