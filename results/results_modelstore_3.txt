@@ -1,0 +1,137 @@
+
+AutOL_streams_Model_store.py
+Data stream is data_streams/new_vehicle_sensIT.arff.
+Initial batch size is 5000.
+Sliding window size is 5000.
+Gama performance metric is accuracy.
+Online performance metric is Accuracy: 0.00%.
+Time budget for GAMA is 1800.
+Search algorithm for GAMA is AsyncEA().
+Initial model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 94, 'max_depth': inf, 'split_criterion': 'gini', 'split_confidence': 1e-09, 'tie_threshold': 0.03, 'leaf_prediction': 'mc', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': False, 'drift_window_threshold': 200, 'adwin_confidence': 0.02, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Test batch - 6000 with Accuracy: 80.00%
+Change detected at data point 6137 and current performance is at Accuracy: 79.95%
+0.8164
+AutoML model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 307, 'max_depth': inf, 'split_criterion': 'hellinger', 'split_confidence': 0.0001, 'tie_threshold': 0.03, 'leaf_prediction': 'nba', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': False, 'drift_window_threshold': 200, 'adwin_confidence': 0.002, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Model store len=  0
+current model added to model store
+Current model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 307, 'max_depth': inf, 'split_criterion': 'hellinger', 'split_confidence': 0.0001, 'tie_threshold': 0.03, 'leaf_prediction': 'nba', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': False, 'drift_window_threshold': 200, 'adwin_confidence': 0.002, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Test batch - 7000 with Accuracy: 82.20%
+Change detected at data point 7230 and current performance is at Accuracy: 82.02%
+0.7156
+AutoML model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 283, 'max_depth': inf, 'split_criterion': 'hellinger', 'split_confidence': 0.0001, 'tie_threshold': 0.06999999999999999, 'leaf_prediction': 'nb', 'nb_threshold': 10, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': True, 'drift_window_threshold': 400, 'adwin_confidence': 0.02, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Model store len=  1
+current model added to model store
+Current model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 283, 'max_depth': inf, 'split_criterion': 'hellinger', 'split_confidence': 0.0001, 'tie_threshold': 0.06999999999999999, 'leaf_prediction': 'nb', 'nb_threshold': 10, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': True, 'drift_window_threshold': 400, 'adwin_confidence': 0.02, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Test batch - 8000 with Accuracy: 77.70%
+Change detected at data point 8369 and current performance is at Accuracy: 78.06%
+0.8136
+AutoML model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 304, 'max_depth': inf, 'split_criterion': 'hellinger', 'split_confidence': 0.0001, 'tie_threshold': 0.03, 'leaf_prediction': 'mc', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': False, 'drift_window_threshold': 200, 'adwin_confidence': 0.02, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Model store len=  2
+current model added to model store
+Current model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 304, 'max_depth': inf, 'split_criterion': 'hellinger', 'split_confidence': 0.0001, 'tie_threshold': 0.03, 'leaf_prediction': 'mc', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': False, 'drift_window_threshold': 200, 'adwin_confidence': 0.02, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Test batch - 9000 with Accuracy: 78.27%
+Test batch - 10000 with Accuracy: 78.52%
+Test batch - 11000 with Accuracy: 78.62%
+Test batch - 12000 with Accuracy: 78.83%
+Test batch - 13000 with Accuracy: 79.14%
+Test batch - 14000 with Accuracy: 79.27%
+Test batch - 15000 with Accuracy: 79.67%
+Test batch - 16000 with Accuracy: 79.71%
+Test batch - 17000 with Accuracy: 79.88%
+Test batch - 18000 with Accuracy: 80.10%
+Test batch - 19000 with Accuracy: 80.23%
+Test batch - 20000 with Accuracy: 80.34%
+Test batch - 21000 with Accuracy: 80.45%
+Test batch - 22000 with Accuracy: 80.58%
+Test batch - 23000 with Accuracy: 80.58%
+Test batch - 24000 with Accuracy: 80.79%
+Test batch - 25000 with Accuracy: 80.85%
+Test batch - 26000 with Accuracy: 80.91%
+Test batch - 27000 with Accuracy: 80.93%
+Test batch - 28000 with Accuracy: 81.02%
+Test batch - 29000 with Accuracy: 81.10%
+Test batch - 30000 with Accuracy: 81.21%
+Test batch - 31000 with Accuracy: 81.32%
+Test batch - 32000 with Accuracy: 81.38%
+Test batch - 33000 with Accuracy: 81.45%
+Test batch - 34000 with Accuracy: 81.51%
+Test batch - 35000 with Accuracy: 81.57%
+Test batch - 36000 with Accuracy: 81.59%
+Test batch - 37000 with Accuracy: 81.60%
+Test batch - 38000 with Accuracy: 81.57%
+Test batch - 39000 with Accuracy: 81.59%
+Test batch - 40000 with Accuracy: 81.57%
+Test batch - 41000 with Accuracy: 81.57%
+Test batch - 42000 with Accuracy: 81.58%
+Test batch - 43000 with Accuracy: 81.63%
+Test batch - 44000 with Accuracy: 81.65%
+Test batch - 45000 with Accuracy: 81.62%
+Test batch - 46000 with Accuracy: 81.61%
+Test batch - 47000 with Accuracy: 81.66%
+Test batch - 48000 with Accuracy: 81.68%
+Test batch - 49000 with Accuracy: 81.73%
+Test batch - 50000 with Accuracy: 81.72%
+Test batch - 51000 with Accuracy: 81.72%
+Test batch - 52000 with Accuracy: 81.73%
+Test batch - 53000 with Accuracy: 81.73%
+Test batch - 54000 with Accuracy: 81.73%
+Test batch - 55000 with Accuracy: 81.76%
+Test batch - 56000 with Accuracy: 81.75%
+Test batch - 57000 with Accuracy: 81.79%
+Test batch - 58000 with Accuracy: 81.77%
+No drift but retraining point 58370 and current performance is at Accuracy: 81.79%
+0.8286
+AutoML model is LeveragingBaggingClassifier(HoeffdingTreeClassifier) and hyperparameters are: {'model': (<class 'river.tree.hoeffding_tree_classifier.HoeffdingTreeClassifier'>, {'grace_period': 200, 'max_depth': inf, 'split_criterion': 'info_gain', 'split_confidence': 1e-07, 'tie_threshold': 0.05, 'leaf_prediction': 'nba', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True}), 'n_models': 6, 'w': 8, 'adwin_delta': 0.002, 'bagging_method': 'subag', 'seed': None}
+Model store len=  3
+current model added to model store
+Current model is LeveragingBaggingClassifier(HoeffdingTreeClassifier) and hyperparameters are: {'model': (<class 'river.tree.hoeffding_tree_classifier.HoeffdingTreeClassifier'>, {'grace_period': 200, 'max_depth': inf, 'split_criterion': 'info_gain', 'split_confidence': 1e-07, 'tie_threshold': 0.05, 'leaf_prediction': 'nba', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True}), 'n_models': 6, 'w': 8, 'adwin_delta': 0.002, 'bagging_method': 'subag', 'seed': None}
+Test batch - 59000 with Accuracy: 81.77%
+Change detected at data point 59425 and current performance is at Accuracy: 81.78%
+0.8224
+AutoML model is AdaptiveRandomForestClassifier and hyperparameters are: {'n_models': 13, 'max_features': 7, 'lambda_value': 4, 'metric': (<class 'river.metrics.accuracy.Accuracy'>, {'cm': }), 'disable_weighted_vote': False, 'drift_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.001}), 'warning_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.01}), 'grace_period': 283, 'max_depth': None, 'split_criterion': 'gini', 'split_confidence': 1e-07, 'tie_threshold': 0.03, 'leaf_prediction': 'nb', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': None, 'binary_split': False, 'max_size': 32, 'memory_estimate_period': 2000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Model store len=  4
+current model added to model store
+code ACTIVATED
+max model score =0.833 || current model score 0.8224
+Online model is updated with Model Store pipeline.
+Current model is LeveragingBaggingClassifier(HoeffdingTreeClassifier) and hyperparameters are: {'model': (<class 'river.tree.hoeffding_tree_classifier.HoeffdingTreeClassifier'>, {'grace_period': 200, 'max_depth': inf, 'split_criterion': 'info_gain', 'split_confidence': 1e-07, 'tie_threshold': 0.05, 'leaf_prediction': 'nba', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True}), 'n_models': 6, 'w': 8, 'adwin_delta': 0.002, 'bagging_method': 'subag', 'seed': None}
+Test batch - 60000 with Accuracy: 81.80%
+Test batch - 61000 with Accuracy: 81.82%
+Test batch - 62000 with Accuracy: 81.84%
+Test batch - 63000 with Accuracy: 81.87%
+Test batch - 64000 with Accuracy: 81.92%
+Test batch - 65000 with Accuracy: 81.96%
+Test batch - 66000 with Accuracy: 81.97%
+Test batch - 67000 with Accuracy: 82.00%
+Test batch - 68000 with Accuracy: 82.02%
+Test batch - 69000 with Accuracy: 82.06%
+Test batch - 70000 with Accuracy: 82.10%
+Test batch - 71000 with Accuracy: 82.11%
+Test batch - 72000 with Accuracy: 82.13%
+Test batch - 73000 with Accuracy: 82.15%
+Test batch - 74000 with Accuracy: 82.17%
+Test batch - 75000 with Accuracy: 82.17%
+Test batch - 76000 with Accuracy: 82.19%
+Test batch - 77000 with Accuracy: 82.23%
+Test batch - 78000 with Accuracy: 82.25%
+Test batch - 79000 with Accuracy: 82.27%
+Test batch - 80000 with Accuracy: 82.31%
+Test batch - 81000 with Accuracy: 82.30%
+Test batch - 82000 with Accuracy: 82.34%
+Test batch - 83000 with Accuracy: 82.36%
+Test batch - 84000 with Accuracy: 82.40%
+Test batch - 85000 with Accuracy: 82.39%
+Test batch - 86000 with Accuracy: 82.40%
+Test batch - 87000 with Accuracy: 82.42%
+Test batch - 88000 with Accuracy: 82.47%
+Test batch - 89000 with Accuracy: 82.50%
+Test batch - 90000 with Accuracy: 82.52%
+Test batch - 91000 with Accuracy: 82.52%
+Test batch - 92000 with Accuracy: 82.54%
+Test batch - 93000 with Accuracy: 82.56%
+Test batch - 94000 with Accuracy: 82.57%
+Test batch - 95000 with Accuracy: 82.60%
+Test batch - 96000 with Accuracy: 82.61%
+Test batch - 97000 with Accuracy: 82.65%
+Test batch - 98000 with Accuracy: 82.68%
+

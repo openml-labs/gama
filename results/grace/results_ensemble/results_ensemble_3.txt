@@ -1,0 +1,2006 @@
+AutOL_streams_ensemble.py
+Data stream is data_streams/new_vehicle_sensIT.arff.
+Initial batch size is 5000.
+Sliding window size is 5000.
+Gama performance metric is accuracy.
+Online performance metric is Accuracy: 0.00%.
+Time budget for GAMA is 600.
+Search algorithm for GAMA is AsyncEA().
+
+Initial model is LeveragingBaggingClassifier(KNNClassifier) and hyperparameters are: {'model': (<class 'river.neighbors.knn_classifier.KNNClassifier'>, {'n_neighbors': 5, 'window_size': 1000, 'leaf_size': 30, 'p': 2, 'weighted': True}), 'n_models': 11, 'w': 9, 'adwin_delta': 0.005, 'bagging_method': 'subag', 'seed': None}
+Test batch - 6000 with Accuracy: 76.40%
+Change detected at data point 6003 and current performance is at Accuracy: 76.27%
+Online model is updated with Backup Ensemble.
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+  model=KNNClassifier (
+    n_neighbors=5
+    window_size=1000
+    leaf_size=30
+    p=2
+    weighted=True
+  )
+  n_models=11
+  w=9
+  adwin_delta=0.005
+  bagging_method="subag"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=3
+  max_features=70
+  lambda_value=3
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=162
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.07
+  leaf_prediction="nb"
+  nb_threshold=20
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+)], 'use_probabilities': True}
+Test batch - 7000 with Accuracy: 75.55%
+Test batch - 8000 with Accuracy: 77.27%
+Change detected at data point 8193 and current performance is at Accuracy: 77.45%
+Online model is updated with latest AutoML pipeline.
+Current model is LeveragingBaggingClassifier(Perceptron) and hyperparameters are: {'model': (<class 'river.linear_model.glm.Perceptron'>, {'l2': 0.0, 'clip_gradient': 1000000000000.0, 'initializer': (<class 'river.optim.initializers.Zeros'>, {})}), 'n_models': 6, 'w': 8, 'adwin_delta': 0.005, 'bagging_method': 'wt', 'seed': None}
+Test batch - 9000 with Accuracy: 77.45%
+Change detected at data point 9247 and current performance is at Accuracy: 77.44%
+Online model is updated with Backup Ensemble.
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+  model=KNNClassifier (
+    n_neighbors=5
+    window_size=1000
+    leaf_size=30
+    p=2
+    weighted=True
+  )
+  n_models=11
+  w=9
+  adwin_delta=0.005
+  bagging_method="subag"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=3
+  max_features=70
+  lambda_value=3
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=162
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.07
+  leaf_prediction="nb"
+  nb_threshold=20
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=6
+  w=8
+  adwin_delta=0.005
+  bagging_method="wt"
+  seed=None
+), HoeffdingAdaptiveTreeClassifier (
+  grace_period=173
+  max_depth=inf
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="nb"
+  nb_threshold=40
+  nominal_attributes=None
+  splitter=GaussianSplitter (
+    n_splits=10
+  )
+  bootstrap_sampling=False
+  drift_window_threshold=300
+  adwin_confidence=0.02
+  binary_split=False
+  max_size=100
+  memory_estimate_period=1000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+)], 'use_probabilities': True}
+Test batch - 10000 with Accuracy: 77.78%
+Change detected at data point 10287 and current performance is at Accuracy: 78.06%
+Online model is updated with Backup Ensemble.
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+  model=KNNClassifier (
+    n_neighbors=5
+    window_size=1000
+    leaf_size=30
+    p=2
+    weighted=True
+  )
+  n_models=11
+  w=9
+  adwin_delta=0.005
+  bagging_method="subag"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=3
+  max_features=70
+  lambda_value=3
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=162
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.07
+  leaf_prediction="nb"
+  nb_threshold=20
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=6
+  w=8
+  adwin_delta=0.005
+  bagging_method="wt"
+  seed=None
+), HoeffdingAdaptiveTreeClassifier (
+  grace_period=173
+  max_depth=inf
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="nb"
+  nb_threshold=40
+  nominal_attributes=None
+  splitter=GaussianSplitter (
+    n_splits=10
+  )
+  bootstrap_sampling=False
+  drift_window_threshold=300
+  adwin_confidence=0.02
+  binary_split=False
+  max_size=100
+  memory_estimate_period=1000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=19
+  max_features=100
+  lambda_value=5
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=186
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.03
+  leaf_prediction="nb"
+  nb_threshold=10
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+)], 'use_probabilities': True}
+Test batch - 11000 with Accuracy: 78.62%
+Change detected at data point 11528 and current performance is at Accuracy: 79.00%
+Online model is updated with Backup Ensemble.
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+  model=KNNClassifier (
+    n_neighbors=5
+    window_size=1000
+    leaf_size=30
+    p=2
+    weighted=True
+  )
+  n_models=11
+  w=9
+  adwin_delta=0.005
+  bagging_method="subag"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=3
+  max_features=70
+  lambda_value=3
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=162
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.07
+  leaf_prediction="nb"
+  nb_threshold=20
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=6
+  w=8
+  adwin_delta=0.005
+  bagging_method="wt"
+  seed=None
+), HoeffdingAdaptiveTreeClassifier (
+  grace_period=173
+  max_depth=inf
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="nb"
+  nb_threshold=40
+  nominal_attributes=None
+  splitter=GaussianSplitter (
+    n_splits=10
+  )
+  bootstrap_sampling=False
+  drift_window_threshold=300
+  adwin_confidence=0.02
+  binary_split=False
+  max_size=100
+  memory_estimate_period=1000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=19
+  max_features=100
+  lambda_value=5
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=186
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.03
+  leaf_prediction="nb"
+  nb_threshold=10
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=HoeffdingTreeClassifier (
+    grace_period=200
+    max_depth=inf
+    split_criterion="info_gain"
+    split_confidence=1e-07
+    tie_threshold=0.05
+    leaf_prediction="nba"
+    nb_threshold=0
+    nominal_attributes=None
+    splitter=GaussianSplitter (
+      n_splits=10
+    )
+    binary_split=False
+    max_size=100
+    memory_estimate_period=1000000
+    stop_mem_management=False
+    remove_poor_attrs=False
+    merit_preprune=True
+  )
+  n_models=15
+  w=6
+  adwin_delta=0.002
+  bagging_method="me"
+  seed=None
+)], 'use_probabilities': True}
+Test batch - 12000 with Accuracy: 79.24%
+Change detected at data point 12692 and current performance is at Accuracy: 79.63%
+Online model is updated with Backup Ensemble.
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+  model=KNNClassifier (
+    n_neighbors=5
+    window_size=1000
+    leaf_size=30
+    p=2
+    weighted=True
+  )
+  n_models=11
+  w=9
+  adwin_delta=0.005
+  bagging_method="subag"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=3
+  max_features=70
+  lambda_value=3
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=162
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.07
+  leaf_prediction="nb"
+  nb_threshold=20
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=6
+  w=8
+  adwin_delta=0.005
+  bagging_method="wt"
+  seed=None
+), HoeffdingAdaptiveTreeClassifier (
+  grace_period=173
+  max_depth=inf
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="nb"
+  nb_threshold=40
+  nominal_attributes=None
+  splitter=GaussianSplitter (
+    n_splits=10
+  )
+  bootstrap_sampling=False
+  drift_window_threshold=300
+  adwin_confidence=0.02
+  binary_split=False
+  max_size=100
+  memory_estimate_period=1000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=19
+  max_features=100
+  lambda_value=5
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=186
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.03
+  leaf_prediction="nb"
+  nb_threshold=10
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=HoeffdingTreeClassifier (
+    grace_period=200
+    max_depth=inf
+    split_criterion="info_gain"
+    split_confidence=1e-07
+    tie_threshold=0.05
+    leaf_prediction="nba"
+    nb_threshold=0
+    nominal_attributes=None
+    splitter=GaussianSplitter (
+      n_splits=10
+    )
+    binary_split=False
+    max_size=100
+    memory_estimate_period=1000000
+    stop_mem_management=False
+    remove_poor_attrs=False
+    merit_preprune=True
+  )
+  n_models=15
+  w=6
+  adwin_delta=0.002
+  bagging_method="me"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=10
+  max_features=20
+  lambda_value=2
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=78
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="mc"
+  nb_threshold=0
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+)], 'use_probabilities': True}
+Test batch - 13000 with Accuracy: 79.85%
+Change detected at data point 13981 and current performance is at Accuracy: 80.45%
+Online model is updated with Backup Ensemble.
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+  model=KNNClassifier (
+    n_neighbors=5
+    window_size=1000
+    leaf_size=30
+    p=2
+    weighted=True
+  )
+  n_models=11
+  w=9
+  adwin_delta=0.005
+  bagging_method="subag"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=3
+  max_features=70
+  lambda_value=3
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=162
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.07
+  leaf_prediction="nb"
+  nb_threshold=20
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=6
+  w=8
+  adwin_delta=0.005
+  bagging_method="wt"
+  seed=None
+), HoeffdingAdaptiveTreeClassifier (
+  grace_period=173
+  max_depth=inf
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="nb"
+  nb_threshold=40
+  nominal_attributes=None
+  splitter=GaussianSplitter (
+    n_splits=10
+  )
+  bootstrap_sampling=False
+  drift_window_threshold=300
+  adwin_confidence=0.02
+  binary_split=False
+  max_size=100
+  memory_estimate_period=1000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=19
+  max_features=100
+  lambda_value=5
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=186
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.03
+  leaf_prediction="nb"
+  nb_threshold=10
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=HoeffdingTreeClassifier (
+    grace_period=200
+    max_depth=inf
+    split_criterion="info_gain"
+    split_confidence=1e-07
+    tie_threshold=0.05
+    leaf_prediction="nba"
+    nb_threshold=0
+    nominal_attributes=None
+    splitter=GaussianSplitter (
+      n_splits=10
+    )
+    binary_split=False
+    max_size=100
+    memory_estimate_period=1000000
+    stop_mem_management=False
+    remove_poor_attrs=False
+    merit_preprune=True
+  )
+  n_models=15
+  w=6
+  adwin_delta=0.002
+  bagging_method="me"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=10
+  max_features=20
+  lambda_value=2
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=78
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="mc"
+  nb_threshold=0
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=19
+  w=6
+  adwin_delta=0.002
+  bagging_method="bag"
+  seed=None
+)], 'use_probabilities': True}
+Test batch - 14000 with Accuracy: 80.44%
+Test batch - 15000 with Accuracy: 80.90%
+Change detected at data point 15720 and current performance is at Accuracy: 81.18%
+Online model is updated with Backup Ensemble.
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+  model=KNNClassifier (
+    n_neighbors=5
+    window_size=1000
+    leaf_size=30
+    p=2
+    weighted=True
+  )
+  n_models=11
+  w=9
+  adwin_delta=0.005
+  bagging_method="subag"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=3
+  max_features=70
+  lambda_value=3
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=162
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.07
+  leaf_prediction="nb"
+  nb_threshold=20
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=6
+  w=8
+  adwin_delta=0.005
+  bagging_method="wt"
+  seed=None
+), HoeffdingAdaptiveTreeClassifier (
+  grace_period=173
+  max_depth=inf
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="nb"
+  nb_threshold=40
+  nominal_attributes=None
+  splitter=GaussianSplitter (
+    n_splits=10
+  )
+  bootstrap_sampling=False
+  drift_window_threshold=300
+  adwin_confidence=0.02
+  binary_split=False
+  max_size=100
+  memory_estimate_period=1000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=19
+  max_features=100
+  lambda_value=5
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=186
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.03
+  leaf_prediction="nb"
+  nb_threshold=10
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=HoeffdingTreeClassifier (
+    grace_period=200
+    max_depth=inf
+    split_criterion="info_gain"
+    split_confidence=1e-07
+    tie_threshold=0.05
+    leaf_prediction="nba"
+    nb_threshold=0
+    nominal_attributes=None
+    splitter=GaussianSplitter (
+      n_splits=10
+    )
+    binary_split=False
+    max_size=100
+    memory_estimate_period=1000000
+    stop_mem_management=False
+    remove_poor_attrs=False
+    merit_preprune=True
+  )
+  n_models=15
+  w=6
+  adwin_delta=0.002
+  bagging_method="me"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=10
+  max_features=20
+  lambda_value=2
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=78
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="mc"
+  nb_threshold=0
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=19
+  w=6
+  adwin_delta=0.002
+  bagging_method="bag"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=2
+  max_features=7
+  lambda_value=7
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=323
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-09
+  tie_threshold=0.03
+  leaf_prediction="mc"
+  nb_threshold=20
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+)], 'use_probabilities': True}
+Test batch - 16000 with Accuracy: 81.25%
+Change detected at data point 16835 and current performance is at Accuracy: 81.58%
+Online model is updated with Backup Ensemble.
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+  model=KNNClassifier (
+    n_neighbors=5
+    window_size=1000
+    leaf_size=30
+    p=2
+    weighted=True
+  )
+  n_models=11
+  w=9
+  adwin_delta=0.005
+  bagging_method="subag"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=3
+  max_features=70
+  lambda_value=3
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=162
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.07
+  leaf_prediction="nb"
+  nb_threshold=20
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=6
+  w=8
+  adwin_delta=0.005
+  bagging_method="wt"
+  seed=None
+), HoeffdingAdaptiveTreeClassifier (
+  grace_period=173
+  max_depth=inf
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="nb"
+  nb_threshold=40
+  nominal_attributes=None
+  splitter=GaussianSplitter (
+    n_splits=10
+  )
+  bootstrap_sampling=False
+  drift_window_threshold=300
+  adwin_confidence=0.02
+  binary_split=False
+  max_size=100
+  memory_estimate_period=1000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=19
+  max_features=100
+  lambda_value=5
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=186
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.03
+  leaf_prediction="nb"
+  nb_threshold=10
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=HoeffdingTreeClassifier (
+    grace_period=200
+    max_depth=inf
+    split_criterion="info_gain"
+    split_confidence=1e-07
+    tie_threshold=0.05
+    leaf_prediction="nba"
+    nb_threshold=0
+    nominal_attributes=None
+    splitter=GaussianSplitter (
+      n_splits=10
+    )
+    binary_split=False
+    max_size=100
+    memory_estimate_period=1000000
+    stop_mem_management=False
+    remove_poor_attrs=False
+    merit_preprune=True
+  )
+  n_models=15
+  w=6
+  adwin_delta=0.002
+  bagging_method="me"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=10
+  max_features=20
+  lambda_value=2
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=78
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="mc"
+  nb_threshold=0
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=19
+  w=6
+  adwin_delta=0.002
+  bagging_method="bag"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=2
+  max_features=7
+  lambda_value=7
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=323
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-09
+  tie_threshold=0.03
+  leaf_prediction="mc"
+  nb_threshold=20
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=3
+  max_features=100
+  lambda_value=9
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=291
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-09
+  tie_threshold=0.07
+  leaf_prediction="nb"
+  nb_threshold=40
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+)], 'use_probabilities': True}
+Test batch - 17000 with Accuracy: 81.62%
+Test batch - 18000 with Accuracy: 81.78%
+Change detected at data point 18326 and current performance is at Accuracy: 81.83%
+Online model is updated with Backup Ensemble.
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+  n_models=3
+  max_features=70
+  lambda_value=3
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=162
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.07
+  leaf_prediction="nb"
+  nb_threshold=20
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=6
+  w=8
+  adwin_delta=0.005
+  bagging_method="wt"
+  seed=None
+), HoeffdingAdaptiveTreeClassifier (
+  grace_period=173
+  max_depth=inf
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="nb"
+  nb_threshold=40
+  nominal_attributes=None
+  splitter=GaussianSplitter (
+    n_splits=10
+  )
+  bootstrap_sampling=False
+  drift_window_threshold=300
+  adwin_confidence=0.02
+  binary_split=False
+  max_size=100
+  memory_estimate_period=1000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=19
+  max_features=100
+  lambda_value=5
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=186
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.03
+  leaf_prediction="nb"
+  nb_threshold=10
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=HoeffdingTreeClassifier (
+    grace_period=200
+    max_depth=inf
+    split_criterion="info_gain"
+    split_confidence=1e-07
+    tie_threshold=0.05
+    leaf_prediction="nba"
+    nb_threshold=0
+    nominal_attributes=None
+    splitter=GaussianSplitter (
+      n_splits=10
+    )
+    binary_split=False
+    max_size=100
+    memory_estimate_period=1000000
+    stop_mem_management=False
+    remove_poor_attrs=False
+    merit_preprune=True
+  )
+  n_models=15
+  w=6
+  adwin_delta=0.002
+  bagging_method="me"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=10
+  max_features=20
+  lambda_value=2
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=78
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="mc"
+  nb_threshold=0
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=19
+  w=6
+  adwin_delta=0.002
+  bagging_method="bag"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=2
+  max_features=7
+  lambda_value=7
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=323
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-09
+  tie_threshold=0.03
+  leaf_prediction="mc"
+  nb_threshold=20
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=3
+  max_features=100
+  lambda_value=9
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=291
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-09
+  tie_threshold=0.07
+  leaf_prediction="nb"
+  nb_threshold=40
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=HoeffdingTreeClassifier (
+    grace_period=200
+    max_depth=inf
+    split_criterion="info_gain"
+    split_confidence=1e-07
+    tie_threshold=0.05
+    leaf_prediction="nba"
+    nb_threshold=0
+    nominal_attributes=None
+    splitter=GaussianSplitter (
+      n_splits=10
+    )
+    binary_split=False
+    max_size=100
+    memory_estimate_period=1000000
+    stop_mem_management=False
+    remove_poor_attrs=False
+    merit_preprune=True
+  )
+  n_models=18
+  w=7
+  adwin_delta=0.001
+  bagging_method="half"
+  seed=None
+)], 'use_probabilities': True}
+Test batch - 19000 with Accuracy: 81.85%
+Test batch - 20000 with Accuracy: 82.07%
+Change detected at data point 20553 and current performance is at Accuracy: 82.11%
+Online model is updated with Backup Ensemble.
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=6
+  w=8
+  adwin_delta=0.005
+  bagging_method="wt"
+  seed=None
+), HoeffdingAdaptiveTreeClassifier (
+  grace_period=173
+  max_depth=inf
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="nb"
+  nb_threshold=40
+  nominal_attributes=None
+  splitter=GaussianSplitter (
+    n_splits=10
+  )
+  bootstrap_sampling=False
+  drift_window_threshold=300
+  adwin_confidence=0.02
+  binary_split=False
+  max_size=100
+  memory_estimate_period=1000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=19
+  max_features=100
+  lambda_value=5
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=186
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.03
+  leaf_prediction="nb"
+  nb_threshold=10
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=HoeffdingTreeClassifier (
+    grace_period=200
+    max_depth=inf
+    split_criterion="info_gain"
+    split_confidence=1e-07
+    tie_threshold=0.05
+    leaf_prediction="nba"
+    nb_threshold=0
+    nominal_attributes=None
+    splitter=GaussianSplitter (
+      n_splits=10
+    )
+    binary_split=False
+    max_size=100
+    memory_estimate_period=1000000
+    stop_mem_management=False
+    remove_poor_attrs=False
+    merit_preprune=True
+  )
+  n_models=15
+  w=6
+  adwin_delta=0.002
+  bagging_method="me"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=10
+  max_features=20
+  lambda_value=2
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=78
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="mc"
+  nb_threshold=0
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=19
+  w=6
+  adwin_delta=0.002
+  bagging_method="bag"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=2
+  max_features=7
+  lambda_value=7
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=323
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-09
+  tie_threshold=0.03
+  leaf_prediction="mc"
+  nb_threshold=20
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=3
+  max_features=100
+  lambda_value=9
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=291
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-09
+  tie_threshold=0.07
+  leaf_prediction="nb"
+  nb_threshold=40
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=HoeffdingTreeClassifier (
+    grace_period=200
+    max_depth=inf
+    split_criterion="info_gain"
+    split_confidence=1e-07
+    tie_threshold=0.05
+    leaf_prediction="nba"
+    nb_threshold=0
+    nominal_attributes=None
+    splitter=GaussianSplitter (
+      n_splits=10
+    )
+    binary_split=False
+    max_size=100
+    memory_estimate_period=1000000
+    stop_mem_management=False
+    remove_poor_attrs=False
+    merit_preprune=True
+  )
+  n_models=18
+  w=7
+  adwin_delta=0.001
+  bagging_method="half"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=2
+  max_features=50
+  lambda_value=4
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=137
+  max_depth=None
+  split_criterion="info_gain"
+  split_confidence=1e-07
+  tie_threshold=0.03
+  leaf_prediction="nb"
+  nb_threshold=30
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+)], 'use_probabilities': True}
+Test batch - 21000 with Accuracy: 82.24%
+Test batch - 22000 with Accuracy: 82.41%
+Test batch - 23000 with Accuracy: 82.42%
+Test batch - 24000 with Accuracy: 82.57%
+Test batch - 25000 with Accuracy: 82.58%
+Test batch - 26000 with Accuracy: 82.64%
+Test batch - 27000 with Accuracy: 82.76%
+Test batch - 28000 with Accuracy: 82.83%
+Test batch - 29000 with Accuracy: 82.95%
+Test batch - 30000 with Accuracy: 83.06%
+Test batch - 31000 with Accuracy: 83.10%
+Test batch - 32000 with Accuracy: 83.13%
+Test batch - 33000 with Accuracy: 83.21%
+Test batch - 34000 with Accuracy: 83.18%
+Test batch - 35000 with Accuracy: 83.27%
+Test batch - 36000 with Accuracy: 83.26%
+Test batch - 37000 with Accuracy: 83.28%
+Test batch - 38000 with Accuracy: 83.29%
+Test batch - 39000 with Accuracy: 83.30%
+Test batch - 40000 with Accuracy: 83.29%
+Test batch - 41000 with Accuracy: 83.36%
+Test batch - 42000 with Accuracy: 83.35%
+Test batch - 43000 with Accuracy: 83.39%
+Test batch - 44000 with Accuracy: 83.41%
+Test batch - 45000 with Accuracy: 83.45%
+Test batch - 46000 with Accuracy: 83.46%
+Test batch - 47000 with Accuracy: 83.52%
+Test batch - 48000 with Accuracy: 83.56%
+Test batch - 49000 with Accuracy: 83.62%
+Test batch - 50000 with Accuracy: 83.61%
+Test batch - 51000 with Accuracy: 83.61%
+Test batch - 52000 with Accuracy: 83.61%
+Test batch - 53000 with Accuracy: 83.61%
+Test batch - 54000 with Accuracy: 83.63%
+Test batch - 55000 with Accuracy: 83.68%
+Test batch - 56000 with Accuracy: 83.71%
+Test batch - 57000 with Accuracy: 83.74%
+Test batch - 58000 with Accuracy: 83.75%
+Test batch - 59000 with Accuracy: 83.77%
+Test batch - 60000 with Accuracy: 83.81%
+Test batch - 61000 with Accuracy: 83.83%
+Test batch - 62000 with Accuracy: 83.83%
+Test batch - 63000 with Accuracy: 83.84%
+Test batch - 64000 with Accuracy: 83.89%
+Test batch - 65000 with Accuracy: 83.92%
+Test batch - 66000 with Accuracy: 83.93%
+Test batch - 67000 with Accuracy: 83.94%
+Test batch - 68000 with Accuracy: 83.94%
+Test batch - 69000 with Accuracy: 83.98%
+Test batch - 70000 with Accuracy: 84.00%
+No drift but retraining point 70554 and current performance is at Accuracy: 84.00%
+Online model is updated with Backup Ensemble.
+Current model is VotingClassifier and hyperparameters are: {'models': [HoeffdingAdaptiveTreeClassifier (
+  grace_period=173
+  max_depth=inf
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="nb"
+  nb_threshold=40
+  nominal_attributes=None
+  splitter=GaussianSplitter (
+    n_splits=10
+  )
+  bootstrap_sampling=False
+  drift_window_threshold=300
+  adwin_confidence=0.02
+  binary_split=False
+  max_size=100
+  memory_estimate_period=1000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=19
+  max_features=100
+  lambda_value=5
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=186
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-07
+  tie_threshold=0.03
+  leaf_prediction="nb"
+  nb_threshold=10
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=HoeffdingTreeClassifier (
+    grace_period=200
+    max_depth=inf
+    split_criterion="info_gain"
+    split_confidence=1e-07
+    tie_threshold=0.05
+    leaf_prediction="nba"
+    nb_threshold=0
+    nominal_attributes=None
+    splitter=GaussianSplitter (
+      n_splits=10
+    )
+    binary_split=False
+    max_size=100
+    memory_estimate_period=1000000
+    stop_mem_management=False
+    remove_poor_attrs=False
+    merit_preprune=True
+  )
+  n_models=15
+  w=6
+  adwin_delta=0.002
+  bagging_method="me"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=10
+  max_features=20
+  lambda_value=2
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=78
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.04
+  leaf_prediction="mc"
+  nb_threshold=0
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=19
+  w=6
+  adwin_delta=0.002
+  bagging_method="bag"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=2
+  max_features=7
+  lambda_value=7
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=323
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-09
+  tie_threshold=0.03
+  leaf_prediction="mc"
+  nb_threshold=20
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=3
+  max_features=100
+  lambda_value=9
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=291
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=1e-09
+  tie_threshold=0.07
+  leaf_prediction="nb"
+  nb_threshold=40
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=HoeffdingTreeClassifier (
+    grace_period=200
+    max_depth=inf
+    split_criterion="info_gain"
+    split_confidence=1e-07
+    tie_threshold=0.05
+    leaf_prediction="nba"
+    nb_threshold=0
+    nominal_attributes=None
+    splitter=GaussianSplitter (
+      n_splits=10
+    )
+    binary_split=False
+    max_size=100
+    memory_estimate_period=1000000
+    stop_mem_management=False
+    remove_poor_attrs=False
+    merit_preprune=True
+  )
+  n_models=18
+  w=7
+  adwin_delta=0.001
+  bagging_method="half"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=2
+  max_features=50
+  lambda_value=4
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=137
+  max_depth=None
+  split_criterion="info_gain"
+  split_confidence=1e-07
+  tie_threshold=0.03
+  leaf_prediction="nb"
+  nb_threshold=30
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), HoeffdingAdaptiveTreeClassifier (
+  grace_period=202
+  max_depth=inf
+  split_criterion="gini"
+  split_confidence=0.01
+  tie_threshold=0.04
+  leaf_prediction="mc"
+  nb_threshold=20
+  nominal_attributes=None
+  splitter=GaussianSplitter (
+    n_splits=10
+  )
+  bootstrap_sampling=True
+  drift_window_threshold=300
+  adwin_confidence=0.02
+  binary_split=False
+  max_size=100
+  memory_estimate_period=1000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+)], 'use_probabilities': True}
+Test batch - 71000 with Accuracy: 84.00%
+Test batch - 72000 with Accuracy: 84.00%
+Test batch - 73000 with Accuracy: 84.00%
+Test batch - 74000 with Accuracy: 84.02%
+Test batch - 75000 with Accuracy: 84.00%
+Test batch - 76000 with Accuracy: 84.03%
+Test batch - 77000 with Accuracy: 84.06%
+Test batch - 78000 with Accuracy: 84.06%
+Test batch - 79000 with Accuracy: 84.07%
+Test batch - 80000 with Accuracy: 84.07%
+Test batch - 81000 with Accuracy: 84.04%
+Test batch - 82000 with Accuracy: 84.05%
+Test batch - 83000 with Accuracy: 84.05%
+Test batch - 84000 with Accuracy: 84.06%
+Test batch - 85000 with Accuracy: 84.03%
+Test batch - 86000 with Accuracy: 84.05%
+Test batch - 87000 with Accuracy: 84.05%
+Test batch - 88000 with Accuracy: 84.07%
+Test batch - 89000 with Accuracy: 84.07%
+Test batch - 90000 with Accuracy: 84.08%
+Test batch - 91000 with Accuracy: 84.06%
+Test batch - 92000 with Accuracy: 84.07%
+Test batch - 93000 with Accuracy: 84.07%
+Test batch - 94000 with Accuracy: 84.06%
+Test batch - 95000 with Accuracy: 84.06%
+Test batch - 96000 with Accuracy: 84.06%
+Test batch - 97000 with Accuracy: 84.08%
+Test batch - 98000 with Accuracy: 84.11%
+

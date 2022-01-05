@@ -1,0 +1,76 @@
+AutOL_streams_ensemble.py
+Data stream is data_streams/electricity-normalized.arff.
+Initial batch size is 5000.
+Sliding window size is 5000.
+Gama performance metric is accuracy.
+Online performance metric is Accuracy: 0.00%.
+Time budget for GAMA is 1800.
+Search algorithm for GAMA is AsyncEA().
+
+Data contains zero values. They are not removed but might cause issues with some River learners.
+Initial model is LeveragingBaggingClassifier(Perceptron) and hyperparameters are: {'model': (<class 'river.linear_model.glm.Perceptron'>, {'l2': 0.0, 'clip_gradient': 1000000000000.0, 'initializer': (<class 'river.optim.initializers.Zeros'>, {})}), 'n_models': 2, 'w': 5, 'adwin_delta': 0.005, 'bagging_method': 'subag', 'seed': None}
+Test batch - 6000 with Accuracy: 82.80%
+Change detected at data point 6072 and current performance is at Accuracy: 82.37%
+Online model is updated with Backup Ensemble.
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+  model=Perceptron (
+    l2=0.
+    clip_gradient=1e+12
+    initializer=Zeros ()
+  )
+  n_models=2
+  w=5
+  adwin_delta=0.005
+  bagging_method="subag"
+  seed=None
+), AdaBoostClassifier (
+  model=KNNClassifier (
+    n_neighbors=5
+    window_size=1000
+    leaf_size=30
+    p=2
+    weighted=True
+  )
+  n_models=10
+  seed=None
+)], 'use_probabilities': True}
+Test batch - 7000 with Accuracy: 81.60%
+Test batch - 8000 with Accuracy: 81.27%
+Test batch - 9000 with Accuracy: 81.60%
+Test batch - 10000 with Accuracy: 81.92%
+Test batch - 11000 with Accuracy: 82.03%
+Test batch - 12000 with Accuracy: 82.40%
+Test batch - 13000 with Accuracy: 82.59%
+Test batch - 14000 with Accuracy: 83.22%
+Test batch - 15000 with Accuracy: 83.26%
+Test batch - 16000 with Accuracy: 83.10%
+Test batch - 17000 with Accuracy: 83.08%
+Test batch - 18000 with Accuracy: 83.30%
+Test batch - 19000 with Accuracy: 83.53%
+Test batch - 20000 with Accuracy: 83.68%
+Test batch - 21000 with Accuracy: 83.48%
+Test batch - 22000 with Accuracy: 83.36%
+Test batch - 23000 with Accuracy: 83.33%
+Test batch - 24000 with Accuracy: 83.36%
+Test batch - 25000 with Accuracy: 83.61%
+Test batch - 26000 with Accuracy: 83.68%
+Test batch - 27000 with Accuracy: 83.89%
+Test batch - 28000 with Accuracy: 84.17%
+Test batch - 29000 with Accuracy: 84.34%
+Test batch - 30000 with Accuracy: 84.50%
+Test batch - 31000 with Accuracy: 84.48%
+Test batch - 32000 with Accuracy: 84.45%
+Test batch - 33000 with Accuracy: 84.56%
+Test batch - 34000 with Accuracy: 84.53%
+Test batch - 35000 with Accuracy: 84.54%
+Test batch - 36000 with Accuracy: 84.52%
+Test batch - 37000 with Accuracy: 84.46%
+Test batch - 38000 with Accuracy: 84.46%
+Test batch - 39000 with Accuracy: 84.51%
+Test batch - 40000 with Accuracy: 84.52%
+Test batch - 41000 with Accuracy: 84.45%
+Test batch - 42000 with Accuracy: 84.45%
+Test batch - 43000 with Accuracy: 84.47%
+Test batch - 44000 with Accuracy: 84.37%
+Test batch - 45000 with Accuracy: 84.45%
+

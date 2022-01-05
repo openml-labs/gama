@@ -1,0 +1,180 @@
+Streams.py
+Data stream is data_streams/electricity-normalized.arff.
+Initial batch size is 5000.
+
+Data contains zero values. They are not removed but might cause issues with some River learners.
+Change detected at data point 5182 and current performance is at Accuracy: 82.97%
+Change detected at data point 5351 and current performance is at Accuracy: 82.34%
+Change detected at data point 5713 and current performance is at Accuracy: 86.96%
+Test batch - 6000 with Accuracy: 87.80%
+Change detected at data point 6011 and current performance is at Accuracy: 87.73%
+Change detected at data point 6307 and current performance is at Accuracy: 88.14%
+Change detected at data point 6547 and current performance is at Accuracy: 87.98%
+Change detected at data point 6975 and current performance is at Accuracy: 89.01%
+Test batch - 7000 with Accuracy: 89.05%
+Change detected at data point 7271 and current performance is at Accuracy: 89.08%
+Change detected at data point 7533 and current performance is at Accuracy: 88.99%
+Change detected at data point 7815 and current performance is at Accuracy: 88.99%
+Test batch - 8000 with Accuracy: 89.23%
+Change detected at data point 8298 and current performance is at Accuracy: 89.66%
+Change detected at data point 8526 and current performance is at Accuracy: 89.45%
+Change detected at data point 8904 and current performance is at Accuracy: 89.68%
+Test batch - 9000 with Accuracy: 89.60%
+Change detected at data point 9257 and current performance is at Accuracy: 89.55%
+Change detected at data point 9478 and current performance is at Accuracy: 89.37%
+Change detected at data point 9706 and current performance is at Accuracy: 89.23%
+Test batch - 10000 with Accuracy: 89.44%
+Change detected at data point 10383 and current performance is at Accuracy: 89.84%
+Change detected at data point 10626 and current performance is at Accuracy: 89.73%
+Change detected at data point 10811 and current performance is at Accuracy: 89.52%
+Test batch - 11000 with Accuracy: 89.62%
+Change detected at data point 11249 and current performance is at Accuracy: 89.76%
+Change detected at data point 11660 and current performance is at Accuracy: 89.74%
+Change detected at data point 11986 and current performance is at Accuracy: 89.78%
+Test batch - 12000 with Accuracy: 89.76%
+Change detected at data point 12382 and current performance is at Accuracy: 89.91%
+Change detected at data point 12639 and current performance is at Accuracy: 89.84%
+Change detected at data point 12909 and current performance is at Accuracy: 89.77%
+Test batch - 13000 with Accuracy: 89.83%
+Change detected at data point 13321 and current performance is at Accuracy: 89.91%
+Test batch - 14000 with Accuracy: 90.12%
+Change detected at data point 14070 and current performance is at Accuracy: 90.08%
+Change detected at data point 14399 and current performance is at Accuracy: 90.09%
+Change detected at data point 14915 and current performance is at Accuracy: 90.27%
+Test batch - 15000 with Accuracy: 90.31%
+Change detected at data point 15228 and current performance is at Accuracy: 90.26%
+Change detected at data point 15426 and current performance is at Accuracy: 90.15%
+Change detected at data point 15648 and current performance is at Accuracy: 90.00%
+Test batch - 16000 with Accuracy: 89.92%
+Change detected at data point 16130 and current performance is at Accuracy: 89.86%
+Change detected at data point 16353 and current performance is at Accuracy: 89.78%
+Change detected at data point 16537 and current performance is at Accuracy: 89.56%
+Change detected at data point 16769 and current performance is at Accuracy: 89.51%
+Test batch - 17000 with Accuracy: 89.58%
+Change detected at data point 17084 and current performance is at Accuracy: 89.52%
+Change detected at data point 17365 and current performance is at Accuracy: 89.51%
+Test batch - 18000 with Accuracy: 89.61%
+Change detected at data point 18136 and current performance is at Accuracy: 89.59%
+Test batch - 19000 with Accuracy: 89.83%
+Change detected at data point 19455 and current performance is at Accuracy: 89.84%
+Change detected at data point 19825 and current performance is at Accuracy: 89.89%
+Test batch - 20000 with Accuracy: 89.90%
+Change detected at data point 20112 and current performance is at Accuracy: 89.88%
+Change detected at data point 20330 and current performance is at Accuracy: 89.82%
+Change detected at data point 20616 and current performance is at Accuracy: 89.81%
+Test batch - 21000 with Accuracy: 89.75%
+Change detected at data point 21694 and current performance is at Accuracy: 89.77%
+Test batch - 22000 with Accuracy: 89.85%
+Change detected at data point 22051 and current performance is at Accuracy: 89.80%
+Change detected at data point 22465 and current performance is at Accuracy: 89.79%
+Change detected at data point 22772 and current performance is at Accuracy: 89.74%
+Change detected at data point 22990 and current performance is at Accuracy: 89.69%
+Test batch - 23000 with Accuracy: 89.67%
+Change detected at data point 23228 and current performance is at Accuracy: 89.66%
+Change detected at data point 23412 and current performance is at Accuracy: 89.59%
+Change detected at data point 23656 and current performance is at Accuracy: 89.45%
+Change detected at data point 23854 and current performance is at Accuracy: 89.40%
+Test batch - 24000 with Accuracy: 89.33%
+Change detected at data point 24024 and current performance is at Accuracy: 89.33%
+Change detected at data point 24284 and current performance is at Accuracy: 89.31%
+Change detected at data point 24469 and current performance is at Accuracy: 89.25%
+Change detected at data point 24674 and current performance is at Accuracy: 89.12%
+Change detected at data point 24908 and current performance is at Accuracy: 89.09%
+Test batch - 25000 with Accuracy: 89.01%
+Change detected at data point 25010 and current performance is at Accuracy: 89.00%
+Change detected at data point 25241 and current performance is at Accuracy: 88.97%
+Change detected at data point 25660 and current performance is at Accuracy: 88.98%
+Change detected at data point 25916 and current performance is at Accuracy: 88.97%
+Test batch - 26000 with Accuracy: 88.99%
+Change detected at data point 26223 and current performance is at Accuracy: 88.98%
+Change detected at data point 26580 and current performance is at Accuracy: 89.02%
+Change detected at data point 26700 and current performance is at Accuracy: 88.94%
+Test batch - 27000 with Accuracy: 89.00%
+Change detected at data point 27142 and current performance is at Accuracy: 89.01%
+Change detected at data point 27324 and current performance is at Accuracy: 88.96%
+Change detected at data point 27529 and current performance is at Accuracy: 88.92%
+Change detected at data point 27731 and current performance is at Accuracy: 88.76%
+Change detected at data point 27908 and current performance is at Accuracy: 88.70%
+Test batch - 28000 with Accuracy: 88.67%
+Change detected at data point 28067 and current performance is at Accuracy: 88.64%
+Change detected at data point 28293 and current performance is at Accuracy: 88.62%
+Change detected at data point 28747 and current performance is at Accuracy: 88.60%
+Change detected at data point 28935 and current performance is at Accuracy: 88.56%
+Test batch - 29000 with Accuracy: 88.56%
+Change detected at data point 29166 and current performance is at Accuracy: 88.54%
+Change detected at data point 29506 and current performance is at Accuracy: 88.53%
+Change detected at data point 29708 and current performance is at Accuracy: 88.50%
+Change detected at data point 29853 and current performance is at Accuracy: 88.44%
+Test batch - 30000 with Accuracy: 88.43%
+Change detected at data point 30115 and current performance is at Accuracy: 88.44%
+Change detected at data point 30304 and current performance is at Accuracy: 88.40%
+Change detected at data point 30449 and current performance is at Accuracy: 88.35%
+Change detected at data point 30860 and current performance is at Accuracy: 88.36%
+Change detected at data point 30960 and current performance is at Accuracy: 88.29%
+Test batch - 31000 with Accuracy: 88.28%
+Change detected at data point 31108 and current performance is at Accuracy: 88.22%
+Change detected at data point 31324 and current performance is at Accuracy: 88.20%
+Change detected at data point 31434 and current performance is at Accuracy: 88.11%
+Change detected at data point 31643 and current performance is at Accuracy: 88.09%
+Change detected at data point 31830 and current performance is at Accuracy: 88.04%
+Change detected at data point 31968 and current performance is at Accuracy: 87.99%
+Test batch - 32000 with Accuracy: 87.99%
+Change detected at data point 32159 and current performance is at Accuracy: 87.96%
+Change detected at data point 32430 and current performance is at Accuracy: 87.87%
+Change detected at data point 32629 and current performance is at Accuracy: 87.82%
+Change detected at data point 32798 and current performance is at Accuracy: 87.78%
+Test batch - 33000 with Accuracy: 87.81%
+Change detected at data point 33117 and current performance is at Accuracy: 87.81%
+Change detected at data point 33336 and current performance is at Accuracy: 87.80%
+Change detected at data point 33603 and current performance is at Accuracy: 87.80%
+Change detected at data point 33782 and current performance is at Accuracy: 87.77%
+Test batch - 34000 with Accuracy: 87.80%
+Change detected at data point 34037 and current performance is at Accuracy: 87.77%
+Change detected at data point 34179 and current performance is at Accuracy: 87.72%
+Change detected at data point 34344 and current performance is at Accuracy: 87.68%
+Change detected at data point 34609 and current performance is at Accuracy: 87.69%
+Change detected at data point 34769 and current performance is at Accuracy: 87.65%
+Test batch - 35000 with Accuracy: 87.66%
+Change detected at data point 35557 and current performance is at Accuracy: 87.69%
+Test batch - 36000 with Accuracy: 87.75%
+Change detected at data point 36357 and current performance is at Accuracy: 87.76%
+Change detected at data point 36484 and current performance is at Accuracy: 87.71%
+Change detected at data point 36602 and current performance is at Accuracy: 87.66%
+Change detected at data point 36784 and current performance is at Accuracy: 87.64%
+Test batch - 37000 with Accuracy: 87.66%
+Change detected at data point 37346 and current performance is at Accuracy: 87.71%
+Change detected at data point 37568 and current performance is at Accuracy: 87.70%
+Change detected at data point 37752 and current performance is at Accuracy: 87.68%
+Change detected at data point 37962 and current performance is at Accuracy: 87.66%
+Test batch - 38000 with Accuracy: 87.66%
+Change detected at data point 38195 and current performance is at Accuracy: 87.65%
+Change detected at data point 38367 and current performance is at Accuracy: 87.62%
+Change detected at data point 38643 and current performance is at Accuracy: 87.60%
+Change detected at data point 38860 and current performance is at Accuracy: 87.59%
+Test batch - 39000 with Accuracy: 87.62%
+Change detected at data point 39216 and current performance is at Accuracy: 87.63%
+Change detected at data point 39501 and current performance is at Accuracy: 87.64%
+Test batch - 40000 with Accuracy: 87.69%
+Change detected at data point 40034 and current performance is at Accuracy: 87.66%
+Change detected at data point 40317 and current performance is at Accuracy: 87.67%
+Change detected at data point 40705 and current performance is at Accuracy: 87.69%
+Test batch - 41000 with Accuracy: 87.69%
+Change detected at data point 41088 and current performance is at Accuracy: 87.69%
+Change detected at data point 41444 and current performance is at Accuracy: 87.72%
+Change detected at data point 41991 and current performance is at Accuracy: 87.76%
+Test batch - 42000 with Accuracy: 87.76%
+Change detected at data point 42328 and current performance is at Accuracy: 87.79%
+Change detected at data point 42573 and current performance is at Accuracy: 87.78%
+Change detected at data point 42750 and current performance is at Accuracy: 87.75%
+Test batch - 43000 with Accuracy: 87.77%
+Change detected at data point 43048 and current performance is at Accuracy: 87.77%
+Change detected at data point 43295 and current performance is at Accuracy: 87.77%
+Change detected at data point 43684 and current performance is at Accuracy: 87.78%
+Change detected at data point 43898 and current performance is at Accuracy: 87.75%
+Test batch - 44000 with Accuracy: 87.74%
+Change detected at data point 44060 and current performance is at Accuracy: 87.72%
+Change detected at data point 44394 and current performance is at Accuracy: 87.74%
+Change detected at data point 44738 and current performance is at Accuracy: 87.77%
+Test batch - 45000 with Accuracy: 87.81%
+Change detected at data point 45165 and current performance is at Accuracy: 87.83%
+

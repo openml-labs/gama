@@ -1,0 +1,91 @@
+AutOL_streams_ensemble.py
+Data stream is data_streams/new_IMDB_drama.arff.
+Initial batch size is 5000.
+Sliding window size is 5000.
+Gama performance metric is accuracy.
+Online performance metric is Accuracy: 0.00%.
+Time budget for GAMA is 1800.
+Search algorithm for GAMA is AsyncEA().
+
+Data contains zero values. They are not removed but might cause issues with some River learners.
+Initial model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 341, 'max_depth': inf, 'split_criterion': 'info_gain', 'split_confidence': 0.01, 'tie_threshold': 0.03, 'leaf_prediction': 'nba', 'nb_threshold': 30, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': True, 'drift_window_threshold': 200, 'adwin_confidence': 0.02, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Test batch - 6000 with Accuracy: 67.10%
+Change detected at data point 6078 and current performance is at Accuracy: 66.70%
+Online model is updated with latest AutoML pipeline.
+Current model is LeveragingBaggingClassifier(KNNClassifier) and hyperparameters are: {'model': (<class 'river.neighbors.knn_classifier.KNNClassifier'>, {'n_neighbors': 5, 'window_size': 1000, 'leaf_size': 30, 'p': 2, 'weighted': True}), 'n_models': 19, 'w': 5, 'adwin_delta': 0.002, 'bagging_method': 'half', 'seed': None}
+Test batch - 7000 with Accuracy: 70.75%
+Change detected at data point 7145 and current performance is at Accuracy: 70.49%
+Online model is updated with Backup Ensemble.
+Current model is VotingClassifier and hyperparameters are: {'models': [HoeffdingAdaptiveTreeClassifier (
+  grace_period=341
+  max_depth=inf
+  split_criterion="info_gain"
+  split_confidence=0.01
+  tie_threshold=0.03
+  leaf_prediction="nba"
+  nb_threshold=30
+  nominal_attributes=None
+  splitter=GaussianSplitter (
+    n_splits=10
+  )
+  bootstrap_sampling=True
+  drift_window_threshold=200
+  adwin_confidence=0.02
+  binary_split=False
+  max_size=100
+  memory_estimate_period=1000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+), LeveragingBaggingClassifier (
+  model=KNNClassifier (
+    n_neighbors=5
+    window_size=1000
+    leaf_size=30
+    p=2
+    weighted=True
+  )
+  n_models=19
+  w=5
+  adwin_delta=0.002
+  bagging_method="half"
+  seed=None
+), AdaptiveRandomForestClassifier (
+  n_models=8
+  max_features=200
+  lambda_value=9
+  metric=Accuracy (
+    cm=ConfusionMatrix ()
+  )
+  disable_weighted_vote=False
+  drift_detector=ADWIN (
+    delta=0.001
+  )
+  warning_detector=ADWIN (
+    delta=0.01
+  )
+  grace_period=271
+  max_depth=None
+  split_criterion="hellinger"
+  split_confidence=0.0001
+  tie_threshold=0.06
+  leaf_prediction="nb"
+  nb_threshold=40
+  nominal_attributes=None
+  splitter=None
+  binary_split=False
+  max_size=32
+  memory_estimate_period=2000000
+  stop_mem_management=False
+  remove_poor_attrs=False
+  merit_preprune=True
+  seed=None
+)], 'use_probabilities': True}
+Test batch - 8000 with Accuracy: 70.93%
+Change detected at data point 8162 and current performance is at Accuracy: 71.00%
+Online model is updated with latest AutoML pipeline.
+Current model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 109, 'max_depth': inf, 'split_criterion': 'hellinger', 'split_confidence': 1e-09, 'tie_threshold': 0.02, 'leaf_prediction': 'nba', 'nb_threshold': 40, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': False, 'drift_window_threshold': 200, 'adwin_confidence': 0.02, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Test batch - 9000 with Accuracy: 71.62%
+Change detected at data point 9257 and current performance is at Accuracy: 71.22%
+
