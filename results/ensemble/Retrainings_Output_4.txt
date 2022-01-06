@@ -1,0 +1,15 @@
+Change detected at data point 6172 and current performance is at Accuracy: 86.77%
+Change detected at data point 9656 and current performance is at Accuracy: 87.74%
+Change detected at data point 10819 and current performance is at Accuracy: 88.00%
+Change detected at data point 12053 and current performance is at Accuracy: 88.26%
+Change detected at data point 13422 and current performance is at Accuracy: 88.03%
+Change detected at data point 14742 and current performance is at Accuracy: 88.07%
+No drift but retraining point 64743 and current performance is at Accuracy: 88.09%
+No drift but retraining point 114744 and current performance is at Accuracy: 88.19%
+No drift but retraining point 164745 and current performance is at Accuracy: 88.23%
+No drift but retraining point 214746 and current performance is at Accuracy: 88.38%
+No drift but retraining point 264747 and current performance is at Accuracy: 88.35%
+No drift but retraining point 314748 and current performance is at Accuracy: 88.45%
+No drift but retraining point 364749 and current performance is at Accuracy: 88.50%
+No drift but retraining point 414750 and current performance is at Accuracy: 88.54%
+No drift but retraining point 464751 and current performance is at Accuracy: 88.59%
