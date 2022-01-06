@@ -73,7 +73,7 @@ live_plot = True
 #Plot initialization
 if live_plot:
     wandb.init(
-        project="Basic-demo",
+        project="Exp.2 - Search algorithms comparison",
         entity = "autoriver",
         config={
             "dataset": datasets[int(sys.argv[1])],
