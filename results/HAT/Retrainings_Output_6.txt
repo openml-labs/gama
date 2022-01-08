@@ -1,0 +1,15 @@
+Change detected at data point 5150 and current performance is at Accuracy: 79.33%
+Change detected at data point 5419 and current performance is at Accuracy: 85.20%
+Change detected at data point 5853 and current performance is at Accuracy: 86.05%
+Change detected at data point 6136 and current performance is at Accuracy: 86.80%
+Change detected at data point 6417 and current performance is at Accuracy: 86.45%
+Change detected at data point 8932 and current performance is at Accuracy: 86.80%
+Change detected at data point 9180 and current performance is at Accuracy: 86.84%
+Change detected at data point 9407 and current performance is at Accuracy: 86.82%
+Change detected at data point 9601 and current performance is at Accuracy: 86.66%
+Change detected at data point 10301 and current performance is at Accuracy: 86.76%
+Change detected at data point 10548 and current performance is at Accuracy: 86.79%
+Change detected at data point 10823 and current performance is at Accuracy: 86.81%
+Change detected at data point 11154 and current performance is at Accuracy: 86.84%
+Change detected at data point 11405 and current performance is at Accuracy: 86.87%
+Change detected at data point 11649 and current performance is at Accuracy: 86.89%

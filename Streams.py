@@ -45,7 +45,7 @@ model_1 = tree.ExtremelyFastDecisionTreeClassifier()
 model_2 = preprocessing.StandardScaler() | linear_model.Perceptron()
 model_3 = preprocessing.AdaptiveStandardScaler() | tree.HoeffdingAdaptiveTreeClassifier()
 model_4 = tree.HoeffdingAdaptiveTreeClassifier()
-model_5 = ensemble.LeveragingBaggingClassifier(preprocessing.StandardScaler() | linear_model.LogisticRegression())
+model_5 = ensemble.LeveragingBaggingClassifier(linear_model.LogisticRegression())
 model_6 = preprocessing.StandardScaler() | neighbors.KNNClassifier()
 model_7 = naive_bayes.BernoulliNB()
 
@@ -69,7 +69,7 @@ live_plot = True
 #Plot initialization
 if live_plot:
     wandb.init(
-        project="Baseline-2 Leverage Bagging",
+        project="Baseline-1 Leverage Bagging",
         entity = "autoriver",
         config={
             "dataset": data_loc,
@@ -116,12 +116,12 @@ for i in range(initial_batch+1,len(X)):
         if live_plot:
             wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
 
-    #Check for drift
-    #in_drift, in_warning = drift_detector.update(int(y_pred == y[i]))
-    drift_detector.add_element(int(y_pred != y[i]))
-    #if in_drift:
-    if drift_detector.detected_change():
-        print(f"Change detected at data point {i} and current performance is at {online_metric}")
-        if live_plot:
-            wandb.log({"drift_point": i, "current_point": i, "Prequential performance": online_metric.get()})
+    # #Check for drift
+    # #in_drift, in_warning = drift_detector.update(int(y_pred == y[i]))
+    # drift_detector.add_element(int(y_pred != y[i]))
+    # #if in_drift:
+    # if drift_detector.detected_change():
+    #     print(f"Change detected at data point {i} and current performance is at {online_metric}")
+    #     if live_plot:
+    #         wandb.log({"drift_point": i, "current_point": i, "Prequential performance": online_metric.get()})
 

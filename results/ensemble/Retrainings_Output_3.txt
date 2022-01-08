@@ -1,0 +1,5 @@
+Change detected at data point 6814 and current performance is at Accuracy: 71.50%
+Change detected at data point 7834 and current performance is at Accuracy: 76.82%
+Change detected at data point 8954 and current performance is at Accuracy: 78.98%
+Change detected at data point 10146 and current performance is at Accuracy: 79.87%
+No drift but retraining point 60147 and current performance is at Accuracy: 85.04%
