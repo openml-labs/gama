@@ -1,0 +1,16 @@
+Initial model is AdaptiveRandomForestClassifier and hyperparameters are: {'n_models': 14, 'max_features': 1, 'lambda_value': 4, 'metric': (<class 'river.metrics.accuracy.Accuracy'>, {'cm': }), 'disable_weighted_vote': False, 'drift_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.001}), 'warning_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.01}), 'grace_period': 233, 'max_depth': None, 'split_criterion': 'hellinger', 'split_confidence': 1e-07, 'tie_threshold': 0.039999999999999994, 'leaf_prediction': 'mc', 'nb_threshold': 10, 'nominal_attributes': None, 'splitter': None, 'binary_split': False, 'max_size': 32, 'memory_estimate_period': 2000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+Current model is AdaptiveRandomForestClassifier and hyperparameters are: {'n_models': 15, 'max_features': 2, 'lambda_value': 8, 'metric': (<class 'river.metrics.accuracy.Accuracy'>, {'cm': }), 'disable_weighted_vote': False, 'drift_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.001}), 'warning_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.01}), 'grace_period': 59, 'max_depth': None, 'split_criterion': 'hellinger', 'split_confidence': 1e-07, 'tie_threshold': 0.06, 'leaf_prediction': 'mc', 'nb_threshold': 10, 'nominal_attributes': None, 'splitter': None, 'binary_split': False, 'max_size': 32, 'memory_estimate_period': 2000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (

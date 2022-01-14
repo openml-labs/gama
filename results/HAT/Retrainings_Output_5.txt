@@ -1,5 +1,0 @@
-Change detected at data point 5168 and current performance is at Accuracy: 80.36%
-Change detected at data point 5285 and current performance is at Accuracy: 77.54%
-Change detected at data point 12830 and current performance is at Accuracy: 81.47%
-Change detected at data point 17637 and current performance is at Accuracy: 81.44%
-Change detected at data point 17791 and current performance is at Accuracy: 81.42%

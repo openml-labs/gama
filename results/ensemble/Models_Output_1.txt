@@ -1,0 +1,30 @@
+Initial model is LeveragingBaggingClassifier(KNNClassifier) and hyperparameters are: {'model': (<class 'river.neighbors.knn_classifier.KNNClassifier'>, {'n_neighbors': 5, 'window_size': 1000, 'leaf_size': 30, 'p': 2, 'weighted': True}), 'n_models': 3, 'w': 4, 'adwin_delta': 0.01, 'bagging_method': 'wt', 'seed': None}
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is LeveragingBaggingClassifier(KNNClassifier) and hyperparameters are: {'model': (<class 'river.neighbors.knn_classifier.KNNClassifier'>, {'n_neighbors': 5, 'window_size': 1000, 'leaf_size': 30, 'p': 2, 'weighted': True}), 'n_models': 14, 'w': 7, 'adwin_delta': 0.01, 'bagging_method': 'subag', 'seed': None}
+Current model is AdaptiveRandomForestClassifier and hyperparameters are: {'n_models': 19, 'max_features': 7, 'lambda_value': 7, 'metric': (<class 'river.metrics.accuracy.Accuracy'>, {'cm': }), 'disable_weighted_vote': False, 'drift_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.001}), 'warning_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.01}), 'grace_period': 197, 'max_depth': None, 'split_criterion': 'gini', 'split_confidence': 0.0001, 'tie_threshold': 0.06999999999999999, 'leaf_prediction': 'mc', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': None, 'binary_split': False, 'max_size': 32, 'memory_estimate_period': 2000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [HoeffdingAdaptiveTreeClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [HoeffdingAdaptiveTreeClassifier (
+Current model is LeveragingBaggingClassifier(HoeffdingTreeClassifier) and hyperparameters are: {'model': (<class 'river.tree.hoeffding_tree_classifier.HoeffdingTreeClassifier'>, {'grace_period': 200, 'max_depth': inf, 'split_criterion': 'info_gain', 'split_confidence': 1e-07, 'tie_threshold': 0.05, 'leaf_prediction': 'nba', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True}), 'n_models': 14, 'w': 5, 'adwin_delta': 0.001, 'bagging_method': 'bag', 'seed': None}
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [HoeffdingAdaptiveTreeClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [HoeffdingAdaptiveTreeClassifier (
+Current model is AdaptiveRandomForestClassifier and hyperparameters are: {'n_models': 9, 'max_features': 3, 'lambda_value': 6, 'metric': (<class 'river.metrics.accuracy.Accuracy'>, {'cm': }), 'disable_weighted_vote': False, 'drift_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.001}), 'warning_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.01}), 'grace_period': 140, 'max_depth': None, 'split_criterion': 'info_gain', 'split_confidence': 1e-07, 'tie_threshold': 0.049999999999999996, 'leaf_prediction': 'nb', 'nb_threshold': 30, 'nominal_attributes': None, 'splitter': None, 'binary_split': False, 'max_size': 32, 'memory_estimate_period': 2000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Current model is AdaptiveRandomForestClassifier and hyperparameters are: {'n_models': 3, 'max_features': 7, 'lambda_value': 6, 'metric': (<class 'river.metrics.accuracy.Accuracy'>, {'cm': }), 'disable_weighted_vote': False, 'drift_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.001}), 'warning_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.01}), 'grace_period': 185, 'max_depth': None, 'split_criterion': 'gini', 'split_confidence': 0.0001, 'tie_threshold': 0.06999999999999999, 'leaf_prediction': 'nba', 'nb_threshold': 30, 'nominal_attributes': None, 'splitter': None, 'binary_split': False, 'max_size': 32, 'memory_estimate_period': 2000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Current model is VotingClassifier and hyperparameters are: {'models': [HoeffdingAdaptiveTreeClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [LeveragingBaggingClassifier (
+Current model is VotingClassifier and hyperparameters are: {'models': [AdaptiveRandomForestClassifier (

@@ -45,7 +45,7 @@ model_1 = tree.ExtremelyFastDecisionTreeClassifier()
 model_2 = preprocessing.StandardScaler() | linear_model.Perceptron()
 model_3 = preprocessing.AdaptiveStandardScaler() | tree.HoeffdingAdaptiveTreeClassifier()
 model_4 = tree.HoeffdingAdaptiveTreeClassifier()
-model_5 = ensemble.LeveragingBaggingClassifier(linear_model.LogisticRegression())
+model_5 = ensemble.LeveragingBaggingClassifier(preprocessing.StandardScaler() | linear_model.Perceptron())
 model_6 = preprocessing.StandardScaler() | neighbors.KNNClassifier()
 model_7 = naive_bayes.BernoulliNB()
 
@@ -69,7 +69,7 @@ live_plot = True
 #Plot initialization
 if live_plot:
     wandb.init(
-        project="Baseline-1 Leverage Bagging",
+        project="Baseline-1 LeverageBagging-2",
         entity = "autoriver",
         config={
             "dataset": data_loc,
