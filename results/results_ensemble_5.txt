@@ -7,7 +7,9 @@ Online performance metric is Accuracy: 0.00%.
 Time budget for GAMA is 600.
 Search algorithm for GAMA is AsyncEA().
 
+Test batch - 0 with Accuracy: 0
 Initial model is LeveragingBaggingClassifier(LogisticRegression) and hyperparameters are: {'model': (<class 'river.linear_model.glm.LogisticRegression'>, {'optimizer': (<class 'river.optim.sgd.SGD'>, {'lr': (<class 'river.optim.schedulers.Constant'>, {'learning_rate': 0.01})}), 'loss': (<class 'river.optim.losses.Log'>, {'weight_pos': 1.0, 'weight_neg': 1.0}), 'l2': 0.0, 'intercept_init': 0.0, 'intercept_lr': (<class 'river.optim.schedulers.Constant'>, {'learning_rate': 0.01}), 'clip_gradient': 1000000000000.0, 'initializer': (<class 'river.optim.initializers.Zeros'>, {})}), 'n_models': 14, 'w': 4, 'adwin_delta': 0.005, 'bagging_method': 'subag', 'seed': None}
+Online model is updated with latest AutoML pipeline.
 Test batch - 6000 with Accuracy: 76.40%
 Change detected at data point 6054 and current performance is at Accuracy: 75.90%
 Online model is updated with Backup Ensemble.

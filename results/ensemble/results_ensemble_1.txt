@@ -7,6 +7,7 @@ Online performance metric is Accuracy: 0.00%.
 Time budget for GAMA is 1800.
 Search algorithm for GAMA is AsyncEA().
 
+Test batch - 0 with Accuracy: 0
 Data contains zero values. They are not removed but might cause issues with some River learners.
 Initial model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 282, 'max_depth': inf, 'split_criterion': 'hellinger', 'split_confidence': 1e-09, 'tie_threshold': 0.02, 'leaf_prediction': 'nb', 'nb_threshold': 10, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': True, 'drift_window_threshold': 300, 'adwin_confidence': 0.002, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
 Test batch - 6000 with Accuracy: 67.50%

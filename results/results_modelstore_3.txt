@@ -7,13 +7,16 @@ Gama performance metric is accuracy.
 Online performance metric is Accuracy: 0.00%.
 Time budget for GAMA is 1800.
 Search algorithm for GAMA is AsyncEA().
+Test batch - 0 with Accuracy: 0
 Initial model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 94, 'max_depth': inf, 'split_criterion': 'gini', 'split_confidence': 1e-09, 'tie_threshold': 0.03, 'leaf_prediction': 'mc', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': False, 'drift_window_threshold': 200, 'adwin_confidence': 0.02, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Online model is updated with latest AutoML pipeline.
 Test batch - 6000 with Accuracy: 80.00%
 Change detected at data point 6137 and current performance is at Accuracy: 79.95%
 0.8164
 AutoML model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 307, 'max_depth': inf, 'split_criterion': 'hellinger', 'split_confidence': 0.0001, 'tie_threshold': 0.03, 'leaf_prediction': 'nba', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': False, 'drift_window_threshold': 200, 'adwin_confidence': 0.002, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
 Model store len=  0
 current model added to model store
+Online model is updated with latest AutoML pipeline.
 Current model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 307, 'max_depth': inf, 'split_criterion': 'hellinger', 'split_confidence': 0.0001, 'tie_threshold': 0.03, 'leaf_prediction': 'nba', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': False, 'drift_window_threshold': 200, 'adwin_confidence': 0.002, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
 Test batch - 7000 with Accuracy: 82.20%
 Change detected at data point 7230 and current performance is at Accuracy: 82.02%
@@ -21,6 +24,7 @@ Change detected at data point 7230 and current performance is at Accuracy: 82.02
 AutoML model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 283, 'max_depth': inf, 'split_criterion': 'hellinger', 'split_confidence': 0.0001, 'tie_threshold': 0.06999999999999999, 'leaf_prediction': 'nb', 'nb_threshold': 10, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': True, 'drift_window_threshold': 400, 'adwin_confidence': 0.02, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
 Model store len=  1
 current model added to model store
+Online model is updated with latest AutoML pipeline.
 Current model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 283, 'max_depth': inf, 'split_criterion': 'hellinger', 'split_confidence': 0.0001, 'tie_threshold': 0.06999999999999999, 'leaf_prediction': 'nb', 'nb_threshold': 10, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': True, 'drift_window_threshold': 400, 'adwin_confidence': 0.02, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
 Test batch - 8000 with Accuracy: 77.70%
 Change detected at data point 8369 and current performance is at Accuracy: 78.06%
@@ -28,6 +32,7 @@ Change detected at data point 8369 and current performance is at Accuracy: 78.06
 AutoML model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 304, 'max_depth': inf, 'split_criterion': 'hellinger', 'split_confidence': 0.0001, 'tie_threshold': 0.03, 'leaf_prediction': 'mc', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': False, 'drift_window_threshold': 200, 'adwin_confidence': 0.02, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
 Model store len=  2
 current model added to model store
+Online model is updated with latest AutoML pipeline.
 Current model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 304, 'max_depth': inf, 'split_criterion': 'hellinger', 'split_confidence': 0.0001, 'tie_threshold': 0.03, 'leaf_prediction': 'mc', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': False, 'drift_window_threshold': 200, 'adwin_confidence': 0.02, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
 Test batch - 9000 with Accuracy: 78.27%
 Test batch - 10000 with Accuracy: 78.52%
@@ -84,6 +89,7 @@ No drift but retraining point 58370 and current performance is at Accuracy: 81.7
 AutoML model is LeveragingBaggingClassifier(HoeffdingTreeClassifier) and hyperparameters are: {'model': (<class 'river.tree.hoeffding_tree_classifier.HoeffdingTreeClassifier'>, {'grace_period': 200, 'max_depth': inf, 'split_criterion': 'info_gain', 'split_confidence': 1e-07, 'tie_threshold': 0.05, 'leaf_prediction': 'nba', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True}), 'n_models': 6, 'w': 8, 'adwin_delta': 0.002, 'bagging_method': 'subag', 'seed': None}
 Model store len=  3
 current model added to model store
+Online model is updated with latest AutoML pipeline.
 Current model is LeveragingBaggingClassifier(HoeffdingTreeClassifier) and hyperparameters are: {'model': (<class 'river.tree.hoeffding_tree_classifier.HoeffdingTreeClassifier'>, {'grace_period': 200, 'max_depth': inf, 'split_criterion': 'info_gain', 'split_confidence': 1e-07, 'tie_threshold': 0.05, 'leaf_prediction': 'nba', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True}), 'n_models': 6, 'w': 8, 'adwin_delta': 0.002, 'bagging_method': 'subag', 'seed': None}
 Test batch - 59000 with Accuracy: 81.77%
 Change detected at data point 59425 and current performance is at Accuracy: 81.78%

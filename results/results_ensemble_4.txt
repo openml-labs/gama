@@ -7,7 +7,9 @@ Online performance metric is Accuracy: 0.00%.
 Time budget for GAMA is 600.
 Search algorithm for GAMA is AsyncEA().
 
+Test batch - 0 with Accuracy: 0
 Initial model is AdaptiveRandomForestClassifier and hyperparameters are: {'n_models': 14, 'max_features': 1, 'lambda_value': 4, 'metric': (<class 'river.metrics.accuracy.Accuracy'>, {'cm': }), 'disable_weighted_vote': False, 'drift_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.001}), 'warning_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.01}), 'grace_period': 233, 'max_depth': None, 'split_criterion': 'hellinger', 'split_confidence': 1e-07, 'tie_threshold': 0.039999999999999994, 'leaf_prediction': 'mc', 'nb_threshold': 10, 'nominal_attributes': None, 'splitter': None, 'binary_split': False, 'max_size': 32, 'memory_estimate_period': 2000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Online model is updated with latest AutoML pipeline.
 Test batch - 6000 with Accuracy: 86.70%
 Change detected at data point 6172 and current performance is at Accuracy: 86.77%
 Online model is updated with Backup Ensemble.

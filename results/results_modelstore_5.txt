@@ -6,13 +6,16 @@ Gama performance metric is accuracy.
 Online performance metric is Accuracy: 0.00%.
 Time budget for GAMA is 600.
 Search algorithm for GAMA is AsyncEA().
+Test batch - 0 with Accuracy: 0
 Initial model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 256, 'max_depth': inf, 'split_criterion': 'hellinger', 'split_confidence': 0.0001, 'tie_threshold': 0.06999999999999999, 'leaf_prediction': 'nb', 'nb_threshold': 20, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': True, 'drift_window_threshold': 300, 'adwin_confidence': 0.0002, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Online model is updated with latest AutoML pipeline.
 Test batch - 6000 with Accuracy: 78.40%
 Change detected at data point 6129 and current performance is at Accuracy: 78.48%
 0.8038
 AutoML model is AdaptiveRandomForestClassifier and hyperparameters are: {'n_models': 11, 'max_features': 3, 'lambda_value': 7, 'metric': (<class 'river.metrics.accuracy.Accuracy'>, {'cm': }), 'disable_weighted_vote': False, 'drift_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.001}), 'warning_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.01}), 'grace_period': 226, 'max_depth': None, 'split_criterion': 'gini', 'split_confidence': 0.01, 'tie_threshold': 0.02, 'leaf_prediction': 'nba', 'nb_threshold': 10, 'nominal_attributes': None, 'splitter': None, 'binary_split': False, 'max_size': 32, 'memory_estimate_period': 2000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
 Model store len=  0
 current model added to model store
+Online model is updated with latest AutoML pipeline.
 Current model is AdaptiveRandomForestClassifier and hyperparameters are: {'n_models': 11, 'max_features': 3, 'lambda_value': 7, 'metric': (<class 'river.metrics.accuracy.Accuracy'>, {'cm': }), 'disable_weighted_vote': False, 'drift_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.001}), 'warning_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.01}), 'grace_period': 226, 'max_depth': None, 'split_criterion': 'gini', 'split_confidence': 0.01, 'tie_threshold': 0.02, 'leaf_prediction': 'nba', 'nb_threshold': 10, 'nominal_attributes': None, 'splitter': None, 'binary_split': False, 'max_size': 32, 'memory_estimate_period': 2000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
 Test batch - 7000 with Accuracy: 79.50%
 Change detected at data point 7180 and current performance is at Accuracy: 79.22%
@@ -20,6 +23,7 @@ Change detected at data point 7180 and current performance is at Accuracy: 79.22
 AutoML model is AdaptiveRandomForestClassifier and hyperparameters are: {'n_models': 4, 'max_features': 7, 'lambda_value': 5, 'metric': (<class 'river.metrics.accuracy.Accuracy'>, {'cm': }), 'disable_weighted_vote': False, 'drift_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.001}), 'warning_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.01}), 'grace_period': 256, 'max_depth': None, 'split_criterion': 'gini', 'split_confidence': 1e-09, 'tie_threshold': 0.06999999999999999, 'leaf_prediction': 'nb', 'nb_threshold': 10, 'nominal_attributes': None, 'splitter': None, 'binary_split': False, 'max_size': 32, 'memory_estimate_period': 2000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
 Model store len=  1
 current model added to model store
+Online model is updated with latest AutoML pipeline.
 Current model is AdaptiveRandomForestClassifier and hyperparameters are: {'n_models': 4, 'max_features': 7, 'lambda_value': 5, 'metric': (<class 'river.metrics.accuracy.Accuracy'>, {'cm': }), 'disable_weighted_vote': False, 'drift_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.001}), 'warning_detector': (<class 'river.drift.adwin.ADWIN'>, {'delta': 0.01}), 'grace_period': 256, 'max_depth': None, 'split_criterion': 'gini', 'split_confidence': 1e-09, 'tie_threshold': 0.06999999999999999, 'leaf_prediction': 'nb', 'nb_threshold': 10, 'nominal_attributes': None, 'splitter': None, 'binary_split': False, 'max_size': 32, 'memory_estimate_period': 2000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
 Test batch - 8000 with Accuracy: 80.07%
 Change detected at data point 8347 and current performance is at Accuracy: 80.52%
@@ -27,6 +31,7 @@ Change detected at data point 8347 and current performance is at Accuracy: 80.52
 AutoML model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 271, 'max_depth': inf, 'split_criterion': 'info_gain', 'split_confidence': 1e-09, 'tie_threshold': 0.06, 'leaf_prediction': 'nb', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': False, 'drift_window_threshold': 400, 'adwin_confidence': 0.0002, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
 Model store len=  2
 current model added to model store
+Online model is updated with latest AutoML pipeline.
 Current model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 271, 'max_depth': inf, 'split_criterion': 'info_gain', 'split_confidence': 1e-09, 'tie_threshold': 0.06, 'leaf_prediction': 'nb', 'nb_threshold': 0, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': False, 'drift_window_threshold': 400, 'adwin_confidence': 0.0002, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
 Test batch - 9000 with Accuracy: 80.50%
 Test batch - 10000 with Accuracy: 80.44%
@@ -36,6 +41,7 @@ Change detected at data point 11552 and current performance is at Accuracy: 79.5
 AutoML model is LeveragingBaggingClassifier(KNNClassifier) and hyperparameters are: {'model': (<class 'river.neighbors.knn_classifier.KNNClassifier'>, {'n_neighbors': 5, 'window_size': 1000, 'leaf_size': 30, 'p': 2, 'weighted': True}), 'n_models': 4, 'w': 2, 'adwin_delta': 0.002, 'bagging_method': 'me', 'seed': None}
 Model store len=  3
 current model added to model store
+Online model is updated with latest AutoML pipeline.
 Current model is LeveragingBaggingClassifier(KNNClassifier) and hyperparameters are: {'model': (<class 'river.neighbors.knn_classifier.KNNClassifier'>, {'n_neighbors': 5, 'window_size': 1000, 'leaf_size': 30, 'p': 2, 'weighted': True}), 'n_models': 4, 'w': 2, 'adwin_delta': 0.002, 'bagging_method': 'me', 'seed': None}
 Test batch - 12000 with Accuracy: 79.23%
 Change detected at data point 12626 and current performance is at Accuracy: 78.76%

@@ -124,7 +124,7 @@ Auto_pipeline = GamaClassifier(max_total_time=int(sys.argv[6]),
 
 Auto_pipeline.fit(X.iloc[0:initial_batch],y[0:initial_batch])
 print(f'Initial model is {Auto_pipeline.model} and hyperparameters are: {Auto_pipeline.model._get_params()}')
-
+print("Online model is updated with latest AutoML pipeline.")
 
 #Online learning
 
@@ -133,6 +133,7 @@ Backup_ensemble = ensemble.VotingClassifier([Auto_pipeline.model])
 Online_model = Auto_pipeline.model
 count_drift = 0
 last_training_point = initial_batch
+print(f'Test batch - 0 with 0')
 for i in range(initial_batch+1,len(B)):
     #Test then train - by one
     y_pred = Online_model.predict_one(X.iloc[i].to_dict())

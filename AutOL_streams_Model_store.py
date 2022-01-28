@@ -123,12 +123,13 @@ Auto_pipeline = GamaClassifier(max_total_time=int(sys.argv[6]),
 
 Auto_pipeline.fit(X.iloc[0:initial_batch], y[0:initial_batch])
 print(f'Initial model is {Auto_pipeline.model} and hyperparameters are: {Auto_pipeline.model._get_params()}')
+print("Online model is updated with latest AutoML pipeline.")
 
 cls = Auto_pipeline.model
 # Online learning
 model_store = []
 last_training_point = initial_batch
-
+print(f'Test batch - 0 with 0')
 for i in range(initial_batch + 1, len(X)):
     # Test then train - by one
     y_pred = cls.predict_one(X.iloc[i].to_dict())
@@ -178,6 +179,7 @@ for i in range(initial_batch + 1, len(X)):
         if len(model_store) < 5:
             print('current model added to model store')
             model_store.append(Auto_pipeline.model)
+            print("Online model is updated with latest AutoML pipeline.")
 
         if len(model_store) >= 5:
             print('code ACTIVATED')

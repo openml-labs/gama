@@ -1,7 +1,7 @@
 Streams.py
 Data stream is data_streams/new_vehicle_sensIT.arff.
 Initial batch size is 5000.
-
+Test batch - 0 with Accuracy: 0
 Test batch - 6000 with Accuracy: 81.80%
 Test batch - 7000 with Accuracy: 82.85%
 Test batch - 8000 with Accuracy: 82.40%

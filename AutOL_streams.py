@@ -123,6 +123,7 @@ print(f'Initial model is {cls.model} and hyperparameters are: {cls.model._get_pa
 #Online learning
 
 last_training_point = initial_batch
+print(f'Test batch - 0 with 0')
 for i in range(initial_batch+1,len(B)):
     #Test then train - by one
     y_pred = cls.model.predict_one(X.iloc[i].to_dict())

@@ -1,3 +1,4 @@
+Online model is updated with latest AutoML pipeline.
 Online model is updated with Backup Ensemble.
 Online model is updated with latest AutoML pipeline.
 Online model is updated with Backup Ensemble.

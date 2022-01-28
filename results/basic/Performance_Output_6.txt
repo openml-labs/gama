@@ -1,3 +1,4 @@
+Test batch - 0 with Accuracy: 0
 Test batch - 6000 with Accuracy: 69.80%
 Test batch - 7000 with Accuracy: 73.45%
 Test batch - 8000 with Accuracy: 73.93%
