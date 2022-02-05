@@ -78,7 +78,7 @@ class AsyncEvaluator:
 
     def __init__(
         self,
-        n_workers: Optional[int] = None,
+        n_workers: int = 1,
         memory_limit_mb: Optional[int] = None,
         logfile: Optional[str] = None,
         wait_time_before_forced_shutdown: int = 10,
@@ -86,9 +86,8 @@ class AsyncEvaluator:
         """
         Parameters
         ----------
-        n_workers : int, optional (default=None)
+        n_workers : int (default=1)
             Maximum number of subprocesses to run for parallel evaluations.
-            Defaults to `AsyncEvaluator.n_jobs`, using all cores unless overwritten.
         memory_limit_mb : int, optional (default=None)
             The maximum number of megabytes that this process and its subprocesses
             may use in total. If None, no limit is enforced.
@@ -109,9 +108,17 @@ class AsyncEvaluator:
         self._logfile = logfile
         self._wait_time_before_forced_shutdown = wait_time_before_forced_shutdown
 
+        # queue.qsize() may raise an error on Unix-like,
+        # more accurate results may be obtained by using a multiprocessing.Value
+        # but it adds a point of failure and I hope to replace this async
+        # module soon, so we use this approximation.
+        # Since we assume all workers will take up a job, we start below 0:
+        self.job_queue_size = -n_workers
+
         self._input: multiprocessing.Queue = multiprocessing.Queue()
         self._output: multiprocessing.Queue = multiprocessing.Queue()
         self._command: multiprocessing.Queue = multiprocessing.Queue()
+
         pid = os.getpid()
         self._main_process = psutil.Process(pid)
 
@@ -147,6 +154,7 @@ class AsyncEvaluator:
         self.clear_queue(self._input)
         self.clear_queue(self._output)
         self.clear_queue(self._command)
+        self.job_queue_size = -self._n_jobs
 
         # Even processes which 'stop' need to be 'waited',
         # otherwise they become zombie processes.
@@ -157,13 +165,13 @@ class AsyncEvaluator:
                 pass
         return False
 
-    def clear_queue(self, queue: multiprocessing.Queue):
-        while not queue.empty():
+    def clear_queue(self, q: multiprocessing.Queue):
+        while not q.empty():
             try:
-                queue.get(timeout=0.001)
-            except:
+                q.get(timeout=0.001)
+            except queue.Empty:
                 pass
-        queue.close()
+        q.close()
 
     def submit(self, fn: Callable, *args, **kwargs) -> AsyncFuture:
         """ Submit fn(*args, **kwargs) to be evaluated on a subprocess.
@@ -186,6 +194,7 @@ class AsyncEvaluator:
         future = AsyncFuture(fn, *args, **kwargs)
         self.futures[future.id] = future
         self._input.put(future)
+        self.job_queue_size += 1
         return future
 
     def wait_next(self, poll_time: float = 0.05) -> AsyncFuture:
@@ -216,6 +225,7 @@ class AsyncEvaluator:
 
             try:
                 completed_future = self._output.get(block=False)
+                self.job_queue_size -= 1
             except queue.Empty:
                 time.sleep(poll_time)
                 continue
