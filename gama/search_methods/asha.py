@@ -1,7 +1,7 @@
 from functools import partial
 import logging
 import math
-from typing import List, Optional, Dict, Tuple, Any
+from typing import List, Optional, Dict, Tuple, Any, Union
 
 import pandas as pd
 import stopit
@@ -24,41 +24,52 @@ class AsynchronousSuccessiveHalving(BaseSearch):
     ----------
     reduction_factor: int, optional (default=3)
         Reduction factor of candidates between each rung.
-    minimum_resource: int, optional (default=100)
+    minimum_resource: int or float, optional (default=0.125)
         Number of samples to use in the lowest rung.
-    maximum_resource: int, optional (default=number of samples in the dataset)
+        If integer, it specifies the number of rows.
+        If float, it specifies the fraction of the dataset.
+    maximum_resource: int or float optional (default=1.0)
         Number of samples to use in the top rung.
-        This should not exceed the number of samples in the data.
-    minimum_early_stopping_rate: int (default=1)
+        If integer, it specifies the number of rows.
+        If float, it specifies the fraction of the dataset.
+    minimum_early_stopping_rate: int (default=0)
         Number of lowest rungs to skip.
     """
 
     def __init__(
         self,
         reduction_factor: Optional[int] = None,
-        minimum_resource: Optional[int] = None,
-        maximum_resource: Optional[int] = None,
+        minimum_resource: Optional[Tuple[int, float]] = None,
+        maximum_resource: Optional[Tuple[int, float]] = None,
         minimum_early_stopping_rate: Optional[int] = None,
     ):
         super().__init__()
         # maps hyperparameter -> (set value, default)
         self._hyperparameters: Dict[str, Tuple[Any, Any]] = dict(
             reduction_factor=(reduction_factor, 3),
-            minimum_resource=(minimum_resource, 100),
-            maximum_resource=(maximum_resource, 100_000),
-            minimum_early_stopping_rate=(minimum_early_stopping_rate, 1),
+            minimum_resource=(minimum_resource, 0.125),
+            maximum_resource=(maximum_resource, 1.0),
+            minimum_early_stopping_rate=(minimum_early_stopping_rate, 0),
         )
         self.output = []
 
         self.logger = partial(
             EvaluationLogger,
-            extra_fields=dict(rung=lambda e: e.individual.meta.get("rung", "unknown")),
+            extra_fields=dict(
+                rung=lambda e: e.individual.meta.get("rung", "unknown"),
+                subsample=lambda e: e.individual.meta.get("subsample", "unknown"),
+            ),
         )
 
     def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float):
-        # `maximum_resource` is the number of samples used in the highest rung.
-        # this typically should be the number of samples in the (training) dataset.
-        self._overwrite_hyperparameter_default("maximum_resource", len(y))
+        set_max, default = self._hyperparameters["maximum_resource"]
+        if set_max is not None and len(y) < set_max:
+            # todo: take into account the evaluation procedure as well.
+            logging.warning(
+                f"`maximum_resource` was set to {set_max}, but the dataset only"
+                f"contains {len(y)} samples. Reverting to default (1.0) instead."
+            )
+            self._hyperparameters["maximum_resource"] = (None, default)
 
     def search(self, operations: OperatorSet, start_candidates: List[Individual]):
         self.output = asha(
@@ -70,9 +81,9 @@ def asha(
     operations: OperatorSet,
     start_candidates: List[Individual],
     reduction_factor: int = 3,
-    minimum_resource: int = 100,
-    maximum_resource: int = 100_000,
-    minimum_early_stopping_rate: int = 1,
+    minimum_resource: Union[int, float] = 0.125,
+    maximum_resource: Union[int, float] = 1.0,
+    minimum_early_stopping_rate: int = 0,
     max_full_evaluations: Optional[int] = None,
 ) -> List[Individual]:
     """ Asynchronous Halving Algorithm by Li et al.
@@ -87,11 +98,14 @@ def asha(
         A list which contains the set of best found individuals during search.
     reduction_factor: int (default=3)
         Reduction factor of candidates between each rung.
-    minimum_resource: int (default=100)
+    minimum_resource: int or float, optional (default=0.125)
         Number of samples to use in the lowest rung.
-    maximum_resource: int (default=100_000)
+        If integer, it specifies the number of rows.
+        If float, it specifies the fraction of the dataset.
+    maximum_resource: int or float optional (default=1.0)
         Number of samples to use in the top rung.
-        This should not exceed the number of samples in the data.
+        If integer, it specifies the number of rows.
+        If float, it specifies the fraction of the dataset.
     minimum_early_stopping_rate: int (default=1)
         Number of lowest rungs to skip.
     max_full_evaluations: Optional[int] (default=None)
@@ -104,6 +118,8 @@ def asha(
         Individuals of the highest rung in which
         at least one individual has been evaluated.
     """
+    if not isinstance(minimum_resource, type(maximum_resource)):
+        raise ValueError("Currently minimum and maximum resource must same type.")
 
     # Note that here we index the rungs by all possible rungs (0..ceil(log_eta(R/r))),
     # and ignore the first minimum_early_stopping_rate rungs.
@@ -191,6 +207,7 @@ def asha(
 def evaluate_on_rung(individual, rung, max_rung, evaluate_individual, *args, **kwargs):
     evaluation = evaluate_individual(individual, *args, **kwargs)
     evaluation.individual.meta["rung"] = rung
+    evaluation.individual.meta["subsample"] = kwargs.get("subsample")
     # We want to avoid saving evaluations that are not on the max rung to disk,
     # because we only want to use pipelines evaluated on the max rung after search.
     # We're working on a better way to relay this information, this is temporary.

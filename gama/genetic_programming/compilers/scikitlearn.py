@@ -6,7 +6,12 @@ from typing import Callable, Tuple, Optional, Sequence
 
 import stopit
 from sklearn.base import TransformerMixin, is_classifier
-from sklearn.model_selection import ShuffleSplit, cross_validate, check_cv
+from sklearn.model_selection import (
+    ShuffleSplit,
+    cross_validate,
+    check_cv,
+    StratifiedShuffleSplit,
+)
 from sklearn.pipeline import Pipeline
 
 from gama.utilities.evaluation_library import Evaluation
@@ -70,15 +75,35 @@ def evaluate_pipeline(
     prediction, estimators = None, None
     # default score for e.g. timeout or failure
     scores = tuple([float("-inf")] * len(metrics))
+    is_classification = is_classifier(pipeline)
 
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
-            if isinstance(subsample, int) and subsample < len(y_train):
-                sampler = ShuffleSplit(n_splits=1, train_size=subsample, random_state=0)
-                idx, _ = next(sampler.split(x))
-                x, y_train = x.iloc[idx, :], y_train[idx]
+            # When splits are generated (i.e., cv is an int), they are deterministic
+            splitter = check_cv(cv, y_train, classifier=is_classification)
 
-            splitter = check_cv(cv, y_train, is_classifier(pipeline))
+            require_subsample = (
+                isinstance(subsample, int) and subsample < len(y_train)
+            ) or (isinstance(subsample, float) and subsample < 1.0)
+
+            if require_subsample:
+                # We subsample the training sets, but not the test sets.
+                # This allows for performance comparisons across subsample levels.
+                new_splits = []
+                for train, test in splitter.split(x, y_train):
+                    if is_classification:
+                        sampler = StratifiedShuffleSplit(
+                            n_splits=1, train_size=subsample, random_state=0
+                        )
+                    else:
+                        sampler = ShuffleSplit(
+                            n_splits=1, train_size=subsample, random_state=0
+                        )
+                    full_train_x, full_train_y = x.iloc[train, :], y_train[train]
+                    subsample_idx, _ = next(sampler.split(full_train_x, full_train_y))
+                    new_splits.append((subsample_idx, test))
+                splitter = new_splits
+
             result = cross_validate(
                 pipeline,
                 x,
@@ -91,7 +116,10 @@ def evaluate_pipeline(
             scores = tuple([np.mean(result[f"test_{m.name}"]) for m in metrics])
             estimators = result["estimator"]
 
-            for (estimator, (_, test)) in zip(estimators, splitter.split(x, y_train)):
+            splitter = (
+                splitter if isinstance(splitter, list) else splitter.split(x, y_train)
+            )
+            for (estimator, (_, test)) in zip(estimators, splitter):
                 if any([m.requires_probabilities for m in metrics]):
                     fold_pred = estimator.predict_proba(x.iloc[test, :])
                 else:

@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Next Release
+--------------
+
+Features:
+ - ASHA resources can now also be specified as fraction of the dataset size by using a float in (0, 1].
+
+Changes:
+ - #138: Instead of subsampling the whole dataset before doing CV, the same test set is used across rungs and only
+        the training folds are subsampled. This makes performance comparable across rungs.
+ - AsyncEA will try to delay creating new individuals as long as possible.
+ - AsyncEA will no longer create offspring from pipelines with failed evaluations (e.g., timeout, invalid configuration).
+
+
 Version 21.0.1
 --------------
 
