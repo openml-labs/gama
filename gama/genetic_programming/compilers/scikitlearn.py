@@ -15,7 +15,7 @@ import numpy as np
 from gama.utilities.metrics import Metric
 from gama.genetic_programming.components import Individual, PrimitiveNode, Fitness
 
-log = logging.getLogger(_name_)
+log = logging.getLogger(__name__)
 
 
 def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
