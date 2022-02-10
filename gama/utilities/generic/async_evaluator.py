@@ -255,6 +255,7 @@ class AsyncEvaluator:
         """ Terminate a new worker node and remove it from the process pool. """
         process.terminate()
         process.wait(timeout=60)
+        self.job_queue_size -= 1
         self._processes.remove(process)
 
     def _control_memory_usage(self, threshold=0.05):
