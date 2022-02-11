@@ -225,19 +225,24 @@ class AsyncEvaluator:
 
             try:
                 completed_future = self._output.get(block=False)
-                self.job_queue_size -= 1
+                break
             except queue.Empty:
                 time.sleep(poll_time)
-                continue
+            except MemoryError:
+                self._mem_violations += 1
+                self.job_queue_size -= 1  # whatever future has completed
+                log.info("Failed to retrieve results")
 
-            match = self.futures.pop(completed_future.id)
-            match.result, match.exception, match.traceback = (
-                completed_future.result,
-                completed_future.exception,
-                completed_future.traceback,
-            )
-            self._mem_behaved += 1
-            return match
+        self.job_queue_size -= 1
+        match = self.futures.pop(completed_future.id)
+        match.result, match.exception, match.traceback = (
+            completed_future.result,
+            completed_future.exception,
+            completed_future.traceback,
+        )
+        self._mem_behaved += 1
+
+        return match
 
     def _start_worker_process(self) -> psutil.Process:
         """ Start a new worker node and add it to the process pool. """
