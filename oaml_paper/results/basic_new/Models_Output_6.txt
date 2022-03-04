@@ -1,0 +1,10 @@
+Initial model is HoeffdingAdaptiveTreeClassifier and hyperparameters are: {'grace_period': 302, 'max_depth': inf, 'split_criterion': 'info_gain', 'split_confidence': 1e-07, 'tie_threshold': 0.03, 'leaf_prediction': 'mc', 'nb_threshold': 10, 'nominal_attributes': None, 'splitter': (<class 'river.tree.splitter.gaussian_splitter.GaussianSplitter'>, {'n_splits': 10}), 'bootstrap_sampling': True, 'drift_window_threshold': 200, 'adwin_confidence': 0.002, 'binary_split': False, 'max_size': 100, 'memory_estimate_period': 1000000, 'stop_mem_management': False, 'remove_poor_attrs': False, 'merit_preprune': True, 'seed': None}
+Current model is HoeffdingAdaptiveTreeClassifier
+Current model is HoeffdingAdaptiveTreeClassifier
+Current model is HoeffdingAdaptiveTreeClassifier
+Current model is HoeffdingAdaptiveTreeClassifier
+Current model is HoeffdingAdaptiveTreeClassifier
+Current model is HoeffdingAdaptiveTreeClassifier
+Current model is HoeffdingAdaptiveTreeClassifier
+Current model is HoeffdingAdaptiveTreeClassifier
+Current model is HoeffdingAdaptiveTreeClassifier

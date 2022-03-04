@@ -21,6 +21,7 @@ from river import evaluate
 from river import datasets
 from river import stream
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.preprocessing import LabelEncoder
 
 import wandb
 import sys
@@ -37,7 +38,8 @@ datasets =['data_streams/electricity-normalized.arff',      #0
            'data_streams/new_ldpa.arff',                    #8      - for later
            'data_streams/new_pokerhand-normalized.arff',    #9      - for later
            'data_streams/new_Run_or_walk_information.arff', #10     - for later
-
+           'data_streams/New_dirty_data/Activity_raw.arff', #11
+           'data_streams/New_dirty_data/Connect_4.arff',    #12
            ]
 #Models
 
@@ -49,7 +51,7 @@ model_5 = ensemble.LeveragingBaggingClassifier(preprocessing.StandardScaler() | 
 model_6 = preprocessing.StandardScaler() | neighbors.KNNClassifier()
 model_7 = naive_bayes.BernoulliNB()
 
-model = model_5
+model = model_3
 
 #User parameters
 
@@ -64,7 +66,7 @@ initial_batch = int(sys.argv[2])                            #initial set of samp
 online_metric = metrics.Accuracy()                          #river metric to evaluate online learning
 #drift_detector = EDDM()
 drift_detector = drift_detection.EDDM()
-live_plot = True
+live_plot = False
 
 #Plot initialization
 if live_plot:
@@ -79,7 +81,9 @@ if live_plot:
 
 #Data
 
-B = pd.DataFrame(arff.load(open(data_loc, 'r'),encode_nominal=True)["data"])
+file = open(data_loc)
+B = pd.DataFrame(arff.loads(file, encode_nominal=True)["data"])
+breakpoint()
 
 # Preprocessing of data: Drop NaNs, move target to the end, check for zero values
 

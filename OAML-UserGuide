@@ -1,0 +1,63 @@
+Online Automated Machine Learning (OAML) function is designed to automate online pipeline design.
+Search space includes River preprocessors, classifiers and ensembles.
+Pipelines can be one of more steps depending on the data characteristics.
+
+We provide 3 versions of OAML as basic, ensemble and modelstore. Each version reads data from an arff file
+and requires certain parameters. Explanation of algorithms can be found in the following paper.
+Please cite this paper if you publish your results.
+
+Bilge Celik, Prabhant Singh, Joaquin Vanschoren, "Online AutoML: An adaptive AutoML framework for online learning."
+CoRR abs/2201.09750 (2022)
+https://doi.org/10.48550/arXiv.2201.09750
+
+OAML Requirements (extra to original GAMA requirements)
+- pip install river==0.8.0 (Newer versions are creating errors at the moment, WIP.)
+- pip install wandb (if live-plot function is used)
+- pip install scikit-multiflow
+
+If you use our applications, following are the user parameters and possible values. All 3 versions of OAML use the same
+user parameters.
+Alternatively, you can use GAMA with "online_learning=True" with your own script.
+
+Example run:
+    python OAML_basic.py 'data_streams/electricity-normalized.arff' 5000 5000 acc acc 60 evol False
+
+#1 Data stream (str)
+- Location of the stream you want to use for online learning. You can find example streams under "data_streams" folder.
+- Must be arff file.
+
+#2 Initial batch size (int)
+- Number of data samples to be used for initial pipeline search.
+
+#3 Sliding window size (int)
+- Number of data samples to be used for pipeline update search at drift points.
+
+#4 GAMA metric (str)
+- Performance metric to optimize in GAMA pipeline search
+- Should be one of the following:
+     [acc, b_acc, f1, roc_auc, rmse]
+
+#5 River metric (str)
+- Performance metric to evalue in Online learning.
+- Should be one of the following:
+    [acc, b_acc, f1, roc_auc, rmse]
+
+#6 Time budget (int)
+- Time budget given to GAMA pipeline search.
+
+#7 Search algorithm (str)
+- Search algorithm to be used in GAMA pipeline search.
+- Should be one of the following:
+    [random, evol, s_halving]
+
+#8 Live-plot (Boolean)
+- Whether to create a live plot with Wandb-ai or not.
+- Requires registration to https://wandb.ai/site
+- If True, then remember to change entity and project names in the script.
+You can then follow your runs through Wand-ai under those pages.
+- Should be one of the following:
+    [True, False]
+
+
+For any problems and questions about the OAML system, please use Git page to open an issue.
+You can also contact B.Celik.Aydin@tue.nl directly.
