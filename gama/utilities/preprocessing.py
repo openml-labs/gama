@@ -57,7 +57,7 @@ def basic_encoding(x: pd.DataFrame, is_classification: bool):
 
     encoding_steps = [
         ("ord-enc", ce.OrdinalEncoder(cols=ord_features, drop_invariant=True)),
-        ("oh-enc", ce.OneHotEncoder(cols=leq_10_features, handle_missing="ignore")),
+        ("oh-enc", ce.OneHotEncoder(cols=leq_10_features, handle_missing="value")),
     ]
     encoding_pipeline = Pipeline(encoding_steps)
     x_enc = encoding_pipeline.fit_transform(x, y=None)  # Is this dangerous?
