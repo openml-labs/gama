@@ -518,7 +518,7 @@ class Gama(ABC):
             # data sets during pipeline evaluation.
             for m in self._metrics:
                 if m.task_type == MetricType.CLASSIFICATION:
-                    m.scorer._kwargs = {"labels": self._y}
+                    m.scorer._kwargs.update({"labels": self._y})
 
             if store_pipelines and self._x.shape[0] * self._x.shape[1] > 6_000_000:
                 # if m > 0, we are storing models for each evaluation. For this size
