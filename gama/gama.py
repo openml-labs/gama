@@ -33,7 +33,7 @@ import gama.genetic_programming.compilers.scikitlearn
 from gama.genetic_programming.components import Individual, Fitness, DATA_TERMINAL
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
-from gama.utilities.metrics import MetricType, scoring_to_metric
+from gama.utilities.metrics import scoring_to_metric
 
 from gama.__version__ import __version__
 from gama.data_loading import X_y_from_file
@@ -512,13 +512,6 @@ class Gama(ABC):
             store_pipelines = (
                 self._evaluation_library._m is None or self._evaluation_library._m > 0
             )
-
-            # Add label information for classification to the scorer such that
-            # the cross validator does not encounter unseen labels in smaller
-            # data sets during pipeline evaluation.
-            for m in self._metrics:
-                if m.task_type == MetricType.CLASSIFICATION:
-                    m.scorer._kwargs.update({"labels": self._y})
 
             if store_pipelines and self._x.shape[0] * self._x.shape[1] > 6_000_000:
                 # if m > 0, we are storing models for each evaluation. For this size

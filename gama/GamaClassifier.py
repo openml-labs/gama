@@ -131,6 +131,13 @@ class GamaClassifier(Gama):
             # If target values are `str` we encode them or scikit-learn will complain.
             y = self._label_encoder.transform(y_)
         self._evaluation_library.determine_sample_indices(stratify=y)
+
+        # Add label information for classification to the scorer such that
+        # the cross validator does not encounter unseen labels in smaller
+        # data sets during pipeline evaluation.
+        for m in self._metrics:
+            m.scorer._kwargs.update({"labels": y})
+
         super().fit(x, y, *args, **kwargs)
 
     def _encode_labels(self, y):
