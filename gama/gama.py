@@ -509,10 +509,16 @@ class Gama(ABC):
                 self._operator_set._compile,
                 preprocessing_steps=self._fixed_pipeline_extension,
             )
-
             store_pipelines = (
                 self._evaluation_library._m is None or self._evaluation_library._m > 0
             )
+
+            # Add label information to the scorer such that the cross validator
+            # does not encounter unseen labels in smaller data sets during
+            # pipeline evaluation.
+            for m in self._metrics:
+                m.scorer._kwargs = {"labels": self._y}
+
             if store_pipelines and self._x.shape[0] * self._x.shape[1] > 6_000_000:
                 # if m > 0, we are storing models for each evaluation. For this size
                 # KNN will create models of about 76Mb in size, which is too big, so
