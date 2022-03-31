@@ -136,7 +136,8 @@ class GamaClassifier(Gama):
         # the cross validator does not encounter unseen labels in smaller
         # data sets during pipeline evaluation.
         for m in self._metrics:
-            m.scorer._kwargs.update({"labels": y})
+            if "labels" in inspect.signature(m.scorer._score_func).parameters:
+                m.scorer._kwargs.update({"labels": y})
 
         super().fit(x, y, *args, **kwargs)
 
