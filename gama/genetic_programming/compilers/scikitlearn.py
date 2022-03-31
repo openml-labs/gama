@@ -110,7 +110,7 @@ def evaluate_pipeline(
                 y_train,
                 cv=splitter,
                 return_estimator=True,
-                scoring=[m.name for m in metrics],
+                scoring=dict([(m.name, m) for m in metrics]),
                 error_score="raise",
             )
             scores = tuple([np.mean(result[f"test_{m.name}"]) for m in metrics])
