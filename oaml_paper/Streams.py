@@ -27,19 +27,19 @@ import wandb
 import sys
 
 #Datasets
-datasets =['data_streams/electricity-normalized.arff',      #0
-           'data_streams/new_airlines.arff',                #1
-           'data_streams/new_IMDB_drama.arff',              #2      - target at the beginning
-           'data_streams/new_vehicle_sensIT.arff',          #3      - target at the beginning
-           'data_streams/SEA_Abrubt_5.arff',                #4
-           'data_streams/HYPERPLANE_01.arff',               #5
-           'data_streams/SEA_Mixed_5.arff',                 #6
-           'data_streams/Forestcover.arff',                 #7      - for later
-           'data_streams/new_ldpa.arff',                    #8      - for later
-           'data_streams/new_pokerhand-normalized.arff',    #9      - for later
-           'data_streams/new_Run_or_walk_information.arff', #10     - for later
-           'data_streams/New_dirty_data/Activity_raw.arff', #11
-           'data_streams/New_dirty_data/Connect_4.arff',    #12
+datasets =['../data_streams/electricity-normalized.arff',      #0
+           '../data_streams/new_airlines.arff',                #1
+           '../data_streams/new_IMDB_drama.arff',              #2      - target at the beginning
+           '../data_streams/new_vehicle_sensIT.arff',          #3      - target at the beginning
+           '../data_streams/SEA_Abrubt_5.arff',                #4
+           '../data_streams/HYPERPLANE_01.arff',               #5
+           '../data_streams/SEA_Mixed_5.arff',                 #6
+           '../data_streams/Forestcover.arff',                 #7      - for later
+           '../data_streams/new_ldpa.arff',                    #8      - for later
+           '../data_streams/new_pokerhand-normalized.arff',    #9      - for later
+           '../data_streams/new_Run_or_walk_information.arff', #10     - for later
+           '../data_streams/New_dirty_data/Activity_raw.arff', #11
+           '../data_streams/New_dirty_data/Connect_4.arff',    #12
            ]
 #Models
 
@@ -47,11 +47,23 @@ model_1 = tree.ExtremelyFastDecisionTreeClassifier()
 model_2 = preprocessing.StandardScaler() | linear_model.Perceptron()
 model_3 = preprocessing.AdaptiveStandardScaler() | tree.HoeffdingAdaptiveTreeClassifier()
 model_4 = tree.HoeffdingAdaptiveTreeClassifier()
-model_5 = ensemble.LeveragingBaggingClassifier(preprocessing.StandardScaler() | linear_model.Perceptron())
+model_5 = ensemble.LeveragingBaggingClassifier(linear_model.Perceptron())
 model_6 = preprocessing.StandardScaler() | neighbors.KNNClassifier()
 model_7 = naive_bayes.BernoulliNB()
+model_8 = ensemble.AdaptiveRandomForestClassifier()
 
-model = model_3
+#initial pipeline - data 6 - oaml basic
+custom_pipeline = ensemble.AdaptiveRandomForestClassifier(n_models=1,
+                                                          max_features=2,
+                                                          lambda_value=2,
+                                                          grace_period=283,
+                                                          split_criterion= 'gini',
+                                                          split_confidence= 1e-09,
+                                                          tie_threshold= 0.05,
+                                                          leaf_prediction = 'nb',
+                                                          nb_threshold = 0)
+
+model = model_5
 
 #User parameters
 
@@ -83,7 +95,6 @@ if live_plot:
 
 file = open(data_loc)
 B = pd.DataFrame(arff.loads(file, encode_nominal=True)["data"])
-breakpoint()
 
 # Preprocessing of data: Drop NaNs, move target to the end, check for zero values
 
