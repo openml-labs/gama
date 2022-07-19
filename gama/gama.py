@@ -663,7 +663,7 @@ class Gama(ABC):
             time_limit=fit_time,
             activity_meta=[self._search_method.__class__.__name__],
         ):
-            self._search_phase(warm_start, timeout=fit_time)
+            self._search_phase(warm_start=self._final_pop, timeout=fit_time)
 
         with self._time_manager.start_activity(
             "postprocess",

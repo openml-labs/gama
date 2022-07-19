@@ -171,7 +171,7 @@ for i in range(initial_batch+1,len(B)):
                                        search=search_alg,
                                        online_learning=True,
                                        post_processing=BestFitOnlinePostProcessing(),
-                                       store='nothing',
+                                       store='all',
                                        )
         Auto_pipeline.fit(X_sliding, y_sliding)
 
