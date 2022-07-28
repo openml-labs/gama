@@ -269,15 +269,19 @@ class Gama(ABC):
 
         self._subscribers: Dict[str, List[Callable]] = defaultdict(list)
         cache_directory = os.path.join(self.output_directory, "cache")
+
         if isinstance(post_processing, EnsemblePostProcessing):
             self._evaluation_library = EvaluationLibrary(
                 m=post_processing.hyperparameters["max_models"],
                 n=post_processing.hyperparameters["hillclimb_size"],
                 cache=cache_directory,
             )
+        if self._online_learning:
+            self._evaluation_library = EvaluationLibrary(m=10, cache=cache_directory)
         else:
             # Don't keep memory-heavy evaluation meta-data (predictions, estimators)
             self._evaluation_library = EvaluationLibrary(m=0, cache=cache_directory)
+
         self.evaluation_completed(self._evaluation_library.save_evaluation)
         e = search.logger(os.path.join(self.output_directory, "evaluations.log"))
         self.evaluation_completed(e.log_evaluation)
@@ -568,6 +572,7 @@ class Gama(ABC):
                     )
                 )
             )
+
             self._post_processing.dynamic_defaults(self)
             self.model = self._post_processing.post_process(
                 self._x,
@@ -575,15 +580,149 @@ class Gama(ABC):
                 self._time_manager.total_time_remaining,
                 best_individuals,
             )
+
         if not self._store == "all":
             to_clean = dict(nothing="all", logs="evaluations", models="logs")
             self.cleanup(to_clean[self._store])
         return self
 
+    def partial_fit(
+        self,
+        x: Union[pd.DataFrame, np.ndarray],
+        y: Union[pd.DataFrame, pd.Series, np.ndarray],
+        warm_start: Optional[List[Individual]] = None,
+    ) -> "Gama":
+        """ Find and partial-fit a model to predict target y from X.
+        Partial-fit can be called only after fit is called once.
+
+        Various possible machine learning pipelines will be fit to the (X,y) data.
+        In partial-fit, the search starts with n_best pipelines found in previous fit call.
+        Using Genetic Programming, the pipelines chosen should lead to gradually
+        better models. Pipelines will internally be validated using cross validation.
+
+        After the search termination condition is met, the best found pipeline
+        configuration is then used to train a final model on all provided data.
+
+        Parameters
+        ----------
+        x: pandas.DataFrame or numpy.ndarray, shape = [n_samples, n_features]
+            Training data. All elements must be able to be converted to float.
+        y: pandas.DataFrame, pandas.Series or numpy.ndarray, shape = [n_samples,]
+            Target values.
+            If a DataFrame is provided, assumes the first column contains target values.
+        warm_start: List[Individual], optional (default=None)
+            A list of individual to start the search  procedure with.
+            If None is given, random start candidates are generated.
+        """
+        self._time_manager = TimeKeeper(self._time_manager.total_time)
+
+        with self._time_manager.start_activity(
+            "preprocessing", activity_meta=["default"]
+        ):
+            x, self._y = format_x_y(x, y)
+            self._inferred_dtypes = x.dtypes
+            is_classification = hasattr(self, "_label_encoder")
+            self._x, self._basic_encoding_pipeline = basic_encoding(
+                x, is_classification
+            )
+            if not self._online_learning:
+                self._fixed_pipeline_extension = basic_pipeline_extension(
+                    self._x, is_classification
+                )
+            else:
+                self._fixed_pipeline_extension = river_pipeline_extension(
+                    self._x, is_classification
+                )
+            self._operator_set._safe_compile = partial(
+                compile_individual, preprocessing_steps=self._fixed_pipeline_extension
+            )
+            store_pipelines = (
+                self._evaluation_library._m is None or self._evaluation_library._m > 0
+            )
+            if store_pipelines and self._x.shape[0] * self._x.shape[1] > 6_000_000:
+                # if m > 0, we are storing models for each evaluation. For this size
+                # KNN will create models of about 76Mb in size, which is too big, so
+                # we exclude it from search:
+                log.info("Excluding KNN from search because the dataset is too big.")
+                from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+
+                self._pset["prediction"] = [
+                    p
+                    for p in self._pset["prediction"]
+                    if p.identifier not in [KNeighborsClassifier, KNeighborsRegressor]
+                ]
+            if store_pipelines and self._x.shape[1] > 50:
+                log.info("Data has too many features to include PolynomialFeatures")
+                from sklearn.preprocessing import PolynomialFeatures
+
+                self._pset["data"] = [
+                    p
+                    for p in self._pset["data"]
+                    if p.identifier not in [PolynomialFeatures]
+                ]
+
+        fit_time = int(
+            (1 - self._post_processing.time_fraction)
+            * self._time_manager.total_time_remaining
+        )
+
+        # prior_top_individuals_1 = [
+        #     evaluation.individual
+        #     for evaluation in self._evaluation_library.n_best()
+        # ]
+
+        #Start search phase from prior populations' top performing 10 individuals
+        prior_top_individuals = list(
+            reversed(
+                sorted(
+                    self._final_pop,
+                    key=lambda ind: cast(Fitness, ind.fitness).values,
+                )
+            )
+        )
+
+        with self._time_manager.start_activity(
+            "search",
+            time_limit=fit_time,
+            activity_meta=[self._search_method.__class__.__name__],
+        ):
+
+            self._search_phase(warm_start=prior_top_individuals[:10], timeout=fit_time)
+
+        with self._time_manager.start_activity(
+            "postprocess",
+            # time_limit=int(self._time_manager.total_time_remaining),
+            time_limit=int(self._time_manager.total_time_remaining),
+            activity_meta=[self._post_processing.__class__.__name__],
+        ):
+            best_individuals = list(
+                reversed(
+                    sorted(
+                        self._final_pop,
+                        key=lambda ind: cast(Fitness, ind.fitness).values,
+                    )
+                )
+            )
+            self._post_processing.dynamic_defaults(self)
+            self.model = self._post_processing.post_process(
+                self._x,
+                self._y,
+                self._time_manager.total_time_remaining,
+                best_individuals,
+            )
+
+
+        if not self._store == "all":
+            to_clean = dict(nothing="all", logs="evaluations", models="logs")
+            self.cleanup(to_clean[self._store])
+        return self
+
+
     def _search_phase(
         self, warm_start: Optional[List[Individual]] = None, timeout: float = 1e6
     ):
         """ Invoke the search algorithm, populate `final_pop`. """
+
         if warm_start:
             if not all([isinstance(i, Individual) for i in warm_start]):
                 raise TypeError("`warm_start` must be a list of Individual.")
@@ -594,6 +733,7 @@ class Gama(ABC):
             pop = [self._operator_set.individual() for _ in range(50)]
 
         deadline = time.time() + timeout
+
 
         evaluate_pipeline = partial(
             self._compiler.evaluate_pipeline,
@@ -611,7 +751,6 @@ class Gama(ABC):
             deadline=deadline,
             add_length_to_score=self._regularize_length,
         )
-
         try:
             with stopit.ThreadingTimeout(timeout):
                 self._search_method.dynamic_defaults(self._x, self._y, timeout)

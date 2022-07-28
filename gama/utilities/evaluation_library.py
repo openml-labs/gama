@@ -236,17 +236,20 @@ class EvaluationLibrary:
         elif self._m is None or self._m > len(self.top_evaluations):
             evaluation.to_disk(self._cache)
             heapq.heappush(self.top_evaluations, evaluation)
-        else:
-            removed = heapq.heappushpop(self.top_evaluations, evaluation)
-            if removed == evaluation:
-                # new evaluation is not in heap, big memory items may be discarded
-                removed._predictions, removed._estimators = None, None
-            else:
-                # new evaluation is now on the heap, remove old from disk
-                evaluation.to_disk(self._cache)
-                removed.remove_from_disk()
+        # else:
+        #     removed = heapq.heappushpop(self.top_evaluations, evaluation)
+        #     if removed == evaluation:
+        #         # new evaluation is not in heap, big memory items may be discarded
+        #         removed._predictions, removed._estimators = None, None
+        #     else:
+        #         # new evaluation is now on the heap, remove old from disk
+        #         evaluation.to_disk(self._cache)
+        #         removed.remove_from_disk()
+        #
+        #     self.other_evaluations.append(removed)
 
-            self.other_evaluations.append(removed)
+        #Removed above code due to error of removing with partial fit, currently works but WIP
+        # for a better solution.
 
         self.lookup[self._lookup_key(evaluation)] = evaluation
 

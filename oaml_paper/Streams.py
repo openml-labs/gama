@@ -20,26 +20,27 @@ from river import naive_bayes
 from river import evaluate
 from river import datasets
 from river import stream
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.preprocessing import LabelEncoder
+from river import compose
+from river import preprocessing
+from river import ensemble
 
 import wandb
 import sys
 
 #Datasets
-datasets =['data_streams/electricity-normalized.arff',      #0
-           'data_streams/new_airlines.arff',                #1
-           'data_streams/new_IMDB_drama.arff',              #2      - target at the beginning
-           'data_streams/new_vehicle_sensIT.arff',          #3      - target at the beginning
-           'data_streams/SEA_Abrubt_5.arff',                #4
-           'data_streams/HYPERPLANE_01.arff',               #5
-           'data_streams/SEA_Mixed_5.arff',                 #6
-           'data_streams/Forestcover.arff',                 #7      - for later
-           'data_streams/new_ldpa.arff',                    #8      - for later
-           'data_streams/new_pokerhand-normalized.arff',    #9      - for later
-           'data_streams/new_Run_or_walk_information.arff', #10     - for later
-           'data_streams/New_dirty_data/Activity_raw.arff', #11
-           'data_streams/New_dirty_data/Connect_4.arff',    #12
+datasets =['../data_streams/electricity-normalized.arff',      #0
+           '../data_streams/new_airlines.arff',                #1
+           '../data_streams/new_IMDB_drama.arff',              #2      - target at the beginning
+           '../data_streams/new_vehicle_sensIT.arff',          #3      - target at the beginning
+           '../data_streams/SEA_Abrubt_5.arff',                #4
+           '../data_streams/HYPERPLANE_01.arff',               #5
+           '../data_streams/SEA_Mixed_5.arff',                 #6
+           '../data_streams/Forestcover.arff',                 #7      - for later
+           '../data_streams/new_ldpa.arff',                    #8      - for later
+           '../data_streams/new_pokerhand-normalized.arff',    #9      - for later
+           '../data_streams/new_Run_or_walk_information.arff', #10     - for later
+           '../data_streams/New_dirty_data/Activity_raw.arff', #11
+           '../data_streams/New_dirty_data/Connect_4.arff',    #12
            ]
 #Models
 
@@ -47,11 +48,29 @@ model_1 = tree.ExtremelyFastDecisionTreeClassifier()
 model_2 = preprocessing.StandardScaler() | linear_model.Perceptron()
 model_3 = preprocessing.AdaptiveStandardScaler() | tree.HoeffdingAdaptiveTreeClassifier()
 model_4 = tree.HoeffdingAdaptiveTreeClassifier()
-model_5 = ensemble.LeveragingBaggingClassifier(preprocessing.StandardScaler() | linear_model.Perceptron())
+model_5 = ensemble.LeveragingBaggingClassifier(linear_model.Perceptron())
 model_6 = preprocessing.StandardScaler() | neighbors.KNNClassifier()
 model_7 = naive_bayes.BernoulliNB()
+model_8 = ensemble.AdaptiveRandomForestClassifier()
+model_9 = compose.Pipeline(
+    preprocessing.StandardScaler(),
+    linear_model.LinearRegression()
+)
+print(type(model_9))
+print(model_9)
+print(model_9.steps)
+#initial pipeline - data 6 - oaml basic
+custom_pipeline = ensemble.AdaptiveRandomForestClassifier(n_models=1,
+                                                          max_features=2,
+                                                          lambda_value=2,
+                                                          grace_period=283,
+                                                          split_criterion= 'gini',
+                                                          split_confidence= 1e-09,
+                                                          tie_threshold= 0.05,
+                                                          leaf_prediction = 'nb',
+                                                          nb_threshold = 0)
 
-model = model_3
+model = model_9
 
 #User parameters
 
@@ -83,7 +102,6 @@ if live_plot:
 
 file = open(data_loc)
 B = pd.DataFrame(arff.loads(file, encode_nominal=True)["data"])
-breakpoint()
 
 # Preprocessing of data: Drop NaNs, move target to the end, check for zero values
 
@@ -102,23 +120,34 @@ if B[:].iloc[:,0:-1].eq(0).any().any():
 
 X = B[:].iloc[:,0:-1]
 y = B[:].iloc[:,-1]
+dataset = []
+for xi, yi in stream.iter_pandas(X, y):
+    dataset.append((xi, yi))
 
-#initial training
-for i in range(0,initial_batch):
-    model = model.learn_one(X.iloc[i].to_dict(), int(y[i]))
+result = evaluate.progressive_val_score(
+    dataset=dataset,
+    model=model,
+    metric=river_metric,
+    print_every=100,
+    file=open("evaluation_prog.txt", "w"))
 
-
-for i in range(initial_batch+1,len(X)):
-    #Test then train - by one
-    y_pred = model.predict_one(X.iloc[i].to_dict())
-    online_metric = online_metric.update(y[i], y_pred)
-    model = model.learn_one(X.iloc[i].to_dict(), int(y[i]))
-
-    #Print performance every x interval
-    if i%1000 == 0:
-        print(f'Test batch - {i} with {online_metric}')
-        if live_plot:
-            wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
+print(result)
+# #initial training
+# for i in range(0,initial_batch):
+#     model = model.learn_one(X.iloc[i].to_dict(), int(y[i]))
+#
+#
+# for i in range(initial_batch+1,len(X)):
+#     #Test then train - by one
+#     y_pred = model.predict_one(X.iloc[i].to_dict())
+#     online_metric = online_metric.update(y[i], y_pred)
+#     model = model.learn_one(X.iloc[i].to_dict(), int(y[i]))
+#
+#     #Print performance every x interval
+#     if i%1000 == 0:
+#         print(f'Test batch - {i} with {online_metric}')
+#         if live_plot:
+#             wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
 
     # #Check for drift
     # #in_drift, in_warning = drift_detector.update(int(y_pred == y[i]))

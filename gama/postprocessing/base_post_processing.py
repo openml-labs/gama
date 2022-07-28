@@ -87,7 +87,7 @@ class BasePostProcessing(ABC):
         raise NotImplementedError("Method must be implemented by child class.")
 
     def to_code(
-        self, preprocessing: Sequence[Tuple[str, Transformer]] = None
+        self, preprocessing: Sequence[Tuple[str, TransformerMixin, Transformer]] = None
     ) -> str:
         """ Generate Python code to reconstruct a pipeline that constructs the model.
 

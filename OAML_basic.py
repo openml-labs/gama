@@ -87,7 +87,7 @@ drift_detector = drift_detection.EDDM()             #multiflow drift detector
 #Plot initialization
 if live_plot:
     wandb.init(
-        project="Streams basic - demo",
+        project="OAML basic - demo",
         entity = "autoriver",
         config={
             "dataset": data_loc,
@@ -137,7 +137,7 @@ for i in range(initial_batch+1,len(B)):
     #Test then train - by one
     y_pred = Online_model.predict_one(X.iloc[i].to_dict())
     online_metric = online_metric.update(y[i], y_pred)
-    Online_model.model = Online_model.learn_one(X.iloc[i].to_dict(), int(y[i]))
+    Online_model = Online_model.learn_one(X.iloc[i].to_dict(), int(y[i]))
 
     #Print performance every x interval
     if i%1000 == 0:
@@ -171,7 +171,7 @@ for i in range(initial_batch+1,len(B)):
                                        search=search_alg,
                                        online_learning=True,
                                        post_processing=BestFitOnlinePostProcessing(),
-                                       store='nothing',
+                                       store='all',
                                        )
         Auto_pipeline.fit(X_sliding, y_sliding)
 
