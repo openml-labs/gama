@@ -123,6 +123,7 @@ Auto_pipeline = GamaClassifier(max_total_time=time_budget,
                      online_learning=True,
                      post_processing=BestFitOnlinePostProcessing(),
                      store='all',
+                     n_jobs = 1,
                      )
 
 Auto_pipeline.fit(X.iloc[0:initial_batch],y[0:initial_batch])
@@ -136,16 +137,23 @@ print(f'Test batch - 0 with 0')
 for i in range(initial_batch+1,len(B)):
     #Test then train - by one
     y_pred = Online_model.predict_one(X.iloc[i].to_dict())
+    print(f'New data point predicted is {i} with predicted label {y_pred} and real label {y[i]}')
     online_metric = online_metric.update(y[i], y_pred)
     Online_model = Online_model.learn_one(X.iloc[i].to_dict(), int(y[i]))
 
     #Print performance every x interval
-    if i%1000 == 0:
-        print(f'Test batch - {i} with {online_metric}')
-        if live_plot:
-            wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
+    print(f'Test batch - {i} with {online_metric}')
+    if live_plot:
+        wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
+
+    # Sliding window at the time of drift
+    X_sliding = X.iloc[(i - sliding_window):i].reset_index(drop=True)
+    y_sliding = y[(i - sliding_window):i].reset_index(drop=True)
+    print(f'Partial training automl with data from: {i-sliding_window} till {i}.')
     # Add new data to Gama
-    Auto_pipeline.partial_fit(X.iloc[(i-sliding_window):i],y[(i-sliding_window):i])
+    Auto_pipeline.partial_fit(X_sliding,y_sliding)
+    Online_model = Auto_pipeline.model
+    print(f'Online model is {Auto_pipeline.model} and hyperparameters are: {Auto_pipeline.model._get_params()}')
 
     #Check for drift
     drift_detector.add_element(int(y_pred != y[i]))

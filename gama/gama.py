@@ -269,15 +269,19 @@ class Gama(ABC):
 
         self._subscribers: Dict[str, List[Callable]] = defaultdict(list)
         cache_directory = os.path.join(self.output_directory, "cache")
+
         if isinstance(post_processing, EnsemblePostProcessing):
             self._evaluation_library = EvaluationLibrary(
                 m=post_processing.hyperparameters["max_models"],
                 n=post_processing.hyperparameters["hillclimb_size"],
                 cache=cache_directory,
             )
+        if self._online_learning:
+            self._evaluation_library = EvaluationLibrary(m=10, cache=cache_directory)
         else:
             # Don't keep memory-heavy evaluation meta-data (predictions, estimators)
             self._evaluation_library = EvaluationLibrary(m=0, cache=cache_directory)
+
         self.evaluation_completed(self._evaluation_library.save_evaluation)
         e = search.logger(os.path.join(self.output_directory, "evaluations.log"))
         self.evaluation_completed(e.log_evaluation)
@@ -568,6 +572,7 @@ class Gama(ABC):
                     )
                 )
             )
+
             self._post_processing.dynamic_defaults(self)
             self.model = self._post_processing.post_process(
                 self._x,
@@ -575,6 +580,7 @@ class Gama(ABC):
                 self._time_manager.total_time_remaining,
                 best_individuals,
             )
+
         if not self._store == "all":
             to_clean = dict(nothing="all", logs="evaluations", models="logs")
             self.cleanup(to_clean[self._store])
@@ -587,8 +593,10 @@ class Gama(ABC):
         warm_start: Optional[List[Individual]] = None,
     ) -> "Gama":
         """ Find and partial-fit a model to predict target y from X.
+        Partial-fit can be called only after fit is called once.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
+        In partial-fit, the search starts with n_best pipelines found in previous fit call.
         Using Genetic Programming, the pipelines chosen should lead to gradually
         better models. Pipelines will internally be validated using cross validation.
 
@@ -658,15 +666,32 @@ class Gama(ABC):
             * self._time_manager.total_time_remaining
         )
 
+        # prior_top_individuals_1 = [
+        #     evaluation.individual
+        #     for evaluation in self._evaluation_library.n_best()
+        # ]
+
+        #Start search phase from prior populations' top performing 10 individuals
+        prior_top_individuals = list(
+            reversed(
+                sorted(
+                    self._final_pop,
+                    key=lambda ind: cast(Fitness, ind.fitness).values,
+                )
+            )
+        )
+
         with self._time_manager.start_activity(
             "search",
             time_limit=fit_time,
             activity_meta=[self._search_method.__class__.__name__],
         ):
-            self._search_phase(warm_start=self._final_pop, timeout=fit_time)
+
+            self._search_phase(warm_start=prior_top_individuals[:10], timeout=fit_time)
 
         with self._time_manager.start_activity(
             "postprocess",
+            # time_limit=int(self._time_manager.total_time_remaining),
             time_limit=int(self._time_manager.total_time_remaining),
             activity_meta=[self._post_processing.__class__.__name__],
         ):
@@ -685,6 +710,8 @@ class Gama(ABC):
                 self._time_manager.total_time_remaining,
                 best_individuals,
             )
+
+
         if not self._store == "all":
             to_clean = dict(nothing="all", logs="evaluations", models="logs")
             self.cleanup(to_clean[self._store])
@@ -695,6 +722,7 @@ class Gama(ABC):
         self, warm_start: Optional[List[Individual]] = None, timeout: float = 1e6
     ):
         """ Invoke the search algorithm, populate `final_pop`. """
+
         if warm_start:
             if not all([isinstance(i, Individual) for i in warm_start]):
                 raise TypeError("`warm_start` must be a list of Individual.")
@@ -705,6 +733,7 @@ class Gama(ABC):
             pop = [self._operator_set.individual() for _ in range(50)]
 
         deadline = time.time() + timeout
+
 
         evaluate_pipeline = partial(
             self._compiler.evaluate_pipeline,
@@ -722,7 +751,6 @@ class Gama(ABC):
             deadline=deadline,
             add_length_to_score=self._regularize_length,
         )
-
         try:
             with stopit.ThreadingTimeout(timeout):
                 self._search_method.dynamic_defaults(self._x, self._y, timeout)

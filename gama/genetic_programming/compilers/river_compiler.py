@@ -7,15 +7,16 @@ from typing import Callable, Tuple, Optional, Sequence
 import stopit
 #from sklearn.base import TransformerMixin, is_classifier
 from river.base import Classifier
-from river.evaluate import progressive_val_score
+from river import evaluate
 from gama.utilities.river_metrics import get_metric
 #from sklearn.model_selection import ShuffleSplit, cross_validate, check_cv
 from river.compose.pipeline import Pipeline #River pipeline instead
+from river import compose
 # we dont have cross valudate checkcv and is classifier equivalent in river, we do have metrics.workswith though
 # shuffle split is also just suffle streamer and then there isa splitter
+from river import stream
+from river import metrics
 
-from river.stream import shuffle
-from river.metrics import Accuracy
 
 from gama.utilities.evaluation_library import Evaluation
 from gama.utilities.generic.stopwatch import Stopwatch
@@ -46,17 +47,24 @@ def compile_individual(
     ]
     if preprocessing_steps:
         steps = steps + list(reversed(preprocessing_steps))
+
     return Pipeline(list(reversed(steps)))
+
 
 
 def object_is_valid_pipeline(o):
     """ Determines if object behaves like a scikit-learn pipeline. """
-    return True
+    return (
+        o is not None
+        and hasattr(o, "learn_one")
+        and hasattr(o, "predict_one")
+        and hasattr(o, "steps")
+    )
 
 def evaluate_pipeline(
     pipeline, x, y_train, timeout: float,metrics: str = 'accuracy', cv=5, subsample=None,
 ) -> Tuple:
-    """ Score `pipeline` with k-fold CV according to `metrics` on (a subsample of) X, y
+    """ Score `pipeline` with online holdout evaluation according to `metrics` on (a subsample of) X, y
 
     Returns
     -------
@@ -67,51 +75,45 @@ def evaluate_pipeline(
         error: None if successful, otherwise an Exception
     """
     if not object_is_valid_pipeline(pipeline):
-        raise TypeError(f"Pipeline must not be None and requires fit, predict, steps.")
+        raise TypeError(f"Pipeline must not be None and requires learn_one, predict_one, steps.")
     if not timeout > 0:
         raise ValueError(f"`timeout` must be greater than 0, is {timeout}.")
-
     prediction, estimators = None, None
     # default score for e.g. timeout or failure
     scores = tuple([float("-inf")])
     river_metric = get_metric(metrics)
+
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
-            #if isinstance(subsample, int) and subsample < len(y_train):
-            # sampler = ShuffleSplit(n_splits=1, train_size=subsample, random_state=0)
-            idx, _ = len(x)*0.3
-            x, y_train = x.iloc[idx, :], y_train[idx]
             dataset = []
-            for a, b in x, y_train:
+            for a, b in stream.iter_pandas(x, y_train):
                 dataset.append((a,b))
-            result = progressive_val_score(
-                model=pipeline,
-                dataset=dataset,
-                metric=river_metric,
-                print_every=100,
+            steps = list(pipeline.steps.values())
+
+            for i in range(len(steps[0])):
+                if i == 0:
+                    river_model = steps[0][i][1]
+                else:
+                    river_model |= steps[0][i][1]
+
+            result = evaluate.progressive_val_score(
+                dataset = dataset,
+                model = river_model,
+                metric = river_metric,
             )
-            scores = tuple((result["Accuracy"]))
-            estimators = pipeline
-            fold_pred = []
-            for (estimator, (_, test)) in zip(estimators,  splitter.split(x, y_train)):
-                # if any([m.requires_probabilities for m in metrics]):
-                # if any([m.requires_probabilities for m in metrics]):
-                #     fold_pred = estimator.predict_proba(x.iloc[test, :])
-                # else:
-                for x_one in x.iloc[test, :]:
-                    fold_pred_one = estimator.predict_one(x_one)
-                    fold_pred.append(fold_pred_one)
 
-                if prediction is None:
-                    # if fold_pred.ndim == 2:
-                    #     prediction = np.empty(shape=(len(y_train), fold_pred.shape[1]))
-                    # else:
-                    prediction = np.empty(shape=(len(y_train),))
-                prediction[test] = fold_pred
+            scores = tuple([result.get()])
+            estimators = river_model
 
-            # prediction, scores, estimators = cross_val_predict_score(
-            #     pipeline, x, y_train, cv=cv, metrics=metrics
-            # )
+            prediction = np.empty(shape=(len(y_train),))
+            y_pred = []
+            for a, b in stream.iter_pandas(x, y_train):
+                y_pred.append(river_model.predict_one(a))
+                river_model = river_model.learn_one(a, b)
+
+            prediction = np.asarray(y_pred)
+
+
         except stopit.TimeoutException:
             # This exception is handled by the ThreadingTimeout context manager.
             raise
@@ -169,14 +171,13 @@ def evaluate_individual(
     """
     result = Evaluation(individual, pid=os.getpid())
     result.start_time = datetime.now()
-
     if deadline is not None:
         time_to_deadline = deadline - time.time()
         timeout = min(timeout, time_to_deadline)
-
     with Stopwatch() as wall_time, Stopwatch(time.process_time) as process_time:
         evaluation = evaluate_pipeline(individual.pipeline, timeout=timeout, **kwargs)
         result._predictions, result.score, result._estimators, error = evaluation
+
         if error is not None:
             result.error = f"{type(error)} {str(error)}"
     result.duration = wall_time.elapsed_time

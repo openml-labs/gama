@@ -20,8 +20,9 @@ from river import naive_bayes
 from river import evaluate
 from river import datasets
 from river import stream
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.preprocessing import LabelEncoder
+from river import compose
+from river import preprocessing
+from river import ensemble
 
 import wandb
 import sys
@@ -51,7 +52,13 @@ model_5 = ensemble.LeveragingBaggingClassifier(linear_model.Perceptron())
 model_6 = preprocessing.StandardScaler() | neighbors.KNNClassifier()
 model_7 = naive_bayes.BernoulliNB()
 model_8 = ensemble.AdaptiveRandomForestClassifier()
-
+model_9 = compose.Pipeline(
+    preprocessing.StandardScaler(),
+    linear_model.LinearRegression()
+)
+print(type(model_9))
+print(model_9)
+print(model_9.steps)
 #initial pipeline - data 6 - oaml basic
 custom_pipeline = ensemble.AdaptiveRandomForestClassifier(n_models=1,
                                                           max_features=2,
@@ -63,7 +70,7 @@ custom_pipeline = ensemble.AdaptiveRandomForestClassifier(n_models=1,
                                                           leaf_prediction = 'nb',
                                                           nb_threshold = 0)
 
-model = model_5
+model = model_9
 
 #User parameters
 
@@ -113,23 +120,34 @@ if B[:].iloc[:,0:-1].eq(0).any().any():
 
 X = B[:].iloc[:,0:-1]
 y = B[:].iloc[:,-1]
+dataset = []
+for xi, yi in stream.iter_pandas(X, y):
+    dataset.append((xi, yi))
 
-#initial training
-for i in range(0,initial_batch):
-    model = model.learn_one(X.iloc[i].to_dict(), int(y[i]))
+result = evaluate.progressive_val_score(
+    dataset=dataset,
+    model=model,
+    metric=river_metric,
+    print_every=100,
+    file=open("evaluation_prog.txt", "w"))
 
-
-for i in range(initial_batch+1,len(X)):
-    #Test then train - by one
-    y_pred = model.predict_one(X.iloc[i].to_dict())
-    online_metric = online_metric.update(y[i], y_pred)
-    model = model.learn_one(X.iloc[i].to_dict(), int(y[i]))
-
-    #Print performance every x interval
-    if i%1000 == 0:
-        print(f'Test batch - {i} with {online_metric}')
-        if live_plot:
-            wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
+print(result)
+# #initial training
+# for i in range(0,initial_batch):
+#     model = model.learn_one(X.iloc[i].to_dict(), int(y[i]))
+#
+#
+# for i in range(initial_batch+1,len(X)):
+#     #Test then train - by one
+#     y_pred = model.predict_one(X.iloc[i].to_dict())
+#     online_metric = online_metric.update(y[i], y_pred)
+#     model = model.learn_one(X.iloc[i].to_dict(), int(y[i]))
+#
+#     #Print performance every x interval
+#     if i%1000 == 0:
+#         print(f'Test batch - {i} with {online_metric}')
+#         if live_plot:
+#             wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
 
     # #Check for drift
     # #in_drift, in_warning = drift_detector.update(int(y_pred == y[i]))
