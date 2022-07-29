@@ -148,6 +148,16 @@ class GamaClassifier(Gama):
         self._evaluation_library.determine_sample_indices(stratify=y)
         super().fit(x, y, *args, **kwargs)
 
+    def partial_fit(self, x, y, *args, **kwargs):
+        """ Should use base class documentation. """
+        y_ = y.squeeze() if isinstance(y, pd.DataFrame) else y
+        self._label_encoder = LabelEncoder().fit(y_)
+        if any([isinstance(yi, str) for yi in y_]):
+            # If target values are `str` we encode them or scikit-learn will complain.
+            y = self._label_encoder.transform(y_)
+        self._evaluation_library.determine_sample_indices(stratify=y)
+        super().partial_fit(x, y, *args, **kwargs)
+
     def _encode_labels(self, y):
         self._label_encoder = LabelEncoder().fit(y)
         return self._label_encoder.transform(y)
