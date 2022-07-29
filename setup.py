@@ -9,8 +9,8 @@ with open("gama/__version__.py", "r") as fh:
 base = [
     "numpy>=1.14.0",
     "scipy>=1.0.0",
-    "scikit-learn>=0.24.0,<0.25.0",
-    "pandas>=1.0,<1.1",
+    "scikit-learn>=0.24.0",
+    "pandas>=1.0",
     "stopit>=1.1.1",
     "liac-arff>=2.2.2",
     "category-encoders>=1.2.8",
@@ -31,7 +31,7 @@ test = [
     "pre-commit==2.1.1",
     "pytest>=4.4.0",
     "pytest-mock",
-    "pytest-xdist<2.0.0",
+    "pytest-xdist",
     "codecov",
     "pytest-cov",
 ]
@@ -60,7 +60,7 @@ setup(
     packages=find_packages(exclude=["tests", "tests.*"]),
     install_requires=base,
     extras_require={"vis": vis, "dev": dev, "all": all_,},
-    python_requires=">=3.6.0",
+    python_requires=">=3.8.0",
     entry_points={
         "console_scripts": [
             "gama=gama.utilities.cli:main",
