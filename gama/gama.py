@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 import shutil
 from abc import ABC
 from collections import defaultdict
@@ -158,6 +159,7 @@ class Gama(ABC):
         output_directory: str, optional (default=None)
             Directory to use to save GAMA output. This includes both intermediate
             results during search and logs.
+            This directory must be empty or not exist.
             If set to None, generate a unique name ("gama_HEXCODE").
 
         store: str (default='logs')
@@ -170,8 +172,12 @@ class Gama(ABC):
         if not output_directory:
             output_directory = f"gama_{str(uuid.uuid4())}"
         self.output_directory = os.path.abspath(os.path.expanduser(output_directory))
+
         if not os.path.exists(self.output_directory):
             os.mkdir(self.output_directory)
+        elif len(os.listdir(self.output_directory)) > 0:
+            raise ValueError(f"`output_directory` ('{self.output_directory}') must be empty or non-existent.")
+            
 
         register_stream_log(verbosity)
         if store in ["logs", "all"]:

@@ -10,6 +10,9 @@ Maintenance:
    - Add support for Python 3.10
  - Use pyproject.toml instead of setup.py
 
+Bugfixes:
+ - #137: raise an output if ``output_directory`` is non-empty.
+
 Features:
  - ASHA resources can now also be specified as fraction of the dataset size by using a float in (0, 1].
 

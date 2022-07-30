@@ -1,6 +1,23 @@
 import pytest
 
+import os
+import shutil
+
 import gama
+
+
+def test_output_directory_must_be_empty():
+    # todo: see pytest temporary directory possibility
+    try:
+        os.mkdir("tmp")
+        with open(os.path.join("tmp", "remove.txt"), 'w') as fh:
+            fh.write("Created for GAMA unit test.")
+        
+        with pytest.raises(ValueError) as e:
+            gama.GamaClassifier(output_directory="tmp")
+        assert "`output_directory`" in str(e.value)
+    finally:
+        shutil.rmtree("tmp")
 
 
 def test_reproducible_initialization():
