@@ -7,6 +7,7 @@ import os
 
 import numpy as np
 import pandas as pd
+from sklearn.base import BaseEstimator
 from sklearn.model_selection import StratifiedShuffleSplit
 
 from gama.genetic_programming.components import Individual
@@ -41,18 +42,20 @@ class Evaluation:
             predictions = predictions.values
         self._predictions: Optional[np.ndarray] = predictions
 
-    def to_disk(self, directory):
+    def to_disk(self, directory: str) -> None:
+        """ Save Evaluation in the provided directory. """
         self._cache_file = os.path.join(directory, str(self.individual._id) + ".pkl")
         with open(self._cache_file, "wb") as fh:
             pickle.dump((self._estimators, self._predictions), fh)
         self._estimators, self._predictions = [], None
 
-    def remove_from_disk(self):
+    def remove_from_disk(self) -> None:
+        """ Remove the related file from disk. """
         os.remove(os.path.join(self._cache_file))
         self._cache_file = None
 
     @property
-    def estimators(self):
+    def estimators(self) -> List[BaseEstimator]:
         if self._estimators or not self._cache_file:
             return self._estimators
         else:
@@ -213,7 +216,7 @@ class EvaluationLibrary:
             # No n was provided here nor set on initialization
             self._sample = None
 
-    def _process_predictions(self, evaluation: Evaluation):
+    def _process_predictions(self, evaluation: Evaluation) -> None:
         """ Downsample evaluation predictions if required. """
         if self._sample_n == 0:
             evaluation._predictions = None
@@ -250,7 +253,7 @@ class EvaluationLibrary:
 
         self.lookup[self._lookup_key(evaluation)] = evaluation
 
-    def clear_cache(self):
+    def clear_cache(self) -> None:
         for file in os.listdir(self._cache):
             os.remove(os.path.join(self._cache, file))
         os.rmdir(self._cache)

@@ -12,7 +12,9 @@ import numpy as np
 
 
 class NSGAMeta:
-    def __init__(self, obj, metrics):
+    """ A helper class for comparing data points for NSGA2. """
+    
+    def __init__(self, obj: object, metrics: List[Callable]):
         self.obj = obj
         self.values = tuple((m(obj) for m in metrics))
         self.rank = None
@@ -20,13 +22,13 @@ class NSGAMeta:
         self.dominating = []
         self.domination_counter = 0
 
-    def dominates(self, other: "NSGAMeta"):
+    def dominates(self, other: "NSGAMeta") -> bool:
         for self_val, other_val in zip(self.values, other.values):
             if self_val <= other_val:  # or maybe <?
                 return False
         return True
 
-    def crowd_compare(self, other: "NSGAMeta"):
+    def crowd_compare(self, other: "NSGAMeta") -> int:
         """ Favor higher rank, if equal, favor less crowded. """
         self_better = self.rank < other.rank or (
             self.rank == other.rank and self.distance > other.distance

@@ -56,10 +56,10 @@ class Metric:
 
         self.score = self.scorer._score_func
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs) -> float:
         return self.scorer(*args, **kwargs)
 
-    def maximizable_score(self, *args, **kwargs):
+    def maximizable_score(self, *args, **kwargs) -> float:
         return self.scorer._sign * self.score(*args, **kwargs)
 
 

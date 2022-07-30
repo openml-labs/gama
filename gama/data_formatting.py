@@ -19,8 +19,8 @@ def series_looks_categorical(series) -> bool:
     return False
 
 
-def infer_categoricals_inplace(df):
-    """ Use simple heuristics to guess which columns should be categorical. """
+def infer_categoricals_inplace(df: pd.DataFrame) -> None:
+    """ Use simple heuristics to convert columns guessed to be categorical. """
     for column in df:
         if series_looks_categorical(df[column]):
             df[column] = df[column].astype("category")

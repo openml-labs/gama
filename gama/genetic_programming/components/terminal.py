@@ -13,11 +13,11 @@ class Terminal(NamedTuple):
     output: str
     identifier: str
 
-    def __str__(self):
+    def __str__(self) -> str:
         """ str: e.g. "tol=0.5" """
         return f"{self.output}={format_hyperparameter_value(self.value)}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """ str: e.g. "FastICA.tol=0.5".
 
         If the hyperparameter is shared across primitives, there is no prefix.

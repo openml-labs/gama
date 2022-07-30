@@ -44,7 +44,7 @@ def compile_individual(
     return Pipeline(list(reversed(steps)))
 
 
-def object_is_valid_pipeline(o):
+def object_is_valid_pipeline(o: object) -> bool:
     """ Determines if object behaves like a scikit-learn pipeline. """
     return (
         o is not None
@@ -132,9 +132,6 @@ def evaluate_pipeline(
                         prediction = np.empty(shape=(len(y_train),))
                 prediction[test] = fold_pred
 
-            # prediction, scores, estimators = cross_val_predict_score(
-            #     pipeline, x, y_train, cv=cv, metrics=metrics
-            # )
         except stopit.TimeoutException:
             # This exception is handled by the ThreadingTimeout context manager.
             raise

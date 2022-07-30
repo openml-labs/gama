@@ -26,7 +26,7 @@ class PrimitiveNode:
         self._data_node = data_node
         self._terminals = sorted(terminals, key=lambda t: str(t))
 
-    def __str__(self):
+    def __str__(self) -> str:
         """ Recursively stringify all primitive nodes (primitive and hyperparameters).
 
         Examples: - "GaussianNB(data)"
@@ -49,7 +49,7 @@ class PrimitiveNode:
         terminal_str = ", ".join([str(terminal) for terminal in self._terminals])
         return f"{self._primitive}({terminal_str})"
 
-    def copy(self):
+    def copy(self) -> "PrimitiveNode":
         """ Copies the object. Shallow for terminals, deep for data_node. """
         if self._data_node == DATA_TERMINAL:
             data_node_copy = DATA_TERMINAL
@@ -62,7 +62,7 @@ class PrimitiveNode:
         )
 
     @classmethod
-    def from_string(cls, string: str, primitive_set: dict):
+    def from_string(cls, string: str, primitive_set: dict) -> "PrimitiveNode":
         """ Create a PrimitiveNode from string formatted like PrimitiveNode.__str__
 
         Parameters

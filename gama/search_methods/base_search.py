@@ -19,7 +19,7 @@ class BaseSearch(ABC):
         self.output: List[Individual] = []
         self.logger = EvaluationLogger
 
-    def __str__(self):
+    def __str__(self) -> str:
         # Not sure if I should report actual used hyperparameters (i.e. include default)
         # or only those set by user.
         user_set_hps = {

@@ -17,10 +17,10 @@ log = logging.getLogger(__name__)
 class RandomSearch(BaseSearch):
     """ Perform random search over all possible pipelines. """
 
-    def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float):
+    def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float) -> None:
         pass
 
-    def search(self, operations: OperatorSet, start_candidates: List[Individual]):
+    def search(self, operations: OperatorSet, start_candidates: List[Individual]) -> None:
         random_search(operations, self.output, start_candidates)
 
 

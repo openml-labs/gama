@@ -42,7 +42,7 @@ def select_categorical_columns(
                 yield column
 
 
-def basic_encoding(x: pd.DataFrame, is_classification: bool):
+def basic_encoding(x: pd.DataFrame, is_classification: bool) -> Tuple[pd.DataFrame, TransformerMixin]:
     """ Perform 'basic' encoding of categorical features.
 
      Specifically, perform:

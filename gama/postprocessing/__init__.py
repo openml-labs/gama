@@ -9,7 +9,7 @@ class NoPostProcessing(BasePostProcessing):
     def __init__(self, time_fraction: float = 0.0):
         super().__init__(time_fraction)
 
-    def post_process(self, *args, **kwargs):
+    def post_process(self, *args, **kwargs) -> None:
         return None
 
 

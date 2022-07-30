@@ -27,7 +27,7 @@ class BasePostProcessing(ABC):
         self.time_fraction: float = time_fraction
         self._hyperparameters: Dict[str, Tuple[Any, Any]] = {}
 
-    def __str__(self):
+    def __str__(self) -> str:
         # Not sure if I should report actual used hyperparameters
         # (i.e. include default), or only those set by user.
         user_set_hps = {
@@ -56,7 +56,8 @@ class BasePostProcessing(ABC):
         set_value, default_value = self._hyperparameters[hyperparameter]
         self._hyperparameters[hyperparameter] = (set_value, value)
 
-    def dynamic_defaults(self, gama: "Gama"):
+    def dynamic_defaults(self, gama: "Gama") -> None:
+        """ Configure the post-processing technique based on GAMA properties. """
         pass
 
     def post_process(
