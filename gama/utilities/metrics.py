@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Iterable, Tuple, Union
 
-from sklearn.metrics import get_scorer
+from sklearn.metrics import get_scorer, get_scorer_names
 from sklearn.metrics._scorer import _ProbaScorer, _BaseScorer, SCORERS
 
 classification_metrics = {"accuracy", "roc_auc", "average_precision", "neg_log_loss"}
@@ -19,7 +19,7 @@ regression_metrics = {
 }
 
 all_metrics = {*classification_metrics, *regression_metrics}
-reversed_scorers = {v: k for k, v in SCORERS.items()}
+reversed_scorers = {repr(v): k for k, v in SCORERS.items()}
 
 
 class MetricType(Enum):
@@ -40,7 +40,7 @@ class Metric:
                 "Scorer was not a valid scorer or could not be converted to one."
             )
         self.scorer = scorer
-        self.name = reversed_scorers[scorer]
+        self.name = reversed_scorers[repr(scorer)]
         self.requires_probabilities = (
             isinstance(scorer, _ProbaScorer) or self.name == "roc_auc"
         )

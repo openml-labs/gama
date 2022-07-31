@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gama"
+description = "A package for automated machine learning based on scikit-learn."
+readme = "README.md"
+authors= [{name = "Pieter Gijsbers", email="p.gijsbers@tue.nl"}]
+license = {text = "MIT"}
+#keywords = ..
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+
+dynamic = ["version"]
+requires-python = ">=3.8"
+dependencies = [    
+  "numpy>=1.14.0",
+  "scipy>=1.0.0",
+  "scikit-learn>=1.1.0",
+  "pandas>=1.0",
+  "stopit>=1.1.1",
+  "liac-arff>=2.2.2",
+  "category-encoders>=1.2.8",
+  "black==19.10b0",
+  "psutil",
+]
+
+[project.optional-dependencies]
+doc = ["sphinx", "sphinx_rtd_theme"]
+test = [
+    "pre-commit==2.1.1",
+    "pytest>=4.4.0",
+    "pytest-mock",
+    "pytest-xdist",
+    "codecov",
+    "pytest-cov",
+]
+vis = [
+    "dash==1.3",
+    "dash-daq==0.1.0",
+    "dash-bootstrap-components",
+    "visdcc",
+]
+
+[tool.setuptools]
+packages = ["gama"]
+
+[tool.setuptools.dynamic]
+version = {attr = "gama.__version__.__version__"}
+
+[urls]
+github = "https://github.com/openml-labs/GAMA"
+documentation = "https://openml-labs.github.io/gama/"
+"bug tracker" = "https://github.com/openml-labs/gama/issues"
+
+[project.scripts]
+gama = "gama.utilities.cli:main"
+gamadash = "gama.dashboard.app:main"

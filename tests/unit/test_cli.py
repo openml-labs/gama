@@ -1,56 +1,44 @@
-import subprocess
-import sys
 from typing import List
+
+import pytest
+
 import gama
+from gama.utilities.cli import main
 
 
-def cli_command(file) -> List[str]:
-    return [sys.executable, "gama/utilities/cli.py", file, "-dry"]
+def test_classifier_invocation(capfd):
+    main("tests/data/breast_cancer_train.arff -dry")
+    out, err = capfd.readouterr()
+    assert "classification" in out
 
 
-def test_classifier_invocation():
-    command = cli_command("tests/data/breast_cancer_train.arff")
-    process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    assert 0 == process.returncode, process.stderr
-    assert "classification" in str(process.stdout)
+def test_classifier_invocation_csv(capfd):
+    main("tests/data/openml_d_23380.csv --target TR -dry")
+    out, err = capfd.readouterr()
+    assert "classification" in out
 
 
-def test_classifier_invocation_csv():
-    command = cli_command("tests/data/openml_d_23380.csv")
-    command.extend("--target TR".split(" "))
-    process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    assert 0 == process.returncode, process.stderr
-    assert "classification" in str(process.stdout)
+def test_regressor_invocation(capfd):
+    main("tests/data/boston.arff -dry")
+    out, err = capfd.readouterr()
+    assert "regression" in out
 
 
-def test_regressor_invocation():
-    command = cli_command("tests/data/boston.arff")
-    process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    assert 0 == process.returncode, process.stderr
-    assert "regression" in str(process.stdout)
-
-
-def test_complex_invocation():
-    command = cli_command("tests/data/boston.arff")
-    command.extend("--target MEDV -py myfile.py -t 60 -v -n 4".split(" "))
-    process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    assert 0 == process.returncode, process.stderr
-    assert "regression" in str(process.stdout)
-    assert gama.__version__ in str(process.stdout)
-    assert "n_jobs=4" in str(process.stdout)
-    assert "max_total_time=3600" in str(process.stdout)
+def test_complex_invocation(capfd):
+    main("tests/data/boston.arff --target MEDV -py myfile.py -t 60 -v -n 4 -dry")
+    out, err = capfd.readouterr()
+    assert "regression" in out
+    assert gama.__version__ in out
+    assert "n_jobs=4" in out
+    assert "max_total_time=3600" in out
 
 
 def test_invalid_file():
-    command = cli_command("invalid.file")
-    process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    assert 0 != process.returncode, "Invalid file should terminate with non-zero code"
-    assert "FileNotFoundError: invalid.file" in str(process.stderr)
+    with pytest.raises(FileNotFoundError):
+        main("invalid.file -dry")
 
 
 def test_invalid_argument():
-    command = cli_command("tests/data/boston.arff")
-    command.append("-invalid")
-    process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    assert 0 != process.returncode, "Invalid arguments should cause non-zero exit code"
-    assert "unrecognized arguments: -invalid" in str(process.stderr)
+    with pytest.raises(SystemExit) as e:
+        main("tests/data/boston.arff -invalid")
+    assert 2 == e.value.code

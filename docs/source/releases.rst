@@ -1,8 +1,14 @@
 Release Notes
 =============
 
-Next Release
+Version 22.0.0
 --------------
+
+Maintenance:
+ - Adopt `NEP 29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_:
+   - Drop support for Python 3.6 and 3.7
+   - Add support for Python 3.10
+ - Use pyproject.toml instead of setup.py
 
 Features:
  - ASHA resources can now also be specified as fraction of the dataset size by using a float in (0, 1].
