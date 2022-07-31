@@ -19,14 +19,30 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+
+      - name: Get pip cache dir
+        id: pip-cache
+        run: |
+          echo "::set-output name=dir::$(pip cache dir)"
+
+      - uses: actions/cache@v3
+        # The CRON job is to detect new issues due to underlying dependency updates
+        # So we want to make sure to install from scratch
+        if: github.event.schedule != "00 0 * * 1"
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: ${{ runner.os }}-pip-${{ python-version }}-${{ hashFiles('**/pyproject.toml') }}
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[test]"
+
       - name: Test with pytest
         run: |
           pytest tests/unit
