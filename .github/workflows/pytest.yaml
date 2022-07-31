@@ -33,7 +33,7 @@ jobs:
       - uses: actions/cache@v3
         # The CRON job is to detect new issues due to underlying dependency updates
         # So we want to make sure to install from scratch
-        if: github.event.schedule != '00 0 * * 1'
+        if: (github.event.schedule != '00 0 * * 1') || (steps.pip-cache.outputs.cache-hit != 'true')
         with:
           path: ${{ steps.pip-cache.outputs.dir }}
           key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml') }}
