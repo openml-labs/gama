@@ -40,10 +40,9 @@ jobs:
           key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml') }}
 
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           python -m pip install --upgrade pip
-          pip install -U ".[test]"
+          pip install ".[test]"
 
       - name: Test with pytest
         run: |
