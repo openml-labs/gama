@@ -9,7 +9,7 @@ from gama import GamaClassifier, GamaRegressor
 from gama.data_loading import X_y_from_file
 
 
-def parse_args():
+def make_parser():
     desc = "An AutoML tool that optimizes machine learning pipelines for your data."
     parser = argparse.ArgumentParser(description=desc)
 
@@ -124,11 +124,16 @@ def parse_args():
         help="If True, execute without calling fit or exports.",
     )
 
-    return parser.parse_args()
+    return parser
 
 
-def main():
-    args = parse_args()
+def main(command: str = ""):
+    parser = make_parser()
+    
+    if isinstance(command, str):
+        command = command.split()
+
+    args = parser.parse_args(command) if command else parser.parse_args()
 
     print("CLI: Processing input")
     if not os.path.exists(args.input_file.lower()):
