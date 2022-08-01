@@ -15,13 +15,13 @@ class OperatorSet:
 
     def __init__(
         self,
-        mutate: Callable[[Individual]],
+        mutate: Callable[[Individual], None],
         mate: Callable[[Individual, Individual], Tuple[Individual, Individual]],
         create_from_population: Callable[[Any], List[Individual]], 
         create_new: Callable[[], Individual],
         compile_: Callable[[Individual], Pipeline],
         eliminate: Callable[[List[Individual], int], List[Individual]],
-        evaluate_callback: Callable[[Evaluation]],
+        evaluate_callback: Callable[[Evaluation], None],
         max_retry: int = 50,
         completed_evaluations: Optional[List[Individual]] = None,
     ):
