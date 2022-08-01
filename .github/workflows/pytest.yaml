@@ -46,4 +46,10 @@ jobs:
 
       - name: Test with pytest
         run: |
-          pytest tests/unit
+          pytest tests/unit --cov
+
+      - uses: codecov/codecov-action@v3
+        with:
+          flags: unit-tests
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)

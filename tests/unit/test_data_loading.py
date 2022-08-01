@@ -13,7 +13,7 @@ from gama.data_loading import (
     file_to_pandas,
 )
 
-NUMERIC_TYPES = [np.int, np.int32, np.int64, np.float]
+NUMERIC_TYPES = [int, np.int32, np.int64, float]
 
 # https://www.openml.org/d/23380
 METADATA_23380 = {
