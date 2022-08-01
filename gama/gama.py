@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 import shutil
 from abc import ABC
 from collections import defaultdict
@@ -304,7 +305,7 @@ class Gama(ABC):
             completed_evaluations=self._evaluation_library.lookup,
         )
 
-    def cleanup(self, which="evaluations"):
+    def cleanup(self, which="evaluations") -> None:
         cache_directory = os.path.join(self.output_directory, "cache")
         if not os.path.exists(self.output_directory):
             return  # Cleanup has been called previously
@@ -328,16 +329,16 @@ class Gama(ABC):
             x[i] = x[i].astype(dtype)
         return x
 
-    def _prepare_for_prediction(self, x):
+    def _prepare_for_prediction(self, x: Union[pd.DataFrame, np.ndarray]) -> pd.DataFrame:
         if isinstance(x, np.ndarray):
             x = self._np_to_matching_dataframe(x)
         x = self._basic_encoding_pipeline.transform(x)
         return x
 
-    def _predict(self, x: pd.DataFrame):
+    def _predict(self, x: pd.DataFrame) -> np.ndarray:
         raise NotImplementedError("_predict is implemented by base classes.")
 
-    def predict(self, x: Union[pd.DataFrame, np.ndarray]):
+    def predict(self, x: Union[pd.DataFrame, np.ndarray]) -> np.ndarray:
         """ Predict the target for input X.
 
         Parameters
@@ -580,7 +581,7 @@ class Gama(ABC):
 
     def _search_phase(
         self, warm_start: Optional[List[Individual]] = None, timeout: float = 1e6
-    ):
+    ) -> None:
         """ Invoke the search algorithm, populate `final_pop`. """
         if warm_start:
             if not all([isinstance(i, Individual) for i in warm_start]):
@@ -603,7 +604,6 @@ class Gama(ABC):
 
         self._operator_set.evaluate = partial(
             gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
-            # evaluate_pipeline=evaluate_pipeline,
             timeout=self._max_eval_time,
             deadline=deadline,
             add_length_to_score=self._regularize_length,
@@ -622,7 +622,7 @@ class Gama(ABC):
 
     def export_script(
         self, file: Optional[str] = "gama_pipeline.py", raise_if_exists: bool = False
-    ):
+    ) -> Optional[str]:
         """ Export a Python script which sets up the best found pipeline.
 
         Can only be called after `fit`.
@@ -670,7 +670,7 @@ class Gama(ABC):
         else:
             return script_text
 
-    def _safe_outside_call(self, fn):
+    def _safe_outside_call(self, fn: Callable) -> None:
         """ Calls fn logging and ignoring all exceptions except TimeoutException. """
         try:
             fn()
@@ -692,7 +692,7 @@ class Gama(ABC):
             # since it should have been handled (3 seconds).
             raise stopit.utils.TimeoutException
 
-    def _on_evaluation_completed(self, evaluation: Evaluation):
+    def _on_evaluation_completed(self, evaluation: Evaluation) -> None:
         for callback in self._subscribers["evaluation_completed"]:
             self._safe_outside_call(partial(callback, evaluation))
 

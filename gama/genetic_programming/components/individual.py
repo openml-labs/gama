@@ -1,6 +1,8 @@
 import uuid
 from typing import List, Callable, Optional, Dict, Any
 
+from sklearn.pipeline import Pipeline
+
 from .fitness import Fitness
 from .primitive_node import PrimitiveNode
 from .terminal import Terminal
@@ -27,20 +29,20 @@ class Individual:
         self._id = uuid.uuid4()
         self._to_pipeline = to_pipeline
 
-    def __eq__(self, other):
+    def __eq__(self, other: "Individual") -> bool:
         return isinstance(other, Individual) and other._id == self._id
 
-    def __hash__(self):
+    def __hash__(self) -> str:
         return hash(self._id)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"Individual {self._id}\n"
             f"Pipeline: {self.pipeline_str()}\nFitness: {self.fitness}"
         )
 
     @property
-    def pipeline(self):
+    def pipeline(self) -> Pipeline:
         """ Calls the `to_pipeline` method on itself."""
         if self._to_pipeline is None:
             raise AttributeError(
@@ -48,14 +50,14 @@ class Individual:
             )
         return self._to_pipeline(self)
 
-    def short_name(self, step_separator: str = ">"):
+    def short_name(self, step_separator: str = ">") -> str:
         """ str: e.g. "Binarizer>BernoulliNB" """
         return step_separator.join(
             [str(primitive._primitive) for primitive in reversed(self.primitives)]
         )
 
-    def pipeline_str(self):
-        """ str: e.g. "BernoulliNB(Binarizer(data, Binarizer.threshold=0.6), BernoulliNB.alpha=1.0)" """  # noqa: E501
+    def pipeline_str(self) -> str:
+        """ str: e.g., "BernoulliNB(Binarizer(data, Binarizer.threshold=0.6), BernoulliNB.alpha=1.0)" """  # noqa: E501
         return str(self.main_node)
 
     @property
@@ -73,7 +75,7 @@ class Individual:
         """ Lists all terminals connected to the Individual's primitive nodes. """
         return [terminal for prim in self.primitives for terminal in prim._terminals]
 
-    def replace_terminal(self, position: int, new_terminal: Terminal):
+    def replace_terminal(self, position: int, new_terminal: Terminal) -> None:
         """ Replace the terminal at `position` by `new_terminal` in-place.
 
         Parameters
@@ -131,14 +133,14 @@ class Individual:
         else:
             last_primitive._data_node = new_primitive
 
-    def copy_as_new(self):
+    def copy_as_new(self) -> "Individual":
         """ Make deep copy of self, but with fitness None and assigned a new id. """
         return Individual(self.main_node.copy(), to_pipeline=self._to_pipeline)
 
     @classmethod
     def from_string(
         cls, string: str, primitive_set: dict, to_pipeline: Optional[Callable] = None
-    ):
+    ) -> "Individual":
         """ Construct an Individual from its `pipeline_str` representation.
 
         Parameters

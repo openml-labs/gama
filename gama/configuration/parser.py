@@ -1,12 +1,12 @@
 from collections import defaultdict
-from typing import Dict, Any
+from typing import Dict, Any, Union, List, Callable, Tuple
 
 import sklearn
 
 from gama.genetic_programming.components import Primitive, Terminal, DATA_TERMINAL
 
 
-def pset_from_config(configuration):
+def pset_from_config(configuration: Dict[Union[str, object], Any]) -> Tuple[Dict[str, List], Dict[str, Callable]]:
     """ Create a pset for the given configuration dictionary.
 
     Given a configuration dictionary specifying operators (e.g. sklearn
@@ -18,7 +18,10 @@ def pset_from_config(configuration):
 
     Side effect: Imports the classes of each primitive.
 
-    Returns the given Pset.
+    returns:
+        pset - Dict[str, List]: maps return-types to a list of Primitives and/or Terminals
+        parameter_check - Dict[str, Callable]: 
+            maps Primitive name to a function which verifies the correct initialization of hyperparameters.
     """
 
     pset = defaultdict(list)
@@ -104,7 +107,7 @@ def pset_from_config(configuration):
     return pset, parameter_checks
 
 
-def merge_configurations(c1, c2):
+def merge_configurations(c1: Dict, c2: Dict) -> Dict:
     """ Takes two configurations and merges them together. """
     # Should refactor out 6 indentation levels
     merged: Dict[Any, Any] = defaultdict(lambda: None, c1)

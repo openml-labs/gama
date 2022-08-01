@@ -11,9 +11,9 @@ class Primitive(NamedTuple):
     output: str
     identifier: Callable
 
-    def __str__(self):
+    def __str__(self) -> str:
         """ str: e.g. "FastICA" """
         return self.identifier.__name__
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)

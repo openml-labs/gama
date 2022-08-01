@@ -23,7 +23,7 @@ def format_import(o: object) -> str:
     return f"from {module} import {o.__class__.__name__}"
 
 
-def format_pipeline(steps: List[Tuple[str, str]], name: str = "pipeline"):
+def format_pipeline(steps: List[Tuple[str, str]], name: str = "pipeline") -> str:
     steps_str = ",\n".join([f"('{name}', {step})" for name, step in steps])
     return f"{name} = Pipeline([{steps_str}])\n"
 
