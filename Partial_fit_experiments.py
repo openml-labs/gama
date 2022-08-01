@@ -2,6 +2,7 @@
 
 
 #imports
+import logging
 
 import pandas as pd
 import arff
@@ -20,6 +21,13 @@ from river import stream
 
 from skmultiflow import drift_detection
 import wandb
+
+gama_log = logging.getLogger('gama')
+gama_log.setLevel(logging.DEBUG)
+
+fh_log = logging.FileHandler('logfile.txt')
+fh_log.setLevel(logging.DEBUG)
+gama_log.addHandler(fh_log)
 
 #Datasets included in library
 # datasets =['data_streams/electricity-normalized.arff',      #0
@@ -123,6 +131,7 @@ Auto_pipeline = GamaClassifier(max_total_time=time_budget,
                      online_learning=True,
                      post_processing=BestFitOnlinePostProcessing(),
                      store='all',
+                    verbosity = logging.DEBUG,
                      n_jobs = 1,
                      )
 
