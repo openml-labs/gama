@@ -1,4 +1,3 @@
-from multiprocessing.sharedctypes import Value
 import shutil
 from abc import ABC
 from collections import defaultdict
@@ -78,7 +77,7 @@ for module_to_ignore in ["sklearn", "numpy"]:
 
 
 class Gama(ABC):
-    """ Wrapper for the toolbox logic surrounding executing the AutoML pipeline. """
+    """Wrapper for the toolbox logic surrounding executing the AutoML pipeline."""
 
     def __init__(
         self,
@@ -87,7 +86,7 @@ class Gama(ABC):
         ] = "filled_in_by_child_class",
         regularize_length: bool = True,
         max_pipeline_length: Optional[int] = None,
-        config: Dict = None,
+        config: Dict[Union[str, object], Any] = {},
         random_state: Optional[int] = None,
         max_total_time: int = 3600,
         max_eval_time: Optional[int] = None,
@@ -176,8 +175,10 @@ class Gama(ABC):
         if not os.path.exists(self.output_directory):
             os.mkdir(self.output_directory)
         elif len(os.listdir(self.output_directory)) > 0:
-            raise ValueError(f"`output_directory` ('{self.output_directory}') must be empty or non-existent.")
-            
+            raise ValueError(
+                f"""`output_directory` ('{self.output_directory}')
+                 must be empty or non-existent."""
+            )
 
         register_stream_log(verbosity)
         if store in ["logs", "all"]:
@@ -287,7 +288,7 @@ class Gama(ABC):
                 )
         max_start_length = 3 if max_pipeline_length is None else max_pipeline_length
         self._operator_set = OperatorSet(
-            mutate=partial(
+            mutate=partial(  # type: ignore #https://github.com/python/mypy/issues/1484
                 random_valid_mutation_in_place,
                 primitive_set=self._pset,
                 max_length=max_pipeline_length,
@@ -320,7 +321,7 @@ class Gama(ABC):
             os.rmdir(self.output_directory)
 
     def _np_to_matching_dataframe(self, x: np.ndarray) -> pd.DataFrame:
-        """ Format np array to dataframe whose column types match the training data. """
+        """Format np array to dataframe whose column types match the training data."""
         if not isinstance(x, np.ndarray):
             raise TypeError(f"Expected x to be of type 'numpy.ndarray' not {type(x)}.")
 
@@ -329,17 +330,20 @@ class Gama(ABC):
             x[i] = x[i].astype(dtype)
         return x
 
-    def _prepare_for_prediction(self, x: Union[pd.DataFrame, np.ndarray]) -> pd.DataFrame:
+    def _prepare_for_prediction(
+        self, x: Union[pd.DataFrame, np.ndarray]
+    ) -> pd.DataFrame:
         if isinstance(x, np.ndarray):
             x = self._np_to_matching_dataframe(x)
-        x = self._basic_encoding_pipeline.transform(x)
+        if self._basic_encoding_pipeline:
+            x = self._basic_encoding_pipeline.transform(x)
         return x
 
     def _predict(self, x: pd.DataFrame) -> np.ndarray:
         raise NotImplementedError("_predict is implemented by base classes.")
 
     def predict(self, x: Union[pd.DataFrame, np.ndarray]) -> np.ndarray:
-        """ Predict the target for input X.
+        """Predict the target for input X.
 
         Parameters
         ----------
@@ -361,7 +365,7 @@ class Gama(ABC):
         encoding: Optional[str] = None,
         **kwargs,
     ) -> np.ndarray:
-        """ Predict the target for input found in the ARFF file.
+        """Predict the target for input found in the ARFF file.
 
         Parameters
         ----------
@@ -390,7 +394,7 @@ class Gama(ABC):
     def score(
         self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]
     ) -> float:
-        """ Calculate `self.scoring` metric of the model on (x, y).
+        """Calculate `self.scoring` metric of the model on (x, y).
 
         Parameters
         ----------
@@ -418,7 +422,7 @@ class Gama(ABC):
         encoding: Optional[str] = None,
         **kwargs,
     ) -> float:
-        """ Calculate `self.scoring` metric of the model on data in the file.
+        """Calculate `self.scoring` metric of the model on data in the file.
 
         Parameters
         ----------
@@ -450,7 +454,7 @@ class Gama(ABC):
         warm_start: Optional[List[Individual]] = None,
         **kwargs,
     ) -> None:
-        """ Find and fit a model to predict the target column (last) from other columns.
+        """Find and fit a model to predict the target column (last) from other columns.
 
         Parameters
         ----------
@@ -477,7 +481,7 @@ class Gama(ABC):
         y: Union[pd.DataFrame, pd.Series, np.ndarray],
         warm_start: Optional[List[Individual]] = None,
     ) -> "Gama":
-        """ Find and fit a model to predict target y from X.
+        """Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
         Using Genetic Programming, the pipelines chosen should lead to gradually
@@ -582,7 +586,7 @@ class Gama(ABC):
     def _search_phase(
         self, warm_start: Optional[List[Individual]] = None, timeout: float = 1e6
     ) -> None:
-        """ Invoke the search algorithm, populate `final_pop`. """
+        """Invoke the search algorithm, populate `final_pop`."""
         if warm_start:
             if not all([isinstance(i, Individual) for i in warm_start]):
                 raise TypeError("`warm_start` must be a list of Individual.")
@@ -622,8 +626,8 @@ class Gama(ABC):
 
     def export_script(
         self, file: Optional[str] = "gama_pipeline.py", raise_if_exists: bool = False
-    ) -> Optional[str]:
-        """ Export a Python script which sets up the best found pipeline.
+    ) -> str:
+        """Export a Python script which sets up the best found pipeline.
 
         Can only be called after `fit`.
 
@@ -650,6 +654,10 @@ class Gama(ABC):
         raise_if_exists: bool (default=False)
             If True, raise an error if the file already exists.
             If False, overwrite `file` if it already exists.
+
+        Returns
+        -------
+        script: str
         """
         if self.model is None:
             raise RuntimeError(STR_NO_OPTIMAL_PIPELINE)
@@ -667,11 +675,10 @@ class Gama(ABC):
             with open(file, "w") as fh:
                 fh.write(script_text)
             subprocess.call(["black", file])
-        else:
-            return script_text
+        return script_text
 
     def _safe_outside_call(self, fn: Callable) -> None:
-        """ Calls fn logging and ignoring all exceptions except TimeoutException. """
+        """Calls fn logging and ignoring all exceptions except TimeoutException."""
         try:
             fn()
         except stopit.utils.TimeoutException:
@@ -683,7 +690,10 @@ class Gama(ABC):
             # Note KeyboardInterrupts are not exceptions and get elevated to the caller.
             log.warning("Exception during callback.", exc_info=True)
 
-        if self._time_manager.current_activity.exceeded_limit(margin=3.0):
+        if (
+            self._time_manager.current_activity
+            and self._time_manager.current_activity.exceeded_limit(margin=3.0)
+        ):
             # If time exceeds during a safe callback, the timeout exception *might*
             # have been swallowed. This can result in GAMA running indefinitely.
             # However in rare conditions it can be that the TimeoutException is still
@@ -697,7 +707,7 @@ class Gama(ABC):
             self._safe_outside_call(partial(callback, evaluation))
 
     def evaluation_completed(self, callback: Callable[[Evaluation], Any]) -> None:
-        """ Register a callback function that is called when an evaluation is completed.
+        """Register a callback function that is called when an evaluation is completed.
 
         Parameters
         ----------

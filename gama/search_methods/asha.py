@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 
 
 class AsynchronousSuccessiveHalving(BaseSearch):
-    """ Asynchronous Halving Algorithm by Li et al.
+    """Asynchronous Halving Algorithm by Li et al.
 
     paper: https://arxiv.org/abs/1810.05934
 
@@ -61,7 +61,9 @@ class AsynchronousSuccessiveHalving(BaseSearch):
             ),
         )
 
-    def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float) -> None:
+    def dynamic_defaults(
+        self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float
+    ) -> None:
         set_max, default = self._hyperparameters["maximum_resource"]
         if set_max is not None and len(y) < set_max:
             # todo: take into account the evaluation procedure as well.
@@ -71,7 +73,9 @@ class AsynchronousSuccessiveHalving(BaseSearch):
             )
             self._hyperparameters["maximum_resource"] = (None, default)
 
-    def search(self, operations: OperatorSet, start_candidates: List[Individual]) -> None:
+    def search(
+        self, operations: OperatorSet, start_candidates: List[Individual]
+    ) -> None:
         self.output = asha(
             operations, start_candidates=start_candidates, **self.hyperparameters
         )
@@ -86,7 +90,7 @@ def asha(
     minimum_early_stopping_rate: int = 0,
     max_full_evaluations: Optional[int] = None,
 ) -> List[Individual]:
-    """ Asynchronous Halving Algorithm by Li et al.
+    """Asynchronous Halving Algorithm by Li et al.
 
     paper: https://arxiv.org/abs/1810.05934
 
@@ -129,7 +133,7 @@ def asha(
     )
     rungs = range(minimum_early_stopping_rate, max_rung + 1)
     rung_resources = {
-        rung: min(minimum_resource * (reduction_factor ** rung), maximum_resource)
+        rung: min(minimum_resource * (reduction_factor**rung), maximum_resource)
         for rung in rungs
     }
     evaluate = partial(

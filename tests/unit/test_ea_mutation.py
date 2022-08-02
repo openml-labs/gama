@@ -15,14 +15,17 @@ from gama.genetic_programming.compilers.scikitlearn import compile_individual
 
 
 def test_mut_replace_terminal(ForestPipeline, pset):
-    """ Tests if mut_replace_terminal replaces exactly one terminal. """
+    """Tests if mut_replace_terminal replaces exactly one terminal."""
     _test_mutation(
-        ForestPipeline, mut_replace_terminal, _mut_replace_terminal_is_applied, pset,
+        ForestPipeline,
+        mut_replace_terminal,
+        _mut_replace_terminal_is_applied,
+        pset,
     )
 
 
 def test_mut_replace_terminal_none_available(GNB, pset):
-    """ mut_replace_terminal raises an exception if no valid mutation is possible. """
+    """mut_replace_terminal raises an exception if no valid mutation is possible."""
     with pytest.raises(ValueError) as error:
         mut_replace_terminal(GNB, pset)
 
@@ -30,26 +33,26 @@ def test_mut_replace_terminal_none_available(GNB, pset):
 
 
 def test_mut_replace_primitive_len_1(LinearSVC, pset):
-    """ mut_replace_primitive replaces exactly one primitive. """
+    """mut_replace_primitive replaces exactly one primitive."""
     _test_mutation(
         LinearSVC, mut_replace_primitive, _mut_replace_primitive_is_applied, pset
     )
 
 
 def test_mut_replace_primitive_len_2(ForestPipeline, pset):
-    """ mut_replace_primitive replaces exactly one primitive. """
+    """mut_replace_primitive replaces exactly one primitive."""
     _test_mutation(
         ForestPipeline, mut_replace_primitive, _mut_replace_primitive_is_applied, pset
     )
 
 
 def test_mut_insert(ForestPipeline, pset):
-    """ mut_insert inserts at least one primitive. """
+    """mut_insert inserts at least one primitive."""
     _test_mutation(ForestPipeline, mut_insert, _mut_insert_is_applied, pset)
 
 
 def test_random_valid_mutation_with_all(ForestPipeline, pset):
-    """ Test if a valid mutation is applied at random.
+    """Test if a valid mutation is applied at random.
 
     I am honestly not sure of the best way to test this.
     Because of the random nature, we repeat this enough times to ensure
@@ -76,7 +79,7 @@ def test_random_valid_mutation_with_all(ForestPipeline, pset):
 
 
 def test_random_valid_mutation_without_shrink(LinearSVC, pset):
-    """ Test if a valid mutation is applied at random.
+    """Test if a valid mutation is applied at random.
 
     I am honestly not sure of the best way to test this.
     Because of the random nature, we repeat this enough times to ensure
@@ -101,7 +104,7 @@ def test_random_valid_mutation_without_shrink(LinearSVC, pset):
 
 
 def test_random_valid_mutation_without_terminal(GNB, pset):
-    """ Test if a valid mutation is applied at random.
+    """Test if a valid mutation is applied at random.
 
     I am honestly not sure of the best way to test this.
     Because of the random nature, we repeat this enough times to ensure
@@ -125,7 +128,7 @@ def test_random_valid_mutation_without_terminal(GNB, pset):
 
 
 def test_random_valid_mutation_without_insert(ForestPipeline, pset):
-    """ Test if a valid mutation is applied at random.
+    """Test if a valid mutation is applied at random.
 
     I am honestly not sure of the best way to test this.
     Because of the random nature, we repeat this enough times to ensure
@@ -158,7 +161,7 @@ def _min_trials(n_mutations: int, max_error_rate: float = 0.0001):
 
 
 def _mut_shrink_is_applied(original, mutated):
-    """ Checks if mutation was caused by `mut_shrink`.
+    """Checks if mutation was caused by `mut_shrink`.
 
     :param original: the pre-mutation individual
     :param mutated:  the post-mutation individual
@@ -175,7 +178,7 @@ def _mut_shrink_is_applied(original, mutated):
 
 
 def _mut_insert_is_applied(original, mutated):
-    """ Checks if mutation was caused by `mut_insert`.
+    """Checks if mutation was caused by `mut_insert`.
 
     :param original: the pre-mutation individual
     :param mutated:  the post-mutation individual
@@ -193,7 +196,7 @@ def _mut_insert_is_applied(original, mutated):
 
 
 def _mut_replace_terminal_is_applied(original, mutated):
-    """ Checks if mutation was caused by `gama.ea.mutation.mut_replace_terminal`.
+    """Checks if mutation was caused by `gama.ea.mutation.mut_replace_terminal`.
 
     :param original: the pre-mutation individual
     :param mutated:  the post-mutation individual
@@ -218,7 +221,7 @@ def _mut_replace_terminal_is_applied(original, mutated):
 
 
 def _mut_replace_primitive_is_applied(original, mutated):
-    """ Checks if mutation was caused by `gama.ea.mutation.mut_replace_primitive`.
+    """Checks if mutation was caused by `gama.ea.mutation.mut_replace_primitive`.
 
     :param original: the pre-mutation individual
     :param mutated:  the post-mutation individual
@@ -243,7 +246,7 @@ def _mut_replace_primitive_is_applied(original, mutated):
 
 
 def _test_mutation(individual: Individual, mutation, mutation_check, pset):
-    """ Test if an individual mutated by `mutation` passes `mutation_check` and compiles.
+    """Test if an individual mutated by `mutation` passes `mutation_check` and compiles.
 
     :param individual: The individual to be mutated.
     :param mutation: function: ind -> (ind,). Should mutate the individual

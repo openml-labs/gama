@@ -19,7 +19,7 @@ def enqueue_output(out, queue_: queue.Queue):
 
 
 class CLIWindow:
-    """ A Component for Dash App which simulates a console window """
+    """A Component for Dash App which simulates a console window"""
 
     def __init__(
         self,

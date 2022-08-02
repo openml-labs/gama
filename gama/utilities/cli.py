@@ -2,11 +2,13 @@ import argparse
 import logging
 import os
 import pickle
+from typing import List, Union
 
 from pandas.api.types import is_categorical_dtype
 
 from gama import GamaClassifier, GamaRegressor
 from gama.data_loading import X_y_from_file
+from gama.gama import Gama
 
 
 def make_parser():
@@ -127,9 +129,9 @@ def make_parser():
     return parser
 
 
-def main(command: str = ""):
+def main(command: Union[str, List[str]] = ""):
     parser = make_parser()
-    
+
     if isinstance(command, str):
         command = command.split()
 
@@ -146,7 +148,9 @@ def main(command: str = ""):
         kwargs["sep"] = args.seperator
 
     x, y = X_y_from_file(
-        file_path=args.input_file.lower(), split_column=args.target, **kwargs,
+        file_path=args.input_file.lower(),
+        split_column=args.target,
+        **kwargs,
     )
     if args.mode is None:
         if is_categorical_dtype(y.dtype):
@@ -170,7 +174,7 @@ def main(command: str = ""):
         configuration["scoring"] = args.metric
 
     if args.mode == "regression":
-        automl = GamaRegressor(**configuration)
+        automl: Gama = GamaRegressor(**configuration)
     elif args.mode == "classification":
         automl = GamaClassifier(**configuration)
     else:

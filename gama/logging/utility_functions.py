@@ -21,6 +21,6 @@ def register_stream_log(verbosity: int) -> None:
         ]
 
     stdout_streamhandler = logging.StreamHandler(sys.stdout)
-    stdout_streamhandler.tag = "machine_set"
+    setattr(stdout_streamhandler, "tag", "machine_set")
     stdout_streamhandler.setLevel(verbosity)
     gama_log.addHandler(stdout_streamhandler)

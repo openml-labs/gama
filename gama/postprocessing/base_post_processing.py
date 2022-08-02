@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class BasePostProcessing(ABC):
-    """ All post-processing methods should be derived from this class.
+    """All post-processing methods should be derived from this class.
     This class should not be directly used to configure GAMA.
     """
 
@@ -42,11 +42,11 @@ class BasePostProcessing(ABC):
 
     @property
     def hyperparameters(self) -> Dict[str, Any]:
-        """ Hyperparameter (name, value) pairs.
+        """Hyperparameter (name, value) pairs.
 
-         Value determined by user > dynamic default > static default.
-         Dynamic default values only considered if `dynamic_defaults` has been called.
-         """
+        Value determined by user > dynamic default > static default.
+        Dynamic default values only considered if `dynamic_defaults` has been called.
+        """
         return {
             parameter: set_value if set_value is not None else default
             for parameter, (set_value, default) in self._hyperparameters.items()
@@ -57,7 +57,7 @@ class BasePostProcessing(ABC):
         self._hyperparameters[hyperparameter] = (set_value, value)
 
     def dynamic_defaults(self, gama: "Gama") -> None:
-        """ Configure the post-processing technique based on GAMA properties. """
+        """Configure the post-processing technique based on GAMA properties."""
         pass
 
     def post_process(
@@ -89,7 +89,7 @@ class BasePostProcessing(ABC):
     def to_code(
         self, preprocessing: Sequence[Tuple[str, TransformerMixin]] = None
     ) -> str:
-        """ Generate Python code to reconstruct a pipeline that constructs the model.
+        """Generate Python code to reconstruct a pipeline that constructs the model.
 
         Parameters
         ----------

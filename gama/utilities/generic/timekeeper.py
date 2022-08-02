@@ -14,21 +14,21 @@ class Activity(NamedTuple):
 
     @property
     def time_left(self) -> float:
-        """ Time left in seconds.
+        """Time left in seconds.
 
         Raises a TypeError if `time_limit` was not specified.
         """
         return self.time_limit - self.stopwatch.elapsed_time
 
     def exceeded_limit(self, margin: float = 0.0) -> float:
-        """ True iff a limit was specified and it is exceeded by `margin` seconds. """
+        """True iff a limit was specified and it is exceeded by `margin` seconds."""
         if self.time_limit is not None:
             return self.time_limit - self.stopwatch.elapsed_time < -margin
         return False
 
 
 class TimeKeeper:
-    """ Simple object that helps keep track of time over multiple activities. """
+    """Simple object that helps keep track of time over multiple activities."""
 
     def __init__(self, total_time: Optional[int] = None):
         """
@@ -45,7 +45,7 @@ class TimeKeeper:
 
     @property
     def total_time_remaining(self) -> float:
-        """ Return time remaining in seconds. """
+        """Return time remaining in seconds."""
         if self.total_time is not None:
             return self.total_time - sum(
                 map(lambda a: a.stopwatch.elapsed_time, self.activities)
@@ -56,7 +56,7 @@ class TimeKeeper:
 
     @property
     def current_activity_time_elapsed(self) -> float:
-        """ Return elapsed time in seconds of current activity.
+        """Return elapsed time in seconds of current activity.
 
         Raise RuntimeError if no current activity.
         """
@@ -67,7 +67,7 @@ class TimeKeeper:
 
     @property
     def current_activity_time_left(self) -> float:
-        """ Return time left in seconds of current activity.
+        """Return time left in seconds of current activity.
 
         Raise RuntimeError if no current activity.
         """
@@ -91,7 +91,7 @@ class TimeKeeper:
         time_limit: Optional[int] = None,
         activity_meta: Optional[List[Any]] = None,
     ) -> Iterator[Stopwatch]:
-        """ Mark the start of a new activity and automatically time its duration.
+        """Mark the start of a new activity and automatically time its duration.
             TimeManager does not currently support nested activities.
 
         Parameters

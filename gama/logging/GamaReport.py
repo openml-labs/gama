@@ -14,10 +14,10 @@ pset, _ = pset_from_config(merge_configurations(clf_config, reg_config))
 
 
 class GamaReport:
-    """ Contains information parsed from a search captured by a GAMA analysis log. """
+    """Contains information parsed from a search captured by a GAMA analysis log."""
 
     def __init__(self, log_directory: str):
-        """ Parse the logfile or log lines provided.
+        """Parse the logfile or log lines provided.
 
         Parameters
         ----------
@@ -113,7 +113,7 @@ class GamaReport:
 
     @property
     def successful_evaluations(self):
-        """ Return only evaluations that completed successfully """
+        """Return only evaluations that completed successfully"""
         with pd.option_context("mode.use_inf_as_na", True):
             return self.evaluations[~self.evaluations[self.metrics].isna().any(axis=1)]
 
@@ -125,4 +125,4 @@ def init_to_hps(init_line: str) -> Dict[str, str]:
     # only supports one nested level - will do proper parsing later
     for token in ["()", "(", ")", ",,"]:
         all_arguments = all_arguments.replace(token, ",")
-    return dict(hp.split("=") for hp in all_arguments.split(","))  # type: ignore
+    return dict(hp.split("=") for hp in all_arguments.split(","))

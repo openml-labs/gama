@@ -12,14 +12,14 @@ import numpy as np
 
 
 class NSGAMeta:
-    """ A helper class for comparing data points for NSGA2. """
-    
+    """A helper class for comparing data points for NSGA2."""
+
     def __init__(self, obj: object, metrics: List[Callable]):
         self.obj = obj
         self.values = tuple((m(obj) for m in metrics))
-        self.rank = None
-        self.distance = 0
-        self.dominating = []
+        self.rank = 0
+        self.distance = 0.0
+        self.dominating: List["NSGAMeta"] = []
         self.domination_counter = 0
 
     def dominates(self, other: "NSGAMeta") -> bool:
@@ -29,7 +29,7 @@ class NSGAMeta:
         return True
 
     def crowd_compare(self, other: "NSGAMeta") -> int:
-        """ Favor higher rank, if equal, favor less crowded. """
+        """Favor higher rank, if equal, favor less crowded."""
         self_better = self.rank < other.rank or (
             self.rank == other.rank and self.distance > other.distance
         )
@@ -39,11 +39,11 @@ class NSGAMeta:
 def nsga2_select(
     population: List[Any], n: int, metrics: List[Callable[[Any], float]]
 ) -> List[Any]:
-    """ Select n pairs from the population.
+    """Select n pairs from the population.
 
-     Selection is done through binary tournament selection based on crowding distance.
-     Parent pairs may be repeated, but each parent pair consists of two unique parents.
-     The population must be at least size 3 (otherwise it is trivial or impossible).
+    Selection is done through binary tournament selection based on crowding distance.
+    Parent pairs may be repeated, but each parent pair consists of two unique parents.
+    The population must be at least size 3 (otherwise it is trivial or impossible).
     """
     if len(population) < 3:
         raise ValueError("population must be at least size 3 for a pair to be selected")
@@ -70,7 +70,7 @@ def nsga2(
     metrics: List[Callable[[Any], float]],
     return_meta: bool = False,
 ) -> List[Any]:
-    """ Selects n individuals from the population for offspring according to NSGA-II.
+    """Selects n individuals from the population for offspring according to NSGA-II.
 
     Parameters
     ----------
@@ -106,15 +106,18 @@ def nsga2(
             selection += fronts[i]
         else:
             # Only the least crowded remainder is selected
-            s = sorted(fronts[i], key=cmp_to_key(lambda x, y: x.crowd_compare(y)))
+            s = sorted(
+                fronts[i],
+                key=cmp_to_key(lambda x, y: x.crowd_compare(y)),  # type: ignore
+            )
             selection += s[: (n - len(selection))]  # Fill up to n
         i += 1
 
-    return selection if return_meta else [s.obj for s in selection]
+    return selection if return_meta else [s.obj for s in selection]  # type: ignore
 
 
 def fast_non_dominated_sort(P: List[NSGAMeta]) -> List[List[NSGAMeta]]:
-    """ Sorts P into Pareto fronts. """
+    """Sorts P into Pareto fronts."""
     fronts: List[List[NSGAMeta]] = [[]]
     for p, q in itertools.combinations(P, 2):
         if p.dominates(q):
@@ -142,9 +145,11 @@ def fast_non_dominated_sort(P: List[NSGAMeta]) -> List[List[NSGAMeta]]:
     return fronts
 
 
-def crowding_distance_assignment(I: List[NSGAMeta]) -> None:
+def crowding_distance_assignment(
+    I: List[NSGAMeta],  # noqa: E741 'I' is name in paper
+) -> None:
     for m in range(len(I[0].values)):
-        I = sorted(I, key=lambda x: x.values[m])  # noqa: E741 'I' is name in paper
+        I = sorted(I, key=lambda x: x.values[m])  # noqa: E741
         I[0].distance = I[-1].distance = float("inf")
         if (
             I[-1].values[m] == I[0].values[m]

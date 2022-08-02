@@ -13,7 +13,7 @@ from gama.utilities.metrics import scoring_to_metric
 
 
 class GamaClassifier(Gama):
-    """ Gama with adaptations for (multi-class) classification. """
+    """Gama with adaptations for (multi-class) classification."""
 
     def __init__(self, config=None, scoring="neg_log_loss", *args, **kwargs):
         if not config:
@@ -38,7 +38,7 @@ class GamaClassifier(Gama):
         super().__init__(*args, **kwargs, config=config, scoring=scoring)
 
     def _predict(self, x: pd.DataFrame):
-        """ Predict the target for input X.
+        """Predict the target for input X.
 
         Parameters
         ----------
@@ -57,7 +57,7 @@ class GamaClassifier(Gama):
         return y
 
     def _predict_proba(self, x: pd.DataFrame):
-        """ Predict the class probabilities for input x.
+        """Predict the class probabilities for input x.
 
         Predict target for x, using the best found pipeline(s) during the `fit` call.
 
@@ -75,7 +75,7 @@ class GamaClassifier(Gama):
         return self.model.predict_proba(x)  # type: ignore
 
     def predict_proba(self, x: Union[pd.DataFrame, np.ndarray]):
-        """ Predict the class probabilities for input x.
+        """Predict the class probabilities for input x.
 
         Predict target for x, using the best found pipeline(s) during the `fit` call.
 
@@ -99,7 +99,7 @@ class GamaClassifier(Gama):
         target_column: Optional[str] = None,
         encoding: Optional[str] = None,
     ):
-        """ Predict the class probabilities for input in the arff_file.
+        """Predict the class probabilities for input in the arff_file.
 
         Parameters
         ----------
@@ -124,7 +124,7 @@ class GamaClassifier(Gama):
         return self._predict_proba(x)
 
     def fit(self, x, y, *args, **kwargs):
-        """ Should use base class documentation. """
+        """Should use base class documentation."""
         y_ = y.squeeze() if isinstance(y, pd.DataFrame) else y
         self._label_encoder = LabelEncoder().fit(y_)
         if any([isinstance(yi, str) for yi in y_]):

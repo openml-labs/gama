@@ -191,7 +191,10 @@ class RunningPage(BasePage):
             id="evaluation-graph",
             figure={
                 "data": [],
-                "layout": dict(hovermode="closest", transition={"duration": 500},),
+                "layout": dict(
+                    hovermode="closest",
+                    transition={"duration": 500},
+                ),
             },
         )
         return html.Div(

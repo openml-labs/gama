@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Iterable, Tuple, Union
 
-from sklearn.metrics import get_scorer, get_scorer_names
+from sklearn.metrics import get_scorer
 from sklearn.metrics._scorer import _ProbaScorer, _BaseScorer, SCORERS
 
 classification_metrics = {"accuracy", "roc_auc", "average_precision", "neg_log_loss"}
@@ -23,14 +23,14 @@ reversed_scorers = {repr(v): k for k, v in SCORERS.items()}
 
 
 class MetricType(Enum):
-    """ Metric types supported by GAMA. """
+    """Metric types supported by GAMA."""
 
     CLASSIFICATION: int = 1  #: discrete target
     REGRESSION: int = 2  #: continuous target
 
 
 class Metric:
-    """ A thin layer around the `scorer` class of scikit-learn. """
+    """A thin layer around the `scorer` class of scikit-learn."""
 
     def __init__(self, scorer: Union[_BaseScorer, str]):
         if isinstance(scorer, str):

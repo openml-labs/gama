@@ -5,7 +5,7 @@ from gama.configuration.regression import reg_config
 
 
 class GamaRegressor(Gama):
-    """ Gama with adaptations for regression. """
+    """Gama with adaptations for regression."""
 
     def __init__(self, config=None, scoring="neg_mean_squared_error", *args, **kwargs):
         """ """
@@ -17,7 +17,7 @@ class GamaRegressor(Gama):
         super().__init__(*args, **kwargs, config=config, scoring=scoring)
 
     def _predict(self, x: pd.DataFrame):
-        """ Predict the target for input X.
+        """Predict the target for input X.
 
         Parameters
         ----------

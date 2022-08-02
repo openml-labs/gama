@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 
 class AsyncEA(BaseSearch):
-    """ Perform asynchronous evolutionary optimization.
+    """Perform asynchronous evolutionary optimization.
 
     Parameters
     ----------
@@ -45,7 +45,7 @@ class AsyncEA(BaseSearch):
         self.output = []
 
         def get_parent(evaluation, n) -> str:
-            """ retrieves the nth parent if it exists, '' otherwise. """
+            """retrieves the nth parent if it exists, '' otherwise."""
             if len(evaluation.individual.meta.get("parents", [])) > n:
                 return evaluation.individual.meta["parents"][n]
             return ""
@@ -59,10 +59,14 @@ class AsyncEA(BaseSearch):
             ),
         )
 
-    def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float) -> None:
+    def dynamic_defaults(
+        self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float
+    ) -> None:
         pass
 
-    def search(self, operations: OperatorSet, start_candidates: List[Individual]) -> None:
+    def search(
+        self, operations: OperatorSet, start_candidates: List[Individual]
+    ) -> None:
         self.output = async_ea(
             operations, self.output, start_candidates, **self.hyperparameters
         )
@@ -76,7 +80,7 @@ def async_ea(
     max_n_evaluations: Optional[int] = None,
     population_size: int = 50,
 ) -> List[Individual]:
-    """ Perform asynchronous evolutionary optimization with given operators.
+    """Perform asynchronous evolutionary optimization with given operators.
 
     Parameters
     ----------

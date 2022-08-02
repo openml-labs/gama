@@ -6,8 +6,10 @@ import sklearn
 from gama.genetic_programming.components import Primitive, Terminal, DATA_TERMINAL
 
 
-def pset_from_config(configuration: Dict[Union[str, object], Any]) -> Tuple[Dict[str, List], Dict[str, Callable]]:
-    """ Create a pset for the given configuration dictionary.
+def pset_from_config(
+    configuration: Dict[Union[str, object], Any]
+) -> Tuple[Dict[str, List], Dict[str, Callable]]:
+    """Create a pset for the given configuration dictionary.
 
     Given a configuration dictionary specifying operators (e.g. sklearn
     estimators), their hyperparameters and values for each hyperparameter,
@@ -19,12 +21,13 @@ def pset_from_config(configuration: Dict[Union[str, object], Any]) -> Tuple[Dict
     Side effect: Imports the classes of each primitive.
 
     returns:
-        pset - Dict[str, List]: maps return-types to a list of Primitives and/or Terminals
-        parameter_check - Dict[str, Callable]: 
-            maps Primitive name to a function which verifies the correct initialization of hyperparameters.
+        pset - Dict[str, List]:
+            maps return-types to a list of Primitives and/or Terminals
+        parameter_check - Dict[str, Callable]:
+            maps Primitive name to a check for the validity of the hp configuration
     """
 
-    pset = defaultdict(list)
+    pset: Dict[str, List[Union[Primitive, Terminal]]] = defaultdict(list)
     parameter_checks = {}
 
     # Make sure the str-keys are evaluated first, they describe shared hyperparameters.
@@ -36,9 +39,9 @@ def pset_from_config(configuration: Dict[Union[str, object], Any]) -> Tuple[Dict
             # Specification of shared hyperparameters
             for value in values:
                 pset[key].append(Terminal(value=value, output=key, identifier=key))
-        elif isinstance(key, object):
+        elif isinstance(key, type):
             # Specification of operator (learner, preprocessor)
-            hyperparameter_types = []
+            hyperparameter_types: List[str] = []
             for name, param_values in sorted(values.items()):
                 # We construct a new type for each hyperparameter, so we can specify
                 # it as terminal type, making sure it matches with expected
@@ -56,41 +59,37 @@ def pset_from_config(configuration: Dict[Union[str, object], Any]) -> Tuple[Dict
                     hyperparameter_types.append(hp_name)
                     for value in param_values:
                         pset[hp_name].append(
-                            Terminal(value=value, output=name, identifier=hp_name,)
+                            Terminal(
+                                value=value,
+                                output=name,
+                                identifier=hp_name,
+                            )
                         )
 
             # After registering the hyperparameter types,
             # we can register the operator itself.
-            transformer_tags = [
-                "DATA_PREPROCESSING",
-                "FEATURE_SELECTION",
-                "DATA_TRANSFORMATION",
-            ]
-            if issubclass(key, sklearn.base.TransformerMixin) or (
-                hasattr(key, "metadata")
-                and key.metadata.query()["primitive_family"] in transformer_tags
-            ):
+            if issubclass(key, sklearn.base.TransformerMixin):
                 pset[DATA_TERMINAL].append(
                     Primitive(
-                        input=hyperparameter_types, output=DATA_TERMINAL, identifier=key
+                        input=tuple(hyperparameter_types),
+                        output=DATA_TERMINAL,
+                        identifier=key,
                     )
                 )
-            elif issubclass(key, sklearn.base.ClassifierMixin) or (
-                hasattr(key, "metadata")
-                and key.metadata.query()["primitive_family"] == "CLASSIFICATION"
-            ):
+            elif issubclass(key, sklearn.base.ClassifierMixin):
                 pset["prediction"].append(
                     Primitive(
-                        input=hyperparameter_types, output="prediction", identifier=key
+                        input=tuple(hyperparameter_types),
+                        output="prediction",
+                        identifier=key,
                     )
                 )
-            elif issubclass(key, sklearn.base.RegressorMixin) or (
-                hasattr(key, "metadata")
-                and key.metadata.query()["primitive_family"] == "REGRESSION"
-            ):
+            elif issubclass(key, sklearn.base.RegressorMixin):
                 pset["prediction"].append(
                     Primitive(
-                        input=hyperparameter_types, output="prediction", identifier=key
+                        input=tuple(hyperparameter_types),
+                        output="prediction",
+                        identifier=key,
                     )
                 )
             else:
@@ -108,7 +107,7 @@ def pset_from_config(configuration: Dict[Union[str, object], Any]) -> Tuple[Dict
 
 
 def merge_configurations(c1: Dict, c2: Dict) -> Dict:
-    """ Takes two configurations and merges them together. """
+    """Takes two configurations and merges them together."""
     # Should refactor out 6 indentation levels
     merged: Dict[Any, Any] = defaultdict(lambda: None, c1)
     for algorithm, hparams2 in c2.items():
