@@ -1,5 +1,6 @@
 name: Publish to Test PyPI
 on:
+  push: # for testing purposes
   workflow_dispatch:
 
 jobs:
