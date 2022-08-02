@@ -26,4 +26,4 @@ jobs:
 
       - name: Upload to test server
         run: |
-          python -m twine upload --repository testpypi -u token -p ${{ secrets.TEST_PYPI }} dist/*
+          python -m twine upload --repository testpypi -u __token__ -p ${{ secrets.TEST_PYPI }} dist/*
