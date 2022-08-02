@@ -17,9 +17,9 @@ class NSGAMeta:
     def __init__(self, obj: object, metrics: List[Callable]):
         self.obj = obj
         self.values = tuple((m(obj) for m in metrics))
-        self.rank = None
-        self.distance = 0
-        self.dominating = []
+        self.rank = 0
+        self.distance = 0.0
+        self.dominating: List["NSGAMeta"] = []
         self.domination_counter = 0
 
     def dominates(self, other: "NSGAMeta") -> bool:
@@ -106,11 +106,14 @@ def nsga2(
             selection += fronts[i]
         else:
             # Only the least crowded remainder is selected
-            s = sorted(fronts[i], key=cmp_to_key(lambda x, y: x.crowd_compare(y)))
+            s = sorted(
+                fronts[i],
+                key=cmp_to_key(lambda x, y: x.crowd_compare(y)),  # type: ignore
+            )
             selection += s[: (n - len(selection))]  # Fill up to n
         i += 1
 
-    return selection if return_meta else [s.obj for s in selection]
+    return selection if return_meta else [s.obj for s in selection]  # type: ignore
 
 
 def fast_non_dominated_sort(P: List[NSGAMeta]) -> List[List[NSGAMeta]]:

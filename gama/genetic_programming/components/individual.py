@@ -29,10 +29,10 @@ class Individual:
         self._id = uuid.uuid4()
         self._to_pipeline = to_pipeline
 
-    def __eq__(self, other: "Individual") -> bool:
+    def __eq__(self, other) -> bool:
         return isinstance(other, Individual) and other._id == self._id
 
-    def __hash__(self) -> str:
+    def __hash__(self) -> int:
         return hash(self._id)
 
     def __str__(self) -> str:

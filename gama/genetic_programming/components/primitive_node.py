@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, cast
 from .terminal import DATA_TERMINAL, Terminal
 from .primitive import Primitive
 
@@ -51,9 +51,9 @@ class PrimitiveNode:
 
     def copy(self) -> "PrimitiveNode":
         """Copies the object. Shallow for terminals, deep for data_node."""
-        if self._data_node == DATA_TERMINAL:
-            data_node_copy = DATA_TERMINAL
-        else:
+        if isinstance(self._data_node, str) and self._data_node == DATA_TERMINAL:
+            data_node_copy = DATA_TERMINAL  # type: Union[str, PrimitiveNode]
+        elif isinstance(self._data_node, PrimitiveNode):
             data_node_copy = self._data_node.copy()
         return PrimitiveNode(
             primitive=self._primitive,
@@ -101,7 +101,7 @@ class PrimitiveNode:
                 raise ValueError(f"terminals {missing} for primitive {primitive}")
             last_node = cls(primitive, last_node, terminals)
 
-        return last_node
+        return cast(PrimitiveNode, last_node)
 
 
 def find_primitive(primitive_set: dict, primitive_string: str) -> Primitive:

@@ -7,7 +7,7 @@ class Primitive(NamedTuple):
     E.g. a preprocessing or classification algorithm.
     """
 
-    input: Tuple[str]
+    input: Tuple[str, ...]
     output: str
     identifier: Callable
 

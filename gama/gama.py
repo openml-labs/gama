@@ -86,7 +86,7 @@ class Gama(ABC):
         ] = "filled_in_by_child_class",
         regularize_length: bool = True,
         max_pipeline_length: Optional[int] = None,
-        config: Dict = None,
+        config: Dict[Union[str, object], Any] = {},
         random_state: Optional[int] = None,
         max_total_time: int = 3600,
         max_eval_time: Optional[int] = None,
@@ -288,7 +288,7 @@ class Gama(ABC):
                 )
         max_start_length = 3 if max_pipeline_length is None else max_pipeline_length
         self._operator_set = OperatorSet(
-            mutate=partial(
+            mutate=partial(  # type: ignore #https://github.com/python/mypy/issues/1484
                 random_valid_mutation_in_place,
                 primitive_set=self._pset,
                 max_length=max_pipeline_length,
@@ -335,7 +335,8 @@ class Gama(ABC):
     ) -> pd.DataFrame:
         if isinstance(x, np.ndarray):
             x = self._np_to_matching_dataframe(x)
-        x = self._basic_encoding_pipeline.transform(x)
+        if self._basic_encoding_pipeline:
+            x = self._basic_encoding_pipeline.transform(x)
         return x
 
     def _predict(self, x: pd.DataFrame) -> np.ndarray:
@@ -625,7 +626,7 @@ class Gama(ABC):
 
     def export_script(
         self, file: Optional[str] = "gama_pipeline.py", raise_if_exists: bool = False
-    ) -> Optional[str]:
+    ) -> str:
         """Export a Python script which sets up the best found pipeline.
 
         Can only be called after `fit`.
@@ -653,6 +654,10 @@ class Gama(ABC):
         raise_if_exists: bool (default=False)
             If True, raise an error if the file already exists.
             If False, overwrite `file` if it already exists.
+
+        Returns
+        -------
+        script: str
         """
         if self.model is None:
             raise RuntimeError(STR_NO_OPTIMAL_PIPELINE)
@@ -670,8 +675,7 @@ class Gama(ABC):
             with open(file, "w") as fh:
                 fh.write(script_text)
             subprocess.call(["black", file])
-        else:
-            return script_text
+        return script_text
 
     def _safe_outside_call(self, fn: Callable) -> None:
         """Calls fn logging and ignoring all exceptions except TimeoutException."""
@@ -686,7 +690,10 @@ class Gama(ABC):
             # Note KeyboardInterrupts are not exceptions and get elevated to the caller.
             log.warning("Exception during callback.", exc_info=True)
 
-        if self._time_manager.current_activity.exceeded_limit(margin=3.0):
+        if (
+            self._time_manager.current_activity
+            and self._time_manager.current_activity.exceeded_limit(margin=3.0)
+        ):
             # If time exceeds during a safe callback, the timeout exception *might*
             # have been swallowed. This can result in GAMA running indefinitely.
             # However in rare conditions it can be that the TimeoutException is still

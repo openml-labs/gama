@@ -31,12 +31,12 @@ class Evaluation:
     ):
         self.individual: Individual = individual
         self.score = score
-        self._estimators: Optional[List] = [] if estimators is None else estimators
+        self._estimators: List[BaseEstimator] = [] if estimators is None else estimators
         self.start_time = start_time
         self.duration = duration
         self.error = error
         self.pid = pid
-        self._cache_file = None
+        self._cache_file = ""
 
         if isinstance(predictions, (pd.Series, pd.DataFrame)):
             predictions = predictions.values
@@ -52,7 +52,7 @@ class Evaluation:
     def remove_from_disk(self) -> None:
         """Remove the related file from disk."""
         os.remove(os.path.join(self._cache_file))
-        self._cache_file = None
+        self._cache_file = ""
 
     @property
     def estimators(self) -> List[BaseEstimator]:
@@ -234,7 +234,7 @@ class EvaluationLibrary:
         self._process_predictions(evaluation)
 
         if evaluation.error is not None:
-            evaluation._estimators, evaluation._predictions = None, None
+            evaluation._estimators, evaluation._predictions = [], None
             self.other_evaluations.append(evaluation)
         elif self._m is None or self._m > len(self.top_evaluations):
             evaluation.to_disk(self._cache)
@@ -243,7 +243,7 @@ class EvaluationLibrary:
             removed = heapq.heappushpop(self.top_evaluations, evaluation)
             if removed == evaluation:
                 # new evaluation is not in heap, big memory items may be discarded
-                removed._predictions, removed._estimators = None, None
+                removed._estimators, removed._predictions = [], None
             else:
                 # new evaluation is now on the heap, remove old from disk
                 evaluation.to_disk(self._cache)

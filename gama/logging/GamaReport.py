@@ -125,4 +125,4 @@ def init_to_hps(init_line: str) -> Dict[str, str]:
     # only supports one nested level - will do proper parsing later
     for token in ["()", "(", ")", ",,"]:
         all_arguments = all_arguments.replace(token, ",")
-    return dict(hp.split("=") for hp in all_arguments.split(","))  # type: ignore
+    return dict(hp.split("=") for hp in all_arguments.split(","))

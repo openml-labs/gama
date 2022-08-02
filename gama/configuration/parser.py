@@ -27,7 +27,7 @@ def pset_from_config(
             maps Primitive name to a check for the validity of the hp configuration
     """
 
-    pset = defaultdict(list)
+    pset: Dict[str, List[Union[Primitive, Terminal]]] = defaultdict(list)
     parameter_checks = {}
 
     # Make sure the str-keys are evaluated first, they describe shared hyperparameters.
@@ -39,9 +39,9 @@ def pset_from_config(
             # Specification of shared hyperparameters
             for value in values:
                 pset[key].append(Terminal(value=value, output=key, identifier=key))
-        elif isinstance(key, object):
+        elif isinstance(key, type):
             # Specification of operator (learner, preprocessor)
-            hyperparameter_types = []
+            hyperparameter_types: List[str] = []
             for name, param_values in sorted(values.items()):
                 # We construct a new type for each hyperparameter, so we can specify
                 # it as terminal type, making sure it matches with expected
@@ -68,36 +68,28 @@ def pset_from_config(
 
             # After registering the hyperparameter types,
             # we can register the operator itself.
-            transformer_tags = [
-                "DATA_PREPROCESSING",
-                "FEATURE_SELECTION",
-                "DATA_TRANSFORMATION",
-            ]
-            if issubclass(key, sklearn.base.TransformerMixin) or (
-                hasattr(key, "metadata")
-                and key.metadata.query()["primitive_family"] in transformer_tags
-            ):
+            if issubclass(key, sklearn.base.TransformerMixin):
                 pset[DATA_TERMINAL].append(
                     Primitive(
-                        input=hyperparameter_types, output=DATA_TERMINAL, identifier=key
+                        input=tuple(hyperparameter_types),
+                        output=DATA_TERMINAL,
+                        identifier=key,
                     )
                 )
-            elif issubclass(key, sklearn.base.ClassifierMixin) or (
-                hasattr(key, "metadata")
-                and key.metadata.query()["primitive_family"] == "CLASSIFICATION"
-            ):
+            elif issubclass(key, sklearn.base.ClassifierMixin):
                 pset["prediction"].append(
                     Primitive(
-                        input=hyperparameter_types, output="prediction", identifier=key
+                        input=tuple(hyperparameter_types),
+                        output="prediction",
+                        identifier=key,
                     )
                 )
-            elif issubclass(key, sklearn.base.RegressorMixin) or (
-                hasattr(key, "metadata")
-                and key.metadata.query()["primitive_family"] == "REGRESSION"
-            ):
+            elif issubclass(key, sklearn.base.RegressorMixin):
                 pset["prediction"].append(
                     Primitive(
-                        input=hyperparameter_types, output="prediction", identifier=key
+                        input=tuple(hyperparameter_types),
+                        output="prediction",
+                        identifier=key,
                     )
                 )
             else:

@@ -1,5 +1,6 @@
 import logging
-from typing import Callable, List, Optional, Tuple, Any
+from typing import Callable, Dict, List, Optional, Tuple, Any
+from gama.genetic_programming.components.primitive_node import PrimitiveNode
 
 from sklearn.pipeline import Pipeline
 
@@ -18,24 +19,24 @@ class OperatorSet:
         mutate: Callable[[Individual], None],
         mate: Callable[[Individual, Individual], Tuple[Individual, Individual]],
         create_from_population: Callable[[Any], List[Individual]],
-        create_new: Callable[[], Individual],
+        create_new: Callable[[], PrimitiveNode],
         compile_: Callable[[Individual], Pipeline],
         eliminate: Callable[[List[Individual], int], List[Individual]],
         evaluate_callback: Callable[[Evaluation], None],
         max_retry: int = 50,
-        completed_evaluations: Optional[List[Individual]] = None,
+        completed_evaluations: Optional[Dict[str, Evaluation]] = None,
     ):
         self._mutate = mutate
         self._mate = mate
         self._create_from_population = create_from_population
         self._create_new = create_new
         self._compile = compile_
-        self._safe_compile = None
+        self._safe_compile: Optional[Callable[[Individual], Pipeline]] = None
         self._eliminate = eliminate
         self._max_retry = max_retry
         self._evaluate = None
         self._evaluate_callback = evaluate_callback
-        self.evaluate = None
+        self.evaluate: Optional[Callable[..., Evaluation]] = None
 
         self._completed_evaluations = completed_evaluations
 
@@ -91,7 +92,7 @@ class OperatorSet:
         ind.meta["origin"] = "new"
         return ind
 
-    def create(self, *args, **kwargs) -> Individual:
+    def create(self, *args, **kwargs) -> List[Individual]:
         return self._create_from_population(self, *args, **kwargs)
 
     def eliminate(self, *args, **kwargs):
