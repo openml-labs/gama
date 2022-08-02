@@ -142,9 +142,11 @@ def fast_non_dominated_sort(P: List[NSGAMeta]) -> List[List[NSGAMeta]]:
     return fronts
 
 
-def crowding_distance_assignment(I: List[NSGAMeta]) -> None:
+def crowding_distance_assignment(
+    I: List[NSGAMeta],  # noqa: E741 'I' is name in paper
+) -> None:
     for m in range(len(I[0].values)):
-        I = sorted(I, key=lambda x: x.values[m])  # noqa: E741 'I' is name in paper
+        I = sorted(I, key=lambda x: x.values[m])  # noqa: E741
         I[0].distance = I[-1].distance = float("inf")
         if (
             I[-1].values[m] == I[0].values[m]

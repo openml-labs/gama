@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Iterable, Tuple, Union
 
-from sklearn.metrics import get_scorer, get_scorer_names
+from sklearn.metrics import get_scorer
 from sklearn.metrics._scorer import _ProbaScorer, _BaseScorer, SCORERS
 
 classification_metrics = {"accuracy", "roc_auc", "average_precision", "neg_log_loss"}

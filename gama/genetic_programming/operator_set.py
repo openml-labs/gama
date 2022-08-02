@@ -40,7 +40,7 @@ class OperatorSet:
         self._completed_evaluations = completed_evaluations
 
     def wait_next(self, async_evaluator):
-        """Wrapper for async_evaluator.wait_next() to forward evaluation and log exceptions."""
+        """Wrapper for wait_next() to forward evaluation and log exceptions."""
         future = async_evaluator.wait_next()
         if future.result is not None:
             evaluation = future.result
@@ -52,7 +52,7 @@ class OperatorSet:
         return future
 
     def try_until_new(self, operator, *args, **kwargs):
-        """Keep executing operator(*args, **kwargs) until a new individual is created."""
+        """Keep executing `operator` until a new individual is created."""
         for _ in range(self._max_retry):
             individual = operator(*args, **kwargs)
             if str(individual.main_node) not in self._completed_evaluations:

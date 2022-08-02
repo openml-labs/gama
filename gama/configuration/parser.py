@@ -21,9 +21,10 @@ def pset_from_config(
     Side effect: Imports the classes of each primitive.
 
     returns:
-        pset - Dict[str, List]: maps return-types to a list of Primitives and/or Terminals
+        pset - Dict[str, List]:
+            maps return-types to a list of Primitives and/or Terminals
         parameter_check - Dict[str, Callable]:
-            maps Primitive name to a function which verifies the correct initialization of hyperparameters.
+            maps Primitive name to a check for the validity of the hp configuration
     """
 
     pset = defaultdict(list)

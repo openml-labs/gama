@@ -1,4 +1,3 @@
-from multiprocessing.sharedctypes import Value
 import shutil
 from abc import ABC
 from collections import defaultdict
@@ -177,7 +176,8 @@ class Gama(ABC):
             os.mkdir(self.output_directory)
         elif len(os.listdir(self.output_directory)) > 0:
             raise ValueError(
-                f"`output_directory` ('{self.output_directory}') must be empty or non-existent."
+                f"""`output_directory` ('{self.output_directory}')
+                 must be empty or non-existent."""
             )
 
         register_stream_log(verbosity)

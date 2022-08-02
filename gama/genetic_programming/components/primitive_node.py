@@ -41,7 +41,7 @@ class PrimitiveNode:
 
     @property
     def str_nonrecursive(self) -> str:
-        """Stringify all primitive node without data node (primitive and hyperparameters).
+        """Stringify primitive node with its hyperparameter configuration
 
         Examples: - "GaussianNB()"
                   - "BernoulliNB(alpha=1.0)"

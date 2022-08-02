@@ -103,4 +103,4 @@ def _check_base_search_hyperparameters(
             f"'start_population' must be a list but was {type(start_candidates)}"
         )
     if not all(isinstance(x, Individual) for x in start_candidates):
-        raise TypeError(f"Each element in 'start_population' must be Individual.")
+        raise TypeError("Each element in 'start_population' must be Individual.")

@@ -38,7 +38,7 @@ def plot_preset_graph(reports: List[GamaReport], preset: Optional[str]):
         # elif aggregate == "aggregate":
         #     plots = aggregate_best_over_time(aggregate_df, first_metric_max)
         layout = dict(
-            title=f"Best score over time",
+            title="Best score over time",
             xaxis=dict(title="time (s)"),
             yaxis=dict(title=f"max {first_metric}"),
             hovermode="closest",
@@ -84,7 +84,7 @@ def plot_preset_graph(reports: List[GamaReport], preset: Optional[str]):
         #            go.Bar(x=size_ratio.index.values, y=size_ratio.values, name=method)
         #        )
         layout = dict(
-            title=f"Ratio of pipelines by size",
+            title="Ratio of pipelines by size",
             xaxis=dict(title="pipeline length"),
             yaxis=dict(title="pipeline count"),
         )
@@ -103,7 +103,7 @@ def plot_preset_graph(reports: List[GamaReport], preset: Optional[str]):
                 )
             )
         layout = dict(
-            title=f"Ratio of pipelines by learner",
+            title="Ratio of pipelines by learner",
             xaxis=dict(title="pipeline length"),
             yaxis=dict(title="learner"),
         )
@@ -119,7 +119,7 @@ def plot_preset_graph(reports: List[GamaReport], preset: Optional[str]):
         #         ].duration.dt.total_seconds()
         #         plots.append(go.Histogram(x=time_s, name=method))
         layout = dict(
-            title=f"Pipeline Evaluation Times",
+            title="Pipeline Evaluation Times",
             xaxis=dict(title="duration (s)"),
             yaxis=dict(title="count"),
         )
@@ -133,7 +133,7 @@ def plot_preset_graph(reports: List[GamaReport], preset: Optional[str]):
                     go.Bar(x=count_by_rung.rung, y=count_by_rung.n, name=report.name)
                 )
         layout = dict(
-            title=f"#Evaluations by Rung",
+            title="#Evaluations by Rung",
             xaxis=dict(title="rung"),
             yaxis=dict(title="count"),
         )
@@ -152,7 +152,7 @@ def plot_preset_graph(reports: List[GamaReport], preset: Optional[str]):
                     )
                 )
         layout = dict(
-            title=f"Time spent per Rung",
+            title="Time spent per Rung",
             xaxis=dict(title="rung"),
             yaxis=dict(title="time (s)"),
         )
