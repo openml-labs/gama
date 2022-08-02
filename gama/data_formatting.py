@@ -20,7 +20,7 @@ def series_looks_categorical(series) -> bool:
 
 
 def infer_categoricals_inplace(df: pd.DataFrame) -> None:
-    """ Use simple heuristics to convert columns guessed to be categorical. """
+    """Use simple heuristics to convert columns guessed to be categorical."""
     for column in df:
         if series_looks_categorical(df[column]):
             df[column] = df[column].astype("category")
@@ -36,7 +36,7 @@ def numpy_to_dataframe(x: np.ndarray) -> pd.DataFrame:
 def format_y(
     y: Union[pd.DataFrame, pd.Series, np.ndarray], y_type: Type = pd.Series
 ) -> Union[pd.DataFrame, pd.Series]:
-    """ Transforms a target vector or indicator matrix to a single series (or 1d df) """
+    """Transforms a target vector or indicator matrix to a single series (or 1d df)"""
     if not isinstance(y, (np.ndarray, pd.Series, pd.DataFrame)):
         raise TypeError("y must be np.ndarray, pd.Series or pd.DataFrame.")
     if y_type not in [pd.Series, pd.DataFrame]:
@@ -63,7 +63,7 @@ def format_y(
 def remove_unlabeled_rows(
     x: pd.DataFrame, y: Union[pd.Series, pd.DataFrame]
 ) -> Tuple[pd.DataFrame, Union[pd.Series, pd.DataFrame]]:
-    """ Removes all rows from x and y where y is nan. """
+    """Removes all rows from x and y where y is nan."""
     if isinstance(y, pd.DataFrame):
         unlabeled = y.iloc[:, 0].isnull()
     else:
@@ -84,7 +84,7 @@ def format_x_y(
     y_type: Type = pd.Series,
     remove_unlabeled: bool = True,
 ) -> Tuple[pd.DataFrame, Union[pd.DataFrame, pd.Series]]:
-    """ Take (X,y) data and convert it to a (pd.DataFrame, pd.Series) tuple.
+    """Take (X,y) data and convert it to a (pd.DataFrame, pd.Series) tuple.
 
     Parameters
     ----------

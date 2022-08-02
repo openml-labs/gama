@@ -129,7 +129,7 @@ def make_parser():
 
 def main(command: str = ""):
     parser = make_parser()
-    
+
     if isinstance(command, str):
         command = command.split()
 
@@ -146,7 +146,9 @@ def main(command: str = ""):
         kwargs["sep"] = args.seperator
 
     x, y = X_y_from_file(
-        file_path=args.input_file.lower(), split_column=args.target, **kwargs,
+        file_path=args.input_file.lower(),
+        split_column=args.target,
+        **kwargs,
     )
     if args.mode is None:
         if is_categorical_dtype(y.dtype):

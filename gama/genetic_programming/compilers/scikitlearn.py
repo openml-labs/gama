@@ -45,7 +45,7 @@ def compile_individual(
 
 
 def object_is_valid_pipeline(o: object) -> bool:
-    """ Determines if object behaves like a scikit-learn pipeline. """
+    """Determines if object behaves like a scikit-learn pipeline."""
     return (
         o is not None
         and hasattr(o, "fit")
@@ -55,9 +55,15 @@ def object_is_valid_pipeline(o: object) -> bool:
 
 
 def evaluate_pipeline(
-    pipeline, x, y_train, timeout: float, metrics: Tuple[Metric], cv=5, subsample=None,
+    pipeline,
+    x,
+    y_train,
+    timeout: float,
+    metrics: Tuple[Metric],
+    cv=5,
+    subsample=None,
 ) -> Tuple:
-    """ Score `pipeline` with k-fold CV according to `metrics` on (a subsample of) X, y
+    """Score `pipeline` with k-fold CV according to `metrics` on (a subsample of) X, y
 
     Returns
     -------
@@ -161,7 +167,7 @@ def evaluate_individual(
     add_length_to_score: bool = True,
     **kwargs,
 ) -> Evaluation:
-    """ Evaluate the pipeline specified by individual, and record
+    """Evaluate the pipeline specified by individual, and record
 
     Parameters
     ----------

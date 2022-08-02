@@ -7,9 +7,9 @@ import gama
 
 
 def test_output_directory_must_be_empty(tmp_path):
-    with open(tmp_path/"remove.txt", 'w') as fh:
+    with open(tmp_path / "remove.txt", "w") as fh:
         fh.write("Created for GAMA unit test.")
-    
+
     with pytest.raises(ValueError) as e:
         gama.GamaClassifier(output_directory=tmp_path)
     assert "`output_directory`" in str(e.value)

@@ -8,7 +8,7 @@ from gama.utilities.evaluation_library import Evaluation
 
 
 def _nested_getattr(o: object, attr: str) -> Any:
-    """ Resolved nested properties, e.g., `individual.fitness.score`. """
+    """Resolved nested properties, e.g., `individual.fitness.score`."""
     for a in attr.split("."):
         o = getattr(o, a)
     return o
@@ -22,7 +22,7 @@ class EvaluationLogger:
         fields: Optional[Dict[str, Callable[[Evaluation], str]]] = None,
         extra_fields: Optional[Dict[str, Callable[[Evaluation], str]]] = None,
     ):
-        """ Formats evaluations for output to a csv file.
+        """Formats evaluations for output to a csv file.
 
         Parameters
         ----------
@@ -66,7 +66,7 @@ class EvaluationLogger:
         self.log_line(list(self.fields))
 
     def log_line(self, values: Iterable[str]) -> None:
-        """ Appends `values` as a row of separated values to the file. """
+        """Appends `values` as a row of separated values to the file."""
         with open(self._file_path, "a") as evaluations:
             evaluations.write(self._sep.join(values) + "\n")
 

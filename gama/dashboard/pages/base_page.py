@@ -3,7 +3,7 @@ import abc
 
 class BasePage(abc.ABC):
     def __init__(self, name: str, alignment: int, starts_hidden: bool = False):
-        """ Defines the basic behavior of a page.
+        """Defines the basic behavior of a page.
 
         Parameters
         ----------
@@ -31,5 +31,5 @@ class BasePage(abc.ABC):
 
     @abc.abstractmethod
     def build_page(self, app, controller):
-        """ Populate the `content` field with html, register any callbacks. """
+        """Populate the `content` field with html, register any callbacks."""
         raise NotImplementedError

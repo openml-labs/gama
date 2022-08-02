@@ -9,7 +9,7 @@ from .terminal import Terminal
 
 
 class Individual:
-    """ Collection of PrimitiveNodes which together specify a machine learning pipeline.
+    """Collection of PrimitiveNodes which together specify a machine learning pipeline.
 
     Parameters
     ----------
@@ -43,7 +43,7 @@ class Individual:
 
     @property
     def pipeline(self) -> Pipeline:
-        """ Calls the `to_pipeline` method on itself."""
+        """Calls the `to_pipeline` method on itself."""
         if self._to_pipeline is None:
             raise AttributeError(
                 "pipeline not available because `to_pipeline` was not set on __init__."
@@ -51,18 +51,18 @@ class Individual:
         return self._to_pipeline(self)
 
     def short_name(self, step_separator: str = ">") -> str:
-        """ str: e.g. "Binarizer>BernoulliNB" """
+        """str: e.g. "Binarizer>BernoulliNB" """
         return step_separator.join(
             [str(primitive._primitive) for primitive in reversed(self.primitives)]
         )
 
     def pipeline_str(self) -> str:
-        """ str: e.g., "BernoulliNB(Binarizer(data, Binarizer.threshold=0.6), BernoulliNB.alpha=1.0)" """  # noqa: E501
+        """str: e.g., "BernoulliNB(Binarizer(data, Binarizer.threshold=0.6), BernoulliNB.alpha=1.0)" """  # noqa: E501
         return str(self.main_node)
 
     @property
     def primitives(self) -> List[PrimitiveNode]:
-        """ Lists all primitive nodes, starting with the Individual's main node. """
+        """Lists all primitive nodes, starting with the Individual's main node."""
         primitives = [self.main_node]
         current_node = self.main_node._data_node
         while isinstance(current_node, PrimitiveNode):  # i.e. not DATA_TERMINAL
@@ -72,11 +72,11 @@ class Individual:
 
     @property
     def terminals(self) -> List[Terminal]:
-        """ Lists all terminals connected to the Individual's primitive nodes. """
+        """Lists all terminals connected to the Individual's primitive nodes."""
         return [terminal for prim in self.primitives for terminal in prim._terminals]
 
     def replace_terminal(self, position: int, new_terminal: Terminal) -> None:
-        """ Replace the terminal at `position` by `new_terminal` in-place.
+        """Replace the terminal at `position` by `new_terminal` in-place.
 
         Parameters
         ----------
@@ -106,7 +106,7 @@ class Individual:
             )
 
     def replace_primitive(self, position: int, new_primitive: PrimitiveNode):
-        """ Replace the PrimitiveNode at `position` by `new_primitive`.
+        """Replace the PrimitiveNode at `position` by `new_primitive`.
 
         Parameters
         ----------
@@ -134,14 +134,14 @@ class Individual:
             last_primitive._data_node = new_primitive
 
     def copy_as_new(self) -> "Individual":
-        """ Make deep copy of self, but with fitness None and assigned a new id. """
+        """Make deep copy of self, but with fitness None and assigned a new id."""
         return Individual(self.main_node.copy(), to_pipeline=self._to_pipeline)
 
     @classmethod
     def from_string(
         cls, string: str, primitive_set: dict, to_pipeline: Optional[Callable] = None
     ) -> "Individual":
-        """ Construct an Individual from its `pipeline_str` representation.
+        """Construct an Individual from its `pipeline_str` representation.
 
         Parameters
         ----------

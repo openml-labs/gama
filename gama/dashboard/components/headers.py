@@ -21,7 +21,7 @@ def markdown_header(text: str, level: int = 4, with_horizontal_rule: bool = True
 
 
 class CollapsableSection:
-    """ A Form with a ButtonHeader which when presses collapses/expands the Form. """
+    """A Form with a ButtonHeader which when presses collapses/expands the Form."""
 
     def __init__(
         self, header: str, controls: List[dbc.FormGroup], start_open: bool = True

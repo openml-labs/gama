@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 
 
 class Evaluation:
-    """ Record relevant evaluation data of an individual. """
+    """Record relevant evaluation data of an individual."""
 
     def __init__(
         self,
@@ -43,14 +43,14 @@ class Evaluation:
         self._predictions: Optional[np.ndarray] = predictions
 
     def to_disk(self, directory: str) -> None:
-        """ Save Evaluation in the provided directory. """
+        """Save Evaluation in the provided directory."""
         self._cache_file = os.path.join(directory, str(self.individual._id) + ".pkl")
         with open(self._cache_file, "wb") as fh:
             pickle.dump((self._estimators, self._predictions), fh)
         self._estimators, self._predictions = [], None
 
     def remove_from_disk(self) -> None:
-        """ Remove the related file from disk. """
+        """Remove the related file from disk."""
         os.remove(os.path.join(self._cache_file))
         self._cache_file = None
 
@@ -94,7 +94,7 @@ class Evaluation:
 
 
 class EvaluationLibrary:
-    """ Maintains an in-memory record of evaluations.
+    """Maintains an in-memory record of evaluations.
 
     The main function of the EvaluationLibrary is to maintain a fast lookup for
     the best evaluations, and to discard meta-data of Evaluations which are not
@@ -119,7 +119,7 @@ class EvaluationLibrary:
         sample: Optional[np.ndarray] = None,
         cache: str = "cache",
     ):
-        """ Create an EvaluationLibrary for in-memory record of evaluations.
+        """Create an EvaluationLibrary for in-memory record of evaluations.
 
         Parameters
         ----------
@@ -173,7 +173,7 @@ class EvaluationLibrary:
         prediction_size: Optional[int] = None,
         stratify: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]] = None,
     ) -> None:
-        """ Set `self._sample` to an array for sampling predictions or `None`.
+        """Set `self._sample` to an array for sampling predictions or `None`.
 
         The sample indices can be class stratified if `stratify` is set.
         If `prediction_size` or `len(stratify)` is smaller than `n`,
@@ -217,7 +217,7 @@ class EvaluationLibrary:
             self._sample = None
 
     def _process_predictions(self, evaluation: Evaluation) -> None:
-        """ Downsample evaluation predictions if required. """
+        """Downsample evaluation predictions if required."""
         if self._sample_n == 0:
             evaluation._predictions = None
         if evaluation.predictions is None:
@@ -259,7 +259,7 @@ class EvaluationLibrary:
         os.rmdir(self._cache)
 
     def n_best(self, n: int = 5, with_pipelines=True) -> List[Evaluation]:
-        """ Return the best `n` pipelines.
+        """Return the best `n` pipelines.
 
         Slower if `n` exceeds `m` given on initialization.
         """

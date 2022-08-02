@@ -11,13 +11,13 @@ log = logging.getLogger(__name__)
 
 
 class OperatorSet:
-    """ Provides a thin layer for ea operators for logging, callbacks and safety. """
+    """Provides a thin layer for ea operators for logging, callbacks and safety."""
 
     def __init__(
         self,
         mutate: Callable[[Individual], None],
         mate: Callable[[Individual, Individual], Tuple[Individual, Individual]],
-        create_from_population: Callable[[Any], List[Individual]], 
+        create_from_population: Callable[[Any], List[Individual]],
         create_new: Callable[[], Individual],
         compile_: Callable[[Individual], Pipeline],
         eliminate: Callable[[List[Individual], int], List[Individual]],
@@ -40,7 +40,7 @@ class OperatorSet:
         self._completed_evaluations = completed_evaluations
 
     def wait_next(self, async_evaluator):
-        """ Wrapper for async_evaluator.wait_next() to forward evaluation and log exceptions. """
+        """Wrapper for async_evaluator.wait_next() to forward evaluation and log exceptions."""
         future = async_evaluator.wait_next()
         if future.result is not None:
             evaluation = future.result
@@ -52,7 +52,7 @@ class OperatorSet:
         return future
 
     def try_until_new(self, operator, *args, **kwargs):
-        """ Keep executing operator(*args, **kwargs) until a new individual is created. """
+        """Keep executing operator(*args, **kwargs) until a new individual is created."""
         for _ in range(self._max_retry):
             individual = operator(*args, **kwargs)
             if str(individual.main_node) not in self._completed_evaluations:
@@ -86,7 +86,7 @@ class OperatorSet:
             compile_ = self._safe_compile
         else:
             compile_ = self._compile
-        
+
         ind = Individual(expression, to_pipeline=compile_)
         ind.meta["origin"] = "new"
         return ind

@@ -2,7 +2,7 @@ from gama.logging.GamaReport import GamaReport
 
 
 def test_gamareport_from_log():
-    """ GamaReport can be constructed from a log that recorded RandomSearch. """
+    """GamaReport can be constructed from a log that recorded RandomSearch."""
     # We refer to a static log, this makes it independent of other unit tests,
     # but it also makes it independent of the actual changes in gama logging.
     # Cons:
@@ -25,7 +25,7 @@ def test_gamareport_from_log():
 
 
 def test_gamareport_asha_from_log():
-    """ GamaReport can be constructed from a log that recorded ASHA. """
+    """GamaReport can be constructed from a log that recorded ASHA."""
     log_dir = "tests/data/ASHA"
     report = GamaReport(log_dir)
     assert report.name == "ASHA"
@@ -40,7 +40,7 @@ def test_gamareport_asha_from_log():
 
 
 def test_gamareport_asyncEA_from_log():
-    """ GamaReport can be constructed from a log that recorded AsyncEA. """
+    """GamaReport can be constructed from a log that recorded AsyncEA."""
     log_dir = "tests/data/AsyncEA"
     report = GamaReport(log_dir)
     assert report.name == "AsyncEA"

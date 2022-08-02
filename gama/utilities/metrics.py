@@ -23,14 +23,14 @@ reversed_scorers = {repr(v): k for k, v in SCORERS.items()}
 
 
 class MetricType(Enum):
-    """ Metric types supported by GAMA. """
+    """Metric types supported by GAMA."""
 
     CLASSIFICATION: int = 1  #: discrete target
     REGRESSION: int = 2  #: continuous target
 
 
 class Metric:
-    """ A thin layer around the `scorer` class of scikit-learn. """
+    """A thin layer around the `scorer` class of scikit-learn."""
 
     def __init__(self, scorer: Union[_BaseScorer, str]):
         if isinstance(scorer, str):

@@ -78,7 +78,7 @@ for module_to_ignore in ["sklearn", "numpy"]:
 
 
 class Gama(ABC):
-    """ Wrapper for the toolbox logic surrounding executing the AutoML pipeline. """
+    """Wrapper for the toolbox logic surrounding executing the AutoML pipeline."""
 
     def __init__(
         self,
@@ -176,8 +176,9 @@ class Gama(ABC):
         if not os.path.exists(self.output_directory):
             os.mkdir(self.output_directory)
         elif len(os.listdir(self.output_directory)) > 0:
-            raise ValueError(f"`output_directory` ('{self.output_directory}') must be empty or non-existent.")
-            
+            raise ValueError(
+                f"`output_directory` ('{self.output_directory}') must be empty or non-existent."
+            )
 
         register_stream_log(verbosity)
         if store in ["logs", "all"]:
@@ -320,7 +321,7 @@ class Gama(ABC):
             os.rmdir(self.output_directory)
 
     def _np_to_matching_dataframe(self, x: np.ndarray) -> pd.DataFrame:
-        """ Format np array to dataframe whose column types match the training data. """
+        """Format np array to dataframe whose column types match the training data."""
         if not isinstance(x, np.ndarray):
             raise TypeError(f"Expected x to be of type 'numpy.ndarray' not {type(x)}.")
 
@@ -329,7 +330,9 @@ class Gama(ABC):
             x[i] = x[i].astype(dtype)
         return x
 
-    def _prepare_for_prediction(self, x: Union[pd.DataFrame, np.ndarray]) -> pd.DataFrame:
+    def _prepare_for_prediction(
+        self, x: Union[pd.DataFrame, np.ndarray]
+    ) -> pd.DataFrame:
         if isinstance(x, np.ndarray):
             x = self._np_to_matching_dataframe(x)
         x = self._basic_encoding_pipeline.transform(x)
@@ -339,7 +342,7 @@ class Gama(ABC):
         raise NotImplementedError("_predict is implemented by base classes.")
 
     def predict(self, x: Union[pd.DataFrame, np.ndarray]) -> np.ndarray:
-        """ Predict the target for input X.
+        """Predict the target for input X.
 
         Parameters
         ----------
@@ -361,7 +364,7 @@ class Gama(ABC):
         encoding: Optional[str] = None,
         **kwargs,
     ) -> np.ndarray:
-        """ Predict the target for input found in the ARFF file.
+        """Predict the target for input found in the ARFF file.
 
         Parameters
         ----------
@@ -390,7 +393,7 @@ class Gama(ABC):
     def score(
         self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]
     ) -> float:
-        """ Calculate `self.scoring` metric of the model on (x, y).
+        """Calculate `self.scoring` metric of the model on (x, y).
 
         Parameters
         ----------
@@ -418,7 +421,7 @@ class Gama(ABC):
         encoding: Optional[str] = None,
         **kwargs,
     ) -> float:
-        """ Calculate `self.scoring` metric of the model on data in the file.
+        """Calculate `self.scoring` metric of the model on data in the file.
 
         Parameters
         ----------
@@ -450,7 +453,7 @@ class Gama(ABC):
         warm_start: Optional[List[Individual]] = None,
         **kwargs,
     ) -> None:
-        """ Find and fit a model to predict the target column (last) from other columns.
+        """Find and fit a model to predict the target column (last) from other columns.
 
         Parameters
         ----------
@@ -477,7 +480,7 @@ class Gama(ABC):
         y: Union[pd.DataFrame, pd.Series, np.ndarray],
         warm_start: Optional[List[Individual]] = None,
     ) -> "Gama":
-        """ Find and fit a model to predict target y from X.
+        """Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
         Using Genetic Programming, the pipelines chosen should lead to gradually
@@ -582,7 +585,7 @@ class Gama(ABC):
     def _search_phase(
         self, warm_start: Optional[List[Individual]] = None, timeout: float = 1e6
     ) -> None:
-        """ Invoke the search algorithm, populate `final_pop`. """
+        """Invoke the search algorithm, populate `final_pop`."""
         if warm_start:
             if not all([isinstance(i, Individual) for i in warm_start]):
                 raise TypeError("`warm_start` must be a list of Individual.")
@@ -623,7 +626,7 @@ class Gama(ABC):
     def export_script(
         self, file: Optional[str] = "gama_pipeline.py", raise_if_exists: bool = False
     ) -> Optional[str]:
-        """ Export a Python script which sets up the best found pipeline.
+        """Export a Python script which sets up the best found pipeline.
 
         Can only be called after `fit`.
 
@@ -671,7 +674,7 @@ class Gama(ABC):
             return script_text
 
     def _safe_outside_call(self, fn: Callable) -> None:
-        """ Calls fn logging and ignoring all exceptions except TimeoutException. """
+        """Calls fn logging and ignoring all exceptions except TimeoutException."""
         try:
             fn()
         except stopit.utils.TimeoutException:
@@ -697,7 +700,7 @@ class Gama(ABC):
             self._safe_outside_call(partial(callback, evaluation))
 
     def evaluation_completed(self, callback: Callable[[Evaluation], Any]) -> None:
-        """ Register a callback function that is called when an evaluation is completed.
+        """Register a callback function that is called when an evaluation is completed.
 
         Parameters
         ----------

@@ -178,7 +178,7 @@ def _test_dataset_problem(
 
 
 def test_binary_classification_accuracy():
-    """ Binary classification, accuracy, numpy data and ensemble code export """
+    """Binary classification, accuracy, numpy data and ensemble code export"""
     gama = _test_dataset_problem(breast_cancer, "accuracy")
 
     x, y = breast_cancer["load"](return_X_y=True)
@@ -193,47 +193,47 @@ def test_binary_classification_accuracy():
 
 
 def test_binary_classification_accuracy_asha():
-    """ Binary classification, accuracy, numpy data, ASHA search. """
+    """Binary classification, accuracy, numpy data, ASHA search."""
     _test_dataset_problem(
         breast_cancer, "accuracy", search=AsynchronousSuccessiveHalving(), max_time=60
     )
 
 
 def test_binary_classification_accuracy_random_search():
-    """ Binary classification, accuracy, numpy data, random search. """
+    """Binary classification, accuracy, numpy data, random search."""
     _test_dataset_problem(breast_cancer, "accuracy", search=RandomSearch())
 
 
 def test_binary_classification_logloss():
-    """ Binary classification, log loss (probabilities), numpy data, ASHA search. """
+    """Binary classification, log loss (probabilities), numpy data, ASHA search."""
     _test_dataset_problem(breast_cancer, "neg_log_loss")
 
 
 def test_multiclass_classification_accuracy():
-    """ Multiclass classification, accuracy, numpy data. """
+    """Multiclass classification, accuracy, numpy data."""
     _test_dataset_problem(wine, "accuracy")
 
 
 def test_multiclass_classification_logloss():
-    """ Multiclass classification, log loss (probabilities), numpy data. """
+    """Multiclass classification, log loss (probabilities), numpy data."""
     _test_dataset_problem(wine, "neg_log_loss")
 
 
 def test_string_label_classification_accuracy():
-    """ Binary classification, accuracy, target is str. """
+    """Binary classification, accuracy, target is str."""
     _test_dataset_problem(breast_cancer, "accuracy", y_type=str)
 
 
 def test_string_label_classification_log_loss():
-    """ Binary classification, log loss (probabilities), target is str. """
+    """Binary classification, log loss (probabilities), target is str."""
     _test_dataset_problem(breast_cancer, "neg_log_loss", y_type=str)
 
 
 def test_missing_value_classification_arff():
-    """ Binary classification, log loss (probabilities), arff data. """
+    """Binary classification, log loss (probabilities), arff data."""
     _test_dataset_problem(breast_cancer_missing, "neg_log_loss", arff=True)
 
 
 def test_missing_value_classification():
-    """ Binary classification, log loss (probabilities), missing values. """
+    """Binary classification, log loss (probabilities), missing values."""
     _test_dataset_problem(breast_cancer_missing, "neg_log_loss", missing_values=True)

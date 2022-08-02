@@ -6,8 +6,10 @@ import sklearn
 from gama.genetic_programming.components import Primitive, Terminal, DATA_TERMINAL
 
 
-def pset_from_config(configuration: Dict[Union[str, object], Any]) -> Tuple[Dict[str, List], Dict[str, Callable]]:
-    """ Create a pset for the given configuration dictionary.
+def pset_from_config(
+    configuration: Dict[Union[str, object], Any]
+) -> Tuple[Dict[str, List], Dict[str, Callable]]:
+    """Create a pset for the given configuration dictionary.
 
     Given a configuration dictionary specifying operators (e.g. sklearn
     estimators), their hyperparameters and values for each hyperparameter,
@@ -20,7 +22,7 @@ def pset_from_config(configuration: Dict[Union[str, object], Any]) -> Tuple[Dict
 
     returns:
         pset - Dict[str, List]: maps return-types to a list of Primitives and/or Terminals
-        parameter_check - Dict[str, Callable]: 
+        parameter_check - Dict[str, Callable]:
             maps Primitive name to a function which verifies the correct initialization of hyperparameters.
     """
 
@@ -56,7 +58,11 @@ def pset_from_config(configuration: Dict[Union[str, object], Any]) -> Tuple[Dict
                     hyperparameter_types.append(hp_name)
                     for value in param_values:
                         pset[hp_name].append(
-                            Terminal(value=value, output=name, identifier=hp_name,)
+                            Terminal(
+                                value=value,
+                                output=name,
+                                identifier=hp_name,
+                            )
                         )
 
             # After registering the hyperparameter types,
@@ -108,7 +114,7 @@ def pset_from_config(configuration: Dict[Union[str, object], Any]) -> Tuple[Dict
 
 
 def merge_configurations(c1: Dict, c2: Dict) -> Dict:
-    """ Takes two configurations and merges them together. """
+    """Takes two configurations and merges them together."""
     # Should refactor out 6 indentation levels
     merged: Dict[Any, Any] = defaultdict(lambda: None, c1)
     for algorithm, hparams2 in c2.items():

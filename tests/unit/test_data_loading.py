@@ -43,7 +43,7 @@ def _test_df_d23380(df):
 
 
 def _test_x_y_d23380(x, y):
-    """ Test if types are as expected from https://www.openml.org/d/23380 """
+    """Test if types are as expected from https://www.openml.org/d/23380"""
     assert isinstance(x, pd.DataFrame)
     assert (2796, 34) == x.shape
     assert 68100 == x.isnull().sum().sum()

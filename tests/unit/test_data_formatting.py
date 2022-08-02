@@ -58,7 +58,7 @@ class TestFormatXy:
             )
 
     def test_format_x_y_missing_targets(self):
-        """ Samples with missing labels should be removed from training data. """
+        """Samples with missing labels should be removed from training data."""
 
         def well_formatted_x_y(x, y, y_type):
             assert isinstance(x, pd.DataFrame)

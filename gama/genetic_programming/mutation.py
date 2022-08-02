@@ -12,7 +12,7 @@ from .operations import random_primitive_node
 
 
 def mut_replace_terminal(individual: Individual, primitive_set: dict) -> None:
-    """ Mutates an Individual in-place by replacing one of its Terminals.
+    """Mutates an Individual in-place by replacing one of its Terminals.
 
     Parameters
     ----------
@@ -37,7 +37,7 @@ def mut_replace_terminal(individual: Individual, primitive_set: dict) -> None:
 
 
 def mut_replace_primitive(individual: Individual, primitive_set: dict) -> None:
-    """ Mutates an Individual in-place by replacing one of its Primitives.
+    """Mutates an Individual in-place by replacing one of its Primitives.
 
     Parameters
     ----------
@@ -66,7 +66,7 @@ def mut_replace_primitive(individual: Individual, primitive_set: dict) -> None:
 def mut_shrink(
     individual: Individual, primitive_set: dict = None, shrink_by: Optional[int] = None
 ) -> None:
-    """ Mutates an Individual in-place by removing any number of primitive nodes.
+    """Mutates an Individual in-place by removing any number of primitive nodes.
 
     Primitive nodes are removed from the preprocessing end.
 
@@ -96,7 +96,7 @@ def mut_shrink(
 
 
 def mut_insert(individual: Individual, primitive_set: dict) -> None:
-    """ Mutate an Individual in-place by inserting a PrimitiveNode at a random location.
+    """Mutate an Individual in-place by inserting a PrimitiveNode at a random location.
 
     The new PrimitiveNode will not be inserted as root node.
 
@@ -117,7 +117,7 @@ def mut_insert(individual: Individual, primitive_set: dict) -> None:
 def random_valid_mutation_in_place(
     individual: Individual, primitive_set: dict, max_length: Optional[int] = None
 ) -> Callable:
-    """ Apply a random valid mutation in place.
+    """Apply a random valid mutation in place.
 
     The random mutation can be one of:
 
