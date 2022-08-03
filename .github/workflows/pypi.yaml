@@ -17,6 +17,7 @@ jobs:
 
       - name: Set dev version
         run: |
+          ls -lah
           ./.github/workflows/test.sh
 
       - name: Install dependencies
