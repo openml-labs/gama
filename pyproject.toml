@@ -66,4 +66,7 @@ gamadash = "gama.dashboard.app:main"
 filterwarnings = [
     "error",
     "ignore::sklearn.exceptions.ConvergenceWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore::DeprecationWarning",
+    "ignore::FutureWarning",
 ]

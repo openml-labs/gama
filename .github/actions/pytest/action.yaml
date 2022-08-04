@@ -21,6 +21,10 @@ inputs:
     description: "Additional pip args"
     default: ""
     required: false
+  pytest-args:
+    description: "Additional ptest args"
+    default: ""
+    required: false
 
 runs:
   using: "composite"
@@ -53,7 +57,7 @@ runs:
     - name: Test with pytest
       shell: bash
       run: |
-        pytest ${{ inputs.path }}  --cov
+        pytest  --cov ${{ inputs.pytest-args }} ${{ inputs.path }}
 
     - uses: codecov/codecov-action@v3
       with:

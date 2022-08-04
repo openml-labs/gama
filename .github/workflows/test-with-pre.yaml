@@ -1,6 +1,6 @@
-name: Test with prerelease/development versions of dependencies
+name: Test --pre
 on:
-  push: # only once so it shows as dispatch
+  push:
   workflow_dispatch:
   schedule:
     - cron: "00 0 * * 1"
@@ -24,3 +24,4 @@ jobs:
           python-version: ${{ matrix.python-version }}
           use-cache: false
           pip-args: "--pre"
+          pytest-args: "-W error -W ignore::sklearn.exceptions.ConvergenceWarning"
