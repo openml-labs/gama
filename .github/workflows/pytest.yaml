@@ -1,7 +1,5 @@
 name: pytest
 on:
-  push:
-
   workflow_dispatch:
 
   schedule:
