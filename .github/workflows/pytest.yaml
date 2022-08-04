@@ -1,9 +1,7 @@
 name: pytest
 on:
   workflow_dispatch:
-
-  schedule:
-    - cron: "00 0 * * 1"
+  pull_request:
 
 jobs:
   unit:
