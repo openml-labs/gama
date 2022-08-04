@@ -191,7 +191,7 @@ class EvaluationLibrary:
             raise ValueError(
                 "Exactly one of `prediction_size` and `stratify` must be set."
             )
-        if len(self.top_evaluations) > 0:
+        if len(self.top_evaluations) > 0 and self._m is not None:
             log.warning("New subsample not used for already stored evaluations.")
         n = self._sample_n if n is None else n
 
@@ -247,9 +247,6 @@ class EvaluationLibrary:
                 removed.remove_from_disk()
 
             self.other_evaluations.append(removed)
-
-        #Removed above code due to error of removing with partial fit, currently works but WIP
-        # for a better solution.
 
         self.lookup[self._lookup_key(evaluation)] = evaluation
 
