@@ -33,6 +33,7 @@ runs:
     - name: Get pip cache dir
       id: get-cache-location
       if: inputs.use-cache
+      shell: bash
       run: |
         echo "::set-output name=dir::$(pip cache dir)"
 
@@ -44,11 +45,13 @@ runs:
         key: ${{ inputs.os }}-pip-${{ inputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
 
     - name: Install dependencies
+      shell: bash
       run: |
         python -m pip install --upgrade pip
         pip install ${{ inputs.pip-args }} ".[test]"
 
     - name: Test with pytest
+      shell: bash
       run: |
         pytest ${{ inputs.path }}  --cov
 
