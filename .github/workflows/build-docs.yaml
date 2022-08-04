@@ -28,7 +28,7 @@ jobs:
           pip install ".[doc]"
 
       - name: Clone GH-Pages
-        if: ${{ github.event_name != "pull_request" }}
+        if: ${{ github.event_name != 'pull_request' }}
         uses: actions/checkout@v3
         with:
           ref: "gh-pages"
@@ -36,14 +36,14 @@ jobs:
 
       - name: Build Docs
         run: |
-          sphinx-build docs/source docs/build/${{ github.ref }}
+          sphinx-build docs/source docs/build/${{ github.ref_name }}
 
       - name: Push GH-Pages
-        if: ${{ github.event_name != "pull_request" }}
+        if: ${{ github.event_name != 'pull_request' }}
         run: |
           cd docs/build
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add ${{ github.ref }}
+          git add ${{ github.ref_name }}
           git commit -m "Autodeploy docs"
           git push
