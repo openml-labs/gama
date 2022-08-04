@@ -36,14 +36,14 @@ runs:
 
     - name: Get pip cache dir
       id: get-cache-location
-      if: inputs.use-cache
+      if: inputs.use-cache == 'true'
       shell: bash
       run: |
         echo "::set-output name=dir::$(pip cache dir)"
 
     - uses: actions/cache@v3
       id: cache
-      if: inputs.use-cache
+      if: inputs.use-cache == 'true'
       with:
         path: ${{ steps.get-cache-location.outputs.dir }}
         key: ${{ inputs.os }}-pip-${{ inputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
