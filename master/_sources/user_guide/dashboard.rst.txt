@@ -9,7 +9,7 @@ Dashboard
 .. note::
     The GAMA Dashboard is not done.
     However, it is functional and released to get some early feedback on what users would like to see included.
-    The near future may see a reimplementation, see `#97 <https://github.com/PGijsbers/gama/issues/97>`_.
+    The near future may see a reimplementation, see `#97 <https://github.com/openml-labs/gama/issues/97>`_.
 
 GAMA Dashboard is a graphical user interface to start and monitor the AutoML search.
 It is available when GAMA has been installed with its visualization optional dependencies (`pip install gama[vis]`).
@@ -62,7 +62,7 @@ On this tab, you can visualize search results from logs.
 
 Clicking 'Select or drop log(s)' in the top-right corner opens a file explorer which lets you select file(s) to load.
 Select both the 'gama.log' and 'evaluation.log' files from your directory together.
-For example the the logs found `here <https://github.com/PGijsbers/gama/blob/master/tests/data/AsyncEA>`_.
+For example the the logs found `here <https://github.com/openml-labs/gama/blob/master/tests/data/AsyncEA>`_.
 After loading the files, you can toggle its visualization by clicking the checkbox that appears next to the file name.
 The first visualization you will see is the best obtained score as a function of the number of evaluated pipelines:
 
