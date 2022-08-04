@@ -9,6 +9,12 @@ Maintenance:
    - Drop support for Python 3.6 and 3.7
    - Add support for Python 3.10
  - Use pyproject.toml instead of setup.py
+ - Transition to Github CI, including:
+   - pytest on pull request
+   - pytest CRON job with prerelease versions
+   - doc build and deploy
+   - pre-commit check
+   - check for changelog
 
 Bugfixes:
  - #137: raise an output if ``output_directory`` is non-empty.
