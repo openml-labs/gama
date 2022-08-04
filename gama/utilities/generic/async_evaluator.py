@@ -29,11 +29,6 @@ import uuid
 
 from psutil import NoSuchProcess
 
-try:
-    import resource
-except ModuleNotFoundError:
-    resource = None  # type: ignore
-
 
 log = logging.getLogger(__name__)
 
