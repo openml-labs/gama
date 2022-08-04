@@ -5,10 +5,6 @@ inputs:
   path:
     description: "Path to test suite"
     required: true
-  os:
-    description: "OS for runs-on"
-    default: "ubuntu-latest"
-    required: true
   python-version:
     description: "Python version to use"
     default: "3.10"
@@ -17,6 +13,10 @@ inputs:
     description: "If set, use cached dependencies."
     default: true
     required: true
+  os:
+    description: "OS for runs-on. Only required when cache is set."
+    default: "ubuntu-latest"
+    required: false
   pip-args:
     description: "Additional pip args"
     default: ""
