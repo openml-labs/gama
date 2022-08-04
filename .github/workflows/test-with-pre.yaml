@@ -1,6 +1,5 @@
 name: Test --pre
 on:
-  push:
   workflow_dispatch:
   schedule:
     - cron: "00 0 * * 1"
