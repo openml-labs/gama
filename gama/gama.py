@@ -277,7 +277,7 @@ class Gama(ABC):
                 cache=cache_directory,
             )
         if self._online_learning:
-            self._evaluation_library = EvaluationLibrary(m=10, cache=cache_directory)
+            self._evaluation_library = EvaluationLibrary(m=None, cache=cache_directory)
         else:
             # Don't keep memory-heavy evaluation meta-data (predictions, estimators)
             self._evaluation_library = EvaluationLibrary(m=0, cache=cache_directory)
@@ -680,6 +680,7 @@ class Gama(ABC):
                 )
             )
         )
+
 
         with self._time_manager.start_activity(
             "search",

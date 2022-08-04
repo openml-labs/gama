@@ -243,9 +243,8 @@ class EvaluationLibrary:
                 removed._predictions, removed._estimators = None, None
             else:
                 # new evaluation is now on the heap, remove old from disk
-                if not self._cache:
-                    evaluation.to_disk(self._cache)
-                    removed.remove_from_disk()
+                evaluation.to_disk(self._cache)
+                removed.remove_from_disk()
 
             self.other_evaluations.append(removed)
 
