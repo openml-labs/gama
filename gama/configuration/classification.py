@@ -29,6 +29,16 @@ from sklearn.feature_selection import (
     VarianceThreshold,
 )
 
+# from gama.genetic_programming.components.terminal import (
+#     DATA_TERMINAL,
+#     RAW_DATA_TERMINAL,
+# )
+
+
+class AlwaysIncluded(StandardScaler):
+    pass
+
+
 # For comparison, this selection of operators and hyperparameters is
 # currently most of what TPOT supports.
 
@@ -140,4 +150,10 @@ clf_config = {
     SelectFwe: {"alpha": np.arange(0, 0.05, 0.001), "score_func": {f_classif: None}},
     SelectPercentile: {"percentile": range(1, 100), "score_func": {f_classif: None}},
     VarianceThreshold: {"threshold": np.arange(0.05, 1.01, 0.05)},
+    # Special, always
+    AlwaysIncluded: {
+        "_always": [],
+        "with_mean": [True, False],
+        "with_std": [True, False],
+    },
 }

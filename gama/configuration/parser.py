@@ -3,7 +3,11 @@ from typing import Dict, Any, Union, List, Callable, Tuple
 
 import sklearn
 
-from gama.genetic_programming.components import Primitive, Terminal, DATA_TERMINAL
+from gama.genetic_programming.components import (
+    Primitive,
+    Terminal,
+    DATA_TERMINAL,
+)  # , RAW_DATA_TERMINAL
 
 
 def pset_from_config(
@@ -28,6 +32,10 @@ def pset_from_config(
     """
 
     pset: Dict[str, List[Union[Primitive, Terminal]]] = defaultdict(list)
+    # pset[DATA_TERMINAL].append(Terminal(value=DATA_TERMINAL,
+    #  output=DATA_TERMINAL, identifier=DATA_TERMINAL))
+    # pset[RAW_DATA_TERMINAL].append(Terminal(value=RAW_DATA_TERMINAL,
+    #  output=RAW_DATA_TERMINAL, identifier=RAW_DATA_TERMINAL))
     parameter_checks = {}
 
     # Make sure the str-keys are evaluated first, they describe shared hyperparameters.
@@ -47,14 +55,18 @@ def pset_from_config(
                 # it as terminal type, making sure it matches with expected
                 # input of the operators. Moreover it automatically makes sure that
                 # crossover only happens between same hyperparameters.
-                if isinstance(param_values, list) and not param_values:
+                if (
+                    isinstance(param_values, list)
+                    and not param_values
+                    and not name.startswith("_")
+                ):
                     # An empty list indicates a shared hyperparameter
                     hyperparameter_types.append(name)
                 elif name == "param_check":
                     # This allows users to define illegal hyperparameter combinations,
                     # but is not a terminal.
                     parameter_checks[key.__name__] = param_values[0]
-                else:
+                elif not name.startswith("_"):
                     hp_name = f"{key.__name__}.{name}"
                     hyperparameter_types.append(hp_name)
                     for value in param_values:
@@ -69,13 +81,22 @@ def pset_from_config(
             # After registering the hyperparameter types,
             # we can register the operator itself.
             if issubclass(key, sklearn.base.TransformerMixin):
-                pset[DATA_TERMINAL].append(
-                    Primitive(
-                        input=tuple(hyperparameter_types),
-                        output=DATA_TERMINAL,
-                        identifier=key,
+                if "_always" in values:
+                    pset["always"].append(
+                        Primitive(
+                            input=tuple(hyperparameter_types),
+                            output=DATA_TERMINAL,
+                            identifier=key,
+                        )
                     )
-                )
+                else:
+                    pset[DATA_TERMINAL].append(
+                        Primitive(
+                            input=tuple(hyperparameter_types),
+                            output=DATA_TERMINAL,
+                            identifier=key,
+                        )
+                    )
             elif issubclass(key, sklearn.base.ClassifierMixin):
                 pset["prediction"].append(
                     Primitive(

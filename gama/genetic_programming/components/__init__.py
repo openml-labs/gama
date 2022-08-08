@@ -16,7 +16,7 @@ Individuals are built with:
 """
 
 from .primitive import Primitive
-from .terminal import Terminal, DATA_TERMINAL
+from .terminal import Terminal, DATA_TERMINAL, RAW_DATA_TERMINAL
 from .primitive_node import PrimitiveNode
 from .individual import Individual
 from .fitness import Fitness

@@ -1,5 +1,6 @@
 from typing import NamedTuple
 
+RAW_DATA_TERMINAL = "raw_data"
 DATA_TERMINAL = "data"
 
 

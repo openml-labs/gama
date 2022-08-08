@@ -20,7 +20,13 @@ def random_primitive_node(
     output_type: str, primitive_set: dict, exclude: Primitive = None
 ) -> PrimitiveNode:
     """Create a PrimitiveNode with specified output_type and random terminals."""
-    primitive = random.choice([p for p in primitive_set[output_type] if p != exclude])
+    primitive = random.choice(
+        [
+            p
+            for p in primitive_set[output_type]
+            if p != exclude and isinstance(p, Primitive)
+        ]
+    )
     terminals = random_terminals_for_primitive(primitive_set, primitive)
     return PrimitiveNode(primitive, data_node=DATA_TERMINAL, terminals=terminals)
 
@@ -41,4 +47,8 @@ def create_random_expression(
         last_primitive_node._data_node = primitive_node
         last_primitive_node = primitive_node
 
+    always_node = random_primitive_node(
+        output_type="always", primitive_set=primitive_set
+    )
+    last_primitive_node._data_node = always_node
     return learner_node
