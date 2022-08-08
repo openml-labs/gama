@@ -4,7 +4,6 @@ import category_encoders as ce
 import pandas as pd
 from sklearn.base import TransformerMixin
 from sklearn.impute import SimpleImputer
-from sklearn.pipeline import Pipeline
 from dirty_cat import SuperVectorizer
 
 log = logging.getLogger(__name__)
@@ -62,12 +61,12 @@ def basic_encoding(
         low_card_cat_transformer=ohe,
         high_card_cat_transformer=ord_enc if is_classification else ohe,
     )
-    x_enc = sv.fit_transform(x)
+    x_enc = pd.DataFrame(sv.fit_transform(x))
     return x_enc, sv
 
 
 def basic_pipeline_extension(
-    x: pd.DataFrame, is_classification: bool
+    is_classification: bool
 ) -> List[Tuple[str, TransformerMixin]]:
     """Define a TargetEncoder and SimpleImputer.
 
@@ -75,13 +74,4 @@ def basic_pipeline_extension(
     if y is not categorical. SimpleImputer imputes with the median.
     """
     # These steps need to be in the pipeline because they need to be trained each fold.
-    extension_steps = []
-    if not is_classification:
-        # TargetEncoder is broken with categorical target
-        many_factor_features = list(select_categorical_columns(x, min_f=11))
-        extension_steps.append(
-            ("target_enc", ce.TargetEncoder(cols=many_factor_features))
-        )
-    extension_steps.append(("imputation", SimpleImputer(strategy="median")))
-
-    return extension_steps
+    return [("imputation", SimpleImputer(strategy="median"))]
