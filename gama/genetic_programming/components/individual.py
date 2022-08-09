@@ -73,7 +73,12 @@ class Individual:
     @property
     def terminals(self) -> List[Terminal]:
         """Lists all terminals connected to the Individual's primitive nodes."""
-        return [terminal for prim in self.primitives for terminal in prim._terminals]
+        return [
+            terminal
+            for prim in self.primitives
+            for terminal in prim._children
+            if isinstance(terminal, Terminal)
+        ]
 
     def replace_terminal(self, position: int, new_terminal: Terminal) -> None:
         """Replace the terminal at `position` by `new_terminal` in-place.
@@ -87,19 +92,19 @@ class Individual:
         """
         scan_position = 0
         for primitive in self.primitives:
-            if scan_position + len(primitive._terminals) > position:
-                terminal_to_be_replaced = primitive._terminals[position - scan_position]
+            if scan_position + len(primitive._children) > position:
+                terminal_to_be_replaced = primitive._children[position - scan_position]
                 if terminal_to_be_replaced.identifier == new_terminal.identifier:
-                    primitive._terminals[position - scan_position] = new_terminal
+                    primitive._children[position - scan_position] = new_terminal
                     return
                 else:
                     raise ValueError(
-                        f"New terminal does not share output type with the old."
+                        f"New terminal does not share output type with the old. "
                         f"Old: {terminal_to_be_replaced.identifier}"
                         f"New: {new_terminal.identifier}."
                     )
             else:
-                scan_position += len(primitive._terminals)
+                scan_position += len(primitive._children)
         if scan_position < position:
             raise ValueError(
                 f"Position {position} is out of range with {scan_position} terminals."

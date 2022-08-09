@@ -12,19 +12,21 @@ class PrimitiveNode:
         The Primitive type of this PrimitiveNode.
     data_node: PrimitiveNode
         The PrimitiveNode that specifies all preprocessing before this PrimitiveNode.
-    terminals: List[Terminal]
-        A list of terminals matching the `primitive`.
+    terminals: List[Union["PrimitiveNode", Terminal]]
+        A non-empty list of terminals and primitivenodes matching the `primitive` input.
     """
 
     def __init__(
         self,
         primitive: Primitive,
         data_node: Union["PrimitiveNode", str],
-        terminals: List[Terminal],
+        children: List[Union["PrimitiveNode", Terminal]],
     ):
+        if not (isinstance(children, List) and len(children)):
+            raise ValueError("`children` must be a non-empty list.")
         self._primitive = primitive
         self._data_node = data_node
-        self._terminals = sorted(terminals, key=lambda t: str(t))
+        self._children = sorted(children, key=lambda t: str(t))
 
     def __str__(self) -> str:
         """Recursively stringify all primitive nodes (primitive and hyperparameters).
@@ -33,8 +35,8 @@ class PrimitiveNode:
                   - "BernoulliNB(data, alpha=1.0)"
                   - "BernoulliNB(FastICA(data, tol=0.5), alpha=1.0)"
         """
-        if self._terminals:
-            terminal_str = ", ".join([repr(terminal) for terminal in self._terminals])
+        if self._children:
+            terminal_str = ", ".join([repr(terminal) for terminal in self._children])
             return f"{self._primitive}({self._data_node}, {terminal_str})"
         else:
             return f"{self._primitive}({self._data_node})"
@@ -46,7 +48,7 @@ class PrimitiveNode:
         Examples: - "GaussianNB()"
                   - "BernoulliNB(alpha=1.0)"
         """
-        terminal_str = ", ".join([str(terminal) for terminal in self._terminals])
+        terminal_str = ", ".join([str(terminal) for terminal in self._children])
         return f"{self._primitive}({terminal_str})"
 
     def copy(self) -> "PrimitiveNode":
@@ -58,7 +60,7 @@ class PrimitiveNode:
         return PrimitiveNode(
             primitive=self._primitive,
             data_node=data_node_copy,
-            terminals=self._terminals.copy(),
+            children=self._children.copy(),
         )
 
     @classmethod

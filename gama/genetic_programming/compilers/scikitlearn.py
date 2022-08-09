@@ -13,6 +13,7 @@ from sklearn.model_selection import (
     StratifiedShuffleSplit,
 )
 from sklearn.pipeline import Pipeline
+from gama.genetic_programming.components.terminal import Terminal
 
 from gama.utilities.evaluation_library import Evaluation
 from gama.utilities.generic.stopwatch import Stopwatch
@@ -26,8 +27,9 @@ log = logging.getLogger(__name__)
 def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
     hyperparameters = {
         terminal.output: terminal.value
-        for terminal in primitive_node._terminals
-        if terminal.output != "data"
+        for terminal in primitive_node._children
+        # BANDAGE
+        if isinstance(terminal, Terminal) and terminal.output != "data"
     }
     return primitive_node._primitive.identifier(**hyperparameters)
 

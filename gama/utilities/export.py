@@ -45,7 +45,7 @@ def imports_and_steps_for_individual(
     steps = []
     for i, primitive_node in reversed(list(enumerate(individual.primitives))):
         steps.append((str(i), primitive_node.str_nonrecursive))
-        for terminal in primitive_node._terminals:
+        for terminal in primitive_node._children:
             if callable(terminal.value) and hasattr(terminal.value, "__name__"):
                 imports.append(
                     f"from {terminal.value.__module__} import {terminal.value.__name__}"  # type: ignore # noqa: E501
