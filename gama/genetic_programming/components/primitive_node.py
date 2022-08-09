@@ -35,11 +35,21 @@ class PrimitiveNode:
                   - "BernoulliNB(data, alpha=1.0)"
                   - "BernoulliNB(FastICA(data, tol=0.5), alpha=1.0)"
         """
-        if self._children:
-            terminal_str = ", ".join([repr(terminal) for terminal in self._children])
-            return f"{self._primitive}({self._data_node}, {terminal_str})"
-        else:
-            return f"{self._primitive}({self._data_node})"
+        # BANDAGE / no order for data terminal
+        primitives_str = ", ".join(str(primitive) for primitive in self.primitives)
+        terminal_str = ", ".join([repr(terminal) for terminal in self.terminals])
+        arguments = f"{primitives_str}{',' if primitives_str else ''}{terminal_str}"
+        return f"{self._primitive}({arguments})"
+
+    @property
+    def primitives(self) -> List["PrimitiveNode"]:
+        """Returns all children of this node that are terminals."""
+        return [c for c in self._children if isinstance(c, PrimitiveNode)]
+
+    @property
+    def terminals(self) -> List[Terminal]:
+        """Returns all children of this node that are terminals."""
+        return [c for c in self._children if isinstance(c, Terminal)]
 
     @property
     def str_nonrecursive(self) -> str:
