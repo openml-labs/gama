@@ -24,22 +24,11 @@ class BestFitOnlinePostProcessing(BasePostProcessing):
         self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]
     ) -> object:
         self._selected_individual = selection[0]
-
-        #TO BE CHANGED
-        steps = list(self._selected_individual.pipeline.steps.values())
-        for i in range(len(steps[0])):
-            if i == 0:
-                river_model = steps[0][i][1]
-            else:
-                river_model |= steps[0][i][1]
-
-
+        model = self._selected_individual.pipeline
         for i in range(0, len(x)):
-            river_model.learn_one(x.iloc[i].to_dict(), int(y[i]))
+            model = model.learn_one(x.iloc[i].to_dict(), int(y[i]))
 
-        #self._selected_individual.pipeline = river_model
-
-        return river_model
+        return model
 
     def to_code(
         self, preprocessing: Sequence[Tuple[str, Transformer]] = None

@@ -45,11 +45,12 @@ def compile_individual(
         (str(i), primitive_node_to_sklearn(primitive))
         for i, primitive in enumerate(individual.primitives)
     ]
-    if preprocessing_steps:
-        steps = steps + list(reversed(preprocessing_steps))
 
-    return Pipeline(list(reversed(steps)))
+    pipeline = Pipeline()
+    for step in list(reversed(steps)):
+        pipeline |= step
 
+    return pipeline
 
 
 def object_is_valid_pipeline(o):
@@ -88,17 +89,10 @@ def evaluate_pipeline(
             dataset = []
             for a, b in stream.iter_pandas(x, y_train):
                 dataset.append((a,b))
-            steps = list(pipeline.steps.values())
-
-            for i in range(len(steps[0])):
-                if i == 0:
-                    river_model = steps[0][i][1]
-                else:
-                    river_model |= steps[0][i][1]
 
             result = evaluate.progressive_val_score(
                 dataset = dataset,
-                model = river_model,
+                model = pipeline,
                 metric = river_metric,
             )
 
@@ -108,8 +102,8 @@ def evaluate_pipeline(
             prediction = np.empty(shape=(len(y_train),))
             y_pred = []
             for a, b in stream.iter_pandas(x, y_train):
-                y_pred.append(river_model.predict_one(a))
-                river_model = river_model.learn_one(a, b)
+                y_pred.append(pipeline.predict_one(a))
+                pipeline = pipeline.learn_one(a, b)
 
             prediction = np.asarray(y_pred)
 

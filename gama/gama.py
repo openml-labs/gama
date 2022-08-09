@@ -666,12 +666,8 @@ class Gama(ABC):
             * self._time_manager.total_time_remaining
         )
 
-        # prior_top_individuals_1 = [
-        #     evaluation.individual
-        #     for evaluation in self._evaluation_library.n_best()
-        # ]
-
-        #Start search phase from prior populations' top performing 10 individuals
+        #Start search phase from the top performing 10 individuals
+        #of previous final population
         prior_top_individuals = list(
             reversed(
                 sorted(
@@ -680,7 +676,6 @@ class Gama(ABC):
                 )
             )
         )
-
 
         with self._time_manager.start_activity(
             "search",
