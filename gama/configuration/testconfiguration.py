@@ -32,6 +32,7 @@ from sklearn.feature_selection import (
 # A configuration with limited operators for unit tests.
 
 clf_config = {
+    "data": ["data"],
     "alpha": [1e-3, 1e-2, 1e-1, 1.0, 10.0, 100.0],
     "fit_prior": [True, False],
     "min_samples_split": range(2, 21),

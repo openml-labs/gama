@@ -74,8 +74,6 @@ def mut_replace_primitive(individual: Individual, primitive_set: dict) -> None:
         skip_input_terminal=True,
         with_depth=0,
     )
-    if old_primitive_node.input_node:
-        primitive_node.replace_or_add_input_node(old_primitive_node.input_node)
     individual.replace_primitive(primitive_index, primitive_node)
 
 
@@ -114,7 +112,7 @@ def mut_shrink(
         candidate_primitive = individual.primitives[i]._primitive
         if candidate_primitive.data_input == candidate_primitive.output:
             individual.primitives[i - 1].replace_or_add_input_node(
-                individual.primitives[i].input_node  # type: ignore
+                individual.primitives[i].input_node
             )
             shrink_by -= 1
         i -= 1
@@ -140,10 +138,13 @@ def mut_insert(individual: Individual, primitive_set: dict) -> None:
     """
     parent_node = random.choice(list(individual.primitives))
     new_primitive_node = random_primitive_node(
-        output_type=DATA_TERMINAL, primitive_set=primitive_set
+        output_type=DATA_TERMINAL,
+        primitive_set=primitive_set,
+        skip_input_terminal=True,
+        with_depth=0,
     )
-    new_primitive_node._data_node = parent_node._data_node
-    parent_node._data_node = new_primitive_node
+    new_primitive_node.replace_or_add_input_node(parent_node.input_node)
+    parent_node.replace_or_add_input_node(new_primitive_node)
 
 
 def random_valid_mutation_in_place(

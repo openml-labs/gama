@@ -120,23 +120,16 @@ class Individual:
         new_primitive: PrimitiveNode
             The new PrimitiveNode to replace the old one with. Must share output type.
         """
-        last_primitive = None
-        for i, primitive_node in enumerate(self.primitives):
-            if i == position:
-                if primitive_node._primitive.output != new_primitive._primitive.output:
-                    raise ValueError("New primitive output type differs from old.")
-                if isinstance(primitive_node._data_node, str):
-                    new_primitive._data_node = primitive_node._data_node
-                else:
-                    new_primitive._data_node = primitive_node._data_node.copy()
-                break
-            else:
-                last_primitive = primitive_node
+        to_be_replaced = self.primitives[position]
 
-        if last_primitive is None:
+        if to_be_replaced._primitive.output != new_primitive._primitive.output:
+            raise ValueError("New primitive output type differs from old.")
+        if to_be_replaced.input_node:
+            new_primitive.replace_or_add_input_node(to_be_replaced.input_node)
+        if position == 0:
             self.main_node = new_primitive
         else:
-            last_primitive._data_node = new_primitive
+            self.primitives[position - 1].replace_or_add_input_node(new_primitive)
 
     def copy_as_new(self) -> "Individual":
         """Make deep copy of self, but with fitness None and assigned a new id."""

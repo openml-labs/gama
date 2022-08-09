@@ -56,7 +56,11 @@ def crossover_primitives(
     """
     p1_node = random.choice(list(ind1.primitives)[:-1])
     p2_node = random.choice(list(ind2.primitives)[:-1])
-    p1_node._data_node, p2_node._data_node = p2_node._data_node, p1_node._data_node
+
+    p1_tail, p2_tail = p1_node.input_node, p2_node.input_node
+    p1_node.replace_or_add_input_node(p2_tail)
+    p2_node.replace_or_add_input_node(p1_tail)
+    # p1_node._data_node, p2_node._data_node = p2_node._data_node, p1_node._data_node
     return ind1, ind2
 
 

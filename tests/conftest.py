@@ -21,13 +21,13 @@ def opset():
 
 @pytest.fixture
 def GNB(pset):
-    return Individual.from_string("GaussianNB(data)", pset, compile_individual)
+    return Individual.from_string("GaussianNB(data='data')", pset, compile_individual)
 
 
 @pytest.fixture
 def RS_MNB(pset):
     return Individual.from_string(
-        "MultinomialNB(RobustScaler(data), alpha=1.0, fit_prior=True)",
+        "MultinomialNB(RobustScaler(data='data'), alpha=1.0, fit_prior=True)",
         pset,
         compile_individual,
     )
@@ -36,7 +36,7 @@ def RS_MNB(pset):
 @pytest.fixture
 def SS_BNB(pset):
     return Individual.from_string(
-        "BernoulliNB(StandardScaler(data), alpha=0.1, fit_prior=True)",
+        "BernoulliNB(StandardScaler(data='data'), alpha=0.1, fit_prior=True)",
         pset,
         compile_individual,
     )
@@ -45,7 +45,7 @@ def SS_BNB(pset):
 @pytest.fixture
 def SS_RBS_SS_BNB(pset):
     return Individual.from_string(
-        "BernoulliNB(StandardScaler(RobustScaler(StandardScaler(data))), alpha=0.1, fit_prior=True)",  # noqa: E501
+        "BernoulliNB(StandardScaler(RobustScaler(StandardScaler(data='data'))), alpha=0.1, fit_prior=True)",  # noqa: E501
         pset,
         compile_individual,
     )
@@ -53,7 +53,7 @@ def SS_RBS_SS_BNB(pset):
 
 @pytest.fixture
 def LinearSVC(pset):
-    individual_str = """LinearSVC(data,
+    individual_str = """LinearSVC(data='data',
             LinearSVC.C=0.001,
             LinearSVC.dual=True,
             LinearSVC.loss='squared_hinge',
@@ -67,7 +67,7 @@ def LinearSVC(pset):
 def ForestPipeline(pset):
     individual_str = """RandomForestClassifier(
             FeatureAgglomeration(
-                    data,
+                    data='data',
                     FeatureAgglomeration.affinity='l2',
                     FeatureAgglomeration.linkage='complete'
                     ),
@@ -84,7 +84,7 @@ def ForestPipeline(pset):
 
 @pytest.fixture
 def InvalidLinearSVC(pset):
-    individual_str = """LinearSVC(data,
+    individual_str = """LinearSVC(data='data',
             LinearSVC.C=0.001,
             LinearSVC.dual=True,
             LinearSVC.loss='squared_hinge',

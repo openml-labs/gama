@@ -33,11 +33,19 @@ class PrimitiveNode:
                   - "BernoulliNB(data, alpha=1.0)"
                   - "BernoulliNB(FastICA(data, tol=0.5), alpha=1.0)"
         """
-        # BANDAGE / no order for data terminal
-        primitives_str = ", ".join(str(primitive) for primitive in self.primitives)
-        terminal_str = ", ".join([repr(terminal) for terminal in self.terminals])
-        arguments = f"{primitives_str}{',' if primitives_str else ''}{terminal_str}"
-        return f"{self._primitive}({arguments})"
+        input_str = f"{self.input_node!r}" if self.input_node else ""
+        terminal_str = ", ".join(
+            [
+                repr(terminal)
+                for terminal in self.terminals
+                if terminal != self.input_node
+            ]
+        )
+        join = ", " if input_str and terminal_str else ""
+        return f"{self._primitive}({input_str}{join}{terminal_str})"
+
+    def __repr__(self) -> str:
+        return str(self)
 
     @property
     def input_node(self) -> Optional[Union[Terminal, "PrimitiveNode"]]:
@@ -56,13 +64,14 @@ class PrimitiveNode:
         )
 
     def replace_or_add_input_node(
-        self, new_node: Union[Terminal, "PrimitiveNode"]
+        self, new_node: Union[None, Terminal, "PrimitiveNode"]
     ) -> None:
         """Replace the input node with the provided node."""
         current_node = self.input_node
         if current_node:
             self._children.remove(current_node)
-        self._children.append(new_node)
+        if new_node:
+            self._children.append(new_node)
 
     @property
     def primitives(self) -> List["PrimitiveNode"]:
@@ -81,19 +90,25 @@ class PrimitiveNode:
         Examples: - "GaussianNB()"
                   - "BernoulliNB(alpha=1.0)"
         """
-        terminal_str = ", ".join([str(terminal) for terminal in self._children])
+        terminal_str = ", ".join(
+            [
+                str(terminal)
+                for terminal in self._children
+                if terminal != self.input_node
+            ]
+        )
         return f"{self._primitive}({terminal_str})"
 
     def copy(self) -> "PrimitiveNode":
         """Copies the object. Shallow for terminals, deep for data_node."""
-        if isinstance(self._data_node, str) and self._data_node == DATA_TERMINAL:
-            data_node_copy = DATA_TERMINAL  # type: Union[str, PrimitiveNode]
-        elif isinstance(self._data_node, PrimitiveNode):
-            data_node_copy = self._data_node.copy()
+        children: List[Union["PrimitiveNode", Terminal]] = [
+            child.copy() if isinstance(child, PrimitiveNode) else child
+            for child in self._children
+        ]
         return PrimitiveNode(
             primitive=self._primitive,
-            data_node=data_node_copy,
-            children=self._children.copy(),
+            data_node=self._data_node,
+            children=children,
         )
 
     @classmethod
@@ -117,24 +132,34 @@ class PrimitiveNode:
         # below assumes that left parenthesis is never part of a parameter name or value
         primitives = string.split("(")[:-1]
         terminal_start_index = string.index(DATA_TERMINAL)
-        terminals_string = string[terminal_start_index + len(DATA_TERMINAL) :]
+        terminals_string = string[terminal_start_index:]
         terminal_sets = terminals_string.split(")")[:-1]
 
-        last_node: Union[PrimitiveNode, str] = DATA_TERMINAL
+        last_node: Optional[PrimitiveNode] = None
         for primitive_string, terminal_set in zip(reversed(primitives), terminal_sets):
             primitive = find_primitive(primitive_set, primitive_string)
             if terminal_set == "":
                 terminals = []
             else:
-                terminal_set = terminal_set[2:]  # 2 is because string starts with ', '
+                if terminal_set.startswith(", "):
+                    terminal_set = terminal_set[2:]
                 terminals = [
                     find_terminal(primitive_set, terminal_string)
                     for terminal_string in terminal_set.split(", ")
                 ]
-            missing = set(primitive.input) - set(map(lambda t: t.identifier, terminals))
+            missing = (
+                set(primitive.input)
+                - set(map(lambda t: t.identifier, terminals))
+                - {last_node._primitive.output}
+                if last_node
+                else {}
+            )
             if missing:
                 raise ValueError(f"terminals {missing} for primitive {primitive}")
-            last_node = cls(primitive, last_node, terminals)
+            children: List[Union[Terminal, "PrimitiveNode"]] = terminals  # type: ignore
+            if last_node:
+                children.append(last_node)
+            last_node = cls(primitive, last_node, children)  # type: ignore
 
         return cast(PrimitiveNode, last_node)
 
@@ -150,6 +175,9 @@ def find_primitive(primitive_set: dict, primitive_string: str) -> Primitive:
 
 def find_terminal(primitive_set: dict, terminal_string: str) -> Terminal:
     """Find the Terminal that matches `terminal_string` in `primitive_set`."""
+    # BANDAGE: this is for backwards compatibility - remove and revise the test suite?
+    if terminal_string == "data":
+        terminal_string = "data='data'"
     term_type, _ = terminal_string.split("=")
     for terminal in primitive_set[term_type]:
         if repr(terminal) == terminal_string:

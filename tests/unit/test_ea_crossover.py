@@ -11,14 +11,14 @@ from gama.genetic_programming.crossover import (
 def test_shared_terminals(SS_BNB, RS_MNB, GNB):
     """Test shared terminals are found, if they exist."""
     assert 0 == len(list(_shared_terminals(SS_BNB, SS_BNB, value_match="different")))
-    assert 2 == len(list(_shared_terminals(SS_BNB, SS_BNB, value_match="equal")))
-    assert 2 == len(list(_shared_terminals(SS_BNB, SS_BNB, value_match="all")))
+    assert 3 == len(list(_shared_terminals(SS_BNB, SS_BNB, value_match="equal")))
+    assert 3 == len(list(_shared_terminals(SS_BNB, SS_BNB, value_match="all")))
 
     assert 1 == len(list(_shared_terminals(SS_BNB, RS_MNB, value_match="different")))
-    assert 1 == len(list(_shared_terminals(SS_BNB, RS_MNB, value_match="equal")))
-    assert 2 == len(list(_shared_terminals(SS_BNB, RS_MNB, value_match="all")))
+    assert 2 == len(list(_shared_terminals(SS_BNB, RS_MNB, value_match="equal")))
+    assert 3 == len(list(_shared_terminals(SS_BNB, RS_MNB, value_match="all")))
 
-    assert 0 == len(list(_shared_terminals(SS_BNB, GNB, value_match="all")))
+    assert 1 == len(list(_shared_terminals(SS_BNB, GNB, value_match="all")))
 
 
 def test_crossover_primitives(SS_BNB, RS_MNB):
