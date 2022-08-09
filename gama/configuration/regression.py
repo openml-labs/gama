@@ -35,7 +35,7 @@ from sklearn.svm import LinearSVR
 # currently most of what TPOT supports.
 
 reg_config = {
-    "data": ["data"],
+    "numeric_data": ["data"],
     ElasticNetCV: {
         "l1_ratio": np.arange(0.0, 1.01, 0.05),
         "tol": [1e-5, 1e-4, 1e-3, 1e-2, 1e-1],

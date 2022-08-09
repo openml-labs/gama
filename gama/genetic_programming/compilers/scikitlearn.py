@@ -29,7 +29,7 @@ def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
         terminal.output: terminal.value
         for terminal in primitive_node._children
         # BANDAGE
-        if isinstance(terminal, Terminal) and terminal.output != "data"
+        if isinstance(terminal, Terminal) and terminal.value != "data"
     }
     return primitive_node._primitive.identifier(**hyperparameters)
 

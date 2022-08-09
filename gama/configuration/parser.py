@@ -1,6 +1,6 @@
 from collections import defaultdict
 import itertools
-from typing import Dict, Any, Union, List, Callable, Tuple
+from typing import Dict, Any, Optional, Union, List, Callable, Tuple
 
 import sklearn
 
@@ -148,8 +148,17 @@ def merge_configurations(c1: Dict, c2: Dict) -> Dict:
     return merged
 
 
-def compute_reachability(pset: Dict, pipeline_input: str = "data") -> Dict[str, int]:
+def compute_reachability(
+    pset: Dict, pipeline_input: Optional[str] = None
+) -> Dict[str, int]:
     """Calculates the minimum number of primitives required to reach data types."""
+    if pipeline_input is None:
+        pipeline_input = next(
+            k
+            for k in pset
+            if k.endswith("data") and any(isinstance(t, Terminal) for t in pset[k])
+        )
+
     reachability = {pipeline_input: 0}
     reachability_updated = True
     while reachability_updated:
@@ -174,3 +183,21 @@ def compute_minimal_pipeline_length(
     """Calculates the minimum number of primitives required to reach data types."""
     reachability = compute_reachability(pset, pipeline_input)
     return reachability[pipeline_output]
+
+
+def remove_primitives_with_unreachable_input(
+    pset: Dict, pipeline_input: str = "data"
+) -> Dict:
+    reachability = compute_reachability(pset, pipeline_input)
+    for return_type, prims_and_terms in pset.items():
+        for pt in prims_and_terms:
+            if isinstance(pt, Primitive) and pt.data_input not in reachability:
+                print(pt)
+    return {
+        return_type: [
+            pt
+            for pt in prims_and_terms
+            if not (isinstance(pt, Primitive) and pt.data_input not in reachability)
+        ]
+        for return_type, prims_and_terms in pset.items()
+    }

@@ -52,7 +52,11 @@ from gama.genetic_programming.selection import (
     eliminate_from_pareto,
 )
 from gama.genetic_programming.operations import create_random_expression
-from gama.configuration.parser import compute_minimal_pipeline_length, pset_from_config
+from gama.configuration.parser import (
+    compute_minimal_pipeline_length,
+    pset_from_config,
+    remove_primitives_with_unreachable_input,
+)
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
 from gama.postprocessing import (
@@ -274,6 +278,11 @@ class Gama(ABC):
 
         self._pset, parameter_checks = pset_from_config(config)
 
+        data_type = cast(str, next(k for k in config if "data" in k))  # type: ignore
+        self._pset = remove_primitives_with_unreachable_input(
+            self._pset, pipeline_input=data_type
+        )
+
         # if DATA_TERMINAL not in self._pset:
         #     if max_pipeline_length is None:
         #         log.info(
@@ -287,7 +296,7 @@ class Gama(ABC):
         #             "because there are no preprocessing steps in the search space."
         #         )
         min_required_length = compute_minimal_pipeline_length(
-            self._pset, "data", "prediction"
+            self._pset, data_type, "prediction"
         )
         max_start_length = (
             min_required_length + 2

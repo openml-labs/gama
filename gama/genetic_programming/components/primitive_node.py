@@ -1,5 +1,6 @@
+import itertools
 from typing import List, Optional, Sequence, Union, cast
-from .terminal import DATA_TERMINAL, Terminal
+from .terminal import Terminal
 from .primitive import Primitive
 
 
@@ -131,7 +132,7 @@ class PrimitiveNode:
         # A(B(C(data[, C.param=value, ..])[, B.param=value, ..])[, A.param=value, ..])
         # below assumes that left parenthesis is never part of a parameter name or value
         primitives = string.split("(")[:-1]
-        terminal_start_index = string.index(DATA_TERMINAL)
+        terminal_start_index = string.rindex("(") + 1
         terminals_string = string[terminal_start_index:]
         terminal_sets = terminals_string.split(")")[:-1]
 
@@ -166,7 +167,9 @@ class PrimitiveNode:
 
 def find_primitive(primitive_set: dict, primitive_string: str) -> Primitive:
     """Find the Primitive that matches `primitive_string` in `primitive_set`."""
-    all_primitives = primitive_set[DATA_TERMINAL] + primitive_set["prediction"]
+    all_primitives = [
+        i for i in itertools.chain(*primitive_set.values()) if isinstance(i, Primitive)
+    ]
     for primitive in all_primitives:
         if repr(primitive) == primitive_string:
             return primitive
@@ -177,7 +180,7 @@ def find_terminal(primitive_set: dict, terminal_string: str) -> Terminal:
     """Find the Terminal that matches `terminal_string` in `primitive_set`."""
     # BANDAGE: this is for backwards compatibility - remove and revise the test suite?
     if terminal_string == "data":
-        terminal_string = "data='data'"
+        terminal_string = "numeric_data='data'"
     term_type, _ = terminal_string.split("=")
     for terminal in primitive_set[term_type]:
         if repr(terminal) == terminal_string:

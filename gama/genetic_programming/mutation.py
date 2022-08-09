@@ -7,7 +7,7 @@ from functools import partial
 from typing import Callable, Optional, List, Dict
 
 from gama.genetic_programming.components.terminal import Terminal
-from .components import Individual, DATA_TERMINAL
+from .components import Individual
 from .operations import random_primitive_node
 
 
@@ -138,7 +138,7 @@ def mut_insert(individual: Individual, primitive_set: dict) -> None:
     """
     parent_node = random.choice(list(individual.primitives))
     new_primitive_node = random_primitive_node(
-        output_type=DATA_TERMINAL,
+        output_type=parent_node._primitive.data_input,
         primitive_set=primitive_set,
         skip_input_terminal=True,
         with_depth=0,
