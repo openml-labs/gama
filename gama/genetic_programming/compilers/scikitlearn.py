@@ -25,7 +25,9 @@ log = logging.getLogger(__name__)
 
 def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
     hyperparameters = {
-        terminal.output: terminal.value for terminal in primitive_node._terminals
+        terminal.output: terminal.value
+        for terminal in primitive_node._terminals
+        if terminal.output != "data"
     }
     return primitive_node._primitive.identifier(**hyperparameters)
 

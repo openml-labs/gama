@@ -7,6 +7,7 @@ from functools import partial
 from typing import Callable, Optional, cast, List, Dict
 
 from gama.genetic_programming.components import PrimitiveNode
+from gama.genetic_programming.components.terminal import Terminal
 from .components import Individual, DATA_TERMINAL
 from .operations import random_primitive_node
 
@@ -23,7 +24,18 @@ def mut_replace_terminal(individual: Individual, primitive_set: dict) -> None:
 
     def terminal_replaceable(index_terminal):
         _, terminal = index_terminal
-        return len(primitive_set[terminal.identifier]) > 1
+        # BANDAGE
+        return (
+            isinstance(terminal, Terminal)
+            and len(
+                [
+                    t
+                    for t in primitive_set[terminal.identifier]
+                    if isinstance(t, Terminal)
+                ]
+            )
+            > 1
+        )
 
     terminals = list(filter(terminal_replaceable, enumerate(individual.terminals)))
     if len(terminals) == 0:

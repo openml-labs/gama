@@ -13,14 +13,23 @@ def random_terminals_for_primitive(
     primitive_set: dict, primitive: Primitive
 ) -> List[Terminal]:
     """Return a list with a random Terminal for each required input to Primitive."""
-    return [random.choice(primitive_set[term_type]) for term_type in primitive.input]
+    return [
+        random.choice([t for t in primitive_set[term_type] if isinstance(t, Terminal)])
+        for term_type in primitive.input
+    ]
 
 
 def random_primitive_node(
     output_type: str, primitive_set: dict, exclude: Primitive = None
 ) -> PrimitiveNode:
     """Create a PrimitiveNode with specified output_type and random terminals."""
-    primitive = random.choice([p for p in primitive_set[output_type] if p != exclude])
+    primitive = random.choice(
+        [
+            p
+            for p in primitive_set[output_type]
+            if p != exclude and isinstance(p, Primitive)
+        ]
+    )
     terminals = random_terminals_for_primitive(primitive_set, primitive)
     return PrimitiveNode(primitive, data_node=DATA_TERMINAL, terminals=terminals)
 

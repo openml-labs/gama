@@ -3,7 +3,7 @@ from typing import Dict, Any, Union, List, Callable, Tuple
 
 import sklearn
 
-from gama.genetic_programming.components import Primitive, Terminal, DATA_TERMINAL
+from gama.genetic_programming.components import Primitive, Terminal
 
 
 def pset_from_config(
@@ -42,6 +42,7 @@ def pset_from_config(
         elif isinstance(key, type):
             # Specification of operator (learner, preprocessor)
             hyperparameter_types: List[str] = []
+            hyperparameter_types.append(values.get("_input", "data"))
             for name, param_values in sorted(values.items()):
                 # We construct a new type for each hyperparameter, so we can specify
                 # it as terminal type, making sure it matches with expected
@@ -54,7 +55,7 @@ def pset_from_config(
                     # This allows users to define illegal hyperparameter combinations,
                     # but is not a terminal.
                     parameter_checks[key.__name__] = param_values[0]
-                else:
+                elif not name.startswith("_"):
                     hp_name = f"{key.__name__}.{name}"
                     hyperparameter_types.append(hp_name)
                     for value in param_values:
@@ -69,26 +70,29 @@ def pset_from_config(
             # After registering the hyperparameter types,
             # we can register the operator itself.
             if issubclass(key, sklearn.base.TransformerMixin):
-                pset[DATA_TERMINAL].append(
+                output = values.get("_output", "data")
+                pset[output].append(
                     Primitive(
                         input=tuple(hyperparameter_types),
-                        output=DATA_TERMINAL,
+                        output=output,
                         identifier=key,
                     )
                 )
             elif issubclass(key, sklearn.base.ClassifierMixin):
-                pset["prediction"].append(
+                output = values.get("_output", "prediction")
+                pset[output].append(
                     Primitive(
                         input=tuple(hyperparameter_types),
-                        output="prediction",
+                        output=output,
                         identifier=key,
                     )
                 )
             elif issubclass(key, sklearn.base.RegressorMixin):
-                pset["prediction"].append(
+                output = values.get("_output", "prediction")
+                pset[output].append(
                     Primitive(
                         input=tuple(hyperparameter_types),
-                        output="prediction",
+                        output=output,
                         identifier=key,
                     )
                 )
