@@ -20,7 +20,10 @@ def random_terminals_for_primitive(
 
 
 def random_children_for_primitive(
-    primitive_set: dict, primitive: Primitive, with_depth: Optional[int] = None
+    primitive_set: dict,
+    primitive: Primitive,
+    with_depth: Optional[int] = None,
+    skip_input_terminal: bool = False,
 ) -> List[Union[PrimitiveNode, Terminal]]:
     """Return a list with a random children for each required input to Primitive."""
     children = [
@@ -32,6 +35,7 @@ def random_children_for_primitive(
             ]
         )
         for term_type in primitive.input
+        if not skip_input_terminal or term_type != primitive.data_input
     ]
     remaining_depth = with_depth - 1 if with_depth else None
 
@@ -52,19 +56,26 @@ def random_primitive_node(
     output_type: str,
     primitive_set: dict,
     exclude: Optional[Primitive] = None,
+    skip_input_terminal: bool = False,
     with_depth: Optional[int] = None,
+    data_input_type: Optional[str] = None,
 ) -> PrimitiveNode:
     """Create a PrimitiveNode with specified output_type and random terminals."""
     primitive = random.choice(
         [
             p
             for p in primitive_set[output_type]
-            if p != exclude and isinstance(p, Primitive)
+            if p != exclude
+            and isinstance(p, Primitive)
+            and (data_input_type is None or p.data_input == data_input_type)
         ]
     )
     remaining_depth = with_depth - 1 if with_depth else None
     children = random_children_for_primitive(
-        primitive_set, primitive, with_depth=remaining_depth
+        primitive_set,
+        primitive,
+        with_depth=remaining_depth,
+        skip_input_terminal=skip_input_terminal,
     )
     return PrimitiveNode(primitive, data_node=DATA_TERMINAL, children=children)
 
@@ -79,12 +90,5 @@ def create_random_expression(
         primitive_set=primitive_set,
         with_depth=individual_length,
     )
-    # last_primitive_node = learner_node
-    # for _ in range(individual_length - 1):
-    #     primitive_node = random_primitive_node(
-    #         output_type=DATA_TERMINAL, primitive_set=primitive_set
-    #     )
-    #     last_primitive_node._data_node = primitive_node
-    #     last_primitive_node = primitive_node
 
     return learner_node

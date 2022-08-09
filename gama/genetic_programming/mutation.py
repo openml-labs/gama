@@ -4,9 +4,8 @@ Each mutation function takes an individual and modifies it in-place.
 """
 import random
 from functools import partial
-from typing import Callable, Optional, cast, List, Dict
+from typing import Callable, Optional, List, Dict
 
-from gama.genetic_programming.components import PrimitiveNode
 from gama.genetic_programming.components.terminal import Terminal
 from .components import Individual, DATA_TERMINAL
 from .operations import random_primitive_node
@@ -68,10 +67,14 @@ def mut_replace_primitive(individual: Individual, primitive_set: dict) -> None:
 
     primitive_index, old_primitive_node = random.choice(primitives)
     primitive_node = random_primitive_node(
+        data_input_type=old_primitive_node._primitive.data_input,
         output_type=old_primitive_node._primitive.output,
         primitive_set=primitive_set,
         exclude=old_primitive_node._primitive,
+        skip_input_terminal=True,
+        with_depth=0,
     )
+    primitive_node.replace_or_add_input_node(old_primitive_node.input_node)
     individual.replace_primitive(primitive_index, primitive_node)
 
 
@@ -93,18 +96,34 @@ def mut_shrink(
         Must be at least one greater than the number of primitives in `individual`.
         If None, a random number of primitives is removed.
     """
-    n_primitives = len(list(individual.primitives))
+    removeable_primitives = [
+        p
+        for p in individual.primitives
+        if p._primitive.data_input == p._primitive.output
+    ]
+    n_primitives = len(removeable_primitives)
+    # BANDAGE / rework errors/checks
     if shrink_by is not None and n_primitives <= shrink_by:
         raise ValueError(f"Can't shrink size {n_primitives} individual by {shrink_by}.")
     if shrink_by is None:
-        shrink_by = random.randint(1, n_primitives - 1)
+        shrink_by = random.randint(1, n_primitives)
 
-    current_primitive_node = individual.main_node
-    primitives_left = n_primitives - 1
-    while primitives_left > shrink_by:
-        current_primitive_node = cast(PrimitiveNode, current_primitive_node._data_node)
-        primitives_left -= 1
-    current_primitive_node._data_node = DATA_TERMINAL
+    i = len(individual.primitives) - 1
+    while shrink_by > 0 and i > 0:
+        candidate_primitive = individual.primitives[i]._primitive
+        if candidate_primitive.data_input == candidate_primitive.output:
+            individual.primitives[i - 1].replace_or_add_input_node(
+                individual.primitives[i].input_node
+            )
+            shrink_by -= 1
+        i -= 1
+
+    # current_primitive_node = individual.main_node
+    # primitives_left = n_primitives - 1
+    # while primitives_left > shrink_by:
+    #   current_primitive_node = cast(PrimitiveNode, current_primitive_node._data_node)
+    #   primitives_left -= 1
+    # current_primitive_node._data_node = DATA_TERMINAL
 
 
 def mut_insert(individual: Individual, primitive_set: dict) -> None:

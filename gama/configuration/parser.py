@@ -42,7 +42,8 @@ def pset_from_config(
         elif isinstance(key, type):
             # Specification of operator (learner, preprocessor)
             hyperparameter_types: List[str] = []
-            hyperparameter_types.append(values.get("_input", "data"))
+            data_input = values.get("_input", "data")
+            hyperparameter_types.append(data_input)
             for name, param_values in sorted(values.items()):
                 # We construct a new type for each hyperparameter, so we can specify
                 # it as terminal type, making sure it matches with expected
@@ -76,6 +77,7 @@ def pset_from_config(
                         input=tuple(hyperparameter_types),
                         output=output,
                         identifier=key,
+                        data_input=data_input,
                     )
                 )
             elif issubclass(key, sklearn.base.ClassifierMixin):
@@ -85,6 +87,7 @@ def pset_from_config(
                         input=tuple(hyperparameter_types),
                         output=output,
                         identifier=key,
+                        data_input=data_input,
                     )
                 )
             elif issubclass(key, sklearn.base.RegressorMixin):
@@ -94,6 +97,7 @@ def pset_from_config(
                         input=tuple(hyperparameter_types),
                         output=output,
                         identifier=key,
+                        data_input=data_input,
                     )
                 )
             else:

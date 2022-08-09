@@ -1,4 +1,4 @@
-from typing import List, Union, cast
+from typing import List, Optional, Union, cast
 from .terminal import DATA_TERMINAL, Terminal
 from .primitive import Primitive
 
@@ -22,8 +22,6 @@ class PrimitiveNode:
         data_node: Union["PrimitiveNode", str],
         children: List[Union["PrimitiveNode", Terminal]],
     ):
-        if not (isinstance(children, List) and len(children)):
-            raise ValueError("`children` must be a non-empty list.")
         self._primitive = primitive
         self._data_node = data_node
         self._children = sorted(children, key=lambda t: str(t))
@@ -40,6 +38,31 @@ class PrimitiveNode:
         terminal_str = ", ".join([repr(terminal) for terminal in self.terminals])
         arguments = f"{primitives_str}{',' if primitives_str else ''}{terminal_str}"
         return f"{self._primitive}({arguments})"
+
+    @property
+    def input_node(self) -> Optional[Union[Terminal, "PrimitiveNode"]]:
+        """Returns the child that provides the input data."""
+        return next(
+            (
+                c
+                for c in self._children
+                if (isinstance(c, Terminal) and c.output == self._primitive.data_input)
+                or (
+                    isinstance(c, PrimitiveNode)
+                    and c._primitive.output == self._primitive.data_input
+                )
+            ),
+            None,
+        )
+
+    def replace_or_add_input_node(
+        self, new_node: Union[Terminal, "PrimitiveNode"]
+    ) -> None:
+        """Replace the input node with the provided node."""
+        current_node = self.input_node
+        if current_node:
+            self._children.remove(current_node)
+        self._children.append(new_node)
 
     @property
     def primitives(self) -> List["PrimitiveNode"]:
