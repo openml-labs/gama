@@ -1,4 +1,5 @@
 from collections import defaultdict
+import itertools
 from typing import Dict, Any, Union, List, Callable, Tuple
 
 import sklearn
@@ -42,7 +43,7 @@ def pset_from_config(
         elif isinstance(key, type):
             # Specification of operator (learner, preprocessor)
             hyperparameter_types: List[str] = []
-            data_input = values.get("_input", "data")
+            data_input = values.get("_input", "numeric_data")
             hyperparameter_types.append(data_input)
             for name, param_values in sorted(values.items()):
                 # We construct a new type for each hyperparameter, so we can specify
@@ -71,7 +72,7 @@ def pset_from_config(
             # After registering the hyperparameter types,
             # we can register the operator itself.
             if issubclass(key, sklearn.base.TransformerMixin):
-                output = values.get("_output", "data")
+                output = values.get("_output", "numeric_data")
                 pset[output].append(
                     Primitive(
                         input=tuple(hyperparameter_types),
@@ -145,3 +146,31 @@ def merge_configurations(c1: Dict, c2: Dict) -> Dict:
                     f"{hparams} vs. {hparams2}"
                 )
     return merged
+
+
+def compute_reachability(pset: Dict, pipeline_input: str = "data") -> Dict[str, int]:
+    """Calculates the minimum number of primitives required to reach data types."""
+    reachability = {pipeline_input: 0}
+    reachability_updated = True
+    while reachability_updated:
+        reachability_updated = False
+        for item in [
+            p for p in itertools.chain(*pset.values()) if isinstance(p, Primitive)
+        ]:
+            reachable = item.data_input in reachability
+            new_return_type = item.output not in reachability
+            if reachable and (
+                new_return_type
+                or reachability[item.output] > reachability[item.output] + 1
+            ):
+                reachability[item.output] = reachability[item.data_input] + 1
+                reachability_updated = True
+    return reachability
+
+
+def compute_minimal_pipeline_length(
+    pset: Dict, pipeline_input: str = "data", pipeline_output: str = "prediction"
+) -> int:
+    """Calculates the minimum number of primitives required to reach data types."""
+    reachability = compute_reachability(pset, pipeline_input)
+    return reachability[pipeline_output]

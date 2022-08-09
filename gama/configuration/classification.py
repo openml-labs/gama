@@ -29,11 +29,23 @@ from sklearn.feature_selection import (
     VarianceThreshold,
 )
 
+
+class SuperEncoder(StandardScaler):
+    # For testing purposes only
+    pass
+
+
 # For comparison, this selection of operators and hyperparameters is
 # currently most of what TPOT supports.
 
 clf_config = {
     "data": ["data"],
+    SuperEncoder: {
+        "_input": "data",
+        "_output": "numeric_data",
+        "with_std": [True, False],
+        "with_mean": [True, False],
+    },
     "alpha": [1e-3, 1e-2, 1e-1, 1.0, 10.0, 100.0],
     "fit_prior": [True, False],
     "min_samples_split": range(2, 21),

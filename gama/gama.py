@@ -30,7 +30,7 @@ from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
 
 import gama.genetic_programming.compilers.scikitlearn
-from gama.genetic_programming.components import Individual, Fitness, DATA_TERMINAL
+from gama.genetic_programming.components import Individual, Fitness
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
 from gama.utilities.metrics import scoring_to_metric
@@ -52,7 +52,7 @@ from gama.genetic_programming.selection import (
     eliminate_from_pareto,
 )
 from gama.genetic_programming.operations import create_random_expression
-from gama.configuration.parser import pset_from_config
+from gama.configuration.parser import compute_minimal_pipeline_length, pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
 from gama.postprocessing import (
@@ -274,19 +274,33 @@ class Gama(ABC):
 
         self._pset, parameter_checks = pset_from_config(config)
 
-        if DATA_TERMINAL not in self._pset:
-            if max_pipeline_length is None:
-                log.info(
-                    "Setting `max_pipeline_length` to 1 "
-                    "because there are no preprocessing steps in the search space."
-                )
-                max_pipeline_length = 1
-            elif max_pipeline_length > 1:
-                raise ValueError(
-                    f"`max_pipeline_length` can't be {max_pipeline_length} "
-                    "because there are no preprocessing steps in the search space."
-                )
-        max_start_length = 3 if max_pipeline_length is None else max_pipeline_length
+        # if DATA_TERMINAL not in self._pset:
+        #     if max_pipeline_length is None:
+        #         log.info(
+        #             "Setting `max_pipeline_length` to 1 "
+        #             "because there are no preprocessing steps in the search space."
+        #         )
+        #         max_pipeline_length = 1
+        #     elif max_pipeline_length > 1:
+        #         raise ValueError(
+        #             f"`max_pipeline_length` can't be {max_pipeline_length} "
+        #             "because there are no preprocessing steps in the search space."
+        #         )
+        min_required_length = compute_minimal_pipeline_length(
+            self._pset, "data", "prediction"
+        )
+        max_start_length = (
+            min_required_length + 2
+            if max_pipeline_length is None
+            else max_pipeline_length
+        )
+        if min_required_length > max_start_length:
+            raise ValueError(
+                f"The provided configuration requires at least a "
+                f"pipeline of length {min_required_length}, "
+                f"which means a max length of {max_start_length} is invalid."
+            )
+
         self._operator_set = OperatorSet(
             mutate=partial(  # type: ignore #https://github.com/python/mypy/issues/1484
                 random_valid_mutation_in_place,
@@ -298,6 +312,7 @@ class Gama(ABC):
             create_new=partial(
                 create_random_expression,
                 primitive_set=self._pset,
+                min_length=min_required_length,
                 max_length=max_start_length,
             ),
             compile_=compile_individual,

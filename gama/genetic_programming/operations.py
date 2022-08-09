@@ -1,5 +1,6 @@
 import random
 from typing import List, Optional, Union
+from gama.configuration.parser import compute_reachability
 
 from gama.genetic_programming.components import (
     Primitive,
@@ -26,17 +27,40 @@ def random_children_for_primitive(
     skip_input_terminal: bool = False,
 ) -> List[Union[PrimitiveNode, Terminal]]:
     """Return a list with a random children for each required input to Primitive."""
-    children = [
-        random.choice(
-            [
-                t
-                for t in primitive_set[term_type]
-                if not (isinstance(t, Primitive) and with_depth == 0)
-            ]
-        )
-        for term_type in primitive.input
-        if not skip_input_terminal or term_type != primitive.data_input
-    ]
+    children = []
+    for terminal_type in primitive.input:
+        candidates = primitive_set[terminal_type]
+        if terminal_type == primitive.data_input:
+            if skip_input_terminal:
+                continue
+            if with_depth:
+                # Since we have to adhere to a max depth,
+                # we need to take into consideration required
+                # preprocessing steps required to make the input data
+                # fit for this primitive
+                reachability = compute_reachability(primitive_set)
+                if reachability[primitive.data_input] == with_depth:
+                    candidates = [
+                        c
+                        for c in candidates
+                        if isinstance(c, Primitive)
+                        and reachability[c.data_input] == with_depth - 1
+                    ]
+            elif with_depth == 0:
+                candidates = [c for c in candidates if isinstance(c, Terminal)]
+
+        children.append(random.choice(candidates))
+    # children = [
+    #     random.choice(
+    #         [
+    #             t
+    #             for t in primitive_set[term_type]
+    #             if not (isinstance(t, Primitive) and with_depth == 0)
+    #         ]
+    #     )
+    #     for term_type in primitive.input
+    #     if not skip_input_terminal or term_type != primitive.data_input
+    # ]
     remaining_depth = with_depth - 1 if with_depth else None
 
     for i, child in enumerate(children):
@@ -61,15 +85,24 @@ def random_primitive_node(
     data_input_type: Optional[str] = None,
 ) -> PrimitiveNode:
     """Create a PrimitiveNode with specified output_type and random terminals."""
-    primitive = random.choice(
-        [
-            p
-            for p in primitive_set[output_type]
-            if p != exclude
-            and isinstance(p, Primitive)
-            and (data_input_type is None or p.data_input == data_input_type)
-        ]
-    )
+    candidates = [
+        p
+        for p in primitive_set[output_type]
+        if p != exclude and isinstance(p, Primitive)
+    ]
+    if data_input_type:
+        candidates = [c for c in candidates if c.data_input == data_input_type]
+    elif with_depth:
+        reachability = compute_reachability(primitive_set)
+        # if the maximum depth is exactly the minimum number of steps
+        # we need to the input data then we need to make sure we take
+        # a step that brings us closer to the input data
+        if with_depth == reachability[output_type]:
+            candidates = [
+                c for c in candidates if reachability[c.data_input] == with_depth - 1
+            ]
+
+    primitive = random.choice(candidates)
     remaining_depth = with_depth - 1 if with_depth else None
     children = random_children_for_primitive(
         primitive_set,
