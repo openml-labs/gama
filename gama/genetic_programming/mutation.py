@@ -74,7 +74,8 @@ def mut_replace_primitive(individual: Individual, primitive_set: dict) -> None:
         skip_input_terminal=True,
         with_depth=0,
     )
-    primitive_node.replace_or_add_input_node(old_primitive_node.input_node)
+    if old_primitive_node.input_node:
+        primitive_node.replace_or_add_input_node(old_primitive_node.input_node)
     individual.replace_primitive(primitive_index, primitive_node)
 
 
@@ -113,7 +114,7 @@ def mut_shrink(
         candidate_primitive = individual.primitives[i]._primitive
         if candidate_primitive.data_input == candidate_primitive.output:
             individual.primitives[i - 1].replace_or_add_input_node(
-                individual.primitives[i].input_node
+                individual.primitives[i].input_node  # type: ignore
             )
             shrink_by -= 1
         i -= 1

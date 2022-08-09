@@ -1,4 +1,4 @@
-from typing import List, Optional, Union, cast
+from typing import List, Optional, Sequence, Union, cast
 from .terminal import DATA_TERMINAL, Terminal
 from .primitive import Primitive
 
@@ -20,7 +20,7 @@ class PrimitiveNode:
         self,
         primitive: Primitive,
         data_node: Union["PrimitiveNode", str],
-        children: List[Union["PrimitiveNode", Terminal]],
+        children: Sequence[Union["PrimitiveNode", Terminal]],
     ):
         self._primitive = primitive
         self._data_node = data_node
