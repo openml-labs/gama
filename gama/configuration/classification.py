@@ -16,8 +16,6 @@ from sklearn.preprocessing import (
     MinMaxScaler,
     Normalizer,
     PolynomialFeatures,
-    RobustScaler,
-    StandardScaler,
     Binarizer,
 )
 from sklearn.kernel_approximation import Nystroem, RBFSampler
@@ -29,10 +27,18 @@ from sklearn.feature_selection import (
     VarianceThreshold,
 )
 
-
-class SuperEncoder(StandardScaler):
-    # For testing purposes only
-    pass
+from dirty_cat import (
+    SuperVectorizer,
+    SimilarityEncoder,
+    GapEncoder,
+    MinHashEncoder,
+)
+from sklearn.preprocessing import (
+    OneHotEncoder,
+    OrdinalEncoder,
+    StandardScaler,
+    RobustScaler,
+)
 
 
 # For comparison, this selection of operators and hyperparameters is
@@ -40,11 +46,34 @@ class SuperEncoder(StandardScaler):
 
 clf_config = {
     "data": ["data"],
-    SuperEncoder: {
+    SuperVectorizer: {
         "_input": "data",
         "_output": "numeric_data",
-        "with_std": [True, False],
-        "with_mean": [True, False],
+        'cardinality_threshold': [40],
+        'low_card_cat_transformer': {
+            OneHotEncoder: {
+                #'categories': ['auto'],
+            },
+        },
+        'high_card_cat_transformer': {
+            #OrdinalEncoder: {
+            #    'categories': ['auto'],
+            #},
+            #SimilarityEncoder: {
+            #    'n_prototypes': [10, 25, 50, 100],
+            #},
+            GapEncoder: {
+                #'analyzer': ['word', 'char', 'char_wb'],
+            },
+            #MinHashEncoder: {
+            #    'n_components': [10, 30, 50, 100],
+            #    'hashing': ['fast', 'murmur'],
+            #},
+        },
+        'numerical_transformer': {
+            #RobustScaler: {},
+            StandardScaler: {},
+        }
     },
     "alpha": [1e-3, 1e-2, 1e-1, 1.0, 10.0, 100.0],
     "fit_prior": [True, False],
@@ -147,8 +176,6 @@ clf_config = {
         "interaction_only": [False],
     },
     RBFSampler: {"gamma": np.arange(0.0, 1.01, 0.05)},
-    RobustScaler: {},
-    StandardScaler: {},
     # Selectors
     SelectFwe: {"alpha": np.arange(0, 0.05, 0.001), "score_func": {f_classif: None}},
     SelectPercentile: {"percentile": range(1, 100), "score_func": {f_classif: None}},
