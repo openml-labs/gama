@@ -537,7 +537,7 @@ class Gama(ABC):
                 x, is_classification
             )
             self._fixed_pipeline_extension = basic_pipeline_extension(
-                self._x, is_classification
+                is_classification
             )
             self._operator_set._safe_compile = partial(
                 self._operator_set._compile,

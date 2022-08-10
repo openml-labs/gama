@@ -4,7 +4,7 @@ import category_encoders as ce
 import pandas as pd
 from sklearn.base import TransformerMixin
 from sklearn.impute import SimpleImputer
-from sklearn.pipeline import Pipeline
+from dirty_cat import SuperVectorizer
 
 log = logging.getLogger(__name__)
 
@@ -49,25 +49,24 @@ def basic_encoding(
 
     Specifically, perform:
      - Ordinal encoding for features with 2 or fewer unique values.
+       FIXME: feature of dirty_cat 0.3 (which is not out as of August 2022)
      - One hot encoding for features with at most 10 unique values.
      - Ordinal encoding for features with 11+ unique values, if y is categorical.
     """
-    ord_features = list(select_categorical_columns(x, max_f=2))
-    if is_classification:
-        ord_features.extend(select_categorical_columns(x, min_f=11))
-    leq_10_features = list(select_categorical_columns(x, min_f=3, max_f=10))
+    ohe = ce.OneHotEncoder(handle_missing="value")
+    ord_enc = ce.OrdinalEncoder(drop_invariant=True)
 
-    encoding_steps = [
-        ("ord-enc", ce.OrdinalEncoder(cols=ord_features, drop_invariant=True)),
-        ("oh-enc", ce.OneHotEncoder(cols=leq_10_features, handle_missing="value")),
-    ]
-    encoding_pipeline = Pipeline(encoding_steps)
-    x_enc = encoding_pipeline.fit_transform(x, y=None)  # Is this dangerous?
-    return x_enc, encoding_pipeline
+    sv = SuperVectorizer(
+        cardinality_threshold=11,
+        low_card_cat_transformer=ohe,
+        high_card_cat_transformer=ord_enc if is_classification else ohe,
+    )
+    x_enc = pd.DataFrame(sv.fit_transform(x))
+    return x_enc, sv
 
 
 def basic_pipeline_extension(
-    x: pd.DataFrame, is_classification: bool
+    is_classification: bool
 ) -> List[Tuple[str, TransformerMixin]]:
     """Define a TargetEncoder and SimpleImputer.
 
@@ -75,13 +74,4 @@ def basic_pipeline_extension(
     if y is not categorical. SimpleImputer imputes with the median.
     """
     # These steps need to be in the pipeline because they need to be trained each fold.
-    extension_steps = []
-    if not is_classification:
-        # TargetEncoder is broken with categorical target
-        many_factor_features = list(select_categorical_columns(x, min_f=11))
-        extension_steps.append(
-            ("target_enc", ce.TargetEncoder(cols=many_factor_features))
-        )
-    extension_steps.append(("imputation", SimpleImputer(strategy="median")))
-
-    return extension_steps
+    return [("imputation", SimpleImputer(strategy="median"))]
