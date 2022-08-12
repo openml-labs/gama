@@ -29,7 +29,6 @@ import stopit
 from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
 
-import gama.genetic_programming.compilers.scikitlearn
 from gama.genetic_programming.components import Individual, Fitness, DATA_TERMINAL
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
@@ -54,7 +53,11 @@ from gama.genetic_programming.selection import (
 from gama.genetic_programming.operations import create_random_expression
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
-from gama.genetic_programming.compilers.scikitlearn import compile_individual
+from gama.genetic_programming.compilers.scikitlearn import (
+    compile_individual,
+    evaluate_individual,
+    evaluate_pipeline,
+)
 from gama.postprocessing import (
     BestFitPostProcessing,
     BasePostProcessing,
@@ -598,16 +601,15 @@ class Gama(ABC):
 
         deadline = time.time() + timeout
 
-        evaluate_pipeline = partial(
-            gama.genetic_programming.compilers.scikitlearn.evaluate_pipeline,
+        AsyncEvaluator.defaults = dict(
+            evaluate_pipeline=evaluate_pipeline,
             x=self._x,
             y_train=self._y,
             metrics=self._metrics,
         )
-        AsyncEvaluator.defaults = dict(evaluate_pipeline=evaluate_pipeline)
 
         self._operator_set.evaluate = partial(
-            gama.genetic_programming.compilers.scikitlearn.evaluate_individual,
+            evaluate_individual,
             timeout=self._max_eval_time,
             deadline=deadline,
             add_length_to_score=self._regularize_length,

@@ -126,19 +126,21 @@ def async_ea(
                 n_evaluated_individuals < max_n_evaluations
             ):
                 future = ops.wait_next(async_)
-                if future.exception is None and future.result.error is None:
-                    current_population.append(future.result.individual)
+                if future.status == "finished" and future.result().error is None:
+                    current_population.append(future.result().individual)
                     if len(current_population) > max_pop_size:
                         to_remove = ops.eliminate(current_population, 1)
                         current_population.remove(to_remove[0])
 
-                if async_.job_queue_size <= 1:
-                    # Technically 0 should work to keep near-100% worker load,
-                    # especially if the dataset is sufficiently large to require
-                    # significant time to evaluate a pipeline.
-                    # Increasing the number decreases the risk of lost compute time,
-                    # but also increases information lag. An offspring created too
-                    # early might miss out on a better parent.
+                # TODO
+                # if async_.job_queue_size <= 1:
+                # Technically 0 should work to keep near-100% worker load,
+                # especially if the dataset is sufficiently large to require
+                # significant time to evaluate a pipeline.
+                # Increasing the number decreases the risk of lost compute time,
+                # but also increases information lag. An offspring created too
+                # early might miss out on a better parent.
+                if len(current_population) > 5:
                     new_individual = ops.create(current_population, 1)[0]
                     async_.submit(ops.evaluate, new_individual)
 
@@ -148,5 +150,4 @@ def async_ea(
                     log.info("Restart criterion met. Creating new random population.")
                     start_candidates = [ops.individual() for _ in range(max_pop_size)]
                     break
-
     return current_population

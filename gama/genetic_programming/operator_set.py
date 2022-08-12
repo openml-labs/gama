@@ -43,13 +43,15 @@ class OperatorSet:
     def wait_next(self, async_evaluator):
         """Wrapper for wait_next() to forward evaluation and log exceptions."""
         future = async_evaluator.wait_next()
-        if future.result is not None:
-            evaluation = future.result
+        if future.status == "error":
+            log.warning(f"Error raised during evaluation: {str(future.exception())}.")
+        else:
+            evaluation = future.result()
             if self._evaluate_callback is not None:
                 self._evaluate_callback(evaluation)
 
-        elif future.exception is not None:
-            log.warning(f"Error raised during evaluation: {str(future.exception)}.")
+        # elif future.exception is not None:
+        #     log.warning(f"Error raised during evaluation: {str(future.exception)}.")
         return future
 
     def try_until_new(self, operator, *args, **kwargs):
