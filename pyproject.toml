@@ -26,6 +26,7 @@ dependencies = [
   "category-encoders>=1.2.8",
   "black==19.10b0",
   "psutil",
+  "distributed",
 ]
 
 [project.optional-dependencies]
