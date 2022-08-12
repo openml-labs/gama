@@ -198,15 +198,14 @@ def asha(
             highest_rung_reached = max(rungs)
     except stopit.TimeoutException:
         log.info("ASHA ended due to timeout.")
-        reached_rungs = (rung for rung, inds in rung_individuals.items() if inds != [])
-        highest_rung_reached = max(reached_rungs)
-        if highest_rung_reached != max(rungs):
-            raise RuntimeWarning("Highest rung not reached.")
-    except:  # noqa: E722
-        raise
     finally:
         for rung, individuals in rung_individuals.items():
             log.info(f"[{len(individuals)}] {rung}")
+
+        reached_rungs = (rung for rung, inds in rung_individuals.items() if inds != [])
+        if reached_rungs and max(reached_rungs) != max(rungs):
+            raise RuntimeWarning("Highest rung not reached.")
+
         return list(map(lambda p: p[1], rung_individuals[highest_rung_reached]))
 
 

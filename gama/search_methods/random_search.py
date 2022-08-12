@@ -62,7 +62,7 @@ def random_search(
         while (max_evaluations is None) or (len(output) < max_evaluations):
             future = operations.wait_next(async_)
             if future.status == "finished" and future.result().error is not None:
-                output.append(future.result.individual)
+                output.append(future.result().individual)
             async_.submit(operations.evaluate, operations.individual())
 
     return output
