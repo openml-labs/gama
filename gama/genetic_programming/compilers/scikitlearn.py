@@ -105,7 +105,7 @@ def evaluate_pipeline(
                         sampler = ShuffleSplit(
                             n_splits=1, train_size=subsample, random_state=0
                         )
-                    full_train_x, full_train_y = x.iloc[train, :], y_train[train]
+                    full_train_x, full_train_y = x.iloc[train, :], y_train.iloc[train]
                     subsample_idx, _ = next(sampler.split(full_train_x, full_train_y))
                     new_splits.append((subsample_idx, test))
                 splitter = new_splits

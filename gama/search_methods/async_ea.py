@@ -132,15 +132,13 @@ def async_ea(
                         to_remove = ops.eliminate(current_population, 1)
                         current_population.remove(to_remove[0])
 
-                # TODO
-                # if async_.job_queue_size <= 1:
-                # Technically 0 should work to keep near-100% worker load,
-                # especially if the dataset is sufficiently large to require
-                # significant time to evaluate a pipeline.
-                # Increasing the number decreases the risk of lost compute time,
-                # but also increases information lag. An offspring created too
-                # early might miss out on a better parent.
-                if len(current_population) > 5:
+                if async_.job_queue_size <= 1:
+                    # Technically 0 should work to keep near-100% worker load,
+                    # especially if the dataset is sufficiently large to require
+                    # significant time to evaluate a pipeline.
+                    # Increasing the number decreases the risk of lost compute time,
+                    # but also increases information lag. An offspring created too
+                    # early might miss out on a better parent.
                     new_individual = ops.create(current_population, 1)[0]
                     async_.submit(ops.evaluate, new_individual)
 

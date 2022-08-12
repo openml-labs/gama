@@ -47,6 +47,16 @@ class AsyncEvaluator:
         self.client = None
         self.futures = None
 
+    @property
+    def job_queue_size(self) -> int:
+        """The number of jobs that are waiting for an available worker."""
+        # Dask does not distinguish between a future which is currently being evaluated
+        # or one which is waiting for a worker, both are "pending".
+        if self.futures:
+            pending_futures = [f for f in self.futures.futures if f.status == "pending"]
+            return len(pending_futures) - self._n_jobs
+        return 0
+
     def __enter__(self):
         if self.cluster or self.client:
             raise RuntimeError(

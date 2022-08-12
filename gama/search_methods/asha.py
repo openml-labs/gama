@@ -188,7 +188,7 @@ def asha(
                 len(rung_individuals[max_rung]) < max_full_evaluations
             ):
                 future = operations.wait_next(async_)
-                if future.status == "finished" and future.result().error is None:
+                if future.status == "finished":
                     rung = future.result().individual.meta["rung"]
                     loss = future.result().score[0]
                     individual = future.result().individual
@@ -202,9 +202,13 @@ def asha(
         for rung, individuals in rung_individuals.items():
             log.info(f"[{len(individuals)}] {rung}")
 
-        reached_rungs = (rung for rung, inds in rung_individuals.items() if inds != [])
-        if reached_rungs and max(reached_rungs) != max(rungs):
-            raise RuntimeWarning("Highest rung not reached.")
+        reached_rungs = [rung for rung, inds in rung_individuals.items() if inds != []]
+        highest_rung_reached = max(reached_rungs) if reached_rungs else None  # type: ignore # noqa: E501
+        if highest_rung_reached != max(rungs):
+            raise RuntimeWarning(
+                "ASHA was stopped before reaching the highest rung. "
+                f"{highest_rung_reached=} {max(rungs)=}"
+            )
 
         return list(map(lambda p: p[1], rung_individuals[highest_rung_reached]))
 
