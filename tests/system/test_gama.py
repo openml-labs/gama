@@ -23,7 +23,7 @@ def _gama_on_digits(gama):
     assert log_loss(y_test, y_proba) == gama.score(X_test, y_test)
     assert log_loss(y_test, y_proba) == gama.score(X_test, pd.Series(y_test))
     assert log_loss(y_test, y_proba) == gama.score(
-        X_test, LabelEncoder().fit_transform(y_test.reshape(-1, 1))
+        X_test, LabelEncoder().fit_transform(y_test)
     )
 
 
