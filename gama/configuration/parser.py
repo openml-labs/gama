@@ -64,7 +64,8 @@ def pset_from_config(configuration):
                 "FEATURE_SELECTION",
                 "DATA_TRANSFORMATION",
             ]
-            if any(issubclass(key, baseclass) for baseclass in [sklearn.base.TransformerMixin, river.base.Transformer]) or (
+            if any(issubclass(key, baseclass) for baseclass in
+                   [sklearn.base.TransformerMixin, river.base.Transformer]) or (
                 hasattr(key, "metadata")
                 and key.metadata.query()["primitive_family"] in transformer_tags
             ):
@@ -73,7 +74,8 @@ def pset_from_config(configuration):
                         input=hyperparameter_types, output=DATA_TERMINAL, identifier=key
                     )
                 )
-            elif any(issubclass(key, baseclass) for baseclass in [sklearn.base.ClassifierMixin, river.base.Classifier])  or (
+            elif any(issubclass(key, baseclass) for baseclass in
+                     [sklearn.base.ClassifierMixin, river.base.Classifier]) or (
                 hasattr(key, "metadata")
                 and key.metadata.query()["primitive_family"] == "CLASSIFICATION"
             ):
@@ -82,7 +84,8 @@ def pset_from_config(configuration):
                         input=hyperparameter_types, output="prediction", identifier=key
                     )
                 )
-            elif any(issubclass(key, baseclass) for baseclass in [sklearn.base.RegressorMixin, river.base.Regressor])  or (
+            elif any(issubclass(key, baseclass) for baseclass in
+                     [sklearn.base.RegressorMixin, river.base.Regressor]) or (
                 hasattr(key, "metadata")
                 and key.metadata.query()["primitive_family"] == "REGRESSION"
             ):
@@ -94,7 +97,8 @@ def pset_from_config(configuration):
             else:
                 raise TypeError(
                     f"Expected {key} to be either subclass of "
-                    "TransformerMixin, RegressorMixin or ClassifierMixin (or River base classes)."
+                    "TransformerMixin, RegressorMixin or ClassifierMixin "
+                    "(or River base classes)."
                 )
         else:
             raise TypeError(

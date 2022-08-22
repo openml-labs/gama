@@ -1,6 +1,6 @@
 from river.metrics import Accuracy
 from river.metrics import BalancedAccuracy
-from river.metrics import BinaryMetric
+# from river.metrics import BinaryMetric
 # from river.metrics import ClassificationMetric
 # from river.metrics import ClassificationReport
 # from river.metrics import CohenKappa

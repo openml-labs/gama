@@ -40,11 +40,10 @@ import wandb
 #Metrics
 
 gama_metrics = {
-  "acc": 'accuracy',
-  "b_acc": "balanced_accuracy",
-  "f1": "f1",
-  "roc_auc": "roc_auc",
-  "rmse": "rmse"
+  "acc": 'r_accuracy',
+  "b_acc": "r_balanced_accuracy",
+  "f1": "r_f1",
+  "roc_auc": "r_roc_auc",
 }
 
 online_metrics = {
@@ -52,7 +51,6 @@ online_metrics = {
     "b_acc":    metrics.BalancedAccuracy(),
     "f1":       metrics.F1(),
     "roc_auc":  metrics.ROCAUC(),
-    "rmse":     metrics.RMSE()
                   }
 
 #Search algorithms
@@ -124,7 +122,7 @@ Auto_pipeline = GamaClassifier(max_total_time=time_budget,
                      online_learning=True,
                      post_processing=BestFitOnlinePostProcessing(),
                      store='all',
-                     n_jobs = 1,
+                     n_jobs =1,
                      )
 
 Auto_pipeline.fit(X.iloc[0:initial_batch],y[0:initial_batch])
@@ -172,3 +170,4 @@ for i in range(initial_batch+1,len(B)):
 
         print(f'Current model is {Online_model} and hyperparameters are: {Online_model._get_params()}')
 
+print("End of run.")

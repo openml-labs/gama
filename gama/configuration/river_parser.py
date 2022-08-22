@@ -2,8 +2,6 @@ import river
 from collections import defaultdict
 from typing import Dict, Any
 
-import sklearn
-import river
 from gama.genetic_programming.components import Primitive, Terminal, DATA_TERMINAL
 
 
@@ -88,7 +86,8 @@ def pset_from_config(configuration):
             # ):
             #     pset["prediction"].append(
             #         Primitive(
-            #             input=hyperparameter_types, output="prediction", identifier=key
+            #             input=hyperparameter_types, output="prediction",
+            #             identifier=key
             #         )
             #     )
             else:

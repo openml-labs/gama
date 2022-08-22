@@ -85,11 +85,12 @@ def basic_pipeline_extension(
 
     return extension_steps
 
+
 def river_pipeline_extension(
     x: pd.DataFrame, is_classification: bool
-) -> List[Tuple[str]]:
-
-    extension_steps = []
-    #not implemented
+) -> List:
+    """ Not implemented
+    """
+    extension_steps = []   # type: List
 
     return extension_steps

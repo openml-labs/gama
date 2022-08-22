@@ -2,29 +2,24 @@ from datetime import datetime
 import logging
 import os
 import time
-from typing import Callable, Tuple, Optional, Sequence
+from typing import Callable, Tuple, Optional
 
 import stopit
-#from sklearn.base import TransformerMixin, is_classifier
-from river.base import Classifier
 from river import evaluate
-from gama.utilities.river_metrics import get_metric
-#from sklearn.model_selection import ShuffleSplit, cross_validate, check_cv
-from river.compose.pipeline import Pipeline #River pipeline instead
-from river import compose
-# we dont have cross valudate checkcv and is classifier equivalent in river, we do have metrics.workswith though
-# shuffle split is also just suffle streamer and then there isa splitter
-from river import stream
-from river import metrics
+from gama.utilities.metrics import Metric
 
+
+from river.compose.pipeline import Pipeline
+
+from river import stream
 
 from gama.utilities.evaluation_library import Evaluation
 from gama.utilities.generic.stopwatch import Stopwatch
 import numpy as np
-from gama.utilities.metrics import Metric
 from gama.genetic_programming.components import Individual, PrimitiveNode, Fitness
 
 log = logging.getLogger(__name__)
+
 
 # Use progressive_val_score instead of cross validate
 
@@ -36,10 +31,9 @@ def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
 
 
 def compile_individual(
-    individual: Individual,
-    parameter_checks=None,
-    preprocessing_steps: Sequence[Tuple[str, Classifier
-    ]] = None,
+        individual: Individual,
+        parameter_checks=None,
+        preprocessing_steps=None,
 ) -> Pipeline:
     steps = [
         (str(i), primitive_node_to_sklearn(primitive))
@@ -62,10 +56,12 @@ def object_is_valid_pipeline(o):
         and hasattr(o, "steps")
     )
 
+
 def evaluate_pipeline(
-    pipeline, x, y_train, timeout: float,metrics: str = 'accuracy', cv=5, subsample=None,
+        pipeline, x, y_train, timeout: float, metrics: Tuple[Metric],
 ) -> Tuple:
-    """ Score `pipeline` with online holdout evaluation according to `metrics` on (a subsample of) X, y
+    """ Score `pipeline` with online holdout evaluation according to `metrics`
+    on (a subsample of) X, y
 
     Returns
     -------
@@ -76,28 +72,30 @@ def evaluate_pipeline(
         error: None if successful, otherwise an Exception
     """
     if not object_is_valid_pipeline(pipeline):
-        raise TypeError(f"Pipeline must not be None and requires learn_one, predict_one, steps.")
+        raise TypeError(f"Pipeline must not be None and requires learn_one, "
+                        f"predict_one, steps.")
     if not timeout > 0:
         raise ValueError(f"`timeout` must be greater than 0, is {timeout}.")
     prediction, estimators = None, None
     # default score for e.g. timeout or failure
     scores = tuple([float("-inf")])
-    river_metric = get_metric(metrics)
+
+    river_metric = metrics
 
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
             dataset = []
             for a, b in stream.iter_pandas(x, y_train):
-                dataset.append((a,b))
+                dataset.append((a, b))
 
             result = evaluate.progressive_val_score(
-                dataset = dataset,
-                model = pipeline,
-                metric = river_metric,
+                dataset=dataset,
+                model=pipeline,
+                metric=river_metric,
             )
 
             scores = tuple([result.get()])
-            estimators = river_model
+            estimators = pipeline
 
             prediction = np.empty(shape=(len(y_train),))
             y_pred = []
@@ -106,7 +104,6 @@ def evaluate_pipeline(
                 pipeline = pipeline.learn_one(a, b)
 
             prediction = np.asarray(y_pred)
-
 
         except stopit.TimeoutException:
             # This exception is handled by the ThreadingTimeout context manager.
@@ -130,12 +127,12 @@ def evaluate_pipeline(
 
 
 def evaluate_individual(
-    individual: Individual,
-    evaluate_pipeline: Callable,
-    timeout: float = 1e6,
-    deadline: Optional[float] = None,
-    add_length_to_score: bool = True,
-    **kwargs,
+        individual: Individual,
+        evaluate_pipeline: Callable,
+        timeout: float = 1e6,
+        deadline: Optional[float] = None,
+        add_length_to_score: bool = True,
+        **kwargs,
 ) -> Evaluation:
     """ Evaluate the pipeline specified by individual, and record
 

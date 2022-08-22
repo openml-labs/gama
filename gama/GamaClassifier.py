@@ -3,9 +3,10 @@ from typing import Union, Optional
 
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 from sklearn.base import ClassifierMixin
 from river.base import Classifier
-from sklearn.preprocessing import LabelEncoder
+
 
 from .gama import Gama
 from gama.data_loading import X_y_from_file
@@ -17,8 +18,12 @@ from gama.utilities.metrics import scoring_to_metric
 class GamaClassifier(Gama):
     """ Gama with adaptations for (multi-class) classification. """
 
-    def __init__(self, config=None, scoring="neg_log_loss", online_learning = False, *args, **kwargs) -> object:
+    def __init__(self, config=None, scoring="neg_log_loss", online_learning=False,
+                 *args, **kwargs) -> None:
+
         self._online_learning = online_learning
+        self._scoring = scoring
+
         if not config:
             # Do this to avoid the whole dictionary being included in the documentation.
             if not self._online_learning:
@@ -27,7 +32,7 @@ class GamaClassifier(Gama):
                 config = clf_config_online
 
         self._metrics = scoring_to_metric(scoring)
-        """
+
         if any(metric.requires_probabilities for metric in self._metrics):
             # we don't want classifiers that do not have `predict_proba`,
             # because then we have to start doing one hot encodings of predictions etc.
@@ -36,13 +41,16 @@ class GamaClassifier(Gama):
                 for (alg, hp) in config.items()
                 if not (
                     inspect.isclass(alg)
-                    and any(issubclass(alg, baseclass) for baseclass in [ClassifierMixin, Classifier])
-                    and not any(hasattr(alg(), attr) for attr in ["predict_proba", "predict_proba_one"])
+                    and any(issubclass(alg, baseclass) for baseclass in
+                            [ClassifierMixin, Classifier])
+                    and not any(hasattr(alg(), attr) for attr in
+                                ["predict_proba", "predict_proba_one"])
                 )
             }
-        """
+
         self._label_encoder = None
-        super().__init__(*args, **kwargs, config=config, scoring=scoring, online_learning=online_learning)
+        super().__init__(*args, **kwargs, config=config, scoring=scoring,
+                         online_learning=online_learning)
 
     def _predict(self, x: pd.DataFrame):
         """ Predict the target for input X.
@@ -59,15 +67,16 @@ class GamaClassifier(Gama):
         """
         if not self._online_learning:
             y = self.model.predict(x)  # type: ignore
-            if y[0] not in self._label_encoder.classes_:
-                y = self._label_encoder.inverse_transform(y)
+            if self._label_encoder is not None:
+                if y[0] not in self._label_encoder.classes_:
+                    y = self._label_encoder.inverse_transform(y)
         else:
             """
             y_pred = []
             for x_i in x:
                 y_pred.append(self.model.predict_one(x_i))
             y = np.array(y_pred) """
-            y = 999  #not implemented
+            y = 999  # not implemented
         # Decode the predicted labels - necessary only if ensemble is not used.
         return y
 

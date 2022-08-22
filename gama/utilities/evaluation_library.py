@@ -7,7 +7,7 @@ import os
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import StratifiedShuffleSplit
+# from sklearn.model_selection import StratifiedShuffleSplit
 
 from gama.genetic_programming.components import Individual
 

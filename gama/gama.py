@@ -35,6 +35,7 @@ from gama.genetic_programming.components import Individual, Fitness
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
 from gama.utilities.metrics import scoring_to_metric
+from gama.utilities.metrics import get_river_metric
 
 from gama.__version__ import __version__
 from gama.data_loading import X_y_from_file
@@ -56,14 +57,15 @@ from gama.genetic_programming.selection import (
 from gama.genetic_programming.operations import create_random_expression
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
-from gama.genetic_programming.compilers.scikitlearn import compile_individual
-from gama.genetic_programming.compilers.river_compiler import compile_individual
+from gama.genetic_programming.compilers.scikitlearn import compile_individual \
+    as sklearn_compile_individual
+from gama.genetic_programming.compilers.river_compiler import compile_individual \
+    as river_compile_individual
 
 from gama.postprocessing import (
     BestFitPostProcessing,
     BasePostProcessing,
     EnsemblePostProcessing,
-    BestFitOnlinePostProcessing,
 )
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.utilities.metrics import Metric
@@ -103,7 +105,6 @@ class Gama(ABC):
         output_directory: Optional[str] = None,
         store: str = "logs",
         online_learning: bool = False,
-        online_scoring: str = 'accuracy'
     ):
         """
 
@@ -248,13 +249,12 @@ class Gama(ABC):
 
         if not self._online_learning:
             self._compiler = gama.genetic_programming.compilers.scikitlearn
-            from gama.genetic_programming.compilers.scikitlearn import compile_individual
+            compile_individual = sklearn_compile_individual
 
         else:
             self._compiler = gama.genetic_programming.compilers.river_compiler
-            from gama.genetic_programming.compilers.river_compiler import compile_individual
-            self._metrics = online_scoring
-
+            self._metrics = get_river_metric(scoring)
+            compile_individual = river_compile_individual
         if random_state is not None:
             random.seed(random_state)
             np.random.seed(random_state)
@@ -515,10 +515,12 @@ class Gama(ABC):
                 self._fixed_pipeline_extension = basic_pipeline_extension(
                     self._x, is_classification
                 )
+                compile_individual = sklearn_compile_individual
             else:
                 self._fixed_pipeline_extension = river_pipeline_extension(
                     self._x, is_classification
                 )
+                compile_individual = river_compile_individual
             self._operator_set._safe_compile = partial(
                 compile_individual, preprocessing_steps=self._fixed_pipeline_extension
             )
@@ -596,7 +598,8 @@ class Gama(ABC):
         Partial-fit can be called only after fit is called once.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
-        In partial-fit, the search starts with n_best pipelines found in previous fit call.
+        In partial-fit, the search starts with n_best pipelines found in
+        previous fit call.
         Using Genetic Programming, the pipelines chosen should lead to gradually
         better models. Pipelines will internally be validated using cross validation.
 
@@ -629,10 +632,13 @@ class Gama(ABC):
                 self._fixed_pipeline_extension = basic_pipeline_extension(
                     self._x, is_classification
                 )
+                compile_individual = sklearn_compile_individual
             else:
                 self._fixed_pipeline_extension = river_pipeline_extension(
                     self._x, is_classification
                 )
+                compile_individual = river_compile_individual
+
             self._operator_set._safe_compile = partial(
                 compile_individual, preprocessing_steps=self._fixed_pipeline_extension
             )
@@ -666,8 +672,8 @@ class Gama(ABC):
             * self._time_manager.total_time_remaining
         )
 
-        #Start search phase from the top performing 10 individuals
-        #of previous final population
+        # Start search phase from the top performing 10 individuals
+        # of previous final population
         prior_top_individuals = list(
             reversed(
                 sorted(
@@ -707,12 +713,10 @@ class Gama(ABC):
                 best_individuals,
             )
 
-
         if not self._store == "all":
             to_clean = dict(nothing="all", logs="evaluations", models="logs")
             self.cleanup(to_clean[self._store])
         return self
-
 
     def _search_phase(
         self, warm_start: Optional[List[Individual]] = None, timeout: float = 1e6
@@ -729,20 +733,16 @@ class Gama(ABC):
             pop = [self._operator_set.individual() for _ in range(50)]
 
         deadline = time.time() + timeout
-
-
         evaluate_pipeline = partial(
             self._compiler.evaluate_pipeline,
             x=self._x,
             y_train=self._y,
             metrics=self._metrics,
         )
-
         AsyncEvaluator.defaults = dict(evaluate_pipeline=evaluate_pipeline)
 
         self._operator_set.evaluate = partial(
             self._compiler.evaluate_individual,
-            # evaluate_pipeline=evaluate_pipeline,
             timeout=self._max_eval_time,
             deadline=deadline,
             add_length_to_score=self._regularize_length,

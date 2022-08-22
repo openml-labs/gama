@@ -11,7 +11,7 @@ from gama.utilities.export import (
     format_import,
     format_pipeline,
 )
-from river import compose
+
 
 class BestFitOnlinePostProcessing(BasePostProcessing):
     """ Post processing technique which trains the best found single pipeline. """
@@ -21,7 +21,8 @@ class BestFitOnlinePostProcessing(BasePostProcessing):
         self._selected_individual: Optional[Individual] = None
 
     def post_process(
-        self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]
+            self, x: pd.DataFrame, y: pd.Series,
+            timeout: float, selection: List[Individual]
     ) -> object:
         self._selected_individual = selection[0]
         model = self._selected_individual.pipeline
@@ -31,7 +32,7 @@ class BestFitOnlinePostProcessing(BasePostProcessing):
         return model
 
     def to_code(
-        self, preprocessing: Sequence[Tuple[str, Transformer]] = None
+            self, preprocessing: Sequence[Tuple[str, Transformer]] = None
     ) -> str:
         if self._selected_individual is None:
             raise RuntimeError("`to_code` can only be called after `post_process`.")
