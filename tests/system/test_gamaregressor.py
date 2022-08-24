@@ -54,12 +54,12 @@ def _test_dataset_problem(data, metric):
 
 
 def test_regression_mean_squared_error():
-    """ GamaRegressor works on all-numeric data. """
+    """GamaRegressor works on all-numeric data."""
     _test_dataset_problem(boston, "neg_mean_squared_error")
 
 
 def test_missing_value_regression():
-    """ GamaRegressor works when missing values are present. """
+    """GamaRegressor works when missing values are present."""
     data = boston
     metric = "neg_mean_squared_error"
     X, y = data["load"](return_X_y=True)
@@ -68,6 +68,9 @@ def test_missing_value_regression():
     X_test[1:100:2, 0] = X_test[2:100:5, 1] = float("NaN")
 
     gama = GamaRegressor(
-        random_state=0, max_total_time=TOTAL_TIME_S, scoring=metric, store="nothing",
+        random_state=0,
+        max_total_time=TOTAL_TIME_S,
+        scoring=metric,
+        store="nothing",
     )
     _test_gama_regressor(gama, X_train, X_test, y_train, y_test, data, metric)

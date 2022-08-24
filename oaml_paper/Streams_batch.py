@@ -1,7 +1,7 @@
-#Application script for automated River
+# Application script for automated River
 
 
-#imports
+# imports
 
 import numpy as np
 import pandas as pd
@@ -25,57 +25,65 @@ import wandb
 
 from sklearn import metrics
 
-#User parameters
+# User parameters
 
-data_loc = 'data_streams/SEA_Abrubt_5.arff'     #needs to be arff
-initial_batch = 1000                            #initial set of samples to train automl
-#drift_detector = EDDM()
+data_loc = "data_streams/SEA_Abrubt_5.arff"  # needs to be arff
+initial_batch = 1000  # initial set of samples to train automl
+# drift_detector = EDDM()
 drift_detector = drift_detection.EDDM()
 live_plot = True
 
-#Plot initialization
+# Plot initialization
 if live_plot:
     wandb.init(
         project="Ensemble-demo",
-        entity = "autoriver",
+        entity="autoriver",
         config={
             "dataset": data_loc,
-        })
+        },
+    )
 
 
-#Data
+# Data
 
-B = pd.DataFrame(arff.load(open(data_loc, 'r'),encode_nominal=True)["data"])
-B = B[~((B.iloc[:,0:-1] == 0).any(axis=1))].reset_index(drop=True)
+B = pd.DataFrame(arff.load(open(data_loc, "r"), encode_nominal=True)["data"])
+B = B[~((B.iloc[:, 0:-1] == 0).any(axis=1))].reset_index(drop=True)
 
-X = B.iloc[:,0:-1]
-y = B.iloc[:,-1]
+X = B.iloc[:, 0:-1]
+y = B.iloc[:, -1]
 
-#model = preprocessing.StandardScaler() | linear_model.Perceptron()
+# model = preprocessing.StandardScaler() | linear_model.Perceptron()
 model = naive_bayes.BernoulliNB()
 
-#initial training
-#breakpoint()
+# initial training
+# breakpoint()
 model = model.learn_many(X.iloc[0:initial_batch], y[0:initial_batch])
 
-for i in range(initial_batch+1,len(X),1000):
-    #Test then train - by one
-    y_pred = 1 * model.predict_many(X.iloc[i:i+1000])
+for i in range(initial_batch + 1, len(X), 1000):
+    # Test then train - by one
+    y_pred = 1 * model.predict_many(X.iloc[i : i + 1000])
     y_pred = y_pred.astype(int)
-    performance = metrics.accuracy_score(y[i:i+1000], y_pred)
-    print(f'Test batch - {i} with {performance}')
-    model = model.learn_many(X.iloc[i:i+1000], y[i:i+1000])
+    performance = metrics.accuracy_score(y[i : i + 1000], y_pred)
+    print(f"Test batch - {i} with {performance}")
+    model = model.learn_many(X.iloc[i : i + 1000], y[i : i + 1000])
 
-
-    #Print performance every x interval
-    for j in range(i,i+999):
+    # Print performance every x interval
+    for j in range(i, i + 999):
         if live_plot:
             wandb.log({"current_point": j, "Batch performance": performance})
         drift_detector.add_element(int(y_pred[j] != int(y[j])))
         if drift_detector.detected_change():
-            print(f"Change detected at data point {j} and current performance is at {performance}")
+            print(
+                f"Change detected at data point {j} and current performance is at {performance}"
+            )
             if live_plot:
-                wandb.log({"drift_point": j, "current_point": j, "Prequential performance": performance})
+                wandb.log(
+                    {
+                        "drift_point": j,
+                        "current_point": j,
+                        "Prequential performance": performance,
+                    }
+                )
 
 # #dataset = datasets.Phishing()
 # dataset = []
@@ -87,7 +95,6 @@ for i in range(initial_batch+1,len(X),1000):
 # evaluate.progressive_val_score(dataset, backup_ensemble, metric)
 # print("ensemble: ", metric)
 # print(backup_ensemble._get_params())
-
 
 
 # for i in range(initial_batch+1,len(X)):

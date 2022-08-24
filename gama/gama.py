@@ -57,10 +57,12 @@ from gama.genetic_programming.selection import (
 from gama.genetic_programming.operations import create_random_expression
 from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
-from gama.genetic_programming.compilers.scikitlearn import compile_individual \
-    as sklearn_compile_individual
-from gama.genetic_programming.compilers.river_compiler import compile_individual \
-    as river_compile_individual
+from gama.genetic_programming.compilers.scikitlearn import (
+    compile_individual as sklearn_compile_individual,
+)
+from gama.genetic_programming.compilers.river_compiler import (
+    compile_individual as river_compile_individual,
+)
 
 from gama.postprocessing import (
     BestFitPostProcessing,
@@ -84,7 +86,7 @@ for module_to_ignore in ["sklearn", "numpy"]:
 
 
 class Gama(ABC):
-    """ Wrapper for the toolbox logic surrounding executing the AutoML pipeline. """
+    """Wrapper for the toolbox logic surrounding executing the AutoML pipeline."""
 
     def __init__(
         self,
@@ -270,14 +272,14 @@ class Gama(ABC):
         self._subscribers: Dict[str, List[Callable]] = defaultdict(list)
         cache_directory = os.path.join(self.output_directory, "cache")
 
-        if isinstance(post_processing, EnsemblePostProcessing):
+        if self._online_learning:
+            self._evaluation_library = EvaluationLibrary(m=None, cache=cache_directory)
+        elif isinstance(post_processing, EnsemblePostProcessing):
             self._evaluation_library = EvaluationLibrary(
                 m=post_processing.hyperparameters["max_models"],
                 n=post_processing.hyperparameters["hillclimb_size"],
                 cache=cache_directory,
             )
-        if self._online_learning:
-            self._evaluation_library = EvaluationLibrary(m=None, cache=cache_directory)
         else:
             # Don't keep memory-heavy evaluation meta-data (predictions, estimators)
             self._evaluation_library = EvaluationLibrary(m=0, cache=cache_directory)
@@ -323,7 +325,7 @@ class Gama(ABC):
             os.rmdir(self.output_directory)
 
     def _np_to_matching_dataframe(self, x: np.ndarray) -> pd.DataFrame:
-        """ Format np array to dataframe whose column types match the training data. """
+        """Format np array to dataframe whose column types match the training data."""
         if not isinstance(x, np.ndarray):
             raise TypeError(f"Expected x to be of type 'numpy.ndarray' not {type(x)}.")
 
@@ -342,7 +344,7 @@ class Gama(ABC):
         raise NotImplementedError("_predict is implemented by base classes.")
 
     def predict(self, x: Union[pd.DataFrame, np.ndarray]):
-        """ Predict the target for input X.
+        """Predict the target for input X.
 
         Parameters
         ----------
@@ -364,7 +366,7 @@ class Gama(ABC):
         encoding: Optional[str] = None,
         **kwargs,
     ) -> np.ndarray:
-        """ Predict the target for input found in the ARFF file.
+        """Predict the target for input found in the ARFF file.
 
         Parameters
         ----------
@@ -393,7 +395,7 @@ class Gama(ABC):
     def score(
         self, x: Union[pd.DataFrame, np.ndarray], y: Union[pd.Series, np.ndarray]
     ) -> float:
-        """ Calculate `self.scoring` metric of the model on (x, y).
+        """Calculate `self.scoring` metric of the model on (x, y).
 
         Parameters
         ----------
@@ -421,7 +423,7 @@ class Gama(ABC):
         encoding: Optional[str] = None,
         **kwargs,
     ) -> float:
-        """ Calculate `self.scoring` metric of the model on data in the file.
+        """Calculate `self.scoring` metric of the model on data in the file.
 
         Parameters
         ----------
@@ -453,7 +455,7 @@ class Gama(ABC):
         warm_start: Optional[List[Individual]] = None,
         **kwargs,
     ) -> None:
-        """ Find and fit a model to predict the target column (last) from other columns.
+        """Find and fit a model to predict the target column (last) from other columns.
 
         Parameters
         ----------
@@ -480,7 +482,7 @@ class Gama(ABC):
         y: Union[pd.DataFrame, pd.Series, np.ndarray],
         warm_start: Optional[List[Individual]] = None,
     ) -> "Gama":
-        """ Find and fit a model to predict target y from X.
+        """Find and fit a model to predict target y from X.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
         Using Genetic Programming, the pipelines chosen should lead to gradually
@@ -594,7 +596,7 @@ class Gama(ABC):
         y: Union[pd.DataFrame, pd.Series, np.ndarray],
         warm_start: Optional[List[Individual]] = None,
     ) -> "Gama":
-        """ Find and partial-fit a model to predict target y from X.
+        """Find and partial-fit a model to predict target y from X.
         Partial-fit can be called only after fit is called once.
 
         Various possible machine learning pipelines will be fit to the (X,y) data.
@@ -721,7 +723,7 @@ class Gama(ABC):
     def _search_phase(
         self, warm_start: Optional[List[Individual]] = None, timeout: float = 1e6
     ):
-        """ Invoke the search algorithm, populate `final_pop`. """
+        """Invoke the search algorithm, populate `final_pop`."""
 
         if warm_start:
             if not all([isinstance(i, Individual) for i in warm_start]):
@@ -734,7 +736,7 @@ class Gama(ABC):
 
         deadline = time.time() + timeout
         evaluate_pipeline = partial(
-            self._compiler.evaluate_pipeline,
+            self._compiler.evaluate_pipeline,  # type: ignore
             x=self._x,
             y_train=self._y,
             metrics=self._metrics,
@@ -742,7 +744,7 @@ class Gama(ABC):
         AsyncEvaluator.defaults = dict(evaluate_pipeline=evaluate_pipeline)
 
         self._operator_set.evaluate = partial(
-            self._compiler.evaluate_individual,
+            self._compiler.evaluate_individual,  # type: ignore
             timeout=self._max_eval_time,
             deadline=deadline,
             add_length_to_score=self._regularize_length,
@@ -761,7 +763,7 @@ class Gama(ABC):
     def export_script(
         self, file: Optional[str] = "gama_pipeline.py", raise_if_exists: bool = False
     ):
-        """ Export a Python script which sets up the best found pipeline.
+        """Export a Python script which sets up the best found pipeline.
 
         Can only be called after `fit`.
 
@@ -809,7 +811,7 @@ class Gama(ABC):
             return script_text
 
     def _safe_outside_call(self, fn):
-        """ Calls fn logging and ignoring all exceptions except TimeoutException. """
+        """Calls fn logging and ignoring all exceptions except TimeoutException."""
         try:
             fn()
         except stopit.utils.TimeoutException:
@@ -835,7 +837,7 @@ class Gama(ABC):
             self._safe_outside_call(partial(callback, evaluation))
 
     def evaluation_completed(self, callback: Callable[[Evaluation], Any]) -> None:
-        """ Register a callback function that is called when an evaluation is completed.
+        """Register a callback function that is called when an evaluation is completed.
 
         Parameters
         ----------

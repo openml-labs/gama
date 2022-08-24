@@ -2,6 +2,7 @@ from abc import ABC
 from typing import List, Union, Dict, Any, Tuple, TYPE_CHECKING, Sequence
 
 import pandas as pd
+
 # from sklearn.base import TransformerMixin
 # from river.base import Transformer
 
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
 
 
 class BasePostProcessing(ABC):
-    """ All post-processing methods should be derived from this class.
+    """All post-processing methods should be derived from this class.
     This class should not be directly used to configure GAMA.
     """
 
@@ -43,11 +44,11 @@ class BasePostProcessing(ABC):
 
     @property
     def hyperparameters(self) -> Dict[str, Any]:
-        """ Hyperparameter (name, value) pairs.
+        """Hyperparameter (name, value) pairs.
 
-         Value determined by user > dynamic default > static default.
-         Dynamic default values only considered if `dynamic_defaults` has been called.
-         """
+        Value determined by user > dynamic default > static default.
+        Dynamic default values only considered if `dynamic_defaults` has been called.
+        """
         return {
             parameter: set_value if set_value is not None else default
             for parameter, (set_value, default) in self._hyperparameters.items()
@@ -86,10 +87,8 @@ class BasePostProcessing(ABC):
         """
         raise NotImplementedError("Method must be implemented by child class.")
 
-    def to_code(
-        self, preprocessing: Sequence[Tuple[str, Any]] = None
-    ) -> str:
-        """ Generate Python code to reconstruct a pipeline that constructs the model.
+    def to_code(self, preprocessing: Sequence[Tuple[str, Any]] = None) -> str:
+        """Generate Python code to reconstruct a pipeline that constructs the model.
 
         Parameters
         ----------

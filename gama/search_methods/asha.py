@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 
 
 class AsynchronousSuccessiveHalving(BaseSearch):
-    """ Asynchronous Halving Algorithm by Li et al.
+    """Asynchronous Halving Algorithm by Li et al.
 
     paper: https://arxiv.org/abs/1810.05934
 
@@ -75,7 +75,7 @@ def asha(
     minimum_early_stopping_rate: int = 1,
     max_full_evaluations: Optional[int] = None,
 ) -> List[Individual]:
-    """ Asynchronous Halving Algorithm by Li et al.
+    """Asynchronous Halving Algorithm by Li et al.
 
     paper: https://arxiv.org/abs/1810.05934
 
@@ -113,7 +113,7 @@ def asha(
     )
     rungs = range(minimum_early_stopping_rate, max_rung + 1)
     rung_resources = {
-        rung: min(minimum_resource * (reduction_factor ** rung), maximum_resource)
+        rung: min(minimum_resource * (reduction_factor**rung), maximum_resource)
         for rung in rungs
     }
     evaluate = partial(

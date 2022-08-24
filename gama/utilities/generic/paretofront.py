@@ -3,7 +3,7 @@ from typing import Tuple, List, Optional, Callable, Any
 
 
 class ParetoFront(Sequence):
-    """ A list of tuples in which no one tuple is dominated by another. """
+    """A list of tuples in which no one tuple is dominated by another."""
 
     def __init__(
         self,
@@ -36,7 +36,7 @@ class ParetoFront(Sequence):
             return item
 
     def update(self, new_item: Any):
-        """ Update the Pareto front with new_item if it qualifies.
+        """Update the Pareto front with new_item if it qualifies.
 
         Parameters
         ----------
@@ -83,7 +83,7 @@ class ParetoFront(Sequence):
         return True
 
     def clear(self):
-        """ Removes all items from the Pareto front."""
+        """Removes all items from the Pareto front."""
         self._front = []
 
     def __len__(self):

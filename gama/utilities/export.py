@@ -6,7 +6,7 @@ from gama.genetic_programming.components import Individual
 
 
 def transformers_to_str(transformers: List[TransformerMixin]) -> List[str]:
-    """ Format a transformer for code export, removes any mapping. """
+    """Format a transformer for code export, removes any mapping."""
     copies = list(map(copy.copy, transformers))
     for transformer in copies:
         if hasattr(transformer, "mapping"):
@@ -15,7 +15,7 @@ def transformers_to_str(transformers: List[TransformerMixin]) -> List[str]:
 
 
 def format_import(o: object) -> str:
-    """ Creates the import statement for `o`'s class. """
+    """Creates the import statement for `o`'s class."""
     if o.__module__.split(".")[-1].startswith("_"):
         module = ".".join(o.__module__.split(".")[:-1])
     else:
@@ -31,7 +31,7 @@ def format_pipeline(steps: List[Tuple[str, str]], name: str = "pipeline"):
 def imports_and_steps_for_individual(
     individual: Individual,
 ) -> Tuple[Set[str], List[Tuple[str, str]]]:
-    """ Determine required imports and steps for the individual's pipeline.
+    """Determine required imports and steps for the individual's pipeline.
 
     Returns two lists:
      - one with import statements
@@ -57,7 +57,7 @@ def imports_and_steps_for_individual(
 def individual_to_python(
     individual: Individual, prepend_steps: List[Tuple[str, TransformerMixin]] = None
 ) -> str:
-    """ Generate code for the machine learning pipeline represented by `individual`. """
+    """Generate code for the machine learning pipeline represented by `individual`."""
     imports, steps = imports_and_steps_for_individual(individual)
     if prepend_steps is not None:
         steps = prepend_steps + steps

@@ -59,7 +59,11 @@ setup(
     },
     packages=find_packages(exclude=["tests", "tests.*"]),
     install_requires=base,
-    extras_require={"vis": vis, "dev": dev, "all": all_,},
+    extras_require={
+        "vis": vis,
+        "dev": dev,
+        "all": all_,
+    },
     python_requires=">=3.6.0",
     entry_points={
         "console_scripts": [

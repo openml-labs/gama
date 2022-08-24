@@ -14,15 +14,14 @@ from gama.utilities.export import (
 
 
 class BestFitOnlinePostProcessing(BasePostProcessing):
-    """ Post processing technique which trains the best found single pipeline. """
+    """Post processing technique which trains the best found single pipeline."""
 
     def __init__(self, time_fraction: float = 0.1):
         super().__init__(time_fraction)
         self._selected_individual: Optional[Individual] = None
 
     def post_process(
-            self, x: pd.DataFrame, y: pd.Series,
-            timeout: float, selection: List[Individual]
+        self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]
     ) -> object:
         self._selected_individual = selection[0]
         model = self._selected_individual.pipeline
@@ -31,9 +30,7 @@ class BestFitOnlinePostProcessing(BasePostProcessing):
 
         return model
 
-    def to_code(
-            self, preprocessing: Sequence[Tuple[str, Transformer]] = None
-    ) -> str:
+    def to_code(self, preprocessing: Sequence[Tuple[str, Transformer]] = None) -> str:
         if self._selected_individual is None:
             raise RuntimeError("`to_code` can only be called after `post_process`.")
 

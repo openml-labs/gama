@@ -16,17 +16,22 @@ from gama.utilities.metrics import scoring_to_metric
 
 
 class GamaClassifier(Gama):
-    """ Gama with adaptations for (multi-class) classification. """
+    """Gama with adaptations for (multi-class) classification."""
 
-    def __init__(self, config=None, scoring="neg_log_loss", online_learning=False,
-                 *args, **kwargs) -> None:
+    def __init__(
+        self,
+        config=None,
+        scoring="neg_log_loss",
+        online_learning=False,
+        *args,
+        **kwargs
+    ) -> None:
 
-        self._online_learning = online_learning
         self._scoring = scoring
 
         if not config:
             # Do this to avoid the whole dictionary being included in the documentation.
-            if not self._online_learning:
+            if not online_learning:
                 config = clf_config
             else:
                 config = clf_config_online
@@ -41,19 +46,28 @@ class GamaClassifier(Gama):
                 for (alg, hp) in config.items()
                 if not (
                     inspect.isclass(alg)
-                    and any(issubclass(alg, baseclass) for baseclass in
-                            [ClassifierMixin, Classifier])
-                    and not any(hasattr(alg(), attr) for attr in
-                                ["predict_proba", "predict_proba_one"])
+                    and any(
+                        issubclass(alg, baseclass)
+                        for baseclass in [ClassifierMixin, Classifier]
+                    )
+                    and not any(
+                        hasattr(alg(), attr)
+                        for attr in ["predict_proba", "predict_proba_one"]
+                    )
                 )
             }
 
         self._label_encoder = None
-        super().__init__(*args, **kwargs, config=config, scoring=scoring,
-                         online_learning=online_learning)
+        super().__init__(  # type: ignore
+            *args,
+            **kwargs,
+            config=config,
+            scoring=scoring,
+            online_learning=online_learning
+        )
 
     def _predict(self, x: pd.DataFrame):
-        """ Predict the target for input X.
+        """Predict the target for input X.
 
         Parameters
         ----------
@@ -75,13 +89,13 @@ class GamaClassifier(Gama):
             y_pred = []
             for x_i in x:
                 y_pred.append(self.model.predict_one(x_i))
-            y = np.array(y_pred) """
+            y = np.array(y_pred)"""
             y = 999  # not implemented
         # Decode the predicted labels - necessary only if ensemble is not used.
         return y
 
     def _predict_proba(self, x: pd.DataFrame):
-        """ Predict the class probabilities for input x.
+        """Predict the class probabilities for input x.
 
         Predict target for x, using the best found pipeline(s) during the `fit` call.
 
@@ -99,7 +113,7 @@ class GamaClassifier(Gama):
         return self.model.predict_proba(x)  # type: ignore
 
     def predict_proba(self, x: Union[pd.DataFrame, np.ndarray]):
-        """ Predict the class probabilities for input x.
+        """Predict the class probabilities for input x.
 
         Predict target for x, using the best found pipeline(s) during the `fit` call.
 
@@ -123,7 +137,7 @@ class GamaClassifier(Gama):
         target_column: Optional[str] = None,
         encoding: Optional[str] = None,
     ):
-        """ Predict the class probabilities for input in the arff_file.
+        """Predict the class probabilities for input in the arff_file.
 
         Parameters
         ----------
@@ -148,7 +162,7 @@ class GamaClassifier(Gama):
         return self._predict_proba(x)
 
     def fit(self, x, y, *args, **kwargs):
-        """ Should use base class documentation. """
+        """Should use base class documentation."""
         y_ = y.squeeze() if isinstance(y, pd.DataFrame) else y
         self._label_encoder = LabelEncoder().fit(y_)
         if any([isinstance(yi, str) for yi in y_]):
@@ -158,7 +172,7 @@ class GamaClassifier(Gama):
         super().fit(x, y, *args, **kwargs)
 
     def partial_fit(self, x, y, *args, **kwargs):
-        """ Should use base class documentation. """
+        """Should use base class documentation."""
         y_ = y.squeeze() if isinstance(y, pd.DataFrame) else y
         self._label_encoder = LabelEncoder().fit(y_)
         if any([isinstance(yi, str) for yi in y_]):

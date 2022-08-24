@@ -6,7 +6,7 @@ from gama.genetic_programming.components import Primitive, Terminal, DATA_TERMIN
 
 
 def pset_from_config(configuration):
-    """ Create a pset for the given configuration dictionary.
+    """Create a pset for the given configuration dictionary.
 
     Given a configuration dictionary specifying operators (e.g. sklearn
     estimators), their hyperparameters and values for each hyperparameter,
@@ -52,7 +52,11 @@ def pset_from_config(configuration):
                     hyperparameter_types.append(hp_name)
                     for value in param_values:
                         pset[hp_name].append(
-                            Terminal(value=value, output=name, identifier=hp_name,)
+                            Terminal(
+                                value=value,
+                                output=name,
+                                identifier=hp_name,
+                            )
                         )
 
             # After registering the hyperparameter types,
@@ -105,7 +109,7 @@ def pset_from_config(configuration):
 
 
 def merge_configurations(c1, c2):
-    """ Takes two configurations and merges them together. """
+    """Takes two configurations and merges them together."""
     # Should refactor out 6 indentation levels
     merged: Dict[Any, Any] = defaultdict(lambda: None, c1)
     for algorithm, hparams2 in c2.items():

@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 
 
 class RandomSearch(BaseSearch):
-    """ Perform random search over all possible pipelines. """
+    """Perform random search over all possible pipelines."""
 
     def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float):
         pass
@@ -30,7 +30,7 @@ def random_search(
     start_candidates: List[Individual],
     max_evaluations: Optional[int] = None,
 ) -> List[Individual]:
-    """ Perform random search over all possible pipelines.
+    """Perform random search over all possible pipelines.
 
     Parameters
     ----------

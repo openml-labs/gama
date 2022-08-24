@@ -53,7 +53,7 @@ def build_app():
 
 
 def create_generic_layout():
-    """ Creates the generic layout of tabs and their content pages. """
+    """Creates the generic layout of tabs and their content pages."""
     tab_banner_style = {
         "border-top-left-radius": "3px",
         "background-color": "#f9f9f9",

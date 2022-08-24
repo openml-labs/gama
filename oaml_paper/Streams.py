@@ -1,7 +1,7 @@
-#Application script for automated River
+# Application script for automated River
 
 
-#imports
+# imports
 
 import numpy as np
 import pandas as pd
@@ -27,99 +27,108 @@ from river import ensemble
 import wandb
 import sys
 
-#Datasets
-datasets =['../data_streams/electricity-normalized.arff',      #0
-           '../data_streams/new_airlines.arff',                #1
-           '../data_streams/new_IMDB_drama.arff',              #2      - target at the beginning
-           '../data_streams/new_vehicle_sensIT.arff',          #3      - target at the beginning
-           '../data_streams/SEA_Abrubt_5.arff',                #4
-           '../data_streams/HYPERPLANE_01.arff',               #5
-           '../data_streams/SEA_Mixed_5.arff',                 #6
-           '../data_streams/Forestcover.arff',                 #7      - for later
-           '../data_streams/new_ldpa.arff',                    #8      - for later
-           '../data_streams/new_pokerhand-normalized.arff',    #9      - for later
-           '../data_streams/new_Run_or_walk_information.arff', #10     - for later
-           '../data_streams/New_dirty_data/Activity_raw.arff', #11
-           '../data_streams/New_dirty_data/Connect_4.arff',    #12
-           ]
-#Models
+# Datasets
+datasets = [
+    "../data_streams/electricity-normalized.arff",  # 0
+    "../data_streams/new_airlines.arff",  # 1
+    "../data_streams/new_IMDB_drama.arff",  # 2      - target at the beginning
+    "../data_streams/new_vehicle_sensIT.arff",  # 3      - target at the beginning
+    "../data_streams/SEA_Abrubt_5.arff",  # 4
+    "../data_streams/HYPERPLANE_01.arff",  # 5
+    "../data_streams/SEA_Mixed_5.arff",  # 6
+    "../data_streams/Forestcover.arff",  # 7      - for later
+    "../data_streams/new_ldpa.arff",  # 8      - for later
+    "../data_streams/new_pokerhand-normalized.arff",  # 9      - for later
+    "../data_streams/new_Run_or_walk_information.arff",  # 10     - for later
+    "../data_streams/New_dirty_data/Activity_raw.arff",  # 11
+    "../data_streams/New_dirty_data/Connect_4.arff",  # 12
+]
+# Models
 
 model_1 = tree.ExtremelyFastDecisionTreeClassifier()
 model_2 = preprocessing.StandardScaler() | linear_model.Perceptron()
-model_3 = preprocessing.AdaptiveStandardScaler() | tree.HoeffdingAdaptiveTreeClassifier()
+model_3 = (
+    preprocessing.AdaptiveStandardScaler() | tree.HoeffdingAdaptiveTreeClassifier()
+)
 model_4 = tree.HoeffdingAdaptiveTreeClassifier()
 model_5 = ensemble.LeveragingBaggingClassifier(linear_model.Perceptron())
 model_6 = preprocessing.StandardScaler() | neighbors.KNNClassifier()
 model_7 = naive_bayes.BernoulliNB()
 model_8 = ensemble.AdaptiveRandomForestClassifier()
 model_9 = compose.Pipeline(
-    preprocessing.StandardScaler(),
-    linear_model.LinearRegression()
+    preprocessing.StandardScaler(), linear_model.LinearRegression()
 )
 print(type(model_9))
 print(model_9)
 print(model_9.steps)
-#initial pipeline - data 6 - oaml basic
-custom_pipeline = ensemble.AdaptiveRandomForestClassifier(n_models=1,
-                                                          max_features=2,
-                                                          lambda_value=2,
-                                                          grace_period=283,
-                                                          split_criterion= 'gini',
-                                                          split_confidence= 1e-09,
-                                                          tie_threshold= 0.05,
-                                                          leaf_prediction = 'nb',
-                                                          nb_threshold = 0)
+# initial pipeline - data 6 - oaml basic
+custom_pipeline = ensemble.AdaptiveRandomForestClassifier(
+    n_models=1,
+    max_features=2,
+    lambda_value=2,
+    grace_period=283,
+    split_criterion="gini",
+    split_confidence=1e-09,
+    tie_threshold=0.05,
+    leaf_prediction="nb",
+    nb_threshold=0,
+)
 
 model = model_9
 
-#User parameters
+# User parameters
 
-#User parameters
+# User parameters
 
-print(sys.argv[0]) # prints python_script.py
-print(f"Data stream is {datasets[int(sys.argv[1])]}.")                      # prints dataset no
-print(f"Initial batch size is {int(sys.argv[2])}.")                         # prints initial batch size
+print(sys.argv[0])  # prints python_script.py
+print(f"Data stream is {datasets[int(sys.argv[1])]}.")  # prints dataset no
+print(f"Initial batch size is {int(sys.argv[2])}.")  # prints initial batch size
 
-data_loc = datasets[int(sys.argv[1])]                       #needs to be arff
-initial_batch = int(sys.argv[2])                            #initial set of samples to train automl
-online_metric = metrics.Accuracy()                          #river metric to evaluate online learning
-#drift_detector = EDDM()
+data_loc = datasets[int(sys.argv[1])]  # needs to be arff
+initial_batch = int(sys.argv[2])  # initial set of samples to train automl
+online_metric = metrics.Accuracy()  # river metric to evaluate online learning
+# drift_detector = EDDM()
 drift_detector = drift_detection.EDDM()
 live_plot = False
 
-#Plot initialization
+# Plot initialization
 if live_plot:
     wandb.init(
         project="Baseline-1 LeverageBagging-2",
-        entity = "autoriver",
+        entity="autoriver",
         config={
             "dataset": data_loc,
             "online_performance_metric": online_metric,
-        })
+        },
+    )
 
 
-#Data
+# Data
 
 file = open(data_loc)
 B = pd.DataFrame(arff.loads(file, encode_nominal=True)["data"])
 
 # Preprocessing of data: Drop NaNs, move target to the end, check for zero values
 
-if int(sys.argv[1]) in [2,3]:
+if int(sys.argv[1]) in [2, 3]:
     columns = B.columns.values.tolist()
     columns.remove(0)
     columns.append(0)
     B = B.reindex(columns, axis=1)
 
 if pd.isnull(B.iloc[:, :]).any().any():
-    print("Data X contains NaN values. The rows that contain NaN values will be dropped.")
+    print(
+        "Data X contains NaN values. The rows that contain NaN values will be dropped."
+    )
     B.dropna(inplace=True)
 
-if B[:].iloc[:,0:-1].eq(0).any().any():
-    print("Data contains zero values. They are not removed but might cause issues with some River learners.")
+if B[:].iloc[:, 0:-1].eq(0).any().any():
+    print(
+        "Data contains zero values. They are not removed but might cause issues with some River learners."
+    )
 
-X = B[:].iloc[:,0:-1]
-y = B[:].iloc[:,-1]
+X = B[:].iloc[:, 0:-1]
+y = B[:].iloc[:, -1]
 dataset = []
 for xi, yi in stream.iter_pandas(X, y):
     dataset.append((xi, yi))
@@ -129,7 +138,8 @@ result = evaluate.progressive_val_score(
     model=model,
     metric=river_metric,
     print_every=100,
-    file=open("evaluation_prog.txt", "w"))
+    file=open("evaluation_prog.txt", "w"),
+)
 
 print(result)
 # #initial training
@@ -149,12 +159,11 @@ print(result)
 #         if live_plot:
 #             wandb.log({"current_point": i, "Prequential performance": online_metric.get()})
 
-    # #Check for drift
-    # #in_drift, in_warning = drift_detector.update(int(y_pred == y[i]))
-    # drift_detector.add_element(int(y_pred != y[i]))
-    # #if in_drift:
-    # if drift_detector.detected_change():
-    #     print(f"Change detected at data point {i} and current performance is at {online_metric}")
-    #     if live_plot:
-    #         wandb.log({"drift_point": i, "current_point": i, "Prequential performance": online_metric.get()})
-
+# #Check for drift
+# #in_drift, in_warning = drift_detector.update(int(y_pred == y[i]))
+# drift_detector.add_element(int(y_pred != y[i]))
+# #if in_drift:
+# if drift_detector.detected_change():
+#     print(f"Change detected at data point {i} and current performance is at {online_metric}")
+#     if live_plot:
+#         wandb.log({"drift_point": i, "current_point": i, "Prequential performance": online_metric.get()})

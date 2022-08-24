@@ -39,7 +39,7 @@ log = logging.getLogger(__name__)
 
 
 class AsyncFuture:
-    """ Reference to a function call executed on a different process. """
+    """Reference to a function call executed on a different process."""
 
     def __init__(self, fn, *args, **kwargs):
         self.id = uuid.uuid4()
@@ -51,7 +51,7 @@ class AsyncFuture:
         self.traceback = None
 
     def execute(self, extra_kwargs):
-        """ Execute the function call `fn(*args, **kwargs)` and record results. """
+        """Execute the function call `fn(*args, **kwargs)` and record results."""
         try:
             # Don't update self.kwargs, as it will be pickled back to the main process
             kwargs = {**self.kwargs, **extra_kwargs}
@@ -62,7 +62,7 @@ class AsyncFuture:
 
 
 class AsyncEvaluator:
-    """ Manages subprocesses on which arbitrary functions can be evaluated.
+    """Manages subprocesses on which arbitrary functions can be evaluated.
 
     The function and all its arguments must be picklable.
     Using the same AsyncEvaluator in two different contexts raises a `RuntimeError`.
@@ -154,7 +154,7 @@ class AsyncEvaluator:
         return False
 
     def submit(self, fn: Callable, *args, **kwargs) -> AsyncFuture:
-        """ Submit fn(*args, **kwargs) to be evaluated on a subprocess.
+        """Submit fn(*args, **kwargs) to be evaluated on a subprocess.
 
         Parameters
         ----------
@@ -177,7 +177,7 @@ class AsyncEvaluator:
         return future
 
     def wait_next(self, poll_time: float = 0.05) -> AsyncFuture:
-        """ Wait until an AsyncFuture has been completed and return it.
+        """Wait until an AsyncFuture has been completed and return it.
 
 
         Parameters
@@ -218,7 +218,7 @@ class AsyncEvaluator:
             return match
 
     def _start_worker_process(self) -> psutil.Process:
-        """ Start a new worker node and add it to the process pool. """
+        """Start a new worker node and add it to the process pool."""
         mp_process = multiprocessing.Process(
             target=evaluator_daemon,
             args=(self._input, self._output, self._command, AsyncEvaluator.defaults),
@@ -230,12 +230,12 @@ class AsyncEvaluator:
         return subprocess
 
     def _stop_worker_process(self, process: psutil.Process):
-        """ Terminate a new worker node and remove it from the process pool. """
+        """Terminate a new worker node and remove it from the process pool."""
         process.terminate()
         self._processes.remove(process)
 
     def _control_memory_usage(self, threshold=0.05):
-        """ Dynamically restarts or kills processes to adhere to memory constraints. """
+        """Dynamically restarts or kills processes to adhere to memory constraints."""
         if self._memory_limit_mb is None:
             return
         # If the memory usage of all processes (the main process, and the evaluation
@@ -297,7 +297,7 @@ class AsyncEvaluator:
         processes = [self._main_process] + self._processes
         for process in processes:
             try:
-                yield process, process.memory_info()[0] / (2 ** 20)
+                yield process, process.memory_info()[0] / (2**20)
             except NoSuchProcess:
                 # can never be the main process anyway
                 self._processes = [p for p in self._processes if p.pid != process.pid]
@@ -310,7 +310,7 @@ def evaluator_daemon(
     command_queue: queue.Queue,
     default_parameters: Optional[Dict] = None,
 ):
-    """ Function for daemon subprocess that evaluates functions from AsyncFutures.
+    """Function for daemon subprocess that evaluates functions from AsyncFutures.
 
     Parameters
     ----------

@@ -2,6 +2,7 @@ import numpy as np
 
 # classifiers
 from river import neighbors
+
 # from river.neighbors import KNNADWINClassifier
 from river.tree import HoeffdingAdaptiveTreeClassifier
 from river.ensemble import LeveragingBaggingClassifier
@@ -19,7 +20,8 @@ from river.preprocessing import (
     MinMaxScaler,
     Normalizer,
     RobustScaler,
-    StandardScaler)
+    StandardScaler,
+)
 
 # feature extraction
 from river.feature_extraction import PolynomialExtender
@@ -69,31 +71,40 @@ clf_config_online = {
         # "memory_estimate_period": [1000]
     },
     LeveragingBaggingClassifier: {
-        "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(),
-                  linear_model.Perceptron(),
-                  tree.HoeffdingTreeClassifier()],
+        "model": [
+            linear_model.LogisticRegression(),
+            neighbors.KNNClassifier(),
+            linear_model.Perceptron(),
+            tree.HoeffdingTreeClassifier(),
+        ],
         "n_models": range(1, 20),
         "w": range(1, 10),
         "adwin_delta": [0.001, 0.002, 0.005, 0.01],
         "bagging_method": ["bag", "me", "half", "wt", "subag"],
     },
     ADWINBaggingClassifier: {
-        "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(),
-                  linear_model.Perceptron(),
-                  tree.HoeffdingTreeClassifier()],
-        "n_models": range(1, 20)
+        "model": [
+            linear_model.LogisticRegression(),
+            neighbors.KNNClassifier(),
+            linear_model.Perceptron(),
+            tree.HoeffdingTreeClassifier(),
+        ],
+        "n_models": range(1, 20),
     },
     AdaBoostClassifier: {
-        "model": [linear_model.LogisticRegression(), neighbors.KNNClassifier(),
-                  linear_model.Perceptron(),
-                  tree.HoeffdingTreeClassifier()],
-        "n_models": range(1, 20)
+        "model": [
+            linear_model.LogisticRegression(),
+            neighbors.KNNClassifier(),
+            linear_model.Perceptron(),
+            tree.HoeffdingTreeClassifier(),
+        ],
+        "n_models": range(1, 20),
     },
     RobustScaler: {
         "with_centering": [True, False],
         "with_scaling": [True, False],
         "q_inf": np.arange(0, 0.5, 0.05),
-        "q_sup": np.arange(0.55, 1, 0.05)
+        "q_sup": np.arange(0.55, 1, 0.05),
     },
     StandardScaler: {},
     AdaptiveStandardScaler: {"alpha": np.arange(0.1, 1, 0.1)},
@@ -106,7 +117,6 @@ clf_config_online = {
     PolynomialExtender: {
         "degree": [2, 3, 4],
         "interaction_only": [True, False],
-        "include_bias": [True, False]
+        "include_bias": [True, False],
     },
-
 }

@@ -1,11 +1,13 @@
 from river.metrics import Accuracy
 from river.metrics import BalancedAccuracy
+
 # from river.metrics import BinaryMetric
 # from river.metrics import ClassificationMetric
 # from river.metrics import ClassificationReport
 # from river.metrics import CohenKappa
 # from river.metrics import Completeness
 from river.metrics import ConfusionMatrix
+
 # from river.metrics import CrossEntropy
 # from river.metrics import ExactMatch
 # from river.metrics import ExampleF1
@@ -13,6 +15,7 @@ from river.metrics import ConfusionMatrix
 # from river.metrics import ExamplePrecision
 # from river.metrics import ExampleRecall
 from river.metrics import F1
+
 # from river.metrics import FBeta
 # from river.metrics import FowlkesMallows
 # from river.metrics import GeometricMean
@@ -52,8 +55,10 @@ from river.metrics import F1
 # from river.metrics import Q2
 # from river.metrics import R2
 from river.metrics import RMSE
+
 # from river.metrics import RMSLE
 from river.metrics import ROCAUC
+
 # from river.metrics import Rand
 # from river.metrics import Recall
 # from river.metrics import RegressionMetric
@@ -70,15 +75,15 @@ from river.metrics import ROCAUC
 
 
 def get_metric(metric):
-    if metric == 'accuracy':
+    if metric == "accuracy":
         return Accuracy()
-    elif metric == 'balanced_accuracy':
+    elif metric == "balanced_accuracy":
         return BalancedAccuracy()
-    elif metric == 'f1':
+    elif metric == "f1":
         return F1()
-    elif metric == 'roc_auc':
+    elif metric == "roc_auc":
         return ROCAUC()
-    elif metric == 'rmse':
+    elif metric == "rmse":
         return RMSE()
-    elif metric == 'confusion_matrix':
+    elif metric == "confusion_matrix":
         return ConfusionMatrix()

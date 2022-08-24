@@ -27,7 +27,7 @@ class NSGAMeta:
         return True
 
     def crowd_compare(self, other: "NSGAMeta"):
-        """ Favor higher rank, if equal, favor less crowded. """
+        """Favor higher rank, if equal, favor less crowded."""
         self_better = self.rank < other.rank or (
             self.rank == other.rank and self.distance > other.distance
         )
@@ -37,11 +37,11 @@ class NSGAMeta:
 def nsga2_select(
     population: List[Any], n: int, metrics: List[Callable[[Any], float]]
 ) -> List[Any]:
-    """ Select n pairs from the population.
+    """Select n pairs from the population.
 
-     Selection is done through binary tournament selection based on crowding distance.
-     Parent pairs may be repeated, but each parent pair consists of two unique parents.
-     The population must be at least size 3 (otherwise it is trivial or impossible).
+    Selection is done through binary tournament selection based on crowding distance.
+    Parent pairs may be repeated, but each parent pair consists of two unique parents.
+    The population must be at least size 3 (otherwise it is trivial or impossible).
     """
     if len(population) < 3:
         raise ValueError("population must be at least size 3 for a pair to be selected")
@@ -68,7 +68,7 @@ def nsga2(
     metrics: List[Callable[[Any], float]],
     return_meta: bool = False,
 ) -> List[Any]:
-    """ Selects n individuals from the population for offspring according to NSGA-II.
+    """Selects n individuals from the population for offspring according to NSGA-II.
 
     Parameters
     ----------
@@ -112,7 +112,7 @@ def nsga2(
 
 
 def fast_non_dominated_sort(P: List[NSGAMeta]) -> List[List[NSGAMeta]]:
-    """ Sorts P into Pareto fronts. """
+    """Sorts P into Pareto fronts."""
     fronts: List[List[NSGAMeta]] = [[]]
     for p, q in itertools.combinations(P, 2):
         if p.dominates(q):

@@ -4,7 +4,7 @@ DATA_TERMINAL = "data"
 
 
 class Terminal(NamedTuple):
-    """ Specifies a specific value for a specific type or input.
+    """Specifies a specific value for a specific type or input.
 
     E.g. a value for a hyperparameter for an algorithm.
     """
@@ -14,11 +14,11 @@ class Terminal(NamedTuple):
     identifier: str
 
     def __str__(self):
-        """ str: e.g. "tol=0.5" """
+        """str: e.g. "tol=0.5" """
         return f"{self.output}={format_hyperparameter_value(self.value)}"
 
     def __repr__(self):
-        """ str: e.g. "FastICA.tol=0.5".
+        """str: e.g. "FastICA.tol=0.5".
 
         If the hyperparameter is shared across primitives, there is no prefix.
         """

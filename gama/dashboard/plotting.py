@@ -247,7 +247,7 @@ def aggregate_best_over_time(aggregate: pd.DataFrame, y_axis: str):
 
 
 def aggregate_plot(aggregate: pd.DataFrame, x_axis: str, y_axis: str):
-    """ Create an aggregate plot over multiple reports.
+    """Create an aggregate plot over multiple reports.
 
      Aggregates the mean and std of `y_axis` by `x_axis`.
 

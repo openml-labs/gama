@@ -8,20 +8,20 @@ import pandas as pd
 
 from gama.data_formatting import infer_categoricals_inplace
 
-CSV_SNIFF_SIZE = 2 ** 12
+CSV_SNIFF_SIZE = 2**12
 
 
 def sniff_csv_meta(file_path: str) -> Tuple[str, bool]:
-    """ Determine the csv delimiter and whether it has a header """
+    """Determine the csv delimiter and whether it has a header"""
     with open(file_path, "r") as csv_file:
-        first_bytes = csv_file.read(2 ** 12)
+        first_bytes = csv_file.read(2**12)
     sep = csv.Sniffer().sniff(first_bytes).delimiter
     has_header = csv.Sniffer().has_header(first_bytes)
     return sep, has_header
 
 
 def load_csv_header(file_path: str, **kwargs) -> List[str]:
-    """ Return column names in the header, or 0...N if no header is present. """
+    """Return column names in the header, or 0...N if no header is present."""
     if not file_path.endswith(".csv"):
         raise ValueError(f"{file_path} is not a file with .csv extension.")
     sep, has_header = sniff_csv_meta(file_path)
@@ -37,7 +37,7 @@ def load_csv_header(file_path: str, **kwargs) -> List[str]:
 
 
 def csv_to_pandas(file_path: str, **kwargs) -> pd.DataFrame:
-    """ Load data from the csv file into a pd.DataFrame.
+    """Load data from the csv file into a pd.DataFrame.
 
     Parameters
     ----------
@@ -69,7 +69,7 @@ def csv_to_pandas(file_path: str, **kwargs) -> pd.DataFrame:
 def arff_to_pandas(
     file_path: str, encoding: Optional[str] = None, **kwargs
 ) -> pd.DataFrame:
-    """ Load data from the ARFF file into a pd.DataFrame.
+    """Load data from the ARFF file into a pd.DataFrame.
 
     Parameters
     ----------
@@ -102,7 +102,7 @@ def arff_to_pandas(
 def file_to_pandas(
     file_path: str, encoding: Optional[str] = None, **kwargs
 ) -> pd.DataFrame:
-    """ Load ARFF/csv file into pd.DataFrame.
+    """Load ARFF/csv file into pd.DataFrame.
 
     Parameters
     ----------
@@ -132,7 +132,7 @@ def X_y_from_file(
     encoding: Optional[str] = None,
     **kwargs,
 ) -> Tuple[pd.DataFrame, pd.Series]:
-    """ Load ARFF/csv file into pd.DataFrame and specified column to pd.Series.
+    """Load ARFF/csv file into pd.DataFrame and specified column to pd.Series.
 
     Parameters
     ----------
@@ -162,7 +162,7 @@ def X_y_from_file(
 
 
 def load_feature_metadata_from_file(file_path: str) -> Dict[str, str]:
-    """ Load the header of the csv or ARFF file, return the type of each attribute.
+    """Load the header of the csv or ARFF file, return the type of each attribute.
 
     For csv files, presence of a header is detected with the Python csv parser.
     If no header is present in the csv file, the columns will be labeled with a number.
@@ -177,7 +177,7 @@ def load_feature_metadata_from_file(file_path: str) -> Dict[str, str]:
 
 
 def load_feature_metadata_from_arff(file_path: str) -> Dict[str, str]:
-    """ Load the header of the ARFF file and return the type of each attribute. """
+    """Load the header of the ARFF file and return the type of each attribute."""
     data_header = "@data"
     attribute_indicator = "@attribute"
     attributes = OrderedDict()

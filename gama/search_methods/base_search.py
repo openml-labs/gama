@@ -9,7 +9,7 @@ from gama.logging.evaluation_logger import EvaluationLogger
 
 
 class BaseSearch(ABC):
-    """ All search methods should be derived from this class.
+    """All search methods should be derived from this class.
     This class should not be directly used to configure GAMA.
     """
 
@@ -34,14 +34,14 @@ class BaseSearch(ABC):
 
     @property
     def hyperparameters(self) -> Dict[str, Any]:
-        """ Hyperparameter (name, value) pairs as set/determined dynamically/default.
+        """Hyperparameter (name, value) pairs as set/determined dynamically/default.
 
-         Values may have been set directly, through dynamic defaults or static defaults.
-         This is also the order in which the value of a hyperparameter is checked,
-         i.e. a user set value wil overwrite any other value, and a dynamic default
-         will overwrite a static one.
-         Dynamic default values only considered if `dynamic_defaults` has been called.
-         """
+        Values may have been set directly, through dynamic defaults or static defaults.
+        This is also the order in which the value of a hyperparameter is checked,
+        i.e. a user set value wil overwrite any other value, and a dynamic default
+        will overwrite a static one.
+        Dynamic default values only considered if `dynamic_defaults` has been called.
+        """
         return {
             parameter: set_value if set_value is not None else default
             for parameter, (set_value, default) in self._hyperparameters.items()
@@ -54,7 +54,7 @@ class BaseSearch(ABC):
     def dynamic_defaults(
         self, x: pd.DataFrame, y: Union[pd.DataFrame, pd.Series], time_limit: float
     ) -> None:
-        """ Set hyperparameter defaults based on the dataset and time-constraints.
+        """Set hyperparameter defaults based on the dataset and time-constraints.
 
         Should be called before `search`.
 
@@ -74,7 +74,7 @@ class BaseSearch(ABC):
         raise NotImplementedError("Must be implemented by child class.")
 
     def search(self, operations: OperatorSet, start_candidates: List[Individual]):
-        """ Execute search as configured.
+        """Execute search as configured.
 
         Sets `output` field of this class to the best Individuals.
 
@@ -91,7 +91,7 @@ class BaseSearch(ABC):
 def _check_base_search_hyperparameters(
     toolbox, output: List[Individual], start_candidates: List[Individual]
 ) -> None:
-    """ Checks that search hyperparameters are valid.
+    """Checks that search hyperparameters are valid.
 
     :param toolbox:
     :param output:

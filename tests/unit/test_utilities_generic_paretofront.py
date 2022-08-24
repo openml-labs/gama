@@ -2,7 +2,7 @@ from gama.utilities.generic.paretofront import ParetoFront
 
 
 def test_pareto_initialization_empty():
-    """ Test initialization of empty front. """
+    """Test initialization of empty front."""
     pf = ParetoFront()
 
     assert list(pf) == []
@@ -11,7 +11,7 @@ def test_pareto_initialization_empty():
 
 
 def test_pareto_initialization_pareto_front():
-    """ Initialization with only Pareto front elements. """
+    """Initialization with only Pareto front elements."""
     list_ = [(1, 2, 3), (3, 2, 1), (0, 5, 0)]
     pf = ParetoFront(list_)
 
@@ -21,7 +21,7 @@ def test_pareto_initialization_pareto_front():
 
 
 def test_pareto_initialization_with_inferiors():
-    """" Initialization containing elements that should not be in the Pareto front. """
+    """ " Initialization containing elements that should not be in the Pareto front."""
     list_ = [(1, 2), (4, 3), (4, 5), (5, 4)]
     pf = ParetoFront(list_)
 
@@ -31,7 +31,7 @@ def test_pareto_initialization_with_inferiors():
 
 
 def test_pareto_initialization_with_duplicates():
-    """ Initialization with duplicate elements. """
+    """Initialization with duplicate elements."""
     list_ = [(1, 2), (3, 1), (1, 2)]
     pf = ParetoFront(list_)
 
@@ -41,7 +41,7 @@ def test_pareto_initialization_with_duplicates():
 
 
 def test_pareto_update_unique():
-    """ Creating Pareto front by updating one by one. """
+    """Creating Pareto front by updating one by one."""
     list_ = [(1, 2, 3), (3, 2, 1), (0, 5, 0)]
     pf = ParetoFront()
 
@@ -51,7 +51,7 @@ def test_pareto_update_unique():
 
 
 def test_pareto_front_clear():
-    """ Calling `clear` empties the Pareto front. """
+    """Calling `clear` empties the Pareto front."""
     pf = ParetoFront([(1, 2), (2, 1)])
     assert list(pf) == [(1, 2), (2, 1)]
 
@@ -60,7 +60,7 @@ def test_pareto_front_clear():
 
 
 def test_pareto_front_custom_function():
-    """ Test construction of Pareto front with custom object and value function. """
+    """Test construction of Pareto front with custom object and value function."""
 
     class A:
         def __init__(self, v1, v2):

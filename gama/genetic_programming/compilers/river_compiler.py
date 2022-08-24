@@ -23,6 +23,7 @@ log = logging.getLogger(__name__)
 
 # Use progressive_val_score instead of cross validate
 
+
 def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
     hyperparameters = {
         terminal.output: terminal.value for terminal in primitive_node._terminals
@@ -31,9 +32,9 @@ def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
 
 
 def compile_individual(
-        individual: Individual,
-        parameter_checks=None,
-        preprocessing_steps=None,
+    individual: Individual,
+    parameter_checks=None,
+    preprocessing_steps=None,
 ) -> Pipeline:
     steps = [
         (str(i), primitive_node_to_sklearn(primitive))
@@ -48,7 +49,7 @@ def compile_individual(
 
 
 def object_is_valid_pipeline(o):
-    """ Determines if object behaves like a scikit-learn pipeline. """
+    """Determines if object behaves like a scikit-learn pipeline."""
     return (
         o is not None
         and hasattr(o, "learn_one")
@@ -58,9 +59,13 @@ def object_is_valid_pipeline(o):
 
 
 def evaluate_pipeline(
-        pipeline, x, y_train, timeout: float, metrics: Tuple[Metric],
+    pipeline,
+    x,
+    y_train,
+    timeout: float,
+    metrics: Tuple[Metric],
 ) -> Tuple:
-    """ Score `pipeline` with online holdout evaluation according to `metrics`
+    """Score `pipeline` with online holdout evaluation according to `metrics`
     on (a subsample of) X, y
 
     Returns
@@ -72,8 +77,9 @@ def evaluate_pipeline(
         error: None if successful, otherwise an Exception
     """
     if not object_is_valid_pipeline(pipeline):
-        raise TypeError(f"Pipeline must not be None and requires learn_one, "
-                        f"predict_one, steps.")
+        raise TypeError(
+            f"Pipeline must not be None and requires learn_one, " f"predict_one, steps."
+        )
     if not timeout > 0:
         raise ValueError(f"`timeout` must be greater than 0, is {timeout}.")
     prediction, estimators = None, None
@@ -127,14 +133,14 @@ def evaluate_pipeline(
 
 
 def evaluate_individual(
-        individual: Individual,
-        evaluate_pipeline: Callable,
-        timeout: float = 1e6,
-        deadline: Optional[float] = None,
-        add_length_to_score: bool = True,
-        **kwargs,
+    individual: Individual,
+    evaluate_pipeline: Callable,
+    timeout: float = 1e6,
+    deadline: Optional[float] = None,
+    add_length_to_score: bool = True,
+    **kwargs,
 ) -> Evaluation:
-    """ Evaluate the pipeline specified by individual, and record
+    """Evaluate the pipeline specified by individual, and record
 
     Parameters
     ----------

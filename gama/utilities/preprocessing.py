@@ -16,7 +16,7 @@ def select_categorical_columns(
     max_f: Optional[int] = None,
     ignore_nan: bool = True,
 ) -> Iterator[str]:
-    """ Find all categorical columns with at least `min_f` and at most `max_f` factors.
+    """Find all categorical columns with at least `min_f` and at most `max_f` factors.
 
     Parameters
     ----------
@@ -44,13 +44,13 @@ def select_categorical_columns(
 
 
 def basic_encoding(x: pd.DataFrame, is_classification: bool):
-    """ Perform 'basic' encoding of categorical features.
+    """Perform 'basic' encoding of categorical features.
 
-     Specifically, perform:
-      - Ordinal encoding for features with 2 or fewer unique values.
-      - One hot encoding for features with at most 10 unique values.
-      - Ordinal encoding for features with 11+ unique values, if y is categorical.
-     """
+    Specifically, perform:
+     - Ordinal encoding for features with 2 or fewer unique values.
+     - One hot encoding for features with at most 10 unique values.
+     - Ordinal encoding for features with 11+ unique values, if y is categorical.
+    """
     ord_features = list(select_categorical_columns(x, max_f=2))
     if is_classification:
         ord_features.extend(select_categorical_columns(x, min_f=11))
@@ -68,7 +68,7 @@ def basic_encoding(x: pd.DataFrame, is_classification: bool):
 def basic_pipeline_extension(
     x: pd.DataFrame, is_classification: bool
 ) -> List[Tuple[str, TransformerMixin]]:
-    """ Define a TargetEncoder and SimpleImputer.
+    """Define a TargetEncoder and SimpleImputer.
 
     TargetEncoding is will encode categorical features with more than 10 unique values,
     if y is not categorical. SimpleImputer imputes with the median.
@@ -86,11 +86,8 @@ def basic_pipeline_extension(
     return extension_steps
 
 
-def river_pipeline_extension(
-    x: pd.DataFrame, is_classification: bool
-) -> List:
-    """ Not implemented
-    """
-    extension_steps = []   # type: List
+def river_pipeline_extension(x: pd.DataFrame, is_classification: bool) -> List:
+    """Not implemented"""
+    extension_steps = []  # type: List
 
     return extension_steps

@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 
 
 class OperatorSet:
-    """ Provides a thin layer for ea operators for logging, callbacks and safety. """
+    """Provides a thin layer for ea operators for logging, callbacks and safety."""
 
     def __init__(
         self,
