@@ -52,7 +52,7 @@ class GamaClassifier(Gama):
         """
         y = self.model.predict(x)  # type: ignore
         # Decode the predicted labels - necessary only if ensemble is not used.
-        if y[0] not in self._label_encoder.classes_:
+        if y[0] not in list(self._label_encoder.classes_):
             y = self._label_encoder.inverse_transform(y)
         return y
 

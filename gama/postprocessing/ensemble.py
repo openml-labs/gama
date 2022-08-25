@@ -108,9 +108,9 @@ class EnsemblePostProcessing(BasePostProcessing):
 
         if isinstance(self._ensemble, EnsembleClassifier):
             if self._ensemble._metric.requires_probabilities:
-                voting = ",'soft'"
+                voting = ", voting='soft'"
             else:
-                voting = ", 'hard'"
+                voting = ", voting='hard'"
         else:
             voting = ""  # This parameter does not exist for VotingRegressor
 
@@ -122,7 +122,7 @@ class EnsemblePostProcessing(BasePostProcessing):
             + "\n\n"
             + "\n\n".join(pipelines)
             + "\n"
-            + f"ensemble = {voter}([{estimators}]{voting},{weights})\n"
+            + f"ensemble = {voter}([{estimators}]{voting}, weights={weights})\n"
         )
         if preprocessing is not None:
             trans_strs = transformers_to_str([t for _, t in preprocessing])
@@ -137,7 +137,7 @@ class Ensemble(object):
         self,
         metric,
         y: pd.DataFrame,
-        evaluation_library: EvaluationLibrary = None,
+        evaluation_library: EvaluationLibrary,
         shrink_on_pickle=True,
         downsample_to: Optional[int] = 10_000,
         use_top_n_only: Optional[int] = 200,
@@ -166,11 +166,7 @@ class Ensemble(object):
                 "metric must be specified as string or `gama.ea.metrics.Metric`."
             )
 
-        if evaluation_library is None:
-            raise ValueError(
-                "`evaluation_library` is None but must be EvaluationLibrary."
-            )
-        elif not isinstance(evaluation_library, EvaluationLibrary):
+        if not isinstance(evaluation_library, EvaluationLibrary):
             raise TypeError(
                 "`evaluation_library` must be of type "
                 "gama.utilities.evaluation_library.EvaluationLibrary."

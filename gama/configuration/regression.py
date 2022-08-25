@@ -90,7 +90,10 @@ reg_config = {
     },
     # Preprocesssors
     Binarizer: {"threshold": np.arange(0.0, 1.01, 0.05)},
-    FastICA: {"tol": np.arange(0.0, 1.01, 0.05)},
+    FastICA: {
+        "tol": np.arange(0.0, 1.01, 0.05),
+        "whiten": ["unit-variance"],
+    },
     FeatureAgglomeration: {
         "linkage": ["ward", "complete", "average"],
         "affinity": ["euclidean", "l1", "l2", "manhattan", "cosine", "precomputed"],

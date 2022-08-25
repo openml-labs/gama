@@ -139,7 +139,11 @@ class Individual:
 
     @classmethod
     def from_string(
-        cls, string: str, primitive_set: dict, to_pipeline: Optional[Callable] = None
+        cls,
+        string: str,
+        primitive_set: dict,
+        to_pipeline: Optional[Callable] = None,
+        strict: bool = True,
     ) -> "Individual":
         """Construct an Individual from its `pipeline_str` representation.
 
@@ -153,10 +157,15 @@ class Individual:
             The function to convert the Individual into a pipeline representation.
             If `None`, the individuals `pipeline` property will not be available.
 
+        strict: bool (default=True)
+            Require each primitives has all required terminals present in `string`.
+            Non-strict matching may be useful when constructing individuals from
+            and old log with a slightly different search space.
+
         Returns
         -------
         Individual
             An individual as defined by `str`.
         """
-        expression = PrimitiveNode.from_string(string, primitive_set)
+        expression = PrimitiveNode.from_string(string, primitive_set, strict)
         return cls(expression, to_pipeline=to_pipeline)
