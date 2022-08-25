@@ -137,7 +137,7 @@ class Ensemble(object):
         self,
         metric,
         y: pd.DataFrame,
-        evaluation_library: EvaluationLibrary = None,
+        evaluation_library: EvaluationLibrary,
         shrink_on_pickle=True,
         downsample_to: Optional[int] = 10_000,
         use_top_n_only: Optional[int] = 200,
@@ -166,11 +166,7 @@ class Ensemble(object):
                 "metric must be specified as string or `gama.ea.metrics.Metric`."
             )
 
-        if evaluation_library is None:
-            raise ValueError(
-                "`evaluation_library` is None but must be EvaluationLibrary."
-            )
-        elif not isinstance(evaluation_library, EvaluationLibrary):
+        if not isinstance(evaluation_library, EvaluationLibrary):
             raise TypeError(
                 "`evaluation_library` must be of type "
                 "gama.utilities.evaluation_library.EvaluationLibrary."
