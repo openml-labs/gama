@@ -23,6 +23,8 @@ class BestFitPostProcessing(BasePostProcessing):
     def post_process(
         self, x: pd.DataFrame, y: pd.Series, timeout: float, selection: List[Individual]
     ) -> object:
+        if len(selection) == 0:
+            raise Exception('No individual to choose from')
         self._selected_individual = selection[0]
         return self._selected_individual.pipeline.fit(x, y)
 

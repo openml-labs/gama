@@ -27,18 +27,7 @@ from sklearn.feature_selection import (
     VarianceThreshold,
 )
 
-from dirty_cat import (
-    SuperVectorizer,
-    SimilarityEncoder,
-    GapEncoder,
-    MinHashEncoder,
-)
-from sklearn.preprocessing import (
-    OneHotEncoder,
-    OrdinalEncoder,
-    StandardScaler,
-    RobustScaler,
-)
+from .preprocessing import preproc_conf
 
 
 # For comparison, this selection of operators and hyperparameters is
@@ -46,35 +35,7 @@ from sklearn.preprocessing import (
 
 clf_config = {
     "data": ["data"],
-    SuperVectorizer: {
-        "_input": "data",
-        "_output": "numeric_data",
-        'cardinality_threshold': [40],
-        'low_card_cat_transformer': {
-            OneHotEncoder: {
-                #'categories': ['auto'],
-            },
-        },
-        'high_card_cat_transformer': {
-            #OrdinalEncoder: {
-            #    'categories': ['auto'],
-            #},
-            #SimilarityEncoder: {
-            #    'n_prototypes': [10, 25, 50, 100],
-            #},
-            GapEncoder: {
-                #'analyzer': ['word', 'char', 'char_wb'],
-            },
-            #MinHashEncoder: {
-            #    'n_components': [10, 30, 50, 100],
-            #    'hashing': ['fast', 'murmur'],
-            #},
-        },
-        'numerical_transformer': {
-            #RobustScaler: {},
-            StandardScaler: {},
-        }
-    },
+    **preproc_conf,
     "alpha": [1e-3, 1e-2, 1e-1, 1.0, 10.0, 100.0],
     "fit_prior": [True, False],
     "min_samples_split": range(2, 21),

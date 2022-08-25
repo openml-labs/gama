@@ -52,10 +52,12 @@ class OperatorSet:
             log.warning(f"Error raised during evaluation: {str(future.exception)}.")
         return future
 
-    def try_until_new(self, operator, *args, **kwargs):
+    def try_until_new(self, operator: Callable[..., Individual], *args, **kwargs):
         """Keep executing `operator` until a new individual is created."""
         for _ in range(self._max_retry):
             individual = operator(*args, **kwargs)
+            if str(individual.main_node) == 'SuperVectorizer':
+                return individual
             if str(individual.main_node) not in self._completed_evaluations:
                 return individual
         else:

@@ -63,12 +63,17 @@ class Individual:
     @property
     def primitives(self) -> List[PrimitiveNode]:
         """Lists all primitive nodes, starting with the Individual's main node."""
+
+        def is_data_primitive(child) -> bool:
+            return isinstance(child, PrimitiveNode) and child._primitive.data_input != "dont_remove"
+
         primitives = [self.main_node]
         current_children = self.main_node._children
-        while any(isinstance(child, PrimitiveNode) for child in current_children):
+        while any(is_data_primitive(child) for child in current_children):
             # Only data input can be a primitive node, so there is never more than one.
             child_node = next(
-                child for child in current_children if isinstance(child, PrimitiveNode)
+                child for child in current_children
+                if is_data_primitive(child)
             )
             primitives.append(child_node)
             current_children = child_node._children

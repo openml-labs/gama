@@ -31,11 +31,15 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import LinearSVR
 
+from .preprocessing import preproc_conf
+
+
 # For comparison, this selection of operators and hyperparameters is
 # currently most of what TPOT supports.
 
 reg_config = {
-    "numeric_data": ["data"],
+    "data": ["data"],
+    **preproc_conf,
     ElasticNetCV: {
         "l1_ratio": np.arange(0.0, 1.01, 0.05),
         "tol": [1e-5, 1e-4, 1e-3, 1e-2, 1e-1],

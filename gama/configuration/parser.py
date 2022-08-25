@@ -53,6 +53,33 @@ def pset_from_config(
                 if isinstance(param_values, list) and not param_values:
                     # An empty list indicates a shared hyperparameter
                     hyperparameter_types.append(name)
+                elif isinstance(param_values, dict) \
+                        and all([isinstance(_k, type) for _k in param_values.keys()]):
+                    for sub_key, sub_hyperparameters in param_values.items():
+                        sub_hps_for_encoder = []
+
+                        for enc_param, sub_hyperparams in sub_hyperparameters.items():
+                            hp_name = f"{key.__name__}.{name}.{sub_key.__name__}.{enc_param}"
+                            sub_hps_for_encoder.append(hp_name)
+                            for sub_param_value in sub_hyperparams:
+                                pset[hp_name].append(
+                                    Terminal(
+                                        value=sub_param_value,
+                                        output=enc_param,
+                                        identifier=hp_name,
+                                    )
+                                )
+                        hp_name = f"{key.__name__}.{name}"
+                        if hp_name not in hyperparameter_types:
+                            hyperparameter_types.append(hp_name)
+                        pset[hp_name].append(
+                            Primitive(
+                                input=tuple(sub_hps_for_encoder),
+                                output=name,
+                                identifier=sub_key,
+                                data_input="dont_remove",
+                            )
+                        )
                 elif name == "param_check":
                     # This allows users to define illegal hyperparameter combinations,
                     # but is not a terminal.
@@ -197,7 +224,7 @@ def remove_primitives_with_unreachable_input(
         return_type: [
             pt
             for pt in prims_and_terms
-            if not (isinstance(pt, Primitive) and pt.data_input not in reachability)
+            if not (isinstance(pt, Primitive) and pt.data_input not in reachability and pt.data_input != "dont_remove")
         ]
         for return_type, prims_and_terms in pset.items()
     }

@@ -148,6 +148,6 @@ def _valid_crossover_functions(ind1: Individual, ind2: Individual) -> List[Calla
     crossover_choices = []
     if list(_shared_terminals(ind1, ind2)):
         crossover_choices.append(crossover_terminals)
-    if len(list(ind1.primitives)) >= 2 and len(list(ind2.primitives)) >= 2:
+    if len(list(ind1.primitives)) >= 3 and len(list(ind2.primitives)) >= 3:
         crossover_choices.append(crossover_primitives)
     return crossover_choices

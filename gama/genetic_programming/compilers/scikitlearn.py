@@ -25,12 +25,23 @@ log = logging.getLogger(__name__)
 
 
 def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
-    hyperparameters = {
-        terminal.output: terminal.value
-        for terminal in primitive_node._children
+    hyperparameters = {}
+    for terminal in primitive_node._children:
         # BANDAGE
-        if isinstance(terminal, Terminal) and terminal.value != "data"
-    }
+        if isinstance(terminal, Terminal) and terminal.value == "data":
+            continue
+        # Check if primitive is hyperparameter or different step in the pipeline
+        # if it is a hyperparameter it has input type dont_remove
+        if isinstance(terminal, PrimitiveNode) and terminal._primitive.data_input == "dont_remove":
+            hps = {
+                hp.output: hp.value
+                for hp in terminal._children
+            }
+            value = terminal._primitive.identifier(**hps)
+            hyperparameters.update({terminal._primitive.output: value})
+        if isinstance(terminal, Terminal):
+            value = terminal.value
+            hyperparameters.update({terminal.output: value})
     return primitive_node._primitive.identifier(**hyperparameters)
 
 

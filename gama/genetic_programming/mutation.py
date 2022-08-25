@@ -105,7 +105,10 @@ def mut_shrink(
     if shrink_by is not None and n_primitives <= shrink_by:
         raise ValueError(f"Can't shrink size {n_primitives} individual by {shrink_by}.")
     if shrink_by is None:
-        shrink_by = random.randint(1, n_primitives)
+        if n_primitives > 1:
+            shrink_by = random.randint(1, n_primitives)
+        else:
+            shrink_by = 0
 
     i = len(individual.primitives) - 1
     while shrink_by > 0 and i > 0:
