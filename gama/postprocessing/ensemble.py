@@ -108,9 +108,9 @@ class EnsemblePostProcessing(BasePostProcessing):
 
         if isinstance(self._ensemble, EnsembleClassifier):
             if self._ensemble._metric.requires_probabilities:
-                voting = ",'soft'"
+                voting = ", voting='soft'"
             else:
-                voting = ", 'hard'"
+                voting = ", voting='hard'"
         else:
             voting = ""  # This parameter does not exist for VotingRegressor
 
@@ -122,7 +122,7 @@ class EnsemblePostProcessing(BasePostProcessing):
             + "\n\n"
             + "\n\n".join(pipelines)
             + "\n"
-            + f"ensemble = {voter}([{estimators}]{voting},{weights})\n"
+            + f"ensemble = {voter}([{estimators}]{voting}, weights={weights})\n"
         )
         if preprocessing is not None:
             trans_strs = transformers_to_str([t for _, t in preprocessing])
