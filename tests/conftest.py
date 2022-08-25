@@ -4,6 +4,24 @@ from gama.genetic_programming.components import Individual
 from gama.configuration.testconfiguration import clf_config
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
 
+from dask.distributed import LocalCluster
+import logging
+
+
+@pytest.fixture(scope="session")
+def cluster():
+    with LocalCluster(
+        n_workers=8,
+        processes=False,
+        silence_logs=logging.ERROR,
+        # We do not want a Bokeh server running for each test that requires a cluster.
+        dashboard_address=None,
+        # Non-default so does not interfere with running other GAMA instances.
+        # scheduler_port=87895,
+    ) as cluster:
+        yield cluster
+    # cluster.close()  # use context manager instead
+
 
 @pytest.fixture
 def pset():

@@ -2,8 +2,9 @@
 import numpy as np
 import pandas as pd
 import pytest
-from typing import Type
+from typing import Optional, Type
 
+from dask.distributed import LocalCluster
 from sklearn.datasets import load_wine, load_breast_cancer
 from sklearn.ensemble import VotingClassifier
 from sklearn.model_selection import train_test_split
@@ -81,6 +82,7 @@ def _test_dataset_problem(
     search: BaseSearch = AsyncEA(),
     missing_values: bool = False,
     max_time: int = 60,
+    cluster: Optional[LocalCluster] = None,
 ):
     """
 
@@ -97,7 +99,8 @@ def _test_dataset_problem(
         search=search,
         n_jobs=1,
         post_processing=EnsemblePostProcessing(ensemble_size=5),
-        store="nothing",
+        store="logs",
+        cluster=cluster,
     )
     if arff:
         train_path = f"tests/data/{data['name']}_train.arff"
@@ -177,9 +180,9 @@ def _test_dataset_problem(
     return gama
 
 
-def test_binary_classification_accuracy():
+def test_binary_classification_accuracy(cluster):
     """Binary classification, accuracy, numpy data and ensemble code export"""
-    gama = _test_dataset_problem(breast_cancer, "accuracy")
+    gama = _test_dataset_problem(breast_cancer, "accuracy", cluster=cluster)
 
     x, y = breast_cancer["load"](return_X_y=True)
     code = gama.export_script(file=None)
@@ -192,48 +195,58 @@ def test_binary_classification_accuracy():
     assert 0.9 < pipeline.score(x, y)
 
 
-def test_binary_classification_accuracy_asha():
+def test_binary_classification_accuracy_asha(cluster):
     """Binary classification, accuracy, numpy data, ASHA search."""
     _test_dataset_problem(
-        breast_cancer, "accuracy", search=AsynchronousSuccessiveHalving(), max_time=60
+        breast_cancer,
+        "accuracy",
+        search=AsynchronousSuccessiveHalving(),
+        max_time=60,
+        cluster=cluster,
     )
 
 
-def test_binary_classification_accuracy_random_search():
+def test_binary_classification_accuracy_random_search(cluster):
     """Binary classification, accuracy, numpy data, random search."""
-    _test_dataset_problem(breast_cancer, "accuracy", search=RandomSearch())
+    _test_dataset_problem(
+        breast_cancer, "accuracy", search=RandomSearch(), cluster=cluster
+    )
 
 
-def test_binary_classification_logloss():
+def test_binary_classification_logloss(cluster):
     """Binary classification, log loss (probabilities), numpy data, ASHA search."""
-    _test_dataset_problem(breast_cancer, "neg_log_loss")
+    _test_dataset_problem(breast_cancer, "neg_log_loss", cluster=cluster)
 
 
-def test_multiclass_classification_accuracy():
+def test_multiclass_classification_accuracy(cluster):
     """Multiclass classification, accuracy, numpy data."""
-    _test_dataset_problem(wine, "accuracy")
+    _test_dataset_problem(wine, "accuracy", cluster=cluster)
 
 
-def test_multiclass_classification_logloss():
+def test_multiclass_classification_logloss(cluster):
     """Multiclass classification, log loss (probabilities), numpy data."""
-    _test_dataset_problem(wine, "neg_log_loss")
+    _test_dataset_problem(wine, "neg_log_loss", cluster=cluster)
 
 
-def test_string_label_classification_accuracy():
+def test_string_label_classification_accuracy(cluster):
     """Binary classification, accuracy, target is str."""
-    _test_dataset_problem(breast_cancer, "accuracy", y_type=str)
+    _test_dataset_problem(breast_cancer, "accuracy", y_type=str, cluster=cluster)
 
 
-def test_string_label_classification_log_loss():
+def test_string_label_classification_log_loss(cluster):
     """Binary classification, log loss (probabilities), target is str."""
-    _test_dataset_problem(breast_cancer, "neg_log_loss", y_type=str)
+    _test_dataset_problem(breast_cancer, "neg_log_loss", y_type=str, cluster=cluster)
 
 
-def test_missing_value_classification_arff():
+def test_missing_value_classification_arff(cluster):
     """Binary classification, log loss (probabilities), arff data."""
-    _test_dataset_problem(breast_cancer_missing, "neg_log_loss", arff=True)
+    _test_dataset_problem(
+        breast_cancer_missing, "neg_log_loss", arff=True, cluster=cluster
+    )
 
 
-def test_missing_value_classification():
+def test_missing_value_classification(cluster):
     """Binary classification, log loss (probabilities), missing values."""
-    _test_dataset_problem(breast_cancer_missing, "neg_log_loss", missing_values=True)
+    _test_dataset_problem(
+        breast_cancer_missing, "neg_log_loss", missing_values=True, cluster=cluster
+    )
