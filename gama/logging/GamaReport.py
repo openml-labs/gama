@@ -16,7 +16,7 @@ pset, _ = pset_from_config(merge_configurations(clf_config, reg_config))
 class GamaReport:
     """Contains information parsed from a search captured by a GAMA analysis log."""
 
-    def __init__(self, log_directory: str):
+    def __init__(self, log_directory: str, strict: bool = True):
         """Parse the logfile or log lines provided.
 
         Parameters
@@ -26,6 +26,11 @@ class GamaReport:
                 - gama.log
                 - evaluations.log
                 - resources.log
+
+        strict: bool (default=True)
+            Require each primitives has all required terminals present in `string`.
+            Non-strict matching may be useful when constructing individuals from
+            and old log with a slightly different search space.
         """
         self._log_directory = os.path.expanduser(log_directory)
         self.name = os.path.split(log_directory)[-1]
@@ -33,6 +38,7 @@ class GamaReport:
         self._last_tell = 0
         self.evaluations: pd.DataFrame = pd.DataFrame()
         self.individuals: Dict[str, Individual] = dict()
+        self.strict = strict
 
         # Parse initialization/progress information from gama.log
         with open(os.path.join(log_directory, "gama.log")) as fh:
@@ -87,7 +93,7 @@ class GamaReport:
             df.duration = pd.to_timedelta(df.duration, unit="s")
 
             new_individuals = {
-                id_: Individual.from_string(pipeline, pset)
+                id_: Individual.from_string(pipeline, pset, strict=self.strict)
                 for id_, pipeline in zip(df.id, df.pipeline)
             }
 

@@ -62,7 +62,9 @@ class PrimitiveNode:
         )
 
     @classmethod
-    def from_string(cls, string: str, primitive_set: dict) -> "PrimitiveNode":
+    def from_string(
+        cls, string: str, primitive_set: dict, strict: bool = True
+    ) -> "PrimitiveNode":
         """Create a PrimitiveNode from string formatted like PrimitiveNode.__str__
 
         Parameters
@@ -71,6 +73,10 @@ class PrimitiveNode:
             A string formatted similar to PrimitiveNode.__str__
         primitive_set: dict
             The dictionary defining all Terminals and Primitives.
+        strict: bool (default=True)
+            Require each primitives has all required terminals present in `string`.
+            Non-strict matching may be useful when constructing individuals from
+            and old log with a slightly different search space.
 
         Returns
         -------
@@ -97,7 +103,7 @@ class PrimitiveNode:
                     for terminal_string in terminal_set.split(", ")
                 ]
             missing = set(primitive.input) - set(map(lambda t: t.identifier, terminals))
-            if missing:
+            if missing and strict:
                 raise ValueError(f"terminals {missing} for primitive {primitive}")
             last_node = cls(primitive, last_node, terminals)
 
