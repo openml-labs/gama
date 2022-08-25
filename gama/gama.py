@@ -28,6 +28,7 @@ import numpy as np
 import stopit
 from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
+from dask.distributed.deploy import Cluster
 
 from gama.genetic_programming.components import Individual, Fitness, DATA_TERMINAL
 from gama.search_methods.base_search import BaseSearch
@@ -100,6 +101,7 @@ class Gama(ABC):
         post_processing: BasePostProcessing = BestFitPostProcessing(),
         output_directory: Optional[str] = None,
         store: str = "logs",
+        cluster: Optional[Cluster] = None,
     ):
         """
 
@@ -170,6 +172,9 @@ class Gama(ABC):
              - 'models': keep only cache with models and predictions
              - 'logs': keep only the logs
              - 'all': keep logs and cache with models and predictions
+
+        cluster: dask.distributed.deploy.Cluster, optional (default=None)
+            Dask cluster that the pipeline evaluation jobs should run on.
         """
         if not output_directory:
             output_directory = f"gama_{str(uuid.uuid4())}"
@@ -230,6 +235,7 @@ class Gama(ABC):
                 logfile=os.path.join(self.output_directory, "memory.log"),
             ),
         )
+        AsyncEvaluator.provided_cluster = cluster
 
         if max_eval_time is None:
             max_eval_time = round(0.1 * max_total_time)

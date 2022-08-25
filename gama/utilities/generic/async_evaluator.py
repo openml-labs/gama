@@ -20,6 +20,7 @@ class AsyncEvaluator:
     """
 
     defaults: Dict = {}
+    provided_cluster = None
 
     def __init__(
         self,
@@ -68,13 +69,18 @@ class AsyncEvaluator:
             if self._memory_limit_mb
             else "auto"
         )
-        log.debug(f"Starting local cluster: {mem_limit=}")
-        self.cluster = LocalCluster(
-            n_workers=self._n_jobs,
-            processes=False,
-            memory_limit=mem_limit,
-            silence_logs=logging.ERROR,
-        )
+        if not AsyncEvaluator.provided_cluster:
+            log.debug(f"Starting local cluster: {mem_limit=}")
+            self.cluster = LocalCluster(
+                n_workers=self._n_jobs,
+                processes=False,
+                memory_limit=mem_limit,
+                silence_logs=logging.ERROR,
+            )
+        else:
+            log.debug(f"Using provided cluster: {mem_limit=}")
+            print("using provided cluster")
+            self.cluster = AsyncEvaluator.provided_cluster
         self.client = Client(self.cluster)
 
         for key, value in AsyncEvaluator.defaults.items():
@@ -83,10 +89,12 @@ class AsyncEvaluator:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        log.debug("Stopping local cluster")
+        log.debug("Clearing futures and closing client.")
         self.futures.clear()
         self.client.close()
-        self.client.shutdown()
+        if not AsyncEvaluator.provided_cluster:
+            log.debug("Stopping local cluster")
+            self.client.shutdown()
 
         self.cluster = None
         self.client = None
