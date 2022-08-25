@@ -66,8 +66,17 @@ gamadash = "gama.dashboard.app:main"
 [tool.pytest.ini_options]
 filterwarnings = [
     "error",
+    # We expect some configurations to fail to converge
     "ignore::sklearn.exceptions.ConvergenceWarning",
-    "ignore::PendingDeprecationWarning",
-    "ignore::DeprecationWarning",
-    "ignore::FutureWarning",
+    # We have a CRON job checking for deprecation/future warnings,
+    # but we dont fail on them by default as they should not interfere with most PRs.
+    # We still print to ensure new warnings are not introduced by the change.
+    "always::PendingDeprecationWarning",
+    "always::DeprecationWarning",
+    "always::FutureWarning",
+    # https://dask.discourse.group/t/using-pytest-with-localclusters/1053
+    # dask ResourceWarning: unclosed <socket.socket fd=14, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('0.0.0.0', 0)>  # noqa: E501
+    "ignore:.*socket.socket.*:pytest.PytestUnraisableExceptionWarning",
+    # Warning about picking random port because default is in use.
+    "ignore::UserWarning:distributed.node:183"
 ]
