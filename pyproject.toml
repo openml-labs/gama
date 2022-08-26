@@ -74,9 +74,9 @@ filterwarnings = [
     "always::PendingDeprecationWarning",
     "always::DeprecationWarning",
     "always::FutureWarning",
-    # https://dask.discourse.group/t/using-pytest-with-localclusters/1053
-    # dask ResourceWarning: unclosed <socket.socket fd=14, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('0.0.0.0', 0)>  # noqa: E501
-    "ignore:.*socket.socket.*:pytest.PytestUnraisableExceptionWarning",
-    # Warning about picking random port because default is in use.
-    "ignore::UserWarning:distributed.node:183"
+    # We will (probably) get rid of category_encoders in 22.1+
+    "ignore:::category_encoders.target_encoder",
+    # https://www.tornadoweb.org/en/stable/releases/v6.2.0.html#deprecation-notice
+    # Use of Tornado is internal to dask.distributed, nothing we can do
+    "ignore:There is no current event loop:DeprecationWarning:tornado",
 ]
