@@ -8,16 +8,51 @@ from dask.distributed import LocalCluster
 import logging
 
 
-@pytest.fixture(scope="session")
-def cluster():
+@pytest.fixture()
+def multiprocessingcluster():
     with LocalCluster(
-        n_workers=8,
-        processes=False,
+        threads_per_worker=2,
+        n_workers=2,
+        processes=True,
         silence_logs=logging.ERROR,
+        memory_limit="auto",
         # We do not want a Bokeh server running for each test that requires a cluster.
-        dashboard_address=None,
+        dashboard_address=":0",
         # Non-default so does not interfere with running other GAMA instances.
         # scheduler_port=87895,
+        scheduler_port=0,
+    ) as cluster:
+        yield cluster
+
+
+@pytest.fixture()
+def cluster():
+    with LocalCluster(
+        threads_per_worker=4,
+        processes=False,
+        silence_logs=logging.ERROR,
+        memory_limit="auto",
+        # We do not want a Bokeh server running for each test that requires a cluster.
+        dashboard_address=":0",
+        # Non-default so does not interfere with running other GAMA instances.
+        # scheduler_port=87895,
+        scheduler_port=0,
+    ) as cluster:
+        yield cluster
+
+
+@pytest.fixture()
+def singlethreadcluster():
+    with LocalCluster(
+        threads_per_worker=1,
+        processes=False,
+        silence_logs=logging.ERROR,
+        memory_limit="auto",
+        # We do not want a Bokeh server running for each test that requires a cluster.
+        dashboard_address=":0",
+        # Non-default so does not interfere with running other GAMA instances.
+        # scheduler_port=87895,
+        scheduler_port=0,
     ) as cluster:
         yield cluster
     # cluster.close()  # use context manager instead

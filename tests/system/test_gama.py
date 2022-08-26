@@ -27,23 +27,31 @@ def _gama_on_digits(gama):
     )
 
 
-def test_full_system_single_core():
+def test_full_system_single_core(singlethreadcluster):
     automl = GamaClassifier(
         random_state=0,
         max_total_time=60,
-        max_memory_mb=2_000,
         store="nothing",
-        n_jobs=1,
+        cluster=singlethreadcluster,
     )
     _gama_on_digits(automl)
 
 
-def test_full_system_multi_core():
+def test_full_system_multi_thread(cluster):
     automl = GamaClassifier(
         random_state=0,
         max_total_time=60,
-        max_memory_mb=4_000,
         store="nothing",
-        n_jobs=2,
+        cluster=cluster,
+    )
+    _gama_on_digits(automl)
+
+
+def test_full_system_multi_core(multiprocessingcluster):
+    automl = GamaClassifier(
+        random_state=0,
+        max_total_time=60,
+        store="nothing",
+        cluster=multiprocessingcluster,
     )
     _gama_on_digits(automl)
