@@ -16,8 +16,6 @@ from sklearn.preprocessing import (
     MinMaxScaler,
     Normalizer,
     PolynomialFeatures,
-    RobustScaler,
-    StandardScaler,
     Binarizer,
 )
 from sklearn.kernel_approximation import Nystroem, RBFSampler
@@ -29,10 +27,7 @@ from sklearn.feature_selection import (
     VarianceThreshold,
 )
 
-
-class SuperEncoder(StandardScaler):
-    # For testing purposes only
-    pass
+from .preprocessing import preproc_conf
 
 
 # For comparison, this selection of operators and hyperparameters is
@@ -40,12 +35,7 @@ class SuperEncoder(StandardScaler):
 
 clf_config = {
     "data": ["data"],
-    SuperEncoder: {
-        "_input": "data",
-        "_output": "numeric_data",
-        "with_std": [True, False],
-        "with_mean": [True, False],
-    },
+    **preproc_conf,
     "alpha": [1e-3, 1e-2, 1e-1, 1.0, 10.0, 100.0],
     "fit_prior": [True, False],
     "min_samples_split": range(2, 21),
@@ -147,8 +137,6 @@ clf_config = {
         "interaction_only": [False],
     },
     RBFSampler: {"gamma": np.arange(0.0, 1.01, 0.05)},
-    RobustScaler: {},
-    StandardScaler: {},
     # Selectors
     SelectFwe: {"alpha": np.arange(0, 0.05, 0.001), "score_func": {f_classif: None}},
     SelectPercentile: {"percentile": range(1, 100), "score_func": {f_classif: None}},

@@ -42,7 +42,6 @@ from gama.search_methods.async_ea import AsyncEA
 from gama.utilities.generic.timekeeper import TimeKeeper
 from gama.logging.utility_functions import register_stream_log
 from gama.utilities.preprocessing import (
-    basic_encoding,
     basic_pipeline_extension,
 )
 from gama.genetic_programming.mutation import random_valid_mutation_in_place
@@ -255,7 +254,6 @@ class Gama(ABC):
 
         self._x: Optional[pd.DataFrame] = None
         self._y: Optional[pd.DataFrame] = None
-        self._basic_encoding_pipeline: Optional[Pipeline] = None
         self._fixed_pipeline_extension: List[Tuple[str, TransformerMixin]] = []
         self._inferred_dtypes: List[Type] = []
         self.model: object = None
@@ -359,8 +357,6 @@ class Gama(ABC):
     ) -> pd.DataFrame:
         if isinstance(x, np.ndarray):
             x = self._np_to_matching_dataframe(x)
-        if self._basic_encoding_pipeline:
-            x = self._basic_encoding_pipeline.transform(x)
         return x
 
     def _predict(self, x: pd.DataFrame) -> np.ndarray:
@@ -530,14 +526,11 @@ class Gama(ABC):
         with self._time_manager.start_activity(
             "preprocessing", activity_meta=["default"]
         ):
-            x, self._y = format_x_y(x, y)
+            self._x, self._y = format_x_y(x, y)
             self._inferred_dtypes = x.dtypes
             is_classification = hasattr(self, "_label_encoder")
-            self._x, self._basic_encoding_pipeline = basic_encoding(
-                x, is_classification
-            )
             self._fixed_pipeline_extension = basic_pipeline_extension(
-                self._x, is_classification
+                is_classification
             )
             self._operator_set._safe_compile = partial(
                 self._operator_set._compile,
@@ -688,12 +681,7 @@ class Gama(ABC):
         if raise_if_exists and file is not None and os.path.isfile(file):
             raise FileExistsError(f"File {file} already exists.")
 
-        if self._basic_encoding_pipeline is not None:
-            script_text = self._post_processing.to_code(
-                self._basic_encoding_pipeline.steps + self._fixed_pipeline_extension
-            )
-        else:
-            script_text = self._post_processing.to_code(self._fixed_pipeline_extension)
+        script_text = self._post_processing.to_code(self._fixed_pipeline_extension)
 
         if file:
             with open(file, "w") as fh:

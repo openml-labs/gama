@@ -9,6 +9,8 @@ from gama.genetic_programming.components import (
     DATA_TERMINAL,
 )
 
+from dirty_cat import SuperVectorizer
+
 
 def random_terminals_for_primitive(
     primitive_set: dict, primitive: Primitive
@@ -85,6 +87,11 @@ def random_primitive_node(
     data_input_type: Optional[str] = None,
 ) -> PrimitiveNode:
     """Create a PrimitiveNode with specified output_type and random terminals."""
+    # Hotfix
+    #  otherwise, the function tries to replace the SuperVectorizer
+    #  with something else (but none match).
+    if isinstance(exclude, Primitive) and exclude.identifier is SuperVectorizer:
+        exclude = None
     candidates = [
         p
         for p in primitive_set[output_type]
@@ -102,6 +109,8 @@ def random_primitive_node(
                 c for c in candidates if reachability[c.data_input] == with_depth - 1
             ]
 
+    if len(candidates) == 0:
+        raise Exception('No candidates to chose from')
     primitive = random.choice(candidates)
     remaining_depth = with_depth - 1 if with_depth else None
     children = random_children_for_primitive(

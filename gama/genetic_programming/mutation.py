@@ -7,7 +7,7 @@ from functools import partial
 from typing import Callable, Optional, List, Dict
 
 from gama.genetic_programming.components.terminal import Terminal
-from .components import Individual
+from .components import Individual, Primitive
 from .operations import random_primitive_node
 
 
@@ -105,7 +105,10 @@ def mut_shrink(
     if shrink_by is not None and n_primitives <= shrink_by:
         raise ValueError(f"Can't shrink size {n_primitives} individual by {shrink_by}.")
     if shrink_by is None:
-        shrink_by = random.randint(1, n_primitives)
+        if n_primitives > 1:
+            shrink_by = random.randint(1, n_primitives)
+        else:
+            shrink_by = 0
 
     i = len(individual.primitives) - 1
     while shrink_by > 0 and i > 0:
@@ -136,7 +139,16 @@ def mut_insert(individual: Individual, primitive_set: dict) -> None:
         Individual to mutate in-place.
     primitive_set: dict
     """
-    parent_node = random.choice(list(individual.primitives))
+    candidate_primitives = [
+        primitive for primitive in individual.primitives
+        if any(
+            isinstance(p, Primitive)
+            for p in primitive_set[primitive._primitive.data_input]
+        )
+    ]
+    if not candidate_primitives:
+        raise Exception(f'No candidate primitives')
+    parent_node = random.choice(candidate_primitives)
     new_primitive_node = random_primitive_node(
         output_type=parent_node._primitive.data_input,
         primitive_set=primitive_set,

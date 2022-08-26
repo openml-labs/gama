@@ -13,7 +13,7 @@ class PrimitiveNode:
         The Primitive type of this PrimitiveNode.
     data_node: PrimitiveNode
         The PrimitiveNode that specifies all preprocessing before this PrimitiveNode.
-    terminals: List[Union["PrimitiveNode", Terminal]]
+    children: List[Union["PrimitiveNode", Terminal]]
         A non-empty list of terminals and primitivenodes matching the `primitive` input.
     """
 
@@ -37,8 +37,8 @@ class PrimitiveNode:
         input_str = f"{self.input_node!r}" if self.input_node else ""
         terminal_str = ", ".join(
             [
-                repr(terminal)
-                for terminal in self.terminals
+                repr(terminal) if isinstance(terminal, Terminal) else str(terminal)
+                for terminal in self.terminals + self.primitives
                 if terminal != self.input_node
             ]
         )
