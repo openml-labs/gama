@@ -89,7 +89,7 @@ def random_primitive_node(
     """Create a PrimitiveNode with specified output_type and random terminals."""
     # Hotfix
     #  otherwise, the function tries to replace the SuperVectorizer
-    #  with something else (except none match).
+    #  with something else (but none match).
     if isinstance(exclude, Primitive) and exclude.identifier is SuperVectorizer:
         exclude = None
     candidates = [

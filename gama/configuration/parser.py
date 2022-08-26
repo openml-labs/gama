@@ -219,7 +219,8 @@ def remove_primitives_with_unreachable_input(
     for return_type, prims_and_terms in pset.items():
         for pt in prims_and_terms:
             if isinstance(pt, Primitive) and pt.data_input not in reachability:
-                print(pt)
+                pass
+                #print(pt)  # FIXME
     return {
         return_type: [
             pt

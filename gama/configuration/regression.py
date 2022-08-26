@@ -129,8 +129,6 @@ reg_config = {
         "interaction_only": [False],
     },
     RBFSampler: {"gamma": np.arange(0.0, 1.01, 0.05)},
-    RobustScaler: {},
-    StandardScaler: {},
     # Selectors
     SelectFwe: {"alpha": np.arange(0, 0.05, 0.001), "score_func": {f_regression: None}},
     SelectPercentile: {"percentile": range(1, 100), "score_func": {f_regression: None}},
