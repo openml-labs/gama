@@ -15,6 +15,7 @@ Maintenance:
    - doc build and deploy
    - pre-commit check
    - check for changelog
+ - Small changes to avoid FutureWarnings and/or DeprecationWarnings.
 
 Bugfixes:
  - #137: raise an output if ``output_directory`` is non-empty.
