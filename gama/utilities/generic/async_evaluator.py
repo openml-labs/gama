@@ -6,6 +6,22 @@ from dask.distributed import Client, LocalCluster, as_completed, Future
 log = logging.getLogger(__name__)
 
 
+# Dask Workers will log warnings to console any job with an exception,
+# but `timeout` exceptions are expected at the end of the the runtime.
+# Moreover, these exceptions can also be processed when processing the Futures.
+def ignore_timeout_exception_on_deadline(record) -> int:
+    if (
+        record.filename == "worker.py"
+        and "Compute Failed" in record.msg
+        and isinstance(record.args, tuple)
+    ):
+        return "`timeout` must be greater than 0" not in record.args[-1]
+    return 1
+
+
+logging.getLogger("distributed.worker").addFilter(ignore_timeout_exception_on_deadline)
+
+
 class AsyncEvaluator:
     """Manages subprocesses on which arbitrary functions can be evaluated.
 
@@ -75,7 +91,6 @@ class AsyncEvaluator:
                 n_workers=self._n_jobs,
                 processes=False,
                 memory_limit=mem_limit,
-                silence_logs=logging.ERROR,
             )
         else:
             log.debug(f"Using provided cluster: {mem_limit=}")
