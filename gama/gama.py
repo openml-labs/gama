@@ -574,6 +574,14 @@ class Gama(ABC):
         ):
             self._search_phase(warm_start, timeout=fit_time)
 
+        log.info("Best pipelines found in search:")
+        for i, evaluation in enumerate(
+            self._evaluation_library.n_best(5, with_pipelines=False)
+        ):
+            log.info(
+                f"{i}, {str(evaluation.individual._id)[:6]}: {evaluation.score}, {evaluation.individual.pipeline_str()}"  # noqa: E501
+            )
+
         with self._time_manager.start_activity(
             "postprocess",
             time_limit=int(self._time_manager.total_time_remaining),
