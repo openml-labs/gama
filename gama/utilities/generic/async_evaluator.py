@@ -80,21 +80,16 @@ class AsyncEvaluator:
                 "You can not use the same `Workers` object in two different contexts."
             )
 
-        mem_limit = (
-            f"{self._memory_limit_mb/self._n_jobs}MB"
-            if self._memory_limit_mb
-            else "auto"
-        )
+        mem_limit = f"{self._memory_limit_mb}MB" if self._memory_limit_mb else "auto"
         if not AsyncEvaluator.provided_cluster:
-            log.debug(f"Starting local cluster: {mem_limit=}")
+            log.debug(f"Starting local cluster: {mem_limit=}, {self._n_jobs=}")
             self.cluster = LocalCluster(
-                n_workers=self._n_jobs,
+                threads_per_worker=self._n_jobs,
                 processes=False,
                 memory_limit=mem_limit,
             )
         else:
-            log.debug(f"Using provided cluster: {mem_limit=}")
-            print("using provided cluster")
+            log.debug(f"Using provided cluster: {AsyncEvaluator.provided_cluster=}")
             self.cluster = AsyncEvaluator.provided_cluster
         self.client = Client(self.cluster)
 
