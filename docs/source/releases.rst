@@ -6,19 +6,21 @@ Version 22.0.0
 
 Maintenance:
  - Adopt `NEP 29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_:
-   - Drop support for Python 3.6 and 3.7
-   - Add support for Python 3.10
+    - Drop support for Python 3.6 and 3.7
+    - Add support for Python 3.10
+    -
  - Use pyproject.toml instead of setup.py
  - Transition to Github CI, including:
-   - pytest on pull request
-   - pytest CRON job with prerelease versions
-   - doc build and deploy
-   - pre-commit check
-   - check for changelog
+    - pytest on pull request
+    - pytest CRON job with prerelease versions
+    - doc build and deploy
+    - pre-commit check
+    - check for changelog
  - Small changes to avoid FutureWarnings and/or DeprecationWarnings.
 
 Bugfixes:
  - #137: raise an output if ``output_directory`` is non-empty.
+ - #174: Fix an issue where GAMA might freeze in when ending search.
 
 Features:
  - ASHA resources can now also be specified as fraction of the dataset size by using a float in (0, 1].
