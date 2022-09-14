@@ -157,7 +157,8 @@ class AsyncEvaluator:
             try:
                 self._stop_worker_process(self._processes[0])
             except psutil.NoSuchProcess:
-                pass
+                self.job_queue_size -= 1
+                self._processes.remove(self._processes[0])
         return False
 
     def clear_queue(self, q: multiprocessing.Queue):
@@ -213,12 +214,12 @@ class AsyncEvaluator:
         """
         if len(self.futures) == 0:
             raise RuntimeError("No Futures queued, must call `submit` first.")
-
         while True:
             self._control_memory_usage()
             self._log_memory_usage()
 
             try:
+
                 completed_future = self._output.get(block=False)
                 self.job_queue_size -= 1
             except queue.Empty:
