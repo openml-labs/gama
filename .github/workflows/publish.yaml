@@ -127,6 +127,6 @@ jobs:
         run: |
           python -m twine upload --repository testpypi -u __token__ -p ${{ secrets.TEST_PYPI }} dist/*
       - name: Upload to real server
-        if: ${{ ! inputs.test-pypi && startsWith(github.ref, join(['refs/tags/v', join([inputs.year, inputs.macro, inputs.micro, inputs.suffix], '.'), '')) }}
+        if: ${{ ! inputs.test-pypi  }}
         run: |
           python -m twine upload -u __token__ -p ${{ secrets.PYPI }} dist/*
