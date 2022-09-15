@@ -55,7 +55,7 @@ jobs:
       - name: Match version with tag
         run: |
           GAMA_VERSION=$(grep -Po "\d+\.\d+\.\d+(\.dev\d*)?" "gama/__version__.py")
-          NEW_VERSION=${{ github.ref_name  }}
+          NEW_VERSION=${{ github.ref  }}
           echo refs/tags/v$GAMA_VERSION $NEW_VERSION
           exit $([ refs/tags/v$GAMA_VERSION == $NEW_VERSION ])
       - name: Install build & publish dependencies
