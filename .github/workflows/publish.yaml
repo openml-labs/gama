@@ -39,14 +39,14 @@ jobs:
           echo ${{ inputs.i-know-what-i-am-doing == 'true' }}
 
   warn:
-    if: ${{ inputs.i-know-what-i-am-doing == 'false' }}
+    if: ${{ ! inputs.i-know-what-i-am-doing }}
     runs-on: ubuntu-latest
     steps:
       - name: "i-know-what-i-am-doing not set"
         run: exit 1
 
   build:
-    if: ${{ inputs.i-know-what-i-am-doing == 'true' }}
+    if: ${{ inputs.i-know-what-i-am-doing }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -124,10 +124,10 @@ jobs:
         run: |
           python -m pip install twine
       - name: Upload to test server
-        if: ${{ inputs.test-pypi == 'true' }}
+        if: ${{ inputs.test-pypi }}
         run: |
           python -m twine upload --repository testpypi -u __token__ -p ${{ secrets.TEST_PYPI }} dist/*
       - name: Upload to real server
-        if: ${{ inputs.test-pypi == 'false' }}
+        if: ${{ ! inputs.test-pypi }}
         run: |
           python -m twine upload -u __token__ -p ${{ secrets.PYPI }} dist/*
