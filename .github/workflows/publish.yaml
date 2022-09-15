@@ -23,9 +23,14 @@ on:
         required: true
         type: boolean
         default: false
+      test-pypi:
+        required: true
+        type: boolean
+        default: true
 
 jobs:
   build:
+    if: ${{ inputs.i-know-what-i-am-doing == "true" }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -45,7 +50,6 @@ jobs:
           python -m pip install build
       - name: Build Wheel
         run: |
-          exit 1
           python -m build
       - name: Upload Dist
         uses: actions/upload-artifact@v3
@@ -104,5 +108,10 @@ jobs:
         run: |
           python -m pip install twine
       - name: Upload to test server
+        if: ${{ inputs.test-pypi == "true" }}
         run: |
           python -m twine upload --repository testpypi -u __token__ -p ${{ secrets.TEST_PYPI }} dist/*
+      - name: Upload to real server
+        if: ${{ inputs.test-pypi == "false" }}
+        run: |
+          python -m twine upload -u __token__ -p ${{ secrets.PYPI }} dist/*
