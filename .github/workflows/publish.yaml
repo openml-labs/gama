@@ -29,6 +29,13 @@ on:
         default: true
 
 jobs:
+  warn:
+    if: ${{ inputs.i-know-what-i-am-doing == 'false' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: "i-know-what-i-am-doing not set"
+        run: exit 1
+
   build:
     if: ${{ inputs.i-know-what-i-am-doing == 'true' }}
     runs-on: ubuntu-latest
