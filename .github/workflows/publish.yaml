@@ -36,11 +36,12 @@ jobs:
       - name: Check Version Match
         run: |
           GAMA_VERSION=$(cat gama/__version__.py | grep -Eo "\d+\.\d+\.\d+\.dev")
-          NEW_VERSION= ${{ inputs.year }}.${{ inputs.macro }}.${{ inputs.micro }}.${{ inputs.suffix }}
+          NEW_VERSION=${{ inputs.year }}.${{ inputs.macro }}.${{ inputs.micro }}.${{ inputs.suffix }}
           echo $GAMA_VERSION $NEW_VERSION
           sed -i '' "s/$GAMA_VERSION/$NEW_VERSION/" "gama/__version__.py" 
           cat "gama/__version__.py"
           echo "Did version check"
+
       - name: Install build & publish dependencies
         run: |
           python -m pip install build
