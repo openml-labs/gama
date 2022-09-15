@@ -16,6 +16,7 @@ Maintenance:
     - doc build and deploy
     - pre-commit check
     - check for changelog
+    - easy release to pypi from github workflow
  - Small changes to avoid FutureWarnings and/or DeprecationWarnings.
 
 Bugfixes:
