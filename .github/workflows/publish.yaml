@@ -34,7 +34,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "i-know-what-i-am-doing not set"
-        run: exit 1
+        run: |
+          echo ${{ github.ref }}
+          exit 1
 
   build:
     if: ${{ inputs.i-know-what-i-am-doing }}
