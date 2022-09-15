@@ -48,7 +48,7 @@ reg_config = {
     },
     GradientBoostingRegressor: {
         "n_estimators": [100],
-        "loss": ["ls", "lad", "huber", "quantile"],
+        "loss": ["squared_error", "absolute_error", "huber", "quantile"],
         "learning_rate": [1e-3, 1e-2, 1e-1, 0.5, 1.0],
         "max_depth": range(1, 11),
         "min_samples_split": range(2, 21),

@@ -546,6 +546,13 @@ class Gama(ABC):
                     if p.identifier not in [PolynomialFeatures]
                 ]
 
+        if self._time_manager.total_time_remaining < 0:
+            pre_time = self._time_manager.activities[-1].stopwatch.elapsed_time
+            raise RuntimeError(
+                f"Preprocessing took {pre_time} seconds. "
+                f"No time remaining (budget: {self._time_manager.total_time} seconds)."
+            )
+
         fit_time = int(
             (1 - self._post_processing.time_fraction)
             * self._time_manager.total_time_remaining

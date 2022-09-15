@@ -67,8 +67,14 @@ filterwarnings = [
     "error",
     "ignore::sklearn.exceptions.ConvergenceWarning",
     "ignore::RuntimeWarning",
+    # Block a warning coming from scikit-learn internals about scipy.mode
+    "ignore:.*mode.*:FutureWarning",
+    # We have a CRON job checking for deprecation/future warnings,
+    # but we dont fail on them by default as they should not interfere with most PRs.
+    # We still print to ensure new warnings are not introduced by the change.
     "default::PendingDeprecationWarning",
     "default::DeprecationWarning",
     "default::FutureWarning",
-    "ignore:.*mode.*:FutureWarning",
+    # We will (probably) get rid of category_encoders in 22.1+
+    "ignore:::category_encoders.target_encoder",
 ]
