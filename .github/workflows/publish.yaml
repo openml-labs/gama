@@ -29,15 +29,6 @@ on:
         default: true
 
 jobs:
-  echo:
-    runs-on: ubuntu-latest
-    steps:
-      - name: "i-know-what-i-am-doing not set"
-        run: |
-          echo ${{ inputs.i-know-what-i-am-doing }}
-          echo ${{ inputs.i-know-what-i-am-doing == 'false' }}
-          echo ${{ inputs.i-know-what-i-am-doing == 'true' }}
-
   warn:
     if: ${{ ! inputs.i-know-what-i-am-doing }}
     runs-on: ubuntu-latest
