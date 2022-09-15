@@ -35,8 +35,8 @@ jobs:
           python-version: "3.10"
       - name: Check Version Match
         run: |
-          echo 1
-          GAMA_VERSION=$(cat gama/__version__.py | grep -Eo "\d+\.\d+\.\d+\.dev")
+          echo $(grep -Po "\d+\.\d+\.\d+(\.dev\d*)?" gama/__version__.py)
+          GAMA_VERSION=$(grep -Po "\d+\.\d+\.\d+(\.dev\d*)?" "gama/__version__.py")
           echo 2
           NEW_VERSION=${{ inputs.year }}.${{ inputs.macro }}.${{ inputs.micro }}.${{ inputs.suffix }}
           echo 3
