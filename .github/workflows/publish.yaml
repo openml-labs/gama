@@ -35,10 +35,15 @@ jobs:
           python-version: "3.10"
       - name: Check Version Match
         run: |
+          echo 1
           GAMA_VERSION=$(cat gama/__version__.py | grep -Eo "\d+\.\d+\.\d+\.dev")
+          echo 2
           NEW_VERSION=${{ inputs.year }}.${{ inputs.macro }}.${{ inputs.micro }}.${{ inputs.suffix }}
+          echo 3
           echo $GAMA_VERSION $NEW_VERSION
+          echo 4
           sed -i '' "s/$GAMA_VERSION/$NEW_VERSION/" "gama/__version__.py" 
+          echo 5
           cat "gama/__version__.py"
           echo "Did version check"
 
