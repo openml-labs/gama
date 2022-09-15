@@ -36,6 +36,9 @@ jobs:
       - name: "i-know-what-i-am-doing not set"
         run: |
           echo ${{ github.ref }}
+          echo ${{ join([inputs.year, inputs.macro, inputs.micro, inputs.suffix], '.') }}
+          echo ${{ join(['refs/tags/v', join([inputs.year, inputs.macro, inputs.micro, inputs.suffix], '.'), '') }}
+          echo ${{ startsWith(github.ref, join(['refs/tags/v', join([inputs.year, inputs.macro, inputs.micro, inputs.suffix], '.'), '')) }}
           exit 1
 
   build:
@@ -47,11 +50,16 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-      - name: Check Version Match
+      - name: Match version with input
         run: |
           GAMA_VERSION=$(grep -Po "\d+\.\d+\.\d+(\.dev\d*)?" "gama/__version__.py")
           NEW_VERSION=${{ inputs.year }}.${{ inputs.macro }}.${{ inputs.micro }}.${{ inputs.suffix }}
           echo $GAMA_VERSION $NEW_VERSION
+          exit $([ $GAMA_VERSION == $NEW_VERSION ])
+      - name: Match version with tag
+        run: |
+          GAMA_VERSION=$(grep -Po "\d+\.\d+\.\d+(\.dev\d*)?" "gama/__version__.py")
+          echo $GAMA_VERSION ${{ github}}
           exit $([ $GAMA_VERSION == $NEW_VERSION ])
       - name: Install build & publish dependencies
         run: |
@@ -120,6 +128,6 @@ jobs:
         run: |
           python -m twine upload --repository testpypi -u __token__ -p ${{ secrets.TEST_PYPI }} dist/*
       - name: Upload to real server
-        if: ${{ ! inputs.test-pypi && startsWith(github.ref, 'refs/tags/v')}}
+        if: ${{ ! inputs.test-pypi && startsWith(github.ref, join(['refs/tags/v', join([inputs.year, inputs.macro, inputs.micro, inputs.suffix], '.'), '')) }}
         run: |
           python -m twine upload -u __token__ -p ${{ secrets.PYPI }} dist/*
