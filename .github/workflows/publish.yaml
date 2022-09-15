@@ -93,7 +93,7 @@ jobs:
       - name: Run example
         run: |
           curl https://raw.githubusercontent.com/PGijsbers/gama/master/examples/classification_example.py > example.py
-          # First reduce runtime for 3 minutes to 1 minute
+          # First reduce runtime for 3 minutes to 1 minute, does not work for Windows but fails silently.
           sed -i.bak "s/180/60/" example.py
           sed -i.bak "s/3/1/" example.py
           python example.py
