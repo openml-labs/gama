@@ -61,17 +61,10 @@ class AsynchronousSuccessiveHalving(BaseSearch):
             ),
         )
 
-    def dynamic_defaults(
-        self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float
-    ) -> None:
-        set_max, default = self._hyperparameters["maximum_resource"]
-        if set_max is not None and len(y) < set_max:
-            # todo: take into account the evaluation procedure as well.
-            logging.warning(
-                f"`maximum_resource` was set to {set_max}, but the dataset only"
-                f"contains {len(y)} samples. Reverting to default (1.0) instead."
-            )
-            self._hyperparameters["maximum_resource"] = (None, default)
+    def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float):
+        # `maximum_resource` is the number of samples used in the highest rung.
+        # this typically should be the number of samples in the (training) dataset.
+        self._overwrite_hyperparameter_default("maximum_resource", len(x))
 
     def search(
         self, operations: OperatorSet, start_candidates: List[Individual]

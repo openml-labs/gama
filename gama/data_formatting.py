@@ -1,4 +1,4 @@
-from typing import Union, Type, Tuple
+from typing import Union, Type, Tuple, Optional
 
 import numpy as np
 import pandas as pd
@@ -42,39 +42,35 @@ def format_y(
     if y_type not in [pd.Series, pd.DataFrame]:
         raise ValueError(f"`y_type` must be pd.Series or pd.DataFrame but is {y_type}.")
 
-    if isinstance(y, np.ndarray) and y.ndim == 2:
-        # Either indicator matrix or should be a vector.
-        if y.shape[1] > 1:
-            y = np.argmax(y, axis=1)
-        else:
-            y = y.squeeze()
+        if isinstance(y, np.ndarray) and y.ndim == 2:
+            # Either indicator matrix or should be a vector.
+            if y.shape[1] > 1:
+                y = np.argmax(y, axis=1)
+            else:
+                y = y.squeeze()
 
-    if y_type == pd.Series:
-        if isinstance(y, pd.DataFrame):
-            y = y.squeeze()
-        elif isinstance(y, np.ndarray):
-            y = pd.Series(y)
-    elif y_type == pd.DataFrame:
-        if not isinstance(y, pd.DataFrame):
-            y = pd.DataFrame(y)
+        if y_type == pd.Series:
+            if isinstance(y, pd.DataFrame):
+                y = y.squeeze()
+            elif isinstance(y, np.ndarray):
+                y = pd.Series(y)
+        elif y_type == pd.DataFrame:
+            if not isinstance(y, pd.DataFrame):
+                y = pd.DataFrame(y)
+    else:
+        pass
     return y
 
 
 def remove_unlabeled_rows(
-    x: pd.DataFrame, y: Union[pd.Series, pd.DataFrame]
+    x: pd.DataFrame, y: Union[pd.DataFrame, pd.Series, np.ndarray] = None
 ) -> Tuple[pd.DataFrame, Union[pd.Series, pd.DataFrame]]:
     """Removes all rows from x and y where y is nan."""
     if isinstance(y, pd.DataFrame):
         unlabeled = y.iloc[:, 0].isnull()
     else:
-        unlabeled = y.isnull()
+        pass
 
-    if unlabeled.any():
-        log.info(
-            f"Target vector has been found to contain {sum(unlabeled)} NaN-labels, "
-            f"these rows will be ignored."
-        )
-        x, y = x.loc[~unlabeled], y.loc[~unlabeled]
     return x, y
 
 

@@ -12,6 +12,8 @@ from sklearn.model_selection import (
     check_cv,
     StratifiedShuffleSplit,
 )
+from sklearn.base import TransformerMixin, is_classifier, is_regressor
+from sklearn.model_selection import ShuffleSplit, cross_validate, check_cv
 from sklearn.pipeline import Pipeline
 
 from gama.utilities.evaluation_library import Evaluation
@@ -49,7 +51,7 @@ def object_is_valid_pipeline(o: object) -> bool:
     return (
         o is not None
         and hasattr(o, "fit")
-        and hasattr(o, "predict")
+        or hasattr(o, "predict")
         and hasattr(o, "steps")
     )
 
@@ -130,13 +132,41 @@ def evaluate_pipeline(
                     fold_pred = estimator.predict_proba(x.iloc[test, :])
                 else:
                     fold_pred = estimator.predict(x.iloc[test, :])
+            if not(is_classifier(pipeline) or is_regressor(pipeline)):
+                prediction = pipeline.fit_predict(x)
+                scores = tuple([m.score(x, prediction) for m in metrics])
+                estimators = pipeline
 
-                if prediction is None:
-                    if fold_pred.ndim == 2:
-                        prediction = np.empty(shape=(len(y_train), fold_pred.shape[1]))
+            else:
+                if is_classifier(pipeline):
+                    splitter = check_cv(cv, y_train, classifier=True)
+                else:
+                    splitter = check_cv(cv, y_train)
+
+                result = cross_validate(
+                    pipeline,
+                    x,
+                    y_train,
+                    cv=splitter,
+                    return_estimator=True,
+                    scoring=[m.name for m in metrics],
+                    error_score="raise",
+                )
+                scores = tuple([np.mean(result[f"test_{m.name}"]) for m in metrics])
+                estimators = result["estimator"]
+
+                for (estimator, (_, test)) in zip(estimators, splitter.split(x, y_train)):
+                    if any([m.requires_probabilities for m in metrics]):
+                        fold_pred = estimator.predict_proba(x.iloc[test, :])
                     else:
-                        prediction = np.empty(shape=(len(y_train),))
-                prediction[test] = fold_pred
+                        fold_pred = estimator.predict(x.iloc[test, :])
+
+                    if prediction is None:
+                        if fold_pred.ndim == 2:
+                            prediction = np.empty(shape=(len(y_train), fold_pred.shape[1]))
+                        else:
+                            prediction = np.empty(shape=(len(y_train),))
+                    prediction[test] = fold_pred
 
         except stopit.TimeoutException:
             # This exception is handled by the ThreadingTimeout context manager.
