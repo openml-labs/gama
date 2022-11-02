@@ -90,6 +90,15 @@ def pset_from_config(configuration):
                         input=hyperparameter_types, output="prediction", identifier=key
                     )
                 )
+            elif issubclass(key, sklearn.base.ClusterMixin) or (
+                hasattr(key, "metadata")
+                and key.metadata.query()["primitive_family"] == "CLUSTERING"
+            ):
+                pset["prediction"].append(
+                    Primitive(
+                        input=hyperparameter_types, output="prediction", identifier=key
+                    )
+                )
             else:
                 raise TypeError(
                     f"Expected {key} to be either subclass of "
