@@ -167,6 +167,9 @@ class AsyncEvaluator:
                 q.get(timeout=0.001)
             except queue.Empty:
                 pass
+            except Exception:
+                log.exception("Unexpected error occurred when emptying mp queue.")
+                break
         q.close()
 
     def submit(self, fn: Callable, *args, **kwargs) -> AsyncFuture:
