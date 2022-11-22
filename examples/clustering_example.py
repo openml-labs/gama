@@ -1,18 +1,24 @@
-from sklearn.datasets import load_breast_cancer
-from sklearn.metrics import calinski_harabasz_score
-from sklearn.metrics import adjusted_mutual_info_score, adjusted_rand_score
+import pandas as pd
 from gama import GamaCluster
+from sklearn.preprocessing import LabelEncoder
 
 if __name__ == "__main__":
 
-    X, y = load_breast_cancer(return_X_y=True)
+    df = pd.read_csv('cc18/iris.csv')
+    le = LabelEncoder()
+    y = df.iloc[:,-1]
+    y = le.fit_transform(y)
+    X = df.iloc[:,:-1]
 
-    automl = GamaCluster(max_total_time=180, store="nothing", n_jobs=1)
-    print("Starting `fit` which will take roughly 3 minutes.")
-    automl.fit(X)
+    automl=GamaCluster(max_total_time=180, store='all', n_jobs=1, scoring='normalized_mutual_info_score')
+    print("Starting `fit` GamaCluster which will take roughly 3 minutes.")
+    automl.fit(X, y)
+    labels = automl.predict(X)
+    #if external metric provided
+    print(automl.score(y))
+    #if internal metric provided
+    #print(automl.score(X))
+    print(automl.model)
+    print(y)
+    print(labels)
 
-    label_predictions = automl.predict(X)
-
-    print("AMI:", adjusted_mutual_info_score(y, label_predictions))
-    print("ARI:", adjusted_rand_score(y, label_predictions))
-    print("Calinski-Harabasz:", calinski_harabasz_score(X, label_predictions))

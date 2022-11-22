@@ -80,9 +80,11 @@ def evaluate_pipeline(
 
             if not(is_classifier(pipeline) or is_regressor(pipeline)):
                 prediction = pipeline.fit_predict(x)
-                scores = tuple([m.score(x, prediction) for m in metrics])
+                # if external metric provided
+                scores = tuple([m.score(y_train, prediction) for m in metrics])
+                # if internal metric provided
+                #scores = tuple([m.score(x, prediction) for m in metrics])
                 estimators = pipeline
-
             else:
                 if is_classifier(pipeline):
                     splitter = check_cv(cv, y_train, classifier=True)
@@ -98,7 +100,22 @@ def evaluate_pipeline(
                     scoring=[m.name for m in metrics],
                     error_score="raise",
                 )
-                scores = tuple([np.mean(result[f"test_{m.name}"]) for m in metrics])
+                scores_mean = tuple([np.mean(result[f"test_{m.name}"]) for m in metrics])
+                scores_std = tuple([np.std(result[f"test_{m.name}"]) for m in metrics])
+
+                scorelist_mean = []
+                scorelist_std = []
+
+                scorelist_mean.append(scores_mean)
+                scorelist_std.append(scores_std)
+
+                minindex = np.argmax(scorelist_mean)
+
+                print(scorelist_mean)
+                print('min mean:', max(scorelist_mean))
+                print('min std:', scorelist_std[minindex])
+
+
                 estimators = result["estimator"]
 
                 for (estimator, (_, test)) in zip(estimators, splitter.split(x, y_train)):

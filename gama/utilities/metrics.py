@@ -1,11 +1,12 @@
 from enum import Enum
 from typing import Iterable, Tuple, Union
+import numpy as np
 
 from sklearn.metrics import get_scorer, make_scorer
 from sklearn.metrics._scorer import _ProbaScorer, _BaseScorer, SCORERS
 
 # scores that ground truth labels are not needed
-from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score, silhouette_samples
 
 SCORERS['silhouette'] = make_scorer(silhouette_score)
 SCORERS['calinski_harabasz'] = make_scorer(calinski_harabasz_score)
@@ -92,6 +93,7 @@ def scoring_to_metric(
 ) -> Tuple[Metric, ...]:
     if isinstance(scoring, str):
         return tuple([Metric(scoring)])
+
     if isinstance(scoring, Metric):
         return tuple([scoring])
 

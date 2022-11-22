@@ -45,7 +45,7 @@ class GamaCluster(Gama):
         """
 
         self.assigned_labels = self.model.steps[-1][1].labels_
-
+        # self.assigned_labels = self.model.fit_predict(x)
         return self.assigned_labels
 
     def score(
@@ -69,7 +69,11 @@ class GamaCluster(Gama):
             The score obtained on the given test data according to the `scoring` metric.
         """
 
-        return self._metrics[0].score(x, self.assigned_labels)
+        # TODO: raise error (default=ch, if y is provided then user has to define scoring)
+        if y is not None:
+            return self._metrics[0].score(y, self.assigned_labels)
+        else:
+            return self._metrics[0].score(x, self.assigned_labels)
 
     def fit_from_file(
             self,
