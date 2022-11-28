@@ -194,15 +194,14 @@ def asha(
                     individual = future.result.individual
                     rung_individuals[rung].append((loss, individual))
                 start_new_job()
-
-            highest_rung_reached = max(rungs)
     except stopit.TimeoutException:
-        log.info("ASHA ended due to timeout.")
+        pass
+    finally:
         reached_rungs = (rung for rung, inds in rung_individuals.items() if inds != [])
         highest_rung_reached = max(reached_rungs)
         if highest_rung_reached != max(rungs):
             raise RuntimeWarning("Highest rung not reached.")
-    finally:
+
         for rung, individuals in rung_individuals.items():
             log.info(f"[{len(individuals)}] {rung}")
         return list(map(lambda p: p[1], rung_individuals[highest_rung_reached]))
