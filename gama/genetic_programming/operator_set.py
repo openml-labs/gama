@@ -49,7 +49,13 @@ class OperatorSet:
                 self._evaluate_callback(evaluation)
 
         elif future.exception is not None:
-            log.warning(f"Error raised during evaluation: {str(future.exception)}.")
+            if "`timeout` must be greater than 0," in str(future.exception):
+                log.info(f"Error raised during evaluation: {str(future.exception)}.")
+                raise KeyboardInterrupt(
+                    "Fake KeyboardInterrupt sent because a TimeoutError was lost."
+                )
+            else:
+                log.warning(f"Error raised during evaluation: {str(future.exception)}.")
         return future
 
     def try_until_new(self, operator, *args, **kwargs):
