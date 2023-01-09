@@ -85,7 +85,6 @@ def format_x_y(
     remove_unlabeled: bool = True,
 ) -> Tuple[pd.DataFrame, Union[pd.DataFrame, pd.Series]]:
     """Take (X,y) data and convert it to a (pd.DataFrame, pd.Series) tuple.
-
     Parameters
     ----------
     x: pandas.DataFrame or numpy.ndarray
@@ -93,7 +92,6 @@ def format_x_y(
     y_type: Type (default=pandas.Series)
     remove_unlabeled: bool (default=True)
         If true, remove all rows associated with unlabeled data (NaN in y).
-
     Returns
     -------
     Tuple[pandas.DataFrame, pandas.DataFrame or pandas.Series]

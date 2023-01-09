@@ -17,9 +17,7 @@ log = logging.getLogger(__name__)
 
 class AsynchronousSuccessiveHalving(BaseSearch):
     """Asynchronous Halving Algorithm by Li et al.
-
     paper: https://arxiv.org/abs/1810.05934
-
     Parameters
     ----------
     reduction_factor: int, optional (default=3)
@@ -91,9 +89,7 @@ def asha(
     max_full_evaluations: Optional[int] = None,
 ) -> List[Individual]:
     """Asynchronous Halving Algorithm by Li et al.
-
     paper: https://arxiv.org/abs/1810.05934
-
     Parameters
     ----------
     operations: OperatorSet
@@ -115,7 +111,6 @@ def asha(
     max_full_evaluations: Optional[int] (default=None)
         Maximum number of individuals to evaluate on the max rung (i.e. on all data).
         If None, the algorithm will be run indefinitely.
-
     Returns
     -------
     List[Individual]

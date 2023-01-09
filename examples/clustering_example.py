@@ -16,5 +16,3 @@ if __name__ == "__main__":
     #print(automl.score(X))
 
     print(automl.model)
-   
-

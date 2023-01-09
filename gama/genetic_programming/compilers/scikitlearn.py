@@ -64,7 +64,6 @@ def evaluate_pipeline(
     subsample=None,
 ) -> Tuple:
     """Score `pipeline` with k-fold CV according to `metrics` on (a subsample of) X, y
-
     Returns
     -------
     Tuple:
@@ -184,7 +183,6 @@ def evaluate_individual(
     **kwargs,
 ) -> Evaluation:
     """Evaluate the pipeline specified by individual, and record
-
     Parameters
     ----------
     individual: Individual
@@ -203,11 +201,9 @@ def evaluate_individual(
         Add the length of the individual to the score result of the evaluation.
     **kwargs: Dict, optional (default=None)
         Passed to `evaluate_pipeline` function.
-
     Returns
     -------
     Evaluation
-
     """
     result = Evaluation(individual, pid=os.getpid())
     result.start_time = datetime.now()
