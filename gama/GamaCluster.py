@@ -2,6 +2,7 @@ from typing import Union, Optional, List
 import numpy as np
 import pandas as pd
 from .gama import Gama
+from sklearn.preprocessing import LabelEncoder
 from gama.data_loading import file_to_pandas, X_y_from_file
 from gama.genetic_programming.components import Individual
 from gama.configuration.clustering import cluster_config
@@ -25,9 +26,12 @@ class GamaCluster(Gama):
     def fit(self, x, y=None, *args, **kwargs):
 
         if y is not None:
-            y = y.squeeze() if isinstance(y, pd.DataFrame) else y
+            y_ = y.squeeze() if isinstance(y, pd.DataFrame) else y
+            self._label_encoder = LabelEncoder().fit(y_)
+            if any([isinstance(yi, str) for yi in y_]):
+                # If target values are `str` we encode them or scikit-learn will complain.
+                y = self._label_encoder.transform(y_)
             self._evaluation_library.determine_sample_indices(stratify=y)
-
         super().fit(x, y, *args, **kwargs)
 
     def _predict(self, x: pd.DataFrame):

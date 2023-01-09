@@ -29,17 +29,12 @@ import uuid
 
 from psutil import NoSuchProcess
 
-try:
-    import resource
-except ModuleNotFoundError:
-    resource = None  # type: ignore
-
 
 log = logging.getLogger(__name__)
 
 
 class AsyncFuture:
-    """ Reference to a function call executed on a different process. """
+    """Reference to a function call executed on a different process."""
 
     def __init__(self, fn, *args, **kwargs):
         self.id = uuid.uuid4()
@@ -51,7 +46,7 @@ class AsyncFuture:
         self.traceback = None
 
     def execute(self, extra_kwargs):
-        """ Execute the function call `fn(*args, **kwargs)` and record results. """
+        """Execute the function call `fn(*args, **kwargs)` and record results."""
         try:
             # Don't update self.kwargs, as it will be pickled back to the main process
             kwargs = {**self.kwargs, **extra_kwargs}
@@ -62,7 +57,7 @@ class AsyncFuture:
 
 
 class AsyncEvaluator:
-    """ Manages subprocesses on which arbitrary functions can be evaluated.
+    """Manages subprocesses on which arbitrary functions can be evaluated.
 
     The function and all its arguments must be picklable.
     Using the same AsyncEvaluator in two different contexts raises a `RuntimeError`.
@@ -78,7 +73,7 @@ class AsyncEvaluator:
 
     def __init__(
         self,
-        n_workers: Optional[int] = None,
+        n_workers: int = 1,
         memory_limit_mb: Optional[int] = None,
         logfile: Optional[str] = None,
         wait_time_before_forced_shutdown: int = 10,
@@ -86,9 +81,8 @@ class AsyncEvaluator:
         """
         Parameters
         ----------
-        n_workers : int, optional (default=None)
+        n_workers : int (default=1)
             Maximum number of subprocesses to run for parallel evaluations.
-            Defaults to `AsyncEvaluator.n_jobs`, using all cores unless overwritten.
         memory_limit_mb : int, optional (default=None)
             The maximum number of megabytes that this process and its subprocesses
             may use in total. If None, no limit is enforced.
@@ -109,9 +103,17 @@ class AsyncEvaluator:
         self._logfile = logfile
         self._wait_time_before_forced_shutdown = wait_time_before_forced_shutdown
 
+        # queue.qsize() may raise an error on Unix-like,
+        # more accurate results may be obtained by using a multiprocessing.Value
+        # but it adds a point of failure and I hope to replace this async
+        # module soon, so we use this approximation.
+        # Since we assume all workers will take up a job, we start below 0:
+        self.job_queue_size = -n_workers
+
         self._input: multiprocessing.Queue = multiprocessing.Queue()
         self._output: multiprocessing.Queue = multiprocessing.Queue()
         self._command: multiprocessing.Queue = multiprocessing.Queue()
+
         pid = os.getpid()
         self._main_process = psutil.Process(pid)
 
@@ -147,6 +149,7 @@ class AsyncEvaluator:
         self.clear_queue(self._input)
         self.clear_queue(self._output)
         self.clear_queue(self._command)
+        self.job_queue_size = -self._n_jobs
 
         # Even processes which 'stop' need to be 'waited',
         # otherwise they become zombie processes.
@@ -154,19 +157,20 @@ class AsyncEvaluator:
             try:
                 self._stop_worker_process(self._processes[0])
             except psutil.NoSuchProcess:
-                pass
+                self.job_queue_size -= 1
+                self._processes.remove(self._processes[0])
         return False
 
-    def clear_queue(self, queue: multiprocessing.Queue):
-        while not queue.empty():
+    def clear_queue(self, q: multiprocessing.Queue):
+        while not q.empty():
             try:
-                queue.get(timeout=0.001)
-            except:
+                q.get(timeout=0.001)
+            except queue.Empty:
                 pass
-        queue.close()
+        q.close()
 
     def submit(self, fn: Callable, *args, **kwargs) -> AsyncFuture:
-        """ Submit fn(*args, **kwargs) to be evaluated on a subprocess.
+        """Submit fn(*args, **kwargs) to be evaluated on a subprocess.
 
         Parameters
         ----------
@@ -186,10 +190,11 @@ class AsyncEvaluator:
         future = AsyncFuture(fn, *args, **kwargs)
         self.futures[future.id] = future
         self._input.put(future)
+        self.job_queue_size += 1
         return future
 
     def wait_next(self, poll_time: float = 0.05) -> AsyncFuture:
-        """ Wait until an AsyncFuture has been completed and return it.
+        """Wait until an AsyncFuture has been completed and return it.
 
 
         Parameters
@@ -209,13 +214,14 @@ class AsyncEvaluator:
         """
         if len(self.futures) == 0:
             raise RuntimeError("No Futures queued, must call `submit` first.")
-
         while True:
             self._control_memory_usage()
             self._log_memory_usage()
 
             try:
+
                 completed_future = self._output.get(block=False)
+                self.job_queue_size -= 1
             except queue.Empty:
                 time.sleep(poll_time)
                 continue
@@ -230,7 +236,7 @@ class AsyncEvaluator:
             return match
 
     def _start_worker_process(self) -> psutil.Process:
-        """ Start a new worker node and add it to the process pool. """
+        """Start a new worker node and add it to the process pool."""
         mp_process = multiprocessing.Process(
             target=evaluator_daemon,
             args=(self._input, self._output, self._command, AsyncEvaluator.defaults),
@@ -242,13 +248,14 @@ class AsyncEvaluator:
         return subprocess
 
     def _stop_worker_process(self, process: psutil.Process):
-        """ Terminate a new worker node and remove it from the process pool. """
+        """Terminate a new worker node and remove it from the process pool."""
         process.terminate()
         process.wait(timeout=60)
+        self.job_queue_size -= 1
         self._processes.remove(process)
 
     def _control_memory_usage(self, threshold=0.05):
-        """ Dynamically restarts or kills processes to adhere to memory constraints. """
+        """Dynamically restarts or kills processes to adhere to memory constraints."""
         if self._memory_limit_mb is None:
             return
         # If the memory usage of all processes (the main process, and the evaluation
@@ -310,7 +317,7 @@ class AsyncEvaluator:
         processes = [self._main_process] + self._processes
         for process in processes:
             try:
-                yield process, process.memory_info()[0] / (2 ** 20)
+                yield process, process.memory_info()[0] / (2**20)
             except NoSuchProcess:
                 # can never be the main process anyway
                 self._processes = [p for p in self._processes if p.pid != process.pid]
@@ -323,7 +330,7 @@ def evaluator_daemon(
     command_queue: queue.Queue,
     default_parameters: Optional[Dict] = None,
 ):
-    """ Function for daemon subprocess that evaluates functions from AsyncFutures.
+    """Function for daemon subprocess that evaluates functions from AsyncFutures.
 
     Parameters
     ----------

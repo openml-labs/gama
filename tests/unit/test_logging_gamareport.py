@@ -1,8 +1,10 @@
+from multiprocessing.sharedctypes import Value
+import pytest
 from gama.logging.GamaReport import GamaReport
 
 
 def test_gamareport_from_log():
-    """ GamaReport can be constructed from a log that recorded RandomSearch. """
+    """GamaReport can be constructed from a log that recorded RandomSearch."""
     # We refer to a static log, this makes it independent of other unit tests,
     # but it also makes it independent of the actual changes in gama logging.
     # Cons:
@@ -12,7 +14,7 @@ def test_gamareport_from_log():
     #   + backwards compatibility test for GamaReport
     # Perhaps we can/should link to the log file used in the documentation.
     log_dir = "tests/data/RandomSearch"
-    report = GamaReport(log_dir)
+    report = GamaReport(log_dir, strict=False)
     assert report.name == "RandomSearch"
     assert "RandomSearch" == report.search_method
     assert 3 == len(report.phases)
@@ -24,10 +26,18 @@ def test_gamareport_from_log():
     )
 
 
+def test_gamareport_from_log_strict_but_outdated():
+    """GamaReport can be constructed from a log that recorded RandomSearch."""
+    # See caveat of test_gamareport_from_log
+    log_dir = "tests/data/RandomSearch"
+    with pytest.raises(ValueError):
+        GamaReport(log_dir, strict=True)
+
+
 def test_gamareport_asha_from_log():
-    """ GamaReport can be constructed from a log that recorded ASHA. """
+    """GamaReport can be constructed from a log that recorded ASHA."""
     log_dir = "tests/data/ASHA"
-    report = GamaReport(log_dir)
+    report = GamaReport(log_dir, strict=False)
     assert report.name == "ASHA"
     assert "AsynchronousSuccessiveHalving" == report.search_method
     assert 3 == len(report.phases)
@@ -40,9 +50,9 @@ def test_gamareport_asha_from_log():
 
 
 def test_gamareport_asyncEA_from_log():
-    """ GamaReport can be constructed from a log that recorded AsyncEA. """
+    """GamaReport can be constructed from a log that recorded AsyncEA."""
     log_dir = "tests/data/AsyncEA"
-    report = GamaReport(log_dir)
+    report = GamaReport(log_dir, strict=False)
     assert report.name == "AsyncEA"
     assert "AsyncEA" == report.search_method
     assert 3 == len(report.phases)

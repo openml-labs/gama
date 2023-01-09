@@ -68,18 +68,20 @@ _note_: By default, GamaClassifier optimizes towards `log_loss`.
 If you want to cite GAMA, please use [our ECML-PKDD 2020 Demo Track publication](https://link.springer.com/chapter/10.1007/978-3-030-67670-4_39).
 
 ```latex
-@article{DBLP:journals/corr/abs-2007-04911,
-  author    = {Pieter Gijsbers and
-               Joaquin Vanschoren},
-  title     = {{GAMA:} a General Automated Machine learning Assistant},
-  journal   = {CoRR},
-  volume    = {abs/2007.04911},
-  year      = {2020},
-  url       = {https://arxiv.org/abs/2007.04911},
-  eprinttype = {arXiv},
-  eprint    = {2007.04911},
-  timestamp = {Mon, 20 Jul 2020 14:20:39 +0200},
-  biburl    = {https://dblp.org/rec/journals/corr/abs-2007-04911.bib},
-  bibsource = {dblp computer science bibliography, https://dblp.org}
+@InProceedings{10.1007/978-3-030-67670-4_39,
+author="Gijsbers, Pieter and Vanschoren, Joaquin",
+editor="Dong, Yuxiao
+and Ifrim, Georgiana
+and Mladeni{\'{c}}, Dunja
+and Saunders, Craig
+and Van Hoecke, Sofie",
+title="GAMA: A General Automated Machine Learning Assistant",
+booktitle="Machine Learning and Knowledge Discovery in Databases. Applied Data Science and Demo Track",
+year="2021",
+publisher="Springer International Publishing",
+address="Cham",
+pages="560--564",
+abstract="The General Automated Machine learning Assistant (GAMA) is a modular AutoML system developed to empower users to track and control how AutoML algorithms search for optimal machine learning pipelines, and facilitate AutoML research itself. In contrast to current, often black-box systems, GAMA allows users to plug in different AutoML and post-processing techniques, logs and visualizes the search process, and supports easy benchmarking. It currently features three AutoML search algorithms, two model post-processing steps, and is designed to allow for more components to be added.",
+isbn="978-3-030-67670-4"
 }
 ```

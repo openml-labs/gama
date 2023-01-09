@@ -13,7 +13,7 @@ from gama.utilities.metrics import scoring_to_metric
 
 
 class GamaClassifier(Gama):
-    """ Gama with adaptations for (multi-class) classification. """
+    """Gama with adaptations for (multi-class) classification."""
 
     def __init__(self, config=None, scoring="neg_log_loss", *args, **kwargs):
         if not config:
@@ -38,7 +38,7 @@ class GamaClassifier(Gama):
         super().__init__(*args, **kwargs, config=config, scoring=scoring)
 
     def _predict(self, x: pd.DataFrame):
-        """ Predict the target for input X.
+        """Predict the target for input X.
 
         Parameters
         ----------
@@ -52,12 +52,12 @@ class GamaClassifier(Gama):
         """
         y = self.model.predict(x)  # type: ignore
         # Decode the predicted labels - necessary only if ensemble is not used.
-        if y[0] not in self._label_encoder.classes_:
+        if y[0] not in list(self._label_encoder.classes_):
             y = self._label_encoder.inverse_transform(y)
         return y
 
     def _predict_proba(self, x: pd.DataFrame):
-        """ Predict the class probabilities for input x.
+        """Predict the class probabilities for input x.
 
         Predict target for x, using the best found pipeline(s) during the `fit` call.
 
@@ -75,7 +75,7 @@ class GamaClassifier(Gama):
         return self.model.predict_proba(x)  # type: ignore
 
     def predict_proba(self, x: Union[pd.DataFrame, np.ndarray]):
-        """ Predict the class probabilities for input x.
+        """Predict the class probabilities for input x.
 
         Predict target for x, using the best found pipeline(s) during the `fit` call.
 
@@ -99,7 +99,7 @@ class GamaClassifier(Gama):
         target_column: Optional[str] = None,
         encoding: Optional[str] = None,
     ):
-        """ Predict the class probabilities for input in the arff_file.
+        """Predict the class probabilities for input in the arff_file.
 
         Parameters
         ----------
@@ -124,13 +124,21 @@ class GamaClassifier(Gama):
         return self._predict_proba(x)
 
     def fit(self, x, y, *args, **kwargs):
-        """ Should use base class documentation. """
+        """Should use base class documentation."""
         y_ = y.squeeze() if isinstance(y, pd.DataFrame) else y
         self._label_encoder = LabelEncoder().fit(y_)
         if any([isinstance(yi, str) for yi in y_]):
             # If target values are `str` we encode them or scikit-learn will complain.
             y = self._label_encoder.transform(y_)
         self._evaluation_library.determine_sample_indices(stratify=y)
+
+        # Add label information for classification to the scorer such that
+        # the cross validator does not encounter unseen labels in smaller
+        # data sets during pipeline evaluation.
+        for m in self._metrics:
+            if "labels" in inspect.signature(m.scorer._score_func).parameters:
+                m.scorer._kwargs.update({"labels": y})
+
         super().fit(x, y, *args, **kwargs)
 
     def _encode_labels(self, y):

@@ -13,7 +13,9 @@ def _short_name():
 
 def _mock_evaluation(
     individual: Individual,
-    predictions: Optional[Union[np.ndarray, pd.DataFrame, pd.Series]] = np.zeros(30,),
+    predictions: Optional[Union[np.ndarray, pd.DataFrame, pd.Series]] = np.zeros(
+        30,
+    ),
     score: Optional[Tuple[float, ...]] = None,
     estimators: List[object] = None,
     start_time: int = 0,
@@ -60,7 +62,7 @@ def test_evaluation_convert_predictions_from_dataframe_to_nparray(GNB):
 
 
 def test_evaluation_library_max_number_evaluations(GNB):
-    """ `max_number_of_evaluations` restricts the size of `top_evaluations`. """
+    """`max_number_of_evaluations` restricts the size of `top_evaluations`."""
     lib200 = EvaluationLibrary(m=200, sample=None, cache=_short_name())
     lib_unlimited = EvaluationLibrary(m=None, sample=None, cache=_short_name())
 
@@ -91,7 +93,7 @@ def test_evaluation_library_max_number_evaluations(GNB):
 
 
 def test_evaluation_library_n_best(GNB):
-    """ Test `n_best` normal usage.  """
+    """Test `n_best` normal usage."""
     lib = EvaluationLibrary(m=None, sample=None, cache=_short_name())
 
     try:
@@ -120,7 +122,7 @@ def test_evaluation_library_n_best(GNB):
 
 
 def _test_subsample(sample, predictions, subsample, individual):
-    """ Test the `predictions` correctly get sampled to `subsample`. """
+    """Test the `predictions` correctly get sampled to `subsample`."""
     lib = EvaluationLibrary(sample=sample, cache=_short_name())
 
     try:
@@ -137,7 +139,7 @@ def _test_subsample(sample, predictions, subsample, individual):
 
 
 def test_evaluation_library_sample_np2d_prediction(GNB):
-    """ `prediction_sample` set with np.ndarray samples predictions with ndim=2. """
+    """`prediction_sample` set with np.ndarray samples predictions with ndim=2."""
     probabilities = np.random.random(size=(30, 5))
     _test_subsample(
         sample=np.asarray([0, 1, 3]),
@@ -148,7 +150,7 @@ def test_evaluation_library_sample_np2d_prediction(GNB):
 
 
 def test_evaluation_library_sample_pd2d_prediction(GNB):
-    """ `prediction_sample` set with np.ndarray samples pd.DataFrame predictions. """
+    """`prediction_sample` set with np.ndarray samples pd.DataFrame predictions."""
     probabilities = pd.DataFrame(np.random.random(size=(30, 5)))
     _test_subsample(
         sample=np.asarray([0, 1, 3]),
@@ -159,7 +161,7 @@ def test_evaluation_library_sample_pd2d_prediction(GNB):
 
 
 def test_evaluation_library_sample_np1d_prediction(GNB):
-    """ `prediction_sample` set with np.ndarray samples predictions with ndim=1. """
+    """`prediction_sample` set with np.ndarray samples predictions with ndim=1."""
     probabilities = np.random.random(size=(30,))
     _test_subsample(
         sample=np.asarray([0, 1, 3]),
@@ -170,7 +172,7 @@ def test_evaluation_library_sample_np1d_prediction(GNB):
 
 
 def test_evaluation_library_sample_pd1d_prediction(GNB):
-    """ `prediction_sample` set with np.ndarray samples pd.Series predictions. """
+    """`prediction_sample` set with np.ndarray samples pd.Series predictions."""
     probabilities = pd.Series(np.random.random(size=(30,)))
     _test_subsample(
         sample=np.asarray([0, 1, 3]),

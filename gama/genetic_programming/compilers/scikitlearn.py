@@ -6,7 +6,12 @@ from typing import Callable, Tuple, Optional, Sequence
 
 import stopit
 from sklearn.base import TransformerMixin, is_classifier, is_regressor
-from sklearn.model_selection import ShuffleSplit, cross_validate, check_cv
+from sklearn.model_selection import (
+    ShuffleSplit,
+    cross_validate,
+    check_cv,
+    StratifiedShuffleSplit,
+)
 from sklearn.pipeline import Pipeline
 
 from gama.utilities.evaluation_library import Evaluation
@@ -39,8 +44,8 @@ def compile_individual(
     return Pipeline(list(reversed(steps)))
 
 
-def object_is_valid_pipeline(o):
-    """ Determines if object behaves like a scikit-learn pipeline. """
+def object_is_valid_pipeline(o: object) -> bool:
+    """Determines if object behaves like a scikit-learn pipeline."""
     return (
         o is not None
         and hasattr(o, "fit")
@@ -50,10 +55,15 @@ def object_is_valid_pipeline(o):
 
 
 def evaluate_pipeline(
-    pipeline, x, y_train, timeout: float, metrics: Tuple[Metric], cv=5, subsample=None,
+    pipeline,
+    x,
+    y_train,
+    timeout: float,
+    metrics: Tuple[Metric],
+    cv=5,
+    subsample=None,
 ) -> Tuple:
-    """ Score `pipeline` with k-fold CV according to `metrics` on (a subsample of) X, y
-
+    """Score `pipeline` with k-fold CV according to `metrics` on (a subsample of) X, y
     Returns
     -------
     Tuple:
@@ -63,16 +73,18 @@ def evaluate_pipeline(
         error: None if successful, otherwise an Exception
     """
     if not object_is_valid_pipeline(pipeline):
-        raise TypeError(f"Pipeline must not be None and requires fit, predict, steps.")
+        raise TypeError("Pipeline must not be None and requires fit, predict, steps.")
     if not timeout > 0:
         raise ValueError(f"`timeout` must be greater than 0, is {timeout}.")
 
     prediction, estimators = None, None
     # default score for e.g. timeout or failure
     scores = tuple([float("-inf")] * len(metrics))
+    is_classification = is_classifier(pipeline)
 
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
+
             if isinstance(subsample, int) and subsample < len(y_train):
                 sampler = ShuffleSplit(n_splits=1, train_size=subsample, random_state=0)
                 idx, _ = next(sampler.split(x))
@@ -91,34 +103,44 @@ def evaluate_pipeline(
                 else:
                     splitter = check_cv(cv, y_train)
 
+                require_subsample = (
+                    isinstance(subsample, int) and subsample < len(y_train)
+                ) or (isinstance(subsample, float) and subsample < 1.0)
+
+                if require_subsample:
+                    # We subsample the training sets, but not the test sets.
+                    # This allows for performance comparisons across subsample levels.
+                    new_splits = []
+                    for train, test in splitter.split(x, y_train):
+                        if is_classification:
+                            sampler = StratifiedShuffleSplit(
+                                n_splits=1, train_size=subsample, random_state=0
+                            )
+                        else:
+                            sampler = ShuffleSplit(
+                                n_splits=1, train_size=subsample, random_state=0
+                            )
+                        full_train_x, full_train_y = x.iloc[train, :], y_train[train]
+                        subsample_idx, _ = next(sampler.split(full_train_x, full_train_y))
+                        new_splits.append((subsample_idx, test))
+                    splitter = new_splits
+
                 result = cross_validate(
                     pipeline,
                     x,
                     y_train,
                     cv=splitter,
                     return_estimator=True,
-                    scoring=[m.name for m in metrics],
+                    scoring=dict([(m.name, m) for m in metrics]),
                     error_score="raise",
                 )
-                scores_mean = tuple([np.mean(result[f"test_{m.name}"]) for m in metrics])
-                scores_std = tuple([np.std(result[f"test_{m.name}"]) for m in metrics])
-
-                scorelist_mean = []
-                scorelist_std = []
-
-                scorelist_mean.append(scores_mean)
-                scorelist_std.append(scores_std)
-
-                minindex = np.argmax(scorelist_mean)
-
-                print(scorelist_mean)
-                print('min mean:', max(scorelist_mean))
-                print('min std:', scorelist_std[minindex])
-
-
+                scores = tuple([np.mean(result[f"test_{m.name}"]) for m in metrics])
                 estimators = result["estimator"]
 
-                for (estimator, (_, test)) in zip(estimators, splitter.split(x, y_train)):
+                splitter = (
+                    splitter if isinstance(splitter, list) else splitter.split(x, y_train)
+                )
+                for (estimator, (_, test)) in zip(estimators, splitter):
                     if any([m.requires_probabilities for m in metrics]):
                         fold_pred = estimator.predict_proba(x.iloc[test, :])
                     else:
@@ -131,9 +153,6 @@ def evaluate_pipeline(
                             prediction = np.empty(shape=(len(y_train),))
                     prediction[test] = fold_pred
 
-            # prediction, scores, estimators = cross_val_predict_score(
-            #     pipeline, x, y_train, cv=cv, metrics=metrics
-            # )
         except stopit.TimeoutException:
             # This exception is handled by the ThreadingTimeout context manager.
             raise
@@ -163,8 +182,7 @@ def evaluate_individual(
     add_length_to_score: bool = True,
     **kwargs,
 ) -> Evaluation:
-    """ Evaluate the pipeline specified by individual, and record
-
+    """Evaluate the pipeline specified by individual, and record
     Parameters
     ----------
     individual: Individual
@@ -183,11 +201,9 @@ def evaluate_individual(
         Add the length of the individual to the score result of the evaluation.
     **kwargs: Dict, optional (default=None)
         Passed to `evaluate_pipeline` function.
-
     Returns
     -------
     Evaluation
-
     """
     result = Evaluation(individual, pid=os.getpid())
     result.start_time = datetime.now()

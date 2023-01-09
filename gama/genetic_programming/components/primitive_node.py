@@ -1,10 +1,10 @@
-from typing import List, Union
+from typing import List, Union, cast
 from .terminal import DATA_TERMINAL, Terminal
 from .primitive import Primitive
 
 
 class PrimitiveNode:
-    """ An instantiation for a Primitive with specific Terminals.
+    """An instantiation for a Primitive with specific Terminals.
 
     Parameters
     ----------
@@ -26,8 +26,8 @@ class PrimitiveNode:
         self._data_node = data_node
         self._terminals = sorted(terminals, key=lambda t: str(t))
 
-    def __str__(self):
-        """ Recursively stringify all primitive nodes (primitive and hyperparameters).
+    def __str__(self) -> str:
+        """Recursively stringify all primitive nodes (primitive and hyperparameters).
 
         Examples: - "GaussianNB(data)"
                   - "BernoulliNB(data, alpha=1.0)"
@@ -41,7 +41,7 @@ class PrimitiveNode:
 
     @property
     def str_nonrecursive(self) -> str:
-        """ Stringify all primitive node without data node (primitive and hyperparameters).
+        """Stringify primitive node with its hyperparameter configuration
 
         Examples: - "GaussianNB()"
                   - "BernoulliNB(alpha=1.0)"
@@ -49,11 +49,11 @@ class PrimitiveNode:
         terminal_str = ", ".join([str(terminal) for terminal in self._terminals])
         return f"{self._primitive}({terminal_str})"
 
-    def copy(self):
-        """ Copies the object. Shallow for terminals, deep for data_node. """
-        if self._data_node == DATA_TERMINAL:
-            data_node_copy = DATA_TERMINAL
-        else:
+    def copy(self) -> "PrimitiveNode":
+        """Copies the object. Shallow for terminals, deep for data_node."""
+        if isinstance(self._data_node, str) and self._data_node == DATA_TERMINAL:
+            data_node_copy = DATA_TERMINAL  # type: Union[str, PrimitiveNode]
+        elif isinstance(self._data_node, PrimitiveNode):
             data_node_copy = self._data_node.copy()
         return PrimitiveNode(
             primitive=self._primitive,
@@ -62,8 +62,10 @@ class PrimitiveNode:
         )
 
     @classmethod
-    def from_string(cls, string: str, primitive_set: dict):
-        """ Create a PrimitiveNode from string formatted like PrimitiveNode.__str__
+    def from_string(
+        cls, string: str, primitive_set: dict, strict: bool = True
+    ) -> "PrimitiveNode":
+        """Create a PrimitiveNode from string formatted like PrimitiveNode.__str__
 
         Parameters
         ----------
@@ -71,6 +73,10 @@ class PrimitiveNode:
             A string formatted similar to PrimitiveNode.__str__
         primitive_set: dict
             The dictionary defining all Terminals and Primitives.
+        strict: bool (default=True)
+            Require each primitives has all required terminals present in `string`.
+            Non-strict matching may be useful when constructing individuals from
+            and old log with a slightly different search space.
 
         Returns
         -------
@@ -97,15 +103,15 @@ class PrimitiveNode:
                     for terminal_string in terminal_set.split(", ")
                 ]
             missing = set(primitive.input) - set(map(lambda t: t.identifier, terminals))
-            if missing:
+            if missing and strict:
                 raise ValueError(f"terminals {missing} for primitive {primitive}")
             last_node = cls(primitive, last_node, terminals)
 
-        return last_node
+        return cast(PrimitiveNode, last_node)
 
 
 def find_primitive(primitive_set: dict, primitive_string: str) -> Primitive:
-    """ Find the Primitive that matches `primitive_string` in `primitive_set`. """
+    """Find the Primitive that matches `primitive_string` in `primitive_set`."""
     all_primitives = primitive_set[DATA_TERMINAL] + primitive_set["prediction"]
     for primitive in all_primitives:
         if repr(primitive) == primitive_string:
@@ -114,7 +120,7 @@ def find_primitive(primitive_set: dict, primitive_string: str) -> Primitive:
 
 
 def find_terminal(primitive_set: dict, terminal_string: str) -> Terminal:
-    """ Find the Terminal that matches `terminal_string` in `primitive_set`. """
+    """Find the Terminal that matches `terminal_string` in `primitive_set`."""
     term_type, _ = terminal_string.split("=")
     for terminal in primitive_set[term_type]:
         if repr(terminal) == terminal_string:

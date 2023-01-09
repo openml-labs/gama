@@ -1,0 +1,67 @@
+name: "Pytest"
+description: "Run a test suite"
+
+inputs:
+  path:
+    description: "Path to test suite"
+    required: true
+  python-version:
+    description: "Python version to use"
+    default: "3.10"
+    required: true
+  use-cache:
+    description: "If set, use cached dependencies."
+    default: true
+    required: true
+  os:
+    description: "OS for runs-on. Only required when cache is set."
+    default: "ubuntu-latest"
+    required: false
+  pip-args:
+    description: "Additional pip args"
+    default: ""
+    required: false
+  pytest-args:
+    description: "Additional ptest args"
+    default: ""
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Get pip cache dir
+      id: get-cache-location
+      if: inputs.use-cache == 'true'
+      shell: bash
+      run: |
+        echo "::set-output name=dir::$(pip cache dir)"
+
+    - uses: actions/cache@v3
+      id: cache
+      if: inputs.use-cache == 'true'
+      with:
+        path: ${{ steps.get-cache-location.outputs.dir }}
+        key: ${{ inputs.os }}-pip-${{ inputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install ${{ inputs.pip-args }} ".[test]"
+
+    - name: Test with pytest
+      shell: bash
+      run: |
+        echo pytest ${{ inputs.path }}  --cov ${{ inputs.pytest-args }} 
+        pytest ${{ inputs.path }}  --cov ${{ inputs.pytest-args }}
+
+    - uses: codecov/codecov-action@v3
+      with:
+        flags: unit-tests
+        fail_ci_if_error: true
+        verbose: true

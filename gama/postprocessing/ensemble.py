@@ -35,7 +35,7 @@ class EnsemblePostProcessing(BasePostProcessing):
         hillclimb_size: Optional[int] = 10_000,
         max_models: Optional[int] = 200,
     ):
-        """ Ensemble construction per Caruana et al.
+        """Ensemble construction per Caruana et al.
 
         Parameters
         ----------
@@ -108,9 +108,9 @@ class EnsemblePostProcessing(BasePostProcessing):
 
         if isinstance(self._ensemble, EnsembleClassifier):
             if self._ensemble._metric.requires_probabilities:
-                voting = ",'soft'"
+                voting = ", voting='soft'"
             else:
-                voting = ", 'hard'"
+                voting = ", voting='hard'"
         else:
             voting = ""  # This parameter does not exist for VotingRegressor
 
@@ -122,7 +122,7 @@ class EnsemblePostProcessing(BasePostProcessing):
             + "\n\n"
             + "\n\n".join(pipelines)
             + "\n"
-            + f"ensemble = {voter}([{estimators}]{voting},{weights})\n"
+            + f"ensemble = {voter}([{estimators}]{voting}, weights={weights})\n"
         )
         if preprocessing is not None:
             trans_strs = transformers_to_str([t for _, t in preprocessing])
@@ -137,7 +137,7 @@ class Ensemble(object):
         self,
         metric,
         y: pd.DataFrame,
-        evaluation_library: EvaluationLibrary = None,
+        evaluation_library: EvaluationLibrary,
         shrink_on_pickle=True,
         downsample_to: Optional[int] = 10_000,
         use_top_n_only: Optional[int] = 200,
@@ -166,11 +166,7 @@ class Ensemble(object):
                 "metric must be specified as string or `gama.ea.metrics.Metric`."
             )
 
-        if evaluation_library is None:
-            raise ValueError(
-                "`evaluation_library` is None but must be EvaluationLibrary."
-            )
-        elif not isinstance(evaluation_library, EvaluationLibrary):
+        if not isinstance(evaluation_library, EvaluationLibrary):
             raise TypeError(
                 "`evaluation_library` must be of type "
                 "gama.utilities.evaluation_library.EvaluationLibrary."
@@ -233,14 +229,14 @@ class Ensemble(object):
         return sum([weight for (model, weight) in self._models.values()])
 
     def _averaged_validation_predictions(self):
-        """ Weighted average of predictions of current models on the hillclimb set. """
+        """Weighted average of predictions of current models on the hillclimb set."""
         weighted_sum_predictions = sum(
             [model.predictions * weight for (model, weight) in self._models.values()]
         )
         return weighted_sum_predictions / self._total_model_weights()
 
     def build_initial_ensemble(self, n: int):
-        """ Add top n models in EvaluationLibrary to the ensemble.
+        """Add top n models in EvaluationLibrary to the ensemble.
 
         Parameters
         ----------
@@ -267,14 +263,14 @@ class Ensemble(object):
         )
 
     def _add_model(self, model, add_weight=1):
-        """ Add a specific model to the ensemble or increases its weight. """
+        """Add a specific model to the ensemble or increases its weight."""
         model, weight = self._models.pop(model.individual._id, (model, 0))
         new_weight = weight + add_weight
         self._models[model.individual._id] = (model, new_weight)
         log.debug(f"Weight {model.individual.short_name('>')} set to {new_weight}.")
 
     def expand_ensemble(self, n: int):
-        """ Adds new models to the ensemble based on earlier given data.
+        """Adds new models to the ensemble based on earlier given data.
 
         Parameters
         ----------
@@ -309,7 +305,7 @@ class Ensemble(object):
             )
 
     def fit(self, x, y, timeout=1e6):
-        """ Constructs an Ensemble out of the library of models.
+        """Constructs an Ensemble out of the library of models.
 
         Parameters
         ----------
@@ -390,7 +386,7 @@ class Ensemble(object):
 
 
 def fit_and_weight(args):
-    """ Fit the pipeline given the data. Update weight to 0 if fitting fails.
+    """Fit the pipeline given the data. Update weight to 0 if fitting fails.
 
     Parameters
     ----------
@@ -502,7 +498,7 @@ def build_fit_ensemble(
     evaluation_library: EvaluationLibrary,
     encoder: Optional[object] = None,
 ) -> Ensemble:
-    """ Construct an Ensemble of models, optimizing for metric. """
+    """Construct an Ensemble of models, optimizing for metric."""
     start_build = time.time()
 
     log.debug("Building ensemble.")

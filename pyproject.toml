@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gama"
+description = "A package for automated machine learning based on scikit-learn."
+readme = "README.md"
+authors= [{name = "Pieter Gijsbers", email="p.gijsbers@tue.nl"}]
+license = {text = "MIT"}
+#keywords = ..
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+
+dynamic = ["version"]
+requires-python = ">=3.8"
+dependencies = [    
+  "numpy>=1.20.0",
+  "scipy>=1.0.0",
+  "scikit-learn>=1.1.0",
+  "pandas>=1.0",
+  "stopit>=1.1.1",
+  "liac-arff>=2.2.2",
+  "category-encoders>=1.2.8",
+  "black==19.10b0",
+  "psutil",
+]
+
+[project.optional-dependencies]
+doc = ["sphinx", "sphinx_rtd_theme"]
+test = [
+    "pre-commit==2.20.0",
+    "pytest>=4.4.0",
+    "pytest-mock",
+    "pytest-xdist",
+    "codecov",
+    "pytest-cov",
+]
+vis = [
+    "dash==1.3",
+    "dash-daq==0.1.0",
+    "dash-bootstrap-components",
+    "visdcc",
+]
+
+
+[tool.setuptools.dynamic]
+version = {attr = "gama.__version__.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["gama*"]  # package names should match these glob patterns (["*"] by default)
+
+[urls]
+github = "https://github.com/openml-labs/GAMA"
+documentation = "https://openml-labs.github.io/gama/"
+"bug tracker" = "https://github.com/openml-labs/gama/issues"
+
+[project.scripts]
+gama = "gama.utilities.cli:main"
+gamadash = "gama.dashboard.app:main"
+
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error",
+    "ignore::sklearn.exceptions.ConvergenceWarning",
+    "ignore::RuntimeWarning",
+    # Block a warning coming from scikit-learn internals about scipy.mode
+    "ignore:.*mode.*:FutureWarning",
+    # We have a CRON job checking for deprecation/future warnings,
+    # but we dont fail on them by default as they should not interfere with most PRs.
+    # We still print to ensure new warnings are not introduced by the change.
+    "default::PendingDeprecationWarning",
+    "default::DeprecationWarning",
+    "default::FutureWarning",
+    # We will (probably) get rid of category_encoders in 22.1+
+    "ignore:::category_encoders.target_encoder",
+]

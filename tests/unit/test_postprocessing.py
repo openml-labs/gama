@@ -7,7 +7,7 @@ from gama.postprocessing import NoPostProcessing, BestFitPostProcessing
 
 
 def test_no_post_processing():
-    """ Test that NoPostProcessing does nothing and no model is returned. """
+    """Test that NoPostProcessing does nothing and no model is returned."""
     postprocessing = NoPostProcessing()
     model = postprocessing.post_process()
     assert pytest.approx(0.0) == postprocessing.time_fraction

@@ -15,7 +15,7 @@ def select_categorical_columns(
     max_f: Optional[int] = None,
     ignore_nan: bool = True,
 ) -> Iterator[str]:
-    """ Find all categorical columns with at least `min_f` and at most `max_f` factors.
+    """Find all categorical columns with at least `min_f` and at most `max_f` factors.
 
     Parameters
     ----------
@@ -42,14 +42,16 @@ def select_categorical_columns(
                 yield column
 
 
-def basic_encoding(x: pd.DataFrame, is_classification: bool):
-    """ Perform 'basic' encoding of categorical features.
+def basic_encoding(
+    x: pd.DataFrame, is_classification: bool
+) -> Tuple[pd.DataFrame, TransformerMixin]:
+    """Perform 'basic' encoding of categorical features.
 
-     Specifically, perform:
-      - Ordinal encoding for features with 2 or fewer unique values.
-      - One hot encoding for features with at most 10 unique values.
-      - Ordinal encoding for features with 11+ unique values, if y is categorical.
-     """
+    Specifically, perform:
+     - Ordinal encoding for features with 2 or fewer unique values.
+     - One hot encoding for features with at most 10 unique values.
+     - Ordinal encoding for features with 11+ unique values, if y is categorical.
+    """
     ord_features = list(select_categorical_columns(x, max_f=2))
     if is_classification:
         ord_features.extend(select_categorical_columns(x, min_f=11))
@@ -57,7 +59,7 @@ def basic_encoding(x: pd.DataFrame, is_classification: bool):
 
     encoding_steps = [
         ("ord-enc", ce.OrdinalEncoder(cols=ord_features, drop_invariant=True)),
-        ("oh-enc", ce.OneHotEncoder(cols=leq_10_features, handle_missing="ignore")),
+        ("oh-enc", ce.OneHotEncoder(cols=leq_10_features, handle_missing="value")),
     ]
     encoding_pipeline = Pipeline(encoding_steps)
     x_enc = encoding_pipeline.fit_transform(x, y=None)  # Is this dangerous?
@@ -67,7 +69,7 @@ def basic_encoding(x: pd.DataFrame, is_classification: bool):
 def basic_pipeline_extension(
     x: pd.DataFrame, is_classification: bool
 ) -> List[Tuple[str, TransformerMixin]]:
-    """ Define a TargetEncoder and SimpleImputer.
+    """Define a TargetEncoder and SimpleImputer.
 
     TargetEncoding is will encode categorical features with more than 10 unique values,
     if y is not categorical. SimpleImputer imputes with the median.

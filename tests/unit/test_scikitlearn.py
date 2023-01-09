@@ -18,7 +18,9 @@ def test_evaluate_individual(SS_BNB):
         return None, (1.0,), [], None
 
     evaluation = evaluate_individual(
-        SS_BNB, evaluate_pipeline=fake_evaluate_pipeline, add_length_to_score=True,
+        SS_BNB,
+        evaluate_pipeline=fake_evaluate_pipeline,
+        add_length_to_score=True,
     )
     individual = evaluation.individual
     assert individual == SS_BNB
@@ -49,7 +51,11 @@ def test_evaluate_pipeline(SS_BNB):
     x, y = pd.DataFrame(x), pd.Series(y)
 
     prediction, scores, estimators, errors = evaluate_pipeline(
-        SS_BNB.pipeline, x, y, timeout=60, metrics=scoring_to_metric("accuracy"),
+        SS_BNB.pipeline,
+        x,
+        y,
+        timeout=60,
+        metrics=scoring_to_metric("accuracy"),
     )
     assert 1 == len(scores)
     assert errors is None

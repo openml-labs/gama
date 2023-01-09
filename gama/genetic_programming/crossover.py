@@ -8,7 +8,7 @@ from gama.genetic_programming.components import Individual
 def random_crossover(
     ind1: Individual, ind2: Individual, max_length: Optional[int] = None
 ) -> Tuple[Individual, Individual]:
-    """ Random valid crossover between two individuals in-place, if it can be done.
+    """Random valid crossover between two individuals in-place, if it can be done.
 
     Parameters
     ----------
@@ -45,7 +45,7 @@ def random_crossover(
 def crossover_primitives(
     ind1: Individual, ind2: Individual
 ) -> Tuple[Individual, Individual]:
-    """ Crossover two individuals by exchanging any number of preprocessing steps.
+    """Crossover two individuals by exchanging any number of preprocessing steps.
 
     Parameters
     ----------
@@ -63,7 +63,7 @@ def crossover_primitives(
 def crossover_terminals(
     ind1: Individual, ind2: Individual
 ) -> Tuple[Individual, Individual]:
-    """ Crossover two individuals in-place by exchanging two Terminals.
+    """Crossover two individuals in-place by exchanging two Terminals.
 
     Terminals must share output type but have different values.
 
@@ -87,7 +87,7 @@ def _shared_terminals(
     with_indices: bool = True,
     value_match: str = "different",
 ) -> Iterable:
-    """ Finds all shared Terminals between two Individuals.
+    """Finds all shared Terminals between two Individuals.
 
     Parameters
     ----------
@@ -127,7 +127,7 @@ def _shared_terminals(
 
 
 def _valid_crossover_functions(ind1: Individual, ind2: Individual) -> List[Callable]:
-    """ Find all crossover functions that can produce new individuals from this input.
+    """Find all crossover functions that can produce new individuals from this input.
 
     Parameters
     ----------

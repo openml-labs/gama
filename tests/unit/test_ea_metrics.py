@@ -7,7 +7,7 @@ from gama.utilities.metrics import Metric, all_metrics, scoring_to_metric
 
 
 def _test_metric(metric, y_true, y_pred, max_score, prediction_score):
-    """ Metric is calculated directly with different input formats. """
+    """Metric is calculated directly with different input formats."""
 
     def as_1d_array(list_):
         return np.asarray(list_).reshape(-1, 1)

@@ -1,12 +1,11 @@
 from enum import Enum
 from typing import Iterable, Tuple, Union
-import numpy as np
 
 from sklearn.metrics import get_scorer, make_scorer
 from sklearn.metrics._scorer import _ProbaScorer, _BaseScorer, SCORERS
 
 # scores that ground truth labels are not needed
-from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score, silhouette_samples
+from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 
 SCORERS['silhouette'] = make_scorer(silhouette_score)
 SCORERS['calinski_harabasz'] = make_scorer(calinski_harabasz_score)
@@ -17,13 +16,14 @@ for metric in ["precision", "recall", "f1"]:
     for average in ["macro", "micro", "samples", "weighted"]:
         classification_metrics.add(f"{metric}_{average}")
 
-regression_metrics = {"explained_variance",
-                      "r2",
-                      "neg_mean_absolute_error",
-                      "neg_mean_squared_log_error",
-                      "neg_median_absolute_error",
-                      "neg_mean_squared_error",
-                      }
+regression_metrics = {
+    "explained_variance",
+    "r2",
+    "neg_mean_absolute_error",
+    "neg_mean_squared_log_error",
+    "neg_median_absolute_error",
+    "neg_mean_squared_error",
+}
 
 clustering_metrics = {'silhouette',
                       'calinski_harabasz',
@@ -41,19 +41,18 @@ clustering_metrics = {'silhouette',
                       }
 
 all_metrics = {*classification_metrics, *regression_metrics, *clustering_metrics}
-reversed_scorers = {v: k for k, v in SCORERS.items()}
+reversed_scorers = {repr(v): k for k, v in SCORERS.items()}
 
 
 class MetricType(Enum):
-    """ Metric types supported by GAMA. """
+    """Metric types supported by GAMA."""
 
     CLASSIFICATION: int = 1  #: discrete target
     REGRESSION: int = 2  #: continuous target
     CLUSTERING: int = 3  #: unknown target
 
-
 class Metric:
-    """ A thin layer around the `scorer` class of scikit-learn. """
+    """A thin layer around the `scorer` class of scikit-learn."""
 
     def __init__(self, scorer: Union[_BaseScorer, str]):
         if isinstance(scorer, str):
@@ -63,7 +62,7 @@ class Metric:
                 "Scorer was not a valid scorer or could not be converted to one."
             )
         self.scorer = scorer
-        self.name = reversed_scorers[scorer]
+        self.name = reversed_scorers[repr(scorer)]
         self.requires_probabilities = (
             isinstance(scorer, _ProbaScorer) or self.name == "roc_auc"
         )
@@ -81,10 +80,10 @@ class Metric:
 
         self.score = self.scorer._score_func
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs) -> float:
         return self.scorer(*args, **kwargs)
 
-    def maximizable_score(self, *args, **kwargs):
+    def maximizable_score(self, *args, **kwargs) -> float:
         return self.scorer._sign * self.score(*args, **kwargs)
 
 
@@ -93,7 +92,6 @@ def scoring_to_metric(
 ) -> Tuple[Metric, ...]:
     if isinstance(scoring, str):
         return tuple([Metric(scoring)])
-
     if isinstance(scoring, Metric):
         return tuple([scoring])
 

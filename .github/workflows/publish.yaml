@@ -1,0 +1,126 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        required: true
+        type: number
+      macro:
+        required: true
+        type: number
+      micro:
+        required: true
+        type: number
+      suffix:
+        required: false
+        type: string
+      i-know-what-i-am-doing:
+        required: true
+        type: boolean
+        default: false
+      test-pypi:
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  warn:
+    if: ${{ ! inputs.i-know-what-i-am-doing }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: "i-know-what-i-am-doing not set"
+        run: |
+          exit 1
+
+  build:
+    if: ${{ inputs.i-know-what-i-am-doing }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Match version with input
+        run: |
+          GAMA_VERSION=$(grep -Po "\d+\.\d+\.\d+(\.dev\d*)?" "gama/__version__.py")
+          NEW_VERSION=${{ inputs.year }}.${{ inputs.macro }}.${{ inputs.micro }}${{ inputs.suffix }}
+          echo $GAMA_VERSION $NEW_VERSION
+          exit $([ $GAMA_VERSION == $NEW_VERSION ])
+      - name: Match version with tag
+        run: |
+          GAMA_VERSION=$(grep -Po "\d+\.\d+\.\d+(\.dev\d*)?" "gama/__version__.py")
+          NEW_VERSION=${{ github.ref  }}
+          echo refs/tags/v$GAMA_VERSION $NEW_VERSION
+          exit $([ refs/tags/v$GAMA_VERSION == $NEW_VERSION ])
+      - name: Install build & publish dependencies
+        run: |
+          python -m pip install build
+      - name: Build Wheel
+        run: |
+          python -m build
+      - name: Upload Dist
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-folder
+          path: dist
+          retention-days: 1
+          if-no-files-found: error
+
+  test-install:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10"]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Download dist
+        uses: actions/download-artifact@v3
+        with:
+          name: dist-folder
+          path: dist
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Wheel
+        shell: bash
+        run: |
+          python -m pip install dist/*.whl
+      - name: Run example
+        run: |
+          curl https://raw.githubusercontent.com/PGijsbers/gama/master/examples/classification_example.py > example.py
+          # First reduce runtime for 3 minutes to 1 minute, does not work for Windows but fails silently.
+          sed -i.bak "s/180/60/" example.py
+          sed -i.bak "s/3/1/" example.py
+          python example.py
+
+  publish:
+    needs: test-install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download dist
+        uses: actions/download-artifact@v3
+        with:
+          name: dist-folder
+          path: dist
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install Twine
+        run: |
+          python -m pip install twine
+      - name: Upload to test server
+        if: ${{ inputs.test-pypi }}
+        run: |
+          python -m twine upload --repository testpypi -u __token__ -p ${{ secrets.TEST_PYPI }} dist/*
+      - name: Upload to real server
+        if: ${{ ! inputs.test-pypi }}
+        run: |
+          python -m twine upload -u __token__ -p ${{ secrets.PYPI }} dist/*

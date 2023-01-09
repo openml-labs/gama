@@ -156,7 +156,8 @@ class AnalysisPage(BasePage):
         )
 
         self._content = html.Div(
-            id=self.id, children=[visualization_container, report_select_container],
+            id=self.id,
+            children=[visualization_container, report_select_container],
         )
 
         app.callback(

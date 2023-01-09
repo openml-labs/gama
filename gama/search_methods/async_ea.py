@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 
 class AsyncEA(BaseSearch):
-    """ Perform asynchronous evolutionary optimization.
+    """Perform asynchronous evolutionary optimization.
 
     Parameters
     ----------
@@ -45,7 +45,7 @@ class AsyncEA(BaseSearch):
         self.output = []
 
         def get_parent(evaluation, n) -> str:
-            """ retrieves the nth parent if it exists, '' otherwise. """
+            """retrieves the nth parent if it exists, '' otherwise."""
             if len(evaluation.individual.meta.get("parents", [])) > n:
                 return evaluation.individual.meta["parents"][n]
             return ""
@@ -59,10 +59,14 @@ class AsyncEA(BaseSearch):
             ),
         )
 
-    def dynamic_defaults(self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float):
+    def dynamic_defaults(
+        self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float
+    ) -> None:
         pass
 
-    def search(self, operations: OperatorSet, start_candidates: List[Individual]):
+    def search(
+        self, operations: OperatorSet, start_candidates: List[Individual]
+    ) -> None:
         self.output = async_ea(
             operations, self.output, start_candidates, **self.hyperparameters
         )
@@ -76,7 +80,7 @@ def async_ea(
     max_n_evaluations: Optional[int] = None,
     population_size: int = 50,
 ) -> List[Individual]:
-    """ Perform asynchronous evolutionary optimization with given operators.
+    """Perform asynchronous evolutionary optimization with given operators.
 
     Parameters
     ----------
@@ -122,14 +126,19 @@ def async_ea(
                 n_evaluated_individuals < max_n_evaluations
             ):
                 future = ops.wait_next(async_)
-                if future.exception is None:
-                    individual = future.result.individual
-                    current_population.append(individual)
+                if future.exception is None and future.result.error is None:
+                    current_population.append(future.result.individual)
                     if len(current_population) > max_pop_size:
                         to_remove = ops.eliminate(current_population, 1)
                         current_population.remove(to_remove[0])
 
-                if len(current_population) > 2:
+                if async_.job_queue_size <= 1:
+                    # Technically 0 should work to keep near-100% worker load,
+                    # especially if the dataset is sufficiently large to require
+                    # significant time to evaluate a pipeline.
+                    # Increasing the number decreases the risk of lost compute time,
+                    # but also increases information lag. An offspring created too
+                    # early might miss out on a better parent.
                     new_individual = ops.create(current_population, 1)[0]
                     async_.submit(ops.evaluate, new_individual)
 

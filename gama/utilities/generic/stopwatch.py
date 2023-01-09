@@ -2,7 +2,7 @@ import time
 
 
 class Stopwatch:
-    """ A context manager that keeps track of wall clock time spent. """
+    """A context manager that keeps track of wall clock time spent."""
 
     def __init__(self, timing_function=time.time):
         """
@@ -29,7 +29,7 @@ class Stopwatch:
 
     @property
     def elapsed_time(self):
-        """ Time spent in seconds during with-statement (so far, if not yet exited). """
+        """Time spent in seconds during with-statement (so far, if not yet exited)."""
         if self._is_running:
             return self._get_time() - self._start
         else:

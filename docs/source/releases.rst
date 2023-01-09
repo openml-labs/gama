@@ -1,6 +1,38 @@
 Release Notes
 =============
 
+Version 22.0.0
+--------------
+
+Maintenance:
+ - Adopt `NEP 29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_:
+    - Drop support for Python 3.6 and 3.7
+    - Add support for Python 3.10
+    -
+ - Use pyproject.toml instead of setup.py
+ - Transition to Github CI, including:
+    - pytest on pull request
+    - pytest CRON job with prerelease versions
+    - doc build and deploy
+    - pre-commit check
+    - check for changelog
+    - easy release to pypi from github workflow
+ - Small changes to avoid FutureWarnings and/or DeprecationWarnings.
+
+Bugfixes:
+ - #137: raise an output if ``output_directory`` is non-empty.
+ - #174: Fix an issue where GAMA might freeze in when ending search.
+
+Features:
+ - ASHA resources can now also be specified as fraction of the dataset size by using a float in (0, 1].
+
+Changes:
+ - #138: Instead of subsampling the whole dataset before doing CV, the same test set is used across rungs and only
+        the training folds are subsampled. This makes performance comparable across rungs.
+ - AsyncEA will try to delay creating new individuals as long as possible.
+ - AsyncEA will no longer create offspring from pipelines with failed evaluations (e.g., timeout, invalid configuration).
+
+
 Version 21.0.1
 --------------
 

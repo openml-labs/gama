@@ -25,7 +25,7 @@ class HomePage(BasePage):
             self._register_callbacks(app)
 
     def _build_content(self, app, controller) -> html.Div:
-        """ Build all the components of the page. """
+        """Build all the components of the page."""
         configuration = build_configuration_menu(app, controller)
         configuration.style["width"] = "35%"
         configuration.style["float"] = "left"
@@ -163,7 +163,7 @@ def text_input(label_text: str, default_text: str, id_: str):
 def dropdown(
     label_text: str, id_: str, options: Dict[str, str], value: Optional[str] = None
 ):
-    """ options formatted as {LABEL_KEY: LABEL_TEXT, ...} """
+    """options formatted as {LABEL_KEY: LABEL_TEXT, ...}"""
     return dbc.FormGroup(
         [
             dbc.Label(label_text, html_for=id_, width=6),

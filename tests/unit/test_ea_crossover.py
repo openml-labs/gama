@@ -9,7 +9,7 @@ from gama.genetic_programming.crossover import (
 
 
 def test_shared_terminals(SS_BNB, RS_MNB, GNB):
-    """ Test shared terminals are found, if they exist. """
+    """Test shared terminals are found, if they exist."""
     assert 0 == len(list(_shared_terminals(SS_BNB, SS_BNB, value_match="different")))
     assert 2 == len(list(_shared_terminals(SS_BNB, SS_BNB, value_match="equal")))
     assert 2 == len(list(_shared_terminals(SS_BNB, SS_BNB, value_match="all")))
@@ -22,7 +22,7 @@ def test_shared_terminals(SS_BNB, RS_MNB, GNB):
 
 
 def test_crossover_primitives(SS_BNB, RS_MNB):
-    """ Two individuals of at least length 2 produce two new ones with crossover. """
+    """Two individuals of at least length 2 produce two new ones with crossover."""
     ind1_copy, ind2_copy = SS_BNB.copy_as_new(), RS_MNB.copy_as_new()
 
     # Cross-over is in-place
@@ -35,7 +35,7 @@ def test_crossover_primitives(SS_BNB, RS_MNB):
 
 
 def test_crossover_terminal(SS_BNB, RS_MNB):
-    """ Two individuals with shared Terminals produce two new ones with crossover. """
+    """Two individuals with shared Terminals produce two new ones with crossover."""
     ind1_copy, ind2_copy = SS_BNB.copy_as_new(), RS_MNB.copy_as_new()
     # Cross-over is in-place
     crossover_terminals(SS_BNB, RS_MNB)
@@ -47,7 +47,7 @@ def test_crossover_terminal(SS_BNB, RS_MNB):
 
 
 def test_crossover(SS_BNB, RS_MNB):
-    """ Two eligible individuals should produce two new individuals with crossover. """
+    """Two eligible individuals should produce two new individuals with crossover."""
     ind1_copy, ind2_copy = SS_BNB.copy_as_new(), RS_MNB.copy_as_new()
     # Cross-over is in-place
     random_crossover(SS_BNB, RS_MNB)
@@ -58,7 +58,7 @@ def test_crossover(SS_BNB, RS_MNB):
 
 
 def test_crossover_max_length_exceeded(SS_RBS_SS_BNB, RS_MNB):
-    """ Raise ValueError if either provided individual exceeds `max_length`. """
+    """Raise ValueError if either provided individual exceeds `max_length`."""
     with pytest.raises(ValueError) as _:
         random_crossover(SS_RBS_SS_BNB, RS_MNB, max_length=2)
 
@@ -67,7 +67,7 @@ def test_crossover_max_length_exceeded(SS_RBS_SS_BNB, RS_MNB):
 
 
 def test_crossover_max_length(SS_RBS_SS_BNB):
-    """ Setting `max_length` affects only maximum produced length. """
+    """Setting `max_length` affects only maximum produced length."""
     primitives_in_parent = len(SS_RBS_SS_BNB.primitives)
     produced_lengths = []
     for _ in range(60):  # guarantees all length pipelines are produced with prob >0.999

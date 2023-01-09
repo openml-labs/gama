@@ -4,12 +4,12 @@ from gama.postprocessing.ensemble import EnsemblePostProcessing
 
 
 class NoPostProcessing(BasePostProcessing):
-    """ Does nothing, no time will be reserved for post-processing. """
+    """Does nothing, no time will be reserved for post-processing."""
 
     def __init__(self, time_fraction: float = 0.0):
         super().__init__(time_fraction)
 
-    def post_process(self, *args, **kwargs):
+    def post_process(self, *args, **kwargs) -> None:
         return None
 
 

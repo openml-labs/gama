@@ -16,7 +16,7 @@ def create_from_population(
     cxpb: float,
     mutpb: float,
 ) -> List[Individual]:
-    """ Creates n new individuals based on the population. """
+    """Creates n new individuals based on the population."""
     offspring = []
     metrics = [lambda ind: ind.fitness.values[0], lambda ind: ind.fitness.values[1]]
     parent_pairs = nsga2_select(pop, n, metrics)
