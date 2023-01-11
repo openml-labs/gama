@@ -92,6 +92,14 @@ def pset_from_config(
                         identifier=key,
                     )
                 )
+            elif issubclass(key, sklearn.base.ClusterMixin):
+                pset["prediction"].append(
+                    Primitive(
+                        input=tuple(hyperparameter_types),
+                        output="prediction",
+                        identifier=key
+                    )
+                )
             else:
                 raise TypeError(
                     f"Expected {key} to be either subclass of "

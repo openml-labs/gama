@@ -1,8 +1,15 @@
 from enum import Enum
 from typing import Iterable, Tuple, Union
 
-from sklearn.metrics import get_scorer
+from sklearn.metrics import get_scorer, make_scorer
 from sklearn.metrics._scorer import _ProbaScorer, _BaseScorer, SCORERS
+
+# scores that ground truth labels are not needed
+from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+
+SCORERS['silhouette'] = make_scorer(silhouette_score)
+SCORERS['calinski_harabasz'] = make_scorer(calinski_harabasz_score)
+SCORERS['davies_bouldin'] = make_scorer(davies_bouldin_score)
 
 classification_metrics = {"accuracy", "roc_auc", "average_precision", "neg_log_loss"}
 for metric in ["precision", "recall", "f1"]:
@@ -18,7 +25,22 @@ regression_metrics = {
     "neg_mean_squared_error",
 }
 
-all_metrics = {*classification_metrics, *regression_metrics}
+clustering_metrics = {'silhouette',
+                      'calinski_harabasz',
+                      'davies_bouldin',
+                      'adjusted_mutual_info_score',
+                      'adjusted_rand_score',
+                      'completeness_score',
+                      'fowlkes_mallows_score',
+                      'homogeneity_score',
+                      'mutual_info_score',
+                      'normalized_mutual_info_score',
+                      'rand_score',
+                      'v_measure_score',
+                      'jaccard'
+                      }
+
+all_metrics = {*classification_metrics, *regression_metrics, *clustering_metrics}
 reversed_scorers = {repr(v): k for k, v in SCORERS.items()}
 
 
@@ -27,7 +49,7 @@ class MetricType(Enum):
 
     CLASSIFICATION: int = 1  #: discrete target
     REGRESSION: int = 2  #: continuous target
-
+    CLUSTERING: int = 3  #: unknown target
 
 class Metric:
     """A thin layer around the `scorer` class of scikit-learn."""
@@ -49,6 +71,8 @@ class Metric:
             self.task_type = MetricType.CLASSIFICATION
         elif self.name in regression_metrics:
             self.task_type = MetricType.REGRESSION
+        elif self.name in clustering_metrics:
+            self.task_type = MetricType.CLUSTERING
         else:
             raise ValueError(
                 "Not sure which type of metric this is. Please raise an issue."

@@ -62,7 +62,7 @@ class AsynchronousSuccessiveHalving(BaseSearch):
         )
 
     def dynamic_defaults(
-        self, x: pd.DataFrame, y: pd.DataFrame, time_limit: float
+        self, x: pd.DataFrame, y: pd.DataFrame = None, time_limit: float = None
     ) -> None:
         set_max, default = self._hyperparameters["maximum_resource"]
         if set_max is not None and len(y) < set_max:

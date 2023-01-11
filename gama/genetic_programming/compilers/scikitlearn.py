@@ -5,7 +5,7 @@ import time
 from typing import Callable, Tuple, Optional, Sequence
 
 import stopit
-from sklearn.base import TransformerMixin, is_classifier
+from sklearn.base import TransformerMixin, is_classifier, is_regressor
 from sklearn.model_selection import (
     ShuffleSplit,
     cross_validate,
@@ -49,7 +49,7 @@ def object_is_valid_pipeline(o: object) -> bool:
     return (
         o is not None
         and hasattr(o, "fit")
-        and hasattr(o, "predict")
+        or hasattr(o, "predict")
         and hasattr(o, "steps")
     )
 
@@ -85,58 +85,74 @@ def evaluate_pipeline(
 
     with stopit.ThreadingTimeout(timeout) as c_mgr:
         try:
-            # When splits are generated (i.e., cv is an int), they are deterministic
-            splitter = check_cv(cv, y_train, classifier=is_classification)
 
-            require_subsample = (
-                isinstance(subsample, int) and subsample < len(y_train)
-            ) or (isinstance(subsample, float) and subsample < 1.0)
+            if isinstance(subsample, int) and subsample < len(y_train):
+                sampler = ShuffleSplit(n_splits=1, train_size=subsample, random_state=0)
+                idx, _ = next(sampler.split(x))
+                x, y_train = x.iloc[idx, :], y_train[idx]
 
-            if require_subsample:
-                # We subsample the training sets, but not the test sets.
-                # This allows for performance comparisons across subsample levels.
-                new_splits = []
-                for train, test in splitter.split(x, y_train):
-                    if is_classification:
-                        sampler = StratifiedShuffleSplit(
-                            n_splits=1, train_size=subsample, random_state=0
-                        )
-                    else:
-                        sampler = ShuffleSplit(
-                            n_splits=1, train_size=subsample, random_state=0
-                        )
-                    full_train_x, full_train_y = x.iloc[train, :], y_train[train]
-                    subsample_idx, _ = next(sampler.split(full_train_x, full_train_y))
-                    new_splits.append((subsample_idx, test))
-                splitter = new_splits
-
-            result = cross_validate(
-                pipeline,
-                x,
-                y_train,
-                cv=splitter,
-                return_estimator=True,
-                scoring=dict([(m.name, m) for m in metrics]),
-                error_score="raise",
-            )
-            scores = tuple([np.mean(result[f"test_{m.name}"]) for m in metrics])
-            estimators = result["estimator"]
-
-            splitter = (
-                splitter if isinstance(splitter, list) else splitter.split(x, y_train)
-            )
-            for (estimator, (_, test)) in zip(estimators, splitter):
-                if any([m.requires_probabilities for m in metrics]):
-                    fold_pred = estimator.predict_proba(x.iloc[test, :])
+            if not(is_classifier(pipeline) or is_regressor(pipeline)):
+                prediction = pipeline.fit_predict(x)
+                '''if external metric provided'''
+                scores = tuple([m.score(y_train, prediction) for m in metrics])
+                '''if internal metric provided'''
+                #scores = tuple([m.score(x, prediction) for m in metrics])
+                estimators = pipeline
+            else:
+                if is_classifier(pipeline):
+                    splitter = check_cv(cv, y_train, classifier=True)
                 else:
-                    fold_pred = estimator.predict(x.iloc[test, :])
+                    splitter = check_cv(cv, y_train)
 
-                if prediction is None:
-                    if fold_pred.ndim == 2:
-                        prediction = np.empty(shape=(len(y_train), fold_pred.shape[1]))
+                require_subsample = (
+                    isinstance(subsample, int) and subsample < len(y_train)
+                ) or (isinstance(subsample, float) and subsample < 1.0)
+
+                if require_subsample:
+                    # We subsample the training sets, but not the test sets.
+                    # This allows for performance comparisons across subsample levels.
+                    new_splits = []
+                    for train, test in splitter.split(x, y_train):
+                        if is_classification:
+                            sampler = StratifiedShuffleSplit(
+                                n_splits=1, train_size=subsample, random_state=0
+                            )
+                        else:
+                            sampler = ShuffleSplit(
+                                n_splits=1, train_size=subsample, random_state=0
+                            )
+                        full_train_x, full_train_y = x.iloc[train, :], y_train[train]
+                        subsample_idx, _ = next(sampler.split(full_train_x, full_train_y))
+                        new_splits.append((subsample_idx, test))
+                    splitter = new_splits
+
+                result = cross_validate(
+                    pipeline,
+                    x,
+                    y_train,
+                    cv=splitter,
+                    return_estimator=True,
+                    scoring=dict([(m.name, m) for m in metrics]),
+                    error_score="raise",
+                )
+                scores = tuple([np.mean(result[f"test_{m.name}"]) for m in metrics])
+                estimators = result["estimator"]
+
+                splitter = (
+                    splitter if isinstance(splitter, list) else splitter.split(x, y_train)
+                )
+                for (estimator, (_, test)) in zip(estimators, splitter):
+                    if any([m.requires_probabilities for m in metrics]):
+                        fold_pred = estimator.predict_proba(x.iloc[test, :])
                     else:
-                        prediction = np.empty(shape=(len(y_train),))
-                prediction[test] = fold_pred
+                        fold_pred = estimator.predict(x.iloc[test, :])
+
+                    if prediction is None:
+                        if fold_pred.ndim == 2:
+                            prediction = np.empty(shape=(len(y_train), fold_pred.shape[1]))
+                        else:
+                            prediction = np.empty(shape=(len(y_train),))
+                    prediction[test] = fold_pred
 
         except stopit.TimeoutException:
             # This exception is handled by the ThreadingTimeout context manager.
