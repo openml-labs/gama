@@ -56,7 +56,7 @@ class Metric:
 
     def __init__(self, scorer: Union[_BaseScorer, str]):
         if isinstance(scorer, str):
-            scorer = get_scorer(scorer)
+            scorer = get_scorer(SCORERS[scorer])
         if not isinstance(scorer, _BaseScorer):
             raise ValueError(
                 "Scorer was not a valid scorer or could not be converted to one."
