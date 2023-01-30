@@ -1,40 +1,77 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>API &mdash; gama 22.0.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="shortcut icon" href="../_static/Color-Transparent.svg"/>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-    <script src="../_static/js/theme.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Benchmark Results" href="../benchmark.html" />
     <link rel="prev" title="Advanced Guide" href="../advanced_guide/index.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/Logo-on-white-text-on-transparent.png" class="logo" alt="Logo"/>
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> gama
+          
+
+          
           </a>
+
+          
+            
+            
               <div class="version">
                 22.0.0
               </div>
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -42,31 +79,72 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced_guide/index.html">Advanced Guide</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#gama">GAMA</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#gamaclassifier">GamaClassifier</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#gamaregressor">GamaRegressor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gamaclassifier">GamaClassifier</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gama.GamaClassifier"><code class="docutils literal notranslate"><span class="pre">GamaClassifier</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#gamaregressor">GamaRegressor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gama.GamaRegressor"><code class="docutils literal notranslate"><span class="pre">GamaRegressor</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#metrics">Metrics</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#metric">Metric</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#metrictype">MetricType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#metric">Metric</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gama.utilities.metrics.Metric"><code class="docutils literal notranslate"><span class="pre">Metric</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#metrictype">MetricType</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gama.utilities.metrics.MetricType"><code class="docutils literal notranslate"><span class="pre">MetricType</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-gama.search_methods">Search Methods</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#asynchronoussuccessivehalving">AsynchronousSuccessiveHalving</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#asyncea">AsyncEA</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#randomsearch">RandomSearch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#asynchronoussuccessivehalving">AsynchronousSuccessiveHalving</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gama.search_methods.AsynchronousSuccessiveHalving"><code class="docutils literal notranslate"><span class="pre">AsynchronousSuccessiveHalving</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#asyncea">AsyncEA</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gama.search_methods.AsyncEA"><code class="docutils literal notranslate"><span class="pre">AsyncEA</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#randomsearch">RandomSearch</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gama.search_methods.RandomSearch"><code class="docutils literal notranslate"><span class="pre">RandomSearch</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-gama.postprocessing">Post-Processing</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#nopostprocessing">NoPostProcessing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#bestfitpostprocessing">BestFitPostProcessing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ensemblepostprocessing">EnsemblePostProcessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nopostprocessing">NoPostProcessing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gama.postprocessing.NoPostProcessing"><code class="docutils literal notranslate"><span class="pre">NoPostProcessing</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bestfitpostprocessing">BestFitPostProcessing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gama.postprocessing.BestFitPostProcessing"><code class="docutils literal notranslate"><span class="pre">BestFitPostProcessing</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ensemblepostprocessing">EnsemblePostProcessing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gama.postprocessing.EnsemblePostProcessing"><code class="docutils literal notranslate"><span class="pre">EnsemblePostProcessing</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#genetic-programming">Genetic Programming</a><ul>
@@ -77,8 +155,20 @@
 <li class="toctree-l4"><a class="reference internal" href="#terminal">Terminal</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#module-gama.genetic_programming.mutation">Mutation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-gama.genetic_programming.crossover">Crossover</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gama.genetic_programming.mutation">Mutation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gama.genetic_programming.mutation.mut_insert"><code class="docutils literal notranslate"><span class="pre">mut_insert()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gama.genetic_programming.mutation.mut_replace_primitive"><code class="docutils literal notranslate"><span class="pre">mut_replace_primitive()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gama.genetic_programming.mutation.mut_replace_terminal"><code class="docutils literal notranslate"><span class="pre">mut_replace_terminal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gama.genetic_programming.mutation.mut_shrink"><code class="docutils literal notranslate"><span class="pre">mut_shrink()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gama.genetic_programming.mutation.random_valid_mutation_in_place"><code class="docutils literal notranslate"><span class="pre">random_valid_mutation_in_place()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gama.genetic_programming.crossover">Crossover</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gama.genetic_programming.crossover.crossover_primitives"><code class="docutils literal notranslate"><span class="pre">crossover_primitives()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gama.genetic_programming.crossover.crossover_terminals"><code class="docutils literal notranslate"><span class="pre">crossover_terminals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gama.genetic_programming.crossover.random_crossover"><code class="docutils literal notranslate"><span class="pre">random_crossover()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#utilities">Utilities</a><ul>
@@ -99,77 +189,118 @@
 <li class="toctree-l1"><a class="reference internal" href="../citing.html">Papers</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">gama</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
+    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
       <li>API</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/api/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <section id="api">
-<span id="api-doc"></span><h1>API<a class="headerlink" href="#api" title="Permalink to this heading"></a></h1>
+<span id="api-doc"></span><h1>API<a class="headerlink" href="#api" title="Permalink to this heading">¶</a></h1>
 <section id="gama">
-<h2>GAMA<a class="headerlink" href="#gama" title="Permalink to this heading"></a></h2>
+<h2>GAMA<a class="headerlink" href="#gama" title="Permalink to this heading">¶</a></h2>
 <section id="gamaclassifier">
-<h3>GamaClassifier<a class="headerlink" href="#gamaclassifier" title="Permalink to this heading"></a></h3>
+<h3>GamaClassifier<a class="headerlink" href="#gamaclassifier" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.GamaClassifier">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.</span></span><span class="sig-name descname"><span class="pre">GamaClassifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'neg_log_loss'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaClassifier.html#GamaClassifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.GamaClassifier" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.</span></span><span class="sig-name descname"><span class="pre">GamaClassifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'neg_log_loss'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaClassifier.html#GamaClassifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.GamaClassifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gama with adaptations for (multi-class) classification.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>scoring</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference internal" href="#gama.utilities.metrics.Metric" title="gama.utilities.metrics.Metric"><em>Metric</em></a><em> or </em><em>Tuple</em>) – Specifies the/all metric(s) to optimize towards.
+<li><p><strong>scoring</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference internal" href="#gama.utilities.metrics.Metric" title="gama.utilities.metrics.Metric"><em>Metric</em></a><em> or </em><em>Tuple</em>) – Specifies the/all metric(s) to optimize towards.
 A string will be converted to Metric.
 A tuple must specify each metric with the same type (e.g. all str).
 See <a class="reference internal" href="#metrics"><span class="std std-ref">Metrics</span></a> for built-in metrics.</p></li>
-<li><p><strong>regularize_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em> (</em><em>default=True</em><em>)</em>) – If True, add pipeline length as an optimization metric.
+<li><p><strong>regularize_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em> (</em><em>default=True</em><em>)</em>) – If True, add pipeline length as an optimization metric.
 Short pipelines should then be preferred over long ones.</p></li>
-<li><p><strong>max_pipeline_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – If set, limit the maximum number of steps in any evaluated pipeline.
+<li><p><strong>max_pipeline_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – If set, limit the maximum number of steps in any evaluated pipeline.
 Encoding and imputation are excluded.</p></li>
 <li><p><strong>config</strong> (<em>Dict</em>) – Specifies available components and their valid hyperparameter settings.
 For more information, see <a class="reference internal" href="../advanced_guide/index.html#search-space-configuration"><span class="std std-ref">GAMA Search Space Configuration</span></a>.</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Seed for the random number generators used in the process.
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Seed for the random number generators used in the process.
 However, with <code class="code docutils literal notranslate"><span class="pre">n_jobs</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>,
 there will be randomization introduced by multi-processing.
 For reproducible results, set this and use <code class="code docutils literal notranslate"><span class="pre">n_jobs=1</span></code>.</p></li>
 <li><p><strong>max_total_time</strong> (<em>positive int</em><em> (</em><em>default=3600</em><em>)</em>) – Time in seconds that can be used for the <code class="code docutils literal notranslate"><span class="pre">fit</span></code> call.</p></li>
 <li><p><strong>max_eval_time</strong> (<em>positive int</em><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Time in seconds that can be used to evaluate any one single individual.
 If None, set to 0.1 * max_total_time.</p></li>
-<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – The amount of parallel processes that may be created to speed up <code class="code docutils literal notranslate"><span class="pre">fit</span></code>.
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – The amount of parallel processes that may be created to speed up <code class="code docutils literal notranslate"><span class="pre">fit</span></code>.
 Accepted values are positive integers, -1 or None.
 If -1 is specified, multiprocessing.cpu_count() processes are created.
 If None is specified, multiprocessing.cpu_count() / 2 processes are created.</p></li>
-<li><p><strong>max_memory_mb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Sets the total amount of memory GAMA is allowed to use (in megabytes).
+<li><p><strong>max_memory_mb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Sets the total amount of memory GAMA is allowed to use (in megabytes).
 If not set, GAMA will use as much as it needs.
 GAMA is not guaranteed to respect this limit at all times,
 but it should never violate it for too long.</p></li>
-<li><p><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> (</em><em>default=logging.WARNING</em><em>)</em>) – Sets the level of log messages to be automatically output to terminal.</p></li>
+<li><p><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> (</em><em>default=logging.WARNING</em><em>)</em>) – Sets the level of log messages to be automatically output to terminal.</p></li>
 <li><p><strong>search</strong> (<em>BaseSearch</em><em> (</em><em>default=AsyncEA</em><em>(</em><em>)</em><em>)</em>) – Search method to use to find good pipelines. Should be instantiated.</p></li>
 <li><p><strong>post_processing</strong> (<em>BasePostProcessing</em><em> (</em><em>default=BestFitPostProcessing</em><em>(</em><em>)</em><em>)</em>) – Post-processing method to create a model after the search phase.
 Should be an instantiated subclass of BasePostProcessing.</p></li>
-<li><p><strong>output_directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Directory to use to save GAMA output. This includes both intermediate
+<li><p><strong>output_directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Directory to use to save GAMA output. This includes both intermediate
 results during search and logs.
 This directory must be empty or not exist.
 If set to None, generate a unique name (“gama_HEXCODE”).</p></li>
-<li><p><strong>store</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> (</em><em>default='logs'</em><em>)</em>) – <dl class="simple">
+<li><p><strong>store</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> (</em><em>default='logs'</em><em>)</em>) – <dl class="simple">
 <dt>Determines which data is stored after each run:</dt><dd><ul>
 <li><p>’nothing’: keep nothing from this run</p></li>
 <li><p>’models’: keep only cache with models and predictions</p></li>
@@ -186,42 +317,42 @@ If set to None, generate a unique name (“gama_HEXCODE”).</p></li>
 
 </section>
 <section id="gamaregressor">
-<h3>GamaRegressor<a class="headerlink" href="#gamaregressor" title="Permalink to this heading"></a></h3>
+<h3>GamaRegressor<a class="headerlink" href="#gamaregressor" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.GamaRegressor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.</span></span><span class="sig-name descname"><span class="pre">GamaRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'neg_mean_squared_error'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaRegressor.html#GamaRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.GamaRegressor" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.</span></span><span class="sig-name descname"><span class="pre">GamaRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'neg_mean_squared_error'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/GamaRegressor.html#GamaRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.GamaRegressor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gama with adaptations for regression.</p>
 </dd></dl>
 
 </section>
 </section>
 <section id="metrics">
-<span id="id1"></span><h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this heading"></a></h2>
+<span id="id1"></span><h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this heading">¶</a></h2>
 <span class="target" id="module-gama.utilities.metrics"></span><p>If you have a custom scoring function, you can define your own <code class="code docutils literal notranslate"><span class="pre">Metric</span></code>.</p>
 <section id="metric">
-<h3>Metric<a class="headerlink" href="#metric" title="Permalink to this heading"></a></h3>
+<h3>Metric<a class="headerlink" href="#metric" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.utilities.metrics.Metric">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.utilities.metrics.</span></span><span class="sig-name descname"><span class="pre">Metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scorer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><span class="pre">_BaseScorer</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/metrics.html#Metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.utilities.metrics.Metric" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.utilities.metrics.</span></span><span class="sig-name descname"><span class="pre">Metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scorer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_BaseScorer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/metrics.html#Metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.utilities.metrics.Metric" title="Permalink to this definition">¶</a></dt>
 <dd><p>A thin layer around the <code class="code docutils literal notranslate"><span class="pre">scorer</span></code> class of scikit-learn.</p>
 </dd></dl>
 
 </section>
 <section id="metrictype">
-<h3>MetricType<a class="headerlink" href="#metrictype" title="Permalink to this heading"></a></h3>
+<h3>MetricType<a class="headerlink" href="#metrictype" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.utilities.metrics.MetricType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.utilities.metrics.</span></span><span class="sig-name descname"><span class="pre">MetricType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/metrics.html#MetricType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.utilities.metrics.MetricType" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.utilities.metrics.</span></span><span class="sig-name descname"><span class="pre">MetricType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/metrics.html#MetricType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.utilities.metrics.MetricType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Metric types supported by GAMA.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gama.utilities.metrics.MetricType.CLASSIFICATION">
-<span class="sig-name descname"><span class="pre">CLASSIFICATION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#gama.utilities.metrics.MetricType.CLASSIFICATION" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">CLASSIFICATION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#gama.utilities.metrics.MetricType.CLASSIFICATION" title="Permalink to this definition">¶</a></dt>
 <dd><p>discrete target</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gama.utilities.metrics.MetricType.REGRESSION">
-<span class="sig-name descname"><span class="pre">REGRESSION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#gama.utilities.metrics.MetricType.REGRESSION" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">REGRESSION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#gama.utilities.metrics.MetricType.REGRESSION" title="Permalink to this definition">¶</a></dt>
 <dd><p>continuous target</p>
 </dd></dl>
 
@@ -231,25 +362,25 @@ If set to None, generate a unique name (“gama_HEXCODE”).</p></li>
 </section>
 <hr class="docutils" />
 <section id="module-gama.search_methods">
-<span id="search-methods"></span><h2>Search Methods<a class="headerlink" href="#module-gama.search_methods" title="Permalink to this heading"></a></h2>
+<span id="search-methods"></span><h2>Search Methods<a class="headerlink" href="#module-gama.search_methods" title="Permalink to this heading">¶</a></h2>
 <section id="asynchronoussuccessivehalving">
-<h3>AsynchronousSuccessiveHalving<a class="headerlink" href="#asynchronoussuccessivehalving" title="Permalink to this heading"></a></h3>
+<h3>AsynchronousSuccessiveHalving<a class="headerlink" href="#asynchronoussuccessivehalving" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.search_methods.AsynchronousSuccessiveHalving">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.search_methods.</span></span><span class="sig-name descname"><span class="pre">AsynchronousSuccessiveHalving</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduction_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_resource</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_resource</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_early_stopping_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/asha.html#AsynchronousSuccessiveHalving"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.search_methods.AsynchronousSuccessiveHalving" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.search_methods.</span></span><span class="sig-name descname"><span class="pre">AsynchronousSuccessiveHalving</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduction_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_resource</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_resource</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_early_stopping_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/asha.html#AsynchronousSuccessiveHalving"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.search_methods.AsynchronousSuccessiveHalving" title="Permalink to this definition">¶</a></dt>
 <dd><p>Asynchronous Halving Algorithm by Li et al.</p>
 <p>paper: <a class="reference external" href="https://arxiv.org/abs/1810.05934">https://arxiv.org/abs/1810.05934</a></p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>reduction_factor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=3</em><em>)</em>) – Reduction factor of candidates between each rung.</p></li>
-<li><p><strong>minimum_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em><em> (</em><em>default=0.125</em><em>)</em>) – Number of samples to use in the lowest rung.
+<li><p><strong>reduction_factor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=3</em><em>)</em>) – Reduction factor of candidates between each rung.</p></li>
+<li><p><strong>minimum_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em><em> (</em><em>default=0.125</em><em>)</em>) – Number of samples to use in the lowest rung.
 If integer, it specifies the number of rows.
 If float, it specifies the fraction of the dataset.</p></li>
-<li><p><strong>maximum_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><em>float optional</em><em> (</em><em>default=1.0</em><em>)</em>) – Number of samples to use in the top rung.
+<li><p><strong>maximum_resource</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> or </em><em>float optional</em><em> (</em><em>default=1.0</em><em>)</em>) – Number of samples to use in the top rung.
 If integer, it specifies the number of rows.
 If float, it specifies the fraction of the dataset.</p></li>
-<li><p><strong>minimum_early_stopping_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> (</em><em>default=0</em><em>)</em>) – Number of lowest rungs to skip.</p></li>
+<li><p><strong>minimum_early_stopping_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> (</em><em>default=0</em><em>)</em>) – Number of lowest rungs to skip.</p></li>
 </ul>
 </dd>
 </dl>
@@ -257,18 +388,18 @@ If float, it specifies the fraction of the dataset.</p></li>
 
 </section>
 <section id="asyncea">
-<h3>AsyncEA<a class="headerlink" href="#asyncea" title="Permalink to this heading"></a></h3>
+<h3>AsyncEA<a class="headerlink" href="#asyncea" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.search_methods.AsyncEA">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.search_methods.</span></span><span class="sig-name descname"><span class="pre">AsyncEA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_n_evaluations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restart_callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/async_ea.html#AsyncEA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.search_methods.AsyncEA" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.search_methods.</span></span><span class="sig-name descname"><span class="pre">AsyncEA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_n_evaluations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restart_callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/async_ea.html#AsyncEA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.search_methods.AsyncEA" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform asynchronous evolutionary optimization.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>population_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=50</em><em>)</em>) – Maximum number of individuals in the population at any time.</p></li>
-<li><p><strong>max_n_evaluations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – If specified, only a maximum of <code class="code docutils literal notranslate"><span class="pre">max_n_evaluations</span></code> individuals are evaluated.
+<li><p><strong>population_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=50</em><em>)</em>) – Maximum number of individuals in the population at any time.</p></li>
+<li><p><strong>max_n_evaluations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – If specified, only a maximum of <code class="code docutils literal notranslate"><span class="pre">max_n_evaluations</span></code> individuals are evaluated.
 If None, the algorithm will be run until interrupted by the user or a timeout.</p></li>
-<li><p><strong>restart_callback</strong> (<em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>]</em><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Function which takes no arguments and returns True if search restart.</p></li>
+<li><p><strong>restart_callback</strong> (<em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>]</em><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Function which takes no arguments and returns True if search restart.</p></li>
 </ul>
 </dd>
 </dl>
@@ -276,10 +407,10 @@ If None, the algorithm will be run until interrupted by the user or a timeout.</
 
 </section>
 <section id="randomsearch">
-<h3>RandomSearch<a class="headerlink" href="#randomsearch" title="Permalink to this heading"></a></h3>
+<h3>RandomSearch<a class="headerlink" href="#randomsearch" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.search_methods.RandomSearch">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.search_methods.</span></span><span class="sig-name descname"><span class="pre">RandomSearch</span></span><a class="reference internal" href="../_modules/gama/search_methods/random_search.html#RandomSearch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.search_methods.RandomSearch" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.search_methods.</span></span><span class="sig-name descname"><span class="pre">RandomSearch</span></span><a class="reference internal" href="../_modules/gama/search_methods/random_search.html#RandomSearch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.search_methods.RandomSearch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform random search over all possible pipelines.</p>
 </dd></dl>
 
@@ -287,51 +418,51 @@ If None, the algorithm will be run until interrupted by the user or a timeout.</
 </section>
 <hr class="docutils" />
 <section id="module-gama.postprocessing">
-<span id="post-processing"></span><h2>Post-Processing<a class="headerlink" href="#module-gama.postprocessing" title="Permalink to this heading"></a></h2>
+<span id="post-processing"></span><h2>Post-Processing<a class="headerlink" href="#module-gama.postprocessing" title="Permalink to this heading">¶</a></h2>
 <section id="nopostprocessing">
-<h3>NoPostProcessing<a class="headerlink" href="#nopostprocessing" title="Permalink to this heading"></a></h3>
+<h3>NoPostProcessing<a class="headerlink" href="#nopostprocessing" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.postprocessing.NoPostProcessing">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.postprocessing.</span></span><span class="sig-name descname"><span class="pre">NoPostProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing.html#NoPostProcessing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.postprocessing.NoPostProcessing" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.postprocessing.</span></span><span class="sig-name descname"><span class="pre">NoPostProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing.html#NoPostProcessing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.postprocessing.NoPostProcessing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does nothing, no time will be reserved for post-processing.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Fraction of total time that to be reserved for this post-processing step.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – Fraction of total time that to be reserved for this post-processing step.</p>
 </dd>
 </dl>
 </dd></dl>
 
 </section>
 <section id="bestfitpostprocessing">
-<h3>BestFitPostProcessing<a class="headerlink" href="#bestfitpostprocessing" title="Permalink to this heading"></a></h3>
+<h3>BestFitPostProcessing<a class="headerlink" href="#bestfitpostprocessing" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.postprocessing.BestFitPostProcessing">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.postprocessing.</span></span><span class="sig-name descname"><span class="pre">BestFitPostProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/best_fit.html#BestFitPostProcessing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.postprocessing.BestFitPostProcessing" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.postprocessing.</span></span><span class="sig-name descname"><span class="pre">BestFitPostProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/best_fit.html#BestFitPostProcessing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.postprocessing.BestFitPostProcessing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Post processing technique which trains the best found single pipeline.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Fraction of total time that to be reserved for this post-processing step.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – Fraction of total time that to be reserved for this post-processing step.</p>
 </dd>
 </dl>
 </dd></dl>
 
 </section>
 <section id="ensemblepostprocessing">
-<h3>EnsemblePostProcessing<a class="headerlink" href="#ensemblepostprocessing" title="Permalink to this heading"></a></h3>
+<h3>EnsemblePostProcessing<a class="headerlink" href="#ensemblepostprocessing" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.postprocessing.EnsemblePostProcessing">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.postprocessing.</span></span><span class="sig-name descname"><span class="pre">EnsemblePostProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hillclimb_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/ensemble.html#EnsemblePostProcessing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.postprocessing.EnsemblePostProcessing" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.postprocessing.</span></span><span class="sig-name descname"><span class="pre">EnsemblePostProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hillclimb_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/ensemble.html#EnsemblePostProcessing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.postprocessing.EnsemblePostProcessing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Ensemble construction per Caruana et al.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> (</em><em>default=0.3</em><em>)</em>) – Fraction of total time reserved for Ensemble building.</p></li>
-<li><p><strong>ensemble_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=25</em><em>)</em>) – Total number of models in the ensemble.
+<li><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em> (</em><em>default=0.3</em><em>)</em>) – Fraction of total time reserved for Ensemble building.</p></li>
+<li><p><strong>ensemble_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=25</em><em>)</em>) – Total number of models in the ensemble.
 When a single model is chosen more than once, it will increase its weight
 in the ensemble and <em>does</em> count towards this maximum.</p></li>
-<li><p><strong>hillclimb_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=10_000</em><em>)</em>) – Number of predictions that are used to determine the ensemble score
+<li><p><strong>hillclimb_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=10_000</em><em>)</em>) – Number of predictions that are used to determine the ensemble score
 during hillclimbing. If <code class="code docutils literal notranslate"><span class="pre">None</span></code>, use all.</p></li>
-<li><p><strong>max_models</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=200</em><em>)</em>) – Only consider the best <code class="code docutils literal notranslate"><span class="pre">max_models</span></code> number of models. If <code class="code docutils literal notranslate"><span class="pre">None</span></code>, use all.
+<li><p><strong>max_models</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=200</em><em>)</em>) – Only consider the best <code class="code docutils literal notranslate"><span class="pre">max_models</span></code> number of models. If <code class="code docutils literal notranslate"><span class="pre">None</span></code>, use all.
 Consequently also sets the max number of unique models in the ensemble.</p></li>
 </ul>
 </dd>
@@ -342,9 +473,9 @@ Consequently also sets the max number of unique models in the ensemble.</p></li>
 </section>
 <hr class="docutils" />
 <section id="genetic-programming">
-<h2>Genetic Programming<a class="headerlink" href="#genetic-programming" title="Permalink to this heading"></a></h2>
+<h2>Genetic Programming<a class="headerlink" href="#genetic-programming" title="Permalink to this heading">¶</a></h2>
 <section id="module-gama.genetic_programming.components">
-<span id="components"></span><h3>Components<a class="headerlink" href="#module-gama.genetic_programming.components" title="Permalink to this heading"></a></h3>
+<span id="components"></span><h3>Components<a class="headerlink" href="#module-gama.genetic_programming.components" title="Permalink to this heading">¶</a></h3>
 <p>Defines the building blocks for Individuals.
 Individuals represent machine learning pipelines in a back-end agnostic way.
 An Individual can be converted to its back-end specific representation
@@ -368,13 +499,13 @@ as long as a function has been provided to convert the individual to it.</p>
 </ul>
 </div></blockquote>
 <section id="individual">
-<h4>Individual<a class="headerlink" href="#individual" title="Permalink to this heading"></a></h4>
+<h4>Individual<a class="headerlink" href="#individual" title="Permalink to this heading">¶</a></h4>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.genetic_programming.components.Individual">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.components.</span></span><span class="sig-name descname"><span class="pre">Individual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.PrimitiveNode" title="gama.genetic_programming.components.primitive_node.PrimitiveNode"><span class="pre">PrimitiveNode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/individual.html#Individual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.components.Individual" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.components.</span></span><span class="sig-name descname"><span class="pre">Individual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.PrimitiveNode" title="gama.genetic_programming.components.primitive_node.PrimitiveNode"><span class="pre">PrimitiveNode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><span class="pre">Callable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/individual.html#Individual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.components.Individual" title="Permalink to this definition">¶</a></dt>
 <dd><p>Collection of PrimitiveNodes which together specify a machine learning pipeline.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>main_node</strong> (<a class="reference internal" href="#gama.genetic_programming.components.PrimitiveNode" title="gama.genetic_programming.components.PrimitiveNode"><em>PrimitiveNode</em></a>) – The first node of the individual (the estimator node).</p></li>
 <li><p><strong>to_pipeline</strong> (<em>Callable</em><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – A function which can convert this individual into a machine learning pipeline.
@@ -386,10 +517,10 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 
 </section>
 <section id="primitive">
-<h4>Primitive<a class="headerlink" href="#primitive" title="Permalink to this heading"></a></h4>
+<h4>Primitive<a class="headerlink" href="#primitive" title="Permalink to this heading">¶</a></h4>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.genetic_programming.components.Primitive">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.components.</span></span><span class="sig-name descname"><span class="pre">Primitive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive.html#Primitive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.components.Primitive" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.components.</span></span><span class="sig-name descname"><span class="pre">Primitive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><span class="pre">Callable</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive.html#Primitive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.components.Primitive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines an operator which takes input and produces output.</p>
 <p>E.g. a preprocessing or classification algorithm.</p>
 <p>Create new instance of Primitive(input, output, identifier)</p>
@@ -397,13 +528,13 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 
 </section>
 <section id="primitivenode">
-<h4>PrimitiveNode<a class="headerlink" href="#primitivenode" title="Permalink to this heading"></a></h4>
+<h4>PrimitiveNode<a class="headerlink" href="#primitivenode" title="Permalink to this heading">¶</a></h4>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.genetic_programming.components.PrimitiveNode">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.components.</span></span><span class="sig-name descname"><span class="pre">PrimitiveNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primitive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Primitive" title="gama.genetic_programming.components.primitive.Primitive"><span class="pre">Primitive</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#gama.genetic_programming.components.PrimitiveNode" title="gama.genetic_programming.components.primitive_node.PrimitiveNode"><span class="pre">PrimitiveNode</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terminals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#gama.genetic_programming.components.Terminal" title="gama.genetic_programming.components.terminal.Terminal"><span class="pre">Terminal</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive_node.html#PrimitiveNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.components.PrimitiveNode" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.components.</span></span><span class="sig-name descname"><span class="pre">PrimitiveNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primitive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Primitive" title="gama.genetic_programming.components.primitive.Primitive"><span class="pre">Primitive</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.PrimitiveNode" title="gama.genetic_programming.components.primitive_node.PrimitiveNode"><span class="pre">PrimitiveNode</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">terminals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#gama.genetic_programming.components.Terminal" title="gama.genetic_programming.components.terminal.Terminal"><span class="pre">Terminal</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/primitive_node.html#PrimitiveNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.components.PrimitiveNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>An instantiation for a Primitive with specific Terminals.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>primitive</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Primitive" title="gama.genetic_programming.components.Primitive"><em>Primitive</em></a>) – The Primitive type of this PrimitiveNode.</p></li>
 <li><p><strong>data_node</strong> (<a class="reference internal" href="#gama.genetic_programming.components.PrimitiveNode" title="gama.genetic_programming.components.PrimitiveNode"><em>PrimitiveNode</em></a>) – The PrimitiveNode that specifies all preprocessing before this PrimitiveNode.</p></li>
@@ -415,10 +546,10 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 
 </section>
 <section id="terminal">
-<h4>Terminal<a class="headerlink" href="#terminal" title="Permalink to this heading"></a></h4>
+<h4>Terminal<a class="headerlink" href="#terminal" title="Permalink to this heading">¶</a></h4>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.genetic_programming.components.Terminal">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.components.</span></span><span class="sig-name descname"><span class="pre">Terminal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><span class="pre">object</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/terminal.html#Terminal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.components.Terminal" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.components.</span></span><span class="sig-name descname"><span class="pre">Terminal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/genetic_programming/components/terminal.html#Terminal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.components.Terminal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Specifies a specific value for a specific type or input.</p>
 <p>E.g. a value for a hyperparameter for an algorithm.</p>
 <p>Create new instance of Terminal(value, output, identifier)</p>
@@ -427,19 +558,19 @@ If not provided, the <code class="code docutils literal notranslate"><span class
 </section>
 </section>
 <section id="module-gama.genetic_programming.mutation">
-<span id="mutation"></span><h3>Mutation<a class="headerlink" href="#module-gama.genetic_programming.mutation" title="Permalink to this heading"></a></h3>
+<span id="mutation"></span><h3>Mutation<a class="headerlink" href="#module-gama.genetic_programming.mutation" title="Permalink to this heading">¶</a></h3>
 <p>Contains mutation functions for genetic programming.
 Each mutation function takes an individual and modifies it in-place.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="gama.genetic_programming.mutation.mut_insert">
-<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.mutation.</span></span><span class="sig-name descname"><span class="pre">mut_insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">individual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">primitive_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_insert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_insert" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.mutation.</span></span><span class="sig-name descname"><span class="pre">mut_insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">individual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">primitive_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_insert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_insert" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mutate an Individual in-place by inserting a PrimitiveNode at a random location.</p>
 <p>The new PrimitiveNode will not be inserted as root node.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>individual</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – Individual to mutate in-place.</p></li>
-<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – </p></li>
+<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -447,13 +578,13 @@ Each mutation function takes an individual and modifies it in-place.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="gama.genetic_programming.mutation.mut_replace_primitive">
-<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.mutation.</span></span><span class="sig-name descname"><span class="pre">mut_replace_primitive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">individual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">primitive_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_replace_primitive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_replace_primitive" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.mutation.</span></span><span class="sig-name descname"><span class="pre">mut_replace_primitive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">individual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">primitive_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_replace_primitive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_replace_primitive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mutates an Individual in-place by replacing one of its Primitives.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>individual</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – Individual to mutate in-place.</p></li>
-<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – </p></li>
+<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -461,13 +592,13 @@ Each mutation function takes an individual and modifies it in-place.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="gama.genetic_programming.mutation.mut_replace_terminal">
-<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.mutation.</span></span><span class="sig-name descname"><span class="pre">mut_replace_terminal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">individual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">primitive_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_replace_terminal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_replace_terminal" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.mutation.</span></span><span class="sig-name descname"><span class="pre">mut_replace_terminal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">individual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">primitive_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_replace_terminal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_replace_terminal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mutates an Individual in-place by replacing one of its Terminals.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>individual</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – Individual to mutate in-place.</p></li>
-<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – </p></li>
+<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -475,15 +606,15 @@ Each mutation function takes an individual and modifies it in-place.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="gama.genetic_programming.mutation.mut_shrink">
-<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.mutation.</span></span><span class="sig-name descname"><span class="pre">mut_shrink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">individual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">primitive_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shrink_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_shrink"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_shrink" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.mutation.</span></span><span class="sig-name descname"><span class="pre">mut_shrink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">individual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">primitive_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shrink_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#mut_shrink"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.mutation.mut_shrink" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mutates an Individual in-place by removing any number of primitive nodes.</p>
 <p>Primitive nodes are removed from the preprocessing end.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>individual</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – Individual to mutate in-place.</p></li>
-<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em>, </em><em>optional</em>) – Not used. Present to create a matching function signature with other mutations.</p></li>
-<li><p><strong>shrink_by</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Number of primitives to remove.
+<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – Not used. Present to create a matching function signature with other mutations.</p></li>
+<li><p><strong>shrink_by</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Number of primitives to remove.
 Must be at least one greater than the number of primitives in <code class="code docutils literal notranslate"><span class="pre">individual</span></code>.
 If None, a random number of primitives is removed.</p></li>
 </ul>
@@ -493,7 +624,7 @@ If None, a random number of primitives is removed.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="gama.genetic_programming.mutation.random_valid_mutation_in_place">
-<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.mutation.</span></span><span class="sig-name descname"><span class="pre">random_valid_mutation_in_place</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">individual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">primitive_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#random_valid_mutation_in_place"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.mutation.random_valid_mutation_in_place" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.mutation.</span></span><span class="sig-name descname"><span class="pre">random_valid_mutation_in_place</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">individual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">primitive_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><span class="pre">Callable</span></a></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/mutation.html#random_valid_mutation_in_place"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.mutation.random_valid_mutation_in_place" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply a random valid mutation in place.</p>
 <p>The random mutation can be one of:</p>
 <blockquote>
@@ -505,17 +636,17 @@ If None, a random number of primitives is removed.</p></li>
 </ul>
 </div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>individual</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – An individual to be mutated <em>in-place</em>.</p></li>
-<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – A dictionary defining the set of primitives and terminals.</p></li>
-<li><p><strong>max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – If specified, impose a maximum length on the new individual.</p></li>
+<li><p><strong>primitive_set</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – A dictionary defining the set of primitives and terminals.</p></li>
+<li><p><strong>max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – If specified, impose a maximum length on the new individual.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The mutation function used.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Callable</p>
 </dd>
 </dl>
@@ -523,14 +654,14 @@ If None, a random number of primitives is removed.</p></li>
 
 </section>
 <section id="module-gama.genetic_programming.crossover">
-<span id="crossover"></span><h3>Crossover<a class="headerlink" href="#module-gama.genetic_programming.crossover" title="Permalink to this heading"></a></h3>
+<span id="crossover"></span><h3>Crossover<a class="headerlink" href="#module-gama.genetic_programming.crossover" title="Permalink to this heading">¶</a></h3>
 <p>Functions which take two Individuals and produce at least one new Individual.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="gama.genetic_programming.crossover.crossover_primitives">
-<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.crossover.</span></span><span class="sig-name descname"><span class="pre">crossover_primitives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#crossover_primitives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.crossover.crossover_primitives" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.crossover.</span></span><span class="sig-name descname"><span class="pre">crossover_primitives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#crossover_primitives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.crossover.crossover_primitives" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crossover two individuals by exchanging any number of preprocessing steps.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ind1</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with individual2.</p></li>
 <li><p><strong>ind2</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with individual1.</p></li>
@@ -541,11 +672,11 @@ If None, a random number of primitives is removed.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="gama.genetic_programming.crossover.crossover_terminals">
-<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.crossover.</span></span><span class="sig-name descname"><span class="pre">crossover_terminals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#crossover_terminals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.crossover.crossover_terminals" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.crossover.</span></span><span class="sig-name descname"><span class="pre">crossover_terminals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#crossover_terminals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.crossover.crossover_terminals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crossover two individuals in-place by exchanging two Terminals.</p>
 <p>Terminals must share output type but have different values.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ind1</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with individual2.</p></li>
 <li><p><strong>ind2</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with individual1.</p></li>
@@ -556,19 +687,19 @@ If None, a random number of primitives is removed.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="gama.genetic_programming.crossover.random_crossover">
-<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.crossover.</span></span><span class="sig-name descname"><span class="pre">random_crossover</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#random_crossover"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.crossover.random_crossover" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">gama.genetic_programming.crossover.</span></span><span class="sig-name descname"><span class="pre">random_crossover</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/gama/genetic_programming/crossover.html#random_crossover"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.genetic_programming.crossover.random_crossover" title="Permalink to this definition">¶</a></dt>
 <dd><p>Random valid crossover between two individuals in-place, if it can be done.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ind1</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with ind2.</p></li>
 <li><p><strong>ind2</strong> (<a class="reference internal" href="#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a>) – The individual to crossover with ind1.</p></li>
-<li><p><strong>max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em><em>(</em><em>default=None</em><em>)</em>) – The first individual in the returned tuple has at most <code class="code docutils literal notranslate"><span class="pre">max_length</span></code> primitives.
+<li><p><strong>max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em><em>(</em><em>default=None</em><em>)</em>) – The first individual in the returned tuple has at most <code class="code docutils literal notranslate"><span class="pre">max_length</span></code> primitives.
 Requires both provided individuals to contain at most <code class="code docutils literal notranslate"><span class="pre">max_length</span></code> primitives.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – <ul class="simple">
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – <ul class="simple">
 <li><p>If there is no valid crossover function for the two individuals.
     - If <code class="code docutils literal notranslate"><span class="pre">max_length</span></code> is set and either <code class="code docutils literal notranslate"><span class="pre">ind1</span></code> or <code class="code docutils literal notranslate"><span class="pre">ind2</span></code> contain
       more primitives than <code class="code docutils literal notranslate"><span class="pre">max_length</span></code>.</p></li>
@@ -582,20 +713,20 @@ Requires both provided individuals to contain at most <code class="code docutils
 </section>
 <hr class="docutils" />
 <section id="utilities">
-<h2>Utilities<a class="headerlink" href="#utilities" title="Permalink to this heading"></a></h2>
+<h2>Utilities<a class="headerlink" href="#utilities" title="Permalink to this heading">¶</a></h2>
 <section id="generic">
-<h3>Generic<a class="headerlink" href="#generic" title="Permalink to this heading"></a></h3>
+<h3>Generic<a class="headerlink" href="#generic" title="Permalink to this heading">¶</a></h3>
 <p>Collection of generic components.</p>
 <section id="pareto-front">
-<h4>Pareto Front<a class="headerlink" href="#pareto-front" title="Permalink to this heading"></a></h4>
+<h4>Pareto Front<a class="headerlink" href="#pareto-front" title="Permalink to this heading">¶</a></h4>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.utilities.generic.paretofront.ParetoFront">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.utilities.generic.paretofront.</span></span><span class="sig-name descname"><span class="pre">ParetoFront</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_values_fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/paretofront.html#ParetoFront"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.utilities.generic.paretofront.ParetoFront" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.utilities.generic.paretofront.</span></span><span class="sig-name descname"><span class="pre">ParetoFront</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_values_fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/paretofront.html#ParetoFront"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.utilities.generic.paretofront.ParetoFront" title="Permalink to this definition">¶</a></dt>
 <dd><p>A list of tuples in which no one tuple is dominated by another.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>start_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em><em>.</em>) – List of items of which to calculate the Pareto front.</p></li>
+<li><p><strong>start_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em><em>.</em>) – List of items of which to calculate the Pareto front.</p></li>
 <li><p><strong>get_values_fn</strong> (<em>Callable</em><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Function that takes an item and returns a tuple of values,
 such that each should be maximized.
 If left None, it is assumed that items are already such tuples.</p></li>
@@ -606,13 +737,13 @@ If left None, it is assumed that items are already such tuples.</p></li>
 
 </section>
 <section id="stopwatch">
-<h4>Stopwatch<a class="headerlink" href="#stopwatch" title="Permalink to this heading"></a></h4>
+<h4>Stopwatch<a class="headerlink" href="#stopwatch" title="Permalink to this heading">¶</a></h4>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.utilities.generic.stopwatch.Stopwatch">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.utilities.generic.stopwatch.</span></span><span class="sig-name descname"><span class="pre">Stopwatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timing_function=&lt;built-in</span> <span class="pre">function</span> <span class="pre">time&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/stopwatch.html#Stopwatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.utilities.generic.stopwatch.Stopwatch" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.utilities.generic.stopwatch.</span></span><span class="sig-name descname"><span class="pre">Stopwatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timing_function=&lt;built-in</span> <span class="pre">function</span> <span class="pre">time&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/stopwatch.html#Stopwatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.utilities.generic.stopwatch.Stopwatch" title="Permalink to this definition">¶</a></dt>
 <dd><p>A context manager that keeps track of wall clock time spent.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>timing_function</strong> (<em>Callable</em><em> (</em><em>default=time.time</em><em>)</em>) – The function used to measure time, e.g. time.time or time.process_time</p>
 </dd>
 </dl>
@@ -620,14 +751,14 @@ If left None, it is assumed that items are already such tuples.</p></li>
 
 </section>
 <section id="timekeeper">
-<h4>Timekeeper<a class="headerlink" href="#timekeeper" title="Permalink to this heading"></a></h4>
+<h4>Timekeeper<a class="headerlink" href="#timekeeper" title="Permalink to this heading">¶</a></h4>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.utilities.generic.timekeeper.TimeKeeper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.utilities.generic.timekeeper.</span></span><span class="sig-name descname"><span class="pre">TimeKeeper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/timekeeper.html#TimeKeeper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.utilities.generic.timekeeper.TimeKeeper" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.utilities.generic.timekeeper.</span></span><span class="sig-name descname"><span class="pre">TimeKeeper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/timekeeper.html#TimeKeeper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.utilities.generic.timekeeper.TimeKeeper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simple object that helps keep track of time over multiple activities.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>total_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – The total time available across activities.
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>total_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – The total time available across activities.
 If set to None, the <code class="code docutils literal notranslate"><span class="pre">total_time_remaining</span></code> property will be unavailable.</p>
 </dd>
 </dl>
@@ -635,7 +766,7 @@ If set to None, the <code class="code docutils literal notranslate"><span class=
 
 </section>
 <section id="asyncevaluator">
-<h4>AsyncEvaluator<a class="headerlink" href="#asyncevaluator" title="Permalink to this heading"></a></h4>
+<h4>AsyncEvaluator<a class="headerlink" href="#asyncevaluator" title="Permalink to this heading">¶</a></h4>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>I’m sure there are better tools out there, but I have yet to find a minimal easy multi-processing tool.
@@ -644,7 +775,7 @@ jobs while they were running.</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="gama.utilities.generic.async_evaluator.AsyncEvaluator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.utilities.generic.async_evaluator.</span></span><span class="sig-name descname"><span class="pre">AsyncEvaluator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory_limit_mb</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_time_before_forced_shutdown</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/async_evaluator.html#AsyncEvaluator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.utilities.generic.async_evaluator.AsyncEvaluator" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.utilities.generic.async_evaluator.</span></span><span class="sig-name descname"><span class="pre">AsyncEvaluator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory_limit_mb</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_time_before_forced_shutdown</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/utilities/generic/async_evaluator.html#AsyncEvaluator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gama.utilities.generic.async_evaluator.AsyncEvaluator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Manages subprocesses on which arbitrary functions can be evaluated.</p>
 <p>The function and all its arguments must be picklable.
 Using the same AsyncEvaluator in two different contexts raises a <code class="code docutils literal notranslate"><span class="pre">RuntimeError</span></code>.</p>
@@ -656,14 +787,14 @@ Only supports keyword arguments.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>n_workers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> (</em><em>default=1</em><em>)</em>) – Maximum number of subprocesses to run for parallel evaluations.</p></li>
-<li><p><strong>memory_limit_mb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – The maximum number of megabytes that this process and its subprocesses
+<li><p><strong>n_workers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> (</em><em>default=1</em><em>)</em>) – Maximum number of subprocesses to run for parallel evaluations.</p></li>
+<li><p><strong>memory_limit_mb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – The maximum number of megabytes that this process and its subprocesses
 may use in total. If None, no limit is enforced.
 There is no guarantee the limit is not violated.</p></li>
-<li><p><strong>logfile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – If set, recorded resource usage will be written to this file.</p></li>
-<li><p><strong>wait_time_before_forced_shutdown</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> (</em><em>default=10</em><em>)</em>) – Number of seconds to wait between asking the worker processes to shut down
+<li><p><strong>logfile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – If set, recorded resource usage will be written to this file.</p></li>
+<li><p><strong>wait_time_before_forced_shutdown</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> (</em><em>default=10</em><em>)</em>) – Number of seconds to wait between asking the worker processes to shut down
 and terminating them forcefully if they failed to do so.</p></li>
 </ul>
 </dd>
@@ -677,33 +808,50 @@ and terminating them forcefully if they failed to do so.</p></li>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../advanced_guide/index.html" class="btn btn-neutral float-left" title="Advanced Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="../benchmark.html" class="btn btn-neutral float-right" title="Benchmark Results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../advanced_guide/index.html" class="btn btn-neutral float-left" title="Advanced Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018-2022, Pieter Gijsbers.</p>
-  </div>
+    <p>
+        &#169; Copyright 2018-2023, Pieter Gijsbers.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
