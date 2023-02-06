@@ -41,7 +41,7 @@ clustering_metrics = {'silhouette',
                       }
 
 all_metrics = {*classification_metrics, *regression_metrics, *clustering_metrics}
-reversed_scorers = {v: k for k, v in SCORERS.items()}
+reversed_scorers = {repr(v): k for k, v in SCORERS.items()}
 
 
 class MetricType(Enum):
@@ -63,7 +63,7 @@ class Metric:
                 "Scorer was not a valid scorer or could not be converted to one."
             )
         self.scorer = scorer
-        self.name = reversed_scorers[scorer]
+        self.name = reversed_scorers[repr(scorer)]
         self.requires_probabilities = (
             isinstance(scorer, _ProbaScorer) or self.name == "roc_auc"
         )
