@@ -85,3 +85,6 @@ abstract="The General Automated Machine learning Assistant (GAMA) is a modular A
 isbn="978-3-030-67670-4"
 }
 ```
+
+## License
+The contents of this repository is under an [Apache-2.0 License](https://github.com/openml-labs/gama/blob/master/LICENSE).
