@@ -1,96 +1,50 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>User Guide &mdash; gama 22.0.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>User Guide &mdash; gama 22.0.1.dev documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/Color-Transparent.svg"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Advanced Guide" href="../advanced_guide/index.html" />
     <link rel="prev" title="GAMA - General Automated Machine learning Assistant" href="../index.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../index.html" class="icon icon-home"> gama
           
-
-          
+          <a href="../index.html">
+            
+              <img src="../_static/Logo-on-white-text-on-transparent.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
               <div class="version">
-                22.0.0
+                22.0.1.dev
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">User Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
@@ -131,73 +85,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../citing.html">Papers</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">gama</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>User Guide</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">User Guide</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/user_guide/index.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="user-guide">
-<span id="user-guide-index"></span><h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this heading">¶</a></h1>
+<span id="user-guide-index"></span><h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this heading"></a></h1>
 <p>GAMA is an AutoML tool which aims to automatically find the right machine learning algorithms to create the best possible data for your model.
 This page gives an introduction to basic components and concepts of GAMA.</p>
 <p>GAMA performs a search over <em>machine learning pipelines</em>.
@@ -211,7 +124,7 @@ After the search, the best model found can be used to make predictions.
 Alternatively, GAMA can combine several models into an <em>ensemble</em> to take into account more than one model when making predictions.
 For ease of use, GAMA provides a <cite>fit</cite>, <cite>predict</cite> and <cite>predict_proba</cite> function akin to scikit-learn.</p>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h2>
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
 <p>For regular usage, you can install GAMA with pip:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">gama</span>
 </pre></div>
@@ -241,9 +154,9 @@ Changes to the code directly affect the installed GAMA package without requiring
 </section>
 <hr class="docutils" />
 <section id="examples">
-<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">¶</a></h2>
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this heading"></a></h2>
 <section id="classification">
-<h3>Classification<a class="headerlink" href="#classification" title="Permalink to this heading">¶</a></h3>
+<h3>Classification<a class="headerlink" href="#classification" title="Permalink to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_breast_cancer</span>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">log_loss</span><span class="p">,</span> <span class="n">accuracy_score</span>
@@ -274,7 +187,7 @@ Changes to the code directly affect the installed GAMA package without requiring
 <p>By default, GamaClassifier will optimize towards <cite>log loss</cite>.</p>
 </section>
 <section id="regression">
-<h3>Regression<a class="headerlink" href="#regression" title="Permalink to this heading">¶</a></h3>
+<h3>Regression<a class="headerlink" href="#regression" title="Permalink to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_diabetes</span>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
@@ -300,7 +213,7 @@ Changes to the code directly affect the installed GAMA package without requiring
 <p>By default, GamaRegressor will optimize towards <cite>mean squared error</cite>.</p>
 </section>
 <section id="using-files-directly">
-<h3>Using Files Directly<a class="headerlink" href="#using-files-directly" title="Permalink to this heading">¶</a></h3>
+<h3>Using Files Directly<a class="headerlink" href="#using-files-directly" title="Permalink to this heading"></a></h3>
 <p>You can load data directly from csv and <a class="reference external" href="https://www.cs.waikato.ac.nz/ml/weka/arff.html">ARFF</a> files.
 For ARFF files, GAMA can utilize extra information given, such as which features are categorical.
 For csv files GAMA will infer column types, but this might lead to mistakes.
@@ -337,11 +250,11 @@ for the latest news, see <a class="reference external" href="https://github.com/
 </section>
 <hr class="docutils" />
 <section id="simple-features">
-<h2>Simple Features<a class="headerlink" href="#simple-features" title="Permalink to this heading">¶</a></h2>
+<h2>Simple Features<a class="headerlink" href="#simple-features" title="Permalink to this heading"></a></h2>
 <p>This section features a couple of simple to use features that might be interesting for a wide audience.
 For more advanced features, see the <a class="reference internal" href="../advanced_guide/index.html#advanced-guide-index"><span class="std std-ref">Advanced Guide</span></a>.</p>
 <section id="command-line-interface">
-<h3>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this heading">¶</a></h3>
+<h3>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this heading"></a></h3>
 <p>GAMA may also be called from a terminal, but the tool currently supports only part of all Python functionality.
 In particular it can only load data from <cite>.csv</cite> or <cite>.arff</cite> files and AutoML pipeline configuration is not available.
 The tool will produce a single pickled scikit-learn model (by default named ‘gama_model.pkl’),
@@ -349,13 +262,13 @@ code export is also available.
 Please see <cite>gama -h</cite> for all options.</p>
 </section>
 <section id="code-export">
-<h3>Code Export<a class="headerlink" href="#code-export" title="Permalink to this heading">¶</a></h3>
+<h3>Code Export<a class="headerlink" href="#code-export" title="Permalink to this heading"></a></h3>
 <p>It is possible to have GAMA export the final model definition as a Python file, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">gama.Gama.export_script()</span></code>.</p>
 <hr class="docutils" />
 </section>
 </section>
 <section id="dashboard">
-<span id="dashboard-section"></span><h2>Dashboard<a class="headerlink" href="#dashboard" title="Permalink to this heading">¶</a></h2>
+<span id="dashboard-section"></span><h2>Dashboard<a class="headerlink" href="#dashboard" title="Permalink to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The GAMA Dashboard is not done.
@@ -366,7 +279,7 @@ The near future may see a reimplementation, see <a class="reference external" hr
 It is available when GAMA has been installed with its visualization optional dependencies (<cite>pip install gama[vis]</cite>).
 To start GAMA Dashboard call <cite>gamadash</cite> from the command line.</p>
 <section id="home-tab">
-<h3>Home tab<a class="headerlink" href="#home-tab" title="Permalink to this heading">¶</a></h3>
+<h3>Home tab<a class="headerlink" href="#home-tab" title="Permalink to this heading"></a></h3>
 <p>Starting GAMA Dashboard will open a new tab in your webbrowser which will show the GAMA Dashboard Home page:</p>
 <img alt="../_images/DashboardHome.png" src="../_images/DashboardHome.png" />
 <p>On the left you can configure GAMA, on the right you can select the dataset you want to perform AutoML on.
@@ -376,7 +289,7 @@ When you are satisfied with your chosen configuration, press the <cite>Go!</cite
 This will take you to the ‘Running’ tab.</p>
 </section>
 <section id="running-tab">
-<h3>Running tab<a class="headerlink" href="#running-tab" title="Permalink to this heading">¶</a></h3>
+<h3>Running tab<a class="headerlink" href="#running-tab" title="Permalink to this heading"></a></h3>
 <p>The running tab will look similar to this:</p>
 <img alt="../_images/DashboardRunning.png" src="../_images/DashboardRunning.png" />
 <p>You see four main components on this page:</p>
@@ -396,7 +309,7 @@ It is possible to sort and filter based on performance.</p></li>
 <p>Selecting a pipeline in the table or through the plot will update the other components.</p>
 </section>
 <section id="analysis-tab">
-<h3>Analysis tab<a class="headerlink" href="#analysis-tab" title="Permalink to this heading">¶</a></h3>
+<h3>Analysis tab<a class="headerlink" href="#analysis-tab" title="Permalink to this heading"></a></h3>
 <p>The analysis tab is also available if you did not start a new GAMA run.
 On this tab, you can visualize search results from logs.</p>
 <img alt="../_images/analysis_empty.png" src="../_images/analysis_empty.png" />
@@ -423,12 +336,12 @@ Below you will find a description of each preset.</p>
 </section>
 <hr class="docutils" />
 <section id="important-hyperparameters">
-<h2>Important Hyperparameters<a class="headerlink" href="#important-hyperparameters" title="Permalink to this heading">¶</a></h2>
+<h2>Important Hyperparameters<a class="headerlink" href="#important-hyperparameters" title="Permalink to this heading"></a></h2>
 <p>There are a lot of hyperparameters exposed in GAMA.
 In this section, you will find some hyperparameters you might want to set even if you otherwise use defaults.
 For more complete documentation on all hyperparameters, see <a class="reference internal" href="../api/index.html#api-doc"><span class="std std-ref">API documentation</span></a>.</p>
 <section id="optimization">
-<h3>Optimization<a class="headerlink" href="#optimization" title="Permalink to this heading">¶</a></h3>
+<h3>Optimization<a class="headerlink" href="#optimization" title="Permalink to this heading"></a></h3>
 <p>Perhaps the most important hyperparameters are the ones that specify what to optimize for, these are:</p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">scoring</span></code>: <code class="docutils literal notranslate"><span class="pre">string</span></code> (default=’neg_log_loss’ for classification and ‘mean_squared_error’ for regression)</dt><dd><p>Sets the metric to optimize for. Make sure to optimize towards the metric that reflects well what is important to you.
@@ -445,7 +358,7 @@ This setting currently has no effect for non-default search methods.</p>
 </div>
 </section>
 <section id="resources">
-<h3>Resources<a class="headerlink" href="#resources" title="Permalink to this heading">¶</a></h3>
+<h3>Resources<a class="headerlink" href="#resources" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">n_jobs</span></code>: <code class="docutils literal notranslate"><span class="pre">int,</span> <span class="pre">optional</span></code> (default=None)</dt><dd><p>Determines how many processes can be run in parallel during <cite>fit</cite>.
 This has the most influence over how many machine learning pipelines can be evaluated.
@@ -469,7 +382,7 @@ The default is set to five minutes. For large datasets, more time may be needed 
 </section>
 <hr class="docutils" />
 <section id="related-packages">
-<h2>Related Packages<a class="headerlink" href="#related-packages" title="Permalink to this heading">¶</a></h2>
+<h2>Related Packages<a class="headerlink" href="#related-packages" title="Permalink to this heading"></a></h2>
 <p>There are many different AutoML packages in Python and other languages.
 <a class="reference external" href="https://openml.github.io/automlbenchmark/automl_overview.html">This webpage</a> of the AutoML Benchmark project has an overview of commonly used open source AutoML frameworks.
 Another nice overview of papers and projects is gathered at <a class="reference external" href="https://github.com/hibayesian/awesome-automl-papers#projects">this Github repo</a>.</p>
@@ -479,7 +392,7 @@ Another nice overview of papers and projects is gathered at <a class="reference 
 If anything is missing that is important to add, please open an issue.</p>
 </div>
 <section id="tpot">
-<h3>TPOT<a class="headerlink" href="#tpot" title="Permalink to this heading">¶</a></h3>
+<h3>TPOT<a class="headerlink" href="#tpot" title="Permalink to this heading"></a></h3>
 <p><a class="reference external" href="https://epistasislab.github.io/tpot/">TPOT</a> is the package most closely related to GAMA.
 Like GAMA, it is an AutoML package that is based on genetic programming in Python.
 Below you will find a list of differences and similarities of the packages.</p>
@@ -495,7 +408,7 @@ with the ability to configure your AutoML pipeline (for instance using a differe
 an ensembling post-processing step, visualization of the optimization process and support for <a class="reference external" href="https://www.cs.waikato.ac.nz/ml/weka/arff.html">ARFF</a> files.</p>
 </section>
 <section id="auto-sklearn">
-<h3>auto-sklearn<a class="headerlink" href="#auto-sklearn" title="Permalink to this heading">¶</a></h3>
+<h3>auto-sklearn<a class="headerlink" href="#auto-sklearn" title="Permalink to this heading"></a></h3>
 <p><a class="reference external" href="https://automl.github.io/auto-sklearn/stable/">auto-sklearn</a> is another AutoML package in Python.
 It uses Bayesian optimization to search for good machine learning pipelines and also features automatic ensemble construction.
 Auto-sklearn won ChaLearn AutoML challenge 1 and 2.</p>
@@ -505,50 +418,33 @@ Auto-sklearn won ChaLearn AutoML challenge 1 and 2.</p>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../advanced_guide/index.html" class="btn btn-neutral float-right" title="Advanced Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../index.html" class="btn btn-neutral float-left" title="GAMA - General Automated Machine learning Assistant" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../advanced_guide/index.html" class="btn btn-neutral float-right" title="Advanced Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2018-2023, Pieter Gijsbers.
-
-    </p>
+    <p>&#169; Copyright 2018-2023, Pieter Gijsbers.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

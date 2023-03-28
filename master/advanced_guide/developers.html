@@ -1,94 +1,48 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Developers Notes &mdash; gama 22.0.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>Developers Notes &mdash; gama 22.0.1.dev documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/Color-Transparent.svg"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../index.html" class="icon icon-home"> gama
           
-
-          
+          <a href="../index.html">
+            
+              <img src="../_static/Logo-on-white-text-on-transparent.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
               <div class="version">
-                22.0.0
+                22.0.1.dev
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Advanced Guide</a></li>
@@ -99,75 +53,34 @@
 <li class="toctree-l1"><a class="reference internal" href="../citing.html">Papers</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">gama</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Developers Notes</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Developers Notes</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/advanced_guide/developers.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="developers-notes">
-<h1>Developers Notes<a class="headerlink" href="#developers-notes" title="Permalink to this heading">¶</a></h1>
+<h1>Developers Notes<a class="headerlink" href="#developers-notes" title="Permalink to this heading"></a></h1>
 <section id="adding-your-own-search-or-postprocessing">
-<span id="add-your-own"></span><h2>Adding Your Own Search or Postprocessing<a class="headerlink" href="#adding-your-own-search-or-postprocessing" title="Permalink to this heading">¶</a></h2>
+<span id="add-your-own"></span><h2>Adding Your Own Search or Postprocessing<a class="headerlink" href="#adding-your-own-search-or-postprocessing" title="Permalink to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This is not set in stone. As more AutoML pipeline steps are added by more people,
@@ -194,7 +107,7 @@ The hyperparameter values with which your search or postprocessing will be calle
 </ul>
 </div></blockquote>
 <section id="search">
-<h3>Search<a class="headerlink" href="#search" title="Permalink to this heading">¶</a></h3>
+<h3>Search<a class="headerlink" href="#search" title="Permalink to this heading"></a></h3>
 <p>To implement your own search procedure, create a class which derives from the base class:</p>
 <dl class="py class">
 <dt class="sig sig-object py">
@@ -250,7 +163,7 @@ Dynamic default values only considered if <cite>dynamic_defaults</cite> has been
 
 <p>You can use existing search implementations as a reference.</p>
 <section id="init">
-<h4><cite>__init__</cite><a class="headerlink" href="#init" title="Permalink to this heading">¶</a></h4>
+<h4><cite>__init__</cite><a class="headerlink" href="#init" title="Permalink to this heading"></a></h4>
 <p>To allow us to identify which hyperparameters are set by the user, and which are defaults, the default values for each hyperparameter in the <cite>__init__</cite> method should be <cite>None</cite>.</p>
 <p>In search methods, each evaluation of a machine learning pipeline is logged automatically.
 Default data recorded includes:</p>
@@ -267,7 +180,7 @@ which maps the name of a field to the method which extracts the information that
 In this case we are interested to know the parent of each evaluated pipeline, so we might later inspect a pipeline’s “lineage”.</p>
 </section>
 <section id="dynamic-defaults">
-<h4><cite>dynamic_defaults</cite><a class="headerlink" href="#dynamic-defaults" title="Permalink to this heading">¶</a></h4>
+<h4><cite>dynamic_defaults</cite><a class="headerlink" href="#dynamic-defaults" title="Permalink to this heading"></a></h4>
 <p>Hyperparameters such as population size might make for good candidates for dynamic defaults.
 However it is not obvious what the relationship should be.
 For this reason, we choose not to work with dynamic defaults in this search strategy.
@@ -275,7 +188,7 @@ Perhaps in the future, when we have adequate data to model the relationship we c
 <p>You can find an example usage of dynamic defaults in the Asynchronous Successive Halving Algorithm search.</p>
 </section>
 <section id="id1">
-<h4><cite>search</cite><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h4>
+<h4><cite>search</cite><a class="headerlink" href="#id1" title="Permalink to this heading"></a></h4>
 <p>This method should execute the search for a good machine learning pipeline.
 The search should always take into account the <cite>start_candidates</cite> in some form.
 This allows the search start point to be set by the user or a warm start step.
@@ -285,7 +198,7 @@ This allows GAMA to control when to shut down search (and continue with post pro
 </section>
 </section>
 <section id="postprocessing">
-<h3>PostProcessing<a class="headerlink" href="#postprocessing" title="Permalink to this heading">¶</a></h3>
+<h3>PostProcessing<a class="headerlink" href="#postprocessing" title="Permalink to this heading"></a></h3>
 <p>PostProcessing follows a similar pattern, where the class should allow initialization with its hyperparameters,
 an implementation of dynamic defaults (optional), and a <cite>post_process</cite> function.</p>
 <dl class="py class">
@@ -373,46 +286,30 @@ post-processing phases.</p>
 
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2018-2023, Pieter Gijsbers.
-
-    </p>
+    <p>&#169; Copyright 2018-2023, Pieter Gijsbers.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
