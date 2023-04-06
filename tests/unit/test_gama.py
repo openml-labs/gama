@@ -1,7 +1,5 @@
 import pytest
 
-import os
-import shutil
 
 import gama
 

@@ -1,10 +1,8 @@
 from sklearn.svm import LinearSVC
 from sklearn.datasets import load_iris
-from sklearn.pipeline import Pipeline
 from sklearn.ensemble import VotingClassifier
 
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
-from gama.genetic_programming.components.individual import Individual
 from gama.postprocessing.ensemble import (
     EnsemblePostProcessing,
     fit_and_weight,

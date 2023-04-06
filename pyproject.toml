@@ -76,3 +76,8 @@ filterwarnings = [
     # We will (probably) get rid of category_encoders in 22.1+
     "ignore:::category_encoders.target_encoder",
 ]
+
+[tool.ruff]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
