@@ -52,7 +52,6 @@ documentation = "https://openml-labs.github.io/gama/"
 
 [project.scripts]
 gama = "gama.utilities.cli:main"
-gamadash = "gama.dashboard.app:main"
 
 [tool.setuptools.dynamic]
 version = {attr = "gama.__version__.__version__"}

@@ -51,5 +51,3 @@ An overview the log levels:
  - `INFO`: General information about the optimization process.
  - `WARNING`: Serious errors that do not prohibit GAMA from running to completion (but results could be suboptimal).
  - `ERROR`: Errors which prevent GAMA from running to completion.
-
-As described in :ref:`dashboard-section` the files in the output directory can be used to generate visualizations about the optimization process.
