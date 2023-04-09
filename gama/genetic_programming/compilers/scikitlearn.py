@@ -32,8 +32,8 @@ def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
 
 def compile_individual(
     individual: Individual,
-    parameter_checks=None,
-    preprocessing_steps: Sequence[Tuple[str, TransformerMixin]] = None,
+    _parameter_checks=None,
+    preprocessing_steps: Optional[Sequence[Tuple[str, TransformerMixin]]] = None,
 ) -> Pipeline:
     steps = [
         (str(i), primitive_node_to_sklearn(primitive))

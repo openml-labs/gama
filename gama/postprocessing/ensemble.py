@@ -82,7 +82,7 @@ class EnsemblePostProcessing(BasePostProcessing):
         return self._ensemble
 
     def to_code(
-        self, preprocessing: Sequence[Tuple[str, TransformerMixin]] = None
+        self, preprocessing: Optional[Sequence[Tuple[str, TransformerMixin]]] = None
     ) -> str:
         if isinstance(self._ensemble, EnsembleClassifier):
             voter = "VotingClassifier"

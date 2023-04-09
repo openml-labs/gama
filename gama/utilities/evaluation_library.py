@@ -26,7 +26,7 @@ class Evaluation:
         estimators: Optional[List] = None,
         start_time: Optional[datetime.datetime] = None,
         duration: float = -1,
-        error: str = None,
+        error: Optional[str] = None,
         pid: Optional[int] = None,
     ):
         self.individual: Individual = individual

@@ -1,5 +1,5 @@
 import random
-from typing import List
+from typing import List, Optional
 
 from gama.genetic_programming.components import (
     Primitive,
@@ -17,7 +17,7 @@ def random_terminals_for_primitive(
 
 
 def random_primitive_node(
-    output_type: str, primitive_set: dict, exclude: Primitive = None
+    output_type: str, primitive_set: dict, exclude: Optional[Primitive] = None
 ) -> PrimitiveNode:
     """Create a PrimitiveNode with specified output_type and random terminals."""
     primitive = random.choice([p for p in primitive_set[output_type] if p != exclude])

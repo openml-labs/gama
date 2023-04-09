@@ -1,5 +1,5 @@
 import copy
-from typing import Tuple, List, Set
+from typing import Tuple, List, Set, Optional
 
 from sklearn.base import TransformerMixin
 from gama.genetic_programming.components import Individual
@@ -10,7 +10,7 @@ def transformers_to_str(transformers: List[TransformerMixin]) -> List[str]:
     copies = list(map(copy.copy, transformers))
     for transformer in copies:
         if hasattr(transformer, "mapping"):
-            transformer.mapping = None  # type: ignore  # ignore no attr 'mapping'
+            transformer.mapping = None
     return list(map(str, copies))
 
 
@@ -48,14 +48,15 @@ def imports_and_steps_for_individual(
         for terminal in primitive_node._terminals:
             if callable(terminal.value) and hasattr(terminal.value, "__name__"):
                 imports.append(
-                    f"from {terminal.value.__module__} import {terminal.value.__name__}"  # type: ignore # noqa: E501
+                    f"from {terminal.value.__module__} import {terminal.value.__name__}"
                 )
 
     return set(imports), steps
 
 
 def individual_to_python(
-    individual: Individual, prepend_steps: List[Tuple[str, TransformerMixin]] = None
+    individual: Individual,
+    prepend_steps: Optional[List[Tuple[str, TransformerMixin]]] = None,
 ) -> str:
     """Generate code for the machine learning pipeline represented by `individual`."""
     imports, steps = imports_and_steps_for_individual(individual)
