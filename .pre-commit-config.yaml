@@ -1,4 +1,9 @@
 repos:
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.261
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
   - repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:
@@ -8,9 +13,4 @@ repos:
     rev: v1.2.0
     hooks:
       - id: mypy
-        files: gama/.*
-  - repo: https://github.com/pycqa/flake8
-    rev: 5.0.3
-    hooks:
-      - id: flake8
         files: gama/.*
