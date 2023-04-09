@@ -219,7 +219,6 @@ class AsyncEvaluator:
             self._log_memory_usage()
 
             try:
-
                 completed_future = self._output.get(block=False)
                 self.job_queue_size -= 1
             except queue.Empty:

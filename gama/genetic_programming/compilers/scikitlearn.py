@@ -125,7 +125,7 @@ def evaluate_pipeline(
             splitter = (
                 splitter if isinstance(splitter, list) else splitter.split(x, y_train)
             )
-            for (estimator, (_, test)) in zip(estimators, splitter):
+            for estimator, (_, test) in zip(estimators, splitter):
                 if any([m.requires_probabilities for m in metrics]):
                     fold_pred = estimator.predict_proba(x.iloc[test, :])
                 else:
