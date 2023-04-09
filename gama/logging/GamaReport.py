@@ -89,7 +89,9 @@ class GamaReport:
                 return pd.Series([float(value) for value in tuple_str[1:-1].split(",")])
 
             df[self.metrics] = df.score.apply(tuple_to_metrics)
-            df.start = pd.to_datetime(df.start)  # needed?
+            df.start = pd.to_datetime(
+                df.start, format="%Y-%m-%d %H:%M:%S,%f"
+            )  # needed?
             df.duration = pd.to_timedelta(df.duration, unit="s")
 
             new_individuals = {
