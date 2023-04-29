@@ -594,7 +594,7 @@ class Gama(ABC):
                 self._time_manager.total_time_remaining,
                 best_individuals,
             )
-        if not self._store == "all":
+        if self._store != "all":
             to_clean = dict(nothing="all", logs="evaluations", models="logs")
             self.cleanup(to_clean[self._store])
         return self
@@ -604,7 +604,7 @@ class Gama(ABC):
     ) -> None:
         """Invoke the search algorithm, populate `final_pop`."""
         if warm_start:
-            if not all([isinstance(i, Individual) for i in warm_start]):
+            if not all(isinstance(i, Individual) for i in warm_start):
                 raise TypeError("`warm_start` must be a list of Individual.")
             pop = warm_start
         elif warm_start is None and len(self._final_pop) > 0:

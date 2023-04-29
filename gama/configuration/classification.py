@@ -1,3 +1,4 @@
+# sourcery skip: de-morgan
 import numpy as np
 
 from sklearn.naive_bayes import GaussianNB, BernoulliNB, MultinomialNB
@@ -108,7 +109,7 @@ clf_config = {
         "linkage": ["ward", "complete", "average"],
         "affinity": ["euclidean", "l1", "l2", "manhattan", "cosine", "precomputed"],
         "param_check": [
-            lambda params: (not params["linkage"] == "ward")
+            lambda params: params["linkage"] != "ward"
             or params["affinity"] == "euclidean"
         ],
     },
