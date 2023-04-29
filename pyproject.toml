@@ -15,7 +15,7 @@ classifiers = [
 ]
 
 dynamic = ["version"]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [    
   "numpy>=1.20.0",
   "scipy>=1.0.0",
@@ -24,7 +24,7 @@ dependencies = [
   "stopit>=1.1.1",
   "liac-arff>=2.2.2",
   "category-encoders>=1.2.8",
-  "black==19.10b0",
+  "black==23.3.0",
   "psutil",
 ]
 
