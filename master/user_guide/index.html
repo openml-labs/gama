@@ -59,12 +59,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#code-export">Code Export</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#dashboard">Dashboard</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#home-tab">Home tab</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#running-tab">Running tab</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#analysis-tab">Analysis tab</a></li>
-</ul>
-</li>
 <li class="toctree-l2"><a class="reference internal" href="#important-hyperparameters">Important Hyperparameters</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#optimization">Optimization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#resources">Resources</a></li>
@@ -264,74 +258,6 @@ Please see <cite>gama -h</cite> for all options.</p>
 <section id="code-export">
 <h3>Code Export<a class="headerlink" href="#code-export" title="Permalink to this heading"></a></h3>
 <p>It is possible to have GAMA export the final model definition as a Python file, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">gama.Gama.export_script()</span></code>.</p>
-<hr class="docutils" />
-</section>
-</section>
-<section id="dashboard">
-<span id="dashboard-section"></span><h2>Dashboard<a class="headerlink" href="#dashboard" title="Permalink to this heading"></a></h2>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The GAMA Dashboard is not done.
-However, it is functional and released to get some early feedback on what users would like to see included.
-The near future may see a reimplementation, see <a class="reference external" href="https://github.com/openml-labs/gama/issues/97">#97</a>.</p>
-</div>
-<p>GAMA Dashboard is a graphical user interface to start and monitor the AutoML search.
-It is available when GAMA has been installed with its visualization optional dependencies (<cite>pip install gama[vis]</cite>).
-To start GAMA Dashboard call <cite>gamadash</cite> from the command line.</p>
-<section id="home-tab">
-<h3>Home tab<a class="headerlink" href="#home-tab" title="Permalink to this heading"></a></h3>
-<p>Starting GAMA Dashboard will open a new tab in your webbrowser which will show the GAMA Dashboard Home page:</p>
-<img alt="../_images/DashboardHome.png" src="../_images/DashboardHome.png" />
-<p>On the left you can configure GAMA, on the right you can select the dataset you want to perform AutoML on.
-To provide a dataset, specify the path to the csv or ARFF-file which contains your data.
-Once the dataset has been set, the <cite>Go!</cite>-button on the bottom left will be enabled.
-When you are satisfied with your chosen configuration, press the <cite>Go!</cite>-button to start GAMA.
-This will take you to the ‘Running’ tab.</p>
-</section>
-<section id="running-tab">
-<h3>Running tab<a class="headerlink" href="#running-tab" title="Permalink to this heading"></a></h3>
-<p>The running tab will look similar to this:</p>
-<img alt="../_images/DashboardRunning.png" src="../_images/DashboardRunning.png" />
-<p>You see four main components on this page:</p>
-<blockquote>
-<div><ol class="arabic simple">
-<li><p>A visualization of search results. In this scatter plot, each scored pipeline is represented by a marker.
-The larger markers represent the most recent evaluations. Their location is determined by the pipeline’s
-length (on the y-axis) and score (on the x-axis). You can hover over the markers to get precise scores,
-and click on the pipeline to select it. A selected pipeline is represented with a large red marker.</p></li>
-<li><p>Output of the search command. This field provides a textual progress report on GAMA’s AutoML process.</p></li>
-<li><p>Full specification of the selected pipeline. This view of the selected pipeline specifies hyperparametersettings
-for each step in the pipeline.</p></li>
-<li><p>A table of each evaluated pipeline. Similar to the plot (1), here you find all pipelines evaluated during search.
-It is possible to sort and filter based on performance.</p></li>
-</ol>
-</div></blockquote>
-<p>Selecting a pipeline in the table or through the plot will update the other components.</p>
-</section>
-<section id="analysis-tab">
-<h3>Analysis tab<a class="headerlink" href="#analysis-tab" title="Permalink to this heading"></a></h3>
-<p>The analysis tab is also available if you did not start a new GAMA run.
-On this tab, you can visualize search results from logs.</p>
-<img alt="../_images/analysis_empty.png" src="../_images/analysis_empty.png" />
-<p>Clicking ‘Select or drop log(s)’ in the top-right corner opens a file explorer which lets you select file(s) to load.
-Select both the ‘gama.log’ and ‘evaluation.log’ files from your directory together.
-For example the the logs found <a class="reference external" href="https://github.com/openml-labs/gama/blob/master/tests/data/AsyncEA">here</a>.
-After loading the files, you can toggle its visualization by clicking the checkbox that appears next to the file name.
-The first visualization you will see is the best obtained score as a function of the number of evaluated pipelines:</p>
-<img alt="../_images/analysis_load.png" src="../_images/analysis_load.png" />
-<p>In the top right you will find a dropdown ‘Visualization Presets’ which allow you to see other visualizations.
-Below you will find a description of each preset.</p>
-<p>Visualization presets include:</p>
-<ul class="simple">
-<li><p><strong>#Pipeline by learner</strong> A bar chart of the number of times each estimator is used as the final step in a machine learning pipeline.</p></li>
-<li><p><strong>#Pipeline by size</strong> A bar chart of the distribution of the number of components per evaluated pipeline.</p></li>
-<li><p><strong>Best score over time</strong> The best score obtained by any individual pipeline at a given point in time.</p></li>
-<li><p><strong>Best score over iterations</strong> The best score obtained by any individual pipeline at a given iteration.</p></li>
-<li><p><strong>Size vs Metric</strong> A scatter plot where each pipeline is represented by a marker, gives an impression of the distribution of scores for evaluated pipelines of different lengths.</p></li>
-<li><p><strong>Evaluation Times</strong> A bar chart plotting the distribution of time required to evaluate pipelines during optimization.</p></li>
-<li><p><strong>Evaluations by Rung</strong> (ASHA only) A bar chart plotting the number of evaluations at each ASHA rung.</p></li>
-<li><p><strong>Time by Rung</strong> (ASHA only) A bar chart plotting the combined time used of all evaluations for each ASHA rung.</p></li>
-</ul>
 </section>
 </section>
 <hr class="docutils" />

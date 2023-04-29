@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 23.0.0
+--------------
+
+We (temporarily) removed the Dashboard, it had not been maintained for a while
+
 Version 22.0.0
 --------------
 

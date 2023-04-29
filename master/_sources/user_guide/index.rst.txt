@@ -32,11 +32,6 @@ For ease of use, GAMA provides a `fit`, `predict` and `predict_proba` function a
 
 -----
 
-.. include:: dashboard.rst
-    :start-line: 1
-
------
-
 .. include:: hyperparameters.rst
     :start-line: 1
 
