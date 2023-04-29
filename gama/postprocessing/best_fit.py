@@ -27,7 +27,7 @@ class BestFitPostProcessing(BasePostProcessing):
         return self._selected_individual.pipeline.fit(x, y)
 
     def to_code(
-        self, preprocessing: Sequence[Tuple[str, TransformerMixin]] = None
+        self, preprocessing: Optional[Sequence[Tuple[str, TransformerMixin]]] = None
     ) -> str:
         if self._selected_individual is None:
             raise RuntimeError("`to_code` can only be called after `post_process`.")

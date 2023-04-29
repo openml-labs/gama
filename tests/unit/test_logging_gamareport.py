@@ -1,4 +1,3 @@
-from multiprocessing.sharedctypes import Value
 import pytest
 from gama.logging.GamaReport import GamaReport
 

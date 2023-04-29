@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import List, Union, Dict, Any, Tuple, TYPE_CHECKING, Sequence
+from typing import List, Union, Dict, Any, Tuple, TYPE_CHECKING, Sequence, Optional
 
 import pandas as pd
 from sklearn.base import TransformerMixin
@@ -87,7 +87,7 @@ class BasePostProcessing(ABC):
         raise NotImplementedError("Method must be implemented by child class.")
 
     def to_code(
-        self, preprocessing: Sequence[Tuple[str, TransformerMixin]] = None
+        self, preprocessing: Optional[Sequence[Tuple[str, TransformerMixin]]] = None
     ) -> str:
         """Generate Python code to reconstruct a pipeline that constructs the model.
 

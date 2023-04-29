@@ -8,6 +8,7 @@ from gama.genetic_programming.nsga2 import (
 
 def _tuples_to_NSGAMeta(tuples: List[Tuple]) -> List[NSGAMeta]:
     """Converts a list of tuples to NSGAMeta objects."""
+
     # Can't declare it directly in a loop as it does not create a new scope.
     def fetch_value(i):
         return lambda x: x[i]

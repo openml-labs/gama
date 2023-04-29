@@ -64,7 +64,9 @@ def mut_replace_primitive(individual: Individual, primitive_set: dict) -> None:
 
 
 def mut_shrink(
-    individual: Individual, primitive_set: dict = None, shrink_by: Optional[int] = None
+    individual: Individual,
+    _primitive_set: Optional[dict] = None,
+    shrink_by: Optional[int] = None,
 ) -> None:
     """Mutates an Individual in-place by removing any number of primitive nodes.
 
@@ -74,7 +76,7 @@ def mut_shrink(
     ----------
     individual: Individual
         Individual to mutate in-place.
-    primitive_set: dict, optional
+    _primitive_set: dict, optional
         Not used. Present to create a matching function signature with other mutations.
     shrink_by: int, optional (default=None)
         Number of primitives to remove.

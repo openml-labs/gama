@@ -82,7 +82,7 @@ class EnsemblePostProcessing(BasePostProcessing):
         return self._ensemble
 
     def to_code(
-        self, preprocessing: Sequence[Tuple[str, TransformerMixin]] = None
+        self, preprocessing: Optional[Sequence[Tuple[str, TransformerMixin]]] = None
     ) -> str:
         if isinstance(self._ensemble, EnsembleClassifier):
             voter = "VotingClassifier"
@@ -352,7 +352,7 @@ class Ensemble(object):
 
     def _get_weighted_mean_predictions(self, X, predict_method="predict"):
         weighted_predictions = []
-        for (model, weight) in self._fit_models:
+        for model, weight in self._fit_models:
             target_prediction = getattr(model, predict_method)(X)
             if self._prediction_transformation:
                 target_prediction = self._prediction_transformation(target_prediction)

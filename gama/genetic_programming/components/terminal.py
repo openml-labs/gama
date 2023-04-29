@@ -29,6 +29,6 @@ def format_hyperparameter_value(value: object) -> str:
     if isinstance(value, str):
         return f"'{value}'"  # Quoted
     elif callable(value) and hasattr(value, "__name__"):
-        return f"{value.__name__}"  # type: ignore
+        return f"{value.__name__}"
     else:
         return str(value)

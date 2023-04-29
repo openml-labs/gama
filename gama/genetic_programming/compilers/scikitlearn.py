@@ -32,8 +32,8 @@ def primitive_node_to_sklearn(primitive_node: PrimitiveNode) -> object:
 
 def compile_individual(
     individual: Individual,
-    parameter_checks=None,
-    preprocessing_steps: Sequence[Tuple[str, TransformerMixin]] = None,
+    _parameter_checks=None,
+    preprocessing_steps: Optional[Sequence[Tuple[str, TransformerMixin]]] = None,
 ) -> Pipeline:
     steps = [
         (str(i), primitive_node_to_sklearn(primitive))
@@ -125,7 +125,7 @@ def evaluate_pipeline(
             splitter = (
                 splitter if isinstance(splitter, list) else splitter.split(x, y_train)
             )
-            for (estimator, (_, test)) in zip(estimators, splitter):
+            for estimator, (_, test) in zip(estimators, splitter):
                 if any([m.requires_probabilities for m in metrics]):
                     fold_pred = estimator.predict_proba(x.iloc[test, :])
                 else:

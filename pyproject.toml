@@ -31,26 +31,13 @@ dependencies = [
 [project.optional-dependencies]
 doc = ["sphinx", "sphinx_rtd_theme"]
 test = [
-    "pre-commit==2.20.0",
+    "pre-commit==3.2.2",
     "pytest>=4.4.0",
     "pytest-mock",
     "pytest-xdist",
     "codecov",
     "pytest-cov",
 ]
-vis = [
-    "dash==1.3",
-    "dash-daq==0.1.0",
-    "dash-bootstrap-components",
-    "visdcc",
-]
-
-
-[tool.setuptools.dynamic]
-version = {attr = "gama.__version__.__version__"}
-
-[tool.setuptools.packages.find]
-include = ["gama*"]  # package names should match these glob patterns (["*"] by default)
 
 [urls]
 github = "https://github.com/openml-labs/GAMA"
@@ -59,8 +46,12 @@ documentation = "https://openml-labs.github.io/gama/"
 
 [project.scripts]
 gama = "gama.utilities.cli:main"
-gamadash = "gama.dashboard.app:main"
 
+[tool.setuptools.dynamic]
+version = {attr = "gama.__version__.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["gama*"]  # package names should match these glob patterns (["*"] by default)
 
 [tool.pytest.ini_options]
 filterwarnings = [
@@ -78,3 +69,32 @@ filterwarnings = [
     # We will (probably) get rid of category_encoders in 22.1+
     "ignore:::category_encoders.target_encoder",
 ]
+
+[tool.ruff]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.mypy]
+# See # https://mypy.readthedocs.io/en/latest/config_file.html
+python_version=3.10
+
+show_column_numbers = true
+
+warn_redundant_casts = true
+warn_unused_ignores = true
+# warn_return_any=True
+# warn_unreachable=True
+
+#disallow_incomplete_defs=True
+#disallow_untyped_defs=True
+
+# Reports any config lines that are not recognized
+warn_unused_configs = true
+
+# Probably want to turn back on later:
+#no_implicit_optional
+ignore_missing_imports = true
+
+# Following configuration are default, but made explicit:
+warn_no_return = true

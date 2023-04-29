@@ -5,7 +5,6 @@ import numpy as np
 from gama.utilities.preprocessing import select_categorical_columns
 
 import pandas as pd
-import pytest
 
 from gama.data_formatting import format_x_y, format_y, series_looks_categorical
 

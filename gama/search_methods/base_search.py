@@ -15,7 +15,7 @@ class BaseSearch(ABC):
 
     def __init__(self):
         # hyperparameters can be used to safe/process search hyperparameters
-        self._hyperparameters: Dict[str, Tuple[Any, Any]] = dict()
+        self._hyperparameters: Dict[str, Tuple[Any, Any]] = {}
         self.output: List[Individual] = []
         self.logger = EvaluationLogger
 

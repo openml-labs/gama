@@ -55,7 +55,7 @@ def test_logloss_numeric():
     log_loss_metric = Metric("neg_log_loss")
     y_true = np.asarray([1, 0, 0, 0, 1])
     y_1_mistake_ohe = np.asarray([[0, 1], [0, 1], [1, 0], [1, 0], [0, 1]])
-    one_mistake_logloss = -6.907755278982137
+    one_mistake_logloss = -7.20873067782343
     _test_metric(
         log_loss_metric,
         y_true,

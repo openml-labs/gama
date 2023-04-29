@@ -4,4 +4,3 @@ codecov:
 
 ignore:
   - "gama/utilities/cli.py"
-  - "gama/dashboard/**/*"

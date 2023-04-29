@@ -5,7 +5,7 @@ from gama.genetic_programming.compilers.scikitlearn import (
     compile_individual,
     evaluate_pipeline,
 )
-from gama.utilities.metrics import Metric, scoring_to_metric
+from gama.utilities.metrics import scoring_to_metric
 
 
 def test_evaluate_individual(SS_BNB):

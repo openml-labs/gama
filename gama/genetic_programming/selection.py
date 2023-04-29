@@ -20,7 +20,7 @@ def create_from_population(
     offspring = []
     metrics = [lambda ind: ind.fitness.values[0], lambda ind: ind.fitness.values[1]]
     parent_pairs = nsga2_select(pop, n, metrics)
-    for (ind1, ind2) in parent_pairs:
+    for ind1, ind2 in parent_pairs:
         if random.random() < cxpb and len(_valid_crossover_functions(ind1, ind2)) > 0:
             ind1 = operator_shell.mate(ind1, ind2)
         else:
