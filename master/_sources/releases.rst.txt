@@ -4,7 +4,12 @@ Release Notes
 Version 23.0.0
 --------------
 
-We (temporarily) removed the Dashboard, it had not been maintained for a while
+We (temporarily) removed the Dashboard, it had not been maintained and is best be rebuilt from the ground up.
+
+Maintenance:
+ - Bump minimum Python version to Python 3.9, in line with `NEP 29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_.
+ - Bump several library dependencies.
+ - Switch from flake8 to ruff.
 
 Version 22.0.0
 --------------
@@ -13,7 +18,6 @@ Maintenance:
  - Adopt `NEP 29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_:
     - Drop support for Python 3.6 and 3.7
     - Add support for Python 3.10
-    -
  - Use pyproject.toml instead of setup.py
  - Transition to Github CI, including:
     - pytest on pull request
