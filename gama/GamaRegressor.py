@@ -7,14 +7,16 @@ from gama.configuration.regression import reg_config
 class GamaRegressor(Gama):
     """Gama with adaptations for regression."""
 
-    def __init__(self, config=None, scoring="neg_mean_squared_error", *args, **kwargs):
+    def __init__(
+        self, search_space=None, scoring="neg_mean_squared_error", *args, **kwargs
+    ):
         """ """
         # Empty docstring overwrites base __init__ doc string.
         # Prevents duplication of the __init__ doc string on the API page.
 
-        if not config:
-            config = reg_config
-        super().__init__(*args, **kwargs, config=config, scoring=scoring)
+        if not search_space:
+            search_space = reg_config
+        super().__init__(*args, search_space=search_space, scoring=scoring, **kwargs)
 
     def _predict(self, x: pd.DataFrame):
         """Predict the target for input X.
