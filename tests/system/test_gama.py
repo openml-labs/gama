@@ -8,7 +8,7 @@ from gama import GamaClassifier
 
 
 def _gama_on_digits(gama):
-    X, y = load_digits(return_X_y=True)
+    X, y = load_digits(return_X_y=True, as_frame=True)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, stratify=y, random_state=0
     )
