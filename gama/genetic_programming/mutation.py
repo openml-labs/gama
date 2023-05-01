@@ -26,7 +26,7 @@ def mut_replace_terminal(individual: Individual, primitive_set: dict) -> None:
         return len(primitive_set[terminal.identifier]) > 1
 
     terminals = list(filter(terminal_replaceable, enumerate(individual.terminals)))
-    if len(terminals) == 0:
+    if not terminals:
         raise ValueError("Individual has no terminals suitable for mutation.")
 
     terminal_index, old = random.choice(terminals)
@@ -51,7 +51,7 @@ def mut_replace_primitive(individual: Individual, primitive_set: dict) -> None:
         return len(primitive_set[primitive._primitive.output]) > 1
 
     primitives = list(filter(primitive_replaceable, enumerate(individual.primitives)))
-    if len(primitives) == 0:
+    if not primitives:
         raise ValueError("Individual has no primitives suitable for replacement.")
 
     primitive_index, old_primitive_node = random.choice(primitives)

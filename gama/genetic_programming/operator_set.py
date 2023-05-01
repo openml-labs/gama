@@ -43,12 +43,9 @@ class OperatorSet:
     def wait_next(self, async_evaluator):
         """Wrapper for wait_next() to forward evaluation and log exceptions."""
         future = async_evaluator.wait_next()
-        if future.result is not None:
-            evaluation = future.result
-            if self._evaluate_callback is not None:
-                self._evaluate_callback(evaluation)
-
-        elif future.exception is not None:
+        if future.result and self._evaluate_callback:
+            self._evaluate_callback(future.result)
+        elif future.exception:
             log.warning(f"Error raised during evaluation: {str(future.exception)}.")
         return future
 
@@ -58,10 +55,9 @@ class OperatorSet:
             individual = operator(*args, **kwargs)
             if str(individual.main_node) not in self._completed_evaluations:
                 return individual
-        else:
-            log.debug(f"50 iterations of {operator.__name__} did not yield new ind.")
-            # For progress on solving this, see #11
-            return individual
+        log.debug(f"50 iterations of {operator.__name__} did not yield new ind.")
+        # For progress on solving this, see #11
+        return individual
 
     def mate(self, ind1: Individual, ind2: Individual, *args, **kwargs) -> Individual:
         def mate_with_log():
@@ -83,11 +79,7 @@ class OperatorSet:
 
     def individual(self, *args, **kwargs) -> Individual:
         expression = self._create_new(*args, **kwargs)
-        if self._safe_compile is not None:
-            compile_ = self._safe_compile
-        else:
-            compile_ = self._compile
-
+        compile_ = self._safe_compile or self._compile
         ind = Individual(expression, to_pipeline=compile_)
         ind.meta["origin"] = "new"
         return ind

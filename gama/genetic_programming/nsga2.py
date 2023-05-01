@@ -23,10 +23,10 @@ class NSGAMeta:
         self.domination_counter = 0
 
     def dominates(self, other: "NSGAMeta") -> bool:
-        for self_val, other_val in zip(self.values, other.values):
-            if self_val <= other_val:  # or maybe <?
-                return False
-        return True
+        return all(
+            self_val > other_val
+            for self_val, other_val in zip(self.values, other.values)
+        )
 
     def crowd_compare(self, other: "NSGAMeta") -> int:
         """Favor higher rank, if equal, favor less crowded."""
