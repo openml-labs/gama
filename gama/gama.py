@@ -67,7 +67,6 @@ from gama.utilities.metrics import Metric
 logging.getLogger("stopit").setLevel(logging.ERROR)
 log = logging.getLogger(__name__)
 
-
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
                           did not terminate successfully."""
@@ -488,7 +487,7 @@ class Gama(ABC):
         self,
         x: Union[pd.DataFrame, np.ndarray],
         y: Union[pd.DataFrame, pd.Series, np.ndarray],
-        warm_start: Optional[List[Individual]] = None,
+        warm_start: Optional[Union[List[Individual], List[str]]] = None,
     ) -> "Gama":
         """Find and fit a model to predict target y from X.
 
@@ -506,7 +505,7 @@ class Gama(ABC):
         y: pandas.DataFrame, pandas.Series or numpy.ndarray, shape = [n_samples,]
             Target values.
             If a DataFrame is provided, assumes the first column contains target values.
-        warm_start: List[Individual], optional (default=None)
+        warm_start: List[Individual] | List[str], optional (default=None)
             A list of individual to start the search  procedure with.
             If None is given, random start candidates are generated.
         """
@@ -566,13 +565,24 @@ class Gama(ABC):
             (1 - self._post_processing.time_fraction)
             * self._time_manager.total_time_remaining
         )
+        if warm_start:
+            warm_start = [
+                Individual.from_string(
+                    ind, self._pset, self._operator_set._safe_compile
+                )
+                if isinstance(ind, str)
+                else ind
+                for ind in warm_start
+            ]
 
         with self._time_manager.start_activity(
             "search",
             time_limit=fit_time,
             activity_meta=[self._search_method.__class__.__name__],
         ):
-            self._search_phase(warm_start, timeout=fit_time)
+            self._search_phase(
+                cast(Optional[List[Individual]], warm_start), timeout=fit_time
+            )
 
         with self._time_manager.start_activity(
             "postprocess",
