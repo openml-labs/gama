@@ -223,15 +223,15 @@ class Ensemble(object):
         raise NotImplementedError("Must be implemented by child class.")
 
     def _total_fit_weights(self):
-        return sum([weight for (model, weight) in self._fit_models])
+        return sum(weight for (model, weight) in self._fit_models)
 
     def _total_model_weights(self):
-        return sum([weight for (model, weight) in self._models.values()])
+        return sum(weight for (model, weight) in self._models.values())
 
     def _averaged_validation_predictions(self):
         """Weighted average of predictions of current models on the hillclimb set."""
         weighted_sum_predictions = sum(
-            [model.predictions * weight for (model, weight) in self._models.values()]
+            model.predictions * weight for (model, weight) in self._models.values()
         )
         return weighted_sum_predictions / self._total_model_weights()
 
@@ -243,7 +243,7 @@ class Ensemble(object):
         n: int
             Number of models to include.
         """
-        if not n > 0:
+        if n <= 0:
             raise ValueError("Ensemble must include at least one model.")
         if self._models:
             log.warning(
@@ -257,9 +257,7 @@ class Ensemble(object):
             self._add_model(model)
 
         log.debug(
-            "Initial ensemble created with score {}".format(
-                self._ensemble_validation_score()
-            )
+            f"Initial ensemble created with score {self._ensemble_validation_score()}"
         )
 
     def _add_model(self, model, add_weight=1):
@@ -277,7 +275,7 @@ class Ensemble(object):
         n: int
             Number of models to add to current ensemble.
         """
-        if not n > 0:
+        if n <= 0:
             raise ValueError("n must be greater than 0.")
 
         for _ in range(n):
@@ -299,9 +297,8 @@ class Ensemble(object):
             self._add_model(best_addition)
             self._internal_score = best_addition_score
             log.info(
-                "Ensemble size {} , best score: {}".format(
-                    self._total_model_weights(), best_addition_score
-                )
+                f"Ensemble size {self._total_model_weights()}, "
+                f"best score: {best_addition_score}"
             )
 
     def fit(self, x, y, timeout=1e6):
@@ -441,12 +438,11 @@ class EnsembleClassifier(Ensemble):
 
         if self._metric.requires_probabilities:
             return self._metric.maximizable_score(self._y, prediction_to_validate)
-        else:
-            # argmax returns (N, 1) matrix, need to squeeze it to (N,) for scoring.
-            class_predictions = self._one_hot_encoder.inverse_transform(
-                prediction_to_validate.toarray()
-            )
-            return self._metric.maximizable_score(self._y, class_predictions)
+        # argmax returns (N, 1) matrix, need to squeeze it to (N,) for scoring.
+        class_predictions = self._one_hot_encoder.inverse_transform(
+            prediction_to_validate.toarray()
+        )
+        return self._metric.maximizable_score(self._y, class_predictions)
 
     def predict(self, X):
         if self._metric.requires_probabilities:
@@ -471,12 +467,11 @@ class EnsembleClassifier(Ensemble):
     def predict_proba(self, X):
         if self._metric.requires_probabilities:
             return self._get_weighted_mean_predictions(X, "predict_proba")
-        else:
-            log.warning(
-                "Ensemble was tuned with a class label predictions metric, "
-                "not probabilities. Using weighted mean of class predictions."
-            )
-            return self._get_weighted_mean_predictions(X, "predict").toarray()
+        log.warning(
+            "Ensemble was tuned with a class label predictions metric, "
+            "not probabilities. Using weighted mean of class predictions."
+        )
+        return self._get_weighted_mean_predictions(X, "predict").toarray()
 
 
 class EnsembleRegressor(Ensemble):
@@ -524,7 +519,7 @@ def build_fit_ensemble(
             ensemble.expand_ensemble(remainder)
 
         build_time = time.time() - start_build
-        timeout = timeout - build_time
+        timeout -= build_time
         log.info(f"Ensemble build took {build_time}s. Fit with timeout {timeout}s.")
         ensemble.fit(x, y, timeout)
     except Exception as e:

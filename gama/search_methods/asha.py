@@ -161,10 +161,9 @@ def asha(
                     promoted_individuals[rung].append(to_promote)
                     return to_promote[1], rung + 1
 
-        if start_candidates is not None and len(start_candidates) > 0:
+        if start_candidates:
             return start_candidates.pop(), minimum_early_stopping_rate
-        else:
-            return operations.individual(), minimum_early_stopping_rate
+        return operations.individual(), minimum_early_stopping_rate
 
     try:
         with AsyncEvaluator() as async_:

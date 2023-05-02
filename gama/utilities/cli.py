@@ -153,10 +153,7 @@ def main(command: Union[str, List[str]] = ""):
         **kwargs,
     )
     if args.mode is None:
-        if is_categorical_dtype(y.dtype):
-            args.mode = "classification"
-        else:
-            args.mode = "regression"
+        args.mode = "classification" if is_categorical_dtype(y.dtype) else "regression"
         print(f"Detected a {args.mode} problem.")
 
     print("CLI: Initializing GAMA")

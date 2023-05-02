@@ -44,7 +44,7 @@ class Evaluation:
 
     def to_disk(self, directory: str) -> None:
         """Save Evaluation in the provided directory."""
-        self._cache_file = os.path.join(directory, str(self.individual._id) + ".pkl")
+        self._cache_file = os.path.join(directory, f"{str(self.individual._id)}.pkl")
         with open(self._cache_file, "wb") as fh:
             pickle.dump((self._estimators, self._predictions), fh)
         self._estimators, self._predictions = [], None
@@ -58,19 +58,17 @@ class Evaluation:
     def estimators(self) -> List[BaseEstimator]:
         if self._estimators or not self._cache_file:
             return self._estimators
-        else:
-            with open(self._cache_file, "rb") as fh:
-                estimators, _ = pickle.load(fh)
-                return estimators
+        with open(self._cache_file, "rb") as fh:
+            estimators, _ = pickle.load(fh)
+            return estimators
 
     @property
     def predictions(self):
         if self._predictions is not None or not self._cache_file:
             return self._predictions
-        else:
-            with open(self._cache_file, "rb") as fh:
-                _, predictions = pickle.load(fh)
-                return predictions
+        with open(self._cache_file, "rb") as fh:
+            _, predictions = pickle.load(fh)
+            return predictions
 
     # Is there a better way to do this?
     # Assignment in __init__ is not preferred even if it saves lines.
@@ -198,22 +196,19 @@ class EvaluationLibrary:
             log.warning("New subsample not used for already stored evaluations.")
         n = self._sample_n if n is None else n
 
-        if n is not None:
-            if prediction_size is not None and n < prediction_size:
-                # Subsample is to be chosen uniformly random.
-                self._sample = np.random.choice(
-                    range(prediction_size), size=n, replace=False
-                )
-            elif stratify is not None and n < len(stratify):
-                splitter = StratifiedShuffleSplit(n_splits=1, train_size=n)
-                self._sample, _ = next(
-                    splitter.split(np.zeros(len(stratify)), stratify)
-                )
-            else:
-                # Specified sample size exceeds size of predictions
-                self._sample = None
-        else:
+        if n is None:
             # No n was provided here nor set on initialization
+            self._sample = None
+        elif prediction_size is not None and n < prediction_size:
+            # Subsample is to be chosen uniformly random.
+            self._sample = np.random.choice(
+                range(prediction_size), size=n, replace=False
+            )
+        elif stratify is not None and n < len(stratify):
+            splitter = StratifiedShuffleSplit(n_splits=1, train_size=n)
+            self._sample, _ = next(splitter.split(np.zeros(len(stratify)), stratify))
+        else:
+            # Specified sample size exceeds size of predictions
             self._sample = None
 
     def _process_predictions(self, evaluation: Evaluation) -> None:

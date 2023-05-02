@@ -44,11 +44,7 @@ def format_y(
 
     if isinstance(y, np.ndarray) and y.ndim == 2:
         # Either indicator matrix or should be a vector.
-        if y.shape[1] > 1:
-            y = np.argmax(y, axis=1)
-        else:
-            y = y.squeeze()
-
+        y = np.argmax(y, axis=1) if y.shape[1] > 1 else y.squeeze()
     if y_type == pd.Series:
         if isinstance(y, pd.DataFrame):
             y = y.squeeze()

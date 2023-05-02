@@ -67,16 +67,17 @@ def scoring_to_metric(
     scoring: Union[str, Metric, Iterable[str], Iterable[Metric]]
 ) -> Tuple[Metric, ...]:
     if isinstance(scoring, str):
-        return tuple([Metric(scoring)])
+        return (Metric(scoring),)
     if isinstance(scoring, Metric):
-        return tuple([scoring])
+        return (scoring,)
 
-    if isinstance(scoring, Iterable):
-        if all([isinstance(scorer, (Metric, str)) for scorer in scoring]):
-            converted_metrics = [
-                scorer if isinstance(scorer, Metric) else Metric(scorer)
-                for scorer in scoring
-            ]
-            return tuple(converted_metrics)
+    if isinstance(scoring, Iterable) and all(
+        isinstance(scorer, (Metric, str)) for scorer in scoring
+    ):
+        converted_metrics = [
+            scorer if isinstance(scorer, Metric) else Metric(scorer)
+            for scorer in scoring
+        ]
+        return tuple(converted_metrics)
 
     raise TypeError("scoring must be str, Metric or Iterable (of str or Metric).")
