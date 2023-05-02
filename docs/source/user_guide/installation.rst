@@ -14,7 +14,6 @@ You can install them with::
 
 where `OPTIONAL` is one or more (comma separated):
 
- - `vis`: allows you to use the prototype dash app to visualize optimization traces.
  - `dev`: sets up all required dependencies for development of GAMA.
  - `doc`: sets up all required dependencies for building documentation of GAMA.
 

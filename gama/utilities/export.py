@@ -45,12 +45,11 @@ def imports_and_steps_for_individual(
     steps = []
     for i, primitive_node in reversed(list(enumerate(individual.primitives))):
         steps.append((str(i), primitive_node.str_nonrecursive))
-        for terminal in primitive_node._terminals:
-            if callable(terminal.value) and hasattr(terminal.value, "__name__"):
-                imports.append(
-                    f"from {terminal.value.__module__} import {terminal.value.__name__}"
-                )
-
+        imports.extend(
+            f"from {terminal.value.__module__} import {terminal.value.__name__}"
+            for terminal in primitive_node._terminals
+            if callable(terminal.value) and hasattr(terminal.value, "__name__")
+        )
     return set(imports), steps
 
 
@@ -65,6 +64,4 @@ def individual_to_python(
         imports = imports.union({format_import(step) for _, step in prepend_steps})
     steps_str = ",\n".join([f"('{name}', {step})" for name, step in steps])
     pipeline = f"Pipeline([{steps_str}])"
-    script = "\n".join(sorted(imports)) + "\n\n" + "pipeline = " + pipeline + "\n"
-
-    return script
+    return "\n".join(sorted(imports)) + "\n\n" + "pipeline = " + pipeline + "\n"

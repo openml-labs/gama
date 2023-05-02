@@ -4,7 +4,9 @@ Release Notes
 Version 23.0.0
 --------------
 
-We (temporarily) removed the Dashboard, it had not been maintained and is best be rebuilt from the ground up.
+Highlights:
+ - We (temporarily) removed the Dashboard, it had not been maintained and is best be rebuilt from the ground up.
+ - The `config` hyperparameter is now called `search_space`.
 
 Maintenance:
  - Bump minimum Python version to Python 3.9, in line with `NEP 29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_.

@@ -81,12 +81,12 @@ class Gama(ABC):
 
     def __init__(
         self,
+        search_space: Dict[Union[str, object], Any],
         scoring: Union[
             str, Metric, Iterable[str], Iterable[Metric]
         ] = "filled_in_by_child_class",
         regularize_length: bool = True,
         max_pipeline_length: Optional[int] = None,
-        config: Dict[Union[str, object], Any] = {},
         random_state: Optional[int] = None,
         max_total_time: int = 3600,
         max_eval_time: Optional[int] = None,
@@ -97,11 +97,16 @@ class Gama(ABC):
         post_processing: BasePostProcessing = BestFitPostProcessing(),
         output_directory: Optional[str] = None,
         store: str = "logs",
+        config: None = None,
     ):
         """
 
         Parameters
         ----------
+        search_space: Dict
+            Specifies available components and their valid hyperparameter settings.
+            For more information, see :ref:`search_space_configuration`.
+
         scoring: str, Metric or Tuple
             Specifies the/all metric(s) to optimize towards.
             A string will be converted to Metric.
@@ -115,10 +120,6 @@ class Gama(ABC):
         max_pipeline_length: int, optional (default=None)
             If set, limit the maximum number of steps in any evaluated pipeline.
             Encoding and imputation are excluded.
-
-        config: Dict
-            Specifies available components and their valid hyperparameter settings.
-            For more information, see :ref:`search_space_configuration`.
 
         random_state:  int, optional (default=None)
             Seed for the random number generators used in the process.
@@ -168,6 +169,14 @@ class Gama(ABC):
              - 'logs': keep only the logs
              - 'all': keep logs and cache with models and predictions
         """
+        if config:
+            warnings.warn(
+                "Hyperparameter `config` is renamed to `search_space`. "
+                "Using `config` will lead to an error with `gama>=24`.",
+                DeprecationWarning,
+            )
+            search_space = config
+
         if not output_directory:
             output_directory = f"gama_{str(uuid.uuid4())}"
         self.output_directory = os.path.abspath(os.path.expanduser(output_directory))
@@ -181,7 +190,7 @@ class Gama(ABC):
             )
 
         register_stream_log(verbosity)
-        if store in ["logs", "all"]:
+        if store in {"logs", "all"}:
             log_file = os.path.join(self.output_directory, "gama.log")
             log_handler = logging.FileHandler(log_file)
             log_handler.setLevel(logging.DEBUG)
@@ -272,7 +281,7 @@ class Gama(ABC):
         e = search.logger(os.path.join(self.output_directory, "evaluations.log"))
         self.evaluation_completed(e.log_evaluation)
 
-        self._pset, parameter_checks = pset_from_config(config)
+        self._pset, parameter_checks = pset_from_config(search_space)
 
         if DATA_TERMINAL not in self._pset:
             if max_pipeline_length is None:
@@ -585,7 +594,7 @@ class Gama(ABC):
                 self._time_manager.total_time_remaining,
                 best_individuals,
             )
-        if not self._store == "all":
+        if self._store != "all":
             to_clean = dict(nothing="all", logs="evaluations", models="logs")
             self.cleanup(to_clean[self._store])
         return self
@@ -595,7 +604,7 @@ class Gama(ABC):
     ) -> None:
         """Invoke the search algorithm, populate `final_pop`."""
         if warm_start:
-            if not all([isinstance(i, Individual) for i in warm_start]):
+            if not all(isinstance(i, Individual) for i in warm_start):
                 raise TypeError("`warm_start` must be a list of Individual.")
             pop = warm_start
         elif warm_start is None and len(self._final_pop) > 0:

@@ -15,18 +15,18 @@ from gama.utilities.metrics import scoring_to_metric
 class GamaClassifier(Gama):
     """Gama with adaptations for (multi-class) classification."""
 
-    def __init__(self, config=None, scoring="neg_log_loss", *args, **kwargs):
-        if not config:
+    def __init__(self, search_space=None, scoring="neg_log_loss", *args, **kwargs):
+        if not search_space:
             # Do this to avoid the whole dictionary being included in the documentation.
-            config = clf_config
+            search_space = clf_config
 
         self._metrics = scoring_to_metric(scoring)
         if any(metric.requires_probabilities for metric in self._metrics):
             # we don't want classifiers that do not have `predict_proba`,
             # because then we have to start doing one hot encodings of predictions etc.
-            config = {
+            search_space = {
                 alg: hp
-                for (alg, hp) in config.items()
+                for (alg, hp) in search_space.items()
                 if not (
                     inspect.isclass(alg)
                     and issubclass(alg, ClassifierMixin)
@@ -35,7 +35,7 @@ class GamaClassifier(Gama):
             }
 
         self._label_encoder = None
-        super().__init__(*args, **kwargs, config=config, scoring=scoring)
+        super().__init__(*args, search_space=search_space, scoring=scoring, **kwargs)
 
     def _predict(self, x: pd.DataFrame):
         """Predict the target for input X.
@@ -127,7 +127,7 @@ class GamaClassifier(Gama):
         """Should use base class documentation."""
         y_ = y.squeeze() if isinstance(y, pd.DataFrame) else y
         self._label_encoder = LabelEncoder().fit(y_)
-        if any([isinstance(yi, str) for yi in y_]):
+        if any(isinstance(yi, str) for yi in y_):
             # If target values are `str` we encode them or scikit-learn will complain.
             y = self._label_encoder.transform(y_)
         self._evaluation_library.determine_sample_indices(stratify=y)

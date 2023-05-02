@@ -37,7 +37,7 @@ class GamaReport:
         self.phases: List[Tuple[str, str, datetime, float]] = []
         self._last_tell = 0
         self.evaluations: pd.DataFrame = pd.DataFrame()
-        self.individuals: Dict[str, Individual] = dict()
+        self.individuals: Dict[str, Individual] = {}
         self.strict = strict
 
         # Parse initialization/progress information from gama.log

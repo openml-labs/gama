@@ -25,7 +25,7 @@ class Individual:
     ):
         self.fitness: Optional[Fitness] = None
         self.main_node = main_node
-        self.meta: Dict[str, Any] = dict()
+        self.meta: Dict[str, Any] = {}
         self._id = uuid.uuid4()
         self._to_pipeline = to_pipeline
 
@@ -89,15 +89,14 @@ class Individual:
         for primitive in self.primitives:
             if scan_position + len(primitive._terminals) > position:
                 terminal_to_be_replaced = primitive._terminals[position - scan_position]
-                if terminal_to_be_replaced.identifier == new_terminal.identifier:
-                    primitive._terminals[position - scan_position] = new_terminal
-                    return
-                else:
+                if terminal_to_be_replaced.identifier != new_terminal.identifier:
                     raise ValueError(
                         f"New terminal does not share output type with the old."
                         f"Old: {terminal_to_be_replaced.identifier}"
                         f"New: {new_terminal.identifier}."
                     )
+                primitive._terminals[position - scan_position] = new_terminal
+                return
             else:
                 scan_position += len(primitive._terminals)
         if scan_position < position:

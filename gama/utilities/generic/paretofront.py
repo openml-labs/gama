@@ -30,10 +30,7 @@ class ParetoFront(Sequence):
         self._iterator_index = 0
 
     def _get_item_value(self, item):
-        if self._get_values_fn is not None:
-            return self._get_values_fn(item)
-        else:
-            return item
+        return self._get_values_fn(item) if self._get_values_fn is not None else item
 
     def update(self, new_item: Any):
         """Update the Pareto front with new_item if it qualifies.

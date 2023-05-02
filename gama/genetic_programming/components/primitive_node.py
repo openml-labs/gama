@@ -33,11 +33,10 @@ class PrimitiveNode:
                   - "BernoulliNB(data, alpha=1.0)"
                   - "BernoulliNB(FastICA(data, tol=0.5), alpha=1.0)"
         """
-        if self._terminals:
-            terminal_str = ", ".join([repr(terminal) for terminal in self._terminals])
-            return f"{self._primitive}({self._data_node}, {terminal_str})"
-        else:
+        if not self._terminals:
             return f"{self._primitive}({self._data_node})"
+        terminal_str = ", ".join([repr(terminal) for terminal in self._terminals])
+        return f"{self._primitive}({self._data_node}, {terminal_str})"
 
     @property
     def str_nonrecursive(self) -> str:

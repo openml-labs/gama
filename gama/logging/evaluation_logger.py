@@ -74,8 +74,6 @@ class EvaluationLogger:
         values = [getter(evaluation) for getter in self.fields.values()]
 
         def format_value(v):
-            if isinstance(v, datetime):
-                return v.strftime(TIME_FORMAT)
-            return str(v)
+            return v.strftime(TIME_FORMAT) if isinstance(v, datetime) else str(v)
 
         self.log_line(map(format_value, values))

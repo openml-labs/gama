@@ -14,6 +14,8 @@ but it has issues:
       Though that does not hinder the execution of the program,
       I don't want errors for expected behavior.
 """
+
+import contextlib
 import datetime
 import gc
 import logging
@@ -141,7 +143,7 @@ class AsyncEvaluator:
         for _ in self._processes:
             self._command.put("stop")
 
-        for i in range(self._wait_time_before_forced_shutdown + 1):
+        for _ in range(self._wait_time_before_forced_shutdown + 1):
             if self._command.empty():
                 break
             time.sleep(1)
@@ -163,10 +165,8 @@ class AsyncEvaluator:
 
     def clear_queue(self, q: multiprocessing.Queue):
         while not q.empty():
-            try:
+            with contextlib.suppress(queue.Empty):
                 q.get(timeout=0.001)
-            except queue.Empty:
-                pass
         q.close()
 
     def submit(self, fn: Callable, *args, **kwargs) -> AsyncFuture:
@@ -348,12 +348,9 @@ def evaluator_daemon(
     """
     try:
         while True:
-            try:
+            with contextlib.suppress(queue.Empty):
                 command_queue.get(block=False)
                 break
-            except queue.Empty:
-                pass
-
             try:
                 future = input_queue.get(block=False)
                 future.execute(default_parameters)

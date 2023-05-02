@@ -40,5 +40,4 @@ class BestFitPostProcessing(BasePostProcessing):
             imports = imports.union({format_import(t) for _, t in preprocessing})
 
         pipeline_statement = format_pipeline(steps)
-        script = "\n".join(imports) + "\n\n" + pipeline_statement
-        return script
+        return "\n".join(imports) + "\n\n" + pipeline_statement

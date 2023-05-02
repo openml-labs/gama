@@ -40,7 +40,7 @@ def compile_individual(
         for i, primitive in enumerate(individual.primitives)
     ]
     if preprocessing_steps:
-        steps = steps + list(reversed(preprocessing_steps))
+        steps += list(reversed(preprocessing_steps))
     return Pipeline(list(reversed(steps)))
 
 
@@ -75,7 +75,7 @@ def evaluate_pipeline(
     """
     if not object_is_valid_pipeline(pipeline):
         raise TypeError("Pipeline must not be None and requires fit, predict, steps.")
-    if not timeout > 0:
+    if timeout <= 0:
         raise ValueError(f"`timeout` must be greater than 0, is {timeout}.")
 
     prediction, estimators = None, None
@@ -119,14 +119,14 @@ def evaluate_pipeline(
                 scoring=dict([(m.name, m) for m in metrics]),
                 error_score="raise",
             )
-            scores = tuple([np.mean(result[f"test_{m.name}"]) for m in metrics])
+            scores = tuple(np.mean(result[f"test_{m.name}"]) for m in metrics)
             estimators = result["estimator"]
 
             splitter = (
                 splitter if isinstance(splitter, list) else splitter.split(x, y_train)
             )
             for estimator, (_, test) in zip(estimators, splitter):
-                if any([m.requires_probabilities for m in metrics]):
+                if any(m.requires_probabilities for m in metrics):
                     fold_pred = estimator.predict_proba(x.iloc[test, :])
                 else:
                     fold_pred = estimator.predict(x.iloc[test, :])
@@ -151,12 +151,11 @@ def evaluate_pipeline(
         # This indicates that the outer context manager (the ea) timed out.
         raise stopit.utils.TimeoutException()
 
-    if not c_mgr:
-        # For now we treat an eval timeout the same way as
-        # e.g. NaN exceptions and use the default score.
-        return prediction, scores, estimators, stopit.TimeoutException()
-
-    return prediction, tuple(scores), estimators, None
+    return (
+        (prediction, tuple(scores), estimators, None)
+        if c_mgr
+        else (prediction, scores, estimators, stopit.TimeoutException())
+    )
 
 
 def evaluate_individual(

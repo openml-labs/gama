@@ -7,14 +7,14 @@ from gama.genetic_programming.compilers.scikitlearn import compile_individual
 
 @pytest.fixture
 def pset():
-    gc = GamaClassifier(config=clf_config, scoring="accuracy", store="nothing")
+    gc = GamaClassifier(search_space=clf_config, scoring="accuracy", store="nothing")
     yield gc._pset
     gc.cleanup("all")
 
 
 @pytest.fixture
 def opset():
-    gc = GamaClassifier(config=clf_config, scoring="accuracy", store="nothing")
+    gc = GamaClassifier(search_space=clf_config, scoring="accuracy", store="nothing")
     yield gc._operator_set
     gc.cleanup("all")
 
