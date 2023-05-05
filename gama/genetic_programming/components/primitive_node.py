@@ -1,5 +1,5 @@
 from typing import List, Union, cast
-from .terminal import DATA_TERMINAL, Terminal
+from .terminal import DATA_TERMINAL, Terminal, find_terminal
 from .primitive import Primitive
 
 
@@ -116,12 +116,3 @@ def find_primitive(primitive_set: dict, primitive_string: str) -> Primitive:
         if repr(primitive) == primitive_string:
             return primitive
     raise IndexError(f"Could not find Primitive of type '{primitive_string}'.")
-
-
-def find_terminal(primitive_set: dict, terminal_string: str) -> Terminal:
-    """Find the Terminal that matches `terminal_string` in `primitive_set`."""
-    term_type, _ = terminal_string.split("=")
-    for terminal in primitive_set[term_type]:
-        if repr(terminal) == terminal_string:
-            return terminal
-    raise RuntimeError(f"Could not find Terminal of type '{terminal_string}'.")

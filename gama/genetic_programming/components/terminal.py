@@ -32,3 +32,12 @@ def format_hyperparameter_value(value: object) -> str:
         return f"{value.__name__}"
     else:
         return str(value)
+
+
+def find_terminal(primitive_set: dict, terminal_string: str) -> Terminal:
+    """Find the Terminal that matches `terminal_string` in `primitive_set`."""
+    term_type, _ = terminal_string.split("=")
+    for terminal in primitive_set[term_type]:
+        if repr(terminal) == terminal_string:
+            return terminal
+    raise KeyError(f"Could not find Terminal of type '{terminal_string}'.")
