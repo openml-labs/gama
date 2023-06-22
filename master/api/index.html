@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API &mdash; gama 22.0.1.dev documentation</title>
+  <title>API &mdash; gama 23.0.0.dev documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="shortcut icon" href="../_static/Color-Transparent.svg"/>
@@ -12,6 +12,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -35,7 +37,7 @@
               <img src="../_static/Logo-on-white-text-on-transparent.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                22.0.1.dev
+                23.0.0.dev
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -206,9 +208,11 @@ If not set, GAMA will use as much as it needs.
 GAMA is not guaranteed to respect this limit at all times,
 but it should never violate it for too long.</p></li>
 <li><p><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> (</em><em>default=logging.WARNING</em><em>)</em>) – Sets the level of log messages to be automatically output to terminal.</p></li>
-<li><p><strong>search</strong> (<em>BaseSearch</em><em> (</em><em>default=AsyncEA</em><em>(</em><em>)</em><em>)</em>) – Search method to use to find good pipelines. Should be instantiated.</p></li>
-<li><p><strong>post_processing</strong> (<em>BasePostProcessing</em><em> (</em><em>default=BestFitPostProcessing</em><em>(</em><em>)</em><em>)</em>) – Post-processing method to create a model after the search phase.
-Should be an instantiated subclass of BasePostProcessing.</p></li>
+<li><p><strong>search</strong> (<em>BaseSearch</em><em>, </em><em>optional</em>) – Search method to use to find good pipelines. Should be instantiated.
+Default depends on <code class="docutils literal notranslate"><span class="pre">goal</span></code>.</p></li>
+<li><p><strong>post_processing</strong> (<em>BasePostProcessing</em><em>, </em><em>optional</em>) – Post-processing method to create a model after the search phase.
+Should be an instantiated subclass of BasePostProcessing.
+Default depends on <code class="docutils literal notranslate"><span class="pre">goal</span></code>.</p></li>
 <li><p><strong>output_directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Directory to use to save GAMA output. This includes both intermediate
 results during search and logs.
 This directory must be empty or not exist.
@@ -222,6 +226,16 @@ If set to None, generate a unique name (“gama_HEXCODE”).</p></li>
 </ul>
 </dd>
 </dl>
+</p></li>
+<li><p><strong>preset</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> (</em><em>default='simple'</em><em>)</em>) – <p>Determines the steps of the AutoML pipeline when they are not
+provided explicitly, based on the given goal.
+One of:</p>
+<blockquote>
+<div><ul>
+<li><p>simple: Create a simple pipeline with good performance.</p></li>
+<li><p>performance: Try to get the best performing model.</p></li>
+</ul>
+</div></blockquote>
 </p></li>
 </ul>
 </dd>

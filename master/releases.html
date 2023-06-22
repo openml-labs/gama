@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Release Notes &mdash; gama 22.0.1.dev documentation</title>
+  <title>Release Notes &mdash; gama 23.0.0.dev documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="shortcut icon" href="_static/Color-Transparent.svg"/>
@@ -12,6 +12,8 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -35,7 +37,7 @@
               <img src="_static/Logo-on-white-text-on-transparent.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                22.0.1.dev
+                23.0.0.dev
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -103,6 +105,10 @@
 <dt>Highlights:</dt><dd><ul class="simple">
 <li><p>We (temporarily) removed the Dashboard, it had not been maintained and is best be rebuilt from the ground up.</p></li>
 <li><p>The <cite>config</cite> hyperparameter is now called <cite>search_space</cite>.</p></li>
+<li><p>Adds back the <code class="docutils literal notranslate"><span class="pre">preset</span></code> hyperparameter to all GAMA estimators which let you specify the goal
+of your AutoML execution. Currently <code class="docutils literal notranslate"><span class="pre">simple</span></code> can be specified to create a
+simple model, and <code class="docutils literal notranslate"><span class="pre">performance</span></code> can be used to generate the best possible model.
+It is still possible to manually set the search and post processing methods.</p></li>
 </ul>
 </dd>
 <dt>Maintenance:</dt><dd><ul class="simple">

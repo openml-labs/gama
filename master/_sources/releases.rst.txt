@@ -1,12 +1,17 @@
 Release Notes
 =============
 
+
 Version 23.0.0
 --------------
 
 Highlights:
  - We (temporarily) removed the Dashboard, it had not been maintained and is best be rebuilt from the ground up.
  - The `config` hyperparameter is now called `search_space`.
+ - Adds back the ``preset`` hyperparameter to all GAMA estimators which let you specify the goal
+   of your AutoML execution. Currently ``simple`` can be specified to create a
+   simple model, and ``performance`` can be used to generate the best possible model.
+   It is still possible to manually set the search and post processing methods.
 
 Maintenance:
  - Bump minimum Python version to Python 3.9, in line with `NEP 29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_.
