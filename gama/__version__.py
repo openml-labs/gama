@@ -1,2 +1,2 @@
 # format: YY.minor.micro
-__version__ = "23.0.0.dev"
+__version__ = "23.0.0"
