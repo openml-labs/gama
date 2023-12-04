@@ -26,11 +26,12 @@ import warnings
 import pandas as pd
 import numpy as np
 import stopit
+from ConfigSpace import ForbiddenEqualsClause
 from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
 
 import gama.genetic_programming.compilers.scikitlearn
-from gama.genetic_programming.components import Individual, Fitness, DATA_TERMINAL
+from gama.genetic_programming.components import Individual, Fitness
 from gama.search_methods.base_search import BaseSearch
 from gama.utilities.evaluation_library import EvaluationLibrary, Evaluation
 from gama.utilities.metrics import scoring_to_metric
@@ -52,7 +53,6 @@ from gama.genetic_programming.selection import (
     eliminate_from_pareto,
 )
 from gama.genetic_programming.operations import create_random_expression
-from gama.configuration.parser import pset_from_config
 from gama.genetic_programming.operator_set import OperatorSet
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
 from gama.postprocessing import (
@@ -63,10 +63,11 @@ from gama.postprocessing import (
 from gama.utilities.generic.async_evaluator import AsyncEvaluator
 from gama.utilities.metrics import Metric
 
+import ConfigSpace as cs
+
 # Avoid stopit from logging warnings every time a pipeline evaluation times out
 logging.getLogger("stopit").setLevel(logging.ERROR)
 log = logging.getLogger(__name__)
-
 
 STR_NO_OPTIMAL_PIPELINE = """Gama did not yet establish an optimal pipeline.
                           This can be because `fit` was not yet called, or
@@ -81,7 +82,7 @@ class Gama(ABC):
 
     def __init__(
         self,
-        search_space: Dict[Union[str, object], Any],
+        search_space: cs.ConfigurationSpace,
         scoring: Union[
             str, Metric, Iterable[str], Iterable[Metric]
         ] = "filled_in_by_child_class",
@@ -104,9 +105,9 @@ class Gama(ABC):
 
         Parameters
         ----------
-        search_space: Dict
-            Specifies available components and their valid hyperparameter settings.
-            For more information, see :ref:`search_space_configuration`.
+        search_space: cs.ConfigurationSpace
+            The ConfigSpace object which defines the search space. Refer to the
+            configuration/(classification||regression).py file for further details.
 
         scoring: str, Metric or Tuple
             Specifies the/all metric(s) to optimize towards.
@@ -277,6 +278,7 @@ class Gama(ABC):
         if random_state is not None:
             random.seed(random_state)
             np.random.seed(random_state)
+            search_space.seed(random_state)
 
         self._x: Optional[pd.DataFrame] = None
         self._y: Optional[pd.DataFrame] = None
@@ -301,9 +303,13 @@ class Gama(ABC):
         e = search.logger(os.path.join(self.output_directory, "evaluations.log"))
         self.evaluation_completed(e.log_evaluation)
 
-        self._pset, parameter_checks = pset_from_config(search_space)
+        self.search_space = search_space
 
-        if DATA_TERMINAL not in self._pset:
+        if (
+            "preprocessors" in self.search_space.meta
+            and self.search_space.meta["preprocessors"]
+            not in self.search_space.get_hyperparameter_names()
+        ) or ("preprocessors" not in self.search_space.meta):
             if max_pipeline_length is None:
                 log.info(
                     "Setting `max_pipeline_length` to 1 "
@@ -319,14 +325,14 @@ class Gama(ABC):
         self._operator_set = OperatorSet(
             mutate=partial(  # type: ignore #https://github.com/python/mypy/issues/1484
                 random_valid_mutation_in_place,
-                primitive_set=self._pset,
+                config_space=self.search_space,
                 max_length=max_pipeline_length,
             ),
             mate=partial(random_crossover, max_length=max_pipeline_length),
             create_from_population=partial(create_from_population, cxpb=0.2, mutpb=0.8),
             create_new=partial(
                 create_random_expression,
-                primitive_set=self._pset,
+                config_space=self.search_space,
                 max_length=max_start_length,
             ),
             compile_=compile_individual,
@@ -557,23 +563,55 @@ class Gama(ABC):
                 # KNN will create models of about 76Mb in size, which is too big, so
                 # we exclude it from search:
                 log.info("Excluding KNN from search because the dataset is too big.")
-                from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+                if (
+                    "KNeighborsClassifier"
+                    in self.search_space.get_hyperparameter(
+                        self.search_space.meta["estimators"]
+                    ).choices
+                ):
+                    self.search_space.add_forbidden_clause(
+                        ForbiddenEqualsClause(
+                            self.search_space.get_hyperparameter(
+                                self.search_space.meta["estimators"]
+                            ),
+                            "KNeighborsClassifier",
+                        )
+                    )
+                if (
+                    "KNeighborsRegressor"
+                    in self.search_space.get_hyperparameter(
+                        self.search_space.meta["estimators"]
+                    ).choices
+                ):
+                    self.search_space.add_forbidden_clause(
+                        ForbiddenEqualsClause(
+                            self.search_space.get_hyperparameter(
+                                self.search_space.meta["regressors"]
+                            ),
+                            "KNeighborsRegressor",
+                        )
+                    )
 
-                self._pset["prediction"] = [
-                    p
-                    for p in self._pset["prediction"]
-                    if p.identifier not in [KNeighborsClassifier, KNeighborsRegressor]
-                ]
-
-            if store_pipelines and self._x.shape[1] > 50:
+            if (
+                store_pipelines
+                and self._x.shape[1] > 50
+                and "preprocessors" in self.search_space.meta
+            ):
                 log.info("Data has too many features to include PolynomialFeatures")
-                from sklearn.preprocessing import PolynomialFeatures
-
-                self._pset["data"] = [
-                    p
-                    for p in self._pset["data"]
-                    if p.identifier not in [PolynomialFeatures]
-                ]
+                if (
+                    "PolynomialFeatures"
+                    in self.search_space.get_hyperparameter(
+                        self.search_space.meta["preprocessors"]
+                    ).choices
+                ):
+                    self.search_space.add_forbidden_clause(
+                        ForbiddenEqualsClause(
+                            self.search_space.get_hyperparameter(
+                                self.search_space.meta["preprocessors"]
+                            ),
+                            "PolynomialFeatures",
+                        )
+                    )
 
         if self._time_manager.total_time_remaining < 0:
             pre_time = self._time_manager.activities[-1].stopwatch.elapsed_time
