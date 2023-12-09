@@ -72,6 +72,23 @@ class AsyncEA(BaseSearch):
         )
 
 
+def generate_unique_individual(
+    ops: OperatorSet, generator_function: Callable, max_attempts: int
+) -> Individual:
+    """Generate a unique individual using the given generator function"""
+    attempts = 0
+    while (new_individual := generator_function()) and ops.is_evaluated(
+        new_individual
+    ):  # type: ignore
+        if attempts >= max_attempts:
+            raise ValueError(
+                "Maximum attempts reached while trying to generate a"
+                "unique individual."
+            )
+        attempts += 1
+    return new_individual
+
+
 def async_ea(
     ops: OperatorSet,
     output: List[Individual],
@@ -79,6 +96,7 @@ def async_ea(
     restart_callback: Optional[Callable[[], bool]] = None,
     max_n_evaluations: Optional[int] = None,
     population_size: int = 50,
+    max_attempts: int = 100000,
 ) -> List[Individual]:
     """Perform asynchronous evolutionary optimization with given operators.
 
@@ -97,6 +115,9 @@ def async_ea(
         If None, the algorithm will be run indefinitely.
     population_size: int (default=50)
         Maximum number of individuals in the population at any time.
+    max_attempts: int (default=100000)
+        Maximum number of attempts to generate a unique individual otherwise raise
+        an error.
 
     Returns
     -------
@@ -139,14 +160,21 @@ def async_ea(
                     # Increasing the number decreases the risk of lost compute time,
                     # but also increases information lag. An offspring created too
                     # early might miss out on a better parent.
-                    new_individual = ops.create(current_population, 1)[0]
+                    new_individual = generate_unique_individual(
+                        ops, lambda: ops.create(current_population, 1)[0], max_attempts
+                    )
                     async_.submit(ops.evaluate, new_individual)
 
                 should_restart = restart_callback is not None and restart_callback()
                 n_evaluated_individuals += 1
                 if should_restart:
                     log.info("Restart criterion met. Creating new random population.")
-                    start_candidates = [ops.individual() for _ in range(max_pop_size)]
+                    start_candidates = [
+                        generate_unique_individual(
+                            ops, lambda: ops.individual(), max_attempts
+                        )
+                        for _ in range(max_pop_size)
+                    ]
                     break
 
     return current_population
