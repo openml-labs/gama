@@ -339,6 +339,7 @@ class Gama(ABC):
             eliminate=eliminate_from_pareto,
             evaluate_callback=self._on_evaluation_completed,
             completed_evaluations=self._evaluation_library.lookup,
+            is_evaluated=self._evaluation_library.is_evaluated,
         )
 
     def cleanup(self, which="evaluations") -> None:
