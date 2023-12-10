@@ -340,6 +340,7 @@ class Gama(ABC):
             evaluate_callback=self._on_evaluation_completed,
             completed_evaluations=self._evaluation_library.lookup,
             is_evaluated=self._evaluation_library.is_evaluated,
+            get_search_space=lambda: self.search_space,
         )
 
     def cleanup(self, which="evaluations") -> None:
