@@ -16,6 +16,7 @@ import ConfigSpace as cs
 from gama.postprocessing import EnsemblePostProcessing
 from gama.search_methods import AsynchronousSuccessiveHalving, AsyncEA, RandomSearch
 from gama.search_methods.base_search import BaseSearch
+from gama.search_methods.bayesian_optimisation import BayesianOptimisation
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama import GamaClassifier
 
@@ -205,6 +206,11 @@ def test_binary_classification_accuracy_asha():
 def test_binary_classification_accuracy_random_search():
     """Binary classification, accuracy, numpy data, random search."""
     _test_dataset_problem(breast_cancer, "accuracy", search=RandomSearch())
+
+
+def test_binary_classification_accuracy_bayesian_optimisation():
+    """Binary classification, accuracy, numpy data, bayesian optimisation."""
+    _test_dataset_problem(breast_cancer, "accuracy", search=BayesianOptimisation())
 
 
 def test_binary_classification_logloss():
