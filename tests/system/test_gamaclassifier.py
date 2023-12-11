@@ -10,9 +10,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, log_loss
 from sklearn.pipeline import Pipeline
 
+from gama.configuration.configuration_task_test import ClassifierConfigTest
+from gama.configuration.testconfiguration import config_space
+import ConfigSpace as cs
 from gama.postprocessing import EnsemblePostProcessing
 from gama.search_methods import AsynchronousSuccessiveHalving, AsyncEA, RandomSearch
 from gama.search_methods.base_search import BaseSearch
+from gama.search_methods.bayesian_optimisation import BayesianOptimisation
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama import GamaClassifier
 
@@ -204,6 +208,11 @@ def test_binary_classification_accuracy_random_search():
     _test_dataset_problem(breast_cancer, "accuracy", search=RandomSearch())
 
 
+def test_binary_classification_accuracy_bayesian_optimisation():
+    """Binary classification, accuracy, numpy data, bayesian optimisation."""
+    _test_dataset_problem(breast_cancer, "accuracy", search=BayesianOptimisation())
+
+
 def test_binary_classification_logloss():
     """Binary classification, log loss (probabilities), numpy data, ASHA search."""
     _test_dataset_problem(breast_cancer, "neg_log_loss")
@@ -237,3 +246,34 @@ def test_missing_value_classification_arff():
 def test_missing_value_classification():
     """Binary classification, log loss (probabilities), missing values."""
     _test_dataset_problem(breast_cancer_missing, "neg_log_loss", missing_values=True)
+
+
+def test_wrong_meta_estimators_config_space_gc():
+    """Meta with wrong estimators"""
+    with pytest.raises(ValueError):
+        config_space.meta = {
+            # "gama_system_name": "current_configuration_name",
+            "dummy": "dummy",
+        }
+        GamaClassifier(
+            search_space=config_space,
+        )
+
+
+def test_wrong_meta_preprocessors_config_space_gc():
+    """Meta with wrong preprocessors"""
+    with pytest.raises(ValueError):
+        dummy_config_space = cs.ConfigurationSpace(
+            meta={
+                # "gama_system_name": "current_configuration_name",
+                "estimators": "classifiers",
+                "preprocessors": "dummy",
+            }
+        )
+
+        dummy_classifier_config = ClassifierConfigTest(dummy_config_space)
+        dummy_classifier_config.setup_classifiers()
+
+        GamaClassifier(
+            search_space=dummy_config_space,
+        )

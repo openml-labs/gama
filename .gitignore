@@ -10,3 +10,4 @@ docs/source/generated/*
 *.log
 *.ipynb_checkpoints*
 venv/
+smac3_output/*

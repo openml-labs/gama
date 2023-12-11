@@ -89,6 +89,7 @@ def asha(
     maximum_resource: Union[int, float] = 1.0,
     minimum_early_stopping_rate: int = 0,
     max_full_evaluations: Optional[int] = None,
+    max_attempts: int = 100000,
 ) -> List[Individual]:
     """Asynchronous Halving Algorithm by Li et al.
 
@@ -115,6 +116,9 @@ def asha(
     max_full_evaluations: Optional[int] (default=None)
         Maximum number of individuals to evaluate on the max rung (i.e. on all data).
         If None, the algorithm will be run indefinitely.
+    max_attempts: int (default=100000)
+        Maximum number of attempts to generate a unique individual otherwise raise
+        an error.
 
     Returns
     -------
@@ -163,7 +167,18 @@ def asha(
 
         if start_candidates:
             return start_candidates.pop(), minimum_early_stopping_rate
-        return operations.individual(), minimum_early_stopping_rate
+
+        attempts = 0
+        while (new_individual := operations.individual()) and operations.is_evaluated(
+            new_individual
+        ):
+            if attempts >= max_attempts:
+                raise ValueError(
+                    "Maximum attempts reached while trying to generate a"
+                    "unique individual."
+                )
+            attempts += 1
+        return new_individual, minimum_early_stopping_rate
 
     try:
         with AsyncEvaluator() as async_:
