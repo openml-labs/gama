@@ -1,58 +1,62 @@
 import pytest
 from gama import GamaClassifier
 from gama.genetic_programming.components import Individual
-from gama.configuration.testconfiguration import clf_config
+from gama.configuration.testconfiguration import config_space as test_config_space
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
 
 
 @pytest.fixture
-def pset():
-    gc = GamaClassifier(search_space=clf_config, scoring="accuracy", store="nothing")
-    yield gc._pset
+def config_space():
+    gc = GamaClassifier(
+        search_space=test_config_space, scoring="accuracy", store="nothing"
+    )
+    yield gc.search_space
     gc.cleanup("all")
 
 
 @pytest.fixture
 def opset():
-    gc = GamaClassifier(search_space=clf_config, scoring="accuracy", store="nothing")
+    gc = GamaClassifier(
+        search_space=test_config_space, scoring="accuracy", store="nothing"
+    )
     yield gc._operator_set
     gc.cleanup("all")
 
 
 @pytest.fixture
-def GNB(pset):
-    return Individual.from_string("GaussianNB(data)", pset, compile_individual)
+def GNB(config_space):
+    return Individual.from_string("GaussianNB(data)", config_space, compile_individual)
 
 
 @pytest.fixture
-def RS_MNB(pset):
+def RS_MNB(config_space):
     return Individual.from_string(
         "MultinomialNB(RobustScaler(data), alpha=1.0, fit_prior=True)",
-        pset,
+        config_space,
         compile_individual,
     )
 
 
 @pytest.fixture
-def SS_BNB(pset):
+def SS_BNB(config_space):
     return Individual.from_string(
         "BernoulliNB(StandardScaler(data), alpha=0.1, fit_prior=True)",
-        pset,
+        config_space,
         compile_individual,
     )
 
 
 @pytest.fixture
-def SS_RBS_SS_BNB(pset):
+def SS_RBS_SS_BNB(config_space):
     return Individual.from_string(
         "BernoulliNB(StandardScaler(RobustScaler(StandardScaler(data))), alpha=0.1, fit_prior=True)",  # noqa: E501
-        pset,
+        config_space,
         compile_individual,
     )
 
 
 @pytest.fixture
-def LinearSVC(pset):
+def LinearSVC(config_space):
     individual_str = """LinearSVC(data,
             LinearSVC.C=0.001,
             LinearSVC.dual=True,
@@ -60,11 +64,11 @@ def LinearSVC(pset):
             LinearSVC.penalty='l2',
             LinearSVC.tol=1e-05)"""
     individual_str = "".join(individual_str.split()).replace(",", ", ")
-    return Individual.from_string(individual_str, pset, None)
+    return Individual.from_string(individual_str, config_space, None)
 
 
 @pytest.fixture
-def ForestPipeline(pset):
+def ForestPipeline(config_space):
     individual_str = """RandomForestClassifier(
             FeatureAgglomeration(
                     data,
@@ -79,11 +83,11 @@ def ForestPipeline(pset):
             RandomForestClassifier.n_estimators=100)"""
     individual_str = "".join(individual_str.split()).replace(",", ", ")
 
-    return Individual.from_string(individual_str, pset, None)
+    return Individual.from_string(individual_str, config_space, None)
 
 
 @pytest.fixture
-def InvalidLinearSVC(pset):
+def InvalidLinearSVC(config_space):
     individual_str = """LinearSVC(data,
             LinearSVC.C=0.001,
             LinearSVC.dual=True,
@@ -91,4 +95,4 @@ def InvalidLinearSVC(pset):
             LinearSVC.penalty='l1',
             LinearSVC.tol=1e-05)"""
     individual_str = "".join(individual_str.split()).replace(",", ", ")
-    return Individual.from_string(individual_str, pset, compile_individual)
+    return Individual.from_string(individual_str, config_space, compile_individual)

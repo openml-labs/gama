@@ -4,13 +4,14 @@ from typing import List, Tuple, Dict
 
 import pandas as pd
 
-from gama.configuration.classification import clf_config
-from gama.configuration.parser import pset_from_config, merge_configurations
-from gama.configuration.regression import reg_config
+from gama.configuration.classification import config_space as cls_config
+from gama.configuration.regression import config_space as reg_config
+from gama.utilities.config_space import merge_configurations
 from gama.genetic_programming.components import Individual
 
-
-pset, _ = pset_from_config(merge_configurations(clf_config, reg_config))
+config_space = merge_configurations(
+    c1=cls_config, c2=reg_config, prefix="merged_regression"
+)
 
 
 class GamaReport:
@@ -95,7 +96,7 @@ class GamaReport:
             df.duration = pd.to_timedelta(df.duration, unit="s")
 
             new_individuals = {
-                id_: Individual.from_string(pipeline, pset, strict=self.strict)
+                id_: Individual.from_string(pipeline, config_space, strict=self.strict)
                 for id_, pipeline in zip(df.id, df.pipeline)
             }
 
