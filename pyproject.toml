@@ -24,7 +24,7 @@ dependencies = [
   "stopit>=1.1.1",
   "liac-arff>=2.2.2",
   "category-encoders>=1.2.8",
-  "black==23.3.0",
+  "black==24.3.0",
   "psutil",
 ]
 
