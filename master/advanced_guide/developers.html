@@ -1,22 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Developers Notes &mdash; gama 23.0.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Developers Notes &mdash; gama 23.0.0.post1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
     <link rel="shortcut icon" href="../_static/Color-Transparent.svg"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=007ffa8e"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -35,7 +37,7 @@
               <img src="../_static/Logo-on-white-text-on-transparent.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                23.0.0
+                23.0.0.post1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -80,9 +82,9 @@
            <div itemprop="articleBody">
              
   <section id="developers-notes">
-<h1>Developers Notes<a class="headerlink" href="#developers-notes" title="Permalink to this heading"></a></h1>
+<h1>Developers Notes<a class="headerlink" href="#developers-notes" title="Link to this heading"></a></h1>
 <section id="adding-your-own-search-or-postprocessing">
-<span id="add-your-own"></span><h2>Adding Your Own Search or Postprocessing<a class="headerlink" href="#adding-your-own-search-or-postprocessing" title="Permalink to this heading"></a></h2>
+<span id="add-your-own"></span><h2>Adding Your Own Search or Postprocessing<a class="headerlink" href="#adding-your-own-search-or-postprocessing" title="Link to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This is not set in stone. As more AutoML pipeline steps are added by more people,
@@ -109,7 +111,7 @@ The hyperparameter values with which your search or postprocessing will be calle
 </ul>
 </div></blockquote>
 <section id="search">
-<h3>Search<a class="headerlink" href="#search" title="Permalink to this heading"></a></h3>
+<h3>Search<a class="headerlink" href="#search" title="Link to this heading"></a></h3>
 <p>To implement your own search procedure, create a class which derives from the base class:</p>
 <dl class="py class">
 <dt class="sig sig-object py">
@@ -118,7 +120,7 @@ The hyperparameter values with which your search or postprocessing will be calle
 This class should not be directly used to configure GAMA.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">dynamic_defaults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.dynamic_defaults"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">dynamic_defaults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.dynamic_defaults"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Set hyperparameter defaults based on the dataset and time-constraints.</p>
 <p>Should be called before <cite>search</cite>.</p>
 <dl class="field-list simple">
@@ -126,7 +128,7 @@ This class should not be directly used to configure GAMA.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>pandas.DataFrame</em>) – Features of the data.</p></li>
 <li><p><strong>y</strong> (<em>pandas.DataFrame</em><em> or </em><em>pandas.Series</em>) – Labels of the data.</p></li>
-<li><p><strong>time_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – Time in seconds available for search and selecting dynamic defaults.
+<li><p><strong>time_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – Time in seconds available for search and selecting dynamic defaults.
 There is no need to adhere to this explicitly,
 a <cite>stopit.utils.TimeoutException</cite> will be raised.
 The time-limit might be an important factor in setting hyperparameter values</p></li>
@@ -137,7 +139,7 @@ The time-limit might be an important factor in setting hyperparameter values</p>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hyperparameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></em></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hyperparameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.12)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></em></dt>
 <dd><p>Hyperparameter (name, value) pairs as set/determined dynamically/default.</p>
 <p>Values may have been set directly, through dynamic defaults or static defaults.
 This is also the order in which the value of a hyperparameter is checked,
@@ -148,7 +150,7 @@ Dynamic default values only considered if <cite>dynamic_defaults</cite> has been
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">OperatorSet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../api/index.html#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">OperatorSet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.12)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../api/index.html#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/search_methods/base_search.html#BaseSearch.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Execute search as configured.</p>
 <p>Sets <cite>output</cite> field of this class to the best Individuals.</p>
 <dl class="field-list simple">
@@ -165,7 +167,7 @@ Dynamic default values only considered if <cite>dynamic_defaults</cite> has been
 
 <p>You can use existing search implementations as a reference.</p>
 <section id="init">
-<h4><cite>__init__</cite><a class="headerlink" href="#init" title="Permalink to this heading"></a></h4>
+<h4><cite>__init__</cite><a class="headerlink" href="#init" title="Link to this heading"></a></h4>
 <p>To allow us to identify which hyperparameters are set by the user, and which are defaults, the default values for each hyperparameter in the <cite>__init__</cite> method should be <cite>None</cite>.</p>
 <p>In search methods, each evaluation of a machine learning pipeline is logged automatically.
 Default data recorded includes:</p>
@@ -182,7 +184,7 @@ which maps the name of a field to the method which extracts the information that
 In this case we are interested to know the parent of each evaluated pipeline, so we might later inspect a pipeline’s “lineage”.</p>
 </section>
 <section id="dynamic-defaults">
-<h4><cite>dynamic_defaults</cite><a class="headerlink" href="#dynamic-defaults" title="Permalink to this heading"></a></h4>
+<h4><cite>dynamic_defaults</cite><a class="headerlink" href="#dynamic-defaults" title="Link to this heading"></a></h4>
 <p>Hyperparameters such as population size might make for good candidates for dynamic defaults.
 However it is not obvious what the relationship should be.
 For this reason, we choose not to work with dynamic defaults in this search strategy.
@@ -190,7 +192,7 @@ Perhaps in the future, when we have adequate data to model the relationship we c
 <p>You can find an example usage of dynamic defaults in the Asynchronous Successive Halving Algorithm search.</p>
 </section>
 <section id="id1">
-<h4><cite>search</cite><a class="headerlink" href="#id1" title="Permalink to this heading"></a></h4>
+<h4><cite>search</cite><a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
 <p>This method should execute the search for a good machine learning pipeline.
 The search should always take into account the <cite>start_candidates</cite> in some form.
 This allows the search start point to be set by the user or a warm start step.
@@ -200,28 +202,28 @@ This allows GAMA to control when to shut down search (and continue with post pro
 </section>
 </section>
 <section id="postprocessing">
-<h3>PostProcessing<a class="headerlink" href="#postprocessing" title="Permalink to this heading"></a></h3>
+<h3>PostProcessing<a class="headerlink" href="#postprocessing" title="Link to this heading"></a></h3>
 <p>PostProcessing follows a similar pattern, where the class should allow initialization with its hyperparameters,
 an implementation of dynamic defaults (optional), and a <cite>post_process</cite> function.</p>
 <dl class="py class">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.postprocessing.</span></span><span class="sig-name descname"><span class="pre">BasePostProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gama.postprocessing.</span></span><span class="sig-name descname"><span class="pre">BasePostProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>All post-processing methods should be derived from this class.
 This class should not be directly used to configure GAMA.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – Fraction of total time that to be reserved for this post-processing step.</p>
+<dd class="field-odd"><p><strong>time_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – Fraction of total time that to be reserved for this post-processing step.</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">dynamic_defaults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gama</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Gama</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing.dynamic_defaults"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">dynamic_defaults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gama</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Gama</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing.dynamic_defaults"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Configure the post-processing technique based on GAMA properties.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hyperparameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></em></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hyperparameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.12)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></em></dt>
 <dd><p>Hyperparameter (name, value) pairs.</p>
 <p>Value determined by user &gt; dynamic default &gt; static default.
 Dynamic default values only considered if <cite>dynamic_defaults</cite> has been called.</p>
@@ -229,13 +231,13 @@ Dynamic default values only considered if <cite>dynamic_defaults</cite> has been
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">selection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../api/index.html#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a></span></span><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">selection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.12)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../api/index.html#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.individual.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><span class="pre">object</span></a></span></span><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>pd.DataFrame</em>) – all training features</p></li>
 <li><p><strong>y</strong> (<em>Union</em><em>[</em><em>pd.DataFrame</em><em>, </em><em>pd.Series</em><em>]</em>) – all training labels</p></li>
-<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – allowed time in seconds for post-processing</p></li>
+<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – allowed time in seconds for post-processing</p></li>
 <li><p><strong>selection</strong> (<em>List</em><em>[</em><a class="reference internal" href="../api/index.html#gama.genetic_programming.components.Individual" title="gama.genetic_programming.components.Individual"><em>Individual</em></a><em>]</em>) – individuals selected by the search space, ordered best first</p></li>
 </ul>
 </dd>
@@ -250,7 +252,7 @@ Dynamic default values only considered if <cite>dynamic_defaults</cite> has been
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">to_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preprocessing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TransformerMixin</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing.to_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">to_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preprocessing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.12)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.12)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TransformerMixin</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/gama/postprocessing/base_post_processing.html#BasePostProcessing.to_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Generate Python code to reconstruct a pipeline that constructs the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -261,7 +263,7 @@ Dynamic default values only considered if <cite>dynamic_defaults</cite> has been
 defines the final pipeline generated by post-processing.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -294,7 +296,7 @@ post-processing phases.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018-2023, Pieter Gijsbers.</p>
+    <p>&#169; Copyright 2018-2024, Pieter Gijsbers.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

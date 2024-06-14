@@ -1,22 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Release Notes &mdash; gama 23.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>Release Notes &mdash; gama 23.0.0.post1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
     <link rel="shortcut icon" href="_static/Color-Transparent.svg"/>
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=007ffa8e"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -37,7 +39,7 @@
               <img src="_static/Logo-on-white-text-on-transparent.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                23.0.0
+                23.0.0.post1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -53,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="benchmark.html">Benchmark Results</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Release Notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-23-0-0-post1">Version 23.0.0.post1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-23-0-0">Version 23.0.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-22-0-0">Version 22.0.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-21-0-1">Version 21.0.1</a></li>
@@ -98,9 +101,13 @@
            <div itemprop="articleBody">
              
   <section id="release-notes">
-<h1>Release Notes<a class="headerlink" href="#release-notes" title="Permalink to this heading"></a></h1>
+<h1>Release Notes<a class="headerlink" href="#release-notes" title="Link to this heading"></a></h1>
+<section id="version-23-0-0-post1">
+<h2>Version 23.0.0.post1<a class="headerlink" href="#version-23-0-0-post1" title="Link to this heading"></a></h2>
+<p>Fix scikit-learn to version &lt;1.3, because GAMA uses scikit-learn internals that were changed from 1.4.</p>
+</section>
 <section id="version-23-0-0">
-<h2>Version 23.0.0<a class="headerlink" href="#version-23-0-0" title="Permalink to this heading"></a></h2>
+<h2>Version 23.0.0<a class="headerlink" href="#version-23-0-0" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>Highlights:</dt><dd><ul class="simple">
 <li><p>We (temporarily) removed the Dashboard, it had not been maintained and is best be rebuilt from the ground up.</p></li>
@@ -120,7 +127,7 @@ It is still possible to manually set the search and post processing methods.</p>
 </dl>
 </section>
 <section id="version-22-0-0">
-<h2>Version 22.0.0<a class="headerlink" href="#version-22-0-0" title="Permalink to this heading"></a></h2>
+<h2>Version 22.0.0<a class="headerlink" href="#version-22-0-0" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>Maintenance:</dt><dd><ul class="simple">
 <li><dl class="simple">
@@ -169,7 +176,7 @@ It is still possible to manually set the search and post processing methods.</p>
 </dl>
 </section>
 <section id="version-21-0-1">
-<h2>Version 21.0.1<a class="headerlink" href="#version-21-0-1" title="Permalink to this heading"></a></h2>
+<h2>Version 21.0.1<a class="headerlink" href="#version-21-0-1" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>News:</dt><dd><ul class="simple">
 <li><p>We have a logo! Check out our README, or <cite>imageslogos</cite> for several renders.</p></li>
@@ -191,7 +198,7 @@ It is still possible to manually set the search and post processing methods.</p>
 </dl>
 </section>
 <section id="version-21-0-0">
-<h2>Version 21.0.0<a class="headerlink" href="#version-21-0-0" title="Permalink to this heading"></a></h2>
+<h2>Version 21.0.0<a class="headerlink" href="#version-21-0-0" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>Features:</dt><dd><ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">warm_start</span></code> parameter of <code class="docutils literal notranslate"><span class="pre">fit()</span></code> had a slight behavior change (see docs).</p></li>
@@ -205,7 +212,7 @@ It is still possible to manually set the search and post processing methods.</p>
 </dl>
 </section>
 <section id="version-20-2-2">
-<h2>Version 20.2.2<a class="headerlink" href="#version-20-2-2" title="Permalink to this heading"></a></h2>
+<h2>Version 20.2.2<a class="headerlink" href="#version-20-2-2" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>Maintenance:</dt><dd><ul class="simple">
 <li><p>Minor refactoring</p></li>
@@ -219,7 +226,7 @@ It is still possible to manually set the search and post processing methods.</p>
 </dl>
 </section>
 <section id="version-20-2-1">
-<h2>Version 20.2.1<a class="headerlink" href="#version-20-2-1" title="Permalink to this heading"></a></h2>
+<h2>Version 20.2.1<a class="headerlink" href="#version-20-2-1" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>Changes:</dt><dd><dl class="simple">
 <dt># 24: Changes to logging</dt><dd><p>The structure of the log file(s) have changed.
@@ -243,7 +250,7 @@ violation which does not minor.</p>
 </dl>
 </section>
 <section id="version-20-2-0">
-<h2>Version 20.2.0<a class="headerlink" href="#version-20-2-0" title="Permalink to this heading"></a></h2>
+<h2>Version 20.2.0<a class="headerlink" href="#version-20-2-0" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>Features:</dt><dd><p># 70: Exported code is now auto-formatted with Black.
 - The Dashboard now has an Analysis tab that allows you to load old log files.
@@ -263,7 +270,7 @@ violation which does not minor.</p>
 </dl>
 </section>
 <section id="version-20-1-0">
-<h2>Version 20.1.0<a class="headerlink" href="#version-20-1-0" title="Permalink to this heading"></a></h2>
+<h2>Version 20.1.0<a class="headerlink" href="#version-20-1-0" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>Features:</dt><dd><ul class="simple">
 <li><p>Encoding of ARFF files may now be specified with the <cite>encoding</cite> parameter in {fit/predict/score}_arff calls.</p></li>
@@ -288,7 +295,7 @@ This is for computational reasons, as all levels of a categorical variable are k
 </dl>
 </section>
 <section id="version-20-0-0">
-<h2>Version 20.0.0<a class="headerlink" href="#version-20-0-0" title="Permalink to this heading"></a></h2>
+<h2>Version 20.0.0<a class="headerlink" href="#version-20-0-0" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>Features:</dt><dd><dl class="simple">
 <dt>#65 GAMA Command Line Interface:</dt><dd><p>Allows users to start GAMA from the command line.
@@ -312,7 +319,7 @@ and monitor the performance of the search as it is executed.</p>
 </dl>
 </section>
 <section id="version-19-11-2">
-<h2>Version 19.11.2<a class="headerlink" href="#version-19-11-2" title="Permalink to this heading"></a></h2>
+<h2>Version 19.11.2<a class="headerlink" href="#version-19-11-2" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>Bugfixes:</dt><dd><ul class="simple">
 <li><p><cite>predict_proba_arff</cite> now also accepts a <cite>target_column</cite> as expected from the previous update.</p></li>
@@ -321,7 +328,7 @@ and monitor the performance of the search as it is executed.</p>
 </dl>
 </section>
 <section id="version-19-11-1">
-<h2>Version 19.11.1<a class="headerlink" href="#version-19-11-1" title="Permalink to this heading"></a></h2>
+<h2>Version 19.11.1<a class="headerlink" href="#version-19-11-1" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>Features:</dt><dd><ul class="simple">
 <li><p><cite>gama.__version__</cite> can now be used to retrieve gama’s version.</p></li>
@@ -341,18 +348,18 @@ If left unset, the last column of the ARFF file is assumed to be the target colu
 </dl>
 </section>
 <section id="version-19-11-0">
-<h2>Version 19.11.0<a class="headerlink" href="#version-19-11-0" title="Permalink to this heading"></a></h2>
+<h2>Version 19.11.0<a class="headerlink" href="#version-19-11-0" title="Link to this heading"></a></h2>
 <p>Accidentally released without updates.</p>
 </section>
 <section id="version-19-08-0">
-<h2>Version 19.08.0<a class="headerlink" href="#version-19-08-0" title="Permalink to this heading"></a></h2>
+<h2>Version 19.08.0<a class="headerlink" href="#version-19-08-0" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Prototype dash app for visualizing GAMA logs.</p></li>
 <li><p>Easy switching between search algorithms</p></li>
 </ul>
 </section>
 <section id="version-0-1-0">
-<h2>Version 0.1.0<a class="headerlink" href="#version-0-1-0" title="Permalink to this heading"></a></h2>
+<h2>Version 0.1.0<a class="headerlink" href="#version-0-1-0" title="Link to this heading"></a></h2>
 <p>First GAMA release.</p>
 </section>
 </section>
@@ -368,7 +375,7 @@ If left unset, the last column of the ARFF file is assumed to be the target colu
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018-2023, Pieter Gijsbers.</p>
+    <p>&#169; Copyright 2018-2024, Pieter Gijsbers.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

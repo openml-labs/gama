@@ -1,6 +1,10 @@
 Release Notes
 =============
 
+Version 23.0.0.post1
+--------------
+
+Fix scikit-learn to version <1.3, because GAMA uses scikit-learn internals that were changed from 1.4.
 
 Version 23.0.0
 --------------

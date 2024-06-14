@@ -1,22 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User Guide &mdash; gama 23.0.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>User Guide &mdash; gama 23.0.0.post1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
     <link rel="shortcut icon" href="../_static/Color-Transparent.svg"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=007ffa8e"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -37,7 +39,7 @@
               <img src="../_static/Logo-on-white-text-on-transparent.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                23.0.0
+                23.0.0.post1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -106,7 +108,7 @@
            <div itemprop="articleBody">
              
   <section id="user-guide">
-<span id="user-guide-index"></span><h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this heading"></a></h1>
+<span id="user-guide-index"></span><h1>User Guide<a class="headerlink" href="#user-guide" title="Link to this heading"></a></h1>
 <p>GAMA is an AutoML tool which aims to automatically find the right machine learning algorithms to create the best possible data for your model.
 This page gives an introduction to basic components and concepts of GAMA.</p>
 <p>GAMA performs a search over <em>machine learning pipelines</em>.
@@ -120,7 +122,7 @@ After the search, the best model found can be used to make predictions.
 Alternatively, GAMA can combine several models into an <em>ensemble</em> to take into account more than one model when making predictions.
 For ease of use, GAMA provides a <cite>fit</cite>, <cite>predict</cite> and <cite>predict_proba</cite> function akin to scikit-learn.</p>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
 <p>For regular usage, you can install GAMA with pip:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">gama</span>
 </pre></div>
@@ -149,9 +151,9 @@ Changes to the code directly affect the installed GAMA package without requiring
 </section>
 <hr class="docutils" />
 <section id="examples">
-<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this heading"></a></h2>
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
 <section id="classification">
-<h3>Classification<a class="headerlink" href="#classification" title="Permalink to this heading"></a></h3>
+<h3>Classification<a class="headerlink" href="#classification" title="Link to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_breast_cancer</span>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">log_loss</span><span class="p">,</span> <span class="n">accuracy_score</span>
@@ -182,7 +184,7 @@ Changes to the code directly affect the installed GAMA package without requiring
 <p>By default, GamaClassifier will optimize towards <cite>log loss</cite>.</p>
 </section>
 <section id="regression">
-<h3>Regression<a class="headerlink" href="#regression" title="Permalink to this heading"></a></h3>
+<h3>Regression<a class="headerlink" href="#regression" title="Link to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_diabetes</span>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
@@ -208,7 +210,7 @@ Changes to the code directly affect the installed GAMA package without requiring
 <p>By default, GamaRegressor will optimize towards <cite>mean squared error</cite>.</p>
 </section>
 <section id="using-files-directly">
-<h3>Using Files Directly<a class="headerlink" href="#using-files-directly" title="Permalink to this heading"></a></h3>
+<h3>Using Files Directly<a class="headerlink" href="#using-files-directly" title="Link to this heading"></a></h3>
 <p>You can load data directly from csv and <a class="reference external" href="https://www.cs.waikato.ac.nz/ml/weka/arff.html">ARFF</a> files.
 For ARFF files, GAMA can utilize extra information given, such as which features are categorical.
 For csv files GAMA will infer column types, but this might lead to mistakes.
@@ -245,11 +247,11 @@ for the latest news, see <a class="reference external" href="https://github.com/
 </section>
 <hr class="docutils" />
 <section id="simple-features">
-<h2>Simple Features<a class="headerlink" href="#simple-features" title="Permalink to this heading"></a></h2>
+<h2>Simple Features<a class="headerlink" href="#simple-features" title="Link to this heading"></a></h2>
 <p>This section features a couple of simple to use features that might be interesting for a wide audience.
 For more advanced features, see the <a class="reference internal" href="../advanced_guide/index.html#advanced-guide-index"><span class="std std-ref">Advanced Guide</span></a>.</p>
 <section id="command-line-interface">
-<h3>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this heading"></a></h3>
+<h3>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Link to this heading"></a></h3>
 <p>GAMA may also be called from a terminal, but the tool currently supports only part of all Python functionality.
 In particular it can only load data from <cite>.csv</cite> or <cite>.arff</cite> files and AutoML pipeline configuration is not available.
 The tool will produce a single pickled scikit-learn model (by default named ‘gama_model.pkl’),
@@ -257,18 +259,18 @@ code export is also available.
 Please see <cite>gama -h</cite> for all options.</p>
 </section>
 <section id="code-export">
-<h3>Code Export<a class="headerlink" href="#code-export" title="Permalink to this heading"></a></h3>
+<h3>Code Export<a class="headerlink" href="#code-export" title="Link to this heading"></a></h3>
 <p>It is possible to have GAMA export the final model definition as a Python file, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">gama.Gama.export_script()</span></code>.</p>
 </section>
 </section>
 <hr class="docutils" />
 <section id="important-hyperparameters">
-<h2>Important Hyperparameters<a class="headerlink" href="#important-hyperparameters" title="Permalink to this heading"></a></h2>
+<h2>Important Hyperparameters<a class="headerlink" href="#important-hyperparameters" title="Link to this heading"></a></h2>
 <p>There are a lot of hyperparameters exposed in GAMA.
 In this section, you will find some hyperparameters you might want to set even if you otherwise use defaults.
 For more complete documentation on all hyperparameters, see <a class="reference internal" href="../api/index.html#api-doc"><span class="std std-ref">API documentation</span></a>.</p>
 <section id="optimization">
-<h3>Optimization<a class="headerlink" href="#optimization" title="Permalink to this heading"></a></h3>
+<h3>Optimization<a class="headerlink" href="#optimization" title="Link to this heading"></a></h3>
 <p>Perhaps the most important hyperparameters are the ones that specify what to optimize for, these are:</p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">scoring</span></code>: <code class="docutils literal notranslate"><span class="pre">string</span></code> (default=’neg_log_loss’ for classification and ‘mean_squared_error’ for regression)</dt><dd><p>Sets the metric to optimize for. Make sure to optimize towards the metric that reflects well what is important to you.
@@ -285,7 +287,7 @@ This setting currently has no effect for non-default search methods.</p>
 </div>
 </section>
 <section id="resources">
-<h3>Resources<a class="headerlink" href="#resources" title="Permalink to this heading"></a></h3>
+<h3>Resources<a class="headerlink" href="#resources" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">n_jobs</span></code>: <code class="docutils literal notranslate"><span class="pre">int,</span> <span class="pre">optional</span></code> (default=None)</dt><dd><p>Determines how many processes can be run in parallel during <cite>fit</cite>.
 This has the most influence over how many machine learning pipelines can be evaluated.
@@ -309,7 +311,7 @@ The default is set to five minutes. For large datasets, more time may be needed 
 </section>
 <hr class="docutils" />
 <section id="related-packages">
-<h2>Related Packages<a class="headerlink" href="#related-packages" title="Permalink to this heading"></a></h2>
+<h2>Related Packages<a class="headerlink" href="#related-packages" title="Link to this heading"></a></h2>
 <p>There are many different AutoML packages in Python and other languages.
 <a class="reference external" href="https://openml.github.io/automlbenchmark/automl_overview.html">This webpage</a> of the AutoML Benchmark project has an overview of commonly used open source AutoML frameworks.
 Another nice overview of papers and projects is gathered at <a class="reference external" href="https://github.com/hibayesian/awesome-automl-papers#projects">this Github repo</a>.</p>
@@ -319,7 +321,7 @@ Another nice overview of papers and projects is gathered at <a class="reference 
 If anything is missing that is important to add, please open an issue.</p>
 </div>
 <section id="tpot">
-<h3>TPOT<a class="headerlink" href="#tpot" title="Permalink to this heading"></a></h3>
+<h3>TPOT<a class="headerlink" href="#tpot" title="Link to this heading"></a></h3>
 <p><a class="reference external" href="https://epistasislab.github.io/tpot/">TPOT</a> is the package most closely related to GAMA.
 Like GAMA, it is an AutoML package that is based on genetic programming in Python.
 Below you will find a list of differences and similarities of the packages.</p>
@@ -335,7 +337,7 @@ with the ability to configure your AutoML pipeline (for instance using a differe
 an ensembling post-processing step, visualization of the optimization process and support for <a class="reference external" href="https://www.cs.waikato.ac.nz/ml/weka/arff.html">ARFF</a> files.</p>
 </section>
 <section id="auto-sklearn">
-<h3>auto-sklearn<a class="headerlink" href="#auto-sklearn" title="Permalink to this heading"></a></h3>
+<h3>auto-sklearn<a class="headerlink" href="#auto-sklearn" title="Link to this heading"></a></h3>
 <p><a class="reference external" href="https://automl.github.io/auto-sklearn/stable/">auto-sklearn</a> is another AutoML package in Python.
 It uses Bayesian optimization to search for good machine learning pipelines and also features automatic ensemble construction.
 Auto-sklearn won ChaLearn AutoML challenge 1 and 2.</p>
@@ -354,7 +356,7 @@ Auto-sklearn won ChaLearn AutoML challenge 1 and 2.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018-2023, Pieter Gijsbers.</p>
+    <p>&#169; Copyright 2018-2024, Pieter Gijsbers.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
