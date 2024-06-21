@@ -7,11 +7,21 @@ class Terminal(NamedTuple):
     """Specifies a specific value for a specific type or input.
 
     E.g. a value for a hyperparameter for an algorithm.
+
+    It is important to note that you should use the hyperparameter's sklearn name as
+    your output and identifier. If your name contains `__estimatorName`, you should
+    remove it (e.g. by using string split). More information may be found in the
+    documentation for the `get_hyperparameter_sklearn_name` function.
+
+    Furthermore, the `config_space_name` is the name of the Config Space's
+    hyperparameter. As a result, this is the name formed by the `__estimatorName` and
+    the name of the hyperparameter.
     """
 
     value: object
     output: str
     identifier: str
+    config_space_name: str = "Not Specified"
 
     def __str__(self) -> str:
         """str: e.g. "tol=0.5" """

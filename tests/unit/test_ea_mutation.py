@@ -14,44 +14,50 @@ from gama.genetic_programming.mutation import (
 from gama.genetic_programming.compilers.scikitlearn import compile_individual
 
 
-def test_mut_replace_terminal(ForestPipeline, pset):
+def test_mut_replace_terminal(ForestPipeline, config_space):
     """Tests if mut_replace_terminal replaces exactly one terminal."""
     _test_mutation(
         ForestPipeline,
         mut_replace_terminal,
         _mut_replace_terminal_is_applied,
-        pset,
+        config_space,
     )
 
 
-def test_mut_replace_terminal_none_available(GNB, pset):
+def test_mut_replace_terminal_none_available(GNB, config_space):
     """mut_replace_terminal raises an exception if no valid mutation is possible."""
     with pytest.raises(ValueError) as error:
-        mut_replace_terminal(GNB, pset)
+        mut_replace_terminal(GNB, config_space)
 
     assert "Individual has no terminals suitable for mutation." in str(error.value)
 
 
-def test_mut_replace_primitive_len_1(LinearSVC, pset):
+def test_mut_replace_primitive_len_1(LinearSVC, config_space):
     """mut_replace_primitive replaces exactly one primitive."""
     _test_mutation(
-        LinearSVC, mut_replace_primitive, _mut_replace_primitive_is_applied, pset
+        LinearSVC,
+        mut_replace_primitive,
+        _mut_replace_primitive_is_applied,
+        config_space,
     )
 
 
-def test_mut_replace_primitive_len_2(ForestPipeline, pset):
+def test_mut_replace_primitive_len_2(ForestPipeline, config_space):
     """mut_replace_primitive replaces exactly one primitive."""
     _test_mutation(
-        ForestPipeline, mut_replace_primitive, _mut_replace_primitive_is_applied, pset
+        ForestPipeline,
+        mut_replace_primitive,
+        _mut_replace_primitive_is_applied,
+        config_space,
     )
 
 
-def test_mut_insert(ForestPipeline, pset):
+def test_mut_insert(ForestPipeline, config_space):
     """mut_insert inserts at least one primitive."""
-    _test_mutation(ForestPipeline, mut_insert, _mut_insert_is_applied, pset)
+    _test_mutation(ForestPipeline, mut_insert, _mut_insert_is_applied, config_space)
 
 
-def test_random_valid_mutation_with_all(ForestPipeline, pset):
+def test_random_valid_mutation_with_all(ForestPipeline, config_space):
     """Test if a valid mutation is applied at random.
 
     I am honestly not sure of the best way to test this.
@@ -63,7 +69,7 @@ def test_random_valid_mutation_with_all(ForestPipeline, pset):
 
     for i in range(_min_trials(n_mutations=4)):
         ind_clone = ForestPipeline.copy_as_new()
-        random_valid_mutation_in_place(ind_clone, pset)
+        random_valid_mutation_in_place(ind_clone, config_space)
         if _mut_shrink_is_applied(ForestPipeline, ind_clone)[0]:
             applied_mutation["shrink"] += 1
         elif _mut_insert_is_applied(ForestPipeline, ind_clone)[0]:
@@ -78,7 +84,7 @@ def test_random_valid_mutation_with_all(ForestPipeline, pset):
     assert all([count > 0 for (mut, count) in applied_mutation.items()])
 
 
-def test_random_valid_mutation_without_shrink(LinearSVC, pset):
+def test_random_valid_mutation_without_shrink(LinearSVC, config_space):
     """Test if a valid mutation is applied at random.
 
     I am honestly not sure of the best way to test this.
@@ -90,7 +96,7 @@ def test_random_valid_mutation_without_shrink(LinearSVC, pset):
 
     for i in range(_min_trials(n_mutations=3)):
         ind_clone = LinearSVC.copy_as_new()
-        random_valid_mutation_in_place(ind_clone, pset)
+        random_valid_mutation_in_place(ind_clone, config_space)
         if _mut_insert_is_applied(LinearSVC, ind_clone)[0]:
             applied_mutation["insert"] += 1
         elif _mut_replace_terminal_is_applied(LinearSVC, ind_clone)[0]:
@@ -103,7 +109,7 @@ def test_random_valid_mutation_without_shrink(LinearSVC, pset):
     assert all([count > 0 for (mut, count) in applied_mutation.items()])
 
 
-def test_random_valid_mutation_without_terminal(GNB, pset):
+def test_random_valid_mutation_without_terminal(GNB, config_space):
     """Test if a valid mutation is applied at random.
 
     I am honestly not sure of the best way to test this.
@@ -116,7 +122,7 @@ def test_random_valid_mutation_without_terminal(GNB, pset):
 
     for i in range(_min_trials(n_mutations=2)):
         ind_clone = GNB.copy_as_new()
-        random_valid_mutation_in_place(ind_clone, pset)
+        random_valid_mutation_in_place(ind_clone, config_space)
         if _mut_insert_is_applied(GNB, ind_clone)[0]:
             applied_mutation["insert"] += 1
         elif _mut_replace_primitive_is_applied(GNB, ind_clone)[0]:
@@ -127,7 +133,7 @@ def test_random_valid_mutation_without_terminal(GNB, pset):
     assert all([count > 0 for (mut, count) in applied_mutation.items()])
 
 
-def test_random_valid_mutation_without_insert(ForestPipeline, pset):
+def test_random_valid_mutation_without_insert(ForestPipeline, config_space):
     """Test if a valid mutation is applied at random.
 
     I am honestly not sure of the best way to test this.
@@ -141,7 +147,7 @@ def test_random_valid_mutation_without_insert(ForestPipeline, pset):
 
     for i in range(_min_trials(n_mutations=3)):
         ind_clone = ForestPipeline.copy_as_new()
-        random_valid_mutation_in_place(ind_clone, pset, max_length=2)
+        random_valid_mutation_in_place(ind_clone, config_space, max_length=2)
         if _mut_shrink_is_applied(ForestPipeline, ind_clone)[0]:
             applied_mutation["shrink"] += 1
         elif _mut_replace_terminal_is_applied(ForestPipeline, ind_clone)[0]:
@@ -245,7 +251,7 @@ def _mut_replace_primitive_is_applied(original, mutated):
     return True, None
 
 
-def _test_mutation(individual: Individual, mutation, mutation_check, pset):
+def _test_mutation(individual: Individual, mutation, mutation_check, config_space):
     """Test if an individual mutated by `mutation` passes `mutation_check` and compiles.
 
     :param individual: The individual to be mutated.
@@ -255,10 +261,10 @@ def _test_mutation(individual: Individual, mutation, mutation_check, pset):
        see above functions.
     """
     ind_clone = individual.copy_as_new()
-    mutation(ind_clone, pset)
+    mutation(ind_clone, config_space)
 
     applied, message = mutation_check(individual, ind_clone)
     assert applied, message
 
     # Should be able to compile the individual, will raise an Exception if not.
-    compile_individual(ind_clone, pset)
+    compile_individual(ind_clone, config_space)
