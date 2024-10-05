@@ -1,6 +1,15 @@
+import ast
 from typing import List, Union, cast
+
+
 from .terminal import DATA_TERMINAL, Terminal
 from .primitive import Primitive
+import ConfigSpace as cs
+
+from ...utilities.config_space import (
+    get_hyperparameter_sklearn_name,
+    get_estimator_by_name,
+)
 
 
 class PrimitiveNode:
@@ -62,7 +71,7 @@ class PrimitiveNode:
 
     @classmethod
     def from_string(
-        cls, string: str, primitive_set: dict, strict: bool = True
+        cls, string: str, config_space: cs.ConfigurationSpace, strict: bool = True
     ) -> "PrimitiveNode":
         """Create a PrimitiveNode from string formatted like PrimitiveNode.__str__
 
@@ -70,8 +79,9 @@ class PrimitiveNode:
         ----------
         string: str
             A string formatted similar to PrimitiveNode.__str__
-        primitive_set: dict
-            The dictionary defining all Terminals and Primitives.
+        config_space: ConfigurationSpace
+            The ConfigSpace object which defines the search space. Refer to the
+            configuration/(classification||regression).py file for further details.
         strict: bool (default=True)
             Require each primitives has all required terminals present in `string`.
             Non-strict matching may be useful when constructing individuals from
@@ -92,13 +102,13 @@ class PrimitiveNode:
 
         last_node: Union[PrimitiveNode, str] = DATA_TERMINAL
         for primitive_string, terminal_set in zip(reversed(primitives), terminal_sets):
-            primitive = find_primitive(primitive_set, primitive_string)
+            primitive = find_primitive(config_space, primitive_string)
             if terminal_set == "":
                 terminals = []
             else:
                 terminal_set = terminal_set[2:]  # 2 is because string starts with ', '
                 terminals = [
-                    find_terminal(primitive_set, terminal_string)
+                    find_terminal(config_space, terminal_string, primitive_string)
                     for terminal_string in terminal_set.split(", ")
                 ]
             missing = set(primitive.input) - set(map(lambda t: t.identifier, terminals))
@@ -109,19 +119,75 @@ class PrimitiveNode:
         return cast(PrimitiveNode, last_node)
 
 
-def find_primitive(primitive_set: dict, primitive_string: str) -> Primitive:
-    """Find the Primitive that matches `primitive_string` in `primitive_set`."""
-    all_primitives = primitive_set[DATA_TERMINAL] + primitive_set["prediction"]
-    for primitive in all_primitives:
-        if repr(primitive) == primitive_string:
-            return primitive
+def find_primitive(
+    config_space: cs.ConfigurationSpace, primitive_string: str
+) -> Primitive:
+    """Find the Primitive that matches `primitive_string` in `config_space`."""
+    if config_space is None:
+        raise ValueError("config_space must not be None")
+    if "estimators" not in config_space.meta:
+        raise ValueError(
+            "config_space must have meta information about the estimators"
+            "hyperparameters"
+        )
+
+    estimators = config_space.get_hyperparameter(
+        config_space.meta["estimators"]
+    ).choices
+    preprocessors = []
+    if "preprocessors" in config_space.meta:
+        preprocessors = config_space.get_hyperparameter(
+            config_space.meta["preprocessors"]
+        ).choices
+
+    all_hyperparameters = estimators + preprocessors
+
+    if primitive_string in all_hyperparameters:
+        return Primitive(
+            input=(),
+            output=(
+                "estimators" if primitive_string in estimators else "preprocessors"
+            ),
+            identifier=get_estimator_by_name(primitive_string),
+        )
+
     raise IndexError(f"Could not find Primitive of type '{primitive_string}'.")
 
 
-def find_terminal(primitive_set: dict, terminal_string: str) -> Terminal:
-    """Find the Terminal that matches `terminal_string` in `primitive_set`."""
-    term_type, _ = terminal_string.split("=")
-    for terminal in primitive_set[term_type]:
-        if repr(terminal) == terminal_string:
-            return terminal
+def find_terminal(
+    config_space: cs.ConfigurationSpace, terminal_string: str, primitive_string: str
+) -> Terminal:
+    """Find the Terminal that matches `terminal_string` in `config_space`."""
+    if config_space is None:
+        raise ValueError("config_space must not be None")
+
+    term_type, value = terminal_string.split("=")
+    if "." in term_type:
+        term_parent_type, term_type = term_type.split(".")
+        term_config_space_name = f"{term_type}__{term_parent_type}"
+    else:
+        term_config_space_name = f"{term_type}__{primitive_string}"
+
+    if isinstance(value, str):
+        value = value.replace("'", "").replace('"', "").replace(" ", "")
+        try:
+            value = ast.literal_eval(value)
+        except (ValueError, SyntaxError):
+            value = str(value)
+
+    if term_config_space_name in config_space.get_hyperparameter_names():
+        return Terminal(
+            identifier=get_hyperparameter_sklearn_name(term_config_space_name),
+            value=value,
+            output=get_hyperparameter_sklearn_name(term_config_space_name),
+            config_space_name=term_config_space_name,
+        )
+    if term_type in config_space.get_hyperparameter_names():
+        return Terminal(
+            identifier=get_hyperparameter_sklearn_name(term_type),
+            value=value,
+            output=get_hyperparameter_sklearn_name(term_type),
+            config_space_name=term_type,
+        )
+
     raise RuntimeError(f"Could not find Terminal of type '{terminal_string}'.")
