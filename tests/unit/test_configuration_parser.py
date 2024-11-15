@@ -1,18 +1,31 @@
-from sklearn.naive_bayes import BernoulliNB, GaussianNB
+from gama.utilities.config_space import merge_configurations
 
-from gama.configuration.parser import merge_configurations
+from gama.configuration.testconfiguration import (
+    config_space as classification_config_space,
+)
+from gama.configuration.regression import config_space as regression_config_space
 
 
 def test_merge_configuration():
     """Test merging two simple configurations works as expected."""
 
-    one = {"alpha": [0, 1], BernoulliNB: {"fit_prior": [True, False]}}
-    two = {"alpha": [0, 2], GaussianNB: {"fit_prior": [True, False]}}
-    expected_merged = {
-        "alpha": [0, 1, 2],
-        GaussianNB: {"fit_prior": [True, False]},
-        BernoulliNB: {"fit_prior": [True, False]},
-    }
+    test_classification_config = classification_config_space
+    test_regression_config = regression_config_space
 
-    actual_merged = merge_configurations(one, two)
-    assert expected_merged == actual_merged
+    prefix = "merged"
+    delimiter = "_"
+
+    merged_config = merge_configurations(
+        test_classification_config,
+        test_regression_config,
+        prefix=prefix,
+        delimiter=delimiter,
+    )
+
+    assert (
+        test_classification_config.meta["estimators"]
+        in merged_config.get_hyperparameters_dict()
+    )
+    assert (
+        prefix + delimiter + test_regression_config.meta["estimators"]
+    ) in merged_config.get_hyperparameters_dict()

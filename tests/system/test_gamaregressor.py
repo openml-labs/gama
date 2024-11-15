@@ -4,9 +4,14 @@ from sklearn.datasets import load_diabetes
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
+from gama.configuration.regression_task import RegressorConfig
+from gama.configuration.testconfiguration import config_space
+import ConfigSpace as cs
 from gama.postprocessing import EnsemblePostProcessing
 from gama.utilities.generic.stopwatch import Stopwatch
 from gama import GamaRegressor
+
+import pytest
 
 FIT_TIME_MARGIN = 1.1
 TOTAL_TIME_S = 60
@@ -74,3 +79,34 @@ def test_missing_value_regression():
         store="nothing",
     )
     _test_gama_regressor(gama, X_train, X_test, y_train, y_test, data, metric)
+
+
+def test_wrong_meta_estimators_config_space_gr():
+    """Meta with wrong estimators"""
+    with pytest.raises(ValueError):
+        config_space.meta = {
+            # "gama_system_name": "current_configuration_name",
+            "dummy": "dummy",
+        }
+        GamaRegressor(
+            search_space=config_space,
+        )
+
+
+def test_wrong_meta_preprocessors_config_space_gc():
+    """Meta with wrong preprocessors"""
+    with pytest.raises(ValueError):
+        dummy_config_space = cs.ConfigurationSpace(
+            meta={
+                # "gama_system_name": "current_configuration_name",
+                "estimators": "regressors",
+                "preprocessors": "dummy",
+            }
+        )
+
+        dummy_classifier_config = RegressorConfig(dummy_config_space)
+        dummy_classifier_config.setup_regressors()
+
+        GamaRegressor(
+            search_space=dummy_config_space,
+        )

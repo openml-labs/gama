@@ -7,6 +7,8 @@ from .fitness import Fitness
 from .primitive_node import PrimitiveNode
 from .terminal import Terminal
 
+import ConfigSpace as cs
+
 
 class Individual:
     """Collection of PrimitiveNodes which together specify a machine learning pipeline.
@@ -140,7 +142,7 @@ class Individual:
     def from_string(
         cls,
         string: str,
-        primitive_set: dict,
+        config_space: cs.ConfigurationSpace,
         to_pipeline: Optional[Callable] = None,
         strict: bool = True,
     ) -> "Individual":
@@ -150,8 +152,9 @@ class Individual:
         ----------
         string: str
             String formatted as `Individual.pipeline_str`.
-        primitive_set: dict
-            The dictionary defining all Terminals and Primitives.
+        config_space: ConfigurationSpace
+            The ConfigSpace object which defines the search space. Refer to the
+            configuration/(classification||regression).py file for further details.
         to_pipeline: Callable, optional (default=None)
             The function to convert the Individual into a pipeline representation.
             If `None`, the individuals `pipeline` property will not be available.
@@ -166,5 +169,5 @@ class Individual:
         Individual
             An individual as defined by `str`.
         """
-        expression = PrimitiveNode.from_string(string, primitive_set, strict)
+        expression = PrimitiveNode.from_string(string, config_space, strict)
         return cls(expression, to_pipeline=to_pipeline)

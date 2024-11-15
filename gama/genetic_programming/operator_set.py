@@ -1,5 +1,8 @@
 import logging
 from typing import Callable, Dict, List, Optional, Tuple, Any
+
+import ConfigSpace
+
 from gama.genetic_programming.components.primitive_node import PrimitiveNode
 
 from sklearn.pipeline import Pipeline
@@ -25,6 +28,8 @@ class OperatorSet:
         evaluate_callback: Callable[[Evaluation], None],
         max_retry: int = 50,
         completed_evaluations: Optional[Dict[str, Evaluation]] = None,
+        is_evaluated: Optional[Callable[[Individual], bool]] = None,
+        get_search_space: Optional[Callable[[], ConfigSpace.ConfigurationSpace]] = None,
     ):
         self._mutate = mutate
         self._mate = mate
@@ -37,6 +42,8 @@ class OperatorSet:
         self._evaluate = None
         self._evaluate_callback = evaluate_callback
         self.evaluate: Optional[Callable[..., Evaluation]] = None
+        self.is_evaluated = is_evaluated
+        self.get_search_space = get_search_space
 
         self._completed_evaluations = completed_evaluations
 
