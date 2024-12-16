@@ -25,6 +25,7 @@ class OperatorSet:
         evaluate_callback: Callable[[Evaluation], None],
         max_retry: int = 50,
         completed_evaluations: Optional[Dict[str, Evaluation]] = None,
+        is_evaluated: Optional[Callable[[Individual], bool]] = None,
     ):
         self._mutate = mutate
         self._mate = mate
@@ -37,6 +38,7 @@ class OperatorSet:
         self._evaluate = None
         self._evaluate_callback = evaluate_callback
         self.evaluate: Optional[Callable[..., Evaluation]] = None
+        self.is_evaluated = is_evaluated
 
         self._completed_evaluations = completed_evaluations
 

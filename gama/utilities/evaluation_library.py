@@ -262,3 +262,13 @@ class EvaluationLibrary:
             return heapq.nlargest(n, self.top_evaluations)
         else:
             return list(reversed(sorted(self.evaluations)))[:n]
+
+    def is_evaluated(self, candidate: Union[Individual, None]) -> bool:
+        """Check if a candidate pipeline has already been evaluated."""
+        if candidate is None:
+            log.warning("Candidate to check is None. Returning False.")
+            return False
+        return any(
+            str(candidate.pipeline) == str(evaluation.individual.pipeline)
+            for evaluation in self.lookup.values()
+        )
